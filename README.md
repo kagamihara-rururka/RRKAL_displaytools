@@ -70,7 +70,8 @@ Primary files:
 - `scripts/setup_windows.ps1`: Windows dependency setup helper.
 - `scripts/run_qt_panel.ps1`: Windows Qt panel launch helper.
 - `scripts/render_quick_smoke.ps1`: Windows headless quick render helper.
-- `scripts/smoke.ps1`: pre-commit smoke test helper.
+- scripts/smoke.ps1: pre-commit smoke test helper.
+- scripts/validate_profiles.py: profile template schema smoke validator.
 
 Qt panel capabilities:
 - Toggle renderer layers without memorizing CLI flags.
@@ -91,6 +92,7 @@ Core docs:
 Notes:
 - Runtime caches, screenshots, logs, databases, and virtual environments are intentionally excluded from Git.
 - This initial import preserves the current monolithic prototype before later module extraction.
+
 
 
 

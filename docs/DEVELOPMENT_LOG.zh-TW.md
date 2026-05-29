@@ -1,5 +1,28 @@
 ﻿# Development Log
 
+## 2026-05-29 - Smoke helper hardening
+
+Scope:
+- Updated `scripts/smoke.ps1` so native command failures stop the script.
+- Updated `scripts/validate_profiles.py` to read UTF-8 BOM profile JSON files with `utf-8-sig`.
+
+Positioning:
+- This makes the new pre-commit smoke rule enforceable instead of only informational.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+## 2026-05-29 - Profile template smoke validation
+
+Scope:
+- Added `scripts/validate_profiles.py` for built-in profile template validation.
+- Added profile validation to `scripts/smoke.ps1`.
+- Updated README and GTD to reference the validator.
+
+Positioning:
+- This protects the RRKAL/displaytools profile handoff shape as templates evolve.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 ## 2026-05-29 - No-GUI profile template listing
 
 Scope:
@@ -333,5 +356,7 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+
 
 
