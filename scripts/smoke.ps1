@@ -1704,8 +1704,14 @@ if ($qtPanelSource -notlike "*show_cross_machine_clone_readiness*") {
 if ($qtPanelSource -notlike "*Clone ready*") {
     throw "Qt Clone ready action button is missing"
 }
-if ($qtPanelSource -notlike "*Inspect portable UI/profile replay coverage JSON*") {
+if ($qtPanelSource -notlike "*Replay/contracts: inspect portable UI/profile replay coverage JSON*") {
     throw "Qt contract inspector tooltips are missing"
+}
+if ($qtPanelSource -notlike "*Renderer ports: inspect scalar ocean material and sea-state handoff JSON*") {
+    throw "Qt Renderer ports inspector tooltip is missing"
+}
+if ($qtPanelSource -notlike "*Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON*") {
+    throw "Qt Research interaction inspector tooltip is missing"
 }
 if ($qtPanelSource -notlike "*setAccessibleDescription*") {
     throw "Qt contract inspector accessible descriptions are missing"
@@ -1713,7 +1719,7 @@ if ($qtPanelSource -notlike "*setAccessibleDescription*") {
 if ($qtPanelSource -notlike "*Pin pick*") {
     throw "Qt Pin pick action button is missing"
 }
-if ($qtPanelSource -notlike "*Inspect renderer Pin hover/click pick bridge JSON*") {
+if ($qtPanelSource -notlike "*Research interaction: inspect renderer Pin hover/click pick bridge JSON*") {
     throw "Qt Pin pick action tooltip is missing"
 }
 if ($qtPanelSource -notlike "*Cursor geo*") {
@@ -1722,7 +1728,7 @@ if ($qtPanelSource -notlike "*Cursor geo*") {
 if ($qtPanelSource -notlike "*show_cursor_geodesy_state*") {
     throw "Qt Cursor geo JSON action is missing"
 }
-if ($qtPanelSource -notlike "*Inspect mouse cursor latitude/longitude geodesy bridge JSON*") {
+if ($qtPanelSource -notlike "*Research interaction: inspect mouse cursor latitude/longitude geodesy bridge JSON*") {
     throw "Qt Cursor geo action tooltip is missing"
 }
 if ($qtPanelSource -notlike "*Boundary JSON*") {
@@ -1737,7 +1743,7 @@ if ($qtPanelSource -notlike "*Inspect: Boundary JSON*") {
 if ($qtPanelSource -notlike "*show_boundary_state*") {
     throw "Qt Boundary JSON action is missing"
 }
-if ($qtPanelSource -notlike "*Inspect Boundary emphasis, identity warning and renderer ack JSON*") {
+if ($qtPanelSource -notlike "*Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON*") {
     throw "Qt Boundary JSON action tooltip is missing"
 }
 if ($qtPanelSource -notlike "*saved_state_groups*") {

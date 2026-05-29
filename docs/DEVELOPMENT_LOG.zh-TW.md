@@ -230,6 +230,20 @@ Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
 
+## 2026-05-30 - Qt grouped Inspect tooltips
+
+Scope:
+- Updated Qt `Inspect:` button tooltips and accessible descriptions to include Replay/contracts, Renderer ports or Research interaction group names.
+- Smoke verifies representative grouped tooltip text for all three groups.
+- Closed-loop evidence now records grouped inspector tooltips instead of ungrouped tooltip text.
+
+Decision:
+- The UI should display the same Inspect grouping that launch packets and renderer capability discovery now expose.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+
 ## 2026-05-30 - Clone quickstart Inspect groups
 
 Scope:

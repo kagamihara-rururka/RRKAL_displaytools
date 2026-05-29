@@ -444,3 +444,8 @@
 
 - The clone quickstart now mirrors the machine-readable Inspect groups: Replay/contracts, Renderer ports and Research interaction.
 - Smoke verifies quickstart group guidance so onboarding remains aligned with `profile_ui_state_replay.qt_inspector_action_groups`.
+
+### 2026-05-30 Qt grouped Inspect tooltips
+
+- Qt Inspect button tooltips and accessible descriptions now include their group names: Replay/contracts, Renderer ports and Research interaction.
+- Smoke verifies grouped tooltip text so the UI reflects the same grouping exposed in profile replay contracts.

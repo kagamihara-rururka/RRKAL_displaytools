@@ -204,3 +204,4 @@ Last updated: 2026-05-29
 - 2026-05-30: Added `qt_inspector_action_ids/labels/count` to `profile_ui_state_replay` and smoke-gated Boundary/Cursor/Clone inspector entries.
 - 2026-05-30: Added `qt_inspector_action_groups/group_count` to `profile_ui_state_replay` for replay/contracts, renderer ports and research interaction inspector grouping.
 - 2026-05-30: Updated clone quickstart to mirror the Qt Inspect groups and smoke-gated Replay/contracts plus Research interaction guidance.
+- 2026-05-30: Added Inspect group names to Qt tooltips/accessibility descriptions and smoke-gated grouped tooltip text.

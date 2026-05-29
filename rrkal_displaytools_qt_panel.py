@@ -2619,15 +2619,15 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         restart_button = QtWidgets.QPushButton("套用並重啟")
         stop_button = QtWidgets.QPushButton("停止本面板啟動的程序")
         for button, tooltip in (
-            (profile_replay_button, "Inspect portable UI/profile replay coverage JSON."),
-            (ocean_port_button, "Inspect scalar ocean material and sea-state handoff JSON."),
-            (hydro_lod_button, "Inspect hydrology layer and LOD hook readiness JSON."),
-            (style_routes_button, "Inspect parchment and tactical style renderer route JSON."),
-            (module_seams_button, "Inspect future module extraction seam registry JSON."),
-            (clone_ready_button, "Inspect cross-machine clone readiness JSON."),
-            (pin_pick_button, "Inspect renderer Pin hover/click pick bridge JSON."),
-            (cursor_geo_button, "Inspect mouse cursor latitude/longitude geodesy bridge JSON."),
-            (boundary_state_button, "Inspect Boundary emphasis, identity warning and renderer ack JSON."),
+            (profile_replay_button, "Replay/contracts: inspect portable UI/profile replay coverage JSON."),
+            (ocean_port_button, "Renderer ports: inspect scalar ocean material and sea-state handoff JSON."),
+            (hydro_lod_button, "Renderer ports: inspect hydrology layer and LOD hook readiness JSON."),
+            (style_routes_button, "Renderer ports: inspect parchment and tactical style renderer route JSON."),
+            (module_seams_button, "Replay/contracts: inspect future module extraction seam registry JSON."),
+            (clone_ready_button, "Replay/contracts: inspect cross-machine clone readiness JSON."),
+            (pin_pick_button, "Research interaction: inspect renderer Pin hover/click pick bridge JSON."),
+            (cursor_geo_button, "Research interaction: inspect mouse cursor latitude/longitude geodesy bridge JSON."),
+            (boundary_state_button, "Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON."),
         ):
             button.setToolTip(tooltip)
             button.setAccessibleDescription(tooltip)
