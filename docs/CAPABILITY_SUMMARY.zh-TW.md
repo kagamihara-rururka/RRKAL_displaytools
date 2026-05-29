@@ -15,11 +15,11 @@
 - Layers 面板已具備 Photoshop-like layer stack 雛形：active layer selection、visibility、lock、opacity、blend mode、UI-only state reset。Visibility 已接 renderer flags；selected layer/lock/opacity/blend 目前是 🚧 UI state，會寫入 launch packet 供後續 renderer sync。
 - Properties 面板已接 active layer inspector，可查看目前選取圖層的 visibility、lock、opacity、blend mode，並可切換選取圖層 visibility 或重設選取圖層 UI state。
 - Qt profile save/load 已支援 selected layer 與 layer stack UI state，因此 active layer、lock、opacity、blend mode 可以隨本機 profile 保存與載入；既有 repo templates 仍相容。
-- 左側 Tools dock 已新增科研導向 tool palette：Move、Select、Pin。Select 用於指定 active layer；Pin 用於科研標記，可保存 type、label、note、latitude、longitude，並加入 marker list。Brush/Mask 暫不納入本輪 UI。`tool_state` 與 `pins` 會寫入 profile 與 launch packet。
+- 左側 Tools dock 已新增科研導向 tool palette：Move、Select、Pin。Select 用於指定 active layer；Pin 用於科研標記，可保存 type、label、note、latitude、longitude，並加入 marker list。Pin list 已支援選取、欄位回填與 selected pin 狀態保存。Brush/Mask 暫不納入本輪 UI。`tool_state`、`pins` 與 `selected_pin_id` 會寫入 profile 與 launch packet。
 - 支援啟動、停止、套用並重啟 renderer。
 - 顯示 renderer PID、執行中狀態與 exit code。
 - 中央 Canvas Preview 已可用 UI-only 方式顯示 style/topography/data mode、active tool、active layer、visible layer count 與 zoom；也可顯示 renderer capabilities、layer manifest、launch packet 或 smoke 結果。
-- Canvas Preview 已支援滑鼠位置的 UI-only 經緯度估算，使用 equirectangular canvas mapping，可一鍵填入 Pin 的 latitude/longitude。
+- Canvas Preview 已支援滑鼠位置的 UI-only 經緯度估算，使用 equirectangular canvas mapping，可一鍵填入 Pin 的 latitude/longitude，並顯示目前 selected pin 與 marker 摘要。
 - 右側 `Provenance` dock 已提供科研可重現性摘要，可複製 JSON，內容包含 style/topo/data mode、active layer、active tool、visible/locked layers、layer count 與 portable command line。
 - 未完成的 live preview、brush/mask、timeline、undo stack 會以 🚧 施工中標示。
 - 可保存、載入、重置本機 workspace layout，狀態位於 `state/ui_workspace.json`。
@@ -32,7 +32,7 @@
 - 圖層即時同步，不再只靠重啟 renderer 套用。
 - Layer stack 的 selected layer、lock、opacity、blend mode 接 renderer 即時同步。
 - Style / Looks panel 的縮圖化模板選擇。
-- Select 工具下一步是補完整圖層選取流程與 canvas/preview 操作回饋；Pin 下一步是把目前 UI-only equirectangular 估算替換為 renderer/globe hit-test；Brush/Mask 暫不納入本輪 UI。
+- Select 工具下一步是補 canvas/preview 操作回饋與圖層 hit target；Pin 下一步是把目前 UI-only equirectangular 估算替換為 renderer/globe hit-test，並把 marker 實際畫到 renderer overlay。Pin overlay 必須跟隨地球旋轉，並計算 horizon/depth occlusion，避免背面標記穿透顯示；Brush/Mask 暫不納入本輪 UI。
 - Provenance 下一步要對接 renderer output artifact 與 RRKAL data manifest，但在 UIUX 閉環完成前只保留 UI provenance summary。
 - Timeline / keyframe / animation controls for ocean/cloud/material parameters。
 - Workspace presets 後續要補成可視化 preset manager，並支援保存多組命名工作區。

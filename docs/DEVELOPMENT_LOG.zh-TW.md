@@ -710,3 +710,18 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Qt selected pin workflow
+
+Scope:
+- Added `selected_pin_id` state for the Qt Pin list.
+- Selecting a Pin now refills the Pin editor fields and updates Canvas Preview.
+- Canvas Preview now shows the selected marker and a compact marker summary.
+- Profile, launch packet, schema validation, and research provenance now include the selected Pin state.
+
+Positioning:
+- This closes another UIUX-side scientific annotation loop before backend renderer overlay and true globe hit-testing are connected.
+- Renderer overlay follow-up must treat Pins as geodetic surface anchors that rotate with the globe and are hidden or faded by horizon/depth occlusion when they move behind the visible hemisphere.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

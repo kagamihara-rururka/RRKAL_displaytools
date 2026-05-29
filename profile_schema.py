@@ -8,7 +8,7 @@ from pathlib import Path
 PROFILE_SCHEMA_ID = "rrkal_displaytools.qt_panel_profile.v1"
 
 REQUIRED_PROFILE_TOP_LEVEL = {"schema", "renderer", "ocean_material", "layers"}
-OPTIONAL_PROFILE_TOP_LEVEL = {"selected_layer", "layer_stack_ui", "tool_state", "pins"}
+OPTIONAL_PROFILE_TOP_LEVEL = {"selected_layer", "selected_pin_id", "layer_stack_ui", "tool_state", "pins"}
 REQUIRED_PROFILE_RENDERER = {
     "style_profile",
     "ui_backend",
@@ -84,6 +84,9 @@ def profile_payload_errors(profile: dict[str, object]) -> list[str]:
             errors.append("selected_layer must be a string")
         elif selected_layer not in REQUIRED_LAYER_STACK_KEYS:
             errors.append(f"selected_layer is not a known layer stack key: {selected_layer}")
+    selected_pin_id = profile.get("selected_pin_id")
+    if selected_pin_id is not None and not isinstance(selected_pin_id, str):
+        errors.append("selected_pin_id must be a string or null")
     layer_stack = profile.get("layer_stack_ui")
     if layer_stack is not None:
         if not isinstance(layer_stack, dict):
@@ -184,6 +187,10 @@ def profile_payload_errors(profile: dict[str, object]) -> list[str]:
                 longitude = pin.get("longitude")
                 if not isinstance(longitude, (int, float)) or isinstance(longitude, bool) or not -180 <= longitude <= 180:
                     errors.append(f"pins[{index}].longitude must be a number from -180 to 180")
+            if isinstance(selected_pin_id, str):
+                pin_ids = {pin.get("id") for pin in pins if isinstance(pin, dict)}
+                if selected_pin_id not in pin_ids:
+                    errors.append("selected_pin_id must match an id in pins")
     return errors
 
 
@@ -219,7 +226,7 @@ def profile_schema_packet() -> dict[str, object]:
             "required_fields": sorted(REQUIRED_PIN_FIELDS),
             "optional_fields": sorted(OPTIONAL_PIN_FIELDS),
             "pin_types": sorted(PIN_TYPES),
-            "coordinate_source": "manual_lat_lon now; cursor lat/lon resolver planned",
+            "coordinate_source": "manual_lat_lon and cursor estimate now; renderer geodetic anchor with globe rotation and horizon/depth occlusion planned",
         },
         "local_only_paths": [
             "state/ui_profiles/",

@@ -25,6 +25,7 @@ rrkal_displaytools.qt_panel_profile.v1
 | `ocean_material` | object | required | 海洋材質參數。 |
 | `layers` | object | required | Renderer layer visibility flags。 |
 | `selected_layer` | string | optional | Qt layer stack 目前選取圖層。 |
+| `selected_pin_id` | string | optional | Qt Pin list 目前選取的科研標記 id。 |
 | `layer_stack_ui` | object | optional | Qt layer stack 的 UI-only state。 |
 | `tool_state` | object | optional | Qt tool palette 的 UI-only state。 |
 | `pins` | array | optional | 科研標記清單。 |
@@ -123,7 +124,9 @@ rrkal_displaytools.qt_panel_profile.v1
 
 ## `pins`
 
-可選。此欄位保存科研標記清單，適合記錄觀測點、採樣站、異常點、參考點與事件。
+可選。此欄位保存科研標記清單，適合記錄觀測點、採樣站、異常點、參考點與事件。若 `selected_pin_id` 存在，必須對應到此清單中的其中一個 `id`，Qt 會用它回復 Pin list 選取狀態並回填 Pin 編輯欄位。
+
+Renderer overlay 接上後，Pin 不應是螢幕固定標籤，而應是 geodetic surface anchor：每個 frame 由 latitude/longitude 投影到球面，套用地球旋轉與 camera/view transform，再用 horizon/depth occlusion 判斷是否被地球背面或地形/海面遮蔽。
 
 | Field | Type | Description |
 | --- | --- | --- |
