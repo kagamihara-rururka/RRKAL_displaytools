@@ -1,5 +1,19 @@
 # Development Log
 
+## 2026-05-29 - Timeline ocean material interpolation
+
+Scope:
+- Added `rrkal_displaytools.timeline_ocean_material_interpolation.v1`.
+- Renderer now interpolates Timeline ocean material fields (`wave_strength`, `roughness`, `foam`) across the active segment while playback is active.
+- Qt launch/provenance packets, No-GUI runtime state, renderer ack payloads, renderer capabilities, closed-loop status, docs, and smoke gates now expose the interpolation contract.
+- Style, layers, pins, boundary, camera, and export remain discrete/pending.
+
+Positioning:
+- This turns Timeline playback from whole-keyframe stepping into a first continuous renderer behavior without overclaiming full animation export.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Renderer Timeline discrete step playback
 
 Scope:

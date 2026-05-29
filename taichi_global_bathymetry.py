@@ -2738,6 +2738,7 @@ def timeline_ack_payload_from_state_file(timeline_state_file: str | Path | None)
         "segment_state": timeline_segment_state_packet(runtime_keyframes, active_step_state.get("active_index")),
         "active_step_state": active_step_state,
         "step_playback": timeline_step_playback_packet(timeline_state, runtime_keyframes, instantiated=False),
+        "ocean_material_interpolation": timeline_ocean_material_interpolation_packet(timeline_state, runtime_keyframes, instantiated=False),
         "first_keyframe_apply": timeline_first_keyframe_apply_preview_packet(
             runtime_keyframes,
             applied=False,
@@ -2747,7 +2748,6 @@ def timeline_ack_payload_from_state_file(timeline_state_file: str | Path | None)
         "applies": ["input_acknowledgement"],
         "pending": [
             "animation_export",
-            "ocean_material_keyframe_interpolation",
             "camera_keyframe_interpolation",
         ],
         "error": state_error,
@@ -2762,10 +2762,10 @@ def timeline_playback_readiness_packet() -> dict[str, object]:
         "renderer_ack_available": True,
         "renderer_timeline_playback": True,
         "renderer_playback_mode": "discrete_keyframe_step",
+        "ocean_material_interpolation": True,
         "animation_export": False,
         "pending": [
             "animation_export",
-            "ocean_material_keyframe_interpolation",
             "camera_keyframe_interpolation",
         ],
         "boundary": "Renderer can drive discrete keyframe step playback; interpolation/export are not claimed yet.",
@@ -2809,9 +2809,9 @@ def timeline_playback_plan_packet(keyframes: list[object] | None = None) -> dict
         ],
         "pending": [
             "animation_export",
-            "inter_keyframe_interpolation",
+            "non_material_interpolation",
         ],
-        "boundary": "Plan can drive renderer discrete keyframe steps; interpolation/export remain pending.",
+        "boundary": "Plan can drive renderer discrete keyframe steps and ocean/material interpolation; non-material interpolation/export remain pending.",
     }
 
 
@@ -2841,7 +2841,7 @@ def timeline_segment_state_packet(
         "active_segment": active_segment,
         "segment_available": active_segment is not None,
         "segment_count": max(0, len(keyframes) - 1),
-        "pending": ["renderer_step_playback", "inter_keyframe_interpolation", "animation_export"],
+        "pending": ["non_material_interpolation", "animation_export"],
         "boundary": "Renderer exposes segment state for future step playback; it is not executing segment animation yet.",
     }
 
@@ -2875,7 +2875,7 @@ def timeline_active_step_state_packet(
         "keyframe_count": len(keyframes),
         "step_available": active_index is not None,
         "applies": ["renderer_startup_selection_hint"],
-        "pending": ["renderer_step_playback", "inter_keyframe_interpolation", "animation_export"],
+        "pending": ["non_material_interpolation", "animation_export"],
         "boundary": "Active step is a discrete keyframe selection contract; renderer playback, interpolation, and export remain pending.",
     }
 
@@ -2908,8 +2908,62 @@ def timeline_step_playback_packet(
         "step_count": max(0, int(step_count)),
         "last_step_at_utc": last_step_at_utc,
         "applies": ["renderer_discrete_keyframe_step"],
-        "pending": ["inter_keyframe_interpolation", "animation_export", "camera_keyframes"],
+        "pending": ["non_material_interpolation", "animation_export", "camera_keyframes"],
         "boundary": "Renderer can advance whole-keyframe steps only; interpolation/export remain pending.",
+    }
+
+
+def timeline_ocean_material_interpolation_packet(
+    timeline_state: dict[str, object] | None = None,
+    keyframes: list[object] | None = None,
+    instantiated: bool = False,
+    last_step_at: float | None = None,
+) -> dict[str, object]:
+    timeline_state = timeline_state if isinstance(timeline_state, dict) else {}
+    keyframes = [keyframe for keyframe in keyframes if isinstance(keyframe, dict)] if isinstance(keyframes, list) else []
+    playback = timeline_state.get("playback")
+    playback = playback if isinstance(playback, dict) else {}
+    active_step = timeline_active_step_state_packet(timeline_state, keyframes)
+    from_index = active_step.get("active_index")
+    to_index = ((from_index + 1) % len(keyframes)) if isinstance(from_index, int) and len(keyframes) >= 2 else None
+    try:
+        interval_ms = int(playback.get("interval_ms", 1200))
+    except (TypeError, ValueError):
+        interval_ms = 1200
+    interval_s = max(0.05, interval_ms / 1000.0)
+    elapsed_s = 0.0
+    if last_step_at is not None:
+        elapsed_s = max(0.0, time.time() - float(last_step_at))
+    fraction = max(0.0, min(1.0, elapsed_s / interval_s))
+    fields = ["wave_strength", "roughness", "foam"]
+    interpolated: dict[str, float] = {}
+    if isinstance(from_index, int) and isinstance(to_index, int):
+        from_material = keyframes[from_index].get("ocean_material")
+        to_material = keyframes[to_index].get("ocean_material")
+        if isinstance(from_material, dict) and isinstance(to_material, dict):
+            for field in fields:
+                if field in from_material and field in to_material:
+                    try:
+                        start_value = float(from_material[field])
+                        end_value = float(to_material[field])
+                    except (TypeError, ValueError):
+                        continue
+                    interpolated[field] = start_value + (end_value - start_value) * fraction
+    return {
+        "schema": "rrkal_displaytools.timeline_ocean_material_interpolation.v1",
+        "supported": True,
+        "instantiated": bool(instantiated),
+        "mode": "linear_ocean_material_segment",
+        "playback_active": parse_bool(playback.get("active"), False),
+        "active": parse_bool(playback.get("active"), False) and bool(interpolated),
+        "from_index": from_index,
+        "to_index": to_index,
+        "fraction": fraction,
+        "fields": fields,
+        "interpolated": interpolated,
+        "applies": ["ocean_material_keyframe_interpolation"],
+        "pending": ["non_material_interpolation", "animation_export", "camera_keyframes"],
+        "boundary": "Only ocean material scalar fields are interpolated; style/layers/pins/boundary remain discrete.",
     }
 
 
@@ -11548,6 +11602,45 @@ class HybridRenderController:
         self.write_timeline_ack()
         return True
 
+    def apply_timeline_ocean_material_interpolation_if_active(self) -> bool:
+        if self.timeline_runtime_state_error is not None:
+            return False
+        state_payload = self.timeline_runtime_state if isinstance(self.timeline_runtime_state, dict) else {}
+        timeline_state = state_payload.get("timeline_state")
+        timeline_state = timeline_state if isinstance(timeline_state, dict) else {}
+        runtime_keyframes = state_payload.get("timeline_keyframes")
+        runtime_keyframes = runtime_keyframes if isinstance(runtime_keyframes, list) else []
+        packet = timeline_ocean_material_interpolation_packet(
+            timeline_state,
+            runtime_keyframes,
+            instantiated=True,
+            last_step_at=getattr(self, "timeline_playback_last_step_at", None),
+        )
+        self.timeline_ocean_material_interpolation_result = packet
+        if not packet.get("active"):
+            return False
+        interpolated = packet.get("interpolated")
+        if not isinstance(interpolated, dict):
+            return False
+        field_attrs = {
+            "wave_strength": "ocean_wave_strength",
+            "roughness": "ocean_roughness",
+            "foam": "ocean_foam",
+        }
+        changed = False
+        for field, attr in field_attrs.items():
+            if field not in interpolated:
+                continue
+            value = max(0.0, min(1.0, float(interpolated[field])))
+            if abs(float(getattr(self.args, attr, value)) - value) > 1e-6:
+                setattr(self.args, attr, value)
+                changed = True
+        if changed:
+            self.globe_dirty = True
+            self.overlay_dirty = True
+            self.write_timeline_ack()
+        return changed
+
     def layer_opacity_attr(self, layer_id: str) -> str | None:
         if layer_id in HYDROLOGY_SPECS:
             return f"{HYDROLOGY_SPECS[layer_id]['prefix']}_opacity"
@@ -13623,6 +13716,16 @@ class HybridRenderController:
             step_count=int(getattr(self, "timeline_playback_step_count", 0)),
             last_step_at_utc=getattr(self, "timeline_playback_last_step_utc", None),
         )
+        ocean_material_interpolation = getattr(
+            self,
+            "timeline_ocean_material_interpolation_result",
+            timeline_ocean_material_interpolation_packet(
+                timeline_state,
+                runtime_keyframes,
+                instantiated=True,
+                last_step_at=getattr(self, "timeline_playback_last_step_at", None),
+            ),
+        )
         payload = {
             "schema": "rrkal_displaytools.renderer_timeline_ack.v1",
             "updated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
@@ -13639,6 +13742,7 @@ class HybridRenderController:
             "segment_state": timeline_segment_state_packet(runtime_keyframes, active_step_state.get("active_index")),
             "active_step_state": active_step_state,
             "step_playback": step_playback,
+            "ocean_material_interpolation": ocean_material_interpolation,
             "first_keyframe_apply": getattr(
                 self,
                 "timeline_first_keyframe_apply_result",
@@ -13647,7 +13751,6 @@ class HybridRenderController:
             "applies": ["input_acknowledgement"],
             "pending": [
                 "animation_export",
-                "ocean_material_keyframe_interpolation",
                 "camera_keyframe_interpolation",
             ],
             "error": self.timeline_runtime_state_error,
@@ -14924,6 +15027,8 @@ class HybridRenderController:
         start = time.time()
         self.refresh_layer_runtime_state()
         if self.advance_timeline_step_playback_if_due():
+            force = True
+        if self.apply_timeline_ocean_material_interpolation_if_active():
             force = True
         self.refresh_ais_if_due(force=force)
         self.refresh_aircraft_if_due(force=force)
@@ -16905,6 +17010,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "segment_state_schema": "rrkal_displaytools.timeline_segment_state.v1",
             "active_step_state_schema": "rrkal_displaytools.timeline_active_step_state.v1",
             "step_playback_schema": "rrkal_displaytools.timeline_step_playback.v1",
+            "ocean_material_interpolation_schema": "rrkal_displaytools.timeline_ocean_material_interpolation.v1",
             "first_keyframe_apply_schema": "rrkal_displaytools.timeline_first_keyframe_apply.v1",
             "playback_readiness": timeline_playback_readiness_packet(),
             "controls": ["timeline-state-file", "timeline-ack-file", "ack-timeline-state-and-exit"],
@@ -16916,6 +17022,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "rrkal_displaytools.timeline_segment_state.v1",
                 "rrkal_displaytools.timeline_active_step_state.v1",
                 "rrkal_displaytools.timeline_step_playback.v1",
+                "rrkal_displaytools.timeline_ocean_material_interpolation.v1",
                 "rrkal_displaytools.timeline_first_keyframe_apply.v1",
                 "profile.timeline_keyframes",
             ],
@@ -16928,13 +17035,13 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "renderer timeline input acknowledgement",
                 "no-GUI timeline ack smoke endpoint",
                 "renderer discrete keyframe step playback",
+                "renderer ocean material keyframe interpolation",
             ],
             "pending": [
                 "animation_export",
-                "ocean_material_keyframe_interpolation",
                 "camera_keyframe_interpolation",
             ],
-            "boundary": "Timeline keyframes are portable UI/profile state; renderer discrete step playback is supported while interpolation/export remain pending.",
+            "boundary": "Timeline keyframes are portable UI/profile state; renderer discrete step playback and ocean/material interpolation are supported while camera/export remain pending.",
         },
         "ui_handoff_contracts": {
             "schema": "rrkal_displaytools.ui_handoff_contracts.v1",

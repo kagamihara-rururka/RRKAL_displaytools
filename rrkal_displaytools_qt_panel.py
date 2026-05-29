@@ -1384,6 +1384,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "timeline_segment_state": self.collect_timeline_segment_state(),
             "timeline_active_step_state": self.collect_timeline_active_step_state(),
             "timeline_step_playback": self.collect_timeline_step_playback_state(),
+            "timeline_ocean_material_interpolation": self.collect_timeline_ocean_material_interpolation_state(),
             "timeline_runtime_state_file": str(TIMELINE_STATE_PATH),
             "timeline_ack_file": str(TIMELINE_ACK_PATH),
             "timeline_ack": self.timeline_ack_payload,
@@ -2672,7 +2673,6 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ],
             "pending": [
                 "animation_export",
-                "ocean_material_keyframes",
                 "camera_keyframes",
             ],
             "playhead": 0,
@@ -2694,6 +2694,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "renderer_ack_available": True,
             "renderer_timeline_playback": True,
             "renderer_playback_mode": "discrete_keyframe_step",
+            "ocean_material_interpolation": True,
             "animation_export": False,
             "ready_handoff_files": {
                 "timeline_runtime_state_file": str(TIMELINE_STATE_PATH),
@@ -2701,7 +2702,6 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             },
             "pending": [
                 "animation_export",
-                "ocean_material_keyframe_interpolation",
                 "camera_keyframe_interpolation",
             ],
             "boundary": "Renderer can advance discrete keyframe steps when playback is active; interpolation and export are not claimed yet.",
@@ -2746,9 +2746,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ],
             "pending": [
                 "animation_export",
-                "inter_keyframe_interpolation",
+                "non_material_interpolation",
             ],
-            "boundary": "Playback plan drives renderer discrete keyframe steps; inter-keyframe interpolation/export remain pending.",
+            "boundary": "Playback plan drives renderer discrete keyframe steps and ocean/material interpolation; non-material interpolation/export remain pending.",
         }
 
     def collect_timeline_segment_state(self) -> dict[str, object]:
@@ -2775,7 +2775,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "active_segment": active_segment,
             "segment_available": active_segment is not None,
             "segment_count": max(0, len(self.timeline_keyframes) - 1),
-            "pending": ["renderer_step_playback", "inter_keyframe_interpolation", "animation_export"],
+            "pending": ["non_material_interpolation", "animation_export"],
             "boundary": "Segment state describes the next playback segment; renderer step playback is not claimed yet.",
         }
 
@@ -2799,7 +2799,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "keyframe_count": keyframe_count,
             "step_available": active_index is not None,
             "applies": ["qt_preview_step_selection", "renderer_startup_selection_hint"],
-            "pending": ["renderer_step_playback", "inter_keyframe_interpolation", "animation_export"],
+            "pending": ["non_material_interpolation", "animation_export"],
             "boundary": "Active step is a discrete keyframe selection contract; renderer playback, interpolation, and export remain pending.",
         }
 
@@ -2816,8 +2816,24 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "keyframe_count": len(self.timeline_keyframes),
             "step_count": 0,
             "applies": ["renderer_discrete_keyframe_step"],
-            "pending": ["inter_keyframe_interpolation", "animation_export", "camera_keyframes"],
+            "pending": ["non_material_interpolation", "animation_export", "camera_keyframes"],
             "boundary": "Qt exports the step playback contract; renderer owns runtime stepping.",
+        }
+
+    def collect_timeline_ocean_material_interpolation_state(self) -> dict[str, object]:
+        active_step = self.collect_timeline_active_step_state()
+        return {
+            "schema": "rrkal_displaytools.timeline_ocean_material_interpolation.v1",
+            "supported": True,
+            "instantiated": False,
+            "mode": "qt_handoff_contract",
+            "playback_active": bool(self.timeline_playback_active),
+            "active_index": active_step.get("active_index"),
+            "fields": ["wave_strength", "roughness", "foam"],
+            "fraction": 0.0,
+            "applies": ["ocean_material_keyframe_interpolation"],
+            "pending": ["non_material_interpolation", "animation_export", "camera_keyframes"],
+            "boundary": "Qt exports the interpolation contract; renderer owns runtime interpolation.",
         }
 
     def collect_timeline_runtime_state(self) -> dict[str, object]:
@@ -2830,6 +2846,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "segment_state": self.collect_timeline_segment_state(),
             "active_step_state": self.collect_timeline_active_step_state(),
             "step_playback": self.collect_timeline_step_playback_state(),
+            "ocean_material_interpolation": self.collect_timeline_ocean_material_interpolation_state(),
             "timeline_keyframes": [dict(keyframe) for keyframe in self.timeline_keyframes],
             "source": "rrkal_displaytools_qt_panel",
             "boundary": "Renderer receives Timeline keyframes for discrete step playback; interpolation/export remain pending.",
@@ -3787,6 +3804,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "timeline_segment_state": self.collect_timeline_segment_state(),
             "timeline_active_step_state": self.collect_timeline_active_step_state(),
             "timeline_step_playback": self.collect_timeline_step_playback_state(),
+            "timeline_ocean_material_interpolation": self.collect_timeline_ocean_material_interpolation_state(),
             "timeline_runtime_state_file": str(TIMELINE_STATE_PATH),
             "timeline_state_last_write_utc": self.timeline_state_last_write_utc,
             "timeline_state_write_error": self.timeline_state_write_error,

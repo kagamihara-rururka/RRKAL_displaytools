@@ -85,6 +85,9 @@ if ($launchPacket.timeline_playback_readiness.renderer_ack_available -ne $true) 
 if ($launchPacket.timeline_playback_readiness.renderer_timeline_playback -ne $true) {
     throw "Launch packet timeline playback readiness must claim renderer discrete playback"
 }
+if ($launchPacket.timeline_playback_readiness.ocean_material_interpolation -ne $true) {
+    throw "Launch packet timeline playback readiness must claim ocean material interpolation"
+}
 if ($launchPacket.timeline_playback_plan.schema -ne "rrkal_displaytools.timeline_playback_plan.v1") {
     throw "Launch packet timeline playback plan schema missing or invalid"
 }
@@ -99,6 +102,9 @@ if ($launchPacket.timeline_active_step_state.schema -ne "rrkal_displaytools.time
 }
 if ($launchPacket.timeline_step_playback.schema -ne "rrkal_displaytools.timeline_step_playback.v1") {
     throw "Launch packet timeline step playback schema missing or invalid"
+}
+if ($launchPacket.timeline_ocean_material_interpolation.schema -ne "rrkal_displaytools.timeline_ocean_material_interpolation.v1") {
+    throw "Launch packet timeline ocean material interpolation schema missing or invalid"
 }
 if ($launchPacket.timeline_state.implemented -notcontains "profile_timeline_keyframe_handoff") {
     throw "Launch packet timeline_state profile keyframe handoff missing"
@@ -126,6 +132,9 @@ if ($launchPacket.timeline_runtime_state.active_step_state.schema -ne "rrkal_dis
 }
 if ($launchPacket.timeline_runtime_state.step_playback.schema -ne "rrkal_displaytools.timeline_step_playback.v1") {
     throw "Launch packet timeline_runtime_state step playback missing or invalid"
+}
+if ($launchPacket.timeline_runtime_state.ocean_material_interpolation.schema -ne "rrkal_displaytools.timeline_ocean_material_interpolation.v1") {
+    throw "Launch packet timeline_runtime_state ocean material interpolation missing or invalid"
 }
 if ($launchPacket.timeline_runtime_state_file -ne "state/renderer_timeline_state.json") {
     throw "Launch packet timeline runtime state file missing or invalid"
@@ -217,6 +226,9 @@ if ($timelineAck.active_step_state.schema -ne "rrkal_displaytools.timeline_activ
 if ($timelineAck.step_playback.schema -ne "rrkal_displaytools.timeline_step_playback.v1") {
     throw "Renderer timeline ack endpoint step playback missing or invalid"
 }
+if ($timelineAck.ocean_material_interpolation.schema -ne "rrkal_displaytools.timeline_ocean_material_interpolation.v1") {
+    throw "Renderer timeline ack endpoint ocean material interpolation missing or invalid"
+}
 if ($timelineAck.first_keyframe_apply.schema -ne "rrkal_displaytools.timeline_first_keyframe_apply.v1") {
     throw "Renderer timeline ack endpoint first keyframe apply packet missing or invalid"
 }
@@ -279,6 +291,9 @@ if ($capabilities.timeline_handoff.active_step_state_schema -ne "rrkal_displayto
 }
 if ($capabilities.timeline_handoff.step_playback_schema -ne "rrkal_displaytools.timeline_step_playback.v1") {
     throw "Renderer timeline_handoff step playback schema missing or invalid"
+}
+if ($capabilities.timeline_handoff.ocean_material_interpolation_schema -ne "rrkal_displaytools.timeline_ocean_material_interpolation.v1") {
+    throw "Renderer timeline_handoff ocean material interpolation schema missing or invalid"
 }
 if ($capabilities.timeline_handoff.first_keyframe_apply_schema -ne "rrkal_displaytools.timeline_first_keyframe_apply.v1") {
     throw "Renderer timeline_handoff first keyframe apply schema missing or invalid"
