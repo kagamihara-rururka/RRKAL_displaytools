@@ -8,6 +8,7 @@ from pathlib import Path
 PROFILE_SCHEMA_ID = "rrkal_displaytools.qt_panel_profile.v1"
 
 REQUIRED_PROFILE_TOP_LEVEL = {"schema", "renderer", "ocean_material", "layers"}
+OPTIONAL_PROFILE_TOP_LEVEL = {"selected_layer", "layer_stack_ui"}
 REQUIRED_PROFILE_RENDERER = {
     "style_profile",
     "ui_backend",
@@ -35,6 +36,10 @@ REQUIRED_PROFILE_LAYERS = {
     "vehicle_icons",
     "demo_closed_loop",
 }
+REQUIRED_LAYER_STACK_KEYS = REQUIRED_PROFILE_LAYERS - {"demo_closed_loop"}
+REQUIRED_LAYER_STACK_UI_FIELDS = {"locked", "opacity", "blend_mode"}
+OPTIONAL_LAYER_STACK_UI_FIELDS = {"selected", "renderer_sync"}
+BLEND_MODES = {"Normal", "Screen", "Multiply", "Overlay", "Soft Light"}
 
 
 def profile_payload_errors(profile: dict[str, object]) -> list[str]:
@@ -64,6 +69,44 @@ def profile_payload_errors(profile: dict[str, object]) -> list[str]:
         for key, value in layers.items():
             if not isinstance(value, bool):
                 errors.append(f"layer {key} must be boolean")
+    selected_layer = profile.get("selected_layer")
+    if selected_layer is not None:
+        if not isinstance(selected_layer, str):
+            errors.append("selected_layer must be a string")
+        elif selected_layer not in REQUIRED_LAYER_STACK_KEYS:
+            errors.append(f"selected_layer is not a known layer stack key: {selected_layer}")
+    layer_stack = profile.get("layer_stack_ui")
+    if layer_stack is not None:
+        if not isinstance(layer_stack, dict):
+            errors.append("layer_stack_ui must be an object")
+        else:
+            for key in sorted(REQUIRED_LAYER_STACK_KEYS - set(layer_stack)):
+                errors.append(f"missing layer_stack_ui key: {key}")
+            for key, value in layer_stack.items():
+                if key not in REQUIRED_LAYER_STACK_KEYS:
+                    errors.append(f"unknown layer_stack_ui key: {key}")
+                    continue
+                if not isinstance(value, dict):
+                    errors.append(f"layer_stack_ui {key} must be an object")
+                    continue
+                allowed_fields = REQUIRED_LAYER_STACK_UI_FIELDS | OPTIONAL_LAYER_STACK_UI_FIELDS
+                for field in sorted(REQUIRED_LAYER_STACK_UI_FIELDS - set(value)):
+                    errors.append(f"missing layer_stack_ui {key} field: {field}")
+                for field in sorted(set(value) - allowed_fields):
+                    errors.append(f"unknown layer_stack_ui {key} field: {field}")
+                locked = value.get("locked")
+                if not isinstance(locked, bool):
+                    errors.append(f"layer_stack_ui {key}.locked must be boolean")
+                opacity = value.get("opacity")
+                if not isinstance(opacity, int) or isinstance(opacity, bool) or not 0 <= opacity <= 100:
+                    errors.append(f"layer_stack_ui {key}.opacity must be an integer from 0 to 100")
+                blend_mode = value.get("blend_mode")
+                if not isinstance(blend_mode, str) or blend_mode not in BLEND_MODES:
+                    errors.append(f"layer_stack_ui {key}.blend_mode must be one of {sorted(BLEND_MODES)}")
+                if "selected" in value and not isinstance(value["selected"], bool):
+                    errors.append(f"layer_stack_ui {key}.selected must be boolean")
+                if "renderer_sync" in value and not isinstance(value["renderer_sync"], str):
+                    errors.append(f"layer_stack_ui {key}.renderer_sync must be a string")
     return errors
 
 
@@ -79,9 +122,16 @@ def profile_schema_packet() -> dict[str, object]:
         "schema": "rrkal_displaytools.profile_schema_contract.v1",
         "profile_schema_id": PROFILE_SCHEMA_ID,
         "required_top_level": sorted(REQUIRED_PROFILE_TOP_LEVEL),
+        "optional_top_level": sorted(OPTIONAL_PROFILE_TOP_LEVEL),
         "required_renderer": sorted(REQUIRED_PROFILE_RENDERER),
         "required_ocean_material": sorted(REQUIRED_PROFILE_OCEAN_MATERIAL),
         "required_layers": sorted(REQUIRED_PROFILE_LAYERS),
+        "optional_layer_stack_ui": {
+            "keys": sorted(REQUIRED_LAYER_STACK_KEYS),
+            "required_fields": sorted(REQUIRED_LAYER_STACK_UI_FIELDS),
+            "optional_fields": sorted(OPTIONAL_LAYER_STACK_UI_FIELDS),
+            "blend_modes": sorted(BLEND_MODES),
+        },
         "local_only_paths": [
             "state/ui_profiles/",
             "state/showcase/",

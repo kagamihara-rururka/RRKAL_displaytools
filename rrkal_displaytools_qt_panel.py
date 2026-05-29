@@ -667,6 +667,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "foam": self.foam_edit.text().strip(),
             },
             "layers": {key: check.isChecked() for key, check in self.checks.items()},
+            "selected_layer": self.selected_layer_key,
+            "layer_stack_ui": self.collect_layer_stack_ui(),
         }
 
     def collect_launch_packet(self) -> dict[str, object]:
@@ -716,6 +718,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         renderer = profile.get("renderer", {})
         material = profile.get("ocean_material", {})
         layers = profile.get("layers", {})
+        selected_layer = profile.get("selected_layer")
+        layer_stack = profile.get("layer_stack_ui")
         if isinstance(renderer, dict):
             self._set_combo(self.style_combo, str(renderer.get("style_profile", self.style_combo.currentText())))
             self._set_combo(self.ui_combo, str(renderer.get("ui_backend", self.ui_combo.currentText())))
@@ -733,7 +737,22 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             for key, value in layers.items():
                 if key in self.checks:
                     self.checks[key].setChecked(bool(value))
+        if isinstance(layer_stack, dict):
+            for key, value in layer_stack.items():
+                if key not in self.layer_locks or not isinstance(value, dict):
+                    continue
+                self.layer_locks[key].setChecked(bool(value.get("locked", False)))
+                self.layer_opacity[key].setValue(int(value.get("opacity", 100)))
+                self.layer_blends[key].setCurrentText(str(value.get("blend_mode", "Normal")))
+        if isinstance(selected_layer, str) and selected_layer in self.layer_rows:
+            self.select_layer(selected_layer)
+        elif isinstance(layer_stack, dict):
+            for key, value in layer_stack.items():
+                if key in self.layer_rows and isinstance(value, dict) and value.get("selected") is True:
+                    self.select_layer(key)
+                    break
         self.refresh_command_preview()
+        self.refresh_layer_stack_status()
 
     def load_profile_path(self, path: Path) -> None:
         if not path.exists():

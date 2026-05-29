@@ -13,6 +13,7 @@
 - 支援水文、海域、交通、視覺輔助四組一鍵切換。
 - Layers 面板已具備 Photoshop-like layer stack 雛形：active layer selection、visibility、lock、opacity、blend mode、UI-only state reset。Visibility 已接 renderer flags；selected layer/lock/opacity/blend 目前是 🚧 UI state，會寫入 launch packet 供後續 renderer sync。
 - Properties 面板已接 active layer inspector，可查看目前選取圖層的 visibility、lock、opacity、blend mode，並可切換選取圖層 visibility 或重設選取圖層 UI state。
+- Qt profile save/load 已支援 selected layer 與 layer stack UI state，因此 active layer、lock、opacity、blend mode 可以隨本機 profile 保存與載入；既有 repo templates 仍相容。
 - 支援啟動、停止、套用並重啟 renderer。
 - 顯示 renderer PID、執行中狀態與 exit code。
 - 可在中央預覽區顯示 renderer capabilities、layer manifest、launch packet 或 smoke 結果。
@@ -25,7 +26,7 @@
 - Dockable panels 的更完整 Photoshop-like 版面：Layers / Properties / Navigator / History / Timeline。
 - 中央 renderer preview 從命令 JSON 預覽升級為可嵌入或可同步的畫面預覽。
 - 圖層即時同步，不再只靠重啟 renderer 套用。
-- Layer stack 的 selected layer、lock、opacity、blend mode 接 renderer 即時同步與 profile schema。
+- Layer stack 的 selected layer、lock、opacity、blend mode 接 renderer 即時同步。
 - Style / Looks panel 的縮圖化模板選擇。
 - Brush / mask / selection 類工具先做 UI placeholder，再逐步接 renderer。
 - Timeline / keyframe / animation controls for ocean/cloud/material parameters。

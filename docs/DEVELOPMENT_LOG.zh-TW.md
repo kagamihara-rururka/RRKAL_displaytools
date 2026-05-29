@@ -613,3 +613,16 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Qt layer stack profile state
+
+Scope:
+- Added optional `selected_layer` and `layer_stack_ui` contract fields to `profile_schema.py`.
+- Updated Qt profile save/load so selected layer, lock, opacity, and blend-mode UI state can round-trip through local profiles.
+- Rewrote `docs/PROFILE_SCHEMA.zh-TW.md` with the layer stack UI contract and handoff rules.
+
+Positioning:
+- This keeps the current work inside UIUX closure: operator UI state can now be saved, loaded, and moved across machines before renderer-side sync is implemented.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
