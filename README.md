@@ -31,6 +31,11 @@ Open the panel with a shared template already loaded:
 .\scripts\run_qt_panel.ps1 -Profile .\profiles\maritime_hydrology.json
 ```
 
+Optional quick headless render request:
+```powershell
+.\scripts\render_quick_smoke.ps1
+```
+
 Direct renderer launch:
 ```powershell
 py -3 taichi_global_bathymetry.py --style-profile scientific --topo-source gebco --topo-step 48 --data-mode static
@@ -48,6 +53,7 @@ Primary files:
 - `profiles/*.json`: repo-shared Qt panel profile templates.
 - `scripts/setup_windows.ps1`: Windows dependency setup helper.
 - `scripts/run_qt_panel.ps1`: Windows Qt panel launch helper.
+- `scripts/render_quick_smoke.ps1`: Windows headless quick render helper.
 
 Qt panel capabilities:
 - Toggle renderer layers without memorizing CLI flags.

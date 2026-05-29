@@ -454,10 +454,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             return
         if sys.platform == "win32":
             ps_command = (
-                "$files=@('scripts\\setup_windows.ps1','scripts\\run_qt_panel.ps1');"
+                "$files=Get-ChildItem scripts -Filter *.ps1;"
                 "foreach($file in $files){"
                 "$tokens=$null;$errors=$null;"
-                "[System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file),[ref]$tokens,[ref]$errors)>$null;"
+                "[System.Management.Automation.Language.Parser]::ParseFile($file.FullName,[ref]$tokens,[ref]$errors)>$null;"
                 "if($errors -and $errors.Count -gt 0){$errors|Format-List *;exit 1}"
                 "}"
             )

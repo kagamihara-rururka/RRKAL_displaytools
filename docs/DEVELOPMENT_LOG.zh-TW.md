@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - Windows quick headless render helper
+
+Scope:
+- Added `scripts/render_quick_smoke.ps1` for a small synthetic/headless render request into `state/showcase/quick_smoke.png`.
+- Updated Qt panel smoke check to parse all PowerShell scripts under `scripts/`.
+- Updated README with the optional quick render command.
+
+Positioning:
+- This is a displaytools showcase helper, not a required pre-commit smoke path.
+- Generated images remain local under `state/` and should not be committed.
+
+Validation:
+- Smoke passed before commit: `py -3 -m py_compile rrkal_displaytools_qt_panel.py taichi_global_bathymetry.py`.
+- Smoke passed before commit: PowerShell parser check for all scripts under `scripts/`.
 ## 2026-05-29 - Qt launch packet export
 
 Scope:
@@ -185,6 +199,7 @@ Validation:
 Next round rule:
 - Before any new development round, inspect current repo state.
 - After each round, update this log and commit before continuing.
+
 
 
 
