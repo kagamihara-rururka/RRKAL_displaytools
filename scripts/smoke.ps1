@@ -37,6 +37,9 @@ if ($launchPacket.layer_undo.schema -ne "rrkal_displaytools.layer_stack_undo.v1"
 if ($launchPacket.session_journal.schema -ne "rrkal_displaytools.session_journal.v1") {
     throw "Launch packet session_journal schema missing or invalid"
 }
+if ($launchPacket.timeline_state.schema -ne "rrkal_displaytools.timeline_state.v1") {
+    throw "Launch packet timeline_state schema missing or invalid"
+}
 if ($launchPacket.boundary_highlight.identity_status.schema -ne "rrkal_displaytools.boundary_identity_status.v1") {
     throw "Launch packet boundary_highlight identity_status schema missing or invalid"
 }

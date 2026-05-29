@@ -1,5 +1,20 @@
 # Development Log
 
+## 2026-05-29 - Timeline UI status contract
+
+Scope:
+- Added a visible Qt Timeline dock with construction markers.
+- Qt launch packet and research provenance now include `timeline_state`.
+- No-GUI launch packet export includes the same schema as a status contract.
+- Closed-loop status now tracks `qt_timeline_panel` as partial, with keyframe storage/playback/export still pending.
+- Smoke now gates launch packet `timeline_state`.
+
+Positioning:
+- This gives the Photoshop-like workspace an honest Timeline surface without claiming renderer animation playback is complete.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Clone quickstart handoff inspection
 
 Scope:

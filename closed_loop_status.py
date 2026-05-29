@@ -109,6 +109,12 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                 ],
             },
             {
+                "id": "qt_timeline_panel",
+                "applies": ["visible timeline dock", "launch packet timeline_state contract", "provenance timeline_state"],
+                "pending": ["keyframe_storage", "playback_controls", "animation_export"],
+                "evidence": ["Timeline dock construction marker", "rrkal_displaytools.timeline_state.v1"],
+            },
+            {
                 "id": "renderer_output_provenance",
                 "applies": ["image output metadata sidecar", "RRKAL manifest reference passthrough"],
                 "pending": [],

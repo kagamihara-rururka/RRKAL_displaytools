@@ -264,6 +264,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_pick_state_mtime_ns: int | None = LAYER_PICK_STATE_PATH.stat().st_mtime_ns if LAYER_PICK_STATE_PATH.exists() else None
         self.layer_pick_state_payload: dict[str, object] | None = None
         self.history_list: QtWidgets.QListWidget | None = None
+        self.timeline_state_label: QtWidgets.QLabel | None = None
         self.selected_layer_key: str | None = None
         self.boundary_highlight_state: dict[str, object] = default_boundary_highlight_state()
         self.boundary_highlight_label: QtWidgets.QLabel | None = None
@@ -935,6 +936,33 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.docks["history"] = history_dock
         self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, history_dock)
 
+        timeline_dock = QtWidgets.QDockWidget("Timeline", self)
+        timeline_dock.setObjectName("timelineDock")
+        timeline = QtWidgets.QWidget(timeline_dock)
+        timeline_layout = QtWidgets.QVBoxLayout(timeline)
+        timeline_layout.setContentsMargins(10, 10, 10, 10)
+        timeline_note = QtWidgets.QLabel(
+            "🚧 Timeline/keyframes：UI contract 已建立；實際 keyframe playback / animation export 尚未完成。"
+        )
+        timeline_note.setWordWrap(True)
+        timeline_layout.addWidget(timeline_note)
+        playhead = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+        playhead.setRange(0, 100)
+        playhead.setValue(0)
+        playhead.setEnabled(False)
+        timeline_layout.addWidget(playhead)
+        self.timeline_state_label = QtWidgets.QLabel(
+            "Timeline status: construction; planned targets include ocean/material and camera states."
+        )
+        self.timeline_state_label.setWordWrap(True)
+        timeline_layout.addWidget(self.timeline_state_label)
+        add_keyframe = QtWidgets.QPushButton("🚧 Add keyframe")
+        add_keyframe.setEnabled(False)
+        timeline_layout.addWidget(add_keyframe)
+        timeline_dock.setWidget(timeline)
+        self.docks["timeline"] = timeline_dock
+        self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, timeline_dock)
+
         provenance_dock = QtWidgets.QDockWidget("Provenance", self)
         provenance_dock.setObjectName("provenanceDock")
         provenance = QtWidgets.QWidget(provenance_dock)
@@ -1006,6 +1034,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.docks["properties"])
         self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.docks["navigator"])
         self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.docks["history"])
+        self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.docks["timeline"])
         self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.docks["provenance"])
         if preset == "maritime":
             self.apply_maritime()
@@ -1014,6 +1043,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         elif preset == "tactical":
             self.apply_tactical()
             self.tabifyDockWidget(self.docks["navigator"], self.docks["history"])
+            self.tabifyDockWidget(self.docks["history"], self.docks["timeline"])
             self.docks["layers"].raise_()
         elif preset == "parchment":
             self.apply_parchment()
@@ -1023,6 +1053,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.apply_baseline()
             self.tabifyDockWidget(self.docks["layers"], self.docks["properties"])
             self.tabifyDockWidget(self.docks["navigator"], self.docks["history"])
+            self.tabifyDockWidget(self.docks["history"], self.docks["timeline"])
             self.tabifyDockWidget(self.docks["history"], self.docks["provenance"])
             self.docks["history"].raise_()
         else:
@@ -1211,6 +1242,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "active_layer_diagnostics": self.active_layer_diagnostics_packet(),
             "layer_undo": self.collect_layer_undo_state(),
             "session_journal": self.collect_session_journal(),
+            "timeline_state": self.collect_timeline_state(),
             "selected_pin_id": self.selected_pin_id,
             "layer_stack_ui": self.collect_layer_stack_ui(),
             "tool_state": self.collect_tool_state(),
@@ -2118,6 +2150,23 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "boundary": "Recent UI/runtime bridge journal only; not a persisted lab notebook or global document history.",
         }
 
+    def collect_timeline_state(self) -> dict[str, object]:
+        return {
+            "schema": "rrkal_displaytools.timeline_state.v1",
+            "status": "construction",
+            "implemented": ["visible_qt_timeline_dock", "launch_packet_status_contract"],
+            "pending": [
+                "keyframe_storage",
+                "playback_controls",
+                "animation_export",
+                "ocean_material_keyframes",
+                "camera_keyframes",
+            ],
+            "playhead": 0,
+            "keyframe_count": 0,
+            "boundary": "UIUX placeholder/status contract only; no renderer animation playback is claimed yet.",
+        }
+
     @QtCore.pyqtSlot()
     def undo_layer_stack_state(self) -> None:
         if not self.layer_undo_stack:
@@ -2829,6 +2878,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "active_layer_diagnostics": self.active_layer_diagnostics_packet(),
             "layer_undo": self.collect_layer_undo_state(),
             "session_journal": self.collect_session_journal(),
+            "timeline_state": self.collect_timeline_state(),
             "active_tool": self.active_tool,
             "cursor_lat_lon_estimate": {
                 "latitude": self.cursor_latitude,
