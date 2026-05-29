@@ -54,6 +54,7 @@ Qt panel capabilities:
 - Load repo-shared profile templates from `profiles/`.
 - Save/load local layer profiles as JSON under `state/ui_profiles/`.
 - Apply current settings by restarting the renderer from the panel.
+- Export a local launch packet JSON under state/showcase/ for handoff/debugging.
 
 Core docs:
 - `docs/PRODUCT_POSITIONING.zh-TW.md`
@@ -66,3 +67,4 @@ Core docs:
 Notes:
 - Runtime caches, screenshots, logs, databases, and virtual environments are intentionally excluded from Git.
 - This initial import preserves the current monolithic prototype before later module extraction.
+

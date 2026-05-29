@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - Qt launch packet export
+
+Scope:
+- Added launch-packet export to `rrkal_displaytools_qt_panel.py`.
+- Exported packets include current profile state, command array, command line, timestamp, and RRKAL/displaytools boundary notes.
+- Updated README and GTD for the new handoff/debugging artifact.
+
+Positioning:
+- Launch packets are local displaytools handoff artifacts under `state/showcase/`.
+- They do not replace RRKAL manifest or install registry governance.
+
+Validation:
+- Smoke passed before commit: `py -3 -m py_compile rrkal_displaytools_qt_panel.py taichi_global_bathymetry.py`.
+- Smoke passed before commit: PowerShell parser check for `scripts/setup_windows.ps1` and `scripts/run_qt_panel.ps1`.
 ## 2026-05-29 - Qt panel smoke check action
 
 Scope:
@@ -171,6 +185,7 @@ Validation:
 Next round rule:
 - Before any new development round, inspect current repo state.
 - After each round, update this log and commit before continuing.
+
 
 
 

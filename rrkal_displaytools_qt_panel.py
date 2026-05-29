@@ -9,6 +9,7 @@ governance; this file is only a displaytools control surface.
 from __future__ import annotations
 
 import argparse
+import datetime
 import json
 import subprocess
 import sys
@@ -26,6 +27,7 @@ ROOT = Path(__file__).resolve().parent
 RENDERER = ROOT / "taichi_global_bathymetry.py"
 PROFILE_DIR = ROOT / "state" / "ui_profiles"
 PROFILE_TEMPLATE_DIR = ROOT / "profiles"
+SHOWCASE_DIR = ROOT / "state" / "showcase"
 
 STYLE_PROFILES = ("scientific", "nautical", "parchment", "tactical")
 UI_BACKENDS = ("qt", "vispy")
@@ -207,6 +209,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         load_button = QtWidgets.QPushButton("載入配置")
         open_templates_button = QtWidgets.QPushButton("模板目錄")
         open_local_profiles_button = QtWidgets.QPushButton("本機配置")
+        export_packet_button = QtWidgets.QPushButton("匯出啟動包")
         smoke_button = QtWidgets.QPushButton("Smoke check")
         launch_button = QtWidgets.QPushButton("啟動地球儀")
         restart_button = QtWidgets.QPushButton("套用並重啟")
@@ -217,6 +220,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         load_button.clicked.connect(self.load_profile_dialog)
         open_templates_button.clicked.connect(self.open_template_dir)
         open_local_profiles_button.clicked.connect(self.open_local_profile_dir)
+        export_packet_button.clicked.connect(self.export_launch_packet_dialog)
         smoke_button.clicked.connect(self.run_smoke_check)
         launch_button.clicked.connect(self.launch_renderer)
         restart_button.clicked.connect(self.restart_renderer)
@@ -227,6 +231,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         actions.addWidget(load_button)
         actions.addWidget(open_templates_button)
         actions.addWidget(open_local_profiles_button)
+        actions.addWidget(export_packet_button)
         actions.addWidget(smoke_button)
         actions.addWidget(launch_button)
         actions.addWidget(restart_button)
@@ -321,6 +326,28 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "foam": self.foam_edit.text().strip(),
             },
             "layers": {key: check.isChecked() for key, check in self.checks.items()},
+        }
+
+    def collect_launch_packet(self) -> dict[str, object]:
+        return {
+            "schema": "rrkal_displaytools.launch_packet.v1",
+            "created_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "repo_role": "RRKAL displaytools renderer launch state",
+            "rrkal_boundary": {
+                "rrkal_owns": [
+                    "dataset discovery",
+                    "download/import/install registry",
+                    "manifest/cache governance",
+                ],
+                "displaytools_owns": [
+                    "renderer launch flags",
+                    "layer/style/material operator state",
+                    "visualization frontend",
+                ],
+            },
+            "profile": self.collect_profile(),
+            "command": self.build_command(),
+            "command_line": subprocess.list2cmdline(self.build_command()),
         }
 
     def apply_profile(self, profile: dict[str, object]) -> None:
@@ -465,6 +492,24 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             encoding="utf-8",
         )
         self.status.setText(f"已儲存配置：{path}")
+
+    @QtCore.pyqtSlot()
+    def export_launch_packet_dialog(self) -> None:
+        SHOWCASE_DIR.mkdir(parents=True, exist_ok=True)
+        default_path = SHOWCASE_DIR / "launch_packet.json"
+        path, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self,
+            "匯出啟動包",
+            str(default_path),
+            "JSON packets (*.json)",
+        )
+        if not path:
+            return
+        Path(path).write_text(
+            json.dumps(self.collect_launch_packet(), ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        self.status.setText(f"已匯出啟動包：{path}")
 
     @QtCore.pyqtSlot()
     def load_profile_dialog(self) -> None:
