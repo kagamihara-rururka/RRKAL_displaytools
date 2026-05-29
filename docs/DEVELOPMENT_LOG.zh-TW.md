@@ -3266,3 +3266,17 @@ Decision:
 Validation:
 - Smoke passed on rerun before commit: first run hit a transient Windows permission lock on `taichi_global_bathymetry.py`; second run passed with `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+
+## 2026-05-30 - Renderer capability Layers workflow hint
+
+Scope:
+- Renderer capability discovery now exposes the same `workflow_hint` and `workflow_hint_surface` in `layer_research_workflow`.
+- Smoke verifies the renderer source carries the Boundary/territorial sea/EEZ/high-seas emphasis workflow hint.
+- Closed-loop evidence now includes renderer capability discovery for the Layers workflow hint.
+
+Decision:
+- The same layer-selection and Boundary emphasis guidance should be visible from Qt, launch packets, handoff inspection and renderer capability discovery.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+

@@ -339,3 +339,8 @@
 
 - `layer_research_workflow` now carries `workflow_hint` and `workflow_hint_surface` in Qt/no-GUI contracts.
 - Handoff inspection reports the same hint, including Boundary/territorial sea/EEZ/high-seas emphasis entry points.
+
+### 2026-05-30 Renderer capability Layers workflow hint
+
+- Renderer capability discovery now includes the Layers workflow hint under `layer_research_workflow`.
+- The hint is now aligned across Qt UI, no-GUI launch packet, handoff inspection and renderer capabilities.

@@ -1646,6 +1646,12 @@ $rendererSource = Get-Content -Raw -Encoding UTF8 taichi_global_bathymetry.py
 if ($rendererSource -notlike "*last_layer_pick_screen*") {
     throw "Renderer layer pick screen position state missing"
 }
+if ($rendererSource -notlike "*workflow_hint_surface*") {
+    throw "Renderer capability layer workflow hint surface missing"
+}
+if ($rendererSource -notlike "*double-click Boundary/territorial sea/EEZ/high-seas rows*") {
+    throw "Renderer capability layer workflow boundary emphasis hint missing"
+}
 
 $scripts = Get-ChildItem scripts -Filter *.ps1
 foreach ($script in $scripts) {

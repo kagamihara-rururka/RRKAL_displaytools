@@ -220,6 +220,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "Qt Boundary identity warning badge",
                     "Qt Layers workflow hint",
                     "launch/handoff Layers workflow hint",
+                    "renderer capability Layers workflow hint",
                     "Canvas Preview boundary identity warning provenance",
                     "No-GUI launch packet boundary identity warning",
                     "handoff inspection boundary identity warning",
@@ -364,6 +365,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
         ],
         "external_dependencies": ["RRKAL data manifest validation/ingest/governance"],
     }
+
 
 
 
