@@ -42,6 +42,11 @@ Optional quick headless render request:
 .\scripts\render_quick_smoke.ps1
 ```
 
+Export a launch packet without opening Qt:
+`powershell
+py -3 scripts\export_launch_packet.py --template fast_synthetic
+` 
+
 Pre-commit smoke:
 ```powershell
 .\scripts\smoke.ps1
@@ -92,6 +97,7 @@ Core docs:
 Notes:
 - Runtime caches, screenshots, logs, databases, and virtual environments are intentionally excluded from Git.
 - This initial import preserves the current monolithic prototype before later module extraction.
+
 
 
 

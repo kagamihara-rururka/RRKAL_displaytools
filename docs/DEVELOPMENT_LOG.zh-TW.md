@@ -1,5 +1,17 @@
 ﻿# Development Log
 
+## 2026-05-29 - No-GUI launch packet exporter
+
+Scope:
+- Added `scripts/export_launch_packet.py` to build launch packets from profile templates without opening Qt.
+- Added exporter coverage to `scripts/smoke.ps1` using the `fast_synthetic` template.
+- Updated README and GTD for the exporter.
+
+Positioning:
+- This gives RRKAL/scripts a direct way to generate displaytools launch state from shared templates.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 ## 2026-05-29 - Shared profile schema validator
 
 Scope:
@@ -378,6 +390,7 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 
 
 

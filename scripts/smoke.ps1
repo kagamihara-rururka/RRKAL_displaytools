@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Stop"
+﻿$ErrorActionPreference = "Stop"
 $RepoRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 Set-Location $RepoRoot
 
@@ -19,6 +19,7 @@ function Invoke-CheckedNative {
 
 Invoke-CheckedNative py @("-3", "-m", "py_compile", "rrkal_displaytools_qt_panel.py", "taichi_global_bathymetry.py")
 Invoke-CheckedNative py @("-3", "scripts\validate_profiles.py")
+Invoke-CheckedNative py @("-3", "scripts\export_launch_packet.py", "--template", "fast_synthetic") | Out-Null
 Invoke-CheckedNative py @("-3", "taichi_global_bathymetry.py", "--print-renderer-capabilities") | Out-Null
 Invoke-CheckedNative py @("-3", "rrkal_displaytools_qt_panel.py", "--list-templates") | Out-Null
 
@@ -38,3 +39,4 @@ foreach ($script in $scripts) {
 }
 
 Write-Host "Smoke passed."
+
