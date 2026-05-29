@@ -2578,6 +2578,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         open_local_profiles_button = QtWidgets.QPushButton("本機配置")
         export_packet_button = QtWidgets.QPushButton("匯出啟動包")
         profile_replay_button = QtWidgets.QPushButton("Profile replay")
+        ocean_port_button = QtWidgets.QPushButton("Ocean port")
         capabilities_button = QtWidgets.QPushButton("Renderer 能力")
         closed_loop_button = QtWidgets.QPushButton("閉環狀態")
         layer_manifest_button = QtWidgets.QPushButton("圖層 manifest")
@@ -2597,6 +2598,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         open_local_profiles_button.clicked.connect(self.open_local_profile_dir)
         export_packet_button.clicked.connect(self.export_launch_packet_dialog)
         profile_replay_button.clicked.connect(self.show_profile_ui_state_replay)
+        ocean_port_button.clicked.connect(self.show_ocean_material_control_port)
         capabilities_button.clicked.connect(self.show_renderer_capabilities)
         closed_loop_button.clicked.connect(self.show_closed_loop_status)
         layer_manifest_button.clicked.connect(self.show_layer_manifest)
@@ -2617,6 +2619,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             open_local_profiles_button,
             export_packet_button,
             profile_replay_button,
+            ocean_port_button,
             capabilities_button,
             closed_loop_button,
             layer_manifest_button,
@@ -6921,6 +6924,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             json.dumps(self.collect_profile_ui_state_replay(), ensure_ascii=False, indent=2)
         )
         self.status.setText("已顯示 profile UI replay coverage JSON")
+
+    def show_ocean_material_control_port(self) -> None:
+        self.command_text.setPlainText(
+            json.dumps(self.collect_ocean_material_control_port(), ensure_ascii=False, indent=2)
+        )
+        self.status.setText("已顯示 ocean material / sea-state port JSON")
 
     def show_pin_pick_state(self) -> None:
         try:

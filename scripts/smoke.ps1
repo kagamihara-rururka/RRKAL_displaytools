@@ -1653,6 +1653,12 @@ if ($qtPanelSource -notlike "*show_profile_ui_state_replay*") {
 if ($qtPanelSource -notlike "*Profile replay*") {
     throw "Qt Profile replay action button is missing"
 }
+if ($qtPanelSource -notlike "*show_ocean_material_control_port*") {
+    throw "Qt ocean material control port JSON action is missing"
+}
+if ($qtPanelSource -notlike "*Ocean port*") {
+    throw "Qt Ocean port action button is missing"
+}
 if ($qtPanelSource -notlike "*saved_state_groups*") {
     throw "Qt profile UI state replay saved groups are missing"
 }

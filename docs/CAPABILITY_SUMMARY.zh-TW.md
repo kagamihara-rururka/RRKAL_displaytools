@@ -369,3 +369,8 @@
 
 - Qt Actions now includes `Profile replay`, which displays the live `profile_ui_state_replay` payload in the JSON preview pane.
 - Smoke verifies the action button and handler so replay coverage remains inspectable from the UI.
+
+### 2026-05-30 Qt Ocean material port JSON action
+
+- Qt Actions now includes `Ocean port`, which displays the live `ocean_material_control_port` payload in the JSON preview pane.
+- This keeps wave strength, roughness, foam, Taichi uniforms and scalar sea-state handoff inspectable without adding provider discovery/download/import/cache governance to displaytools.

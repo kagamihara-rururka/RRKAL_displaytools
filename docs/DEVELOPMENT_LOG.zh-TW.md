@@ -229,6 +229,20 @@ Positioning:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+
+## 2026-05-30 - Qt Ocean material port JSON action
+
+Scope:
+- Added an `Ocean port` action button to the Qt Actions panel.
+- The action renders `collect_ocean_material_control_port()` as JSON in the command/JSON preview pane.
+- Closed-loop evidence now includes the Qt action, and smoke verifies the button plus `show_ocean_material_control_port` handler.
+
+Decision:
+- Researchers should be able to inspect wave strength, roughness, foam, Taichi uniforms and scalar sea-state handoff from Qt without adding provider IO or cache governance to displaytools.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-30 - Cursor geodesy renderer state bridge
 
 Scope:

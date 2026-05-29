@@ -189,3 +189,4 @@ Last updated: 2026-05-29
 - 2026-05-30: Documented `profile_ui_state_replay` in the profile schema and smoke-gated the docs.
 - 2026-05-30: Strengthened smoke gates for `profile_ui_state_replay` saved groups and replay surfaces across Qt, capabilities, launch packet and handoff.
 - 2026-05-30: Added Qt `Profile replay` action for inspecting `profile_ui_state_replay` JSON directly in the panel.
+- 2026-05-30: Added Qt `Ocean port` action for inspecting the scalar ocean material / sea-state handoff JSON directly in the panel.
