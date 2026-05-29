@@ -115,6 +115,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "UI-only keyframe storage",
                     "UI-only keyframe restore",
                     "UI-only playback controls",
+                    "No-GUI profile keyframe handoff",
                     "launch packet timeline_state contract",
                     "provenance timeline_state",
                 ],

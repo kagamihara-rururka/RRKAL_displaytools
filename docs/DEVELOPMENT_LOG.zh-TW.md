@@ -1,5 +1,19 @@
 # Development Log
 
+## 2026-05-29 - Timeline No-GUI keyframe handoff
+
+Scope:
+- No-GUI launch packet export now summarizes profile `timeline_keyframes` into `timeline_state`.
+- `timeline_state` now reports `profile_keyframes_present` and keyframe count from the source profile.
+- Smoke now gates `profile_timeline_keyframe_handoff`.
+- Closed-loop status now lists No-GUI profile keyframe handoff for the Timeline panel.
+
+Positioning:
+- This makes Timeline keyframes portable in launch packets even when exporting from scripts instead of opening Qt.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Timeline UI playback controls
 
 Scope:

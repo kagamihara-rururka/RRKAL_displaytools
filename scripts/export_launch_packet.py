@@ -223,11 +223,25 @@ def session_journal_packet() -> dict[str, object]:
     }
 
 
-def timeline_state_packet() -> dict[str, object]:
+def timeline_state_packet(profile: dict[str, object]) -> dict[str, object]:
+    profile_keyframes = profile.get("timeline_keyframes")
+    keyframes = []
+    if isinstance(profile_keyframes, list):
+        for keyframe in profile_keyframes[:12]:
+            if not isinstance(keyframe, dict):
+                continue
+            keyframes.append(
+                {
+                    "id": str(keyframe.get("id", "")),
+                    "label": str(keyframe.get("label", "")),
+                    "style_profile": str(keyframe.get("style_profile", "")),
+                    "selected_layer": keyframe.get("selected_layer"),
+                }
+            )
     return {
         "schema": "rrkal_displaytools.timeline_state.v1",
-        "status": "no_gui_export_no_runtime_keyframes",
-        "implemented": ["launch_packet_status_contract"],
+        "status": "profile_keyframes_exported" if keyframes else "no_gui_export_no_runtime_keyframes",
+        "implemented": ["launch_packet_status_contract", "profile_timeline_keyframe_handoff"],
         "pending": [
             "visible_qt_timeline_dock",
             "keyframe_storage",
@@ -239,8 +253,9 @@ def timeline_state_packet() -> dict[str, object]:
             "camera_keyframes",
         ],
         "playhead": 0,
-        "keyframe_count": 0,
-        "keyframes": [],
+        "keyframe_count": len(keyframes),
+        "keyframes": keyframes,
+        "profile_keyframes_present": bool(keyframes),
         "playback": {
             "mode": "no_gui_export_no_runtime_playback",
             "active": False,
@@ -279,7 +294,7 @@ def launch_packet(profile_path: Path, profile: dict[str, object], rrkal_data_man
         "active_layer_diagnostics": active_layer_diagnostics_packet(profile),
         "layer_undo": layer_undo_packet(),
         "session_journal": session_journal_packet(),
-        "timeline_state": timeline_state_packet(),
+        "timeline_state": timeline_state_packet(profile),
         "closed_loop_status": renderer_closed_loop_status_packet(),
         "portable_command": portable_command,
         "portable_command_line": " ".join(portable_command),

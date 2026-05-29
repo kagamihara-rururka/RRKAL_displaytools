@@ -40,6 +40,12 @@ if ($launchPacket.session_journal.schema -ne "rrkal_displaytools.session_journal
 if ($launchPacket.timeline_state.schema -ne "rrkal_displaytools.timeline_state.v1") {
     throw "Launch packet timeline_state schema missing or invalid"
 }
+if ($launchPacket.timeline_state.implemented -notcontains "profile_timeline_keyframe_handoff") {
+    throw "Launch packet timeline_state profile keyframe handoff missing"
+}
+if ($null -eq $launchPacket.timeline_state.keyframes) {
+    throw "Launch packet timeline_state keyframes missing"
+}
 if ($launchPacket.boundary_highlight.identity_status.schema -ne "rrkal_displaytools.boundary_identity_status.v1") {
     throw "Launch packet boundary_highlight identity_status schema missing or invalid"
 }
