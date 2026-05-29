@@ -1677,6 +1677,12 @@ if ($qtPanelSource -notlike "*show_module_boundary_registry*") {
 if ($qtPanelSource -notlike "*Module seams*") {
     throw "Qt Module seams action button is missing"
 }
+if ($qtPanelSource -notlike "*show_cross_machine_clone_readiness*") {
+    throw "Qt cross-machine clone readiness JSON action is missing"
+}
+if ($qtPanelSource -notlike "*Clone ready*") {
+    throw "Qt Clone ready action button is missing"
+}
 if ($qtPanelSource -notlike "*saved_state_groups*") {
     throw "Qt profile UI state replay saved groups are missing"
 }

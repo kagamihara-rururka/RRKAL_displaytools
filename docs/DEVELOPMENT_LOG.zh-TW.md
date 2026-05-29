@@ -230,6 +230,20 @@ Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
 
+## 2026-05-30 - Qt Clone readiness JSON action
+
+Scope:
+- Added a `Clone ready` action button to the Qt Actions panel.
+- The action renders `cross_machine_clone_readiness` in the command/JSON preview pane.
+- Closed-loop evidence now includes the Qt action, and smoke verifies the button plus `show_cross_machine_clone_readiness` handler.
+
+Decision:
+- Cross-machine readiness should be inspectable from the primary Qt UI, not only through no-GUI launch packets or handoff scripts.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+
 ## 2026-05-30 - Qt Module seams JSON action
 
 Scope:

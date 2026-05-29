@@ -389,3 +389,8 @@
 
 - Qt Actions now includes `Module seams`, which displays the live `module_boundary_registry` payload in the JSON preview pane.
 - The registry keeps future extraction boundaries explicit: contracts, Qt UI, Taichi render core, ocean material, style profiles, overlays, RRKAL-owned data sources and diagnostics.
+
+### 2026-05-30 Qt Clone readiness JSON action
+
+- Qt Actions now includes `Clone ready`, which displays the live `cross_machine_clone_readiness` payload in the JSON preview pane.
+- Cross-machine users can inspect portable command, profile launch readiness and module boundary readiness from Qt without reading raw launch packets.
