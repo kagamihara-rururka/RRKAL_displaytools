@@ -10543,6 +10543,9 @@ class HybridRenderController:
             "contours": bool(getattr(args, "terrain_contours", False)),
             "scale": bool(getattr(args, "scale_bar", True)),
         }
+        self.runtime_overlay_opacity_percent: dict[str, int] = {
+            "aircraft": 100,
+        }
         self.hydrology_overlays = self._load_hydrology_overlays()
         self.boundary_overlays = self._load_boundary_overlays()
         self.lake_overlay_rgba = np.zeros_like(self.globe_rgba)
@@ -10596,6 +10599,8 @@ class HybridRenderController:
         return None
 
     def layer_opacity_percent(self, layer_id: str) -> int | None:
+        if hasattr(self, "runtime_overlay_opacity_percent") and layer_id in self.runtime_overlay_opacity_percent:
+            return int(self.runtime_overlay_opacity_percent[layer_id])
         attr = self.layer_opacity_attr(layer_id)
         if attr is None or not hasattr(self.args, attr):
             return None
@@ -10606,6 +10611,10 @@ class HybridRenderController:
         current = self.layer_opacity_percent(layer_id)
         if current is not None and current == int(round(opacity_value * 100.0)):
             return False
+        if hasattr(self, "runtime_overlay_opacity_percent") and layer_id in self.runtime_overlay_opacity_percent:
+            self.runtime_overlay_opacity_percent[layer_id] = int(round(opacity_value * 100.0))
+            self.overlay_dirty = True
+            return True
         if layer_id in HYDROLOGY_SPECS:
             self.set_hydrology_opacity(layer_id, opacity_value)
             return True
@@ -10622,6 +10631,18 @@ class HybridRenderController:
             self.overlay_dirty = True
             return True
         return False
+
+    def apply_runtime_overlay_opacity(self, layer_id: str, overlay: np.ndarray) -> np.ndarray:
+        opacity = self.layer_opacity_percent(layer_id)
+        if opacity is None or opacity >= 100:
+            return overlay
+        out = overlay.copy()
+        if opacity <= 0:
+            out[..., 3] = 0
+            return out
+        alpha = out[..., 3].astype(np.float32) * (float(opacity) / 100.0)
+        out[..., 3] = np.clip(alpha, 0.0, 255.0).astype(np.uint8)
+        return out
 
     def refresh_layer_runtime_state(self) -> bool:
         if self.layer_runtime_state_file is None:
@@ -13573,7 +13594,10 @@ class HybridRenderController:
         self.frame_rgba = alpha_compose(self.frame_rgba, self.river_overlay_rgba)
         self.frame_rgba = alpha_compose(self.frame_rgba, self.boundary_overlay_rgba)
         self.frame_rgba = alpha_compose(self.frame_rgba, self.overlay_rgba)
-        self.frame_rgba = alpha_compose(self.frame_rgba, self.aircraft_overlay_rgba)
+        self.frame_rgba = alpha_compose(
+            self.frame_rgba,
+            self.apply_runtime_overlay_opacity("aircraft", self.aircraft_overlay_rgba),
+        )
         self.frame_rgba = alpha_compose(self.frame_rgba, self.pin_overlay_rgba)
         self.frame_rgba = apply_style_profile(self.frame_rgba, getattr(self.args, "style_profile", "scientific"))
         self.last_render_ms = (time.time() - start) * 1000.0
@@ -15307,6 +15331,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "ack_schema": "rrkal_displaytools.renderer_layer_runtime_ack.v1",
             "runtime_layer_aliases": dict(LAYER_RUNTIME_ID_ALIASES),
             "applies": ["visibility", "lock_guard_visibility", "opacity"],
+            "runtime_overlay_opacity_layers": ["aircraft"],
             "pending": ["blend_mode"],
         },
         "rrkal_boundary": {

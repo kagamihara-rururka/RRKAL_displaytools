@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - Aircraft runtime opacity overlay
+
+Scope:
+- Added renderer runtime overlay opacity storage for overlay-only layer alpha controls.
+- `aircraft_layer` opacity from Qt runtime state now scales the ADS-B overlay alpha before final frame composition.
+- Renderer capabilities expose `aircraft` as a runtime overlay opacity target.
+
+Positioning:
+- This extends live opacity sync from vector/scalar layers into one real point overlay without claiming unsupported `vehicle_icons` behavior.
+- Remaining point/icon opacity work is vehicle icons, Pins, other independent overlays, blend mode sync, and renderer-backed picking.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - GitHub Actions smoke workflow
 
 Scope:
@@ -23,6 +37,7 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Shared profile schema validator
 
 Scope:
