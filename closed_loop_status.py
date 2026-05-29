@@ -158,6 +158,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "no-GUI renderer ack endpoint",
                     "timeline playback readiness contract",
                     "timeline playback plan contract",
+                    "renderer startup first-keyframe apply contract",
                 ],
                 "pending": ["renderer_timeline_playback", "animation_export"],
                 "evidence": [
@@ -167,6 +168,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "rrkal_displaytools.renderer_timeline_ack.v1",
                     "rrkal_displaytools.timeline_playback_readiness.v1",
                     "rrkal_displaytools.timeline_playback_plan.v1",
+                    "rrkal_displaytools.timeline_first_keyframe_apply.v1",
                     "renderer capabilities timeline_handoff",
                 ],
             },

@@ -184,6 +184,9 @@ if ($timelineAck.playback_readiness.schema -ne "rrkal_displaytools.timeline_play
 if ($timelineAck.playback_plan.schema -ne "rrkal_displaytools.timeline_playback_plan.v1") {
     throw "Renderer timeline ack endpoint playback plan missing or invalid"
 }
+if ($timelineAck.first_keyframe_apply.schema -ne "rrkal_displaytools.timeline_first_keyframe_apply.v1") {
+    throw "Renderer timeline ack endpoint first keyframe apply packet missing or invalid"
+}
 Remove-Item -LiteralPath $timelineAckOut -Force
 Remove-Item -LiteralPath $timelineStateOut -Force
 $capabilitiesText = & py -3 taichi_global_bathymetry.py --print-renderer-capabilities
@@ -225,6 +228,9 @@ if ($capabilities.timeline_handoff.playback_readiness.schema -ne "rrkal_displayt
 }
 if ($capabilities.timeline_handoff.playback_plan_schema -ne "rrkal_displaytools.timeline_playback_plan.v1") {
     throw "Renderer timeline_handoff playback plan schema missing or invalid"
+}
+if ($capabilities.timeline_handoff.first_keyframe_apply_schema -ne "rrkal_displaytools.timeline_first_keyframe_apply.v1") {
+    throw "Renderer timeline_handoff first keyframe apply schema missing or invalid"
 }
 if ($capabilities.timeline_handoff.controls -notcontains "timeline-state-file") {
     throw "Renderer timeline_handoff timeline-state-file control missing"

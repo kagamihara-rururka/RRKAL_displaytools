@@ -2734,6 +2734,11 @@ def timeline_ack_payload_from_state_file(timeline_state_file: str | Path | None)
         "playback_mode": playback.get("mode"),
         "playback_readiness": timeline_playback_readiness_packet(),
         "playback_plan": timeline_playback_plan_packet(runtime_keyframes),
+        "first_keyframe_apply": timeline_first_keyframe_apply_preview_packet(
+            runtime_keyframes,
+            applied=False,
+            reason="ack_endpoint_does_not_instantiate_renderer",
+        ),
         "applies": ["input_acknowledgement"],
         "pending": [
             "renderer_timeline_playback",
@@ -2804,6 +2809,43 @@ def timeline_playback_plan_packet(keyframes: list[object] | None = None) -> dict
             "inter_keyframe_interpolation",
         ],
         "boundary": "Plan is acknowledged for future renderer playback; it is not executed by the renderer yet.",
+    }
+
+
+def timeline_first_keyframe_apply_preview_packet(
+    keyframes: list[object] | None = None,
+    applied: bool = False,
+    reason: str = "ack_endpoint_preview_only",
+) -> dict[str, object]:
+    keyframes = keyframes if isinstance(keyframes, list) else []
+    first = next((keyframe for keyframe in keyframes if isinstance(keyframe, dict)), None)
+    snapshot = first.get("layer_stack_snapshot") if isinstance(first, dict) else None
+    layers = snapshot.get("layers") if isinstance(snapshot, dict) else None
+    material = first.get("ocean_material") if isinstance(first, dict) else None
+    return {
+        "schema": "rrkal_displaytools.timeline_first_keyframe_apply.v1",
+        "mode": "renderer_startup_first_keyframe",
+        "applied": bool(applied),
+        "available": first is not None,
+        "reason": reason,
+        "keyframe_id": str(first.get("id", "")) if isinstance(first, dict) else None,
+        "detected_scope": {
+            "style_profile": bool(first.get("style_profile")) if isinstance(first, dict) else False,
+            "ocean_material": isinstance(material, dict),
+            "layer_stack_snapshot": isinstance(layers, dict),
+            "pins": isinstance(first.get("pins"), list) if isinstance(first, dict) else False,
+            "boundary_highlight": isinstance(first.get("boundary_highlight"), dict) if isinstance(first, dict) else False,
+        },
+        "changed": {
+            "style_profile": False,
+            "ocean_material": [],
+            "layer_visibility": [],
+            "layer_opacity": [],
+            "layer_blend": [],
+            "selected_layer": False,
+        },
+        "unsupported_scope": ["pins", "boundary_highlight"],
+        "boundary": "Preview/apply packet for startup first-keyframe handling; this is not renderer animation playback.",
     }
 
 
@@ -11105,6 +11147,8 @@ class HybridRenderController:
             "pins": "Normal",
             "vehicle_icons": "Normal",
         }
+        self.timeline_first_keyframe_apply_result = self.apply_timeline_first_keyframe_runtime_state()
+        self.write_timeline_ack()
         self.hydrology_overlays = self._load_hydrology_overlays()
         self.boundary_overlays = self._load_boundary_overlays()
         self.lake_overlay_rgba = np.zeros_like(self.globe_rgba)
@@ -11194,6 +11238,107 @@ class HybridRenderController:
             "semantic_roles": self.layer_semantic_roles(renderer_layer),
         }
         return previous_renderer_layer != renderer_layer
+
+    def apply_timeline_first_keyframe_runtime_state(self) -> dict[str, object]:
+        state_payload = self.timeline_runtime_state if isinstance(self.timeline_runtime_state, dict) else {}
+        runtime_keyframes = state_payload.get("timeline_keyframes")
+        runtime_keyframes = runtime_keyframes if isinstance(runtime_keyframes, list) else []
+        result = timeline_first_keyframe_apply_preview_packet(
+            runtime_keyframes,
+            applied=False,
+            reason="no_valid_keyframe",
+        )
+        if self.timeline_runtime_state_error is not None:
+            result["reason"] = self.timeline_runtime_state_error
+            return result
+        first = next((keyframe for keyframe in runtime_keyframes if isinstance(keyframe, dict)), None)
+        if first is None:
+            return result
+        changed_style = False
+        changed_material: list[str] = []
+        changed_layers: list[str] = []
+        changed_opacity_layers: list[str] = []
+        changed_blend_layers: list[str] = []
+        renderer = first.get("renderer")
+        style_profile = None
+        if isinstance(renderer, dict):
+            style_profile = renderer.get("style_profile")
+        if not style_profile:
+            style_profile = first.get("style_profile")
+        if isinstance(style_profile, str) and style_profile:
+            previous_style = getattr(self.args, "style_profile", None)
+            self.set_style_profile(style_profile)
+            changed_style = previous_style != getattr(self.args, "style_profile", None)
+        material = first.get("ocean_material")
+        if isinstance(material, dict):
+            for field, setter in (
+                ("wave_strength", self.set_ocean_wave_strength),
+                ("roughness", self.set_ocean_roughness),
+                ("foam", self.set_ocean_foam),
+            ):
+                raw_value = material.get(field)
+                if raw_value is None:
+                    continue
+                try:
+                    before = float(getattr(self.args, f"ocean_{field if field != 'wave_strength' else 'wave_strength'}"))
+                    setter(float(raw_value))
+                    after = float(getattr(self.args, f"ocean_{field if field != 'wave_strength' else 'wave_strength'}"))
+                except (TypeError, ValueError):
+                    continue
+                if before != after:
+                    changed_material.append(field)
+        snapshot = first.get("layer_stack_snapshot")
+        layers = snapshot.get("layers") if isinstance(snapshot, dict) else None
+        if isinstance(layers, dict):
+            for runtime_layer_id, layer_state in layers.items():
+                if not isinstance(layer_state, dict):
+                    continue
+                layer_id = self.layer_runtime_id(runtime_layer_id)
+                if layer_id not in self.layer_visible:
+                    continue
+                visible = layer_state.get("visible")
+                opacity = layer_state.get("opacity")
+                blend_mode = layer_state.get("blend_mode")
+                if isinstance(visible, bool) and self.layer_visible.get(layer_id) != visible:
+                    self.set_layer_visible(layer_id, visible)
+                    changed_layers.append(layer_id)
+                if isinstance(opacity, int) and not isinstance(opacity, bool):
+                    if self.set_layer_opacity(layer_id, opacity):
+                        changed_opacity_layers.append(layer_id)
+                if isinstance(blend_mode, str):
+                    if self.set_layer_blend_mode(layer_id, blend_mode):
+                        changed_blend_layers.append(layer_id)
+        selected_layer_key = None
+        if isinstance(snapshot, dict):
+            selected_layer_key = snapshot.get("selected_layer")
+        if not isinstance(selected_layer_key, str) or not selected_layer_key:
+            selected_layer_key = first.get("selected_layer")
+        selected_layer_state = layers.get(selected_layer_key) if isinstance(layers, dict) else None
+        selected_layer_changed = self.set_selected_layer_semantic_target(selected_layer_key, selected_layer_state)
+        result.update(
+            {
+                "applied": True,
+                "reason": "applied_startup_first_keyframe",
+                "changed": {
+                    "style_profile": changed_style,
+                    "ocean_material": changed_material,
+                    "layer_visibility": changed_layers,
+                    "layer_opacity": changed_opacity_layers,
+                    "layer_blend": changed_blend_layers,
+                    "selected_layer": selected_layer_changed,
+                },
+                "unsupported_scope": [
+                    scope
+                    for scope, present in (
+                        ("pins", isinstance(first.get("pins"), list)),
+                        ("boundary_highlight", isinstance(first.get("boundary_highlight"), dict)),
+                    )
+                    if present
+                ],
+                "boundary": "Startup applies only the first keyframe's style/material/layer state; no inter-keyframe animation or export is performed.",
+            }
+        )
+        return result
 
     def layer_opacity_attr(self, layer_id: str) -> str | None:
         if layer_id in HYDROLOGY_SPECS:
@@ -13275,6 +13420,11 @@ class HybridRenderController:
             else None,
             "playback_readiness": timeline_playback_readiness_packet(),
             "playback_plan": timeline_playback_plan_packet(runtime_keyframes),
+            "first_keyframe_apply": getattr(
+                self,
+                "timeline_first_keyframe_apply_result",
+                timeline_first_keyframe_apply_preview_packet(runtime_keyframes),
+            ),
             "applies": ["input_acknowledgement"],
             "pending": [
                 "renderer_timeline_playback",
@@ -16532,6 +16682,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "state_schema": "rrkal_displaytools.timeline_runtime_state.v1",
             "ack_schema": "rrkal_displaytools.renderer_timeline_ack.v1",
             "playback_plan_schema": "rrkal_displaytools.timeline_playback_plan.v1",
+            "first_keyframe_apply_schema": "rrkal_displaytools.timeline_first_keyframe_apply.v1",
             "playback_readiness": timeline_playback_readiness_packet(),
             "controls": ["timeline-state-file", "timeline-ack-file", "ack-timeline-state-and-exit"],
             "input_contracts": [
@@ -16539,6 +16690,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "rrkal_displaytools.timeline_keyframe.v1",
                 "rrkal_displaytools.timeline_runtime_state.v1",
                 "rrkal_displaytools.timeline_playback_plan.v1",
+                "rrkal_displaytools.timeline_first_keyframe_apply.v1",
                 "profile.timeline_keyframes",
             ],
             "applies": [

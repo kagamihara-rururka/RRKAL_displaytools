@@ -1,5 +1,18 @@
 # Development Log
 
+## 2026-05-29 - Renderer startup first Timeline keyframe apply
+
+Scope:
+- Added `rrkal_displaytools.timeline_first_keyframe_apply.v1`.
+- Renderer startup can apply the first Timeline keyframe's style profile, ocean material values, layer visibility/opacity/blend state, and selected layer from the runtime state.
+- Renderer ack and capabilities now expose first-keyframe apply status while keeping Pins, Boundary, inter-keyframe animation, and export pending.
+
+Positioning:
+- This is the first renderer-side Timeline behavior beyond acknowledgement, without claiming full playback.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Timeline playback plan contract
 
 Scope:
