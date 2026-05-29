@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-30 - Profile launch readiness UI surface
+
+- Added `rrkal_displaytools.profile_launch_readiness_ui.v1` so Qt exposes profile/launch readiness as a visible Layers dock label instead of JSON-only evidence.
+- Exposed the UI surface contract through Qt launch/provenance packets, No-GUI launch packets, renderer capability discovery, handoff inspection and closed-loop evidence.
+- Smoke: PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Profile launch readiness contract
 
 - Added `rrkal_displaytools.profile_launch_readiness.v1` to summarize cross-machine readiness for profile schema, built-in templates, launch packet export, portable command, renderer capability discovery, style entries and layer operator groups.

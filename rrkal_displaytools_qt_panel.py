@@ -173,6 +173,27 @@ def profile_launch_readiness_packet(
     }
 
 
+def profile_launch_readiness_ui_packet(
+    readiness: dict[str, object] | None,
+    source: str,
+) -> dict[str, object]:
+    readiness = readiness if isinstance(readiness, dict) else {}
+    return {
+        "schema": "rrkal_displaytools.profile_launch_readiness_ui.v1",
+        "source": source,
+        "readiness_schema": readiness.get("schema"),
+        "readiness": readiness.get("readiness", "unknown"),
+        "ready_check_count": int(readiness.get("ready_check_count") or 0),
+        "check_count": int(readiness.get("check_count") or 0),
+        "qt_surface": "Layers dock readiness label",
+        "label_prefix": "Profile/launch readiness",
+        "visible_fields": ["readiness", "ready_check_count", "check_count"],
+        "cross_machine_commands_visible": True,
+        "launch_packet_fields": ["profile_launch_readiness_ui", "profile_launch_readiness"],
+        "boundary": "Qt UI surface only; it displays readiness evidence without mutating RRKAL data governance.",
+    }
+
+
 if "--list-templates" in sys.argv[1:]:
     print(json.dumps(profile_template_packet(), ensure_ascii=False, indent=2))
     raise SystemExit(0)
@@ -1708,6 +1729,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         )
         self.layer_operator_groups_label.setWordWrap(True)
         layers_layout.addWidget(self.layer_operator_groups_label)
+        self.profile_launch_readiness_label = QtWidgets.QLabel("Profile/launch readiness: pending")
+        self.profile_launch_readiness_label.setWordWrap(True)
+        layers_layout.addWidget(self.profile_launch_readiness_label)
         self.layer_runtime_legend_label = QtWidgets.QLabel(
             "Runtime badge: no_ack=等待 ack, ok=無近期變更, target=目前 renderer target, changed=renderer 已套用, locked=locked skip, error=ack error"
         )
@@ -2530,6 +2554,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_operator_groups": self.collect_layer_operator_groups(),
             "style_renderer_entries": self.collect_style_renderer_entries(),
             "profile_launch_readiness": self.collect_profile_launch_readiness(),
+            "profile_launch_readiness_ui": self.collect_profile_launch_readiness_ui(),
             "layer_capability_matrix": self.collect_layer_capability_matrix(),
             "layer_runtime_evidence_summary": self.collect_layer_capability_matrix().get("runtime_evidence_summary"),
             "active_layer_diagnostics": self.active_layer_diagnostics_packet(),
@@ -2634,6 +2659,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "rrkal_displaytools_qt_panel",
             self.collect_style_renderer_entries(),
             self.collect_layer_operator_groups(),
+        )
+
+    def collect_profile_launch_readiness_ui(self) -> dict[str, object]:
+        return profile_launch_readiness_ui_packet(
+            self.collect_profile_launch_readiness(),
+            "rrkal_displaytools_qt_panel",
         )
 
     def collect_layer_operator_groups(self) -> dict[str, object]:
@@ -3422,6 +3453,13 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "Layer workflow: "
                 f"{operator_groups.get('summary_text', 'Selection / Edit state / Isolation / History / Diagnostics')} "
                 f"({operator_groups.get('complete_group_count', 0)}/{operator_groups.get('group_count', 0)} groups complete)"
+            )
+        readiness_ui = self.collect_profile_launch_readiness_ui()
+        if hasattr(self, "profile_launch_readiness_label"):
+            self.profile_launch_readiness_label.setText(
+                f"{readiness_ui.get('label_prefix', 'Profile/launch readiness')}: "
+                f"{readiness_ui.get('readiness', 'unknown')} "
+                f"({readiness_ui.get('ready_check_count', 0)}/{readiness_ui.get('check_count', 0)} checks)"
             )
         self.layer_stack_note.setText(
             f"可見圖層 {visible}/{len(LAYER_LABELS)}；鎖定 {locked}；"
@@ -5306,6 +5344,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_operator_groups": self.collect_layer_operator_groups(),
             "style_renderer_entries": self.collect_style_renderer_entries(),
             "profile_launch_readiness": self.collect_profile_launch_readiness(),
+            "profile_launch_readiness_ui": self.collect_profile_launch_readiness_ui(),
             "layer_capability_matrix": self.collect_layer_capability_matrix(),
             "layer_runtime_evidence_summary": self.collect_layer_capability_matrix().get("runtime_evidence_summary"),
             "layer_runtime_badge_summary": self.collect_layer_capability_matrix().get("runtime_badge_summary"),

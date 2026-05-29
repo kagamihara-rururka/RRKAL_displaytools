@@ -907,6 +907,27 @@ def profile_launch_readiness_packet(
     }
 
 
+def profile_launch_readiness_ui_packet(
+    readiness: dict[str, object] | None,
+    source: str,
+) -> dict[str, object]:
+    readiness = readiness if isinstance(readiness, dict) else {}
+    return {
+        "schema": "rrkal_displaytools.profile_launch_readiness_ui.v1",
+        "source": source,
+        "readiness_schema": readiness.get("schema"),
+        "readiness": readiness.get("readiness", "unknown"),
+        "ready_check_count": int(readiness.get("ready_check_count") or 0),
+        "check_count": int(readiness.get("check_count") or 0),
+        "qt_surface": "Layers dock readiness label",
+        "label_prefix": "Profile/launch readiness",
+        "visible_fields": ["readiness", "ready_check_count", "check_count"],
+        "cross_machine_commands_visible": True,
+        "launch_packet_fields": ["profile_launch_readiness_ui", "profile_launch_readiness"],
+        "boundary": "Qt UI surface only; it displays readiness evidence without mutating RRKAL data governance.",
+    }
+
+
 def layer_operator_shortcuts_packet(
     source: str,
     selected_layer: str | None = None,
@@ -1934,6 +1955,7 @@ def launch_packet(
         "layer_operator_groups": layer_operator_groups_packet(layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None), "scripts.export_launch_packet"),
         "style_renderer_entries": style_renderer_entries_packet("scripts.export_launch_packet", profile.get("style_profile") if isinstance(profile.get("style_profile"), str) else None),
         "profile_launch_readiness": profile_launch_readiness_packet("scripts.export_launch_packet", style_renderer_entries_packet("scripts.export_launch_packet", profile.get("style_profile") if isinstance(profile.get("style_profile"), str) else None), layer_operator_groups_packet(layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None), "scripts.export_launch_packet")),
+        "profile_launch_readiness_ui": profile_launch_readiness_ui_packet(profile_launch_readiness_packet("scripts.export_launch_packet", style_renderer_entries_packet("scripts.export_launch_packet", profile.get("style_profile") if isinstance(profile.get("style_profile"), str) else None), layer_operator_groups_packet(layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None), "scripts.export_launch_packet")), "scripts.export_launch_packet"),
         "layer_capability_matrix": layer_capability_matrix_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None, rrkal_data_manifest_ref),
         "canvas_preview": canvas_preview_packet(profile),
         "boundary_highlight": boundary_highlight_packet(profile),

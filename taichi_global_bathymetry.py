@@ -18011,6 +18011,27 @@ def profile_launch_readiness_packet(
     }
 
 
+def profile_launch_readiness_ui_packet(
+    readiness: dict[str, object] | None,
+    source: str,
+) -> dict[str, object]:
+    readiness = readiness if isinstance(readiness, dict) else {}
+    return {
+        "schema": "rrkal_displaytools.profile_launch_readiness_ui.v1",
+        "source": source,
+        "readiness_schema": readiness.get("schema"),
+        "readiness": readiness.get("readiness", "unknown"),
+        "ready_check_count": int(readiness.get("ready_check_count") or 0),
+        "check_count": int(readiness.get("check_count") or 0),
+        "qt_surface": "Layers dock readiness label",
+        "label_prefix": "Profile/launch readiness",
+        "visible_fields": ["readiness", "ready_check_count", "check_count"],
+        "cross_machine_commands_visible": True,
+        "launch_packet_fields": ["profile_launch_readiness_ui", "profile_launch_readiness"],
+        "boundary": "Qt UI surface only; it displays readiness evidence without mutating RRKAL data governance.",
+    }
+
+
 def layer_operator_shortcuts_packet(
     source: str,
     selected_layer: str | None = None,
@@ -18451,6 +18472,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
         "layer_operator_groups": layer_operator_groups_packet(layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"), "taichi_global_bathymetry.renderer_capabilities"),
         "style_renderer_entries": style_renderer_entries_packet("taichi_global_bathymetry.renderer_capabilities"),
         "profile_launch_readiness": profile_launch_readiness_packet("taichi_global_bathymetry.renderer_capabilities", style_renderer_entries_packet("taichi_global_bathymetry.renderer_capabilities"), layer_operator_groups_packet(layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"), "taichi_global_bathymetry.renderer_capabilities")),
+        "profile_launch_readiness_ui": profile_launch_readiness_ui_packet(profile_launch_readiness_packet("taichi_global_bathymetry.renderer_capabilities", style_renderer_entries_packet("taichi_global_bathymetry.renderer_capabilities"), layer_operator_groups_packet(layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"), "taichi_global_bathymetry.renderer_capabilities")), "taichi_global_bathymetry.renderer_capabilities"),
         "layer_capability_matrix": layer_capability_matrix_packet(),
         "pin_controls": [
             "pin-file",

@@ -41,6 +41,7 @@ $summary = [ordered]@{
         layer_operator_groups = $launchPacket.layer_operator_groups.schema
         style_renderer_entries = $launchPacket.style_renderer_entries.schema
         profile_launch_readiness = $launchPacket.profile_launch_readiness.schema
+        profile_launch_readiness_ui = $launchPacket.profile_launch_readiness_ui.schema
         layer_undo = $launchPacket.layer_undo.schema
         session_journal = $launchPacket.session_journal.schema
         timeline_state = $launchPacket.timeline_state.schema
@@ -77,6 +78,13 @@ $summary = [ordered]@{
         ready_check_count = $launchPacket.profile_launch_readiness.ready_check_count
         check_count = $launchPacket.profile_launch_readiness.check_count
         cross_machine_commands = $launchPacket.profile_launch_readiness.cross_machine_commands
+    }
+    profile_launch_readiness_ui = @{
+        launch_packet_schema = $launchPacket.profile_launch_readiness_ui.schema
+        renderer_capabilities_schema = $capabilities.profile_launch_readiness_ui.schema
+        readiness = $launchPacket.profile_launch_readiness_ui.readiness
+        qt_surface = $launchPacket.profile_launch_readiness_ui.qt_surface
+        visible_fields = $launchPacket.profile_launch_readiness_ui.visible_fields
     }
     layer_capability_matrix = @{
         schema = $capabilities.layer_capability_matrix.schema

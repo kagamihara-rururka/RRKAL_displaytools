@@ -209,6 +209,15 @@ if ($launchPacket.profile_launch_readiness.readiness -ne "ready") {
 if ([int]$launchPacket.profile_launch_readiness.ready_check_count -lt 7) {
     throw "Launch packet profile_launch_readiness ready check count missing"
 }
+if ($launchPacket.profile_launch_readiness_ui.schema -ne "rrkal_displaytools.profile_launch_readiness_ui.v1") {
+    throw "Launch packet profile_launch_readiness_ui schema missing or invalid"
+}
+if ($launchPacket.profile_launch_readiness_ui.readiness -ne "ready") {
+    throw "Launch packet profile_launch_readiness_ui should be ready"
+}
+if ($launchPacket.profile_launch_readiness_ui.qt_surface -ne "Layers dock readiness label") {
+    throw "Launch packet profile_launch_readiness_ui surface mismatch"
+}
 if ($launchPacket.layer_undo.schema -ne "rrkal_displaytools.layer_stack_undo.v1") {
     throw "Launch packet layer_undo schema missing or invalid"
 }
@@ -556,6 +565,12 @@ if ($capabilities.profile_launch_readiness.readiness -ne "ready") {
 if ([int]$capabilities.profile_launch_readiness.ready_check_count -lt 7) {
     throw "Renderer profile_launch_readiness ready check count missing"
 }
+if ($capabilities.profile_launch_readiness_ui.schema -ne "rrkal_displaytools.profile_launch_readiness_ui.v1") {
+    throw "Renderer profile_launch_readiness_ui schema missing or invalid"
+}
+if ($capabilities.profile_launch_readiness_ui.readiness -ne "ready") {
+    throw "Renderer profile_launch_readiness_ui should be ready"
+}
 if ($capabilities.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
     throw "Renderer layer_capability_matrix capability missing or invalid"
 }
@@ -774,6 +789,18 @@ if ($handoff.profile_launch_readiness.readiness -ne "ready") {
 }
 if ([int]$handoff.profile_launch_readiness.ready_check_count -lt 7) {
     throw "Handoff inspection profile_launch_readiness ready check count missing"
+}
+if ($handoff.launch_packet_contracts.profile_launch_readiness_ui -ne "rrkal_displaytools.profile_launch_readiness_ui.v1") {
+    throw "Handoff inspection profile_launch_readiness_ui launch contract missing or invalid"
+}
+if ($handoff.profile_launch_readiness_ui.launch_packet_schema -ne "rrkal_displaytools.profile_launch_readiness_ui.v1") {
+    throw "Handoff inspection profile_launch_readiness_ui launch schema missing or invalid"
+}
+if ($handoff.profile_launch_readiness_ui.renderer_capabilities_schema -ne "rrkal_displaytools.profile_launch_readiness_ui.v1") {
+    throw "Handoff inspection profile_launch_readiness_ui renderer schema missing or invalid"
+}
+if ($handoff.profile_launch_readiness_ui.qt_surface -ne "Layers dock readiness label") {
+    throw "Handoff inspection profile_launch_readiness_ui surface mismatch"
 }
 if ($handoff.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
     throw "Handoff inspection layer_capability_matrix summary missing or invalid"
