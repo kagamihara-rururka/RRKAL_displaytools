@@ -878,3 +878,18 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Canvas Select layer hit bands
+
+Scope:
+- Added UI-only Canvas Preview hit bands for the Select tool.
+- When Select is active, left-clicking the Canvas Preview maps the vertical click position to the current visible layer list and updates the active layer.
+- Canvas Preview now displays a compact Select hit map so researchers can see which visible layers are targetable.
+- Research provenance now records the current Canvas Select hit targets.
+
+Positioning:
+- This makes layer targeting less dependent on the right-side layer stack and improves the Photoshop-like interaction loop without adding Brush/Mask tools.
+- The next step is upgrading the hit target from UI-only preview bands to renderer-backed layer/object picking.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

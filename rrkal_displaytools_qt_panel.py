@@ -798,6 +798,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.cursor_longitude = x_ratio * 360.0 - 180.0
             self.cursor_latitude = 90.0 - y_ratio * 180.0
             self.refresh_canvas_preview()
+        if watched is self.canvas_preview_label and event.type() == QtCore.QEvent.Type.MouseButtonPress:
+            if self.active_tool == "select" and event.button() == QtCore.Qt.MouseButton.LeftButton:
+                key = self.canvas_layer_hit_key(float(event.position().y()))
+                if key is not None:
+                    label = next((text for layer_key, text in LAYER_LABELS if layer_key == key), key)
+                    self.select_layer(key)
+                    self.status.setText(f"Canvas Select 命中圖層：{label}")
+                    return True
         return super().eventFilter(watched, event)
 
     def build_command(self) -> list[str]:
@@ -1106,6 +1114,22 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.status.setText(f"已選取圖層：{label}")
         self.refresh_tool_target()
 
+    def canvas_layer_hit_keys(self) -> list[str]:
+        visible_keys = [key for key, _label in LAYER_LABELS if key in self.checks and self.checks[key].isChecked()]
+        if visible_keys:
+            return visible_keys
+        return [key for key, _label in LAYER_LABELS if key in self.checks]
+
+    def canvas_layer_hit_key(self, y: float) -> str | None:
+        if self.canvas_preview_label is None:
+            return None
+        keys = self.canvas_layer_hit_keys()
+        if not keys:
+            return None
+        height = max(1.0, float(self.canvas_preview_label.height()))
+        y_ratio = min(max(y / height, 0.0), 0.999999)
+        return keys[min(len(keys) - 1, int(y_ratio * len(keys)))]
+
     def refresh_layer_properties(self) -> None:
         if not self.layer_property_labels:
             return
@@ -1396,11 +1420,19 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         style = self.style_combo.currentText() if hasattr(self, "style_combo") else "-"
         topo = self.topo_combo.currentText() if hasattr(self, "topo_combo") else "-"
         data_mode = self.data_combo.currentText() if hasattr(self, "data_combo") else "-"
+        hit_keys = self.canvas_layer_hit_keys()
+        hit_labels = [next((text for layer_key, text in LAYER_LABELS if layer_key == key), key) for key in hit_keys[:5]]
+        hit_map = ", ".join(hit_labels)
+        if len(hit_keys) > 5:
+            hit_map = f"{hit_map}, +{len(hit_keys) - 5} more"
+        if not hit_map:
+            hit_map = "-"
         self.canvas_preview_label.setText(
             "RRKAL Scientific Canvas Preview\n\n"
             f"Style: {style} | Topo: {topo} | Data: {data_mode}\n"
             f"Tool: {tool_label} -> Layer: {selected_label}\n"
             f"Visible layers: {visible}/{len(LAYER_LABELS)} | Pins: {pin_count} | Zoom: {zoom}%\n\n"
+            f"Select hit map: {hit_map}\n"
             f"Selected pin: {selected_pin_text}\n"
             f"Pin markers: {pin_markers}\n"
             f"Cursor estimate: {cursor_text}\n\n"
@@ -1442,6 +1474,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "pins": self.collect_research_pins(),
             "pin_pick_state_file": str(PIN_PICK_STATE_PATH),
             "pin_pick_state_last_event": self.pin_pick_state_last_event,
+            "canvas_select_hit_targets": self.canvas_layer_hit_keys(),
             "pin_overlay_boundary": "Pins are geodetic annotations; renderer sync must rotate them with the globe and apply horizon/depth occlusion.",
             "pin_projection_contract": pin_projection_contract_packet(),
             "visible_layers": visible_layers,
