@@ -1421,6 +1421,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "timeline_ocean_material_interpolation": self.collect_timeline_ocean_material_interpolation_state(),
             "timeline_animation_export": self.collect_timeline_animation_export_state(),
             "timeline_camera_keyframe": self.collect_timeline_camera_keyframe_state(),
+            "timeline_camera_interpolation": self.collect_timeline_camera_interpolation_state(),
             "timeline_runtime_state_file": str(TIMELINE_STATE_PATH),
             "timeline_ack_file": str(TIMELINE_ACK_PATH),
             "timeline_ack": self.timeline_ack_payload,
@@ -2713,7 +2714,6 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ],
             "pending": [
                 "video_encoding",
-                "camera_keyframe_interpolation",
                 "non_material_interpolation",
             ],
             "playhead": 0,
@@ -2739,15 +2739,16 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "animation_export": True,
             "animation_export_mode": "png_frame_sequence",
             "camera_keyframes": True,
+            "camera_keyframe_interpolation": True,
             "ready_handoff_files": {
                 "timeline_runtime_state_file": str(TIMELINE_STATE_PATH),
                 "timeline_ack_file": str(TIMELINE_ACK_PATH),
             },
             "pending": [
                 "video_encoding",
-                "camera_keyframe_interpolation",
+                "non_material_interpolation",
             ],
-            "boundary": "Renderer can apply discrete camera keyframes and export PNG frame sequences; video encoding and camera interpolation remain pending.",
+            "boundary": "Renderer can interpolate camera keyframes and export PNG frame sequences; video encoding and non-material interpolation remain pending.",
         }
 
     def collect_timeline_camera_state(self) -> dict[str, object]:
@@ -2806,8 +2807,30 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "active_camera": active_camera,
             "current_camera_controls": self.collect_timeline_camera_state(),
             "applies": ["qt_camera_keyframe_capture", "renderer_discrete_camera_apply"],
-            "pending": ["camera_keyframe_interpolation"],
-            "boundary": "Camera keyframes are captured and applied discretely; smooth camera interpolation is a later renderer task.",
+            "pending": [],
+            "boundary": "Camera keyframes are captured and applied discretely; smooth playback is represented by timeline_camera_interpolation.",
+        }
+
+    def collect_timeline_camera_interpolation_state(self) -> dict[str, object]:
+        active_step = self.collect_timeline_active_step_state()
+        active_index = active_step.get("active_index")
+        next_index = None
+        if isinstance(active_index, int) and len(self.timeline_keyframes) >= 2:
+            next_index = (active_index + 1) % len(self.timeline_keyframes)
+        return {
+            "schema": "rrkal_displaytools.timeline_camera_interpolation.v1",
+            "supported": True,
+            "instantiated": False,
+            "mode": "linear_camera_segment",
+            "playback_active": bool(self.timeline_playback_active),
+            "from_index": active_index,
+            "to_index": next_index,
+            "fraction": 0.0,
+            "fields": ["yaw", "pitch", "zoom"],
+            "interpolated": {},
+            "applies": ["camera_keyframe_interpolation"],
+            "pending": [],
+            "boundary": "Qt exports the camera interpolation contract; renderer owns runtime interpolation.",
         }
 
     def collect_timeline_playback_plan(self) -> dict[str, object]:
@@ -2852,9 +2875,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ],
             "pending": [
                 "non_material_interpolation",
-                "camera_keyframe_interpolation",
             ],
-            "boundary": "Playback plan drives renderer discrete keyframe steps, camera apply, and ocean/material interpolation; non-material and camera interpolation remain pending.",
+            "boundary": "Playback plan drives renderer discrete keyframe steps, camera interpolation, and ocean/material interpolation; non-material interpolation remains pending.",
         }
 
     def collect_timeline_segment_state(self) -> dict[str, object]:
@@ -2870,8 +2892,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "to_index": segment_index + 1,
                 "from_keyframe_id": str(first.get("id", "")),
                 "to_keyframe_id": str(second.get("id", "")),
-                "interpolatable_fields": ["ocean_material"],
-                "discrete_fields": ["style_profile", "layer_visibility", "layer_blend", "pins", "boundary_highlight", "camera"],
+                "interpolatable_fields": ["ocean_material", "camera"],
+                "discrete_fields": ["style_profile", "layer_visibility", "layer_blend", "pins", "boundary_highlight"],
             }
         return {
             "schema": "rrkal_displaytools.timeline_segment_state.v1",
@@ -2881,8 +2903,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "active_segment": active_segment,
             "segment_available": active_segment is not None,
             "segment_count": max(0, len(self.timeline_keyframes) - 1),
-            "pending": ["non_material_interpolation", "camera_keyframe_interpolation"],
-            "boundary": "Segment state describes the next playback segment; camera currently applies as a discrete field.",
+            "pending": ["non_material_interpolation"],
+            "boundary": "Segment state describes the next playback segment; camera and ocean material are interpolatable fields.",
         }
 
     def collect_timeline_active_step_state(self) -> dict[str, object]:
@@ -2905,8 +2927,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "keyframe_count": keyframe_count,
             "step_available": active_index is not None,
             "applies": ["qt_preview_step_selection", "renderer_startup_selection_hint"],
-            "pending": ["non_material_interpolation", "camera_keyframe_interpolation"],
-            "boundary": "Active step is a discrete keyframe selection contract for renderer step playback and camera apply.",
+            "pending": ["non_material_interpolation"],
+            "boundary": "Active step is a discrete keyframe selection contract for renderer step playback.",
         }
 
     def collect_timeline_step_playback_state(self) -> dict[str, object]:
@@ -2922,7 +2944,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "keyframe_count": len(self.timeline_keyframes),
             "step_count": 0,
             "applies": ["renderer_discrete_keyframe_step"],
-            "pending": ["non_material_interpolation", "camera_keyframe_interpolation"],
+            "pending": ["non_material_interpolation"],
             "boundary": "Qt exports the step playback contract; renderer owns runtime stepping.",
         }
 
@@ -2938,7 +2960,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "fields": ["wave_strength", "roughness", "foam"],
             "fraction": 0.0,
             "applies": ["ocean_material_keyframe_interpolation"],
-            "pending": ["non_material_interpolation", "camera_keyframe_interpolation"],
+            "pending": ["non_material_interpolation"],
             "boundary": "Qt exports the interpolation contract; renderer owns runtime interpolation.",
         }
 
@@ -2952,8 +2974,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "fps": 24.0,
             "frames": [],
             "applies": ["timeline_png_frame_sequence", "timeline_animation_manifest"],
-            "pending": ["video_encoding", "camera_keyframe_interpolation", "non_material_interpolation"],
-            "boundary": "Qt exposes renderer animation export capability; renderer writes frames and manifest with discrete camera keyframes.",
+            "pending": ["video_encoding", "non_material_interpolation"],
+            "boundary": "Qt exposes renderer animation export capability; renderer writes frames and manifest with interpolated camera keyframes.",
         }
 
     def collect_timeline_runtime_state(self) -> dict[str, object]:
@@ -2969,6 +2991,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "ocean_material_interpolation": self.collect_timeline_ocean_material_interpolation_state(),
             "animation_export": self.collect_timeline_animation_export_state(),
             "camera_keyframe": self.collect_timeline_camera_keyframe_state(),
+            "camera_interpolation": self.collect_timeline_camera_interpolation_state(),
             "timeline_keyframes": [dict(keyframe) for keyframe in self.timeline_keyframes],
             "source": "rrkal_displaytools_qt_panel",
             "boundary": "Renderer receives Timeline keyframes for discrete step playback, camera apply, material interpolation, and PNG export.",
@@ -3936,6 +3959,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "timeline_ocean_material_interpolation": self.collect_timeline_ocean_material_interpolation_state(),
             "timeline_animation_export": self.collect_timeline_animation_export_state(),
             "timeline_camera_keyframe": self.collect_timeline_camera_keyframe_state(),
+            "timeline_camera_interpolation": self.collect_timeline_camera_interpolation_state(),
             "timeline_runtime_state_file": str(TIMELINE_STATE_PATH),
             "timeline_state_last_write_utc": self.timeline_state_last_write_utc,
             "timeline_state_write_error": self.timeline_state_write_error,

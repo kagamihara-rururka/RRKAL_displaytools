@@ -5,6 +5,7 @@ import datetime
 import json
 import math
 import sys
+import time
 from pathlib import Path
 
 
@@ -398,13 +399,12 @@ def timeline_state_packet(profile: dict[str, object]) -> dict[str, object]:
     return {
         "schema": "rrkal_displaytools.timeline_state.v1",
         "status": "profile_keyframes_exported" if keyframes else "no_gui_export_no_runtime_keyframes",
-        "implemented": ["launch_packet_status_contract", "profile_timeline_keyframe_handoff", "camera_keyframe_handoff"],
+        "implemented": ["launch_packet_status_contract", "profile_timeline_keyframe_handoff", "camera_keyframe_handoff", "camera_keyframe_interpolation"],
         "pending": [
             "visible_qt_timeline_dock",
             "keyframe_storage",
             "keyframe_restore",
             "playback_controls",
-            "camera_keyframe_interpolation",
         ],
         "playhead": 0,
         "keyframe_count": len(keyframes),
@@ -437,6 +437,7 @@ def timeline_runtime_state_packet(profile: dict[str, object], target_file: str =
         "ocean_material_interpolation": timeline_ocean_material_interpolation_packet(timeline_state, keyframes, instantiated=False),
         "animation_export": timeline_animation_export_packet(executed=False),
         "camera_keyframe": timeline_camera_keyframe_packet(timeline_state, keyframes, instantiated=False),
+        "camera_interpolation": timeline_camera_interpolation_packet(timeline_state, keyframes, instantiated=False),
         "timeline_keyframes": keyframes,
         "source": "scripts/export_launch_packet.py",
         "target_file": target_file,
@@ -455,11 +456,12 @@ def timeline_playback_readiness_packet() -> dict[str, object]:
         "animation_export": True,
         "animation_export_mode": "png_frame_sequence",
         "camera_keyframes": True,
+        "camera_keyframe_interpolation": True,
         "pending": [
             "video_encoding",
-            "camera_keyframe_interpolation",
+            "non_material_interpolation",
         ],
-        "boundary": "No-GUI handoff can export runtime state for renderer PNG frame sequence export and discrete camera keyframes; video encoding and camera interpolation remain pending.",
+        "boundary": "No-GUI handoff can export runtime state for renderer PNG frame sequence export and camera keyframe interpolation; video encoding and non-material interpolation remain pending.",
     }
 
 
@@ -500,9 +502,8 @@ def timeline_playback_plan_packet(keyframes: list[dict[str, object]]) -> dict[st
         ],
         "pending": [
             "non_material_interpolation",
-            "camera_keyframe_interpolation",
         ],
-        "boundary": "Playback plan is exported for renderer discrete step playback, camera apply, and ocean/material interpolation; non-material and camera interpolation remain pending.",
+        "boundary": "Playback plan is exported for renderer discrete step playback, camera interpolation, and ocean/material interpolation; non-material interpolation remains pending.",
     }
 
 
@@ -521,8 +522,8 @@ def timeline_segment_state_packet(
             "to_index": segment_index + 1,
             "from_keyframe_id": str(keyframes[segment_index].get("id", "")),
             "to_keyframe_id": str(keyframes[segment_index + 1].get("id", "")),
-            "interpolatable_fields": ["ocean_material"],
-            "discrete_fields": ["style_profile", "layer_visibility", "layer_blend", "pins", "boundary_highlight", "camera"],
+            "interpolatable_fields": ["ocean_material", "camera"],
+            "discrete_fields": ["style_profile", "layer_visibility", "layer_blend", "pins", "boundary_highlight"],
         }
     return {
         "schema": "rrkal_displaytools.timeline_segment_state.v1",
@@ -532,8 +533,8 @@ def timeline_segment_state_packet(
         "active_segment": active_segment,
         "segment_available": active_segment is not None,
         "segment_count": max(0, len(keyframes) - 1),
-        "pending": ["non_material_interpolation", "camera_keyframe_interpolation"],
-        "boundary": "No-GUI segment state describes the next playback segment; camera currently applies as a discrete field.",
+        "pending": ["non_material_interpolation"],
+        "boundary": "No-GUI segment state describes the next playback segment; camera and ocean material are interpolatable fields.",
     }
 
 
@@ -565,8 +566,8 @@ def timeline_active_step_state_packet(
         "keyframe_count": len(keyframes),
         "step_available": active_index is not None,
         "applies": ["renderer_startup_selection_hint"],
-        "pending": ["non_material_interpolation", "camera_keyframe_interpolation"],
-        "boundary": "Active step is a discrete keyframe selection contract for renderer step playback and camera apply.",
+        "pending": ["non_material_interpolation"],
+        "boundary": "Active step is a discrete keyframe selection contract for renderer step playback.",
     }
 
 
@@ -618,8 +619,64 @@ def timeline_camera_keyframe_packet(
         "active_index": active_index,
         "camera": active_camera,
         "applies": ["renderer_discrete_camera_apply"],
-        "pending": ["camera_keyframe_interpolation"],
-        "boundary": "Camera keyframes are applied discretely at active keyframes; smooth camera interpolation is pending.",
+        "pending": [],
+        "boundary": "Camera keyframes are applied discretely at active keyframes; smooth playback is represented by timeline_camera_interpolation.",
+    }
+
+
+def _lerp_camera_angle(start: float, end: float, fraction: float) -> float:
+    delta = (end - start + math.pi) % (2.0 * math.pi) - math.pi
+    return start + delta * fraction
+
+
+def timeline_camera_interpolation_packet(
+    timeline_state: dict[str, object] | None,
+    keyframes: list[dict[str, object]],
+    instantiated: bool = False,
+    last_step_at: float | None = None,
+) -> dict[str, object]:
+    playback = timeline_state.get("playback") if isinstance(timeline_state, dict) else {}
+    playback = playback if isinstance(playback, dict) else {}
+    active_step = timeline_active_step_state_packet(timeline_state, keyframes)
+    from_index = active_step.get("active_index")
+    to_index = ((from_index + 1) % len(keyframes)) if isinstance(from_index, int) and len(keyframes) >= 2 else None
+    try:
+        interval_ms = int(playback.get("interval_ms", 1200))
+    except (TypeError, ValueError):
+        interval_ms = 1200
+    interval_s = max(0.05, interval_ms / 1000.0)
+    elapsed_s = 0.0 if last_step_at is None else max(0.0, time.time() - float(last_step_at))
+    fraction = 0.0 if not instantiated else max(0.0, min(1.0, elapsed_s / interval_s))
+    interpolated: dict[str, float] = {}
+    if isinstance(from_index, int) and isinstance(to_index, int):
+        from_camera = timeline_camera_payload(keyframes[from_index])
+        to_camera = timeline_camera_payload(keyframes[to_index])
+        if isinstance(from_camera, dict) and isinstance(to_camera, dict):
+            yaw = _lerp_camera_angle(float(from_camera["yaw"]), float(to_camera["yaw"]), fraction)
+            pitch = float(from_camera["pitch"]) + (float(to_camera["pitch"]) - float(from_camera["pitch"])) * fraction
+            zoom = float(from_camera["zoom"]) + (float(to_camera["zoom"]) - float(from_camera["zoom"])) * fraction
+            interpolated = {
+                "yaw": yaw,
+                "pitch": pitch,
+                "zoom": max(0.08, min(zoom, 4.0)),
+                "yaw_degrees": math.degrees(yaw),
+                "pitch_degrees": math.degrees(pitch),
+            }
+    return {
+        "schema": "rrkal_displaytools.timeline_camera_interpolation.v1",
+        "supported": True,
+        "instantiated": bool(instantiated),
+        "mode": "linear_camera_segment",
+        "playback_active": bool(playback.get("active")),
+        "active": bool(playback.get("active")) and bool(interpolated),
+        "from_index": from_index,
+        "to_index": to_index,
+        "fraction": fraction,
+        "fields": ["yaw", "pitch", "zoom"],
+        "interpolated": interpolated,
+        "applies": ["camera_keyframe_interpolation"],
+        "pending": [],
+        "boundary": "Camera yaw/pitch/zoom are linearly interpolated across the active Timeline segment; yaw uses shortest-angle interpolation.",
     }
 
 
@@ -647,7 +704,7 @@ def timeline_step_playback_packet(
         "keyframe_count": len(keyframes),
         "step_count": 0,
         "applies": ["renderer_discrete_keyframe_step"],
-        "pending": ["non_material_interpolation", "camera_keyframe_interpolation"],
+        "pending": ["non_material_interpolation"],
         "boundary": "Renderer can advance whole-keyframe steps and apply discrete camera state; interpolation/export remain pending.",
     }
 
@@ -675,7 +732,7 @@ def timeline_ocean_material_interpolation_packet(
         "fields": ["wave_strength", "roughness", "foam"],
         "interpolated": {},
         "applies": ["ocean_material_keyframe_interpolation"],
-        "pending": ["non_material_interpolation", "camera_keyframe_interpolation"],
+        "pending": ["non_material_interpolation"],
         "boundary": "Only ocean material scalar fields are interpolated; style/layers/pins/boundary remain discrete.",
     }
 
@@ -690,8 +747,8 @@ def timeline_animation_export_packet(executed: bool = False) -> dict[str, object
         "fps": 24.0,
         "frames": [],
         "applies": ["timeline_png_frame_sequence", "timeline_animation_manifest"],
-        "pending": ["video_encoding", "camera_keyframe_interpolation", "non_material_interpolation"],
-        "boundary": "No-GUI launch packets expose renderer animation export capability; renderer writes frames and manifest with discrete camera keyframes.",
+        "pending": ["video_encoding", "non_material_interpolation"],
+        "boundary": "No-GUI launch packets expose renderer animation export capability; renderer writes frames and manifest with interpolated camera keyframes.",
     }
 
 
@@ -750,6 +807,7 @@ def launch_packet(
         "timeline_ocean_material_interpolation": timeline_ocean_material_interpolation_packet(timeline_state, timeline_keyframes, instantiated=False),
         "timeline_animation_export": timeline_animation_export_packet(executed=False),
         "timeline_camera_keyframe": timeline_camera_keyframe_packet(timeline_state, timeline_keyframes, instantiated=False),
+        "timeline_camera_interpolation": timeline_camera_interpolation_packet(timeline_state, timeline_keyframes, instantiated=False),
         "timeline_runtime_state": timeline_runtime_state_packet(profile, timeline_state_file),
         "timeline_runtime_state_file": timeline_state_file,
         "timeline_ack_file": timeline_ack_file,

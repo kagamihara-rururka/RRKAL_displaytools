@@ -166,8 +166,9 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "renderer ocean material keyframe interpolation",
                     "renderer PNG frame sequence animation export",
                     "renderer discrete camera keyframe apply",
+                    "renderer camera keyframe interpolation",
                 ],
-                "pending": ["video_encoding", "non_material_interpolation", "camera_keyframe_interpolation"],
+                "pending": ["video_encoding", "non_material_interpolation"],
                 "evidence": [
                     "Timeline dock controls",
                     "rrkal_displaytools.timeline_state.v1",
@@ -181,6 +182,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "rrkal_displaytools.timeline_ocean_material_interpolation.v1",
                     "rrkal_displaytools.timeline_animation_export.v1",
                     "rrkal_displaytools.timeline_camera_keyframe.v1",
+                    "rrkal_displaytools.timeline_camera_interpolation.v1",
                     "rrkal_displaytools.timeline_first_keyframe_apply.v1",
                     "renderer capabilities timeline_handoff",
                 ],

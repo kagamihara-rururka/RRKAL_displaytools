@@ -2413,3 +2413,18 @@ Decision:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Timeline camera keyframe interpolation
+
+Scope:
+- Added Timeline camera interpolation contract `rrkal_displaytools.timeline_camera_interpolation.v1`.
+- Renderer playback now interpolates camera yaw, pitch, and zoom across the active Timeline segment.
+- Yaw interpolation uses shortest-angle interpolation to avoid long spins across the 180 degree seam.
+- Timeline PNG export now records the interpolated camera for each exported frame.
+- Smoke now gates launch packet, runtime state, renderer ack, and renderer capability discovery for camera interpolation.
+
+Decision:
+- Camera interpolation is limited to yaw, pitch, and zoom. Non-material UI state interpolation remains pending.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

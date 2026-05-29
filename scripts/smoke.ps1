@@ -94,6 +94,9 @@ if ($launchPacket.timeline_playback_readiness.animation_export -ne $true) {
 if ($launchPacket.timeline_playback_readiness.camera_keyframes -ne $true) {
     throw "Launch packet timeline playback readiness must claim discrete camera keyframes"
 }
+if ($launchPacket.timeline_playback_readiness.camera_keyframe_interpolation -ne $true) {
+    throw "Launch packet timeline playback readiness must claim camera keyframe interpolation"
+}
 if ($launchPacket.timeline_playback_plan.schema -ne "rrkal_displaytools.timeline_playback_plan.v1") {
     throw "Launch packet timeline playback plan schema missing or invalid"
 }
@@ -120,6 +123,9 @@ if ($launchPacket.timeline_animation_export.schema -ne "rrkal_displaytools.timel
 }
 if ($launchPacket.timeline_camera_keyframe.schema -ne "rrkal_displaytools.timeline_camera_keyframe.v1") {
     throw "Launch packet timeline camera keyframe schema missing or invalid"
+}
+if ($launchPacket.timeline_camera_interpolation.schema -ne "rrkal_displaytools.timeline_camera_interpolation.v1") {
+    throw "Launch packet timeline camera interpolation schema missing or invalid"
 }
 if ($launchPacket.timeline_state.implemented -notcontains "profile_timeline_keyframe_handoff") {
     throw "Launch packet timeline_state profile keyframe handoff missing"
@@ -156,6 +162,9 @@ if ($launchPacket.timeline_runtime_state.animation_export.schema -ne "rrkal_disp
 }
 if ($launchPacket.timeline_runtime_state.camera_keyframe.schema -ne "rrkal_displaytools.timeline_camera_keyframe.v1") {
     throw "Launch packet timeline_runtime_state camera keyframe missing or invalid"
+}
+if ($launchPacket.timeline_runtime_state.camera_interpolation.schema -ne "rrkal_displaytools.timeline_camera_interpolation.v1") {
+    throw "Launch packet timeline_runtime_state camera interpolation missing or invalid"
 }
 if ($launchPacket.timeline_runtime_state_file -ne "state/renderer_timeline_state.json") {
     throw "Launch packet timeline runtime state file missing or invalid"
@@ -256,6 +265,9 @@ if ($timelineAck.animation_export.schema -ne "rrkal_displaytools.timeline_animat
 if ($timelineAck.camera_keyframe.schema -ne "rrkal_displaytools.timeline_camera_keyframe.v1") {
     throw "Renderer timeline ack endpoint camera keyframe missing or invalid"
 }
+if ($timelineAck.camera_interpolation.schema -ne "rrkal_displaytools.timeline_camera_interpolation.v1") {
+    throw "Renderer timeline ack endpoint camera interpolation missing or invalid"
+}
 if ($timelineAck.first_keyframe_apply.schema -ne "rrkal_displaytools.timeline_first_keyframe_apply.v1") {
     throw "Renderer timeline ack endpoint first keyframe apply packet missing or invalid"
 }
@@ -331,8 +343,14 @@ if ($capabilities.timeline_handoff.animation_export_schema -ne "rrkal_displaytoo
 if ($capabilities.timeline_handoff.camera_keyframe_schema -ne "rrkal_displaytools.timeline_camera_keyframe.v1") {
     throw "Renderer timeline_handoff camera keyframe schema missing or invalid"
 }
+if ($capabilities.timeline_handoff.camera_interpolation_schema -ne "rrkal_displaytools.timeline_camera_interpolation.v1") {
+    throw "Renderer timeline_handoff camera interpolation schema missing or invalid"
+}
 if ($capabilities.timeline_handoff.input_contracts -notcontains "rrkal_displaytools.timeline_camera_keyframe.v1") {
     throw "Renderer timeline_handoff camera keyframe input contract missing"
+}
+if ($capabilities.timeline_handoff.input_contracts -notcontains "rrkal_displaytools.timeline_camera_interpolation.v1") {
+    throw "Renderer timeline_handoff camera interpolation input contract missing"
 }
 if ($capabilities.timeline_handoff.controls -notcontains "timeline-export-dir") {
     throw "Renderer timeline_handoff timeline-export-dir control missing"
