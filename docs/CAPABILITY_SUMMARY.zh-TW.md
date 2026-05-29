@@ -354,3 +354,8 @@
 
 - Added `profile_ui_state_replay` across Qt UI, launch packet, renderer capabilities, handoff inspection and closed-loop status.
 - The contract summarizes which UI state groups are portable through profiles and Timeline keyframes.
+
+### 2026-05-30 Profile schema UI state replay docs
+
+- Profile schema docs now describe `profile_ui_state_replay` and its saved state groups / replay surfaces.
+- Smoke verifies the docs stay aligned with the new profile replay handoff contract.

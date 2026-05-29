@@ -300,6 +300,25 @@ Renderer overlay 接上後，Pin 不應是螢幕固定標籤，而應是 geodeti
 
 Timeline playback plan 目前把 style、layer visibility/blend、pins、boundary highlight、boundary emphasis control 視為 discrete keyframe fields；ocean material、camera 與 layer opacity 有獨立 interpolation/handoff contract。
 
+## `profile_ui_state_replay`
+
+此欄位是 profile / launch packet / renderer capability / handoff 的覆蓋摘要，用來告訴跨機器使用者哪些 UI 狀態已可透過 profile 或 Timeline keyframes 保存與復現。它不是使用者必填 profile 欄位，也不負責 RRKAL dataset discovery、download、import、cache governance 或 authoritative geospatial identity。
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `schema` | string | 固定為 `rrkal_displaytools.profile_ui_state_replay.v1`。 |
+| `status` | string | 目前為 `ready`，表示覆蓋摘要可由 Qt、launch packet、renderer capabilities 與 handoff inspection 讀取。 |
+| `saved_state_groups` | array | 已納入 portable UI/profile replay 的狀態群組，例如 `renderer_config`、`selected_layer`、`layer_stack_ui`、`pins`、`boundary_highlight`、`boundary_emphasis_control`、`canvas_preview`、`timeline_keyframes`、`timeline_export_options`。 |
+| `saved_state_group_count` | integer | `saved_state_groups` 的數量。 |
+| `replay_surfaces` | array | 可讀取或復現這些狀態的入口，目前包含 Qt save/load profile、Qt startup `--profile` / `--template`、No-GUI launch packet、renderer first-keyframe apply、research provenance summary。 |
+| `replay_surface_count` | integer | `replay_surfaces` 的數量。 |
+| `qt_surface` | string | Qt 顯示入口，目前為 Layers dock `profileUiStateReplay` label。 |
+| `launch_packet_fields` | array | No-GUI launch packet 中與 replay 覆蓋相關的欄位。 |
+| `renderer_capability_field` | string | Renderer capability discovery 中的欄位名稱。 |
+| `handoff_field` | string | `scripts\inspect_handoff.ps1` 輸出的欄位名稱。 |
+| `summary_text` | string | 給 handoff / UI 顯示的簡短摘要。 |
+| `boundary` | string | 明確標示此契約只描述 portable UI/profile state，不代表 RRKAL data governance 或 authoritative geospatial identity 已完成。 |
+
 ## Handoff rules
 
 - Repo-shared templates live in `profiles/` and are committed.

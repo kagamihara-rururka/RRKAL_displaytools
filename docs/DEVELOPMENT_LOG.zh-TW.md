@@ -3310,3 +3310,17 @@ Decision:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+
+## 2026-05-30 - Profile schema UI state replay docs
+
+Scope:
+- `docs\PROFILE_SCHEMA.zh-TW.md` now documents `profile_ui_state_replay` as a profile/launch/capability/handoff coverage summary.
+- The docs list `saved_state_groups`, `replay_surfaces`, Qt surface, launch packet fields, renderer capability field and handoff field.
+- Smoke now verifies the profile schema docs include `profile_ui_state_replay`, saved state groups and replay surfaces.
+
+Decision:
+- Cross-machine users need the schema docs to explain portable UI/profile replay coverage without reading Qt, renderer or launch packet source.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+

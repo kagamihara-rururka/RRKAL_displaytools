@@ -1764,4 +1764,15 @@ if ($closedLoopSource -notmatch 'profile_ui_state_replay_handoff') {
     throw "Closed-loop profile UI state replay evidence is missing"
 }
 
+$profileSchemaDoc = Get-Content -LiteralPath (Join-Path $BoundaryIdentityRoot "docs\PROFILE_SCHEMA.zh-TW.md") -Raw -Encoding UTF8
+if ($profileSchemaDoc -notmatch 'profile_ui_state_replay') {
+    throw "Profile schema docs missing profile_ui_state_replay section"
+}
+if ($profileSchemaDoc -notmatch 'saved_state_groups') {
+    throw "Profile schema docs missing profile UI state replay saved groups"
+}
+if ($profileSchemaDoc -notmatch 'replay_surfaces') {
+    throw "Profile schema docs missing profile UI state replay surfaces"
+}
+
 Write-Host "Smoke passed."
