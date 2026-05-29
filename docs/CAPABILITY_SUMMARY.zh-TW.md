@@ -1,4 +1,4 @@
-# Capability Summary
+﻿# Capability Summary
 
 最後更新：2026-05-29
 
@@ -288,3 +288,9 @@
 
 - Closed-loop status now includes `pin_boundary_ui_handoff` for Pin coordinate source/projection UI and Boundary emphasis/ack handoff evidence.
 - Timeline partial status now lists Boundary emphasis keyframe preservation and Boundary target summaries.
+
+### 2026-05-30 Boundary identity source hint contract
+
+- Boundary identity status now carries `identity_source_hint` across renderer, Qt and launch packet contracts.
+- The contract states that current emphasis identity is preview/provenance based, while authoritative polygon identity and open-line area inference remain `pending_backend_geometry_closure` backend closures.
+

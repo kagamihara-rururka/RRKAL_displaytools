@@ -2617,6 +2617,18 @@ def default_boundary_identity_status() -> dict[str, object]:
             "open_line_area_inference",
         ],
         "boundary": "visual/source-property preview only; not an authoritative legal boundary resolution",
+        "identity_source_hint": {
+            "schema": "rrkal_displaytools.boundary_identity_source_hint.v1",
+            "current_sources": [
+                "source_properties",
+                "maritime_property_keys",
+                "closed_ring_geometry",
+            ],
+            "authoritative_source_required": "RRKAL-governed polygon/EEZ dataset manifest",
+            "open_line_area_inference_status": "pending_backend_geometry_closure",
+            "displaytools_scope": "consume identity fields and expose visual emphasis/provenance only",
+        },
+        "ui_summary_fields": ["applied", "pending", "boundary", "identity_source_hint"],
     }
 
 
@@ -19566,3 +19578,4 @@ def main(argv: list[str] | None = None) -> None:
 
 if __name__ == "__main__":
     main()
+

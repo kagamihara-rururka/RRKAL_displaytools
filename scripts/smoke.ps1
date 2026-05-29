@@ -1653,4 +1653,23 @@ foreach ($script in $scripts) {
     }
 }
 
+# Boundary identity source hint smoke gate
+$BoundaryIdentityRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+$boundaryIdentityFiles = @(
+    "taichi_global_bathymetry.py",
+    "rrkal_displaytools_qt_panel.py",
+    "scripts\export_launch_packet.py",
+    "closed_loop_status.py"
+)
+foreach ($boundaryIdentityFile in $boundaryIdentityFiles) {
+    $boundaryIdentityPath = Join-Path $BoundaryIdentityRoot $boundaryIdentityFile
+    $boundaryIdentityText = Get-Content -LiteralPath $boundaryIdentityPath -Raw -Encoding UTF8
+    if ($boundaryIdentityText -notmatch 'identity_source_hint') {
+        throw "Missing boundary identity source hint in $boundaryIdentityFile"
+    }
+    if ($boundaryIdentityText -notmatch 'pending_backend_geometry_closure') {
+        throw "Missing open-line inference pending marker in $boundaryIdentityFile"
+    }
+}
+
 Write-Host "Smoke passed."

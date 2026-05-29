@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import argparse
 import datetime
@@ -169,6 +169,18 @@ DEFAULT_BOUNDARY_IDENTITY_STATUS = {
         "open_line_area_inference",
     ],
     "boundary": "visual/source-property preview only; not an authoritative legal boundary resolution",
+    "identity_source_hint": {
+        "schema": "rrkal_displaytools.boundary_identity_source_hint.v1",
+        "current_sources": [
+            "source_properties",
+            "maritime_property_keys",
+            "closed_ring_geometry",
+        ],
+        "authoritative_source_required": "RRKAL-governed polygon/EEZ dataset manifest",
+        "open_line_area_inference_status": "pending_backend_geometry_closure",
+        "displaytools_scope": "consume identity fields and expose visual emphasis/provenance only",
+    },
+    "ui_summary_fields": ["applied", "pending", "boundary", "identity_source_hint"],
 }
 DEFAULT_BOUNDARY_HIGHLIGHT = {
     "schema": "rrkal_displaytools.boundary_highlight_mask.v1",
@@ -2705,3 +2717,4 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

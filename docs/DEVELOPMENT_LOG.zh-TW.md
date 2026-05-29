@@ -1,4 +1,4 @@
-# Development Log
+﻿# Development Log
 
 ## 2026-05-30 - Cursor geodesy state ack bridge contract
 
@@ -3125,3 +3125,17 @@ Decision:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Boundary identity source hint contract
+
+Scope:
+- Boundary identity status now exposes `identity_source_hint` in renderer, Qt and no-GUI launch packet contracts.
+- The hint records current preview identity sources as source properties, maritime keys and closed-ring geometry.
+- Smoke now verifies the source hint and `pending_backend_geometry_closure` marker across renderer, Qt, launch packet and closed-loop status files.
+
+Decision:
+- Territory/EEZ emphasis must be honest about provenance: displaytools can visualize and preserve source-property identity, while authoritative polygon identity and open-line area inference remain RRKAL/data-backend work.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+

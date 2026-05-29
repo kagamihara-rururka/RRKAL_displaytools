@@ -1,4 +1,4 @@
-"""Shared closed-loop status contract for RRKAL_displaytools."""
+﻿"""Shared closed-loop status contract for RRKAL_displaytools."""
 
 from __future__ import annotations
 
@@ -194,8 +194,11 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "source-property feature identity",
                     "maritime property key identity",
                     "boundary identity-status handoff",
+                    "boundary identity source hint handoff",
                 ],
                 "pending": ["authoritative_polygon_territory_identity", "open_line_area_inference"],
+                "identity_source_hint": "current preview identity uses source properties / maritime keys / closed rings; authoritative polygon and open-line inference remain pending",
+                "open_line_area_inference_status": "pending_backend_geometry_closure",
                 "evidence": ["boundary-highlight-json", "boundary-highlight-ack-file"],
             },
             {
@@ -332,3 +335,5 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
         ],
         "external_dependencies": ["RRKAL data manifest validation/ingest/governance"],
     }
+
+
