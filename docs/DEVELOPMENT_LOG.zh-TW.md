@@ -1,5 +1,19 @@
 # Development Log
 
+## 2026-05-29 - Boundary identity status handoff
+
+Scope:
+- Qt Boundary highlight state now carries `identity_status`.
+- Renderer boundary normalization and ack preserve the same identity-status contract.
+- No-GUI launch packets add `boundary_highlight.identity_status` even when repo templates do not define it yet.
+- Profile schema, renderer capabilities, smoke, and docs now expose the boundary identity-status schema.
+
+Positioning:
+- This makes the legal/scientific boundary of the current highlight mask portable in profile/launch packet handoff.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Boundary highlight identity status copy
 
 Scope:

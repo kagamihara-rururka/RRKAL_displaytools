@@ -59,6 +59,38 @@ DEFAULT_CANVAS_PREVIEW = {
     "preview_frame_interval_s": PREVIEW_FRAME_INTERVAL_S,
     "renderer_sync": "ui_state_preview",
 }
+DEFAULT_BOUNDARY_IDENTITY_STATUS = {
+    "schema": "rrkal_displaytools.boundary_identity_status.v1",
+    "applied": [
+        "source_property_feature_identity",
+        "maritime_property_key_identity",
+        "closed_ring_area_hit_test",
+        "closed_ring_fill_preview",
+    ],
+    "pending": [
+        "authoritative_polygon_territory_identity",
+        "open_line_area_inference",
+    ],
+    "boundary": "visual/source-property preview only; not an authoritative legal boundary resolution",
+}
+DEFAULT_BOUNDARY_HIGHLIGHT = {
+    "schema": "rrkal_displaytools.boundary_highlight_mask.v1",
+    "enabled": True,
+    "trigger": "hover",
+    "target_layers": ["border_layer", "territorial_sea_layer", "eez_layer", "high_seas_layer"],
+    "color_rgb": [255, 190, 72],
+    "contrast": 45,
+    "alpha": 48,
+    "gamma": 100,
+    "feather": 14,
+    "breathing": {
+        "enabled": True,
+        "speed": 42,
+        "amplitude": 16,
+    },
+    "renderer_sync": "ui_profile_launch_packet_only",
+    "identity_status": DEFAULT_BOUNDARY_IDENTITY_STATUS,
+}
 
 
 def resolve_profile(profile: Path | None, template: str | None) -> Path:
@@ -129,6 +161,22 @@ def canvas_preview_packet(profile: dict[str, object]) -> dict[str, object]:
     return dict(DEFAULT_CANVAS_PREVIEW)
 
 
+def boundary_highlight_packet(profile: dict[str, object]) -> dict[str, object] | None:
+    merged = dict(DEFAULT_BOUNDARY_HIGHLIGHT)
+    payload = profile.get("boundary_highlight")
+    if isinstance(payload, dict):
+        merged.update(payload)
+    identity_status = merged.get("identity_status")
+    if isinstance(identity_status, dict):
+        merged["identity_status"] = {
+            **DEFAULT_BOUNDARY_IDENTITY_STATUS,
+            **identity_status,
+        }
+    else:
+        merged["identity_status"] = dict(DEFAULT_BOUNDARY_IDENTITY_STATUS)
+    return merged
+
+
 def active_layer_diagnostics_packet(profile: dict[str, object]) -> dict[str, object]:
     selected_layer = profile.get("selected_layer")
     selected_layer = selected_layer if isinstance(selected_layer, str) else None
@@ -169,6 +217,7 @@ def launch_packet(profile_path: Path, profile: dict[str, object], rrkal_data_man
         "rrkal_data_manifest_ref": manifest_ref,
         "rrkal_data_manifest_ref_boundary": "Reference-only handoff field; displaytools does not discover, download, validate, import, or govern this manifest.",
         "canvas_preview": canvas_preview_packet(profile),
+        "boundary_highlight": boundary_highlight_packet(profile),
         "active_layer_diagnostics": active_layer_diagnostics_packet(profile),
         "closed_loop_status": renderer_closed_loop_status_packet(),
         "portable_command": portable_command,

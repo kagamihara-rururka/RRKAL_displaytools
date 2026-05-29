@@ -2532,6 +2532,7 @@ def load_pin_records(pin_file: str | None, pin_json: str | None) -> tuple[list[d
 
 
 BOUNDARY_HIGHLIGHT_SCHEMA = "rrkal_displaytools.boundary_highlight_mask.v1"
+BOUNDARY_IDENTITY_STATUS_SCHEMA = "rrkal_displaytools.boundary_identity_status.v1"
 BOUNDARY_HIGHLIGHT_LAYER_MAP = {
     "border_layer": "borders",
     "territorial_sea_layer": "territorial_sea",
@@ -2601,6 +2602,23 @@ def apply_boundary_highlight_fill_controls(color_rgb: object, contrast: object, 
     return tuple(int(round(float(value) * 255.0)) for value in rgb)
 
 
+def default_boundary_identity_status() -> dict[str, object]:
+    return {
+        "schema": BOUNDARY_IDENTITY_STATUS_SCHEMA,
+        "applied": [
+            "source_property_feature_identity",
+            "maritime_property_key_identity",
+            "closed_ring_area_hit_test",
+            "closed_ring_fill_preview",
+        ],
+        "pending": [
+            "authoritative_polygon_territory_identity",
+            "open_line_area_inference",
+        ],
+        "boundary": "visual/source-property preview only; not an authoritative legal boundary resolution",
+    }
+
+
 def default_boundary_highlight_state(received: bool = False) -> dict[str, object]:
     return {
         "schema": BOUNDARY_HIGHLIGHT_SCHEMA,
@@ -2619,6 +2637,7 @@ def default_boundary_highlight_state(received: bool = False) -> dict[str, object
             "speed": 42,
             "amplitude": 16,
         },
+        "identity_status": default_boundary_identity_status(),
         "renderer_sync": "input_acknowledged_overlay_pending",
     }
 
@@ -2655,6 +2674,12 @@ def normalize_boundary_highlight_state(payload: object, received: bool = True) -
     state["renderer_target_layers"] = [
         BOUNDARY_HIGHLIGHT_LAYER_MAP[layer] for layer in state["target_layers"] if layer in BOUNDARY_HIGHLIGHT_LAYER_MAP
     ]
+    identity_status = payload.get("identity_status")
+    if isinstance(identity_status, dict):
+        state["identity_status"] = {
+            **default_boundary_identity_status(),
+            **identity_status,
+        }
     return state, None
 
 
@@ -13078,6 +13103,7 @@ class HybridRenderController:
             "gamma": state.get("gamma", 100),
             "feather": state.get("feather", 14),
             "breathing": state.get("breathing", {}),
+            "identity_status": state.get("identity_status", default_boundary_identity_status()),
             "applies": [
                 "input_acknowledgement",
                 "hover_hit_gate",
@@ -16265,6 +16291,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
         "boundary_highlight": {
             "schema": BOUNDARY_HIGHLIGHT_SCHEMA,
             "ack_schema": "rrkal_displaytools.renderer_boundary_highlight_ack.v1",
+            "identity_status_schema": BOUNDARY_IDENTITY_STATUS_SCHEMA,
             "controls": [
                 "boundary-highlight-json",
                 "boundary-highlight-ack-file",

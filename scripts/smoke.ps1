@@ -31,6 +31,9 @@ if ($launchPacket.canvas_preview.schema -ne "rrkal_displaytools.canvas_preview.v
 if ($launchPacket.active_layer_diagnostics.schema -ne "rrkal_displaytools.active_layer_diagnostics.v1") {
     throw "Launch packet active_layer_diagnostics schema missing or invalid"
 }
+if ($launchPacket.boundary_highlight.identity_status.schema -ne "rrkal_displaytools.boundary_identity_status.v1") {
+    throw "Launch packet boundary_highlight identity_status schema missing or invalid"
+}
 if ($launchPacket.portable_command -notcontains "--preview-frame-file") {
     throw "Launch packet portable command is missing --preview-frame-file"
 }
@@ -55,6 +58,9 @@ if ($capabilities.preview_frame_stream.schema -ne "rrkal_displaytools.preview_fr
 }
 if ($capabilities.active_layer_diagnostics.schema -ne "rrkal_displaytools.active_layer_diagnostics.v1") {
     throw "Renderer active_layer_diagnostics capability missing or invalid"
+}
+if ($capabilities.boundary_highlight.identity_status_schema -ne "rrkal_displaytools.boundary_identity_status.v1") {
+    throw "Renderer boundary_highlight identity_status capability missing or invalid"
 }
 Invoke-CheckedNative py @("-3", "taichi_global_bathymetry.py", "--print-closed-loop-status") | Out-Null
 Invoke-CheckedNative py @("-3", "taichi_global_bathymetry.py", "--print-layer-manifest") | Out-Null

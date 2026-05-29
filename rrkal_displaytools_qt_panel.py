@@ -130,6 +130,7 @@ LAYER_RUNTIME_ID_ALIASES = {
 }
 
 BOUNDARY_HIGHLIGHT_SCHEMA = "rrkal_displaytools.boundary_highlight_mask.v1"
+BOUNDARY_IDENTITY_STATUS_SCHEMA = "rrkal_displaytools.boundary_identity_status.v1"
 BOUNDARY_HIGHLIGHT_LAYER_KEYS = (
     "border_layer",
     "territorial_sea_layer",
@@ -161,6 +162,23 @@ def _coerce_int(value: object, default: int, minimum: int, maximum: int) -> int:
     return max(minimum, min(maximum, number))
 
 
+def default_boundary_identity_status() -> dict[str, object]:
+    return {
+        "schema": BOUNDARY_IDENTITY_STATUS_SCHEMA,
+        "applied": [
+            "source_property_feature_identity",
+            "maritime_property_key_identity",
+            "closed_ring_area_hit_test",
+            "closed_ring_fill_preview",
+        ],
+        "pending": [
+            "authoritative_polygon_territory_identity",
+            "open_line_area_inference",
+        ],
+        "boundary": "visual/source-property preview only; not an authoritative legal boundary resolution",
+    }
+
+
 def default_boundary_highlight_state() -> dict[str, object]:
     return {
         "schema": BOUNDARY_HIGHLIGHT_SCHEMA,
@@ -177,6 +195,7 @@ def default_boundary_highlight_state() -> dict[str, object]:
             "speed": 42,
             "amplitude": 16,
         },
+        "identity_status": default_boundary_identity_status(),
         "renderer_sync": "ui_profile_launch_packet_only",
     }
 

@@ -164,6 +164,7 @@ Renderer overlay 接上後，Pin 不應是螢幕固定標籤，而應是 geodeti
 | `gamma` | integer 25-300 | gamma bar，100 表示 1.00x。 |
 | `feather` | integer 0-100 | 邊界柔化程度。 |
 | `breathing` | object | 呼吸特效設定，包含 `enabled`、`speed`、`amplitude`。 |
+| `identity_status` | object | 可選，固定 schema 為 `rrkal_displaytools.boundary_identity_status.v1`；記錄 source-property identity / closed-ring preview 已 live，authoritative territory/EEZ identity 與 open-line area inference 仍 pending。 |
 | `renderer_sync` | string | 目前為 `ui_profile_launch_packet_only`，表示 renderer polygon mask 尚未接。 |
 
 目前 Qt 已提供 Properties 入口與圖層列雙擊對話框，並會把設定寫入 profile、launch packet、Canvas Preview 與 provenance。下一步 renderer 應先實作 hover outline + translucent glow，再接 polygon fill、contrast/gamma shader 與呼吸動畫。

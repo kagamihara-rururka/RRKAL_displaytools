@@ -7,6 +7,7 @@ from pathlib import Path
 
 PROFILE_SCHEMA_ID = "rrkal_displaytools.qt_panel_profile.v1"
 BOUNDARY_HIGHLIGHT_SCHEMA_ID = "rrkal_displaytools.boundary_highlight_mask.v1"
+BOUNDARY_IDENTITY_STATUS_SCHEMA_ID = "rrkal_displaytools.boundary_identity_status.v1"
 CANVAS_PREVIEW_SCHEMA_ID = "rrkal_displaytools.canvas_preview.v1"
 
 REQUIRED_PROFILE_TOP_LEVEL = {"schema", "renderer", "ocean_material", "layers"}
@@ -72,6 +73,7 @@ REQUIRED_BOUNDARY_HIGHLIGHT_FIELDS = {
     "renderer_sync",
 }
 REQUIRED_BOUNDARY_BREATHING_FIELDS = {"enabled", "speed", "amplitude"}
+OPTIONAL_BOUNDARY_HIGHLIGHT_FIELDS = {"identity_status"}
 REQUIRED_PIN_FIELDS = {"id", "type", "label", "latitude", "longitude", "placement"}
 OPTIONAL_PIN_FIELDS = {"note", "target_layer", "label_priority"}
 REQUIRED_TOOL_STATE_FIELDS = {
@@ -326,6 +328,12 @@ def profile_payload_errors(profile: dict[str, object]) -> list[str]:
                         errors.append(f"boundary_highlight.breathing.{field} must be an integer from 0 to 100")
             if not isinstance(boundary_highlight.get("renderer_sync"), str):
                 errors.append("boundary_highlight.renderer_sync must be a string")
+            identity_status = boundary_highlight.get("identity_status")
+            if identity_status is not None:
+                if not isinstance(identity_status, dict):
+                    errors.append("boundary_highlight.identity_status must be an object")
+                elif identity_status.get("schema") != BOUNDARY_IDENTITY_STATUS_SCHEMA_ID:
+                    errors.append(f"boundary_highlight.identity_status.schema must be {BOUNDARY_IDENTITY_STATUS_SCHEMA_ID!r}")
     return errors
 
 
@@ -377,6 +385,8 @@ def profile_schema_packet() -> dict[str, object]:
             "target_layers": sorted(BOUNDARY_HIGHLIGHT_LAYER_KEYS),
             "triggers": sorted(BOUNDARY_HIGHLIGHT_TRIGGERS),
             "required_fields": sorted(REQUIRED_BOUNDARY_HIGHLIGHT_FIELDS),
+            "optional_fields": sorted(OPTIONAL_BOUNDARY_HIGHLIGHT_FIELDS),
+            "identity_status_schema": BOUNDARY_IDENTITY_STATUS_SCHEMA_ID,
             "breathing_required_fields": sorted(REQUIRED_BOUNDARY_BREATHING_FIELDS),
             "status": "Qt UI/profile/launch packet state; renderer hover polygon mask pending",
         },
