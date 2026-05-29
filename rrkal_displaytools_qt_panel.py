@@ -848,7 +848,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         navigator = QtWidgets.QWidget(navigator_dock)
         navigator_layout = QtWidgets.QVBoxLayout(navigator)
         navigator_layout.setContentsMargins(10, 10, 10, 10)
-        preview = QtWidgets.QLabel("🚧 Navigator preview\n施工中：live renderer thumbnail")
+        preview = QtWidgets.QLabel(
+            "Navigator preview\n"
+            "Live renderer pixels are available from the central Canvas Preview."
+        )
         preview.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         preview.setMinimumHeight(120)
         preview.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)

@@ -1,5 +1,17 @@
 # Development Log
 
+## 2026-05-29 - Navigator live preview wording
+
+Scope:
+- Navigator dock no longer labels live renderer thumbnail as under construction.
+- The dock now points users to the central Canvas Preview for live renderer pixels.
+
+Positioning:
+- This keeps the Qt UI copy aligned with the newly closed file-based live preview loop.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Launch packet preview frame handoff
 
 Scope:
