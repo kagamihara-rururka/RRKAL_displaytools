@@ -18530,6 +18530,14 @@ def layer_operator_shortcuts_packet(
             "profile_effect": "layer_stack_ui",
         },
         {
+            "id": "open_boundary_emphasis",
+            "label": "Open boundary emphasis controls",
+            "surface": "Boundary layer row action badge / double-click",
+            "state_scope": "boundary_emphasis_control",
+            "qt_available": True,
+            "profile_effect": "boundary_highlight",
+        },
+        {
             "id": "solo_selected_layer",
             "label": "Solo selected layer",
             "surface": "Layers actions",
@@ -18689,6 +18697,7 @@ def layer_selection_tool_packet(source: str, selected_layer: str | None = None) 
             "Select first filtered layer",
             "Reveal selected layer row",
             "Layer pick JSON inspector",
+            "Boundary row emphasis action badge",
         ],
         "selection_sources": [
             "layer_row_click",

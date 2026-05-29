@@ -161,3 +161,4 @@ Last updated: 2026-05-29
 - 2026-05-30: Added smoke-gated boundary identity applied/pending markers to renderer capabilities and handoff inspection.
 - 2026-05-30: Showed boundary identity applied/pending markers in Qt Properties and Canvas Preview.
 - 2026-05-30: Added Boundary emphasis dialog RGB swatch/live numeric preview and smoke-gated the dialog feedback contract.
+- 2026-05-30: Added visible Boundary layer Emphasis action badges and smoke-gated the layer action contract.

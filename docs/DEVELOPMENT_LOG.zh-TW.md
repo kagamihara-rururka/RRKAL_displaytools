@@ -2968,3 +2968,15 @@ Decision:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Boundary layer action badge
+
+Scope:
+- Qt layer rows now include a visible Action column; boundary-capable rows show an Emphasis badge that opens Boundary emphasis controls by double-click.
+- Layer operator shortcuts and layer selection tool contracts now expose `open_boundary_emphasis` and the Boundary row emphasis action badge surface in launch packet and renderer capabilities.
+
+Decision:
+- Boundary emphasis must be discoverable from the layer list itself, not hidden behind tooltip-only behavior, because researchers tune country/territorial sea/EEZ/high-seas overlays while scanning layers.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

@@ -1294,6 +1294,14 @@ def layer_operator_shortcuts_packet(
             "profile_effect": "layer_stack_ui",
         },
         {
+            "id": "open_boundary_emphasis",
+            "label": "Open boundary emphasis controls",
+            "surface": "Boundary layer row action badge / double-click",
+            "state_scope": "boundary_emphasis_control",
+            "qt_available": True,
+            "profile_effect": "boundary_highlight",
+        },
+        {
             "id": "solo_selected_layer",
             "label": "Solo selected layer",
             "surface": "Layers actions",
@@ -1453,6 +1461,7 @@ def layer_selection_tool_packet(source: str, selected_layer: str | None = None) 
             "Select first filtered layer",
             "Reveal selected layer row",
             "Layer pick JSON inspector",
+            "Boundary row emphasis action badge",
         ],
         "selection_sources": [
             "layer_row_click",
@@ -2241,7 +2250,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         layer_header = QtWidgets.QWidget()
         layer_header_layout = QtWidgets.QGridLayout(layer_header)
         layer_header_layout.setContentsMargins(0, 0, 0, 0)
-        headers = ("Select", "Vis", "Layer", "Lock", "Opacity", "Blend", "Runtime")
+        headers = ("Select", "Vis", "Layer", "Lock", "Opacity", "Blend", "Runtime", "Action")
         for column, text in enumerate(headers):
             header_label = QtWidgets.QLabel(text)
             header_label.setObjectName("layerHeader")
@@ -2291,14 +2300,19 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             runtime_badge.setStyleSheet(layer_runtime_badge_style("no_ack"))
             runtime_badge.setToolTip("Last renderer layer runtime ack status for this layer.")
             self.layer_runtime_badges[key] = runtime_badge
+            action_badge = QtWidgets.QLabel("Emphasis" if key in BOUNDARY_HIGHLIGHT_LAYER_KEYS else "-")
+            action_badge.setObjectName("layerActionBadge")
             if key in BOUNDARY_HIGHLIGHT_LAYER_KEYS:
                 boundary_tooltip = "雙擊開啟疆域/領海/EEZ/公海強調遮罩控制。"
                 row.setToolTip(boundary_tooltip)
                 layer_label.setToolTip(boundary_tooltip)
+                action_badge.setToolTip(boundary_tooltip)
                 row.installEventFilter(self)
                 layer_label.installEventFilter(self)
+                action_badge.installEventFilter(self)
                 self.boundary_layer_event_targets[id(row)] = key
                 self.boundary_layer_event_targets[id(layer_label)] = key
+                self.boundary_layer_event_targets[id(action_badge)] = key
 
             row_layout.addWidget(select_button, 0, 0)
             row_layout.addWidget(check, 0, 1)
@@ -2307,6 +2321,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             row_layout.addWidget(opacity, 0, 4)
             row_layout.addWidget(blend, 0, 5)
             row_layout.addWidget(runtime_badge, 0, 6)
+            row_layout.addWidget(action_badge, 0, 7)
             layers_layout.addWidget(row)
         self.selected_layer_label = QtWidgets.QLabel("目前選取圖層：尚未選取")
         self.selected_layer_label.setObjectName("selectedLayer")

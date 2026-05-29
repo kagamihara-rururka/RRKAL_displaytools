@@ -179,6 +179,9 @@ if ($launchLayerOperatorActions -notcontains "restore_solo_visibility") {
 if ($launchLayerOperatorActions -notcontains "undo_layer_state") {
     throw "Launch packet layer_operator_shortcuts missing layer undo action"
 }
+if ($launchLayerOperatorActions -notcontains "open_boundary_emphasis") {
+    throw "Launch packet layer_operator_shortcuts missing boundary emphasis action"
+}
 if ([int]$launchPacket.layer_operator_shortcuts.keyboard_shortcut_count -lt 7) {
     throw "Launch packet layer_operator_shortcuts keyboard shortcut count missing"
 }
@@ -208,6 +211,9 @@ if ([int]$launchPacket.layer_selection_tool.selectable_layer_count -le 0) {
 }
 if ($launchPacket.layer_selection_tool.brush_mask_scope -ne "excluded") {
     throw "Launch packet layer_selection_tool must exclude brush/mask scope"
+}
+if ($launchPacket.layer_selection_tool.qt_surfaces -notcontains "Boundary row emphasis action badge") {
+    throw "Launch packet layer_selection_tool boundary action badge surface missing"
 }
 if ($launchPacket.layer_research_workflow.schema -ne "rrkal_displaytools.layer_research_workflow.v1") {
     throw "Launch packet layer_research_workflow schema missing or invalid"
@@ -772,6 +778,9 @@ if ($capabilities.layer_operator_shortcuts.schema -ne "rrkal_displaytools.layer_
 if ($capabilities.layer_operator_shortcuts.implemented_action_ids -notcontains "solo_selected_layer") {
     throw "Renderer layer_operator_shortcuts missing solo action"
 }
+if ($capabilities.layer_operator_shortcuts.implemented_action_ids -notcontains "open_boundary_emphasis") {
+    throw "Renderer layer_operator_shortcuts missing boundary emphasis action"
+}
 if ([int]$capabilities.layer_operator_shortcuts.keyboard_shortcut_count -lt 7) {
     throw "Renderer layer_operator_shortcuts keyboard shortcut count missing"
 }
@@ -792,6 +801,9 @@ if ($capabilities.layer_selection_tool.supported_renderer_pick_scopes -notcontai
 }
 if ($capabilities.layer_selection_tool.brush_mask_scope -ne "excluded") {
     throw "Renderer layer_selection_tool must exclude brush/mask scope"
+}
+if ($capabilities.layer_selection_tool.qt_surfaces -notcontains "Boundary row emphasis action badge") {
+    throw "Renderer layer_selection_tool boundary action badge surface missing"
 }
 if ($capabilities.layer_research_workflow.schema -ne "rrkal_displaytools.layer_research_workflow.v1") {
     throw "Renderer layer_research_workflow schema missing or invalid"
@@ -1487,6 +1499,12 @@ if ($qtPanelSource -notlike "*Boundary emphasis preview:*") {
 }
 if ($qtPanelSource -notlike "*boundaryEmphasisSwatch*") {
     throw "Qt boundary emphasis RGB swatch missing"
+}
+if ($qtPanelSource -notlike "*layerActionBadge*") {
+    throw "Qt layer action badge missing"
+}
+if ($qtPanelSource -notlike "*Emphasis*") {
+    throw "Qt boundary layer emphasis action label missing"
 }
 if ($qtPanelSource -notlike "*Boundary identity:*") {
     throw "Qt canvas boundary identity summary line missing"

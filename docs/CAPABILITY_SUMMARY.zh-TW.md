@@ -228,3 +228,8 @@
 
 - Qt Boundary emphasis controls now include an RGB swatch and live numeric preview for target, RGB, contrast, opacity, gamma and breathing timing.
 - Boundary emphasis launch/capability contracts expose dialog feedback fields so clone-after-setup checks can confirm the UI affordance exists.
+
+### 2026-05-30 Boundary layer action badge
+
+- Boundary-capable layer rows now expose a visible Emphasis action badge in the Qt Layers dock.
+- Launch packet and renderer capabilities advertise the boundary emphasis row action so cross-machine clone checks can verify the UI affordance.
