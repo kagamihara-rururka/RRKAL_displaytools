@@ -98,6 +98,33 @@ if ($timelinePacket.timeline_runtime_state_file -ne $timelineStateOut) {
 if ($timelinePacket.portable_command -notcontains $timelineStateOut) {
     throw "No-GUI launch packet portable command did not include --timeline-state-out path"
 }
+$timelineAckOut = Join-Path $env:TEMP "rrkal_displaytools_smoke_timeline_ack.json"
+if (Test-Path $timelineAckOut) {
+    Remove-Item -LiteralPath $timelineAckOut -Force
+}
+$timelineAckText = & py -3 taichi_global_bathymetry.py --ack-timeline-state-and-exit --timeline-state-file $timelineStateOut --timeline-ack-file $timelineAckOut
+if ($LASTEXITCODE -ne 0) {
+    throw "Command failed: py -3 taichi_global_bathymetry.py --ack-timeline-state-and-exit"
+}
+if (!(Test-Path $timelineAckOut)) {
+    throw "Renderer timeline ack output was not written"
+}
+$timelineAckRaw = $timelineAckText -join "`n"
+$timelineAckJsonStart = $timelineAckRaw.IndexOf("{")
+if ($timelineAckJsonStart -lt 0) {
+    throw "Renderer timeline ack JSON payload not found"
+}
+$timelineAck = $timelineAckRaw.Substring($timelineAckJsonStart) | ConvertFrom-Json
+if ($timelineAck.schema -ne "rrkal_displaytools.renderer_timeline_ack.v1") {
+    throw "Renderer timeline ack endpoint schema missing or invalid"
+}
+if ($timelineAck.received -ne $true) {
+    throw "Renderer timeline ack endpoint did not receive the runtime state"
+}
+if ($timelineAck.timeline_runtime_state_schema -ne "rrkal_displaytools.timeline_runtime_state.v1") {
+    throw "Renderer timeline ack endpoint runtime state schema missing or invalid"
+}
+Remove-Item -LiteralPath $timelineAckOut -Force
 Remove-Item -LiteralPath $timelineStateOut -Force
 $capabilitiesText = & py -3 taichi_global_bathymetry.py --print-renderer-capabilities
 if ($LASTEXITCODE -ne 0) {
@@ -126,6 +153,9 @@ if ($capabilities.timeline_handoff.ack_schema -ne "rrkal_displaytools.renderer_t
 }
 if ($capabilities.timeline_handoff.controls -notcontains "timeline-state-file") {
     throw "Renderer timeline_handoff timeline-state-file control missing"
+}
+if ($capabilities.timeline_handoff.controls -notcontains "ack-timeline-state-and-exit") {
+    throw "Renderer timeline_handoff ack endpoint control missing"
 }
 if ($capabilities.boundary_highlight.identity_status_schema -ne "rrkal_displaytools.boundary_identity_status.v1") {
     throw "Renderer boundary_highlight identity_status capability missing or invalid"

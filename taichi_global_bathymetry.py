@@ -2711,6 +2711,47 @@ def load_timeline_runtime_state(timeline_state_file: str | Path | None) -> tuple
     return payload, None
 
 
+def timeline_ack_payload_from_state_file(timeline_state_file: str | Path | None) -> dict[str, object]:
+    state_payload, state_error = load_timeline_runtime_state(timeline_state_file)
+    runtime_state = state_payload if isinstance(state_payload, dict) else {}
+    timeline_state = runtime_state.get("timeline_state")
+    timeline_state = timeline_state if isinstance(timeline_state, dict) else {}
+    runtime_keyframes = runtime_state.get("timeline_keyframes")
+    runtime_keyframes = runtime_keyframes if isinstance(runtime_keyframes, list) else []
+    keyframe_count = timeline_state.get("keyframe_count")
+    if not isinstance(keyframe_count, int):
+        keyframe_count = len(runtime_keyframes)
+    playback = timeline_state.get("playback")
+    playback = playback if isinstance(playback, dict) else {}
+    return {
+        "schema": "rrkal_displaytools.renderer_timeline_ack.v1",
+        "updated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "received": state_payload is not None and state_error is None,
+        "timeline_runtime_state_file": str(timeline_state_file) if timeline_state_file else None,
+        "timeline_runtime_state_schema": runtime_state.get("schema"),
+        "timeline_state_schema": timeline_state.get("schema"),
+        "keyframe_count": keyframe_count,
+        "playback_mode": playback.get("mode"),
+        "applies": ["input_acknowledgement"],
+        "pending": [
+            "renderer_timeline_playback",
+            "animation_export",
+            "ocean_material_keyframe_interpolation",
+            "camera_keyframe_interpolation",
+        ],
+        "error": state_error,
+        "source": "taichi_global_bathymetry",
+    }
+
+
+def write_timeline_ack_payload(timeline_ack_file: str | Path | None, payload: dict[str, object]) -> None:
+    if not timeline_ack_file:
+        return
+    path = Path(timeline_ack_file)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
 def _pin_label_text(pin: dict[str, object]) -> str:
     text = str(pin.get("label") or pin.get("id") or "Pin").strip()
     if len(text) > 28:
@@ -16119,6 +16160,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--print-renderer-capabilities", action=bool_action, default=False)
     parser.add_argument("--print-layer-manifest", action=bool_action, default=False)
     parser.add_argument("--print-closed-loop-status", action=bool_action, default=False)
+    parser.add_argument("--ack-timeline-state-and-exit", action=bool_action, default=False)
 
     parser.add_argument("--topo-step", type=int, default=int(os.environ.get("TOPO_STEP", "16")))
     parser.add_argument("--topo-source", choices=["gebco", "synthetic"], default=os.environ.get("TOPO_SOURCE", "gebco"))
@@ -16424,7 +16466,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "schema": "rrkal_displaytools.timeline_handoff.v1",
             "state_schema": "rrkal_displaytools.timeline_runtime_state.v1",
             "ack_schema": "rrkal_displaytools.renderer_timeline_ack.v1",
-            "controls": ["timeline-state-file", "timeline-ack-file"],
+            "controls": ["timeline-state-file", "timeline-ack-file", "ack-timeline-state-and-exit"],
             "input_contracts": [
                 "rrkal_displaytools.timeline_state.v1",
                 "rrkal_displaytools.timeline_keyframe.v1",
@@ -16438,6 +16480,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "No-GUI launch packet keyframe summary",
                 "UI-only keyframe playback preview",
                 "renderer timeline input acknowledgement",
+                "no-GUI timeline ack smoke endpoint",
             ],
             "pending": [
                 "renderer_timeline_playback",
@@ -16637,6 +16680,11 @@ def main(argv: list[str] | None = None) -> None:
         return
     if args.print_layer_manifest:
         print(json.dumps(renderer_layer_manifest_packet(), ensure_ascii=False, indent=2))
+        return
+    if args.ack_timeline_state_and_exit:
+        payload = timeline_ack_payload_from_state_file(getattr(args, "timeline_state_file", None))
+        write_timeline_ack_payload(getattr(args, "timeline_ack_file", None), payload)
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
         return
     if args.demo_closed_loop:
         apply_closed_loop_demo_defaults(args)

@@ -67,7 +67,7 @@
 - `py -3 scripts\export_launch_packet.py --template fast_synthetic`
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_handoff.ps1`
 
-這些入口給腳本查詢 renderer 能力、closed-loop status、圖層 manifest、可用 templates、profile schema、產生 launch packet，以及檢查跨機器 handoff summary。Renderer capabilities 內含 `closed_loop_status`、`preview_frame_stream`、`active_layer_diagnostics`、`timeline_handoff` 與 `ui_handoff_contracts` contract；`ui_handoff_contracts` 會列出 `timeline_state`，`timeline_handoff` 會列出 `timeline-state-file` / `timeline-ack-file` 與 `rrkal_displaytools.renderer_timeline_ack.v1`，並明確標示 renderer timeline playback/export 仍 pending。也可用 `--print-closed-loop-status` 只輸出目前 closed、partial 與 pending 的功能邊界；closed-loop status 會列出 `diagnostics_handoff_contracts`。
+這些入口給腳本查詢 renderer 能力、closed-loop status、圖層 manifest、可用 templates、profile schema、產生 launch packet，以及檢查跨機器 handoff summary。Renderer capabilities 內含 `closed_loop_status`、`preview_frame_stream`、`active_layer_diagnostics`、`timeline_handoff` 與 `ui_handoff_contracts` contract；`ui_handoff_contracts` 會列出 `timeline_state`，`timeline_handoff` 會列出 `timeline-state-file` / `timeline-ack-file` / `ack-timeline-state-and-exit` 與 `rrkal_displaytools.renderer_timeline_ack.v1`，並明確標示 renderer timeline playback/export 仍 pending。也可用 `--print-closed-loop-status` 只輸出目前 closed、partial 與 pending 的功能邊界；closed-loop status 會列出 `diagnostics_handoff_contracts`。
 
 ### Launch packets and handoff
 
@@ -103,6 +103,7 @@
   - Launch packet Timeline runtime state/ack file gate。
   - Launch packet `--timeline-state-file` / `--timeline-ack-file` gate。
   - No-GUI `--timeline-state-out` writes runtime JSON and updates portable command gate。
+  - Renderer `--ack-timeline-state-and-exit` reads Timeline runtime JSON and writes ack gate。
   - Launch packet `boundary_highlight.identity_status` schema gate。
   - Launch packet `--preview-frame-file` gate。
   - Launch packet `canvas_preview.preview_frame_path` / `preview_frame_interval_s` gate。

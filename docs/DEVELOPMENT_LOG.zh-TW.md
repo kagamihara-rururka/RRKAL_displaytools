@@ -1,5 +1,19 @@
 # Development Log
 
+## 2026-05-29 - Timeline ack smoke endpoint
+
+Scope:
+- Renderer now supports `--ack-timeline-state-and-exit`.
+- The endpoint reads `--timeline-state-file`, writes `--timeline-ack-file`, prints `rrkal_displaytools.renderer_timeline_ack.v1`, and exits before Taichi initialization.
+- Renderer capabilities now list the ack endpoint control.
+- Smoke now validates the no-GUI Timeline runtime JSON through the renderer ack endpoint.
+
+Positioning:
+- This closes Timeline receipt verification for smoke/cross-machine checks without starting the full renderer or claiming animation playback.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - No-GUI Timeline state file export
 
 Scope:

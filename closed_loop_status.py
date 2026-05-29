@@ -122,6 +122,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "launch packet timeline_state contract",
                     "provenance timeline_state",
                     "renderer timeline ack handoff",
+                    "no-GUI renderer ack endpoint",
                 ],
                 "pending": ["renderer_timeline_playback", "animation_export"],
                 "evidence": [
