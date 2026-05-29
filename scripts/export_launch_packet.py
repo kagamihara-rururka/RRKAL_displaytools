@@ -402,7 +402,7 @@ def timeline_state_packet(profile: dict[str, object]) -> dict[str, object]:
             "keyframe_storage",
             "keyframe_restore",
             "playback_controls",
-            "renderer_timeline_playback",
+            "renderer_discrete_step_playback",
             "animation_export",
             "ocean_material_keyframes",
             "camera_keyframes",
@@ -417,7 +417,7 @@ def timeline_state_packet(profile: dict[str, object]) -> dict[str, object]:
             "interval_ms": 0,
             "next_index": 0,
         },
-        "boundary": "UIUX placeholder/status contract only; no renderer animation playback is claimed yet.",
+        "boundary": "No-GUI status contract includes renderer discrete step playback; interpolation/export are not claimed yet.",
     }
 
 
@@ -434,10 +434,11 @@ def timeline_runtime_state_packet(profile: dict[str, object], target_file: str =
         "playback_plan": timeline_playback_plan_packet(keyframes),
         "segment_state": timeline_segment_state_packet(keyframes, active_step_state.get("active_index")),
         "active_step_state": active_step_state,
+        "step_playback": timeline_step_playback_packet(timeline_state, keyframes, instantiated=False),
         "timeline_keyframes": keyframes,
         "source": "scripts/export_launch_packet.py",
         "target_file": target_file,
-        "boundary": "Save this payload to the target file before launching the renderer; renderer playback/export remain pending.",
+        "boundary": "Save this payload to the target file before launching the renderer; discrete step playback is supported, interpolation/export remain pending.",
     }
 
 
@@ -446,15 +447,15 @@ def timeline_playback_readiness_packet() -> dict[str, object]:
         "schema": "rrkal_displaytools.timeline_playback_readiness.v1",
         "ui_preview_playback_available": True,
         "renderer_ack_available": True,
-        "renderer_timeline_playback": False,
+        "renderer_timeline_playback": True,
+        "renderer_playback_mode": "discrete_keyframe_step",
         "animation_export": False,
         "pending": [
-            "renderer_timeline_playback",
             "animation_export",
             "ocean_material_keyframe_interpolation",
             "camera_keyframe_interpolation",
         ],
-        "boundary": "No-GUI handoff can export timeline runtime state and receive renderer ack; renderer playback/export are not claimed yet.",
+        "boundary": "No-GUI handoff can export runtime state for renderer discrete step playback; interpolation/export are not claimed yet.",
     }
 
 
@@ -478,8 +479,8 @@ def timeline_playback_plan_packet(keyframes: list[dict[str, object]]) -> dict[st
     return {
         "schema": "rrkal_displaytools.timeline_playback_plan.v1",
         "mode": "ordered_keyframe_plan",
-        "playback_driver": "no_gui_export_plan_only",
-        "renderer_contract": "acknowledge_plan_only",
+        "playback_driver": "renderer_discrete_step_playback",
+        "renderer_contract": "discrete_step_playback",
         "keyframe_count": len(plan_keyframes),
         "segment_count": max(0, len(plan_keyframes) - 1),
         "keyframes": plan_keyframes,
@@ -491,11 +492,10 @@ def timeline_playback_plan_packet(keyframes: list[dict[str, object]]) -> dict[st
             "boundary_highlight",
         ],
         "pending": [
-            "renderer_timeline_playback",
             "animation_export",
             "inter_keyframe_interpolation",
         ],
-        "boundary": "Playback plan is exported for renderer handoff; current renderer only acknowledges it.",
+        "boundary": "Playback plan is exported for renderer discrete step playback; interpolation/export remain pending.",
     }
 
 
@@ -563,6 +563,35 @@ def timeline_active_step_state_packet(
     }
 
 
+def timeline_step_playback_packet(
+    timeline_state: dict[str, object] | None,
+    keyframes: list[dict[str, object]],
+    instantiated: bool = False,
+) -> dict[str, object]:
+    timeline_state = timeline_state if isinstance(timeline_state, dict) else {}
+    playback = timeline_state.get("playback")
+    playback = playback if isinstance(playback, dict) else {}
+    active_step = timeline_active_step_state_packet(timeline_state, keyframes)
+    try:
+        interval_ms = int(playback.get("interval_ms", 1200))
+    except (TypeError, ValueError):
+        interval_ms = 1200
+    return {
+        "schema": "rrkal_displaytools.timeline_step_playback.v1",
+        "supported": True,
+        "instantiated": bool(instantiated),
+        "mode": "renderer_discrete_keyframe_step",
+        "playback_active": bool(playback.get("active")),
+        "interval_ms": max(50, interval_ms),
+        "current_index": active_step.get("active_index"),
+        "keyframe_count": len(keyframes),
+        "step_count": 0,
+        "applies": ["renderer_discrete_keyframe_step"],
+        "pending": ["inter_keyframe_interpolation", "animation_export", "camera_keyframes"],
+        "boundary": "Renderer can advance whole-keyframe steps only; interpolation/export remain pending.",
+    }
+
+
 def launch_packet(
     profile_path: Path,
     profile: dict[str, object],
@@ -614,6 +643,7 @@ def launch_packet(
         "timeline_playback_plan": timeline_playback_plan_packet(timeline_keyframes),
         "timeline_segment_state": timeline_segment_state_packet(timeline_keyframes, timeline_active_step_state.get("active_index")),
         "timeline_active_step_state": timeline_active_step_state,
+        "timeline_step_playback": timeline_step_playback_packet(timeline_state, timeline_keyframes, instantiated=False),
         "timeline_runtime_state": timeline_runtime_state_packet(profile, timeline_state_file),
         "timeline_runtime_state_file": timeline_state_file,
         "timeline_ack_file": timeline_ack_file,

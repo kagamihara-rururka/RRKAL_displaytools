@@ -2737,6 +2737,7 @@ def timeline_ack_payload_from_state_file(timeline_state_file: str | Path | None)
         "playback_plan": timeline_playback_plan_packet(runtime_keyframes),
         "segment_state": timeline_segment_state_packet(runtime_keyframes, active_step_state.get("active_index")),
         "active_step_state": active_step_state,
+        "step_playback": timeline_step_playback_packet(timeline_state, runtime_keyframes, instantiated=False),
         "first_keyframe_apply": timeline_first_keyframe_apply_preview_packet(
             runtime_keyframes,
             applied=False,
@@ -2745,7 +2746,6 @@ def timeline_ack_payload_from_state_file(timeline_state_file: str | Path | None)
         ),
         "applies": ["input_acknowledgement"],
         "pending": [
-            "renderer_timeline_playback",
             "animation_export",
             "ocean_material_keyframe_interpolation",
             "camera_keyframe_interpolation",
@@ -2760,15 +2760,15 @@ def timeline_playback_readiness_packet() -> dict[str, object]:
         "schema": "rrkal_displaytools.timeline_playback_readiness.v1",
         "ui_preview_playback_available": True,
         "renderer_ack_available": True,
-        "renderer_timeline_playback": False,
+        "renderer_timeline_playback": True,
+        "renderer_playback_mode": "discrete_keyframe_step",
         "animation_export": False,
         "pending": [
-            "renderer_timeline_playback",
             "animation_export",
             "ocean_material_keyframe_interpolation",
             "camera_keyframe_interpolation",
         ],
-        "boundary": "Renderer can acknowledge Timeline runtime state, but does not yet drive animation playback/export from it.",
+        "boundary": "Renderer can drive discrete keyframe step playback; interpolation/export are not claimed yet.",
     }
 
 
@@ -2795,8 +2795,8 @@ def timeline_playback_plan_packet(keyframes: list[object] | None = None) -> dict
     return {
         "schema": "rrkal_displaytools.timeline_playback_plan.v1",
         "mode": "ordered_keyframe_plan",
-        "playback_driver": "renderer_ack_plan_only",
-        "renderer_contract": "acknowledge_plan_only",
+        "playback_driver": "renderer_discrete_step_playback",
+        "renderer_contract": "discrete_step_playback",
         "keyframe_count": len(plan_keyframes),
         "segment_count": max(0, len(plan_keyframes) - 1),
         "keyframes": plan_keyframes,
@@ -2808,11 +2808,10 @@ def timeline_playback_plan_packet(keyframes: list[object] | None = None) -> dict
             "boundary_highlight",
         ],
         "pending": [
-            "renderer_timeline_playback",
             "animation_export",
             "inter_keyframe_interpolation",
         ],
-        "boundary": "Plan is acknowledged for future renderer playback; it is not executed by the renderer yet.",
+        "boundary": "Plan can drive renderer discrete keyframe steps; interpolation/export remain pending.",
     }
 
 
@@ -2878,6 +2877,39 @@ def timeline_active_step_state_packet(
         "applies": ["renderer_startup_selection_hint"],
         "pending": ["renderer_step_playback", "inter_keyframe_interpolation", "animation_export"],
         "boundary": "Active step is a discrete keyframe selection contract; renderer playback, interpolation, and export remain pending.",
+    }
+
+
+def timeline_step_playback_packet(
+    timeline_state: dict[str, object] | None = None,
+    keyframes: list[object] | None = None,
+    instantiated: bool = False,
+    step_count: int = 0,
+    last_step_at_utc: str | None = None,
+) -> dict[str, object]:
+    timeline_state = timeline_state if isinstance(timeline_state, dict) else {}
+    keyframes = [keyframe for keyframe in keyframes if isinstance(keyframe, dict)] if isinstance(keyframes, list) else []
+    playback = timeline_state.get("playback")
+    playback = playback if isinstance(playback, dict) else {}
+    active_step = timeline_active_step_state_packet(timeline_state, keyframes)
+    try:
+        interval_ms = int(playback.get("interval_ms", 1200))
+    except (TypeError, ValueError):
+        interval_ms = 1200
+    return {
+        "schema": "rrkal_displaytools.timeline_step_playback.v1",
+        "supported": True,
+        "instantiated": bool(instantiated),
+        "mode": "renderer_discrete_keyframe_step",
+        "playback_active": parse_bool(playback.get("active"), False),
+        "interval_ms": max(50, interval_ms),
+        "current_index": active_step.get("active_index"),
+        "keyframe_count": len(keyframes),
+        "step_count": max(0, int(step_count)),
+        "last_step_at_utc": last_step_at_utc,
+        "applies": ["renderer_discrete_keyframe_step"],
+        "pending": ["inter_keyframe_interpolation", "animation_export", "camera_keyframes"],
+        "boundary": "Renderer can advance whole-keyframe steps only; interpolation/export remain pending.",
     }
 
 
@@ -11229,6 +11261,9 @@ class HybridRenderController:
             "vehicle_icons": "Normal",
         }
         self.timeline_first_keyframe_apply_result = self.apply_timeline_first_keyframe_runtime_state()
+        self.timeline_playback_step_count = 0
+        self.timeline_playback_last_step_at = time.time()
+        self.timeline_playback_last_step_utc: str | None = None
         self.write_timeline_ack()
         self.hydrology_overlays = self._load_hydrology_overlays()
         self.boundary_overlays = self._load_boundary_overlays()
@@ -11463,10 +11498,55 @@ class HybridRenderController:
                     "boundary_highlight": changed_boundary_highlight,
                 },
                 "unsupported_scope": [],
-                "boundary": "Startup applies only the first keyframe's style/material/layer/pin/boundary state; no inter-keyframe animation or export is performed.",
+                "boundary": "Renderer applies one active Timeline keyframe at a time; no inter-keyframe interpolation or export is performed.",
             }
         )
         return result
+
+    def advance_timeline_step_playback_if_due(self) -> bool:
+        if self.timeline_runtime_state_error is not None:
+            return False
+        state_payload = self.timeline_runtime_state if isinstance(self.timeline_runtime_state, dict) else {}
+        timeline_state = state_payload.get("timeline_state")
+        timeline_state = timeline_state if isinstance(timeline_state, dict) else {}
+        playback = timeline_state.get("playback")
+        playback = playback if isinstance(playback, dict) else {}
+        if not parse_bool(playback.get("active"), False):
+            return False
+        runtime_keyframes = state_payload.get("timeline_keyframes")
+        valid_keyframes = [keyframe for keyframe in runtime_keyframes if isinstance(keyframe, dict)] if isinstance(runtime_keyframes, list) else []
+        if len(valid_keyframes) < 2:
+            return False
+        try:
+            interval_ms = int(playback.get("interval_ms", 1200))
+        except (TypeError, ValueError):
+            interval_ms = 1200
+        interval_s = max(0.05, interval_ms / 1000.0)
+        now = time.time()
+        last_step_at = float(getattr(self, "timeline_playback_last_step_at", now))
+        if now - last_step_at < interval_s:
+            return False
+        active_step = timeline_active_step_state_packet(timeline_state, valid_keyframes)
+        current_index = active_step.get("active_index")
+        current_index = current_index if isinstance(current_index, int) else 0
+        playback["next_index"] = (current_index + 1) % len(valid_keyframes)
+        playback["last_renderer_step_utc"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        self.timeline_playback_step_count = int(getattr(self, "timeline_playback_step_count", 0)) + 1
+        playback["renderer_step_count"] = self.timeline_playback_step_count
+        self.timeline_playback_last_step_at = now
+        self.timeline_playback_last_step_utc = str(playback["last_renderer_step_utc"])
+        timeline_state["playback"] = playback
+        state_payload["timeline_state"] = timeline_state
+        self.timeline_runtime_state = state_payload
+        self.timeline_first_keyframe_apply_result = self.apply_timeline_first_keyframe_runtime_state()
+        self.timeline_first_keyframe_apply_result["reason"] = "renderer_timeline_step_playback"
+        self.timeline_first_keyframe_apply_result["playback_step_count"] = self.timeline_playback_step_count
+        self.globe_dirty = True
+        self.overlay_dirty = True
+        self.hydrology_dirty = True
+        self.boundary_dirty = True
+        self.write_timeline_ack()
+        return True
 
     def layer_opacity_attr(self, layer_id: str) -> str | None:
         if layer_id in HYDROLOGY_SPECS:
@@ -13536,6 +13616,13 @@ class HybridRenderController:
         if not isinstance(keyframe_count, int):
             keyframe_count = len(runtime_keyframes)
         active_step_state = timeline_active_step_state_packet(timeline_state, runtime_keyframes)
+        step_playback = timeline_step_playback_packet(
+            timeline_state,
+            runtime_keyframes,
+            instantiated=True,
+            step_count=int(getattr(self, "timeline_playback_step_count", 0)),
+            last_step_at_utc=getattr(self, "timeline_playback_last_step_utc", None),
+        )
         payload = {
             "schema": "rrkal_displaytools.renderer_timeline_ack.v1",
             "updated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
@@ -13551,6 +13638,7 @@ class HybridRenderController:
             "playback_plan": timeline_playback_plan_packet(runtime_keyframes),
             "segment_state": timeline_segment_state_packet(runtime_keyframes, active_step_state.get("active_index")),
             "active_step_state": active_step_state,
+            "step_playback": step_playback,
             "first_keyframe_apply": getattr(
                 self,
                 "timeline_first_keyframe_apply_result",
@@ -13558,7 +13646,6 @@ class HybridRenderController:
             ),
             "applies": ["input_acknowledgement"],
             "pending": [
-                "renderer_timeline_playback",
                 "animation_export",
                 "ocean_material_keyframe_interpolation",
                 "camera_keyframe_interpolation",
@@ -14836,6 +14923,8 @@ class HybridRenderController:
     def render_if_needed(self, force: bool = False) -> np.ndarray | None:
         start = time.time()
         self.refresh_layer_runtime_state()
+        if self.advance_timeline_step_playback_if_due():
+            force = True
         self.refresh_ais_if_due(force=force)
         self.refresh_aircraft_if_due(force=force)
         self.update_basemap_lod()
@@ -16815,6 +16904,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "playback_plan_schema": "rrkal_displaytools.timeline_playback_plan.v1",
             "segment_state_schema": "rrkal_displaytools.timeline_segment_state.v1",
             "active_step_state_schema": "rrkal_displaytools.timeline_active_step_state.v1",
+            "step_playback_schema": "rrkal_displaytools.timeline_step_playback.v1",
             "first_keyframe_apply_schema": "rrkal_displaytools.timeline_first_keyframe_apply.v1",
             "playback_readiness": timeline_playback_readiness_packet(),
             "controls": ["timeline-state-file", "timeline-ack-file", "ack-timeline-state-and-exit"],
@@ -16825,6 +16915,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "rrkal_displaytools.timeline_playback_plan.v1",
                 "rrkal_displaytools.timeline_segment_state.v1",
                 "rrkal_displaytools.timeline_active_step_state.v1",
+                "rrkal_displaytools.timeline_step_playback.v1",
                 "rrkal_displaytools.timeline_first_keyframe_apply.v1",
                 "profile.timeline_keyframes",
             ],
@@ -16836,14 +16927,14 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "UI-only keyframe playback preview",
                 "renderer timeline input acknowledgement",
                 "no-GUI timeline ack smoke endpoint",
+                "renderer discrete keyframe step playback",
             ],
             "pending": [
-                "renderer_timeline_playback",
                 "animation_export",
                 "ocean_material_keyframe_interpolation",
                 "camera_keyframe_interpolation",
             ],
-            "boundary": "Timeline keyframes are portable UI/profile state; renderer animation playback is not claimed yet.",
+            "boundary": "Timeline keyframes are portable UI/profile state; renderer discrete step playback is supported while interpolation/export remain pending.",
         },
         "ui_handoff_contracts": {
             "schema": "rrkal_displaytools.ui_handoff_contracts.v1",

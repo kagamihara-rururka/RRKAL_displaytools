@@ -1,5 +1,19 @@
 # Development Log
 
+## 2026-05-29 - Renderer Timeline discrete step playback
+
+Scope:
+- Added `rrkal_displaytools.timeline_step_playback.v1`.
+- Renderer now advances Timeline playback by whole keyframes when `timeline_state.playback.active` is true and the interval elapses.
+- Ack/runtime/capabilities expose step playback support, current index, interval, step count, and pending interpolation/export boundaries.
+- Qt and No-GUI launch packets now advertise renderer discrete step playback instead of ack-only playback.
+
+Positioning:
+- This closes renderer-side discrete keyframe playback before ocean/material interpolation, camera keyframes, and animation export.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Timeline active segment selection
 
 Scope:

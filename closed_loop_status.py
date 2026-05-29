@@ -162,8 +162,9 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "timeline active segment contract",
                     "renderer startup first-keyframe apply contract",
                     "renderer startup first-keyframe pins/boundary apply",
+                    "renderer discrete keyframe step playback",
                 ],
-                "pending": ["renderer_timeline_playback", "animation_export"],
+                "pending": ["animation_export", "inter_keyframe_interpolation"],
                 "evidence": [
                     "Timeline dock controls",
                     "rrkal_displaytools.timeline_state.v1",
@@ -173,6 +174,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "rrkal_displaytools.timeline_playback_plan.v1",
                     "rrkal_displaytools.timeline_segment_state.v1",
                     "rrkal_displaytools.timeline_active_step_state.v1",
+                    "rrkal_displaytools.timeline_step_playback.v1",
                     "rrkal_displaytools.timeline_first_keyframe_apply.v1",
                     "renderer capabilities timeline_handoff",
                 ],
