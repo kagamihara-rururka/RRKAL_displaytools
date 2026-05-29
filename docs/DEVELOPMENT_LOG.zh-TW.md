@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - Selected layer semantic target bridge
+
+Scope:
+- Qt layer runtime payload now exports `selected_renderer_layer` and a `selected_layer_semantic_target` packet.
+- Renderer maps the selected Qt layer key to a renderer layer ID, stores the semantic target, and reports it in `renderer_layer_runtime_ack.json`.
+- Renderer capabilities now mark `selected_layer_semantic_target` as applied and keep actual renderer object picking as pending.
+
+Positioning:
+- This closes the selected-layer bridge needed before scientific object/layer picking.
+- No data discovery, download, import, or cache governance was added to displaytools.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Layer renderer sync metadata
 
 Scope:

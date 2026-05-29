@@ -10542,6 +10542,9 @@ class HybridRenderController:
         )
         self.layer_runtime_state_mtime_ns: int | None = None
         self.layer_runtime_state_last_error: str | None = None
+        self.runtime_selected_layer_key: str | None = None
+        self.selected_renderer_layer_id: str | None = None
+        self.selected_layer_semantic_target: dict[str, object] | None = None
         self.current_pin_projections: list[dict[str, object]] = []
         self.pin_visible_count = 0
         self.output_path = Path(args.output) if args.output else None
@@ -10684,6 +10687,54 @@ class HybridRenderController:
         raw_id = str(layer_id)
         return LAYER_RUNTIME_ID_ALIASES.get(raw_id, raw_id)
 
+    def layer_semantic_roles(self, layer_id: str) -> list[str]:
+        if layer_id in HYDROLOGY_SPECS:
+            return ["hydrology", "vector_overlay", "scientific_context"]
+        if layer_id in BOUNDARY_SPECS:
+            return ["boundary", "maritime_zone", "political_context"]
+        if layer_id in {"ais", "aircraft", "vehicle_icons"}:
+            return ["traffic", "point_overlay", "realtime_context"]
+        if layer_id == "pins":
+            return ["research_annotation", "point_overlay", "user_observation"]
+        if layer_id in {"grid", "stars", "scale", "contours", "ocean_material"}:
+            return ["visual_aid", "renderer_context"]
+        return ["renderer_layer"]
+
+    def set_selected_layer_semantic_target(self, runtime_layer_key: object, state: object | None) -> bool:
+        previous_renderer_layer = self.selected_renderer_layer_id
+        if not isinstance(runtime_layer_key, str) or not runtime_layer_key:
+            self.runtime_selected_layer_key = None
+            self.selected_renderer_layer_id = None
+            self.selected_layer_semantic_target = None
+            return previous_renderer_layer is not None
+        renderer_layer = self.layer_runtime_id(runtime_layer_key)
+        if renderer_layer not in self.layer_visible:
+            self.runtime_selected_layer_key = runtime_layer_key
+            self.selected_renderer_layer_id = None
+            self.selected_layer_semantic_target = {
+                "ui_layer": runtime_layer_key,
+                "renderer_layer": renderer_layer,
+                "valid": False,
+                "reason": "renderer layer is not registered",
+            }
+            return previous_renderer_layer is not None
+        layer_state = state if isinstance(state, dict) else {}
+        self.runtime_selected_layer_key = runtime_layer_key
+        self.selected_renderer_layer_id = renderer_layer
+        self.selected_layer_semantic_target = {
+            "ui_layer": runtime_layer_key,
+            "renderer_layer": renderer_layer,
+            "label": self.layer_label(renderer_layer),
+            "valid": True,
+            "visible": bool(self.layer_visible.get(renderer_layer, False)),
+            "locked": bool(layer_state.get("locked", False)),
+            "opacity": self.layer_opacity_percent(renderer_layer),
+            "blend_mode": self.layer_blend_mode(renderer_layer),
+            "allowed_in_mode": self.layer_allowed_in_mode(renderer_layer),
+            "semantic_roles": self.layer_semantic_roles(renderer_layer),
+        }
+        return previous_renderer_layer != renderer_layer
+
     def layer_opacity_attr(self, layer_id: str) -> str | None:
         if layer_id in HYDROLOGY_SPECS:
             return f"{HYDROLOGY_SPECS[layer_id]['prefix']}_opacity"
@@ -10803,6 +10854,8 @@ class HybridRenderController:
         changed_blend_layers: list[str] = []
         skipped_locked_layers: list[str] = []
         layers = payload.get("layers")
+        selected_layer_key = payload.get("selected_layer")
+        selected_layer_state = layers.get(selected_layer_key) if isinstance(layers, dict) else None
         if isinstance(layers, dict):
             for runtime_layer_id, state in layers.items():
                 layer_id = self.layer_runtime_id(runtime_layer_id)
@@ -10841,6 +10894,7 @@ class HybridRenderController:
                     if self.set_layer_blend_mode(str(layer_id), blend_mode):
                         changed_blend_layers.append(str(layer_id))
                         changed = True
+        selected_layer_changed = self.set_selected_layer_semantic_target(selected_layer_key, selected_layer_state)
         self.layer_runtime_state_mtime_ns = next_mtime_ns
         self.layer_runtime_state_last_error = None
         self.write_layer_runtime_ack(
@@ -10851,6 +10905,7 @@ class HybridRenderController:
             changed_blend_layers,
             skipped_locked_layers,
             next_mtime_ns,
+            selected_layer_changed,
         )
         return changed
 
@@ -10863,6 +10918,7 @@ class HybridRenderController:
         changed_blend_layers: list[str],
         skipped_locked_layers: list[str],
         state_mtime_ns: int | None,
+        selected_layer_changed: bool,
     ) -> None:
         if self.layer_runtime_ack_file is None:
             return
@@ -10894,12 +10950,23 @@ class HybridRenderController:
             "layer_visible": {layer_id: bool(visible) for layer_id, visible in self.layer_visible.items()},
             "layer_opacity": layer_opacity,
             "layer_blend_mode": layer_blend_mode,
+            "selected_layer": state_payload.get("selected_layer") if isinstance(state_payload, dict) else None,
+            "selected_renderer_layer": self.selected_renderer_layer_id,
+            "selected_layer_changed": selected_layer_changed,
+            "selected_layer_semantic_target": self.selected_layer_semantic_target,
             "boundary_aggregate_blend_mode": self.boundary_aggregate_blend_mode(),
             "boundary_split_blend_layers": ["borders", "territorial_sea", "eez", "high_seas"],
             "runtime_layer_aliases": dict(LAYER_RUNTIME_ID_ALIASES),
             "frame_index": getattr(self, "frame_index", 0),
-            "applies": ["visibility", "lock_guard_visibility", "opacity", "blend_mode_overlay", "blend_mode_per_boundary_split"],
-            "pending": ["selected_layer_semantic_target"],
+            "applies": [
+                "visibility",
+                "lock_guard_visibility",
+                "opacity",
+                "blend_mode_overlay",
+                "blend_mode_per_boundary_split",
+                "selected_layer_semantic_target",
+            ],
+            "pending": ["renderer_object_picking"],
             "error": self.layer_runtime_state_last_error,
             "source": "taichi_global_bathymetry",
         }
@@ -15525,7 +15592,14 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "ack_control": "layer-runtime-ack-file",
             "ack_schema": "rrkal_displaytools.renderer_layer_runtime_ack.v1",
             "runtime_layer_aliases": dict(LAYER_RUNTIME_ID_ALIASES),
-            "applies": ["visibility", "lock_guard_visibility", "opacity", "blend_mode_overlay", "blend_mode_per_boundary_split"],
+            "applies": [
+                "visibility",
+                "lock_guard_visibility",
+                "opacity",
+                "blend_mode_overlay",
+                "blend_mode_per_boundary_split",
+                "selected_layer_semantic_target",
+            ],
             "runtime_overlay_opacity_layers": ["aircraft", "pins", "vehicle_icons"],
             "runtime_overlay_blend_layers": [
                 "lakes",
@@ -15535,7 +15609,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "vehicle_icons",
             ],
             "runtime_split_blend_layers": ["borders", "territorial_sea", "eez", "high_seas"],
-            "pending": ["selected_layer_semantic_target"],
+            "pending": ["renderer_object_picking"],
         },
         "rrkal_boundary": {
             "displaytools_owns": [

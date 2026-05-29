@@ -108,6 +108,23 @@ LAYER_LABELS = (
     ("vehicle_icons", "交通工具圖示"),
 )
 
+LAYER_RUNTIME_ID_ALIASES = {
+    "show_grid": "grid",
+    "show_stars": "stars",
+    "lake_layer": "lakes",
+    "river_layer": "rivers",
+    "border_layer": "borders",
+    "territorial_sea_layer": "territorial_sea",
+    "eez_layer": "eez",
+    "high_seas_layer": "high_seas",
+    "aircraft_layer": "aircraft",
+    "pin_layer": "pins",
+    "ocean_material": "ocean_material",
+    "terrain_contours": "contours",
+    "scale_bar": "scale",
+    "vehicle_icons": "vehicle_icons",
+}
+
 BOUNDARY_HIGHLIGHT_SCHEMA = "rrkal_displaytools.boundary_highlight_mask.v1"
 BOUNDARY_HIGHLIGHT_LAYER_KEYS = (
     "border_layer",
@@ -1175,11 +1192,30 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 layers[key]["visible"] = self.checks[key].isChecked()
         visible_layers = [key for key, _label in LAYER_LABELS if key in self.checks and self.checks[key].isChecked()]
         locked_layers = [key for key, _label in LAYER_LABELS if key in self.layer_locks and self.layer_locks[key].isChecked()]
+        selected_renderer_layer = (
+            LAYER_RUNTIME_ID_ALIASES.get(self.selected_layer_key, self.selected_layer_key)
+            if self.selected_layer_key
+            else None
+        )
+        selected_layer_state = layers.get(self.selected_layer_key) if self.selected_layer_key else None
+        selected_layer_label = next(
+            (label for key, label in LAYER_LABELS if key == self.selected_layer_key),
+            self.selected_layer_key,
+        )
         return {
             "schema": "rrkal_displaytools.layer_runtime_state.v1",
             "updated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             "source": "rrkal_displaytools_qt_panel",
             "selected_layer": self.selected_layer_key,
+            "selected_renderer_layer": selected_renderer_layer,
+            "selected_layer_semantic_target": {
+                "ui_layer": self.selected_layer_key,
+                "renderer_layer": selected_renderer_layer,
+                "label": selected_layer_label,
+                "state": selected_layer_state,
+            }
+            if self.selected_layer_key
+            else None,
             "visible_layers": visible_layers,
             "locked_layers": locked_layers,
             "layer_visibility_snapshot_active": self.layer_visibility_snapshot is not None,
@@ -1214,6 +1250,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         visible_layers = payload.get("visible_layers", [])
         visible_count = len(visible_layers) if isinstance(visible_layers, list) else "-"
         selected_layer = str(payload.get("selected_layer") or "-")
+        selected_renderer_layer = str(payload.get("selected_renderer_layer") or "-")
         if self.layer_runtime_state_write_error:
             self.layer_runtime_state_label.setText(
                 f"Layer runtime bridge: write failed: {self.layer_runtime_state_write_error}"
@@ -1222,8 +1259,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         last_write = self.layer_runtime_state_last_write_utc or str(payload.get("updated_at_utc", "-"))
         self.layer_runtime_state_label.setText(
             f"Layer runtime bridge: {LAYER_RUNTIME_STATE_PATH.name}; selected={selected_layer}; "
-            f"visible={visible_count}/{len(LAYER_LABELS)}; last_write={last_write}; "
-            "visibility/opacity live, overlay/split blend live, selected-layer semantic target pending, lock guard live"
+            f"renderer_target={selected_renderer_layer}; visible={visible_count}/{len(LAYER_LABELS)}; "
+            f"last_write={last_write}; visibility/opacity live, overlay/split blend live, "
+            "selected-layer semantic target live, lock guard live"
         )
 
     def append_layer_runtime_history(self, payload: dict[str, object]) -> None:
@@ -1300,6 +1338,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         skipped_locked_layers = payload.get("skipped_locked_layers", [])
         skipped_count = len(skipped_locked_layers) if isinstance(skipped_locked_layers, list) else "-"
         boundary_blend = str(payload.get("boundary_aggregate_blend_mode", "-"))
+        selected_renderer_layer = str(payload.get("selected_renderer_layer") or "-")
         frame_index = payload.get("frame_index", "-")
         updated_at = str(payload.get("updated_at_utc", "-"))
         error = payload.get("error")
@@ -1309,7 +1348,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_runtime_ack_label.setText(
             f"Renderer ack: event={event}, changed={changed_count}, opacity={changed_opacity_count}, "
             f"blend={changed_blend_count}, "
-            f"boundary_blend={boundary_blend}, skipped_locked={skipped_count}, frame={frame_index}, updated={updated_at}"
+            f"target={selected_renderer_layer}, boundary_blend={boundary_blend}, "
+            f"skipped_locked={skipped_count}, frame={frame_index}, updated={updated_at}"
         )
 
     def refresh_pin_input_ack_state(self) -> None:
