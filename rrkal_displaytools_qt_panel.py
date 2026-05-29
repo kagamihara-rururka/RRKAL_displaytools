@@ -1112,9 +1112,63 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "opacity": self.layer_opacity[key].value(),
                 "blend_mode": self.layer_blends[key].currentText(),
                 "selected": key == self.selected_layer_key,
-                "renderer_sync": "planned",
+                "renderer_sync": self.layer_renderer_sync_status(key),
             }
         return stack
+
+    def layer_renderer_sync_status(self, key: str) -> str:
+        visibility_live = {
+            "show_grid",
+            "show_stars",
+            "lake_layer",
+            "river_layer",
+            "border_layer",
+            "territorial_sea_layer",
+            "eez_layer",
+            "high_seas_layer",
+            "aircraft_layer",
+            "pin_layer",
+            "vehicle_icons",
+            "ocean_material",
+            "terrain_contours",
+            "scale_bar",
+        }
+        opacity_live = {
+            "lake_layer",
+            "river_layer",
+            "border_layer",
+            "territorial_sea_layer",
+            "eez_layer",
+            "high_seas_layer",
+            "aircraft_layer",
+            "pin_layer",
+            "vehicle_icons",
+            "terrain_contours",
+            "scale_bar",
+        }
+        blend_live = {
+            "lake_layer",
+            "river_layer",
+            "border_layer",
+            "territorial_sea_layer",
+            "eez_layer",
+            "high_seas_layer",
+            "aircraft_layer",
+            "pin_layer",
+            "vehicle_icons",
+        }
+        live = []
+        if key in visibility_live:
+            live.append("visibility")
+        if key in opacity_live:
+            live.append("opacity")
+        if key in blend_live:
+            live.append("blend")
+        if not live:
+            return "planned"
+        if key in {"border_layer", "territorial_sea_layer", "eez_layer", "high_seas_layer"}:
+            return f"live: {', '.join(live)}; pending: per-boundary split blend"
+        return f"live: {', '.join(live)}"
 
     def collect_layer_runtime_state(self) -> dict[str, object]:
         layers = self.collect_layer_stack_ui()

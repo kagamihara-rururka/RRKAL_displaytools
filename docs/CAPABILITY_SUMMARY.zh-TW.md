@@ -16,6 +16,7 @@
 - Renderer layer runtime opacity 目前已落地到 hydrology/boundary/scale/contours、ADS-B aircraft overlay alpha、Pin marker overlay alpha 與 vehicle icon overlay alpha。
 - Renderer layer runtime blend mode 目前已對 lake、river、ADS-B aircraft、Pin marker 與 vehicle icon 獨立 overlay 支援 Normal、Screen、Multiply、Overlay、Soft Light；boundary layers 目前支援 aggregate overlay blend，per-boundary split blend 仍列為後續項。
 - Renderer layer runtime visibility 目前已同步 hydrology/boundary/aircraft/pin/vehicle icons/scale/contours/grid/stars/ocean material 的對應 renderer flags；這些基礎視覺圖層可透過 runtime bridge 改變而不必重啟。
+- Qt layer stack metadata 會在 profile / launch packet / runtime bridge 中寫入每個 layer 的 `renderer_sync` 摘要，區分 visibility / opacity / blend live 狀態與 per-boundary split blend pending。
 - Properties 面板已接 active layer inspector，可查看目前選取圖層的 visibility、lock、opacity、blend mode，並可切換選取圖層 visibility 或重設選取圖層 UI state。
 - Properties 面板已新增 `Boundary highlight` 疆域強調遮罩控制入口；國界、領海、EEZ、公海圖層列可雙擊打開控制對話框，設定 hover/selected 觸發、target layers、RGB 色彩、對比、半透明、gamma、feather 與呼吸特效。此狀態已寫入 profile、launch packet、Canvas Preview 與 provenance；Qt 啟動 renderer 時會以 `--boundary-highlight-json` 傳入，renderer 會用 `--boundary-highlight-ack-file` 寫回 `state/renderer_boundary_highlight_ack.json`。Renderer 目前已用該 payload 控制 hover hit target layers、啟用狀態、outline/glow 顏色、contrast、gamma、alpha、feather 與 breathing speed，滑鼠移到國界/領海/EEZ/公海線段附近即可看到線段強調預覽。完整疆域/領海/EEZ polygon fill mask 仍是下一步。
 - Qt profile save/load 已支援 selected layer 與 layer stack UI state，因此 active layer、lock、opacity、blend mode 可以隨本機 profile 保存與載入；既有 repo templates 仍相容。
@@ -37,7 +38,7 @@
 - 中央 Canvas Preview 後續要從 UI-only 摘要升級為可嵌入或可同步的 renderer 畫面預覽。
 - Renderer layer runtime sync 下一步擴充 per-boundary split blend 與更完整 renderer diagnostics；目前 visibility、支援圖層 opacity、lake/river/aircraft/pin/vehicle icon overlay blend 與 boundary aggregate blend 已可透過 `state/renderer_layer_runtime_state.json` 即時同步，Qt 與 renderer 端已有 bridge diagnostics、history、renderer ack 與 locked layer 防誤改。
 - Point/icon opacity/blend 下一步處理其他新增獨立 overlay，前提是 renderer 有可單獨合成的 frame overlay。
-- Layer stack 的 selected layer、lock、opacity、blend mode 接 renderer 即時同步。
+- Layer stack 下一步是 selected layer 的 renderer semantic target / object picking，以及 per-boundary split blend。
 - Style / Looks panel 的縮圖化模板選擇。
 - Select 工具下一步是從 UI-only Canvas Preview hit bands 升級到 renderer 實際圖層/物件 picking；Pin 下一步是補更細的 renderer interaction ack 與 globe mask / depth buffer refinement；Brush/Mask 暫不納入本輪 UI。
 - Boundary highlight 下一步是從目前 line hover outline/glow 升級到疆域/領海/EEZ feature identity、polygon fill mask，以及 fill shader 的 gamma/contrast。

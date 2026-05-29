@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - Layer renderer sync metadata
+
+Scope:
+- Replaced the Qt layer stack `renderer_sync: planned` placeholder with per-layer live support summaries.
+- Launch packets, profiles, runtime bridge payloads, and provenance now distinguish visibility / opacity / blend live status.
+- Boundary layers explicitly report per-boundary split blend as pending while aggregate blend remains live.
+
+Positioning:
+- This gives researchers a clearer audit trail of which layer controls are live renderer controls versus future compositor work.
+- Remaining layer UX work is renderer semantic picking for the selected layer target.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Boundary aggregate runtime blend
 
 Scope:
