@@ -2942,3 +2942,16 @@ Decision:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Boundary identity markers in Qt
+
+Scope:
+- Qt Boundary identity summary now lists applied and pending identity markers instead of only counts.
+- Canvas Preview now shows the same Boundary identity applied/pending marker summary next to Boundary highlight status.
+- Smoke gates the visible Canvas Boundary identity line and applied marker summary helper.
+
+Decision:
+- Researchers need to see whether boundary emphasis is using visual/source-property preview identity or waiting on authoritative polygon/open-line work directly in the UI, not only in JSON contracts.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

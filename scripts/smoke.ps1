@@ -1467,6 +1467,12 @@ $qtPanelSource = Get-Content -Raw -Encoding UTF8 rrkal_displaytools_qt_panel.py
 if ($qtPanelSource -like "*Boundary emphasis: UI ready, renderer mask hook queued*") {
     throw "Qt boundary emphasis label still reports queued renderer mask hook"
 }
+if ($qtPanelSource -notlike "*Boundary identity:*") {
+    throw "Qt canvas boundary identity summary line missing"
+}
+if ($qtPanelSource -notlike "*applied_text*") {
+    throw "Qt boundary identity applied marker summary missing"
+}
 if ($qtPanelSource -notlike "*Boundary emphasis: UI ready, renderer bridge wired*") {
     throw "Qt boundary emphasis label missing renderer bridge wired status"
 }

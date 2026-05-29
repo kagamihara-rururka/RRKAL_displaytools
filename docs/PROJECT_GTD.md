@@ -159,3 +159,4 @@ Last updated: 2026-05-29
 - 2026-05-30: Added boundary highlight ack history to Qt History and research provenance.
 - 2026-05-30: Promoted boundary highlight ack history into launch/capability/handoff contracts.
 - 2026-05-30: Added smoke-gated boundary identity applied/pending markers to renderer capabilities and handoff inspection.
+- 2026-05-30: Showed boundary identity applied/pending markers in Qt Properties and Canvas Preview.

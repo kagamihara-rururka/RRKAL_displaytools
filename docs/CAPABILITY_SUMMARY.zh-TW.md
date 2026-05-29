@@ -218,3 +218,8 @@
 
 - Renderer capabilities and handoff inspection now expose boundary identity applied/pending markers.
 - Smoke verifies applied closed-ring/source-property identity scope and pending authoritative polygon / open-line inference scope across launch packet, capabilities, and handoff.
+
+### 2026-05-30 Boundary identity markers in Qt
+
+- Qt Properties and Canvas Preview now show boundary identity applied/pending marker names, making visual/source-property identity and pending authoritative polygon/open-line work visible in the UI.
+- Smoke verifies the visible Boundary identity summary line.

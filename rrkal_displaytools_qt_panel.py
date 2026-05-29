@@ -4013,10 +4013,18 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             identity_status = default_boundary_identity_status()
         applied = identity_status.get("applied", [])
         pending = identity_status.get("pending", [])
-        applied_count = len(applied) if isinstance(applied, list) else "-"
-        pending_count = len(pending) if isinstance(pending, list) else "-"
+        applied_items = [str(item) for item in applied] if isinstance(applied, list) else []
+        pending_items = [str(item) for item in pending] if isinstance(pending, list) else []
+        applied_count = len(applied_items)
+        pending_count = len(pending_items)
+        applied_text = ", ".join(applied_items[:3]) or "-"
+        pending_text = ", ".join(pending_items[:3]) or "-"
+        if len(applied_items) > 3:
+            applied_text = f"{applied_text}, +{len(applied_items) - 3}"
+        if len(pending_items) > 3:
+            pending_text = f"{pending_text}, +{len(pending_items) - 3}"
         boundary = str(identity_status.get("boundary", "visual/source-property preview only"))
-        return f"applied={applied_count}; pending={pending_count}; {boundary}"
+        return f"applied={applied_count} [{applied_text}]; pending={pending_count} [{pending_text}]; {boundary}"
 
     def refresh_boundary_highlight_status(self) -> None:
         if self.boundary_highlight_label is not None:
@@ -6311,6 +6319,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if not hit_map:
             hit_map = "-"
         boundary_summary = self.boundary_highlight_summary()
+        boundary_identity_summary = self.boundary_identity_status_summary()
         self.canvas_preview_label.setPixmap(QtGui.QPixmap())
         self.canvas_preview_label.setText(
             "RRKAL Scientific Canvas Preview\n\n"
@@ -6319,6 +6328,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"Visible layers: {visible}/{len(LAYER_LABELS)} | Pins: {pin_count} | Zoom: {zoom}%\n\n"
             f"Select hit map: {hit_map}\n"
             f"Boundary highlight: {boundary_summary}\n"
+            f"Boundary identity: {boundary_identity_summary}\n"
             f"Selected pin: {selected_pin_text}\n"
             f"Pin markers: {pin_markers}\n"
             f"Cursor estimate: {cursor_text}\n\n"
