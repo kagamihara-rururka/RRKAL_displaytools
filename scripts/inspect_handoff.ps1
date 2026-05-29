@@ -50,6 +50,7 @@ $summary = [ordered]@{
         cross_machine_clone_readiness = $launchPacket.cross_machine_clone_readiness.schema
         profile_launch_readiness = $launchPacket.profile_launch_readiness.schema
         profile_launch_readiness_ui = $launchPacket.profile_launch_readiness_ui.schema
+        profile_ui_state_replay = $launchPacket.profile_ui_state_replay.schema
         layer_visual_presets = $launchPacket.layer_visual_presets.schema
         layer_visual_preset_runtime_feedback = $launchPacket.layer_visual_preset_runtime_feedback.schema
         hydrology_lod_readiness = $launchPacket.hydrology_lod_readiness.schema
@@ -109,6 +110,14 @@ $summary = [ordered]@{
         workflow_hint = $launchPacket.layer_research_workflow.workflow_hint
         workflow_hint_surface = $launchPacket.layer_research_workflow.workflow_hint_surface
         qt_surface = $launchPacket.layer_research_workflow.qt_surface
+    }
+    profile_ui_state_replay = @{
+        launch_packet_schema = $launchPacket.profile_ui_state_replay.schema
+        renderer_capabilities_schema = $capabilities.profile_ui_state_replay.schema
+        status = $launchPacket.profile_ui_state_replay.status
+        saved_state_groups = $launchPacket.profile_ui_state_replay.saved_state_groups
+        replay_surfaces = $launchPacket.profile_ui_state_replay.replay_surfaces
+        summary_text = $launchPacket.profile_ui_state_replay.summary_text
     }
     cursor_geodesy_readout = @{
         launch_packet_schema = $launchPacket.cursor_geodesy_readout.schema

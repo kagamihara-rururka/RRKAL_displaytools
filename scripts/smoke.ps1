@@ -1641,6 +1641,12 @@ if ($qtPanelSource -notlike "*click a row to select the active research layer*")
 if ($qtPanelSource -notlike "*not authoritative polygon/EEZ resolution*") {
     throw "Qt Layers workflow identity warning hint is missing"
 }
+if ($qtPanelSource -notlike "*profileUiStateReplay*") {
+    throw "Qt profile UI state replay label is missing"
+}
+if ($qtPanelSource -notlike "*profile_ui_state_replay_packet*") {
+    throw "Qt profile UI state replay contract is missing"
+}
 
 $rendererSource = Get-Content -Raw -Encoding UTF8 taichi_global_bathymetry.py
 if ($rendererSource -notlike "*last_layer_pick_screen*") {
@@ -1651,6 +1657,9 @@ if ($rendererSource -notlike "*workflow_hint_surface*") {
 }
 if ($rendererSource -notlike "*double-click Boundary/territorial sea/EEZ/high-seas rows*") {
     throw "Renderer capability layer workflow boundary emphasis hint missing"
+}
+if ($rendererSource -notlike "*profile_ui_state_replay_packet*") {
+    throw "Renderer capability profile UI state replay contract missing"
 }
 
 $scripts = Get-ChildItem scripts -Filter *.ps1
@@ -1731,6 +1740,12 @@ if ($launchPacketSource -notmatch 'workflow_hint_surface') {
 if ($launchPacketSource -notmatch 'double-click Boundary/territorial sea/EEZ/high-seas rows') {
     throw "Launch packet layer workflow boundary emphasis hint is missing"
 }
+if ($launchPacketSource -notmatch 'profile_ui_state_replay') {
+    throw "Launch packet profile UI state replay contract is missing"
+}
+if ($handoffInspectorSource -notmatch 'profile_ui_state_replay') {
+    throw "Handoff inspection profile UI state replay output is missing"
+}
 
 $closedLoopSource = Get-Content -LiteralPath (Join-Path $BoundaryIdentityRoot "closed_loop_status.py") -Raw -Encoding UTF8
 if ($closedLoopSource -notmatch 'boundary_identity_warning_handoff') {
@@ -1744,6 +1759,9 @@ if ($closedLoopSource -notmatch 'layer_workflow_hint_handoff') {
 }
 if ($closedLoopSource -notmatch 'Closed UI/operator guidance loop only') {
     throw "Closed-loop layer workflow hint boundary note is missing"
+}
+if ($closedLoopSource -notmatch 'profile_ui_state_replay_handoff') {
+    throw "Closed-loop profile UI state replay evidence is missing"
 }
 
 Write-Host "Smoke passed."

@@ -238,6 +238,42 @@ def profile_launch_readiness_ui_packet(
     }
 
 
+def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
+    saved_groups = [
+        "renderer_config",
+        "selected_layer",
+        "layer_stack_ui",
+        "pins",
+        "boundary_highlight",
+        "boundary_emphasis_control",
+        "canvas_preview",
+        "timeline_keyframes",
+        "timeline_export_options",
+    ]
+    replay_surfaces = [
+        "Qt save/load profile",
+        "Qt startup --profile/--template",
+        "No-GUI launch packet",
+        "renderer first-keyframe apply",
+        "research provenance summary",
+    ]
+    return {
+        "schema": "rrkal_displaytools.profile_ui_state_replay.v1",
+        "source": source,
+        "status": "ready",
+        "saved_state_groups": saved_groups,
+        "saved_state_group_count": len(saved_groups),
+        "replay_surfaces": replay_surfaces,
+        "replay_surface_count": len(replay_surfaces),
+        "qt_surface": "Layers dock profile UI replay label",
+        "launch_packet_fields": ["profile_ui_state_replay", "profile", "timeline_keyframes", "timeline_runtime_state"],
+        "renderer_capability_field": "profile_ui_state_replay",
+        "handoff_field": "profile_ui_state_replay",
+        "summary_text": "Profiles preserve renderer settings, layer stack, pins, Boundary emphasis/warnings and Timeline keyframes for cross-machine UI replay.",
+        "boundary": "Replay coverage describes portable UI/profile state; it does not imply RRKAL data discovery/cache governance or authoritative geospatial identity resolution.",
+    }
+
+
 def layer_visual_presets_packet(
     source: str,
     selected_preset: str | None = None,
@@ -2406,6 +2442,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.profile_launch_readiness_label = QtWidgets.QLabel("Profile/launch readiness: pending")
         self.profile_launch_readiness_label.setWordWrap(True)
         layers_layout.addWidget(self.profile_launch_readiness_label)
+        self.profile_ui_state_replay_label = QtWidgets.QLabel(
+            "Profile UI replay: layers, pins, Boundary emphasis/warnings and Timeline keyframes are portable profile state"
+        )
+        self.profile_ui_state_replay_label.setObjectName("profileUiStateReplay")
+        self.profile_ui_state_replay_label.setWordWrap(True)
+        layers_layout.addWidget(self.profile_ui_state_replay_label)
         self.cross_machine_readiness_label = QtWidgets.QLabel("Cross-machine clone readiness: pending")
         self.cross_machine_readiness_label.setWordWrap(True)
         layers_layout.addWidget(self.cross_machine_readiness_label)
@@ -2602,6 +2644,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             QLabel#navigatorPreview { background: #202832; color: #d8e6f3; border: 1px dashed #8aa0b6; }
             QLabel#layerHeader { color: #587087; font-size: 8.5pt; font-weight: 700; }
             QLabel#layerWorkflowHint { color: #405466; background: #eef5f8; border: 1px solid #b7c9d6; border-radius: 8px; padding: 6px 8px; }
+            QLabel#profileUiStateReplay { color: #2f4f42; background: #edf7f1; border: 1px solid #9fc7ad; border-radius: 8px; padding: 6px 8px; }
             QWidget#layerRow { border-bottom: 1px solid #d6e0ea; }
             QWidget#layerRow[selected="true"] { background: #dceeff; border: 1px solid #5b8db8; }
             QLabel#selectedLayer { color: #23435f; font-weight: 700; padding-top: 6px; }
@@ -3466,6 +3509,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.collect_profile_launch_readiness(),
             "rrkal_displaytools_qt_panel",
         )
+
+    def collect_profile_ui_state_replay(self) -> dict[str, object]:
+        return profile_ui_state_replay_packet("rrkal_displaytools_qt_panel")
 
     def collect_layer_visual_presets(self) -> dict[str, object]:
         return layer_visual_presets_packet(
@@ -6714,6 +6760,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "cross_machine_clone_readiness": self.collect_cross_machine_clone_readiness(),
             "profile_launch_readiness": self.collect_profile_launch_readiness(),
             "profile_launch_readiness_ui": self.collect_profile_launch_readiness_ui(),
+            "profile_ui_state_replay": self.collect_profile_ui_state_replay(),
             "layer_visual_presets": self.collect_layer_visual_presets(),
             "layer_visual_preset_runtime_feedback": self.collect_layer_visual_preset_runtime_feedback(),
             "hydrology_lod_readiness": self.collect_hydrology_lod_readiness(),

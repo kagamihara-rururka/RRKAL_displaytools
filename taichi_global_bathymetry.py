@@ -18164,6 +18164,42 @@ def profile_launch_readiness_ui_packet(
     }
 
 
+def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
+    saved_groups = [
+        "renderer_config",
+        "selected_layer",
+        "layer_stack_ui",
+        "pins",
+        "boundary_highlight",
+        "boundary_emphasis_control",
+        "canvas_preview",
+        "timeline_keyframes",
+        "timeline_export_options",
+    ]
+    replay_surfaces = [
+        "Qt save/load profile",
+        "Qt startup --profile/--template",
+        "No-GUI launch packet",
+        "renderer first-keyframe apply",
+        "research provenance summary",
+    ]
+    return {
+        "schema": "rrkal_displaytools.profile_ui_state_replay.v1",
+        "source": source,
+        "status": "ready",
+        "saved_state_groups": saved_groups,
+        "saved_state_group_count": len(saved_groups),
+        "replay_surfaces": replay_surfaces,
+        "replay_surface_count": len(replay_surfaces),
+        "qt_surface": "Layers dock profile UI replay label",
+        "launch_packet_fields": ["profile_ui_state_replay", "profile", "timeline_keyframes", "timeline_runtime_state"],
+        "renderer_capability_field": "profile_ui_state_replay",
+        "handoff_field": "profile_ui_state_replay",
+        "summary_text": "Profiles preserve renderer settings, layer stack, pins, Boundary emphasis/warnings and Timeline keyframes for cross-machine UI replay.",
+        "boundary": "Replay coverage describes portable UI/profile state; it does not imply RRKAL data discovery/cache governance or authoritative geospatial identity resolution.",
+    }
+
+
 def layer_visual_presets_packet(
     source: str,
     selected_preset: str | None = None,
@@ -19179,6 +19215,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
         "cross_machine_clone_readiness": cross_machine_clone_readiness_packet(profile_launch_readiness_packet("taichi_global_bathymetry.renderer_capabilities", style_renderer_entries_packet("taichi_global_bathymetry.renderer_capabilities"), layer_operator_groups_packet(layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"), "taichi_global_bathymetry.renderer_capabilities")), module_boundary_registry_packet("taichi_global_bathymetry.renderer_capabilities"), "taichi_global_bathymetry.renderer_capabilities"),
         "profile_launch_readiness": profile_launch_readiness_packet("taichi_global_bathymetry.renderer_capabilities", style_renderer_entries_packet("taichi_global_bathymetry.renderer_capabilities"), layer_operator_groups_packet(layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"), "taichi_global_bathymetry.renderer_capabilities")),
         "profile_launch_readiness_ui": profile_launch_readiness_ui_packet(profile_launch_readiness_packet("taichi_global_bathymetry.renderer_capabilities", style_renderer_entries_packet("taichi_global_bathymetry.renderer_capabilities"), layer_operator_groups_packet(layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"), "taichi_global_bathymetry.renderer_capabilities")), "taichi_global_bathymetry.renderer_capabilities"),
+        "profile_ui_state_replay": profile_ui_state_replay_packet("taichi_global_bathymetry.renderer_capabilities"),
         "layer_visual_presets": layer_visual_presets_packet("taichi_global_bathymetry.renderer_capabilities"),
         "layer_visual_preset_runtime_feedback": layer_visual_preset_runtime_feedback_packet(layer_visual_presets_packet("taichi_global_bathymetry.renderer_capabilities"), None, "taichi_global_bathymetry.renderer_capabilities"),
         "hydrology_lod_readiness": hydrology_lod_readiness_packet("taichi_global_bathymetry.renderer_capabilities", layer_capability_matrix_packet()),
@@ -19367,6 +19404,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "session_journal",
                 "document_undo",
                 "timeline_state",
+                "profile_ui_state_replay",
                 "cursor_geodesy_readout",
                 "pin_overlay",
                 "boundary_emphasis_control",

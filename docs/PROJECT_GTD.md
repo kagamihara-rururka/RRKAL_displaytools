@@ -185,3 +185,4 @@ Last updated: 2026-05-29
 - 2026-05-30: Added launch packet and handoff inspection workflow hints for layer row selection and Boundary emphasis entry points.
 - 2026-05-30: Added renderer capability discovery support for the Layers workflow hint and smoke coverage.
 - 2026-05-30: Added `layer_workflow_hint_handoff` closed-loop evidence for layer workflow guidance across Qt, launch packet, handoff, capabilities and smoke.
+- 2026-05-30: Added `profile_ui_state_replay_handoff` for portable profile/UI replay coverage across Qt, launch packet, capabilities, handoff and smoke.

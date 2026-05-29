@@ -220,6 +220,26 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                 ],
                 "boundary": "Closed UI/operator guidance loop only; renderer layer picking and backend geospatial identity refinements remain separate.",
             },
+            {
+                "id": "profile_ui_state_replay_handoff",
+                "scope": [
+                    "Qt profile UI replay label",
+                    "launch packet profile_ui_state_replay contract",
+                    "renderer capability profile_ui_state_replay discovery",
+                    "handoff inspection profile_ui_state_replay output",
+                    "research provenance profile_ui_state_replay",
+                    "smoke-gated saved state groups and replay surfaces",
+                ],
+                "evidence": [
+                    "profileUiStateReplay",
+                    "rrkal_displaytools.profile_ui_state_replay.v1",
+                    "profile_ui_state_replay.saved_state_groups",
+                    "profile_ui_state_replay.replay_surfaces",
+                    "scripts/inspect_handoff.ps1 profile_ui_state_replay",
+                    "scripts/smoke.ps1 profile UI state replay gates",
+                ],
+                "boundary": "Closed profile/UI replay evidence loop only; it does not claim RRKAL data cache governance or authoritative geospatial identity resolution.",
+            },
         ],
         "partial": [
             {

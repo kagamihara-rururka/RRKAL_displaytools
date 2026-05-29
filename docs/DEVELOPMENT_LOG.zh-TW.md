@@ -3294,3 +3294,19 @@ Decision:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+
+## 2026-05-30 - Profile UI state replay handoff loop
+
+Scope:
+- Added `rrkal_displaytools.profile_ui_state_replay.v1` across Qt, no-GUI launch packet and renderer capability discovery.
+- Qt Layers dock now shows a `profileUiStateReplay` label describing portable UI replay coverage for renderer config, layer stack, pins, Boundary emphasis/warnings and Timeline keyframes.
+- Handoff inspection now reports saved state groups, replay surfaces and summary text.
+- Closed-loop status now includes `profile_ui_state_replay_handoff`.
+- Smoke verifies the Qt label, launch packet, renderer capability, handoff and closed-loop evidence.
+
+Decision:
+- Profile replay needs a visible and machine-readable coverage summary so cross-machine users can distinguish portable UI state from RRKAL data governance or authoritative geospatial identity.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+

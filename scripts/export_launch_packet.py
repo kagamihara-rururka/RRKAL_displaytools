@@ -1044,6 +1044,42 @@ def profile_launch_readiness_ui_packet(
     }
 
 
+def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
+    saved_groups = [
+        "renderer_config",
+        "selected_layer",
+        "layer_stack_ui",
+        "pins",
+        "boundary_highlight",
+        "boundary_emphasis_control",
+        "canvas_preview",
+        "timeline_keyframes",
+        "timeline_export_options",
+    ]
+    replay_surfaces = [
+        "Qt save/load profile",
+        "Qt startup --profile/--template",
+        "No-GUI launch packet",
+        "renderer first-keyframe apply",
+        "research provenance summary",
+    ]
+    return {
+        "schema": "rrkal_displaytools.profile_ui_state_replay.v1",
+        "source": source,
+        "status": "ready",
+        "saved_state_groups": saved_groups,
+        "saved_state_group_count": len(saved_groups),
+        "replay_surfaces": replay_surfaces,
+        "replay_surface_count": len(replay_surfaces),
+        "qt_surface": "Layers dock profile UI replay label",
+        "launch_packet_fields": ["profile_ui_state_replay", "profile", "timeline_keyframes", "timeline_runtime_state"],
+        "renderer_capability_field": "profile_ui_state_replay",
+        "handoff_field": "profile_ui_state_replay",
+        "summary_text": "Profiles preserve renderer settings, layer stack, pins, Boundary emphasis/warnings and Timeline keyframes for cross-machine UI replay.",
+        "boundary": "Replay coverage describes portable UI/profile state; it does not imply RRKAL data discovery/cache governance or authoritative geospatial identity resolution.",
+    }
+
+
 def layer_visual_presets_packet(
     source: str,
     selected_preset: str | None = None,
@@ -2625,6 +2661,7 @@ def launch_packet(
         "cross_machine_clone_readiness": cross_machine_clone_readiness_packet(profile_launch_readiness_packet("scripts.export_launch_packet", style_renderer_entries_packet("scripts.export_launch_packet", profile.get("style_profile") if isinstance(profile.get("style_profile"), str) else None), layer_operator_groups_packet(layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None), "scripts.export_launch_packet")), module_boundary_registry_packet("scripts.export_launch_packet"), "scripts.export_launch_packet"),
         "profile_launch_readiness": profile_launch_readiness_packet("scripts.export_launch_packet", style_renderer_entries_packet("scripts.export_launch_packet", profile.get("style_profile") if isinstance(profile.get("style_profile"), str) else None), layer_operator_groups_packet(layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None), "scripts.export_launch_packet")),
         "profile_launch_readiness_ui": profile_launch_readiness_ui_packet(profile_launch_readiness_packet("scripts.export_launch_packet", style_renderer_entries_packet("scripts.export_launch_packet", profile.get("style_profile") if isinstance(profile.get("style_profile"), str) else None), layer_operator_groups_packet(layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None), "scripts.export_launch_packet")), "scripts.export_launch_packet"),
+        "profile_ui_state_replay": profile_ui_state_replay_packet("scripts.export_launch_packet"),
         "layer_visual_presets": layer_visual_presets_packet("scripts.export_launch_packet"),
         "layer_visual_preset_runtime_feedback": layer_visual_preset_runtime_feedback_packet(layer_visual_presets_packet("scripts.export_launch_packet"), None, "scripts.export_launch_packet"),
         "hydrology_lod_readiness": hydrology_lod_readiness_packet("scripts.export_launch_packet", layer_capability_matrix_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None, rrkal_data_manifest_ref)),

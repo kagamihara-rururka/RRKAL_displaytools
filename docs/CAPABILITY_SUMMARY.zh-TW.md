@@ -349,3 +349,8 @@
 
 - Closed-loop status now lists `layer_workflow_hint_handoff` for the layer workflow guidance loop.
 - Evidence spans Qt UI, launch packet, handoff inspection, renderer capabilities and smoke gates.
+
+### 2026-05-30 Profile UI state replay handoff loop
+
+- Added `profile_ui_state_replay` across Qt UI, launch packet, renderer capabilities, handoff inspection and closed-loop status.
+- The contract summarizes which UI state groups are portable through profiles and Timeline keyframes.
