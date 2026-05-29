@@ -1,5 +1,18 @@
 # Development Log
 
+## 2026-05-29 - Boundary renderer sync wording
+
+Scope:
+- Boundary highlight default `renderer_sync` now reports `renderer_line_fill_identity_status_handoff`.
+- Renderer default boundary sync text now reports acknowledged line/fill/identity-status behavior.
+- Profile schema docs no longer describe Boundary highlight as only a UI/profile pending contract.
+
+Positioning:
+- This removes stale contract wording after line highlight, closed-ring fill, and identity-status handoff were closed.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Boundary identity status summary
 
 Scope:

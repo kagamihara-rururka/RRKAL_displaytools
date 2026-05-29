@@ -88,7 +88,7 @@ DEFAULT_BOUNDARY_HIGHLIGHT = {
         "speed": 42,
         "amplitude": 16,
     },
-    "renderer_sync": "ui_profile_launch_packet_only",
+    "renderer_sync": "renderer_line_fill_identity_status_handoff",
     "identity_status": DEFAULT_BOUNDARY_IDENTITY_STATUS,
 }
 

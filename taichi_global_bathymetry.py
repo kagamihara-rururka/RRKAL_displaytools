@@ -2638,7 +2638,7 @@ def default_boundary_highlight_state(received: bool = False) -> dict[str, object
             "amplitude": 16,
         },
         "identity_status": default_boundary_identity_status(),
-        "renderer_sync": "input_acknowledged_overlay_pending",
+        "renderer_sync": "input_acknowledged_line_fill_identity_status",
     }
 
 

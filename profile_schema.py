@@ -388,7 +388,7 @@ def profile_schema_packet() -> dict[str, object]:
             "optional_fields": sorted(OPTIONAL_BOUNDARY_HIGHLIGHT_FIELDS),
             "identity_status_schema": BOUNDARY_IDENTITY_STATUS_SCHEMA_ID,
             "breathing_required_fields": sorted(REQUIRED_BOUNDARY_BREATHING_FIELDS),
-            "status": "Qt UI/profile/launch packet state; renderer hover polygon mask pending",
+            "status": "Qt UI/profile/launch packet state; renderer line/fill highlight and identity-status handoff live; authoritative polygon territory identity pending",
         },
         "optional_pins": {
             "required_fields": sorted(REQUIRED_PIN_FIELDS),

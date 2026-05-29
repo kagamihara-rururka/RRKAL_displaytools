@@ -196,7 +196,7 @@ def default_boundary_highlight_state() -> dict[str, object]:
             "amplitude": 16,
         },
         "identity_status": default_boundary_identity_status(),
-        "renderer_sync": "ui_profile_launch_packet_only",
+        "renderer_sync": "renderer_line_fill_identity_status_handoff",
     }
 
 
@@ -1834,7 +1834,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                         "speed": breath_speed_slider.value(),
                         "amplitude": breath_amp_slider.value(),
                     },
-                    "renderer_sync": "ui_profile_launch_packet_only",
+                    "renderer_sync": "renderer_line_fill_identity_status_handoff",
                 }
             )
             self.refresh_boundary_highlight_status()
