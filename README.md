@@ -97,6 +97,7 @@ Primary files:
 Qt panel capabilities:
 - Toggle renderer layers without memorizing CLI flags.
 - Control layer lock, opacity, and blend mode through the renderer runtime bridge.
+- Use Canvas Preview in Qt state, latest renderer thumbnail, or file-based live renderer preview mode.
 - Inspect renderer layer runtime JSON and renderer layer pick JSON from the Layers panel.
 - Select Pin, traffic, boundary line, and hydrology line targets through selected-layer-aware renderer picking.
 - Configure boundary highlight color, alpha, contrast, gamma, feather, breathing, and closed-ring fill preview.

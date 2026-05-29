@@ -1,5 +1,18 @@
 # Development Log
 
+## 2026-05-29 - Clone quickstart for live preview
+
+Scope:
+- README now lists Canvas Preview state / thumbnail / live preview as a Qt panel capability.
+- Clone quickstart now documents how to use Live preview after launching the Qt panel.
+- Quickstart now names `state/renderer_preview_frame.png` as a local runtime bridge artifact that should not be committed.
+
+Positioning:
+- This improves cross-machine usage without adding displaytools-side dataset discovery, download, import, or cache governance.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - File-based renderer live preview stream
 
 Scope:
