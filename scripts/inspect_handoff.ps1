@@ -43,6 +43,7 @@ $summary = [ordered]@{
         profile_launch_readiness = $launchPacket.profile_launch_readiness.schema
         profile_launch_readiness_ui = $launchPacket.profile_launch_readiness_ui.schema
         layer_visual_presets = $launchPacket.layer_visual_presets.schema
+        layer_visual_preset_runtime_feedback = $launchPacket.layer_visual_preset_runtime_feedback.schema
         layer_undo = $launchPacket.layer_undo.schema
         session_journal = $launchPacket.session_journal.schema
         timeline_state = $launchPacket.timeline_state.schema
@@ -94,6 +95,14 @@ $summary = [ordered]@{
         preset_ids = $launchPacket.layer_visual_presets.preset_ids
         qt_surface = $launchPacket.layer_visual_presets.qt_surface
         respects_layer_locks = $launchPacket.layer_visual_presets.respects_layer_locks
+    }
+    layer_visual_preset_runtime_feedback = @{
+        launch_packet_schema = $launchPacket.layer_visual_preset_runtime_feedback.schema
+        renderer_capabilities_schema = $capabilities.layer_visual_preset_runtime_feedback.schema
+        status = $launchPacket.layer_visual_preset_runtime_feedback.status
+        qt_surface = $launchPacket.layer_visual_preset_runtime_feedback.qt_surface
+        ack_file = $launchPacket.layer_visual_preset_runtime_feedback.ack_file
+        requires_renderer_ack_for_reproducibility = $launchPacket.layer_visual_preset_runtime_feedback.requires_renderer_ack_for_reproducibility
     }
     layer_capability_matrix = @{
         schema = $capabilities.layer_capability_matrix.schema

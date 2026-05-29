@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-30 - Layer visual preset runtime feedback
+
+- Added `rrkal_displaytools.layer_visual_preset_runtime_feedback.v1` to connect layer visual presets with the existing renderer layer runtime ack bridge.
+- Qt Layers dock now has a preset renderer ack label, and launch packets, renderer capabilities, handoff inspection and closed-loop evidence expose the same feedback contract.
+- Smoke: PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Layer visual presets panel
 
 - Added `rrkal_displaytools.layer_visual_presets.v1` for Qt Layers dock preset buttons: All, Hydrology, Boundary and Annotations.

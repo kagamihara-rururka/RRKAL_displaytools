@@ -977,6 +977,39 @@ def layer_visual_presets_packet(
     }
 
 
+def layer_visual_preset_runtime_feedback_packet(
+    visual_presets: dict[str, object] | None,
+    runtime_ack: dict[str, object] | None,
+    source: str,
+) -> dict[str, object]:
+    visual_presets = visual_presets if isinstance(visual_presets, dict) else {}
+    runtime_ack = runtime_ack if isinstance(runtime_ack, dict) else {}
+    changed_layers = runtime_ack.get("changed_layers") if isinstance(runtime_ack.get("changed_layers"), list) else []
+    changed_opacity_layers = runtime_ack.get("changed_opacity_layers") if isinstance(runtime_ack.get("changed_opacity_layers"), list) else []
+    skipped_locked_layers = runtime_ack.get("skipped_locked_layers") if isinstance(runtime_ack.get("skipped_locked_layers"), list) else []
+    ack_available = bool(runtime_ack)
+    status = "ack_available" if ack_available else "waiting_for_renderer_ack"
+    return {
+        "schema": "rrkal_displaytools.layer_visual_preset_runtime_feedback.v1",
+        "source": source,
+        "preset_schema": visual_presets.get("schema"),
+        "selected_preset": visual_presets.get("selected_preset", "custom"),
+        "runtime_ack_available": ack_available,
+        "runtime_ack_schema": runtime_ack.get("schema") if ack_available else "rrkal_displaytools.renderer_layer_runtime_ack.v1",
+        "runtime_ack_event": runtime_ack.get("event"),
+        "status": status,
+        "changed_layer_count": len(changed_layers),
+        "changed_opacity_layer_count": len(changed_opacity_layers),
+        "skipped_locked_count": len(skipped_locked_layers),
+        "qt_surface": "Layers dock preset renderer ack label",
+        "ack_file": "state/renderer_layer_runtime_ack.json",
+        "requires_renderer_ack_for_reproducibility": True,
+        "launch_packet_fields": ["layer_visual_preset_runtime_feedback", "layer_visual_presets", "layer_runtime_evidence"],
+        "renderer_capability_field": "layer_visual_preset_runtime_feedback",
+        "boundary": "Preset feedback reads the existing renderer layer runtime ack bridge; it does not create a new renderer protocol or mutate RRKAL data governance.",
+    }
+
+
 def layer_operator_shortcuts_packet(
     source: str,
     selected_layer: str | None = None,
@@ -2006,6 +2039,7 @@ def launch_packet(
         "profile_launch_readiness": profile_launch_readiness_packet("scripts.export_launch_packet", style_renderer_entries_packet("scripts.export_launch_packet", profile.get("style_profile") if isinstance(profile.get("style_profile"), str) else None), layer_operator_groups_packet(layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None), "scripts.export_launch_packet")),
         "profile_launch_readiness_ui": profile_launch_readiness_ui_packet(profile_launch_readiness_packet("scripts.export_launch_packet", style_renderer_entries_packet("scripts.export_launch_packet", profile.get("style_profile") if isinstance(profile.get("style_profile"), str) else None), layer_operator_groups_packet(layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None), "scripts.export_launch_packet")), "scripts.export_launch_packet"),
         "layer_visual_presets": layer_visual_presets_packet("scripts.export_launch_packet"),
+        "layer_visual_preset_runtime_feedback": layer_visual_preset_runtime_feedback_packet(layer_visual_presets_packet("scripts.export_launch_packet"), None, "scripts.export_launch_packet"),
         "layer_capability_matrix": layer_capability_matrix_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None, rrkal_data_manifest_ref),
         "canvas_preview": canvas_preview_packet(profile),
         "boundary_highlight": boundary_highlight_packet(profile),

@@ -243,6 +243,39 @@ def layer_visual_presets_packet(
     }
 
 
+def layer_visual_preset_runtime_feedback_packet(
+    visual_presets: dict[str, object] | None,
+    runtime_ack: dict[str, object] | None,
+    source: str,
+) -> dict[str, object]:
+    visual_presets = visual_presets if isinstance(visual_presets, dict) else {}
+    runtime_ack = runtime_ack if isinstance(runtime_ack, dict) else {}
+    changed_layers = runtime_ack.get("changed_layers") if isinstance(runtime_ack.get("changed_layers"), list) else []
+    changed_opacity_layers = runtime_ack.get("changed_opacity_layers") if isinstance(runtime_ack.get("changed_opacity_layers"), list) else []
+    skipped_locked_layers = runtime_ack.get("skipped_locked_layers") if isinstance(runtime_ack.get("skipped_locked_layers"), list) else []
+    ack_available = bool(runtime_ack)
+    status = "ack_available" if ack_available else "waiting_for_renderer_ack"
+    return {
+        "schema": "rrkal_displaytools.layer_visual_preset_runtime_feedback.v1",
+        "source": source,
+        "preset_schema": visual_presets.get("schema"),
+        "selected_preset": visual_presets.get("selected_preset", "custom"),
+        "runtime_ack_available": ack_available,
+        "runtime_ack_schema": runtime_ack.get("schema") if ack_available else "rrkal_displaytools.renderer_layer_runtime_ack.v1",
+        "runtime_ack_event": runtime_ack.get("event"),
+        "status": status,
+        "changed_layer_count": len(changed_layers),
+        "changed_opacity_layer_count": len(changed_opacity_layers),
+        "skipped_locked_count": len(skipped_locked_layers),
+        "qt_surface": "Layers dock preset renderer ack label",
+        "ack_file": "state/renderer_layer_runtime_ack.json",
+        "requires_renderer_ack_for_reproducibility": True,
+        "launch_packet_fields": ["layer_visual_preset_runtime_feedback", "layer_visual_presets", "layer_runtime_evidence"],
+        "renderer_capability_field": "layer_visual_preset_runtime_feedback",
+        "boundary": "Preset feedback reads the existing renderer layer runtime ack bridge; it does not create a new renderer protocol or mutate RRKAL data governance.",
+    }
+
+
 if "--list-templates" in sys.argv[1:]:
     print(json.dumps(profile_template_packet(), ensure_ascii=False, indent=2))
     raise SystemExit(0)
@@ -1785,6 +1818,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_visual_presets_label = QtWidgets.QLabel("Layer presets: custom")
         self.layer_visual_presets_label.setWordWrap(True)
         layers_layout.addWidget(self.layer_visual_presets_label)
+        self.layer_visual_preset_runtime_feedback_label = QtWidgets.QLabel("Preset renderer ack: waiting")
+        self.layer_visual_preset_runtime_feedback_label.setWordWrap(True)
+        layers_layout.addWidget(self.layer_visual_preset_runtime_feedback_label)
         preset_buttons = QtWidgets.QHBoxLayout()
         for preset_id, label in (
             ("all_context", "All"),
@@ -2621,6 +2657,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "profile_launch_readiness": self.collect_profile_launch_readiness(),
             "profile_launch_readiness_ui": self.collect_profile_launch_readiness_ui(),
             "layer_visual_presets": self.collect_layer_visual_presets(),
+            "layer_visual_preset_runtime_feedback": self.collect_layer_visual_preset_runtime_feedback(),
             "layer_capability_matrix": self.collect_layer_capability_matrix(),
             "layer_runtime_evidence_summary": self.collect_layer_capability_matrix().get("runtime_evidence_summary"),
             "active_layer_diagnostics": self.active_layer_diagnostics_packet(),
@@ -2737,6 +2774,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         return layer_visual_presets_packet(
             "rrkal_displaytools_qt_panel",
             getattr(self, "layer_visual_preset", "custom"),
+        )
+
+    def collect_layer_visual_preset_runtime_feedback(self) -> dict[str, object]:
+        runtime_ack = self.layer_runtime_ack_payload if isinstance(self.layer_runtime_ack_payload, dict) else None
+        return layer_visual_preset_runtime_feedback_packet(
+            self.collect_layer_visual_presets(),
+            runtime_ack,
+            "rrkal_displaytools_qt_panel",
         )
 
     def collect_layer_operator_groups(self) -> dict[str, object]:
@@ -3538,6 +3583,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.layer_visual_presets_label.setText(
                 f"Layer presets: {visual_presets.get('selected_preset', 'custom')} "
                 f"({visual_presets.get('preset_count', 0)} available, locked layers preserved)"
+            )
+        preset_feedback = self.collect_layer_visual_preset_runtime_feedback()
+        if hasattr(self, "layer_visual_preset_runtime_feedback_label"):
+            self.layer_visual_preset_runtime_feedback_label.setText(
+                f"Preset renderer ack: {preset_feedback.get('status', 'waiting_for_renderer_ack')} "
+                f"(changed={preset_feedback.get('changed_layer_count', 0)}, locked={preset_feedback.get('skipped_locked_count', 0)})"
             )
         self.layer_stack_note.setText(
             f"可見圖層 {visible}/{len(LAYER_LABELS)}；鎖定 {locked}；"
@@ -5424,6 +5475,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "profile_launch_readiness": self.collect_profile_launch_readiness(),
             "profile_launch_readiness_ui": self.collect_profile_launch_readiness_ui(),
             "layer_visual_presets": self.collect_layer_visual_presets(),
+            "layer_visual_preset_runtime_feedback": self.collect_layer_visual_preset_runtime_feedback(),
             "layer_capability_matrix": self.collect_layer_capability_matrix(),
             "layer_runtime_evidence_summary": self.collect_layer_capability_matrix().get("runtime_evidence_summary"),
             "layer_runtime_badge_summary": self.collect_layer_capability_matrix().get("runtime_badge_summary"),

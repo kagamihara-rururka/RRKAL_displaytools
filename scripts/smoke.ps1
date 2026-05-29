@@ -233,6 +233,15 @@ if ($launchPacket.layer_visual_presets.preset_ids -notcontains "boundary_focus")
 if ($launchPacket.layer_visual_presets.respects_layer_locks -ne $true) {
     throw "Launch packet layer_visual_presets must preserve locked layers"
 }
+if ($launchPacket.layer_visual_preset_runtime_feedback.schema -ne "rrkal_displaytools.layer_visual_preset_runtime_feedback.v1") {
+    throw "Launch packet layer_visual_preset_runtime_feedback schema missing or invalid"
+}
+if ($launchPacket.layer_visual_preset_runtime_feedback.qt_surface -ne "Layers dock preset renderer ack label") {
+    throw "Launch packet layer_visual_preset_runtime_feedback surface mismatch"
+}
+if ($launchPacket.layer_visual_preset_runtime_feedback.requires_renderer_ack_for_reproducibility -ne $true) {
+    throw "Launch packet layer_visual_preset_runtime_feedback must require renderer ack"
+}
 if ($launchPacket.layer_undo.schema -ne "rrkal_displaytools.layer_stack_undo.v1") {
     throw "Launch packet layer_undo schema missing or invalid"
 }
@@ -595,6 +604,12 @@ if ($capabilities.layer_visual_presets.preset_ids -notcontains "boundary_focus")
 if ($capabilities.layer_visual_presets.respects_layer_locks -ne $true) {
     throw "Renderer layer_visual_presets must preserve locked layers"
 }
+if ($capabilities.layer_visual_preset_runtime_feedback.schema -ne "rrkal_displaytools.layer_visual_preset_runtime_feedback.v1") {
+    throw "Renderer layer_visual_preset_runtime_feedback schema missing or invalid"
+}
+if ($capabilities.layer_visual_preset_runtime_feedback.ack_file -ne "state/renderer_layer_runtime_ack.json") {
+    throw "Renderer layer_visual_preset_runtime_feedback ack file mismatch"
+}
 if ($capabilities.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
     throw "Renderer layer_capability_matrix capability missing or invalid"
 }
@@ -840,6 +855,18 @@ if ($handoff.layer_visual_presets.preset_ids -notcontains "hydrology_focus") {
 }
 if ($handoff.layer_visual_presets.respects_layer_locks -ne $true) {
     throw "Handoff inspection layer_visual_presets must preserve locked layers"
+}
+if ($handoff.launch_packet_contracts.layer_visual_preset_runtime_feedback -ne "rrkal_displaytools.layer_visual_preset_runtime_feedback.v1") {
+    throw "Handoff inspection layer_visual_preset_runtime_feedback launch contract missing or invalid"
+}
+if ($handoff.layer_visual_preset_runtime_feedback.launch_packet_schema -ne "rrkal_displaytools.layer_visual_preset_runtime_feedback.v1") {
+    throw "Handoff inspection layer_visual_preset_runtime_feedback launch schema missing or invalid"
+}
+if ($handoff.layer_visual_preset_runtime_feedback.renderer_capabilities_schema -ne "rrkal_displaytools.layer_visual_preset_runtime_feedback.v1") {
+    throw "Handoff inspection layer_visual_preset_runtime_feedback renderer schema missing or invalid"
+}
+if ($handoff.layer_visual_preset_runtime_feedback.requires_renderer_ack_for_reproducibility -ne $true) {
+    throw "Handoff inspection layer_visual_preset_runtime_feedback must require renderer ack"
 }
 if ($handoff.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
     throw "Handoff inspection layer_capability_matrix summary missing or invalid"
