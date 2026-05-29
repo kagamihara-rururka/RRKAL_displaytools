@@ -44,7 +44,7 @@
 - Style / Looks panel 的縮圖化模板選擇。
 - Select 工具已接 renderer selected-layer object picking bridge；Canvas Preview 本身仍是 Qt-side hit bands，下一步是 embedded renderer thumbnail。Pin 下一步是補更細的 renderer interaction ack 與 globe mask / depth buffer refinement；Brush/Mask 暫不納入本輪 UI。
 - Boundary highlight 下一步是從目前 line hover outline/glow 與閉合 ring polygon preview 升級到疆域/領海/EEZ feature identity、開放線段面域推論，以及 fill shader 的 gamma/contrast。
-- Provenance 下一步要對接 renderer output artifact 與 RRKAL data manifest，但在 UIUX 閉環完成前只保留 UI provenance summary。
+- Renderer headless/once output 會在 image output 旁寫出 `.metadata.json` sidecar，記錄 renderer state、layer state、selected-layer pick、boundary highlight、closed-loop status 與 RRKAL/displaytools 邊界。RRKAL data manifest 對接仍屬後續資料治理銜接。
 - Timeline / keyframe / animation controls for ocean/cloud/material parameters。
 - Workspace presets 後續要補成可視化 preset manager，並支援保存多組命名工作區。
 

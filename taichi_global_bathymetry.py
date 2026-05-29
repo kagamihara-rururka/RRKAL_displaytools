@@ -12670,6 +12670,61 @@ class HybridRenderController:
         except OSError as exc:
             print(f"Unable to write layer pick state: {exc}")
 
+    def output_metadata_path(self) -> Path | None:
+        if self.output_path is None:
+            return None
+        return self.output_path.with_suffix(self.output_path.suffix + ".metadata.json")
+
+    def write_output_metadata(self) -> None:
+        metadata_path = self.output_metadata_path()
+        if metadata_path is None:
+            return
+        visible_layers = [layer_id for layer_id, visible in self.layer_visible.items() if visible]
+        layer_opacity = {
+            layer_id: opacity
+            for layer_id in self.layer_visible
+            for opacity in [self.layer_opacity_percent(layer_id)]
+            if opacity is not None
+        }
+        layer_blend_mode = {
+            layer_id: blend_mode
+            for layer_id in self.layer_visible
+            for blend_mode in [self.layer_blend_mode(layer_id)]
+            if blend_mode is not None
+        }
+        payload = {
+            "schema": "rrkal_displaytools.renderer_output_metadata.v1",
+            "created_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "output_file": str(self.output_path),
+            "renderer": "taichi_global_bathymetry",
+            "frame_index": self.frame_index,
+            "width": self.width,
+            "height": self.height,
+            "style_profile": getattr(self.args, "style_profile", "scientific"),
+            "topography_source": getattr(self.args, "topo_source", None),
+            "data_mode": getattr(self.args, "data_mode", None),
+            "ui_backend": getattr(self.args, "ui", None),
+            "basemap_lod": self.basemap_lod,
+            "render_ms": self.last_render_ms,
+            "visible_layers": visible_layers,
+            "layer_visible": {layer_id: bool(visible) for layer_id, visible in self.layer_visible.items()},
+            "layer_opacity": layer_opacity,
+            "layer_blend_mode": layer_blend_mode,
+            "selected_layer_semantic_target": self.selected_layer_semantic_target,
+            "last_layer_pick_result": self.last_layer_pick_result,
+            "boundary_highlight": getattr(self, "boundary_highlight_state", {}),
+            "closed_loop_status": renderer_closed_loop_status_packet(),
+            "rrkal_boundary": {
+                "displaytools_owns": ["renderer output artifact", "visual layer state", "render metadata sidecar"],
+                "rrkal_owns": ["dataset discovery", "download/import/install registry", "manifest/cache governance"],
+            },
+        }
+        try:
+            metadata_path.parent.mkdir(parents=True, exist_ok=True)
+            metadata_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+        except OSError as exc:
+            print(f"Unable to write output metadata: {exc}")
+
     def write_pin_input_ack(self) -> None:
         if self.pin_input_ack_file is None:
             return
@@ -14137,6 +14192,7 @@ class HybridRenderController:
             from PIL import Image
 
             Image.fromarray(self.frame_rgba, mode="RGBA").save(self.output_path)
+            self.write_output_metadata()
         self.frame_index += 1
         return self.frame_rgba
 

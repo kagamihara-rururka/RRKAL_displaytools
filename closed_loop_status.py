@@ -54,11 +54,17 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "renderer_layer_pick_state.json",
                 ],
             },
+            {
+                "id": "renderer_output_provenance",
+                "applies": ["image output metadata sidecar"],
+                "pending": ["RRKAL data manifest linkage"],
+                "evidence": ["--output", "renderer_output_metadata.v1"],
+            },
         ],
         "pending": [
             "full territory/EEZ feature identity",
             "open-line area inference",
             "embedded renderer thumbnail",
-            "renderer output artifact provenance",
+            "RRKAL data manifest linkage",
         ],
     }

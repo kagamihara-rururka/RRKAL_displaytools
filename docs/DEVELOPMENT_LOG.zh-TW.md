@@ -1,5 +1,18 @@
 ﻿# Development Log
 
+## 2026-05-29 - Renderer output metadata sidecar
+
+Scope:
+- Headless/once image output now writes a `.metadata.json` sidecar next to the rendered image.
+- The sidecar records style/topography/data mode, visible layers, opacity/blend state, selected-layer target, latest pick result, boundary highlight state, closed-loop status, and RRKAL/displaytools ownership boundary.
+
+Positioning:
+- This starts closing renderer output artifact provenance without taking over RRKAL data manifest governance.
+- Full RRKAL data manifest linkage remains a later integration point.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - No-GUI launch packet status parity
 
 Scope:
