@@ -1,5 +1,10 @@
 # Development Log
 
+## 2026-05-30 - Capability summary mojibake repair
+
+- Repaired the `Canvas Preview` capability summary line that was garbled during the cursor geodesy raycast contract update.
+- Smoke: PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Cursor geodesy renderer raycast contract
 
 - Added `cursor_geodesy.py` with a dependency-free `viewport_sphere_raycast` helper for renderer-facing cursor-to-lat/lon math.
