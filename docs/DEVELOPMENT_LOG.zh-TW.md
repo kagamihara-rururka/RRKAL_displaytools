@@ -3020,3 +3020,16 @@ Decision:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Timeline keyframe boundary target summary
+
+Scope:
+- Qt timeline keyframe list now shows each keyframe's Boundary emphasis target mode, resolved target layer and target alignment.
+- Added a shared keyframe list formatter so loaded profile keyframes and newly captured keyframes use the same summary.
+- Smoke verifies the keyframe list formatter and boundary target summary string.
+
+Decision:
+- Demonstration workflows need to inspect boundary target state before playback without opening JSON or applying each keyframe.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

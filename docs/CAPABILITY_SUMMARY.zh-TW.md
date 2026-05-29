@@ -248,3 +248,8 @@
 
 - Timeline keyframes now preserve Boundary emphasis control state and restore it when keyframes are applied in Qt.
 - Timeline launch/renderer contracts include Boundary emphasis as a discrete keyframe field for reproducible demonstrations.
+
+### 2026-05-30 Timeline keyframe boundary target summary
+
+- Timeline keyframe rows now include Boundary emphasis target and alignment summaries.
+- Loaded profile keyframes and newly captured keyframes share the same display formatter.

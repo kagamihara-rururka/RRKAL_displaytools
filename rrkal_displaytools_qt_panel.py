@@ -5599,17 +5599,27 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         )
         self.write_timeline_runtime_state()
 
+    def timeline_keyframe_list_text(self, keyframe: dict[str, object]) -> str:
+        camera = keyframe.get("camera")
+        camera_label = f" · camera={float(camera.get('zoom', 1.0)):.2f}z" if isinstance(camera, dict) else ""
+        boundary_emphasis = keyframe.get("boundary_emphasis_control")
+        boundary_label = " · boundary=-"
+        if isinstance(boundary_emphasis, dict):
+            target_mode = boundary_emphasis.get("target_mode", "auto_selected_boundary_layer")
+            target_layer = boundary_emphasis.get("target_layer_key") or "-"
+            target_alignment = boundary_emphasis.get("target_alignment", "unknown")
+            boundary_label = f" · boundary={target_mode}->{target_layer}; {target_alignment}"
+        return (
+            f"{keyframe.get('id', '-')} · {keyframe.get('style_profile', '-')} · "
+            f"layer={keyframe.get('selected_layer') or '-'}{camera_label}{boundary_label}"
+        )
+
     def apply_timeline_keyframes(self, keyframes: list[object]) -> None:
         self.timeline_keyframes = [dict(keyframe) for keyframe in keyframes if isinstance(keyframe, dict)]
         if self.timeline_keyframe_list is not None:
             self.timeline_keyframe_list.clear()
             for keyframe in self.timeline_keyframes:
-                camera = keyframe.get("camera")
-                camera_label = f" · camera={float(camera.get('zoom', 1.0)):.2f}z" if isinstance(camera, dict) else ""
-                self.timeline_keyframe_list.addItem(
-                    f"{keyframe.get('id', '-')} · {keyframe.get('style_profile', '-')} · "
-                    f"layer={keyframe.get('selected_layer') or '-'}{camera_label}"
-                )
+                self.timeline_keyframe_list.addItem(self.timeline_keyframe_list_text(keyframe))
         self.refresh_timeline_state_label()
 
     @QtCore.pyqtSlot()
@@ -5617,10 +5627,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         keyframe = self.collect_timeline_keyframe()
         self.timeline_keyframes.append(keyframe)
         if self.timeline_keyframe_list is not None:
-            self.timeline_keyframe_list.addItem(
-                f"{keyframe['id']} · {keyframe['style_profile']} · "
-                f"layer={keyframe['selected_layer'] or '-'} · camera={keyframe['camera']['zoom']:.2f}z"
-            )
+            self.timeline_keyframe_list.addItem(self.timeline_keyframe_list_text(keyframe))
         self.refresh_timeline_state_label()
         self.refresh_research_provenance()
         if self.history_list is not None:

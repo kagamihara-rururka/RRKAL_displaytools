@@ -1533,6 +1533,12 @@ if ($qtPanelSource -notlike "*Boundary target:*") {
 if ($qtPanelSource -notlike "*boundary_emphasis_target_alignment*") {
     throw "Qt canvas provenance boundary emphasis target alignment missing"
 }
+if ($qtPanelSource -notlike "*timeline_keyframe_list_text*") {
+    throw "Qt timeline keyframe list formatter missing"
+}
+if ($qtPanelSource -notlike "*boundary=*") {
+    throw "Qt timeline keyframe boundary target summary missing"
+}
 if ($qtPanelSource -notlike "*Boundary identity:*") {
     throw "Qt canvas boundary identity summary line missing"
 }

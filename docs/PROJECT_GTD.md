@@ -165,3 +165,4 @@ Last updated: 2026-05-29
 - 2026-05-30: Added Boundary emphasis target alignment fields and Qt status display.
 - 2026-05-30: Added Boundary target alignment to Canvas Preview and canvas provenance state.
 - 2026-05-30: Added Boundary emphasis control preservation to timeline keyframes and renderer timeline ack contracts.
+- 2026-05-30: Added Boundary target summaries to Timeline keyframe list rows.
