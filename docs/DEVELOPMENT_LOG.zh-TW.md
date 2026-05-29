@@ -1014,3 +1014,18 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Pin pick diagnostics JSON
+
+Scope:
+- Qt now stores the latest renderer Pin pick bridge payload.
+- Added `顯示 Pin pick JSON` in the Pin Annotation panel.
+- The central text area can display `state/renderer_pin_pick_state.json` directly.
+- Research provenance now includes the latest Pin pick payload in addition to Pin pick history.
+
+Positioning:
+- This makes Pin interaction diagnostics inspectable from the Qt UI instead of requiring manual file lookup.
+- Remaining Pin work is renderer-side acknowledgement and deeper globe-mask/depth-buffer occlusion refinement.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

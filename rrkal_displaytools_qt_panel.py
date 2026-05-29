@@ -155,6 +155,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.pin_pick_state_label: QtWidgets.QLabel | None = None
         self.pin_pick_state_mtime_ns: int | None = PIN_PICK_STATE_PATH.stat().st_mtime_ns if PIN_PICK_STATE_PATH.exists() else None
         self.pin_pick_state_last_event: str | None = None
+        self.pin_pick_state_payload: dict[str, object] | None = None
         self.pin_pick_history: list[str] = []
         self.pin_pick_history_signature: str | None = None
         self.selected_pin_id: str | None = None
@@ -617,12 +618,15 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         add_pin_button = QtWidgets.QPushButton("加入 Pin")
         remove_pin_button = QtWidgets.QPushButton("移除選取 Pin")
         use_cursor_button = QtWidgets.QPushButton("用游標填入 Pin")
+        show_pin_pick_button = QtWidgets.QPushButton("顯示 Pin pick JSON")
         add_pin_button.clicked.connect(self.add_pin_marker)
         remove_pin_button.clicked.connect(self.remove_selected_pin_marker)
         use_cursor_button.clicked.connect(self.fill_pin_from_cursor)
+        show_pin_pick_button.clicked.connect(self.show_pin_pick_state)
         pin_actions.addWidget(add_pin_button)
         pin_actions.addWidget(remove_pin_button)
         pin_actions.addWidget(use_cursor_button)
+        pin_actions.addWidget(show_pin_pick_button)
         pin_form.addRow(pin_actions)
         self.pin_list = QtWidgets.QListWidget()
         self.pin_list.setMinimumHeight(110)
@@ -1578,6 +1582,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             return
         self.pin_pick_state_mtime_ns = next_mtime_ns
         if isinstance(payload, dict):
+            self.pin_pick_state_payload = payload
             self.apply_renderer_pin_pick_state(payload)
 
     def apply_renderer_pin_pick_state(self, payload: dict[str, object]) -> None:
@@ -1737,6 +1742,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "pins": self.collect_research_pins(),
             "pin_pick_state_file": str(PIN_PICK_STATE_PATH),
             "pin_pick_state_last_event": self.pin_pick_state_last_event,
+            "pin_pick_state": self.pin_pick_state_payload,
             "pin_pick_history": self.pin_pick_history[:5],
             "layer_runtime_state_file": str(LAYER_RUNTIME_STATE_PATH),
             "layer_runtime_state_last_write_utc": self.layer_runtime_state_last_write_utc,
@@ -1777,6 +1783,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             text = json.dumps(self.collect_layer_runtime_state(), ensure_ascii=False, indent=2)
         self.command_text.setPlainText(text)
         self.status.setText(f"已顯示 layer runtime state JSON：{LAYER_RUNTIME_STATE_PATH}")
+
+    def show_pin_pick_state(self) -> None:
+        try:
+            text = PIN_PICK_STATE_PATH.read_text(encoding="utf-8")
+        except OSError:
+            text = json.dumps(self.pin_pick_state_payload or {}, ensure_ascii=False, indent=2)
+        self.command_text.setPlainText(text)
+        self.status.setText(f"已顯示 Pin pick state JSON：{PIN_PICK_STATE_PATH}")
 
     def toggle_selected_layer_visibility(self) -> None:
         key = self.selected_layer_key
