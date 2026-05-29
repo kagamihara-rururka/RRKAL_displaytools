@@ -149,3 +149,4 @@ Last updated: 2026-05-29
 - 2026-05-29: Added Timeline layer visibility/blend discrete hold contract for renderer playback and export manifests.
 - 2026-05-30: Wired cursor geodesy renderer state/ack bridge for mouse press/move lat-lon readout.
 - 2026-05-30: Added Qt readback for renderer cursor geodesy state/ack in Canvas Preview and provenance.
+- 2026-05-30: Made Pin cursor fill prefer renderer cursor geodesy state before Qt canvas estimate fallback.

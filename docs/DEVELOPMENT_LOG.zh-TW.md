@@ -2807,3 +2807,17 @@ Decision:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Pin cursor fill prefers renderer geodesy
+
+Scope:
+- Pin "use cursor" now prefers renderer cursor geodesy state from the globe raycast bridge.
+- The Qt canvas equirectangular estimate remains a fallback when renderer state is unavailable or outside the globe.
+- Tool state documents the fill priority as `renderer_cursor_geodesy_state_then_ui_estimate`.
+- Smoke gates the renderer-first Pin cursor fill hook.
+
+Decision:
+- Pin placement should use renderer globe coordinates when available because researcher annotations need globe-aware coordinates, not only panel preview estimates.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

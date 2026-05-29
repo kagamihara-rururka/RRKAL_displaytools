@@ -3959,6 +3959,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "placement": "manual_lat_lon",
             },
             "renderer_sync": "planned",
+            "cursor_fill_priority": "renderer_cursor_geodesy_state_then_ui_estimate",
         }
 
     def collect_research_pins(self) -> list[dict[str, object]]:
@@ -5907,16 +5908,33 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.refresh_canvas_preview()
         self.status.setText(f"已加入科研 Pin：{pin['label']}")
 
+    def renderer_cursor_geodesy_lat_lon(self) -> tuple[float, float] | None:
+        state = self.cursor_geodesy_state_payload if isinstance(self.cursor_geodesy_state_payload, dict) else {}
+        if state.get("hit") is not True:
+            return None
+        latitude = state.get("latitude")
+        longitude = state.get("longitude")
+        if not isinstance(latitude, (int, float)) or not isinstance(longitude, (int, float)):
+            return None
+        return float(latitude), float(longitude)
+
     def fill_pin_from_cursor(self) -> None:
-        if self.cursor_latitude is None or self.cursor_longitude is None:
+        renderer_lat_lon = self.renderer_cursor_geodesy_lat_lon()
+        if renderer_lat_lon is not None:
+            latitude, longitude = renderer_lat_lon
+            source = "renderer globe raycast"
+        elif self.cursor_latitude is not None and self.cursor_longitude is not None:
+            latitude, longitude = self.cursor_latitude, self.cursor_longitude
+            source = "Qt canvas estimate"
+        else:
             self.status.setText("尚未偵測到 Canvas 游標經緯度")
             return
         if self.pin_lat_edit is not None:
-            self.pin_lat_edit.setText(f"{self.cursor_latitude:.6f}")
+            self.pin_lat_edit.setText(f"{latitude:.6f}")
         if self.pin_lon_edit is not None:
-            self.pin_lon_edit.setText(f"{self.cursor_longitude:.6f}")
+            self.pin_lon_edit.setText(f"{longitude:.6f}")
         self.status.setText(
-            f"已用游標位置填入 Pin：lat={self.cursor_latitude:.6f}, lon={self.cursor_longitude:.6f}"
+            f"已用游標位置填入 Pin：lat={latitude:.6f}, lon={longitude:.6f} ({source})"
         )
 
     def remove_selected_pin_marker(self) -> None:

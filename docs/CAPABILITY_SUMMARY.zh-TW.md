@@ -168,3 +168,8 @@
 - Qt Canvas Preview now reads renderer cursor geodesy state/ack files and shows hit/miss, lat/lon, event, frame, and update time.
 - Research provenance records renderer cursor geodesy state and ack payloads alongside the UI cursor estimate.
 - Smoke gates the Qt label, refresh hook, and provenance payload for this bridge.
+
+### 2026-05-30 Pin cursor fill priority
+
+- Pin "use cursor" now prefers renderer globe raycast geodesy and falls back to the Qt canvas estimate only when renderer state is unavailable.
+- This makes researcher annotations use globe-aware coordinates when the renderer bridge is active.

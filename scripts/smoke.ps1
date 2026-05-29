@@ -1413,6 +1413,9 @@ if ($qtPanelSource -notlike "*Renderer cursor geodesy: waiting for state/ack*") 
 if ($qtPanelSource -notlike "*renderer_cursor_geodesy_state*") {
     throw "Qt panel cursor geodesy provenance payload missing"
 }
+if ($qtPanelSource -notlike "*renderer_cursor_geodesy_lat_lon*") {
+    throw "Qt panel Pin cursor fill does not prefer renderer cursor geodesy"
+}
 
 $scripts = Get-ChildItem scripts -Filter *.ps1
 foreach ($script in $scripts) {
