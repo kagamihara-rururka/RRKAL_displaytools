@@ -2834,3 +2834,17 @@ Decision:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Pin cursor fill source UI status
+
+Scope:
+- Tools dock now shows the active Pin cursor fill source.
+- The status reports renderer globe raycast readiness, outside-globe fallback, Qt canvas estimate fallback, or waiting state.
+- Renderer cursor geodesy readback refresh now updates the Tools dock status immediately.
+- Smoke now gates the visible Pin cursor fill source status and helper.
+
+Decision:
+- Research users need to know whether a Pin coordinate came from renderer globe raycast or from the Qt preview estimate before placing annotations.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

@@ -3925,8 +3925,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 changed = True
         if changed:
             self.refresh_cursor_geodesy_bridge_label()
-            self.refresh_canvas_preview()
-            self.refresh_research_provenance()
+            self.refresh_tool_target()
 
     def current_pin_label_mode(self) -> str:
         if self.pin_label_mode_combo is None:
@@ -5871,7 +5870,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"Active tool: {tool_label}\n"
             f"Target layer: {layer_label}\n"
             f"Pin: {self.collect_tool_state()['pin']['type']} / {self.collect_tool_state()['pin']['label']}\n"
-            f"Labels: {self.current_pin_label_mode()} >= {self.pin_label_min_priority_spin.value() if self.pin_label_min_priority_spin is not None else 50}"
+            f"Labels: {self.current_pin_label_mode()} >= {self.pin_label_min_priority_spin.value() if self.pin_label_min_priority_spin is not None else 50}\n"
+            f"Pin cursor fill: {self.pin_cursor_fill_source_text()}"
         )
         self.refresh_canvas_preview()
 
@@ -5917,6 +5917,18 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if not isinstance(latitude, (int, float)) or not isinstance(longitude, (int, float)):
             return None
         return float(latitude), float(longitude)
+
+    def pin_cursor_fill_source_text(self) -> str:
+        renderer_lat_lon = self.renderer_cursor_geodesy_lat_lon()
+        if renderer_lat_lon is not None:
+            latitude, longitude = renderer_lat_lon
+            return f"renderer globe raycast ready (lat={latitude:.4f}, lon={longitude:.4f})"
+        state = self.cursor_geodesy_state_payload if isinstance(self.cursor_geodesy_state_payload, dict) else {}
+        if state.get("hit") is False:
+            return "renderer outside globe; fallback uses Qt canvas estimate"
+        if self.cursor_latitude is not None and self.cursor_longitude is not None:
+            return f"Qt canvas estimate fallback (lat={self.cursor_latitude:.4f}, lon={self.cursor_longitude:.4f})"
+        return "waiting for renderer or Qt cursor"
 
     def fill_pin_from_cursor(self) -> None:
         renderer_lat_lon = self.renderer_cursor_geodesy_lat_lon()

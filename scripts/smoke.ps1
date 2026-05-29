@@ -1428,6 +1428,12 @@ if ($qtPanelSource -notlike "*renderer_cursor_geodesy_state*") {
 if ($qtPanelSource -notlike "*renderer_cursor_geodesy_lat_lon*") {
     throw "Qt panel Pin cursor fill does not prefer renderer cursor geodesy"
 }
+if ($qtPanelSource -notlike "*Pin cursor fill:*") {
+    throw "Qt panel Pin cursor fill source status is not visible"
+}
+if ($qtPanelSource -notlike "*pin_cursor_fill_source_text*") {
+    throw "Qt panel Pin cursor fill source helper missing"
+}
 
 $scripts = Get-ChildItem scripts -Filter *.ps1
 foreach ($script in $scripts) {

@@ -178,3 +178,8 @@
 
 - Shared Pin projection contract now exposes `cursor_fill_priority = renderer_cursor_geodesy_state_then_ui_estimate`.
 - Launch packets, renderer capabilities, Qt provenance, handoff inspection, and smoke all verify renderer-first Pin cursor placement.
+
+### 2026-05-30 Pin cursor fill source UI status
+
+- Tools dock now shows whether Pin cursor fill is using renderer globe raycast, outside-globe fallback, Qt canvas estimate fallback, or waiting for cursor state.
+- This makes annotation coordinate provenance visible before researchers place Pins.
