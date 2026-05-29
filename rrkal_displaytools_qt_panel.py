@@ -732,13 +732,23 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="RRKAL_displaytools Qt operator panel")
     parser.add_argument("--profile", type=Path, help="Load a panel profile JSON on startup")
+    parser.add_argument("--template", help="Load a built-in profile template by file stem, for example maritime_hydrology")
     return parser
+
+
+def resolve_startup_profile(profile: Path | None, template: str | None) -> Path | None:
+    if profile is not None:
+        return profile
+    if not template:
+        return None
+    template_name = template[:-5] if template.endswith(".json") else template
+    return PROFILE_TEMPLATE_DIR / f"{template_name}.json"
 
 
 def main(argv: list[str] | None = None) -> None:
     args = build_arg_parser().parse_args(argv)
     app = QtWidgets.QApplication([sys.argv[0]])
-    panel = DisplayToolsQtPanel(initial_profile=args.profile)
+    panel = DisplayToolsQtPanel(initial_profile=resolve_startup_profile(args.profile, args.template))
     panel.show()
     raise SystemExit(app.exec())
 

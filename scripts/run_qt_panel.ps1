@@ -1,5 +1,6 @@
 param(
-    [string]$Profile
+    [string]$Profile,
+    [string]$Template
 )
 
 $ErrorActionPreference = "Stop"
@@ -9,5 +10,8 @@ Set-Location $RepoRoot
 $args = @("-3", "rrkal_displaytools_qt_panel.py")
 if ($Profile) {
     $args += @("--profile", $Profile)
+}
+if ($Template) {
+    $args += @("--template", $Template)
 }
 py @args

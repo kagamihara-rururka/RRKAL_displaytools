@@ -1,5 +1,17 @@
 ﻿# Development Log
 
+## 2026-05-29 - Qt startup template loading
+
+Scope:
+- Added `--template` to `rrkal_displaytools_qt_panel.py` for loading a built-in profile template by file stem.
+- Added `-Template` passthrough to `scripts/run_qt_panel.ps1`.
+- Updated README with the shorter template startup command.
+
+Positioning:
+- This improves cross-machine startup ergonomics for shared displaytools templates.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 ## 2026-05-29 - Named profile templates
 
 Scope:
@@ -309,3 +321,4 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+

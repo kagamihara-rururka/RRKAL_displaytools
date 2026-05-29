@@ -29,6 +29,7 @@ py -3 rrkal_displaytools_qt_panel.py
 Open the panel with a shared template already loaded:
 ```powershell
 .\scripts\run_qt_panel.ps1 -Profile .\profiles\maritime_hydrology.json
+.\scripts\run_qt_panel.ps1 -Template maritime_hydrology
 ```
 
 Optional quick headless render request:
