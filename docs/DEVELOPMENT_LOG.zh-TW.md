@@ -1,5 +1,19 @@
 # Development Log
 
+## 2026-05-29 - No-GUI Timeline runtime payload
+
+Scope:
+- No-GUI launch packet export now includes `timeline_runtime_state`.
+- The payload is shaped as `rrkal_displaytools.timeline_runtime_state.v1` and can be saved to `state/renderer_timeline_state.json` before launching the renderer.
+- Smoke now gates the runtime payload schema and nested `timeline_state` schema.
+- Capability summary now documents the cross-machine no-GUI payload path.
+
+Positioning:
+- This closes the portable launch-packet side of Timeline state handoff without adding renderer playback/export behavior.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Timeline renderer acknowledgement handoff
 
 Scope:

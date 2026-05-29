@@ -272,6 +272,20 @@ def timeline_state_packet(profile: dict[str, object]) -> dict[str, object]:
     }
 
 
+def timeline_runtime_state_packet(profile: dict[str, object]) -> dict[str, object]:
+    profile_keyframes = profile.get("timeline_keyframes")
+    keyframes = [dict(keyframe) for keyframe in profile_keyframes if isinstance(keyframe, dict)] if isinstance(profile_keyframes, list) else []
+    return {
+        "schema": "rrkal_displaytools.timeline_runtime_state.v1",
+        "updated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "timeline_state": timeline_state_packet(profile),
+        "timeline_keyframes": keyframes,
+        "source": "scripts/export_launch_packet.py",
+        "target_file": TIMELINE_STATE_PATH,
+        "boundary": "Save this payload to the target file before launching the renderer; renderer playback/export remain pending.",
+    }
+
+
 def launch_packet(profile_path: Path, profile: dict[str, object], rrkal_data_manifest_ref: str = "") -> dict[str, object]:
     portable_command = ["py", "-3", "taichi_global_bathymetry.py", *renderer_args(profile, rrkal_data_manifest_ref)]
     manifest_ref = rrkal_data_manifest_ref or str(profile.get("renderer", {}).get("rrkal_data_manifest_ref", "")).strip()
@@ -301,6 +315,7 @@ def launch_packet(profile_path: Path, profile: dict[str, object], rrkal_data_man
         "layer_undo": layer_undo_packet(),
         "session_journal": session_journal_packet(),
         "timeline_state": timeline_state_packet(profile),
+        "timeline_runtime_state": timeline_runtime_state_packet(profile),
         "timeline_runtime_state_file": TIMELINE_STATE_PATH,
         "timeline_ack_file": TIMELINE_ACK_PATH,
         "closed_loop_status": renderer_closed_loop_status_packet(),

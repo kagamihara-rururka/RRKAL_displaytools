@@ -46,6 +46,12 @@ if ($launchPacket.timeline_state.implemented -notcontains "profile_timeline_keyf
 if ($null -eq $launchPacket.timeline_state.keyframes) {
     throw "Launch packet timeline_state keyframes missing"
 }
+if ($launchPacket.timeline_runtime_state.schema -ne "rrkal_displaytools.timeline_runtime_state.v1") {
+    throw "Launch packet timeline_runtime_state schema missing or invalid"
+}
+if ($launchPacket.timeline_runtime_state.timeline_state.schema -ne "rrkal_displaytools.timeline_state.v1") {
+    throw "Launch packet timeline_runtime_state nested timeline_state schema missing or invalid"
+}
 if ($launchPacket.timeline_runtime_state_file -ne "state/renderer_timeline_state.json") {
     throw "Launch packet timeline runtime state file missing or invalid"
 }
