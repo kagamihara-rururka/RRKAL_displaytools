@@ -1,5 +1,19 @@
 # Development Log
 
+## 2026-05-29 - Timeline keyframe restore
+
+Scope:
+- Timeline dock now has `Apply selected`.
+- Applying a keyframe restores renderer/profile controls, ocean material controls, layer stack snapshot, Pins, and Boundary highlight state.
+- Timeline keyframes now also capture `taichi_arch`.
+- Closed-loop status now marks UI-only keyframe restore as applied.
+
+Positioning:
+- This closes the front-end Timeline save/restore loop while keeping playback/export as future renderer work.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Timeline profile persistence
 
 Scope:

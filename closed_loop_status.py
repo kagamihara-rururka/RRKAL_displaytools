@@ -113,6 +113,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                 "applies": [
                     "visible timeline dock",
                     "UI-only keyframe storage",
+                    "UI-only keyframe restore",
                     "launch packet timeline_state contract",
                     "provenance timeline_state",
                 ],

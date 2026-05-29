@@ -965,9 +965,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         timeline_actions = QtWidgets.QHBoxLayout()
         add_keyframe = QtWidgets.QPushButton("Add keyframe")
         add_keyframe.clicked.connect(self.add_timeline_keyframe)
+        apply_keyframe = QtWidgets.QPushButton("Apply selected")
+        apply_keyframe.clicked.connect(self.apply_selected_timeline_keyframe)
         clear_keyframes = QtWidgets.QPushButton("Clear")
         clear_keyframes.clicked.connect(self.clear_timeline_keyframes)
         timeline_actions.addWidget(add_keyframe)
+        timeline_actions.addWidget(apply_keyframe)
         timeline_actions.addWidget(clear_keyframes)
         timeline_layout.addLayout(timeline_actions)
         timeline_dock.setWidget(timeline)
@@ -2178,7 +2181,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         return {
             "schema": "rrkal_displaytools.timeline_state.v1",
             "status": "ui_keyframe_storage",
-            "implemented": ["visible_qt_timeline_dock", "ui_keyframe_storage", "launch_packet_status_contract"],
+            "implemented": [
+                "visible_qt_timeline_dock",
+                "ui_keyframe_storage",
+                "ui_keyframe_restore",
+                "launch_packet_status_contract",
+            ],
             "pending": [
                 "playback_controls",
                 "animation_export",
@@ -2208,6 +2216,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "width": self.width_edit.text().strip(),
                 "height": self.height_edit.text().strip(),
                 "topo_step": self.topo_step_edit.text().strip(),
+                "taichi_arch": self.arch_edit.text().strip(),
             },
             "ocean_material": {
                 "wave_strength": self.wave_edit.text().strip(),
@@ -2252,6 +2261,59 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if self.history_list is not None:
             self.history_list.insertItem(0, f"Timeline keyframe stored: {keyframe['id']}")
         self.status.setText(f"已保存 Timeline keyframe：{keyframe['id']}")
+
+    @QtCore.pyqtSlot()
+    def apply_selected_timeline_keyframe(self) -> None:
+        if self.timeline_keyframe_list is None:
+            return
+        row = self.timeline_keyframe_list.currentRow()
+        if row < 0 or row >= len(self.timeline_keyframes):
+            self.status.setText("尚未選取 Timeline keyframe")
+            return
+        keyframe = self.timeline_keyframes[row]
+        renderer = keyframe.get("renderer")
+        if isinstance(renderer, dict):
+            self._set_combo(self.style_combo, str(renderer.get("style_profile", self.style_combo.currentText())))
+            self._set_combo(self.ui_combo, str(renderer.get("ui_backend", self.ui_combo.currentText())))
+            self._set_combo(self.topo_combo, str(renderer.get("topo_source", self.topo_combo.currentText())))
+            self._set_combo(self.data_combo, str(renderer.get("data_mode", self.data_combo.currentText())))
+            self.width_edit.setText(str(renderer.get("width", self.width_edit.text())))
+            self.height_edit.setText(str(renderer.get("height", self.height_edit.text())))
+            self.topo_step_edit.setText(str(renderer.get("topo_step", self.topo_step_edit.text())))
+            self.arch_edit.setText(str(renderer.get("taichi_arch", self.arch_edit.text())))
+        material = keyframe.get("ocean_material")
+        if isinstance(material, dict):
+            self.wave_edit.setText(str(material.get("wave_strength", self.wave_edit.text())))
+            self.roughness_edit.setText(str(material.get("roughness", self.roughness_edit.text())))
+            self.foam_edit.setText(str(material.get("foam", self.foam_edit.text())))
+        snapshot = keyframe.get("layer_stack_snapshot")
+        if isinstance(snapshot, dict):
+            layers = snapshot.get("layers")
+            if isinstance(layers, dict):
+                for key, value in layers.items():
+                    if key not in self.checks or not isinstance(value, dict):
+                        continue
+                    self.checks[key].setChecked(bool(value.get("visible", self.checks[key].isChecked())))
+                    self.layer_locks[key].setChecked(bool(value.get("locked", self.layer_locks[key].isChecked())))
+                    self.layer_opacity[key].setValue(int(value.get("opacity", self.layer_opacity[key].value())))
+                    self.layer_blends[key].setCurrentText(str(value.get("blend_mode", self.layer_blends[key].currentText())))
+            selected_layer = snapshot.get("selected_layer")
+            if isinstance(selected_layer, str) and selected_layer in self.layer_rows:
+                self.select_layer(selected_layer)
+        pins = keyframe.get("pins")
+        if isinstance(pins, list):
+            self.apply_research_pins(pins)
+        boundary_highlight = keyframe.get("boundary_highlight")
+        if isinstance(boundary_highlight, dict):
+            self.boundary_highlight_state = normalized_boundary_highlight_state(boundary_highlight)
+            self.refresh_boundary_highlight_status()
+        self.refresh_command_preview()
+        self.refresh_layer_stack_status()
+        self.refresh_canvas_preview()
+        self.refresh_research_provenance()
+        if self.history_list is not None:
+            self.history_list.insertItem(0, f"Timeline keyframe applied: {keyframe.get('id', '-')}")
+        self.status.setText(f"已套用 Timeline keyframe：{keyframe.get('id', '-')}")
 
     @QtCore.pyqtSlot()
     def clear_timeline_keyframes(self) -> None:
