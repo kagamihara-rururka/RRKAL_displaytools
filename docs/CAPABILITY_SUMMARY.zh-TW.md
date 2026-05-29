@@ -60,12 +60,13 @@
 ### No-GUI integration endpoints
 
 - `py -3 taichi_global_bathymetry.py --print-renderer-capabilities`
+- `py -3 taichi_global_bathymetry.py --print-closed-loop-status`
 - `py -3 taichi_global_bathymetry.py --print-layer-manifest`
 - `py -3 rrkal_displaytools_qt_panel.py --list-templates`
 - `py -3 profile_schema.py`
 - `py -3 scripts\export_launch_packet.py --template fast_synthetic`
 
-這些入口給腳本查詢 renderer 能力、圖層 manifest、可用 templates、profile schema，以及產生 launch packet。Renderer capabilities 內含 `closed_loop_status`，可直接判讀目前 closed、partial 與 pending 的功能邊界。
+這些入口給腳本查詢 renderer 能力、closed-loop status、圖層 manifest、可用 templates、profile schema，以及產生 launch packet。Renderer capabilities 內含 `closed_loop_status`，也可用 `--print-closed-loop-status` 只輸出目前 closed、partial 與 pending 的功能邊界。
 
 ### Launch packets and handoff
 

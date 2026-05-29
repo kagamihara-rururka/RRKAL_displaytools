@@ -593,6 +593,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         open_local_profiles_button = QtWidgets.QPushButton("本機配置")
         export_packet_button = QtWidgets.QPushButton("匯出啟動包")
         capabilities_button = QtWidgets.QPushButton("Renderer 能力")
+        closed_loop_button = QtWidgets.QPushButton("閉環狀態")
         layer_manifest_button = QtWidgets.QPushButton("圖層 manifest")
         smoke_button = QtWidgets.QPushButton("Smoke check")
         launch_button = QtWidgets.QPushButton("啟動地球儀")
@@ -607,6 +608,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         open_local_profiles_button.clicked.connect(self.open_local_profile_dir)
         export_packet_button.clicked.connect(self.export_launch_packet_dialog)
         capabilities_button.clicked.connect(self.show_renderer_capabilities)
+        closed_loop_button.clicked.connect(self.show_closed_loop_status)
         layer_manifest_button.clicked.connect(self.show_layer_manifest)
         smoke_button.clicked.connect(self.run_smoke_check)
         launch_button.clicked.connect(self.launch_renderer)
@@ -622,6 +624,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             open_local_profiles_button,
             export_packet_button,
             capabilities_button,
+            closed_loop_button,
             layer_manifest_button,
             smoke_button,
             launch_button,
@@ -677,6 +680,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         renderer_menu.addAction("Stop", self.stop_renderer)
         renderer_menu.addSeparator()
         renderer_menu.addAction("Capabilities JSON", self.show_renderer_capabilities)
+        renderer_menu.addAction("Closed-loop Status JSON", self.show_closed_loop_status)
         renderer_menu.addAction("Layer Manifest JSON", self.show_layer_manifest)
 
         window_menu = self.menuBar().addMenu("Window")
@@ -800,6 +804,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ("Tactical", self.apply_tactical),
             ("Smoke", self.run_smoke_check),
             ("Caps", self.show_renderer_capabilities),
+            ("Loops", self.show_closed_loop_status),
             ("Layers", self.show_layer_manifest),
         )
         for label, callback in tool_actions:
@@ -2601,6 +2606,22 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             return
         self.command_text.setPlainText(result.stdout.strip())
         self.status.setText("已顯示 renderer capabilities JSON")
+
+    @QtCore.pyqtSlot()
+    def show_closed_loop_status(self) -> None:
+        result = subprocess.run(
+            [sys.executable, str(RENDERER), "--print-closed-loop-status"],
+            cwd=str(ROOT),
+            text=True,
+            capture_output=True,
+            timeout=90,
+        )
+        if result.returncode != 0:
+            self.status.setText("Closed-loop status failed")
+            self.command_text.setPlainText((result.stderr or result.stdout).strip())
+            return
+        self.command_text.setPlainText(result.stdout.strip())
+        self.status.setText("已顯示 renderer closed-loop status JSON")
 
     @QtCore.pyqtSlot()
     def show_layer_manifest(self) -> None:

@@ -15620,6 +15620,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--write-demo-packet", default=os.environ.get("WRITE_DEMO_PACKET"))
     parser.add_argument("--print-renderer-capabilities", action=bool_action, default=False)
     parser.add_argument("--print-layer-manifest", action=bool_action, default=False)
+    parser.add_argument("--print-closed-loop-status", action=bool_action, default=False)
 
     parser.add_argument("--topo-step", type=int, default=int(os.environ.get("TOPO_STEP", "16")))
     parser.add_argument("--topo-source", choices=["gebco", "synthetic"], default=os.environ.get("TOPO_SOURCE", "gebco"))
@@ -16100,6 +16101,9 @@ def main(argv: list[str] | None = None) -> None:
     args = build_parser().parse_args(argv)
     if args.print_renderer_capabilities:
         print(json.dumps(renderer_capabilities_packet(), ensure_ascii=False, indent=2))
+        return
+    if args.print_closed_loop_status:
+        print(json.dumps(renderer_closed_loop_status_packet(), ensure_ascii=False, indent=2))
         return
     if args.print_layer_manifest:
         print(json.dumps(renderer_layer_manifest_packet(), ensure_ascii=False, indent=2))

@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - Closed-loop status endpoint
+
+Scope:
+- Added `--print-closed-loop-status` as a no-GUI endpoint.
+- Added Qt actions/menu/quick-tool entry to display the closed-loop status JSON.
+- Added the endpoint to `scripts/smoke.ps1`.
+
+Positioning:
+- Scripts and researchers can inspect current closed/partial/pending status without parsing full renderer capabilities.
+- This strengthens renderer capability discovery and cross-machine checks.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Capability closed-loop status packet
 
 Scope:
