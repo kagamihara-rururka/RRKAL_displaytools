@@ -1,5 +1,19 @@
 # Development Log
 
+## 2026-05-29 - Active layer diagnostics handoff
+
+Scope:
+- Qt launch packets now include `active_layer_diagnostics`.
+- Research provenance now includes the same selected layer, renderer target, diagnostics text, runtime ack, and pick state snapshot.
+- No-GUI launch packets now include the same contract with a no-runtime-evidence marker.
+- Smoke now gates `active_layer_diagnostics.schema`.
+
+Positioning:
+- This makes active layer renderer evidence portable instead of only visible in the live Qt Properties panel.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Active layer renderer diagnostics
 
 Scope:

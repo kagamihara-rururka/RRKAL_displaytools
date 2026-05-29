@@ -1168,6 +1168,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "rrkal_data_manifest_ref": self.rrkal_manifest_ref_edit.text().strip(),
             "rrkal_data_manifest_ref_boundary": "Reference-only handoff field; displaytools does not discover, download, validate, import, or govern this manifest.",
             "selected_layer": self.selected_layer_key,
+            "active_layer_diagnostics": self.active_layer_diagnostics_packet(),
             "selected_pin_id": self.selected_pin_id,
             "layer_stack_ui": self.collect_layer_stack_ui(),
             "tool_state": self.collect_tool_state(),
@@ -2123,6 +2124,27 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             pick_text = f"pick={pick_event}, target={pick_target}, {hit_text}{feature_text}"
         return f"{ack_text}; {pick_text}"
 
+    def active_layer_diagnostics_packet(self) -> dict[str, object]:
+        key = self.selected_layer_key
+        label = next((text for layer_key, text in LAYER_LABELS if layer_key == key), key or None)
+        renderer_target = LAYER_RUNTIME_ID_ALIASES.get(key, None) if key is not None else None
+        diagnostics_text = (
+            self.layer_diagnostics_text(str(renderer_target))
+            if renderer_target is not None
+            else "no active layer selected"
+        )
+        return {
+            "schema": "rrkal_displaytools.active_layer_diagnostics.v1",
+            "selected_layer": key,
+            "label": label,
+            "renderer_target": renderer_target,
+            "diagnostics_text": diagnostics_text,
+            "runtime_ack_file": str(LAYER_RUNTIME_ACK_PATH),
+            "runtime_ack": self.layer_runtime_ack_payload,
+            "pick_state_file": str(LAYER_PICK_STATE_PATH),
+            "pick_state": self.layer_pick_state_payload,
+        }
+
     def set_active_tool(self, mode: str) -> None:
         if mode not in self.tool_buttons:
             return
@@ -2633,6 +2655,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "rrkal_data_manifest_ref": self.rrkal_manifest_ref_edit.text().strip(),
             },
             "active_layer": self.selected_layer_key,
+            "active_layer_diagnostics": self.active_layer_diagnostics_packet(),
             "active_tool": self.active_tool,
             "cursor_lat_lon_estimate": {
                 "latitude": self.cursor_latitude,

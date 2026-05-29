@@ -28,6 +28,9 @@ $launchPacket = $launchPacketText | ConvertFrom-Json
 if ($launchPacket.canvas_preview.schema -ne "rrkal_displaytools.canvas_preview.v1") {
     throw "Launch packet canvas_preview schema missing or invalid"
 }
+if ($launchPacket.active_layer_diagnostics.schema -ne "rrkal_displaytools.active_layer_diagnostics.v1") {
+    throw "Launch packet active_layer_diagnostics schema missing or invalid"
+}
 if ($launchPacket.portable_command -notcontains "--preview-frame-file") {
     throw "Launch packet portable command is missing --preview-frame-file"
 }

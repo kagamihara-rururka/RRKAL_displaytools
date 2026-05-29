@@ -34,6 +34,22 @@ BOOL_FLAGS = {
     "vehicle_icons": "vehicle-icons",
     "demo_closed_loop": "demo-closed-loop",
 }
+LAYER_RUNTIME_ID_ALIASES = {
+    "show_grid": "grid",
+    "show_stars": "stars",
+    "lake_layer": "lakes",
+    "river_layer": "rivers",
+    "border_layer": "borders",
+    "territorial_sea_layer": "territorial_sea",
+    "eez_layer": "eez",
+    "high_seas_layer": "high_seas",
+    "aircraft_layer": "aircraft",
+    "pin_layer": "pins",
+    "ocean_material": "ocean_material",
+    "terrain_contours": "contours",
+    "scale_bar": "scale",
+    "vehicle_icons": "vehicle_icons",
+}
 
 DEFAULT_CANVAS_PREVIEW = {
     "schema": "rrkal_displaytools.canvas_preview.v1",
@@ -113,6 +129,22 @@ def canvas_preview_packet(profile: dict[str, object]) -> dict[str, object]:
     return dict(DEFAULT_CANVAS_PREVIEW)
 
 
+def active_layer_diagnostics_packet(profile: dict[str, object]) -> dict[str, object]:
+    selected_layer = profile.get("selected_layer")
+    selected_layer = selected_layer if isinstance(selected_layer, str) else None
+    renderer_target = LAYER_RUNTIME_ID_ALIASES.get(selected_layer) if selected_layer else None
+    return {
+        "schema": "rrkal_displaytools.active_layer_diagnostics.v1",
+        "selected_layer": selected_layer,
+        "renderer_target": renderer_target,
+        "diagnostics_text": "no runtime ack/pick in no-GUI export",
+        "runtime_ack_file": "state/renderer_layer_runtime_ack.json",
+        "runtime_ack": None,
+        "pick_state_file": "state/renderer_layer_pick_state.json",
+        "pick_state": None,
+    }
+
+
 def launch_packet(profile_path: Path, profile: dict[str, object], rrkal_data_manifest_ref: str = "") -> dict[str, object]:
     portable_command = ["py", "-3", "taichi_global_bathymetry.py", *renderer_args(profile, rrkal_data_manifest_ref)]
     manifest_ref = rrkal_data_manifest_ref or str(profile.get("renderer", {}).get("rrkal_data_manifest_ref", "")).strip()
@@ -137,6 +169,7 @@ def launch_packet(profile_path: Path, profile: dict[str, object], rrkal_data_man
         "rrkal_data_manifest_ref": manifest_ref,
         "rrkal_data_manifest_ref_boundary": "Reference-only handoff field; displaytools does not discover, download, validate, import, or govern this manifest.",
         "canvas_preview": canvas_preview_packet(profile),
+        "active_layer_diagnostics": active_layer_diagnostics_packet(profile),
         "closed_loop_status": renderer_closed_loop_status_packet(),
         "portable_command": portable_command,
         "portable_command_line": " ".join(portable_command),
