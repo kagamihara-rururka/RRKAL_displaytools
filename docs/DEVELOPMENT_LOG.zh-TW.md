@@ -784,3 +784,18 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Renderer Pin label layout
+
+Scope:
+- Added simple renderer-side Pin label boxes with leader lines.
+- Label placement uses four candidate quadrants around each visible Pin.
+- Labels skip positions that collide with previously placed labels.
+- Label colors now follow the active Pin marker style profile.
+
+Positioning:
+- This makes scientific Pins readable in the renderer instead of only showing symbols.
+- Remaining Pin work is label priority controls, pick/hover, and deeper globe-mask/depth-buffer occlusion refinement.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

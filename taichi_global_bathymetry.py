@@ -2334,6 +2334,9 @@ PIN_MARKER_STYLE_PROFILES = {
         },
         "selected_ring": (255, 255, 255, 220),
         "center": (12, 18, 24, 255),
+        "label_bg": (15, 28, 42, 218),
+        "label_text": (245, 250, 255, 255),
+        "label_line": (255, 255, 255, 170),
     },
     "nautical": {
         "colors": {
@@ -2345,6 +2348,9 @@ PIN_MARKER_STYLE_PROFILES = {
         },
         "selected_ring": (237, 248, 255, 226),
         "center": (8, 32, 44, 255),
+        "label_bg": (6, 44, 60, 220),
+        "label_text": (235, 250, 255, 255),
+        "label_line": (237, 248, 255, 176),
     },
     "tactical": {
         "colors": {
@@ -2356,6 +2362,9 @@ PIN_MARKER_STYLE_PROFILES = {
         },
         "selected_ring": (214, 255, 220, 235),
         "center": (0, 20, 12, 255),
+        "label_bg": (0, 24, 14, 228),
+        "label_text": (188, 255, 190, 255),
+        "label_line": (160, 255, 140, 188),
     },
     "parchment": {
         "colors": {
@@ -2367,6 +2376,9 @@ PIN_MARKER_STYLE_PROFILES = {
         },
         "selected_ring": (255, 244, 202, 228),
         "center": (61, 39, 24, 255),
+        "label_bg": (235, 213, 165, 222),
+        "label_text": (70, 45, 25, 255),
+        "label_line": (124, 79, 38, 180),
     },
 }
 
@@ -2386,6 +2398,9 @@ def pin_marker_style_packet() -> dict[str, object]:
             "pin_types": sorted(colors),
             "selected_ring": style["selected_ring"],
             "center": style["center"],
+            "label_bg": style["label_bg"],
+            "label_text": style["label_text"],
+            "label_line": style["label_line"],
         }
     return {
         "schema": "rrkal_displaytools.pin_marker_style_profiles.v1",
@@ -2425,6 +2440,119 @@ def load_pin_records(pin_file: str | None, pin_json: str | None) -> tuple[list[d
     return records, selected_pin_id
 
 
+def _pin_label_text(pin: dict[str, object]) -> str:
+    text = str(pin.get("label") or pin.get("id") or "Pin").strip()
+    if len(text) > 28:
+        return text[:25] + "..."
+    return text or "Pin"
+
+
+def _boxes_intersect(a: tuple[int, int, int, int], b: tuple[int, int, int, int], pad: int = 4) -> bool:
+    return not (
+        a[2] + pad <= b[0]
+        or b[2] + pad <= a[0]
+        or a[3] + pad <= b[1]
+        or b[3] + pad <= a[1]
+    )
+
+
+def _clamp_label_box(box: tuple[int, int, int, int], width: int, height: int) -> tuple[int, int, int, int]:
+    x0, y0, x1, y1 = box
+    box_w = x1 - x0
+    box_h = y1 - y0
+    x0 = max(0, min(width - box_w - 1, x0))
+    y0 = max(0, min(height - box_h - 1, y0))
+    return x0, y0, x0 + box_w, y0 + box_h
+
+
+def _pin_label_candidates(
+    x: int,
+    y: int,
+    text: str,
+    marker_radius: int,
+    width: int,
+    height: int,
+) -> list[tuple[int, int, int, int]]:
+    label_w = max(42, min(220, len(text) * 7 + 14))
+    label_h = 18
+    gap = marker_radius + 8
+    raw = [
+        (x + gap, y - label_h - 4, x + gap + label_w, y - 4),
+        (x + gap, y + 4, x + gap + label_w, y + 4 + label_h),
+        (x - gap - label_w, y - label_h - 4, x - gap, y - 4),
+        (x - gap - label_w, y + 4, x - gap, y + 4 + label_h),
+    ]
+    return [_clamp_label_box(box, width, height) for box in raw]
+
+
+def _draw_pin_label_fallback(
+    overlay: np.ndarray,
+    planned: list[dict[str, object]],
+    marker_style: dict[str, object],
+) -> None:
+    label_bg = marker_style["label_bg"]
+    label_line = marker_style["label_line"]
+    for item in planned:
+        x = int(item["x"])
+        y = int(item["y"])
+        x0, y0, x1, y1 = item["box"]
+        cx = max(x0, min(x1 - 1, x))
+        cy = max(y0, min(y1 - 1, y))
+        steps = max(abs(cx - x), abs(cy - y), 1)
+        for step in range(steps + 1):
+            px = int(round(x + (cx - x) * step / steps))
+            py = int(round(y + (cy - y) * step / steps))
+            if 0 <= py < overlay.shape[0] and 0 <= px < overlay.shape[1]:
+                overlay[py, px, :3] = label_line[:3]
+                overlay[py, px, 3] = max(int(overlay[py, px, 3]), int(label_line[3]))
+        region = overlay[y0:y1, x0:x1]
+        region[..., :3] = label_bg[:3]
+        region[..., 3] = np.maximum(region[..., 3], int(label_bg[3]))
+
+
+def _draw_pin_labels(
+    overlay: np.ndarray,
+    labels: list[dict[str, object]],
+    marker_style: dict[str, object],
+    width: int,
+    height: int,
+) -> None:
+    occupied: list[tuple[int, int, int, int]] = []
+    planned: list[dict[str, object]] = []
+    for label in labels[:24]:
+        x = int(label["x"])
+        y = int(label["y"])
+        text = str(label["text"])
+        marker_radius = int(label["marker_radius"])
+        for box in _pin_label_candidates(x, y, text, marker_radius, width, height):
+            if any(_boxes_intersect(box, other) for other in occupied):
+                continue
+            occupied.append(box)
+            planned.append({"x": x, "y": y, "text": text, "box": box})
+            break
+    if not planned:
+        return
+    try:
+        from PIL import Image, ImageDraw, ImageFont
+
+        image = Image.fromarray(overlay, mode="RGBA")
+        draw = ImageDraw.Draw(image, mode="RGBA")
+        font = ImageFont.load_default()
+        label_bg = tuple(marker_style["label_bg"])
+        label_text = tuple(marker_style["label_text"])
+        label_line = tuple(marker_style["label_line"])
+        for item in planned:
+            x = int(item["x"])
+            y = int(item["y"])
+            x0, y0, x1, y1 = item["box"]
+            draw.line((x, y, (x0 + x1) // 2, (y0 + y1) // 2), fill=label_line, width=1)
+            draw.rectangle((x0, y0, x1, y1), fill=label_bg, outline=label_line)
+            draw.text((x0 + 5, y0 + 3), str(item["text"]), fill=label_text, font=font)
+        overlay[:] = np.asarray(image, dtype=np.uint8)
+    except Exception:
+        _draw_pin_label_fallback(overlay, planned, marker_style)
+
+
 def render_pin_overlay(
     width: int,
     height: int,
@@ -2439,6 +2567,7 @@ def render_pin_overlay(
     marker_colors = marker_style["colors"]
     selected_ring = marker_style["selected_ring"]
     center_color = marker_style["center"]
+    labels: list[dict[str, object]] = []
     for pin in projected_pins:
         if not bool(pin.get("visible", False)):
             continue
@@ -2470,6 +2599,15 @@ def render_pin_overlay(
         if 0 <= x < width and 0 <= y < height:
             overlay[y, x, :3] = center_color[:3]
             overlay[y, x, 3] = center_color[3]
+        labels.append(
+            {
+                "x": x,
+                "y": y,
+                "text": _pin_label_text(pin),
+                "marker_radius": marker_radius,
+            }
+        )
+    _draw_pin_labels(overlay, labels, marker_style, width, height)
     return overlay
 
 
