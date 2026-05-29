@@ -430,6 +430,7 @@ def timeline_runtime_state_packet(profile: dict[str, object], target_file: str =
         "timeline_state": timeline_state_packet(profile),
         "playback_readiness": timeline_playback_readiness_packet(),
         "playback_plan": timeline_playback_plan_packet(keyframes),
+        "segment_state": timeline_segment_state_packet(keyframes),
         "timeline_keyframes": keyframes,
         "source": "scripts/export_launch_packet.py",
         "target_file": target_file,
@@ -495,6 +496,28 @@ def timeline_playback_plan_packet(keyframes: list[dict[str, object]]) -> dict[st
     }
 
 
+def timeline_segment_state_packet(keyframes: list[dict[str, object]]) -> dict[str, object]:
+    active_segment = None
+    if len(keyframes) >= 2:
+        active_segment = {
+            "from_index": 0,
+            "to_index": 1,
+            "from_keyframe_id": str(keyframes[0].get("id", "")),
+            "to_keyframe_id": str(keyframes[1].get("id", "")),
+            "interpolatable_fields": ["ocean_material"],
+            "discrete_fields": ["style_profile", "layer_visibility", "layer_blend", "pins", "boundary_highlight"],
+        }
+    return {
+        "schema": "rrkal_displaytools.timeline_segment_state.v1",
+        "mode": "first_segment_preview",
+        "active_segment": active_segment,
+        "segment_available": active_segment is not None,
+        "segment_count": max(0, len(keyframes) - 1),
+        "pending": ["renderer_step_playback", "inter_keyframe_interpolation", "animation_export"],
+        "boundary": "No-GUI segment state describes the next playback segment; renderer step playback is not claimed yet.",
+    }
+
+
 def launch_packet(
     profile_path: Path,
     profile: dict[str, object],
@@ -542,6 +565,7 @@ def launch_packet(
         "timeline_state": timeline_state_packet(profile),
         "timeline_playback_readiness": timeline_playback_readiness_packet(),
         "timeline_playback_plan": timeline_playback_plan_packet(timeline_keyframes),
+        "timeline_segment_state": timeline_segment_state_packet(timeline_keyframes),
         "timeline_runtime_state": timeline_runtime_state_packet(profile, timeline_state_file),
         "timeline_runtime_state_file": timeline_state_file,
         "timeline_ack_file": timeline_ack_file,

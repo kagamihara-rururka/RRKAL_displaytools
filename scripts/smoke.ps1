@@ -88,6 +88,9 @@ if ($launchPacket.timeline_playback_readiness.renderer_timeline_playback -ne $fa
 if ($launchPacket.timeline_playback_plan.schema -ne "rrkal_displaytools.timeline_playback_plan.v1") {
     throw "Launch packet timeline playback plan schema missing or invalid"
 }
+if ($launchPacket.timeline_segment_state.schema -ne "rrkal_displaytools.timeline_segment_state.v1") {
+    throw "Launch packet timeline segment state schema missing or invalid"
+}
 if ($launchPacket.timeline_state.implemented -notcontains "profile_timeline_keyframe_handoff") {
     throw "Launch packet timeline_state profile keyframe handoff missing"
 }
@@ -105,6 +108,9 @@ if ($launchPacket.timeline_runtime_state.playback_readiness.schema -ne "rrkal_di
 }
 if ($launchPacket.timeline_runtime_state.playback_plan.schema -ne "rrkal_displaytools.timeline_playback_plan.v1") {
     throw "Launch packet timeline_runtime_state playback plan missing or invalid"
+}
+if ($launchPacket.timeline_runtime_state.segment_state.schema -ne "rrkal_displaytools.timeline_segment_state.v1") {
+    throw "Launch packet timeline_runtime_state segment state missing or invalid"
 }
 if ($launchPacket.timeline_runtime_state_file -ne "state/renderer_timeline_state.json") {
     throw "Launch packet timeline runtime state file missing or invalid"
@@ -184,6 +190,9 @@ if ($timelineAck.playback_readiness.schema -ne "rrkal_displaytools.timeline_play
 if ($timelineAck.playback_plan.schema -ne "rrkal_displaytools.timeline_playback_plan.v1") {
     throw "Renderer timeline ack endpoint playback plan missing or invalid"
 }
+if ($timelineAck.segment_state.schema -ne "rrkal_displaytools.timeline_segment_state.v1") {
+    throw "Renderer timeline ack endpoint segment state missing or invalid"
+}
 if ($timelineAck.first_keyframe_apply.schema -ne "rrkal_displaytools.timeline_first_keyframe_apply.v1") {
     throw "Renderer timeline ack endpoint first keyframe apply packet missing or invalid"
 }
@@ -234,6 +243,9 @@ if ($capabilities.timeline_handoff.playback_readiness.schema -ne "rrkal_displayt
 }
 if ($capabilities.timeline_handoff.playback_plan_schema -ne "rrkal_displaytools.timeline_playback_plan.v1") {
     throw "Renderer timeline_handoff playback plan schema missing or invalid"
+}
+if ($capabilities.timeline_handoff.segment_state_schema -ne "rrkal_displaytools.timeline_segment_state.v1") {
+    throw "Renderer timeline_handoff segment state schema missing or invalid"
 }
 if ($capabilities.timeline_handoff.first_keyframe_apply_schema -ne "rrkal_displaytools.timeline_first_keyframe_apply.v1") {
     throw "Renderer timeline_handoff first keyframe apply schema missing or invalid"

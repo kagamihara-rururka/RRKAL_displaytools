@@ -1,5 +1,18 @@
 # Development Log
 
+## 2026-05-29 - Timeline active segment contract
+
+Scope:
+- Added `rrkal_displaytools.timeline_segment_state.v1`.
+- Qt launch/provenance packets, No-GUI launch packets, Timeline runtime state, renderer ack payloads, renderer capabilities, closed-loop status, docs, and smoke gates now expose the first active segment, segment count, interpolatable fields, and discrete fields.
+- Segment state does not claim renderer step playback yet; it fixes the handoff shape for the next playback loop.
+
+Positioning:
+- This prepares renderer-side Timeline step playback without mixing in animation export.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Timeline first keyframe Pins and Boundary apply
 
 Scope:

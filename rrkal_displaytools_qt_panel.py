@@ -1381,6 +1381,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "timeline_state": self.collect_timeline_state(),
             "timeline_playback_readiness": self.collect_timeline_playback_readiness(),
             "timeline_playback_plan": self.collect_timeline_playback_plan(),
+            "timeline_segment_state": self.collect_timeline_segment_state(),
             "timeline_runtime_state_file": str(TIMELINE_STATE_PATH),
             "timeline_ack_file": str(TIMELINE_ACK_PATH),
             "timeline_ack": self.timeline_ack_payload,
@@ -2749,6 +2750,29 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "boundary": "Playback plan describes ordered keyframes for future renderer playback; current renderer only acknowledges the plan.",
         }
 
+    def collect_timeline_segment_state(self) -> dict[str, object]:
+        first = self.timeline_keyframes[0] if len(self.timeline_keyframes) >= 1 else None
+        second = self.timeline_keyframes[1] if len(self.timeline_keyframes) >= 2 else None
+        active_segment = None
+        if isinstance(first, dict) and isinstance(second, dict):
+            active_segment = {
+                "from_index": 0,
+                "to_index": 1,
+                "from_keyframe_id": str(first.get("id", "")),
+                "to_keyframe_id": str(second.get("id", "")),
+                "interpolatable_fields": ["ocean_material"],
+                "discrete_fields": ["style_profile", "layer_visibility", "layer_blend", "pins", "boundary_highlight"],
+            }
+        return {
+            "schema": "rrkal_displaytools.timeline_segment_state.v1",
+            "mode": "first_segment_preview",
+            "active_segment": active_segment,
+            "segment_available": active_segment is not None,
+            "segment_count": max(0, len(self.timeline_keyframes) - 1),
+            "pending": ["renderer_step_playback", "inter_keyframe_interpolation", "animation_export"],
+            "boundary": "Segment state describes the next playback segment; renderer step playback is not claimed yet.",
+        }
+
     def collect_timeline_runtime_state(self) -> dict[str, object]:
         return {
             "schema": "rrkal_displaytools.timeline_runtime_state.v1",
@@ -2756,6 +2780,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "timeline_state": self.collect_timeline_state(),
             "playback_readiness": self.collect_timeline_playback_readiness(),
             "playback_plan": self.collect_timeline_playback_plan(),
+            "segment_state": self.collect_timeline_segment_state(),
             "timeline_keyframes": [dict(keyframe) for keyframe in self.timeline_keyframes],
             "source": "rrkal_displaytools_qt_panel",
             "boundary": "Renderer receives Timeline keyframes as state only; renderer playback/interpolation/export remain pending.",
@@ -3710,6 +3735,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "timeline_state": self.collect_timeline_state(),
             "timeline_playback_readiness": self.collect_timeline_playback_readiness(),
             "timeline_playback_plan": self.collect_timeline_playback_plan(),
+            "timeline_segment_state": self.collect_timeline_segment_state(),
             "timeline_runtime_state_file": str(TIMELINE_STATE_PATH),
             "timeline_state_last_write_utc": self.timeline_state_last_write_utc,
             "timeline_state_write_error": self.timeline_state_write_error,

@@ -2734,6 +2734,7 @@ def timeline_ack_payload_from_state_file(timeline_state_file: str | Path | None)
         "playback_mode": playback.get("mode"),
         "playback_readiness": timeline_playback_readiness_packet(),
         "playback_plan": timeline_playback_plan_packet(runtime_keyframes),
+        "segment_state": timeline_segment_state_packet(runtime_keyframes),
         "first_keyframe_apply": timeline_first_keyframe_apply_preview_packet(
             runtime_keyframes,
             applied=False,
@@ -2809,6 +2810,29 @@ def timeline_playback_plan_packet(keyframes: list[object] | None = None) -> dict
             "inter_keyframe_interpolation",
         ],
         "boundary": "Plan is acknowledged for future renderer playback; it is not executed by the renderer yet.",
+    }
+
+
+def timeline_segment_state_packet(keyframes: list[object] | None = None) -> dict[str, object]:
+    keyframes = [keyframe for keyframe in keyframes if isinstance(keyframe, dict)] if isinstance(keyframes, list) else []
+    active_segment = None
+    if len(keyframes) >= 2:
+        active_segment = {
+            "from_index": 0,
+            "to_index": 1,
+            "from_keyframe_id": str(keyframes[0].get("id", "")),
+            "to_keyframe_id": str(keyframes[1].get("id", "")),
+            "interpolatable_fields": ["ocean_material"],
+            "discrete_fields": ["style_profile", "layer_visibility", "layer_blend", "pins", "boundary_highlight"],
+        }
+    return {
+        "schema": "rrkal_displaytools.timeline_segment_state.v1",
+        "mode": "first_segment_preview",
+        "active_segment": active_segment,
+        "segment_available": active_segment is not None,
+        "segment_count": max(0, len(keyframes) - 1),
+        "pending": ["renderer_step_playback", "inter_keyframe_interpolation", "animation_export"],
+        "boundary": "Renderer exposes segment state for future step playback; it is not executing segment animation yet.",
     }
 
 
@@ -13460,6 +13484,7 @@ class HybridRenderController:
             else None,
             "playback_readiness": timeline_playback_readiness_packet(),
             "playback_plan": timeline_playback_plan_packet(runtime_keyframes),
+            "segment_state": timeline_segment_state_packet(runtime_keyframes),
             "first_keyframe_apply": getattr(
                 self,
                 "timeline_first_keyframe_apply_result",
@@ -16722,6 +16747,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "state_schema": "rrkal_displaytools.timeline_runtime_state.v1",
             "ack_schema": "rrkal_displaytools.renderer_timeline_ack.v1",
             "playback_plan_schema": "rrkal_displaytools.timeline_playback_plan.v1",
+            "segment_state_schema": "rrkal_displaytools.timeline_segment_state.v1",
             "first_keyframe_apply_schema": "rrkal_displaytools.timeline_first_keyframe_apply.v1",
             "playback_readiness": timeline_playback_readiness_packet(),
             "controls": ["timeline-state-file", "timeline-ack-file", "ack-timeline-state-and-exit"],
@@ -16730,6 +16756,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "rrkal_displaytools.timeline_keyframe.v1",
                 "rrkal_displaytools.timeline_runtime_state.v1",
                 "rrkal_displaytools.timeline_playback_plan.v1",
+                "rrkal_displaytools.timeline_segment_state.v1",
                 "rrkal_displaytools.timeline_first_keyframe_apply.v1",
                 "profile.timeline_keyframes",
             ],
