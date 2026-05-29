@@ -283,3 +283,8 @@
 
 - Renderer capability discovery now lists cursor geodesy, Pin overlay, Boundary emphasis and Boundary ack history in `ui_handoff_contracts`.
 - Smoke verifies the refreshed handoff contract list.
+
+### 2026-05-30 Closed-loop Pin/Boundary UI handoff evidence
+
+- Closed-loop status now includes `pin_boundary_ui_handoff` for Pin coordinate source/projection UI and Boundary emphasis/ack handoff evidence.
+- Timeline partial status now lists Boundary emphasis keyframe preservation and Boundary target summaries.

@@ -1149,6 +1149,9 @@ if ($closedLoopIds -notcontains "layer_stack_undo_snapshots") {
 if ($closedLoopIds -notcontains "session_journal_handoff") {
     throw "Closed-loop session_journal_handoff missing"
 }
+if ($closedLoopIds -notcontains "pin_boundary_ui_handoff") {
+    throw "Closed-loop pin_boundary_ui_handoff missing"
+}
 $timelinePartial = @($closedLoop.partial | Where-Object { $_.id -eq "qt_timeline_panel" }) | Select-Object -First 1
 if ($null -eq $timelinePartial) {
     throw "Closed-loop qt_timeline_panel partial status missing"

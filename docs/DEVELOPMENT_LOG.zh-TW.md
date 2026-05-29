@@ -3112,3 +3112,16 @@ Decision:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Closed-loop Pin/Boundary UI handoff evidence
+
+Scope:
+- Closed-loop status now includes `pin_boundary_ui_handoff` as a closed evidence group for Pin coordinate source metadata, Pin cursor fill UI, Pin projection notes, Boundary emphasis feedback/target alignment and Boundary ack history handoff.
+- Timeline partial status now explicitly lists Boundary emphasis keyframe preservation and Timeline keyframe Boundary target summaries.
+- Smoke gates the new `pin_boundary_ui_handoff` closed-loop id.
+
+Decision:
+- Progress inspection should expose the same Pin/Boundary UI loops now covered by Qt, launch packet, renderer capabilities and handoff inspection, rather than leaving them implicit in separate contracts.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
