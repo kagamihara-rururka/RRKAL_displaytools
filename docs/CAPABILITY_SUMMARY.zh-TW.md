@@ -213,3 +213,8 @@
 
 - Launch packets, renderer capabilities, and handoff inspection now expose the boundary ack history contract, source file, fields, Qt History surface, and provenance field.
 - Smoke verifies that boundary emphasis ack history is discoverable across machines.
+
+### 2026-05-30 Boundary identity status verification
+
+- Renderer capabilities and handoff inspection now expose boundary identity applied/pending markers.
+- Smoke verifies applied closed-ring/source-property identity scope and pending authoritative polygon / open-line inference scope across launch packet, capabilities, and handoff.

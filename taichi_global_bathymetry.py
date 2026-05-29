@@ -19129,6 +19129,9 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "schema": BOUNDARY_HIGHLIGHT_SCHEMA,
             "ack_schema": "rrkal_displaytools.renderer_boundary_highlight_ack.v1",
             "identity_status_schema": BOUNDARY_IDENTITY_STATUS_SCHEMA,
+            "identity_status_applied": default_boundary_identity_status()["applied"],
+            "identity_status_pending": default_boundary_identity_status()["pending"],
+            "identity_status_boundary": default_boundary_identity_status()["boundary"],
             "controls": [
                 "boundary-highlight-json",
                 "boundary-highlight-ack-file",

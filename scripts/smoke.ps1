@@ -536,6 +536,12 @@ if ($launchPacket.timeline_ack_file -ne "state/renderer_timeline_ack.json") {
 if ($launchPacket.boundary_highlight.identity_status.schema -ne "rrkal_displaytools.boundary_identity_status.v1") {
     throw "Launch packet boundary_highlight identity_status schema missing or invalid"
 }
+if ($launchPacket.boundary_highlight.identity_status.applied -notcontains "closed_ring_area_hit_test") {
+    throw "Launch packet boundary_highlight identity_status closed ring hit test missing"
+}
+if ($launchPacket.boundary_highlight.identity_status.pending -notcontains "authoritative_polygon_territory_identity") {
+    throw "Launch packet boundary_highlight identity_status authoritative polygon pending marker missing"
+}
 if ($launchPacket.boundary_highlight.ack_history_contract -ne "boundary_highlight_ack_history") {
     throw "Launch packet boundary_highlight ack history contract missing"
 }
@@ -1057,6 +1063,12 @@ if ($capabilities.timeline_handoff.controls -notcontains "ack-timeline-state-and
 if ($capabilities.boundary_highlight.identity_status_schema -ne "rrkal_displaytools.boundary_identity_status.v1") {
     throw "Renderer boundary_highlight identity_status capability missing or invalid"
 }
+if ($capabilities.boundary_highlight.identity_status_applied -notcontains "closed_ring_fill_preview") {
+    throw "Renderer boundary_highlight identity_status applied fill preview missing"
+}
+if ($capabilities.boundary_highlight.identity_status_pending -notcontains "open_line_area_inference") {
+    throw "Renderer boundary_highlight identity_status open-line pending marker missing"
+}
 if ($capabilities.boundary_highlight.ack_history_contract -ne "boundary_highlight_ack_history") {
     throw "Renderer boundary_highlight ack history contract missing"
 }
@@ -1248,6 +1260,12 @@ if ($handoff.boundary_emphasis_control.qt_surface -ne "Layers dock boundary emph
 }
 if ($handoff.boundary_highlight.ack_history_contract -ne "boundary_highlight_ack_history") {
     throw "Handoff inspection boundary_highlight ack history contract missing"
+}
+if ($handoff.boundary_highlight.identity_status_applied -notcontains "maritime_property_key_identity") {
+    throw "Handoff inspection boundary_highlight identity applied marker missing"
+}
+if ($handoff.boundary_highlight.renderer_identity_status_pending -notcontains "authoritative_polygon_territory_identity") {
+    throw "Handoff inspection boundary_highlight renderer identity pending marker missing"
 }
 if ($handoff.boundary_highlight.ack_history_fields -notcontains "updated_at_utc") {
     throw "Handoff inspection boundary_highlight ack history timestamp field missing"

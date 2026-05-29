@@ -2929,3 +2929,16 @@ Decision:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Boundary identity status verification
+
+Scope:
+- Renderer capabilities now expose boundary identity applied/pending markers.
+- Handoff inspection now reports launch-packet and renderer boundary identity applied/pending fields.
+- Smoke now verifies closed-ring hit/fill applied markers and authoritative polygon / open-line pending markers across launch packet, renderer capability, and handoff inspection.
+
+Decision:
+- Boundary emphasis is not yet an authoritative legal identity resolver. The current contract now makes the applied visual/source-property identity scope and pending authoritative identity work explicit and cross-machine verifiable.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
