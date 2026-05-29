@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PROFILE_DIR = ROOT / "profiles"
 sys.path.insert(0, str(ROOT))
 
+from closed_loop_status import renderer_closed_loop_status_packet  # noqa: E402
 from profile_schema import load_profile_payload, profile_payload_errors  # noqa: E402
 
 
@@ -24,6 +25,7 @@ BOOL_FLAGS = {
     "eez_layer": "eez-layer",
     "high_seas_layer": "high-seas-layer",
     "aircraft_layer": "aircraft-layer",
+    "pin_layer": "pin-layer",
     "ocean_material": "ocean-material",
     "terrain_contours": "terrain-contours",
     "scale_bar": "scale-bar",
@@ -104,6 +106,7 @@ def launch_packet(profile_path: Path, profile: dict[str, object]) -> dict[str, o
             ],
         },
         "profile": profile,
+        "closed_loop_status": renderer_closed_loop_status_packet(),
         "portable_command": portable_command,
         "portable_command_line": " ".join(portable_command),
     }

@@ -1,5 +1,18 @@
 ﻿# Development Log
 
+## 2026-05-29 - No-GUI launch packet status parity
+
+Scope:
+- `scripts/export_launch_packet.py` now includes the shared `closed_loop_status` snapshot.
+- The no-GUI renderer arg builder now includes the `pin_layer` / `--pin-layer` flag, matching the Qt panel layer stack.
+
+Positioning:
+- GUI and no-GUI launch packets now expose the same closed-loop status contract.
+- This improves cross-machine handoff and keeps Pin layer launch behavior consistent.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Shared closed-loop status contract
 
 Scope:
