@@ -1,5 +1,19 @@
 # Development Log
 
+## 2026-05-29 - Timeline layer opacity interpolation
+
+Scope:
+- Added `rrkal_displaytools.timeline_layer_opacity_interpolation.v1`.
+- Renderer playback now interpolates layer opacity between active and next Timeline keyframes.
+- Timeline PNG/GIF export manifests now record interpolated layer opacity per frame.
+- Qt/No-GUI launch packets, renderer ack, renderer capabilities, closed-loop status, docs, and smoke gates now expose the layer opacity interpolation contract.
+
+Positioning:
+- This closes the first layer-state interpolation path while keeping layer blend mode and visibility interpolation explicitly pending.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Timeline PNG frame sequence export
 
 Scope:

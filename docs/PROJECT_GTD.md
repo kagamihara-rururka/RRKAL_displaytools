@@ -27,7 +27,7 @@ Last updated: 2026-05-29
 
 ## Backlog
 
-- Move future development fully into `C:\Users\lyn59\Documents\Codex\RRKAL_displaytools`; avoid editing the old scratch source unless explicitly requested.
+- Move future development fully into `L:\RRKAL_displaytools`; avoid editing the old scratch source unless explicitly requested.
 - Define the minimal renderer input contract expected from RRKAL tile/cache manifests.
 - Create in-renderer layer toggles after the Qt launch panel proves the control model.
 - Tune profile templates after the preferred visual baseline is confirmed.
@@ -36,7 +36,7 @@ Last updated: 2026-05-29
 
 ## Done
 
-- 2026-05-29: Created and pushed the private GitHub repo `kagamihara-rururka/RRKAL_displaytools`.
+- 2026-05-29: Created and pushed the GitHub repo `Kagamihara-Ruruka/RRKAL_displaytools`.
 - 2026-05-29: Imported the current Taichi globe prototype and minimal governance docs.
 - 2026-05-29: Added RRKAL-aligned documentation governance skeleton and product positioning.
 - 2026-05-29: Added `--demo-closed-loop` as the first bounded showcase path for the existing renderer stack.
@@ -103,3 +103,4 @@ Last updated: 2026-05-29
 - 2026-05-29: Added Timeline camera keyframe controls and renderer discrete camera apply contract.
 - 2026-05-29: Added Timeline camera keyframe interpolation for renderer playback and PNG export manifests.
 - 2026-05-29: Added Timeline GIF animation export fallback for dependency-light sharing.
+- 2026-05-29: Added Timeline layer opacity interpolation for renderer playback and export manifests.

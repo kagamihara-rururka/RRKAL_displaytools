@@ -168,8 +168,9 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "renderer GIF animation export",
                     "renderer discrete camera keyframe apply",
                     "renderer camera keyframe interpolation",
+                    "renderer layer opacity keyframe interpolation",
                 ],
-                "pending": ["mp4_video_encoding", "non_material_interpolation"],
+                "pending": ["mp4_video_encoding", "layer_blend_interpolation", "visibility_interpolation"],
                 "evidence": [
                     "Timeline dock controls",
                     "rrkal_displaytools.timeline_state.v1",
@@ -184,6 +185,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "rrkal_displaytools.timeline_animation_export.v1",
                     "rrkal_displaytools.timeline_camera_keyframe.v1",
                     "rrkal_displaytools.timeline_camera_interpolation.v1",
+                    "rrkal_displaytools.timeline_layer_opacity_interpolation.v1",
                     "rrkal_displaytools.timeline_first_keyframe_apply.v1",
                     "renderer capabilities timeline_handoff",
                 ],

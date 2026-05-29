@@ -1422,6 +1422,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "timeline_animation_export": self.collect_timeline_animation_export_state(),
             "timeline_camera_keyframe": self.collect_timeline_camera_keyframe_state(),
             "timeline_camera_interpolation": self.collect_timeline_camera_interpolation_state(),
+            "timeline_layer_opacity_interpolation": self.collect_timeline_layer_opacity_interpolation_state(),
             "timeline_runtime_state_file": str(TIMELINE_STATE_PATH),
             "timeline_ack_file": str(TIMELINE_ACK_PATH),
             "timeline_ack": self.timeline_ack_payload,
@@ -2711,10 +2712,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "renderer_ocean_material_interpolation",
                 "renderer_animation_export",
                 "camera_keyframe_storage",
+                "renderer_discrete_camera_keyframe_apply",
+                "renderer_camera_keyframe_interpolation",
+                "renderer_layer_opacity_interpolation",
             ],
             "pending": [
-                "video_encoding",
-                "non_material_interpolation",
+                "mp4_video_encoding",
+                "layer_blend_interpolation",
+                "visibility_interpolation",
             ],
             "playhead": 0,
             "keyframe_count": len(self.timeline_keyframes),
@@ -2725,7 +2730,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "interval_ms": self.timeline_playback_interval_ms,
                 "next_index": self.timeline_playback_index,
             },
-            "boundary": "UIUX keyframe storage/restore/playback plus renderer discrete step playback, ocean material interpolation, PNG export, and discrete camera keyframes are available.",
+            "boundary": "UIUX keyframe storage/restore/playback plus renderer discrete step playback, ocean material interpolation, layer opacity interpolation, PNG/GIF export, and discrete camera keyframes are available.",
         }
 
     def collect_timeline_playback_readiness(self) -> dict[str, object]:
@@ -2740,15 +2745,17 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "animation_export_mode": "png_frame_sequence_with_optional_gif",
             "camera_keyframes": True,
             "camera_keyframe_interpolation": True,
+            "layer_opacity_interpolation": True,
             "ready_handoff_files": {
                 "timeline_runtime_state_file": str(TIMELINE_STATE_PATH),
                 "timeline_ack_file": str(TIMELINE_ACK_PATH),
             },
             "pending": [
                 "mp4_video_encoding",
-                "non_material_interpolation",
+                "layer_blend_interpolation",
+                "visibility_interpolation",
             ],
-            "boundary": "Renderer can interpolate camera keyframes and export PNG frame sequences with optional GIF animation; MP4 encoding and non-material interpolation remain pending.",
+            "boundary": "Renderer can interpolate camera keyframes, layer opacity, and ocean material, and export PNG frame sequences with optional GIF animation; MP4 encoding, layer blend interpolation, and visibility interpolation remain pending.",
         }
 
     def collect_timeline_camera_state(self) -> dict[str, object]:
@@ -2833,6 +2840,29 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "boundary": "Qt exports the camera interpolation contract; renderer owns runtime interpolation.",
         }
 
+    def collect_timeline_layer_opacity_interpolation_state(self) -> dict[str, object]:
+        active_step = self.collect_timeline_active_step_state()
+        active_index = active_step.get("active_index")
+        next_index = None
+        if isinstance(active_index, int) and len(self.timeline_keyframes) >= 2:
+            next_index = (active_index + 1) % len(self.timeline_keyframes)
+        return {
+            "schema": "rrkal_displaytools.timeline_layer_opacity_interpolation.v1",
+            "supported": True,
+            "instantiated": False,
+            "mode": "linear_layer_opacity_segment",
+            "playback_active": bool(self.timeline_playback_active),
+            "from_index": active_index,
+            "to_index": next_index,
+            "fraction": 0.0,
+            "fields": ["layer_stack_snapshot.layers.*.opacity"],
+            "interpolated_layer_opacity": {},
+            "layer_count": 0,
+            "applies": ["layer_opacity_keyframe_interpolation"],
+            "pending": ["layer_blend_interpolation", "visibility_interpolation"],
+            "boundary": "Qt exports the layer opacity interpolation contract; renderer owns runtime interpolation.",
+        }
+
     def collect_timeline_playback_plan(self) -> dict[str, object]:
         keyframes = []
         for index, keyframe in enumerate(self.timeline_keyframes[:24]):
@@ -2872,11 +2902,13 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "pins",
                 "boundary_highlight",
                 "camera",
+                "layer_opacity",
             ],
             "pending": [
-                "non_material_interpolation",
+                "layer_blend_interpolation",
+                "visibility_interpolation",
             ],
-            "boundary": "Playback plan drives renderer discrete keyframe steps, camera interpolation, and ocean/material interpolation; non-material interpolation remains pending.",
+            "boundary": "Playback plan drives renderer discrete keyframe steps, camera interpolation, ocean/material interpolation, and layer opacity interpolation; layer blend and visibility interpolation remain pending.",
         }
 
     def collect_timeline_segment_state(self) -> dict[str, object]:
@@ -2892,7 +2924,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "to_index": segment_index + 1,
                 "from_keyframe_id": str(first.get("id", "")),
                 "to_keyframe_id": str(second.get("id", "")),
-                "interpolatable_fields": ["ocean_material", "camera"],
+                "interpolatable_fields": ["ocean_material", "camera", "layer_opacity"],
                 "discrete_fields": ["style_profile", "layer_visibility", "layer_blend", "pins", "boundary_highlight"],
             }
         return {
@@ -2903,8 +2935,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "active_segment": active_segment,
             "segment_available": active_segment is not None,
             "segment_count": max(0, len(self.timeline_keyframes) - 1),
-            "pending": ["non_material_interpolation"],
-            "boundary": "Segment state describes the next playback segment; camera and ocean material are interpolatable fields.",
+            "pending": ["layer_blend_interpolation", "visibility_interpolation"],
+            "boundary": "Segment state describes the next playback segment; camera, ocean material, and layer opacity are interpolatable fields.",
         }
 
     def collect_timeline_active_step_state(self) -> dict[str, object]:
@@ -2927,7 +2959,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "keyframe_count": keyframe_count,
             "step_available": active_index is not None,
             "applies": ["qt_preview_step_selection", "renderer_startup_selection_hint"],
-            "pending": ["non_material_interpolation"],
+            "pending": ["layer_blend_interpolation", "visibility_interpolation"],
             "boundary": "Active step is a discrete keyframe selection contract for renderer step playback.",
         }
 
@@ -2944,7 +2976,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "keyframe_count": len(self.timeline_keyframes),
             "step_count": 0,
             "applies": ["renderer_discrete_keyframe_step"],
-            "pending": ["non_material_interpolation"],
+            "pending": ["layer_blend_interpolation", "visibility_interpolation"],
             "boundary": "Qt exports the step playback contract; renderer owns runtime stepping.",
         }
 
@@ -2960,7 +2992,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "fields": ["wave_strength", "roughness", "foam"],
             "fraction": 0.0,
             "applies": ["ocean_material_keyframe_interpolation"],
-            "pending": ["non_material_interpolation"],
+            "pending": ["layer_blend_interpolation", "visibility_interpolation"],
             "boundary": "Qt exports the interpolation contract; renderer owns runtime interpolation.",
         }
 
@@ -2978,8 +3010,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "encoding_format": None,
             "encoding_error": None,
             "applies": ["timeline_png_frame_sequence", "timeline_animation_manifest", "timeline_gif_animation"],
-            "pending": ["mp4_video_encoding", "non_material_interpolation"],
-            "boundary": "Qt exposes renderer animation export capability; renderer writes frames, manifest, and optional GIF with interpolated camera keyframes.",
+            "pending": ["mp4_video_encoding", "layer_blend_interpolation", "visibility_interpolation"],
+            "boundary": "Qt exposes renderer animation export capability; renderer writes frames, manifest, and optional GIF with interpolated camera and layer opacity keyframes.",
         }
 
     def collect_timeline_runtime_state(self) -> dict[str, object]:
@@ -2996,9 +3028,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "animation_export": self.collect_timeline_animation_export_state(),
             "camera_keyframe": self.collect_timeline_camera_keyframe_state(),
             "camera_interpolation": self.collect_timeline_camera_interpolation_state(),
+            "layer_opacity_interpolation": self.collect_timeline_layer_opacity_interpolation_state(),
             "timeline_keyframes": [dict(keyframe) for keyframe in self.timeline_keyframes],
             "source": "rrkal_displaytools_qt_panel",
-            "boundary": "Renderer receives Timeline keyframes for discrete step playback, camera apply, material interpolation, and PNG export.",
+            "boundary": "Renderer receives Timeline keyframes for discrete step playback, camera apply, material interpolation, layer opacity interpolation, and PNG/GIF export.",
         }
 
     def write_timeline_runtime_state(self) -> None:
@@ -3964,6 +3997,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "timeline_animation_export": self.collect_timeline_animation_export_state(),
             "timeline_camera_keyframe": self.collect_timeline_camera_keyframe_state(),
             "timeline_camera_interpolation": self.collect_timeline_camera_interpolation_state(),
+            "timeline_layer_opacity_interpolation": self.collect_timeline_layer_opacity_interpolation_state(),
             "timeline_runtime_state_file": str(TIMELINE_STATE_PATH),
             "timeline_state_last_write_utc": self.timeline_state_last_write_utc,
             "timeline_state_write_error": self.timeline_state_write_error,

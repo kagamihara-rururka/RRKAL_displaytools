@@ -2742,6 +2742,7 @@ def timeline_ack_payload_from_state_file(timeline_state_file: str | Path | None)
         "animation_export": timeline_animation_export_packet(executed=False),
         "camera_keyframe": timeline_camera_keyframe_packet(timeline_state, runtime_keyframes, instantiated=False),
         "camera_interpolation": timeline_camera_interpolation_packet(timeline_state, runtime_keyframes, instantiated=False),
+        "layer_opacity_interpolation": timeline_layer_opacity_interpolation_packet(timeline_state, runtime_keyframes, instantiated=False),
         "first_keyframe_apply": timeline_first_keyframe_apply_preview_packet(
             runtime_keyframes,
             applied=False,
@@ -2750,7 +2751,8 @@ def timeline_ack_payload_from_state_file(timeline_state_file: str | Path | None)
         ),
         "applies": ["input_acknowledgement"],
         "pending": [
-            "non_material_interpolation",
+            "layer_blend_interpolation",
+            "visibility_interpolation",
         ],
         "error": state_error,
         "source": "taichi_global_bathymetry",
@@ -2769,11 +2771,13 @@ def timeline_playback_readiness_packet() -> dict[str, object]:
         "animation_export_mode": "png_frame_sequence_with_optional_gif",
         "camera_keyframes": True,
         "camera_keyframe_interpolation": True,
+        "layer_opacity_interpolation": True,
         "pending": [
             "mp4_video_encoding",
-            "non_material_interpolation",
+            "layer_blend_interpolation",
+            "visibility_interpolation",
         ],
-        "boundary": "Renderer can interpolate camera keyframes and export PNG frame sequences with optional GIF animation; MP4 encoding and non-material interpolation remain pending.",
+        "boundary": "Renderer can interpolate camera keyframes, layer opacity, and ocean material, and export PNG frame sequences with optional GIF animation; MP4 encoding, layer blend interpolation, and visibility interpolation remain pending.",
     }
 
 
@@ -2814,11 +2818,13 @@ def timeline_playback_plan_packet(keyframes: list[object] | None = None) -> dict
             "pins",
             "boundary_highlight",
             "camera",
+            "layer_opacity",
         ],
         "pending": [
-            "non_material_interpolation",
+            "layer_blend_interpolation",
+            "visibility_interpolation",
         ],
-        "boundary": "Plan can drive renderer discrete keyframe steps, camera interpolation, and ocean/material interpolation; non-material interpolation remains pending.",
+        "boundary": "Plan can drive renderer discrete keyframe steps, camera interpolation, ocean/material interpolation, and layer opacity interpolation; layer blend and visibility interpolation remain pending.",
     }
 
 
@@ -2837,7 +2843,7 @@ def timeline_segment_state_packet(
             "to_index": segment_index + 1,
             "from_keyframe_id": str(keyframes[segment_index].get("id", "")),
             "to_keyframe_id": str(keyframes[segment_index + 1].get("id", "")),
-            "interpolatable_fields": ["ocean_material", "camera"],
+            "interpolatable_fields": ["ocean_material", "camera", "layer_opacity"],
             "discrete_fields": ["style_profile", "layer_visibility", "layer_blend", "pins", "boundary_highlight"],
         }
     return {
@@ -2848,8 +2854,8 @@ def timeline_segment_state_packet(
         "active_segment": active_segment,
         "segment_available": active_segment is not None,
         "segment_count": max(0, len(keyframes) - 1),
-        "pending": ["non_material_interpolation"],
-        "boundary": "Renderer exposes segment state; camera and ocean material are interpolatable fields.",
+        "pending": ["layer_blend_interpolation", "visibility_interpolation"],
+        "boundary": "Renderer exposes segment state; camera, ocean material, and layer opacity are interpolatable fields.",
     }
 
 
@@ -2882,7 +2888,7 @@ def timeline_active_step_state_packet(
         "keyframe_count": len(keyframes),
         "step_available": active_index is not None,
         "applies": ["renderer_startup_selection_hint"],
-        "pending": ["non_material_interpolation"],
+        "pending": ["layer_blend_interpolation", "visibility_interpolation"],
         "boundary": "Active step is a discrete keyframe selection contract for renderer step playback.",
     }
 
@@ -3001,6 +3007,84 @@ def timeline_camera_interpolation_packet(
     }
 
 
+def timeline_layer_opacity_payload(keyframe: dict[str, object] | None) -> dict[str, float]:
+    if not isinstance(keyframe, dict):
+        return {}
+    snapshot = keyframe.get("layer_stack_snapshot")
+    snapshot = snapshot if isinstance(snapshot, dict) else {}
+    layers = snapshot.get("layers")
+    layers = layers if isinstance(layers, dict) else snapshot
+    opacities: dict[str, float] = {}
+    for layer_key, layer_state in layers.items():
+        if not isinstance(layer_state, dict):
+            continue
+        raw_opacity = layer_state.get("opacity")
+        if raw_opacity is None:
+            continue
+        try:
+            opacities[str(layer_key)] = max(0.0, min(100.0, float(raw_opacity)))
+        except (TypeError, ValueError):
+            continue
+    return opacities
+
+
+def timeline_layer_opacity_interpolation_packet(
+    timeline_state: dict[str, object] | None = None,
+    keyframes: list[object] | None = None,
+    instantiated: bool = False,
+    last_step_at: float | None = None,
+) -> dict[str, object]:
+    timeline_state = timeline_state if isinstance(timeline_state, dict) else {}
+    keyframes = [keyframe for keyframe in keyframes if isinstance(keyframe, dict)] if isinstance(keyframes, list) else []
+    playback = timeline_state.get("playback")
+    playback = playback if isinstance(playback, dict) else {}
+    active_step = timeline_active_step_state_packet(timeline_state, keyframes)
+    from_index = active_step.get("active_index")
+    to_index = ((from_index + 1) % len(keyframes)) if isinstance(from_index, int) and len(keyframes) >= 2 else None
+    try:
+        interval_ms = int(playback.get("interval_ms", 1200))
+    except (TypeError, ValueError):
+        interval_ms = 1200
+    interval_s = max(0.05, interval_ms / 1000.0)
+    elapsed_s = 0.0
+    if last_step_at is not None:
+        elapsed_s = max(0.0, time.time() - float(last_step_at))
+    fraction = max(0.0, min(1.0, elapsed_s / interval_s))
+    interpolated: dict[str, float] = {}
+    if isinstance(from_index, int) and isinstance(to_index, int):
+        from_opacity = timeline_layer_opacity_payload(keyframes[from_index])
+        to_opacity = timeline_layer_opacity_payload(keyframes[to_index])
+        for layer_key in sorted(set(from_opacity) | set(to_opacity)):
+            start = from_opacity.get(layer_key)
+            end = to_opacity.get(layer_key)
+            if start is None and end is None:
+                continue
+            if start is None:
+                start = end
+            if end is None:
+                end = start
+            if start is None or end is None:
+                continue
+            interpolated[layer_key] = round(float(start) + (float(end) - float(start)) * fraction, 4)
+    return {
+        "schema": "rrkal_displaytools.timeline_layer_opacity_interpolation.v1",
+        "supported": True,
+        "instantiated": bool(instantiated),
+        "mode": "linear_layer_opacity_segment",
+        "playback_active": parse_bool(playback.get("active"), False),
+        "active": parse_bool(playback.get("active"), False) and bool(interpolated),
+        "from_index": from_index,
+        "to_index": to_index,
+        "fraction": fraction,
+        "fields": ["layer_stack_snapshot.layers.*.opacity"],
+        "interpolated_layer_opacity": interpolated,
+        "layer_count": len(interpolated),
+        "applies": ["layer_opacity_keyframe_interpolation"],
+        "pending": ["layer_blend_interpolation", "visibility_interpolation"],
+        "boundary": "Layer opacity is linearly interpolated between Timeline keyframes; layer blend mode and visibility remain discrete/pending.",
+    }
+
+
 def timeline_step_playback_packet(
     timeline_state: dict[str, object] | None = None,
     keyframes: list[object] | None = None,
@@ -3029,8 +3113,8 @@ def timeline_step_playback_packet(
         "step_count": max(0, int(step_count)),
         "last_step_at_utc": last_step_at_utc,
         "applies": ["renderer_discrete_keyframe_step"],
-        "pending": ["non_material_interpolation"],
-        "boundary": "Renderer can advance whole-keyframe steps and apply discrete camera state; interpolation/export remain pending.",
+        "pending": ["layer_blend_interpolation", "visibility_interpolation"],
+        "boundary": "Renderer can advance whole-keyframe steps and apply discrete camera state; layer blend interpolation and visibility interpolation remain pending.",
     }
 
 
@@ -3083,8 +3167,8 @@ def timeline_ocean_material_interpolation_packet(
         "fields": fields,
         "interpolated": interpolated,
         "applies": ["ocean_material_keyframe_interpolation"],
-        "pending": ["non_material_interpolation"],
-        "boundary": "Only ocean material scalar fields are interpolated; style/layers/pins/boundary remain discrete.",
+        "pending": ["layer_blend_interpolation", "visibility_interpolation"],
+        "boundary": "Only ocean material scalar fields are interpolated here; layer opacity is handled by the layer opacity interpolation contract, while style/blend/visibility/pins/boundary remain discrete.",
     }
 
 
@@ -3115,7 +3199,7 @@ def timeline_animation_export_packet(
         "encoding_format": encoding_format,
         "encoding_error": encoding_error,
         "applies": ["timeline_png_frame_sequence", "timeline_animation_manifest", "timeline_gif_animation"],
-        "pending": ["mp4_video_encoding", "non_material_interpolation"],
+        "pending": ["mp4_video_encoding", "layer_blend_interpolation", "visibility_interpolation"],
         "boundary": "Exports PNG frames, manifest, and optional GIF animation; MP4/video-container encoding remains pending.",
     }
 
@@ -11846,6 +11930,38 @@ class HybridRenderController:
             self.write_timeline_ack()
         return changed
 
+    def apply_timeline_layer_opacity_interpolation_if_active(self) -> bool:
+        if self.timeline_runtime_state_error is not None:
+            return False
+        state_payload = self.timeline_runtime_state if isinstance(self.timeline_runtime_state, dict) else {}
+        timeline_state = state_payload.get("timeline_state")
+        timeline_state = timeline_state if isinstance(timeline_state, dict) else {}
+        runtime_keyframes = state_payload.get("timeline_keyframes")
+        runtime_keyframes = runtime_keyframes if isinstance(runtime_keyframes, list) else []
+        packet = timeline_layer_opacity_interpolation_packet(
+            timeline_state,
+            runtime_keyframes,
+            instantiated=True,
+            last_step_at=getattr(self, "timeline_playback_last_step_at", None),
+        )
+        self.timeline_layer_opacity_interpolation_result = packet
+        if not packet.get("active"):
+            return False
+        interpolated = packet.get("interpolated_layer_opacity")
+        if not isinstance(interpolated, dict):
+            return False
+        changed_layers: list[str] = []
+        for layer_key, opacity_percent in interpolated.items():
+            layer_id = self.layer_runtime_id(str(layer_key)) if hasattr(self, "layer_runtime_id") else str(layer_key)
+            if self.set_layer_opacity(layer_id, opacity_percent):
+                changed_layers.append(layer_id)
+        if changed_layers:
+            packet["changed_layers"] = changed_layers
+            self.overlay_dirty = True
+            self.write_timeline_ack()
+            return True
+        return False
+
     def layer_opacity_attr(self, layer_id: str) -> str | None:
         if layer_id in HYDROLOGY_SPECS:
             return f"{HYDROLOGY_SPECS[layer_id]['prefix']}_opacity"
@@ -13894,6 +14010,13 @@ class HybridRenderController:
                     last_step_at=export_last_step_at,
                 )
                 self.timeline_camera_interpolation_result = camera_interpolation_packet
+                layer_opacity_packet = timeline_layer_opacity_interpolation_packet(
+                    interpolation_state,
+                    valid_keyframes,
+                    instantiated=True,
+                    last_step_at=export_last_step_at,
+                )
+                self.timeline_layer_opacity_interpolation_result = layer_opacity_packet
                 interpolated = packet.get("interpolated")
                 if isinstance(interpolated, dict):
                     for field, attr in {
@@ -13911,6 +14034,11 @@ class HybridRenderController:
                         self.zoom = max(0.08, min(float(interpolated_camera["zoom"]), 4.0))
                     except (KeyError, TypeError, ValueError):
                         pass
+                interpolated_layer_opacity = layer_opacity_packet.get("interpolated_layer_opacity")
+                if isinstance(interpolated_layer_opacity, dict):
+                    for layer_key, opacity_percent in interpolated_layer_opacity.items():
+                        layer_id = self.layer_runtime_id(str(layer_key)) if hasattr(self, "layer_runtime_id") else str(layer_key)
+                        self.set_layer_opacity(layer_id, opacity_percent)
                 frame = self.render_if_needed(force=True)
                 if frame is None:
                     frame = self.frame_rgba
@@ -13927,6 +14055,7 @@ class HybridRenderController:
                         "fraction": fraction,
                         "ocean_material": packet.get("interpolated", {}),
                         "camera": camera_interpolation_packet.get("interpolated") or camera_packet.get("camera"),
+                        "layer_opacity": layer_opacity_packet.get("interpolated_layer_opacity", {}),
                     }
                 )
             if gif_path is not None and gif_images:
@@ -14099,6 +14228,16 @@ class HybridRenderController:
             "animation_export": getattr(self, "timeline_animation_export_result", timeline_animation_export_packet(executed=False)),
             "camera_keyframe": timeline_camera_keyframe_packet(timeline_state, runtime_keyframes, instantiated=True),
             "camera_interpolation": camera_interpolation,
+            "layer_opacity_interpolation": getattr(
+                self,
+                "timeline_layer_opacity_interpolation_result",
+                timeline_layer_opacity_interpolation_packet(
+                    timeline_state,
+                    runtime_keyframes,
+                    instantiated=True,
+                    last_step_at=getattr(self, "timeline_playback_last_step_at", None),
+                ),
+            ),
             "first_keyframe_apply": getattr(
                 self,
                 "timeline_first_keyframe_apply_result",
@@ -14106,7 +14245,8 @@ class HybridRenderController:
             ),
             "applies": ["input_acknowledgement"],
             "pending": [
-                "non_material_interpolation",
+                "layer_blend_interpolation",
+                "visibility_interpolation",
             ],
             "error": self.timeline_runtime_state_error,
             "source": "taichi_global_bathymetry",
@@ -15386,6 +15526,8 @@ class HybridRenderController:
         if self.apply_timeline_ocean_material_interpolation_if_active():
             force = True
         if self.apply_timeline_camera_interpolation_if_active():
+            force = True
+        if self.apply_timeline_layer_opacity_interpolation_if_active():
             force = True
         self.refresh_ais_if_due(force=force)
         self.refresh_aircraft_if_due(force=force)
@@ -17376,6 +17518,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "animation_export_schema": "rrkal_displaytools.timeline_animation_export.v1",
             "camera_keyframe_schema": "rrkal_displaytools.timeline_camera_keyframe.v1",
             "camera_interpolation_schema": "rrkal_displaytools.timeline_camera_interpolation.v1",
+            "layer_opacity_interpolation_schema": "rrkal_displaytools.timeline_layer_opacity_interpolation.v1",
             "first_keyframe_apply_schema": "rrkal_displaytools.timeline_first_keyframe_apply.v1",
             "playback_readiness": timeline_playback_readiness_packet(),
             "controls": [
@@ -17400,6 +17543,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "rrkal_displaytools.timeline_animation_export.v1",
                 "rrkal_displaytools.timeline_camera_keyframe.v1",
                 "rrkal_displaytools.timeline_camera_interpolation.v1",
+                "rrkal_displaytools.timeline_layer_opacity_interpolation.v1",
                 "rrkal_displaytools.timeline_first_keyframe_apply.v1",
                 "profile.timeline_keyframes",
             ],
@@ -17417,12 +17561,14 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "renderer GIF animation export",
                 "renderer discrete camera keyframe apply",
                 "renderer camera keyframe interpolation",
+                "renderer layer opacity keyframe interpolation",
             ],
             "pending": [
                 "mp4_video_encoding",
-                "non_material_interpolation",
+                "layer_blend_interpolation",
+                "visibility_interpolation",
             ],
-            "boundary": "Timeline keyframes are portable UI/profile state; renderer can interpolate camera keyframes and export PNG/GIF animations while MP4 encoding and non-material interpolation remain pending.",
+            "boundary": "Timeline keyframes are portable UI/profile state; renderer can interpolate camera keyframes, layer opacity, and export PNG/GIF animations while MP4 encoding, layer blend interpolation, and visibility interpolation remain pending.",
         },
         "ui_handoff_contracts": {
             "schema": "rrkal_displaytools.ui_handoff_contracts.v1",
