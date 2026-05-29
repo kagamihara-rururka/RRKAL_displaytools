@@ -38,6 +38,7 @@ REQUIRED_PROFILE_LAYERS = {
     "eez_layer",
     "high_seas_layer",
     "aircraft_layer",
+    "pin_layer",
     "ocean_material",
     "terrain_contours",
     "scale_bar",

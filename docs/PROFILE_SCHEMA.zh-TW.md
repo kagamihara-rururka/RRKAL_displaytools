@@ -65,6 +65,7 @@ rrkal_displaytools.qt_panel_profile.v1
 - `eez_layer`
 - `high_seas_layer`
 - `aircraft_layer`
+- `pin_layer`
 - `ocean_material`
 - `terrain_contours`
 - `scale_bar`
@@ -84,6 +85,7 @@ rrkal_displaytools.qt_panel_profile.v1
 - `eez_layer`
 - `high_seas_layer`
 - `aircraft_layer`
+- `pin_layer`
 - `ocean_material`
 - `terrain_contours`
 - `scale_bar`

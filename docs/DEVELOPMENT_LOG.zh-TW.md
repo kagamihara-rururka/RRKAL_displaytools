@@ -1,5 +1,20 @@
 ﻿# Development Log
 
+## 2026-05-29 - Pin layer runtime visibility opacity
+
+Scope:
+- Added `pin_layer` to the Qt layer stack, command boolean flags, baseline preset, and visual-aid group toggle.
+- Added `pin_layer` to the shared profile schema and repo profile templates.
+- Added renderer runtime alias `pin_layer -> pins`.
+- Pin marker overlay alpha now follows Qt runtime opacity before final frame composition.
+
+Positioning:
+- This makes scientific Pins controllable as a first-class live layer instead of only as a tool/annotation state.
+- Remaining point/icon opacity work is vehicle icons and other independent overlays; blend mode sync remains pending.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Aircraft runtime opacity overlay
 
 Scope:

@@ -27,6 +27,7 @@
                    "eez_layer":  false,
                    "high_seas_layer":  false,
                    "aircraft_layer":  false,
+                   "pin_layer":  true,
                    "ocean_material":  true,
                    "terrain_contours":  false,
                    "scale_bar":  true,

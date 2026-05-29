@@ -83,6 +83,7 @@ BOOL_FLAGS = {
     "eez_layer": "eez-layer",
     "high_seas_layer": "high-seas-layer",
     "aircraft_layer": "aircraft-layer",
+    "pin_layer": "pin-layer",
     "ocean_material": "ocean-material",
     "terrain_contours": "terrain-contours",
     "scale_bar": "scale-bar",
@@ -100,6 +101,7 @@ LAYER_LABELS = (
     ("eez_layer", "EEZ 圖層"),
     ("high_seas_layer", "公海圖層"),
     ("aircraft_layer", "航機圖層"),
+    ("pin_layer", "科研 Pin 標記"),
     ("ocean_material", "海洋材質"),
     ("terrain_contours", "地形等高線"),
     ("scale_bar", "比例尺"),
@@ -2544,7 +2546,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot()
     def toggle_visual_aids(self) -> None:
-        self._toggle_group(("show_grid", "show_stars", "terrain_contours", "scale_bar"))
+        self._toggle_group(("show_grid", "show_stars", "terrain_contours", "scale_bar", "pin_layer"))
 
     @QtCore.pyqtSlot()
     def apply_baseline(self) -> None:
@@ -2562,6 +2564,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "lake_layer": True,
                 "river_layer": True,
                 "border_layer": True,
+                "pin_layer": True,
                 "ocean_material": True,
                 "scale_bar": True,
             }

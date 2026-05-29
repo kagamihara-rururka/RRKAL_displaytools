@@ -2472,6 +2472,7 @@ LAYER_RUNTIME_ID_ALIASES = {
     "eez_layer": "eez",
     "high_seas_layer": "high_seas",
     "aircraft_layer": "aircraft",
+    "pin_layer": "pins",
     "terrain_contours": "contours",
     "scale_bar": "scale",
     "vehicle_icons": "vehicle_icons",
@@ -10545,6 +10546,7 @@ class HybridRenderController:
         }
         self.runtime_overlay_opacity_percent: dict[str, int] = {
             "aircraft": 100,
+            "pins": 100,
         }
         self.hydrology_overlays = self._load_hydrology_overlays()
         self.boundary_overlays = self._load_boundary_overlays()
@@ -13598,7 +13600,10 @@ class HybridRenderController:
             self.frame_rgba,
             self.apply_runtime_overlay_opacity("aircraft", self.aircraft_overlay_rgba),
         )
-        self.frame_rgba = alpha_compose(self.frame_rgba, self.pin_overlay_rgba)
+        self.frame_rgba = alpha_compose(
+            self.frame_rgba,
+            self.apply_runtime_overlay_opacity("pins", self.pin_overlay_rgba),
+        )
         self.frame_rgba = apply_style_profile(self.frame_rgba, getattr(self.args, "style_profile", "scientific"))
         self.last_render_ms = (time.time() - start) * 1000.0
         if self.output_path and (getattr(self.args, "once", False) or getattr(self.args, "headless", False)):
@@ -15331,7 +15336,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "ack_schema": "rrkal_displaytools.renderer_layer_runtime_ack.v1",
             "runtime_layer_aliases": dict(LAYER_RUNTIME_ID_ALIASES),
             "applies": ["visibility", "lock_guard_visibility", "opacity"],
-            "runtime_overlay_opacity_layers": ["aircraft"],
+            "runtime_overlay_opacity_layers": ["aircraft", "pins"],
             "pending": ["blend_mode"],
         },
         "rrkal_boundary": {
