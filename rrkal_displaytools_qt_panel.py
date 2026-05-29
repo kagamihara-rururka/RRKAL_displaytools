@@ -1672,7 +1672,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         layout = QtWidgets.QVBoxLayout(dialog)
         note = QtWidgets.QLabel(
             "控制國界/領海/EEZ/公海 hover 強調遮罩。這是科研定位用的圖層強調狀態，"
-            "已寫入 profile / launch packet / provenance；renderer 線段遮罩與閉合 ring fill 已 live，完整 feature identity 仍為下一步。"
+            "已寫入 profile / launch packet / provenance。renderer 線段遮罩、閉合 ring fill、"
+            "source-property feature identity 已 live；authoritative 疆域/EEZ identity 與 open-line area inference 仍為明確 pending。"
         )
         note.setWordWrap(True)
         layout.addWidget(note)
@@ -1803,7 +1804,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.refresh_command_preview()
             self.refresh_canvas_preview()
             if self.history_list is not None:
-                self.history_list.insertItem(0, f"🚧 Boundary highlight UI updated: {layer_key}")
+                self.history_list.insertItem(0, f"Boundary highlight UI updated: {layer_key}")
             self.status.setText(f"已更新疆域強調遮罩設定：{layer_label}")
             dialog.accept()
 

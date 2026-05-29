@@ -1,5 +1,18 @@
 # Development Log
 
+## 2026-05-29 - Boundary highlight identity status copy
+
+Scope:
+- Boundary highlight dialog now distinguishes live source-property feature identity from pending authoritative territory/EEZ identity.
+- Boundary highlight history entries no longer use a construction marker for ordinary UI updates.
+- Capability summary now documents the identity-status wording.
+
+Positioning:
+- This keeps the research UI honest: visual emphasis and source properties are live, but legal/authoritative area ownership inference remains pending.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Live preview status wording cleanup
 
 Scope:
