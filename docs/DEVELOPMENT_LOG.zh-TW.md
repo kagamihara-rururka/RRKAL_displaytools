@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - Selected-layer scoped renderer picking
+
+Scope:
+- Renderer mouse clicks now route through the selected renderer layer target before falling back to legacy global picking.
+- Selected Pin layers pick only Pins; selected aircraft/vehicle icon layers pick traffic points; selected boundary layers pick the matching boundary line segment.
+- Non-pickable selected layers no longer accidentally select unrelated Pins or vehicles.
+
+Positioning:
+- This turns the selected-layer bridge into a renderer interaction loop useful for scientific layer/object inspection.
+- Polygon fill masks and hydrology feature picking remain separate renderer work.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Selected layer semantic target bridge
 
 Scope:

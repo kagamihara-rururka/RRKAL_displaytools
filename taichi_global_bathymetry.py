@@ -10559,6 +10559,11 @@ class HybridRenderController:
         self.ocean_conditions = OceanConditionProvider(args)
         self.ocean_material_policy = OceanMaterialPolicy(args)
         self.hover_boundary_hit = build_empty_boundary_hit()
+        self.selected_boundary_hit = build_empty_boundary_hit()
+        self.last_layer_pick_result: dict[str, object] = {
+            "schema": "rrkal_displaytools.renderer_layer_pick_result.v1",
+            "event": "none",
+        }
         self.boundary_hover_dirty = False
         self.boundary_base_dirty = False
         self.boundary_hover_phase_bucket = -1
@@ -10965,8 +10970,9 @@ class HybridRenderController:
                 "blend_mode_overlay",
                 "blend_mode_per_boundary_split",
                 "selected_layer_semantic_target",
+                "selected_layer_scoped_object_picking",
             ],
-            "pending": ["renderer_object_picking"],
+            "pending": ["polygon_fill_mask", "hydrology_feature_picking"],
             "error": self.layer_runtime_state_last_error,
             "source": "taichi_global_bathymetry",
         }
@@ -12538,10 +12544,23 @@ class HybridRenderController:
     def selected_info_text(self) -> str:
         if self.selected_pin_hit is not None:
             return self.pin_hit_info_text(self.selected_pin_hit, "Selected Pin")
+        if self.selected_boundary_hit.get("layer_id"):
+            return self.boundary_hit_info_text(self.selected_boundary_hit, "Selected Boundary")
         if self.hover_pin_hit is not None:
             return self.pin_hit_info_text(self.hover_pin_hit, "Hover Pin")
         if self.selected_vehicle is None:
-            return "No vehicle selected."
+            result = getattr(self, "last_layer_pick_result", {})
+            if isinstance(result, dict) and result.get("event") not in {None, "none"}:
+                return "\n".join(
+                    [
+                        "Selected layer pick",
+                        f"- event: {result.get('event')}",
+                        f"- renderer_layer: {result.get('renderer_layer')}",
+                        f"- picker: {result.get('picker')}",
+                        f"- hit: {result.get('hit')}",
+                    ]
+                )
+            return "No selected object."
         row = self.selected_vehicle
         if isinstance(row, pd.Series):
             lines = ["Selected vehicle"]
@@ -12561,6 +12580,14 @@ class HybridRenderController:
             lines.append(f"- screen: {float(hit['screen_x']):.1f}, {float(hit['screen_y']):.1f}")
         if "pick_distance_px" in hit:
             lines.append(f"- pick_distance_px: {float(hit['pick_distance_px']):.1f}")
+        return "\n".join(lines)
+
+    def boundary_hit_info_text(self, hit: dict[str, object], title: str) -> str:
+        lines = [title]
+        for key in ("layer_id", "name", "line_index", "distance_px"):
+            value = hit.get(key)
+            if value is not None:
+                lines.append(f"- {key}: {value}")
         return "\n".join(lines)
 
     def write_pin_pick_state(self, event_kind: str, hit: dict[str, object] | None = None) -> None:
@@ -12673,6 +12700,7 @@ class HybridRenderController:
         self.selected_pin_hit = hit
         self.selected_pin_id = str(hit.get("id", ""))
         self.selected_vehicle = None
+        self.selected_boundary_hit = build_empty_boundary_hit()
         self.overlay_dirty = True
         self.write_pin_pick_state("selected", hit)
         return True
@@ -12684,11 +12712,12 @@ class HybridRenderController:
             self._last_hover_pin_id = hover_id
             self.write_pin_pick_state("hover", self.hover_pin_hit)
 
-    def pick_vehicle(self, x: float, y: float) -> None:
+    def pick_vehicle(self, x: float, y: float, source_filter: set[str] | None = None) -> None:
         had_pin_state = self.selected_pin_hit is not None or self.hover_pin_hit is not None or self.selected_pin_id is not None
         self.selected_pin_hit = None
         self.hover_pin_hit = None
         self.selected_pin_id = None
+        self.selected_boundary_hit = build_empty_boundary_hit()
         self.overlay_dirty = True
         if had_pin_state:
             self.write_pin_pick_state("cleared", None)
@@ -12696,6 +12725,8 @@ class HybridRenderController:
         best_row = None
         best_dist2 = radius * radius
         for source_name, frame in (("AIS", self.current_projected), ("ADS-B", self.current_aircraft_projected)):
+            if source_filter is not None and source_name not in source_filter:
+                continue
             if frame.empty:
                 continue
             dx = frame["screen_x"].to_numpy(dtype=np.float32) - float(x)
@@ -12708,6 +12739,126 @@ class HybridRenderController:
                 row["source"] = source_name
                 best_row = row
         self.selected_vehicle = best_row
+
+    def nearest_boundary_hit(
+        self,
+        x: float,
+        y: float,
+        target_layers: set[str] | None = None,
+        radius_px: float = 10.0,
+    ) -> dict[str, object]:
+        best = build_empty_boundary_hit()
+        for layer_id, overlay in getattr(self, "boundary_overlays", {}).items():
+            if target_layers is not None and layer_id not in target_layers:
+                continue
+            if not self.layer_visible.get(layer_id, True) or overlay is None:
+                continue
+            hit = overlay.hit_test(
+                x,
+                y,
+                self.yaw,
+                self.pitch,
+                self.zoom,
+                self.flip_longitude,
+                self.flip_latitude,
+                radius_px=radius_px,
+            )
+            if hit and hit["distance_px"] < best["distance_px"]:
+                best = {
+                    "layer_id": layer_id,
+                    "name": self.layer_label(layer_id),
+                    "line_index": hit.get("line_index"),
+                    "distance_px": hit["distance_px"],
+                }
+        return best
+
+    def pick_boundary_layer(self, layer_id: str, x: float, y: float) -> bool:
+        hit = self.nearest_boundary_hit(x, y, {layer_id}, radius_px=12.0)
+        self.selected_boundary_hit = hit
+        picked = bool(hit.get("layer_id"))
+        self.last_layer_pick_result = {
+            "schema": "rrkal_displaytools.renderer_layer_pick_result.v1",
+            "event": "selected_layer_pick",
+            "renderer_layer": layer_id,
+            "picker": "boundary_line",
+            "hit": picked,
+            "hit_detail": hit if picked else None,
+            "frame_index": self.frame_index,
+        }
+        if picked:
+            had_pin_state = self.selected_pin_hit is not None or self.hover_pin_hit is not None or self.selected_pin_id is not None
+            self.selected_pin_hit = None
+            self.hover_pin_hit = None
+            self.selected_pin_id = None
+            self.selected_vehicle = None
+            self.hover_boundary_hit = hit
+            self.boundary_hover_dirty = True
+            self.boundary_dirty = True
+            self.overlay_dirty = True
+            if had_pin_state:
+                self.write_pin_pick_state("cleared", None)
+        return picked
+
+    def pick_selected_layer_target(self, x: float, y: float) -> bool:
+        layer_id = self.selected_renderer_layer_id
+        if layer_id == "pins":
+            picked = self.pick_pin(x, y)
+            self.last_layer_pick_result = {
+                "schema": "rrkal_displaytools.renderer_layer_pick_result.v1",
+                "event": "selected_layer_pick",
+                "renderer_layer": layer_id,
+                "picker": "pin",
+                "hit": picked,
+                "frame_index": self.frame_index,
+            }
+            return picked
+        if layer_id in {"aircraft", "vehicle_icons"}:
+            source_filter = {"ADS-B"} if layer_id == "aircraft" else None
+            self.pick_vehicle(x, y, source_filter=source_filter)
+            picked = self.selected_vehicle is not None
+            self.last_layer_pick_result = {
+                "schema": "rrkal_displaytools.renderer_layer_pick_result.v1",
+                "event": "selected_layer_pick",
+                "renderer_layer": layer_id,
+                "picker": "traffic_point",
+                "hit": picked,
+                "frame_index": self.frame_index,
+            }
+            return picked
+        if layer_id in BOUNDARY_SPECS:
+            return self.pick_boundary_layer(layer_id, x, y)
+        if layer_id:
+            self.last_layer_pick_result = {
+                "schema": "rrkal_displaytools.renderer_layer_pick_result.v1",
+                "event": "selected_layer_pick",
+                "renderer_layer": layer_id,
+                "picker": "none",
+                "hit": False,
+                "frame_index": self.frame_index,
+            }
+            return False
+        picked_pin = self.pick_pin(x, y)
+        if picked_pin:
+            self.last_layer_pick_result = {
+                "schema": "rrkal_displaytools.renderer_layer_pick_result.v1",
+                "event": "legacy_pick",
+                "renderer_layer": "pins",
+                "picker": "pin",
+                "hit": True,
+                "frame_index": self.frame_index,
+            }
+            return True
+        self.pick_vehicle(x, y)
+        picked_vehicle = self.selected_vehicle is not None
+        self.last_layer_pick_result = {
+            "schema": "rrkal_displaytools.renderer_layer_pick_result.v1",
+            "event": "legacy_pick",
+            "renderer_layer": "vehicle_icons",
+            "picker": "traffic_point",
+            "hit": picked_vehicle,
+            "frame_index": self.frame_index,
+        }
+        return picked_vehicle
 
     def hit_test_scale_bar(self, x: float, y: float) -> bool:
         if not bool(getattr(self.args, "scale_bar", True)):
@@ -12735,29 +12886,7 @@ class HybridRenderController:
                 self.boundary_dirty = True
             return
         target_layers = set(boundary_highlight.get("renderer_target_layers", [])) if isinstance(boundary_highlight, dict) else set()
-        best = build_empty_boundary_hit()
-        for layer_id, overlay in getattr(self, "boundary_overlays", {}).items():
-            if layer_id not in target_layers:
-                continue
-            if not self.layer_visible.get(layer_id, True) or overlay is None:
-                continue
-            hit = overlay.hit_test(
-                x,
-                y,
-                self.yaw,
-                self.pitch,
-                self.zoom,
-                self.flip_longitude,
-                self.flip_latitude,
-                radius_px=10.0,
-            )
-            if hit and hit["distance_px"] < best["distance_px"]:
-                best = {
-                    "layer_id": layer_id,
-                    "name": self.layer_label(layer_id),
-                    "line_index": hit.get("line_index"),
-                    "distance_px": hit["distance_px"],
-                }
+        best = self.nearest_boundary_hit(x, y, target_layers, radius_px=10.0)
         if best != self.hover_boundary_hit:
             self.hover_boundary_hit = best
             self.boundary_hover_dirty = True
@@ -15270,9 +15399,7 @@ class QtHybridWindow:
                 return
             was_dragging = self.dragging
             if self.mouse_down_pos is not None and not self.dragging:
-                picked_pin = self.controller.pick_pin(float(event.pos[0]), float(event.pos[1]))
-                if not picked_pin:
-                    self.controller.pick_vehicle(float(event.pos[0]), float(event.pos[1]))
+                self.controller.pick_selected_layer_target(float(event.pos[0]), float(event.pos[1]))
                 self.selection_label.setText(self.controller.selected_info_text())
             if was_dragging:
                 self.controller.set_interaction_active(False)
@@ -15599,6 +15726,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "blend_mode_overlay",
                 "blend_mode_per_boundary_split",
                 "selected_layer_semantic_target",
+                "selected_layer_scoped_object_picking",
             ],
             "runtime_overlay_opacity_layers": ["aircraft", "pins", "vehicle_icons"],
             "runtime_overlay_blend_layers": [
@@ -15609,7 +15737,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "vehicle_icons",
             ],
             "runtime_split_blend_layers": ["borders", "territorial_sea", "eez", "high_seas"],
-            "pending": ["renderer_object_picking"],
+            "pending": ["polygon_fill_mask", "hydrology_feature_picking"],
         },
         "rrkal_boundary": {
             "displaytools_owns": [
