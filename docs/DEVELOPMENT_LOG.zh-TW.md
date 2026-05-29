@@ -1,5 +1,18 @@
 # Development Log
 
+## 2026-05-29 - Layers runtime evidence badges
+
+Scope:
+- Added a `Runtime` badge column to the Qt Layers dock.
+- Each layer row now surfaces the latest renderer ack status derived from `layer_runtime_evidence`: `no_ack`, `ok`, `target`, `changed`, `locked`, or `error`.
+- Badges refresh when renderer ack changes and when layer state refreshes.
+
+Positioning:
+- This makes renderer apply feedback visible without forcing researchers to open JSON, improving the Photoshop-like layer control loop.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Layer capability runtime evidence
 
 Scope:

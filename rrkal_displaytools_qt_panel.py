@@ -441,6 +441,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_runtime_ack_label: QtWidgets.QLabel | None = None
         self.layer_runtime_ack_mtime_ns: int | None = LAYER_RUNTIME_ACK_PATH.stat().st_mtime_ns if LAYER_RUNTIME_ACK_PATH.exists() else None
         self.layer_runtime_ack_payload: dict[str, object] | None = None
+        self.layer_runtime_badges: dict[str, QtWidgets.QLabel] = {}
         self.layer_pick_state_label: QtWidgets.QLabel | None = None
         self.layer_pick_state_mtime_ns: int | None = LAYER_PICK_STATE_PATH.stat().st_mtime_ns if LAYER_PICK_STATE_PATH.exists() else None
         self.layer_pick_state_payload: dict[str, object] | None = None
@@ -774,7 +775,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         layer_header = QtWidgets.QWidget()
         layer_header_layout = QtWidgets.QGridLayout(layer_header)
         layer_header_layout.setContentsMargins(0, 0, 0, 0)
-        headers = ("Select", "Vis", "Layer", "Lock", "Opacity", "Blend")
+        headers = ("Select", "Vis", "Layer", "Lock", "Opacity", "Blend", "Runtime")
         for column, text in enumerate(headers):
             header_label = QtWidgets.QLabel(text)
             header_label.setObjectName("layerHeader")
@@ -819,6 +820,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             blend.setToolTip("Renderer runtime blend sync is live for hydrology, boundary, and point/icon overlays.")
             blend.currentTextChanged.connect(lambda _text, self=self: self.refresh_layer_stack_status())
             self.layer_blends[key] = blend
+            runtime_badge = QtWidgets.QLabel("no_ack")
+            runtime_badge.setObjectName("layerRuntimeBadge")
+            runtime_badge.setToolTip("Last renderer layer runtime ack status for this layer.")
+            self.layer_runtime_badges[key] = runtime_badge
             if key in BOUNDARY_HIGHLIGHT_LAYER_KEYS:
                 boundary_tooltip = "雙擊開啟疆域/領海/EEZ/公海強調遮罩控制。"
                 row.setToolTip(boundary_tooltip)
@@ -834,6 +839,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             row_layout.addWidget(lock, 0, 3)
             row_layout.addWidget(opacity, 0, 4)
             row_layout.addWidget(blend, 0, 5)
+            row_layout.addWidget(runtime_badge, 0, 6)
             layers_layout.addWidget(row)
         self.selected_layer_label = QtWidgets.QLabel("目前選取圖層：尚未選取")
         self.selected_layer_label.setObjectName("selectedLayer")
@@ -1862,6 +1868,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         except FileNotFoundError:
             if self.layer_runtime_ack_mtime_ns is not None:
                 self.layer_runtime_ack_mtime_ns = None
+                self.layer_runtime_ack_payload = None
+                self.update_layer_runtime_badges()
+                self.refresh_layer_properties()
                 if self.layer_runtime_ack_label is not None:
                     self.layer_runtime_ack_label.setText(f"Renderer ack: waiting for {LAYER_RUNTIME_ACK_PATH.name}")
             return
@@ -1882,6 +1891,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if isinstance(payload, dict):
             self.layer_runtime_ack_payload = payload
             self.refresh_layer_runtime_ack_label(payload)
+            self.update_layer_runtime_badges()
             self.refresh_layer_properties()
             self.refresh_research_provenance()
 
@@ -1911,6 +1921,37 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"target={selected_renderer_layer}, boundary_blend={boundary_blend}, "
             f"skipped_locked={skipped_count}, frame={frame_index}, updated={updated_at}"
         )
+
+    def update_layer_runtime_badges(self) -> None:
+        if not self.layer_runtime_badges:
+            return
+        matrix = self.collect_layer_capability_matrix()
+        layers = matrix.get("layers", [])
+        if not isinstance(layers, list):
+            return
+        for layer in layers:
+            if not isinstance(layer, dict):
+                continue
+            key = str(layer.get("key", ""))
+            badge = self.layer_runtime_badges.get(key)
+            if badge is None:
+                continue
+            runtime_status = layer.get("runtime_status")
+            statuses = [str(item) for item in runtime_status] if isinstance(runtime_status, list) else ["no_ack"]
+            if "ack_error" in statuses:
+                text = "error"
+            elif "skipped_locked" in statuses:
+                text = "locked"
+            elif any(status.endswith("_changed") for status in statuses):
+                text = "changed"
+            elif "selected_target" in statuses:
+                text = "target"
+            elif "no_recent_change" in statuses:
+                text = "ok"
+            else:
+                text = "no_ack"
+            badge.setText(text)
+            badge.setToolTip(", ".join(statuses))
 
     def refresh_layer_pick_state(self) -> None:
         try:
@@ -2479,6 +2520,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.refresh_layer_undo_label()
         self.write_layer_runtime_state()
         self.refresh_layer_properties()
+        self.update_layer_runtime_badges()
         self.refresh_canvas_preview()
 
     def layer_filter_matches(self, key: str, label: str) -> bool:
