@@ -1,5 +1,20 @@
 # Development Log
 
+## 2026-05-29 - Layer undo handoff contract
+
+Scope:
+- Qt launch packet and research provenance now include `layer_undo`.
+- No-GUI launch packet export includes the same schema with a no-runtime-stack marker.
+- Closed-loop status now includes `layer_stack_undo_snapshots`.
+- Smoke now gates launch packet `layer_undo` and the closed-loop id.
+- `layer_undo` explicitly marks global document undo as pending, so the contract does not overclaim scope.
+
+Positioning:
+- This makes the local layer undo UIUX loop visible in handoff/provenance contracts without claiming full document-wide undo.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Layer stack undo snapshots
 
 Scope:

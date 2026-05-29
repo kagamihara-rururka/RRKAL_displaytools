@@ -1209,6 +1209,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "rrkal_data_manifest_ref_boundary": "Reference-only handoff field; displaytools does not discover, download, validate, import, or govern this manifest.",
             "selected_layer": self.selected_layer_key,
             "active_layer_diagnostics": self.active_layer_diagnostics_packet(),
+            "layer_undo": self.collect_layer_undo_state(),
             "selected_pin_id": self.selected_pin_id,
             "layer_stack_ui": self.collect_layer_stack_ui(),
             "tool_state": self.collect_tool_state(),
@@ -2088,6 +2089,17 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "covers visibility/lock/opacity/blend/active layer"
         )
 
+    def collect_layer_undo_state(self) -> dict[str, object]:
+        return {
+            "schema": "rrkal_displaytools.layer_stack_undo.v1",
+            "depth": len(self.layer_undo_stack),
+            "capacity": 24,
+            "tracking_enabled": self.layer_undo_tracking_enabled,
+            "covers": ["visibility", "lock", "opacity", "blend_mode", "active_layer"],
+            "source": "qt_panel_runtime",
+            "global_document_undo": "pending",
+        }
+
     @QtCore.pyqtSlot()
     def undo_layer_stack_state(self) -> None:
         if not self.layer_undo_stack:
@@ -2797,6 +2809,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             },
             "active_layer": self.selected_layer_key,
             "active_layer_diagnostics": self.active_layer_diagnostics_packet(),
+            "layer_undo": self.collect_layer_undo_state(),
             "active_tool": self.active_tool,
             "cursor_lat_lon_estimate": {
                 "latitude": self.cursor_latitude,

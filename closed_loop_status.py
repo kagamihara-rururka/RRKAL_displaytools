@@ -23,6 +23,15 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                 "evidence": ["layer-pick-state-file", "rrkal_displaytools.renderer_layer_pick_state.v1"],
             },
             {
+                "id": "layer_stack_undo_snapshots",
+                "scope": ["visibility", "lock", "opacity", "blend mode", "active layer"],
+                "evidence": [
+                    "Qt Layers Undo 圖層狀態",
+                    "rrkal_displaytools.layer_stack_undo.v1",
+                    "launch_packet layer_undo",
+                ],
+            },
+            {
                 "id": "renderer_capability_discovery",
                 "scope": ["renderer capabilities", "layer manifest", "profile templates"],
                 "evidence": [
@@ -36,11 +45,13 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                 "scope": [
                     "active_layer_diagnostics",
                     "boundary_highlight.identity_status",
+                    "layer_undo",
                     "canvas_preview stream provenance",
                 ],
                 "evidence": [
                     "launch_packet active_layer_diagnostics",
                     "launch_packet boundary_highlight.identity_status",
+                    "launch_packet layer_undo",
                     "renderer capabilities active_layer_diagnostics",
                     "profile_schema optional canvas_preview",
                 ],

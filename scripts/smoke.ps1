@@ -31,6 +31,9 @@ if ($launchPacket.canvas_preview.schema -ne "rrkal_displaytools.canvas_preview.v
 if ($launchPacket.active_layer_diagnostics.schema -ne "rrkal_displaytools.active_layer_diagnostics.v1") {
     throw "Launch packet active_layer_diagnostics schema missing or invalid"
 }
+if ($launchPacket.layer_undo.schema -ne "rrkal_displaytools.layer_stack_undo.v1") {
+    throw "Launch packet layer_undo schema missing or invalid"
+}
 if ($launchPacket.boundary_highlight.identity_status.schema -ne "rrkal_displaytools.boundary_identity_status.v1") {
     throw "Launch packet boundary_highlight identity_status schema missing or invalid"
 }
@@ -75,6 +78,9 @@ $closedLoop = $closedLoopRaw.Substring($closedLoopJsonStart) | ConvertFrom-Json
 $closedLoopIds = @($closedLoop.closed | ForEach-Object { $_.id })
 if ($closedLoopIds -notcontains "diagnostics_handoff_contracts") {
     throw "Closed-loop diagnostics_handoff_contracts missing"
+}
+if ($closedLoopIds -notcontains "layer_stack_undo_snapshots") {
+    throw "Closed-loop layer_stack_undo_snapshots missing"
 }
 Invoke-CheckedNative py @("-3", "taichi_global_bathymetry.py", "--print-layer-manifest") | Out-Null
 Invoke-CheckedNative py @("-3", "rrkal_displaytools_qt_panel.py", "--list-templates") | Out-Null
