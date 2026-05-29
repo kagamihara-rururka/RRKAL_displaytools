@@ -1671,6 +1671,8 @@ def layer_research_workflow_packet(
         "runtime_warning_severity": warning_list.get("severity", "unknown"),
         "runtime_warning_count": warning_list.get("warning_count", 0),
         "remediation_hint_count": remediation.get("hint_count", 0),
+        "workflow_hint": "Layer workflow: click a row to select the active research layer; double-click Boundary/territorial sea/EEZ/high-seas rows or use Emphasis to open mask controls; identity warning badges mean preview/source-property identity only, not authoritative polygon/EEZ resolution.",
+        "workflow_hint_surface": "Layers dock layerWorkflowHint / launch packet / handoff inspection",
         "researcher_path": [
             "Filter or group the layer list",
             "Select or reveal a layer",

@@ -1716,6 +1716,15 @@ if ($handoffInspectorSource -notmatch 'boundary_identity_warning') {
 if ($handoffInspectorSource -notmatch 'boundary_identity_warning_surface') {
     throw "Handoff inspection boundary identity warning surface output is missing"
 }
+if ($handoffInspectorSource -notmatch 'workflow_hint') {
+    throw "Handoff inspection layer workflow hint output is missing"
+}
+if ($launchPacketSource -notmatch 'workflow_hint_surface') {
+    throw "Launch packet layer workflow hint surface is missing"
+}
+if ($launchPacketSource -notmatch 'double-click Boundary/territorial sea/EEZ/high-seas rows') {
+    throw "Launch packet layer workflow boundary emphasis hint is missing"
+}
 
 $closedLoopSource = Get-Content -LiteralPath (Join-Path $BoundaryIdentityRoot "closed_loop_status.py") -Raw -Encoding UTF8
 if ($closedLoopSource -notmatch 'boundary_identity_warning_handoff') {

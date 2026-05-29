@@ -3252,3 +3252,17 @@ Decision:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+
+## 2026-05-30 - Launch/Handoff Layers workflow hint
+
+Scope:
+- `layer_research_workflow` now exports `workflow_hint` and `workflow_hint_surface` from both Qt and no-GUI launch packet paths.
+- `scripts\inspect_handoff.ps1` now reports the workflow hint for cross-machine operators.
+- Smoke verifies the launch packet and handoff script expose the Boundary emphasis workflow hint.
+
+Decision:
+- Layer workflow guidance should be available from UI and handoff contracts, because clone-after-setup users may inspect the project before launching Qt.
+
+Validation:
+- Smoke passed on rerun before commit: first run hit a transient Windows permission lock on `taichi_global_bathymetry.py`; second run passed with `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+

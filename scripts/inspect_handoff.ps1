@@ -106,6 +106,8 @@ $summary = [ordered]@{
         runtime_warning_severity = $launchPacket.layer_research_workflow.runtime_warning_severity
         runtime_warning_count = $launchPacket.layer_research_workflow.runtime_warning_count
         remediation_hint_count = $launchPacket.layer_research_workflow.remediation_hint_count
+        workflow_hint = $launchPacket.layer_research_workflow.workflow_hint
+        workflow_hint_surface = $launchPacket.layer_research_workflow.workflow_hint_surface
         qt_surface = $launchPacket.layer_research_workflow.qt_surface
     }
     cursor_geodesy_readout = @{

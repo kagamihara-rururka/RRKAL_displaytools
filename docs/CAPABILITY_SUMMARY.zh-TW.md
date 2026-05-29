@@ -334,3 +334,8 @@
 
 - Layers dock now includes a visible workflow hint for selecting active research layers and opening Boundary emphasis controls.
 - The hint clarifies that identity warning badges indicate preview/source-property identity, not authoritative polygon/EEZ resolution.
+
+### 2026-05-30 Launch/Handoff Layers workflow hint
+
+- `layer_research_workflow` now carries `workflow_hint` and `workflow_hint_surface` in Qt/no-GUI contracts.
+- Handoff inspection reports the same hint, including Boundary/territorial sea/EEZ/high-seas emphasis entry points.

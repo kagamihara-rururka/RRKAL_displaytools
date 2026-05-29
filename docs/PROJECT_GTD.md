@@ -182,3 +182,4 @@ Last updated: 2026-05-29
 - 2026-05-30: Added Boundary identity warning fields to handoff inspection output and smoke coverage.
 - 2026-05-30: Added `boundary_identity_warning_handoff` closed-loop evidence while keeping authoritative polygon/EEZ and open-line backend work pending.
 - 2026-05-30: Added Qt Layers dock workflow hint for row selection, Boundary emphasis entry points and non-authoritative identity warnings.
+- 2026-05-30: Added launch packet and handoff inspection workflow hints for layer row selection and Boundary emphasis entry points.
