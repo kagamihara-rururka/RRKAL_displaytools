@@ -409,7 +409,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.template_combo.addItem("沒有內建模板")
             return
         for path in self.template_paths:
-            self.template_combo.addItem(path.stem.replace("_", " "), str(path))
+            label = path.stem.replace("_", " ")
+            try:
+                profile = json.loads(path.read_text(encoding="utf-8"))
+                if isinstance(profile, dict) and profile.get("name"):
+                    label = str(profile["name"])
+            except Exception:
+                pass
+            self.template_combo.addItem(label, str(path))
 
     @QtCore.pyqtSlot()
     def load_selected_template(self) -> None:

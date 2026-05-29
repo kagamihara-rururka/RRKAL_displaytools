@@ -1,34 +1,36 @@
-{
-  "schema": "rrkal_displaytools.qt_panel_profile.v1",
-  "renderer": {
-    "style_profile": "nautical",
-    "ui_backend": "qt",
-    "topo_source": "gebco",
-    "data_mode": "static",
-    "width": "1280",
-    "height": "720",
-    "topo_step": "48",
-    "taichi_arch": "gpu"
-  },
-  "ocean_material": {
-    "wave_strength": "0.26",
-    "roughness": "0.30",
-    "foam": "0.15"
-  },
-  "layers": {
-    "show_grid": true,
-    "show_stars": true,
-    "lake_layer": true,
-    "river_layer": true,
-    "border_layer": true,
-    "territorial_sea_layer": true,
-    "eez_layer": true,
-    "high_seas_layer": true,
-    "aircraft_layer": false,
-    "ocean_material": true,
-    "terrain_contours": true,
-    "scale_bar": true,
-    "vehicle_icons": false,
-    "demo_closed_loop": false
-  }
+﻿{
+    "name":  "Maritime hydrology",
+    "description":  "Water, river, border, EEZ, and maritime-zone review profile.",
+    "schema":  "rrkal_displaytools.qt_panel_profile.v1",
+    "renderer":  {
+                     "style_profile":  "nautical",
+                     "ui_backend":  "qt",
+                     "topo_source":  "gebco",
+                     "data_mode":  "static",
+                     "width":  "1280",
+                     "height":  "720",
+                     "topo_step":  "48",
+                     "taichi_arch":  "gpu"
+                 },
+    "ocean_material":  {
+                           "wave_strength":  "0.26",
+                           "roughness":  "0.30",
+                           "foam":  "0.15"
+                       },
+    "layers":  {
+                   "show_grid":  true,
+                   "show_stars":  true,
+                   "lake_layer":  true,
+                   "river_layer":  true,
+                   "border_layer":  true,
+                   "territorial_sea_layer":  true,
+                   "eez_layer":  true,
+                   "high_seas_layer":  true,
+                   "aircraft_layer":  false,
+                   "ocean_material":  true,
+                   "terrain_contours":  true,
+                   "scale_bar":  true,
+                   "vehicle_icons":  false,
+                   "demo_closed_loop":  false
+               }
 }

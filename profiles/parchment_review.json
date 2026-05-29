@@ -1,34 +1,36 @@
-{
-  "schema": "rrkal_displaytools.qt_panel_profile.v1",
-  "renderer": {
-    "style_profile": "parchment",
-    "ui_backend": "qt",
-    "topo_source": "gebco",
-    "data_mode": "static",
-    "width": "1280",
-    "height": "720",
-    "topo_step": "48",
-    "taichi_arch": "gpu"
-  },
-  "ocean_material": {
-    "wave_strength": "0.18",
-    "roughness": "0.34",
-    "foam": "0.08"
-  },
-  "layers": {
-    "show_grid": true,
-    "show_stars": false,
-    "lake_layer": true,
-    "river_layer": true,
-    "border_layer": true,
-    "territorial_sea_layer": false,
-    "eez_layer": false,
-    "high_seas_layer": false,
-    "aircraft_layer": false,
-    "ocean_material": true,
-    "terrain_contours": true,
-    "scale_bar": true,
-    "vehicle_icons": false,
-    "demo_closed_loop": false
-  }
+﻿{
+    "name":  "Parchment review",
+    "description":  "Warm parchment/cartographic review profile with contours.",
+    "schema":  "rrkal_displaytools.qt_panel_profile.v1",
+    "renderer":  {
+                     "style_profile":  "parchment",
+                     "ui_backend":  "qt",
+                     "topo_source":  "gebco",
+                     "data_mode":  "static",
+                     "width":  "1280",
+                     "height":  "720",
+                     "topo_step":  "48",
+                     "taichi_arch":  "gpu"
+                 },
+    "ocean_material":  {
+                           "wave_strength":  "0.18",
+                           "roughness":  "0.34",
+                           "foam":  "0.08"
+                       },
+    "layers":  {
+                   "show_grid":  true,
+                   "show_stars":  false,
+                   "lake_layer":  true,
+                   "river_layer":  true,
+                   "border_layer":  true,
+                   "territorial_sea_layer":  false,
+                   "eez_layer":  false,
+                   "high_seas_layer":  false,
+                   "aircraft_layer":  false,
+                   "ocean_material":  true,
+                   "terrain_contours":  true,
+                   "scale_bar":  true,
+                   "vehicle_icons":  false,
+                   "demo_closed_loop":  false
+               }
 }

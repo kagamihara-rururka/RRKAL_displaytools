@@ -1,5 +1,16 @@
 ﻿# Development Log
 
+## 2026-05-29 - Named profile templates
+
+Scope:
+- Added `name` and `description` metadata to built-in profile templates.
+- Updated the Qt template selector to show `name` when present, falling back to filename when metadata is missing.
+
+Positioning:
+- This improves operator clarity without changing renderer behavior.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 ## 2026-05-29 - Qt smoke action uses smoke helper
 
 Scope:
@@ -274,6 +285,7 @@ Validation:
 Next round rule:
 - Before any new development round, inspect current repo state.
 - After each round, update this log and commit before continuing.
+
 
 
 
