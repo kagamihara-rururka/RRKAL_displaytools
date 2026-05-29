@@ -2769,17 +2769,16 @@ def timeline_playback_readiness_packet() -> dict[str, object]:
         "renderer_playback_mode": "discrete_keyframe_step",
         "ocean_material_interpolation": True,
         "animation_export": True,
-        "animation_export_mode": "png_frame_sequence_with_optional_gif",
+        "animation_export_mode": "png_frame_sequence_with_optional_gif_mp4",
         "camera_keyframes": True,
         "camera_keyframe_interpolation": True,
         "layer_opacity_interpolation": True,
         "layer_discrete_hold": True,
         "pending": [
-            "mp4_video_encoding",
             "blend_crossfade_interpolation",
             "visibility_fade_interpolation",
         ],
-        "boundary": "Renderer can interpolate camera keyframes, layer opacity, and ocean material, hold active-keyframe layer visibility/blend states, and export PNG frame sequences with optional GIF animation; MP4 encoding, blend crossfade, and visibility fade interpolation remain pending.",
+        "boundary": "Renderer can interpolate camera keyframes, layer opacity, and ocean material, hold active-keyframe layer visibility/blend states, and export PNG frame sequences with optional GIF/MP4 animation; MP4 requires imageio[ffmpeg], while blend crossfade and visibility fade interpolation remain pending.",
     }
 
 
@@ -3237,9 +3236,13 @@ def timeline_animation_export_packet(
     manifest_file: str | Path | None = None,
     frames: list[dict[str, object]] | None = None,
     gif_file: str | Path | None = None,
+    mp4_file: str | Path | None = None,
     encoded_animation: bool = False,
     encoding_format: str | None = None,
     encoding_error: str | None = None,
+    encoded_video: bool = False,
+    video_encoding_format: str | None = None,
+    video_encoding_error: str | None = None,
     executed: bool = False,
 ) -> dict[str, object]:
     return {
@@ -3253,12 +3256,16 @@ def timeline_animation_export_packet(
         "fps": max(1.0, float(fps)),
         "frames": frames or [],
         "gif_file": str(gif_file) if gif_file else None,
+        "mp4_file": str(mp4_file) if mp4_file else None,
         "encoded_animation": bool(encoded_animation),
         "encoding_format": encoding_format,
         "encoding_error": encoding_error,
-        "applies": ["timeline_png_frame_sequence", "timeline_animation_manifest", "timeline_gif_animation"],
-        "pending": ["mp4_video_encoding", "blend_crossfade_interpolation", "visibility_fade_interpolation"],
-        "boundary": "Exports PNG frames, manifest, and optional GIF animation; MP4/video-container encoding remains pending.",
+        "encoded_video": bool(encoded_video),
+        "video_encoding_format": video_encoding_format,
+        "video_encoding_error": video_encoding_error,
+        "applies": ["timeline_png_frame_sequence", "timeline_animation_manifest", "timeline_gif_animation", "timeline_mp4_video"],
+        "pending": ["blend_crossfade_interpolation", "visibility_fade_interpolation"],
+        "boundary": "Exports PNG frames, manifest, optional GIF animation, and optional MP4 video; MP4 requires imageio[ffmpeg].",
     }
 
 
@@ -14009,10 +14016,14 @@ class HybridRenderController:
         manifest_path = Path(manifest_path_value) if manifest_path_value else export_dir / "timeline_animation_manifest.json"
         gif_path_value = getattr(self.args, "timeline_export_gif", None)
         gif_path = Path(gif_path_value) if gif_path_value else None
+        mp4_path_value = getattr(self.args, "timeline_export_mp4", None)
+        mp4_path = Path(mp4_path_value) if mp4_path_value else None
         export_dir.mkdir(parents=True, exist_ok=True)
         manifest_path.parent.mkdir(parents=True, exist_ok=True)
         if gif_path is not None:
             gif_path.parent.mkdir(parents=True, exist_ok=True)
+        if mp4_path is not None:
+            mp4_path.parent.mkdir(parents=True, exist_ok=True)
         state_payload = self.timeline_runtime_state if isinstance(self.timeline_runtime_state, dict) else {}
         runtime_keyframes = state_payload.get("timeline_keyframes")
         valid_keyframes = [keyframe for keyframe in runtime_keyframes if isinstance(keyframe, dict)] if isinstance(runtime_keyframes, list) else []
@@ -14029,8 +14040,11 @@ class HybridRenderController:
         self.output_path = None
         frames: list[dict[str, object]] = []
         gif_images = []
+        mp4_images = []
         encoded_animation = False
         encoding_error = None
+        encoded_video = False
+        video_encoding_error = None
         try:
             from PIL import Image
 
@@ -14111,6 +14125,8 @@ class HybridRenderController:
                 image.save(frame_path)
                 if gif_path is not None:
                     gif_images.append(image.copy())
+                if mp4_path is not None:
+                    mp4_images.append(image.convert("RGB").copy())
                 frames.append(
                     {
                         "index": frame_index,
@@ -14138,6 +14154,16 @@ class HybridRenderController:
                     encoded_animation = True
                 except Exception as exc:
                     encoding_error = str(exc)
+            if mp4_path is not None and mp4_images:
+                try:
+                    import imageio.v2 as imageio
+
+                    with imageio.get_writer(str(mp4_path), fps=fps, codec="libx264", macro_block_size=1) as writer:
+                        for image in mp4_images:
+                            writer.append_data(np.asarray(image))
+                    encoded_video = True
+                except Exception as exc:
+                    video_encoding_error = str(exc)
         finally:
             self.output_path = previous_output_path
         manifest = timeline_animation_export_packet(
@@ -14147,9 +14173,13 @@ class HybridRenderController:
             manifest_file=manifest_path,
             frames=frames,
             gif_file=gif_path,
+            mp4_file=mp4_path,
             encoded_animation=encoded_animation,
             encoding_format="gif" if gif_path is not None else None,
             encoding_error=encoding_error,
+            encoded_video=encoded_video,
+            video_encoding_format="mp4" if mp4_path is not None else None,
+            video_encoding_error=video_encoding_error,
             executed=True,
         )
         self.timeline_animation_export_result = manifest
@@ -17341,6 +17371,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--timeline-export-fps", type=float, default=float(os.environ.get("TIMELINE_EXPORT_FPS", "24.0")))
     parser.add_argument("--timeline-export-manifest", default=os.environ.get("TIMELINE_EXPORT_MANIFEST"))
     parser.add_argument("--timeline-export-gif", default=os.environ.get("TIMELINE_EXPORT_GIF"))
+    parser.add_argument("--timeline-export-mp4", default=os.environ.get("TIMELINE_EXPORT_MP4"))
 
     parser.add_argument("--adaptive-sampling", action=bool_action, default=parse_bool(os.environ.get("ADAPTIVE_SAMPLING"), True))
     parser.add_argument("--target-fps", type=float, default=float(os.environ.get("TARGET_FPS", "30.0")))
@@ -17602,6 +17633,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "timeline-export-fps",
                 "timeline-export-manifest",
                 "timeline-export-gif",
+                "timeline-export-mp4",
             ],
             "input_contracts": [
                 "rrkal_displaytools.timeline_state.v1",
@@ -17632,17 +17664,17 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "renderer ocean material keyframe interpolation",
                 "renderer PNG frame sequence export",
                 "renderer GIF animation export",
+                "renderer MP4 video export",
                 "renderer discrete camera keyframe apply",
                 "renderer camera keyframe interpolation",
                 "renderer layer opacity keyframe interpolation",
                 "renderer layer visibility/blend discrete hold",
             ],
             "pending": [
-                "mp4_video_encoding",
                 "blend_crossfade_interpolation",
                 "visibility_fade_interpolation",
             ],
-            "boundary": "Timeline keyframes are portable UI/profile state; renderer can interpolate camera keyframes/layer opacity, hold active-keyframe layer visibility/blend states, and export PNG/GIF animations while MP4 encoding, blend crossfade, and visibility fade interpolation remain pending.",
+            "boundary": "Timeline keyframes are portable UI/profile state; renderer can interpolate camera keyframes/layer opacity, hold active-keyframe layer visibility/blend states, and export PNG/GIF/MP4 animations; MP4 requires imageio[ffmpeg], while blend crossfade and visibility fade interpolation remain pending.",
         },
         "ui_handoff_contracts": {
             "schema": "rrkal_displaytools.ui_handoff_contracts.v1",

@@ -456,17 +456,16 @@ def timeline_playback_readiness_packet() -> dict[str, object]:
         "renderer_playback_mode": "discrete_keyframe_step",
         "ocean_material_interpolation": True,
         "animation_export": True,
-        "animation_export_mode": "png_frame_sequence_with_optional_gif",
+        "animation_export_mode": "png_frame_sequence_with_optional_gif_mp4",
         "camera_keyframes": True,
         "camera_keyframe_interpolation": True,
         "layer_opacity_interpolation": True,
         "layer_discrete_hold": True,
         "pending": [
-            "mp4_video_encoding",
             "blend_crossfade_interpolation",
             "visibility_fade_interpolation",
         ],
-        "boundary": "No-GUI handoff can export runtime state for renderer PNG frame sequence/GIF export, camera keyframe interpolation, layer opacity interpolation, and active-keyframe layer visibility/blend hold.",
+        "boundary": "No-GUI handoff can export runtime state for renderer PNG frame sequence/GIF/MP4 export, camera keyframe interpolation, layer opacity interpolation, and active-keyframe layer visibility/blend hold. MP4 requires imageio[ffmpeg].",
     }
 
 
@@ -877,17 +876,22 @@ def timeline_animation_export_packet(executed: bool = False) -> dict[str, object
         "schema": "rrkal_displaytools.timeline_animation_export.v1",
         "supported": True,
         "executed": bool(executed),
-        "mode": "png_frame_sequence_with_optional_gif",
+        "mode": "png_frame_sequence_with_optional_gif_mp4",
         "frame_count": 0,
         "fps": 24.0,
+        "manifest_file": None,
         "frames": [],
         "gif_file": None,
+        "mp4_file": None,
         "encoded_animation": False,
         "encoding_format": None,
         "encoding_error": None,
-        "applies": ["timeline_png_frame_sequence", "timeline_animation_manifest", "timeline_gif_animation"],
-        "pending": ["mp4_video_encoding", "blend_crossfade_interpolation", "visibility_fade_interpolation"],
-        "boundary": "No-GUI launch packets expose renderer animation export capability; renderer writes frames, manifest, and optional GIF with interpolated camera and layer opacity keyframes.",
+        "encoded_video": False,
+        "video_encoding_format": None,
+        "video_encoding_error": None,
+        "applies": ["timeline_png_frame_sequence", "timeline_animation_manifest", "timeline_gif_animation", "timeline_mp4_video"],
+        "pending": ["blend_crossfade_interpolation", "visibility_fade_interpolation"],
+        "boundary": "No-GUI launch packets expose renderer animation export capability; renderer writes frames, manifest, optional GIF, and optional MP4 with interpolated camera and layer opacity keyframes. MP4 requires imageio[ffmpeg].",
     }
 
 

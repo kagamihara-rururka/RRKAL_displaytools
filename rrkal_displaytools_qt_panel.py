@@ -2712,6 +2712,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "renderer_discrete_step_playback",
                 "renderer_ocean_material_interpolation",
                 "renderer_animation_export",
+                "renderer_mp4_video_export",
                 "camera_keyframe_storage",
                 "renderer_discrete_camera_keyframe_apply",
                 "renderer_camera_keyframe_interpolation",
@@ -2719,7 +2720,6 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "renderer_layer_visibility_blend_discrete_hold",
             ],
             "pending": [
-                "mp4_video_encoding",
                 "blend_crossfade_interpolation",
                 "visibility_fade_interpolation",
             ],
@@ -2732,7 +2732,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "interval_ms": self.timeline_playback_interval_ms,
                 "next_index": self.timeline_playback_index,
             },
-            "boundary": "UIUX keyframe storage/restore/playback plus renderer discrete step playback, ocean material interpolation, layer opacity interpolation, PNG/GIF export, and discrete camera keyframes are available.",
+            "boundary": "UIUX keyframe storage/restore/playback plus renderer discrete step playback, ocean material interpolation, layer opacity interpolation, PNG/GIF/MP4 export, and discrete camera keyframes are available. MP4 requires imageio[ffmpeg].",
         }
 
     def collect_timeline_playback_readiness(self) -> dict[str, object]:
@@ -2744,7 +2744,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "renderer_playback_mode": "discrete_keyframe_step",
             "ocean_material_interpolation": True,
             "animation_export": True,
-            "animation_export_mode": "png_frame_sequence_with_optional_gif",
+            "animation_export_mode": "png_frame_sequence_with_optional_gif_mp4",
             "camera_keyframes": True,
             "camera_keyframe_interpolation": True,
             "layer_opacity_interpolation": True,
@@ -2754,11 +2754,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "timeline_ack_file": str(TIMELINE_ACK_PATH),
             },
             "pending": [
-                "mp4_video_encoding",
                 "blend_crossfade_interpolation",
                 "visibility_fade_interpolation",
             ],
-            "boundary": "Renderer can interpolate camera keyframes, layer opacity, and ocean material, hold active-keyframe layer visibility/blend states, and export PNG frame sequences with optional GIF animation.",
+            "boundary": "Renderer can interpolate camera keyframes, layer opacity, and ocean material, hold active-keyframe layer visibility/blend states, and export PNG frame sequences with optional GIF/MP4 animation. MP4 requires imageio[ffmpeg].",
         }
 
     def collect_timeline_camera_state(self) -> dict[str, object]:
@@ -3040,17 +3039,22 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "schema": "rrkal_displaytools.timeline_animation_export.v1",
             "supported": True,
             "executed": False,
-            "mode": "png_frame_sequence_with_optional_gif",
+            "mode": "png_frame_sequence_with_optional_gif_mp4",
             "frame_count": 0,
             "fps": 24.0,
+            "manifest_file": None,
             "frames": [],
             "gif_file": None,
+            "mp4_file": None,
             "encoded_animation": False,
             "encoding_format": None,
             "encoding_error": None,
-            "applies": ["timeline_png_frame_sequence", "timeline_animation_manifest", "timeline_gif_animation"],
-            "pending": ["mp4_video_encoding", "blend_crossfade_interpolation", "visibility_fade_interpolation"],
-            "boundary": "Qt exposes renderer animation export capability; renderer writes frames, manifest, and optional GIF with interpolated camera and layer opacity keyframes.",
+            "encoded_video": False,
+            "video_encoding_format": None,
+            "video_encoding_error": None,
+            "applies": ["timeline_png_frame_sequence", "timeline_animation_manifest", "timeline_gif_animation", "timeline_mp4_video"],
+            "pending": ["blend_crossfade_interpolation", "visibility_fade_interpolation"],
+            "boundary": "Qt exposes renderer animation export capability; renderer writes frames, manifest, optional GIF, and optional MP4 with interpolated camera and layer opacity keyframes. MP4 requires imageio[ffmpeg].",
         }
 
     def collect_timeline_runtime_state(self) -> dict[str, object]:

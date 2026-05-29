@@ -5,3 +5,4 @@ vispy
 PyQt5
 Pillow
 PyQt6
+imageio[ffmpeg]

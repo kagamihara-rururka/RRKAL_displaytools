@@ -1,5 +1,19 @@
 # Development Log
 
+## 2026-05-29 - Timeline MP4 video export
+
+Scope:
+- Added optional Timeline MP4 export through `--timeline-export-mp4` / `TIMELINE_EXPORT_MP4`.
+- `rrkal_displaytools.timeline_animation_export.v1` now reports `mp4_file`, `encoded_video`, `video_encoding_format`, and `video_encoding_error`.
+- Renderer, Qt runtime state, No-GUI launch packets, renderer capabilities, closed-loop status, and smoke gates now advertise `timeline_mp4_video`.
+- Added `imageio[ffmpeg]` as the MP4/container writer dependency while keeping PNG frames as the canonical frame sequence.
+
+Positioning:
+- PNG remains the reproducible scientific frame sequence; GIF and MP4 are convenience containers for review and handoff. Blend crossfade and visibility fade remain pending.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Timeline layer visibility/blend discrete hold
 
 Scope:

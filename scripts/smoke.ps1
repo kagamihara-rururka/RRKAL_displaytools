@@ -136,6 +136,9 @@ if ($launchPacket.timeline_animation_export.schema -ne "rrkal_displaytools.timel
 if ($launchPacket.timeline_animation_export.applies -notcontains "timeline_gif_animation") {
     throw "Launch packet timeline animation export missing GIF animation capability"
 }
+if ($launchPacket.timeline_animation_export.applies -notcontains "timeline_mp4_video") {
+    throw "Launch packet timeline animation export missing MP4 video capability"
+}
 if ($launchPacket.timeline_camera_keyframe.schema -ne "rrkal_displaytools.timeline_camera_keyframe.v1") {
     throw "Launch packet timeline camera keyframe schema missing or invalid"
 }
@@ -183,6 +186,9 @@ if ($launchPacket.timeline_runtime_state.animation_export.schema -ne "rrkal_disp
 }
 if ($launchPacket.timeline_runtime_state.animation_export.applies -notcontains "timeline_gif_animation") {
     throw "Launch packet timeline_runtime_state animation export missing GIF capability"
+}
+if ($launchPacket.timeline_runtime_state.animation_export.applies -notcontains "timeline_mp4_video") {
+    throw "Launch packet timeline_runtime_state animation export missing MP4 capability"
 }
 if ($launchPacket.timeline_runtime_state.camera_keyframe.schema -ne "rrkal_displaytools.timeline_camera_keyframe.v1") {
     throw "Launch packet timeline_runtime_state camera keyframe missing or invalid"
@@ -294,6 +300,9 @@ if ($timelineAck.animation_export.schema -ne "rrkal_displaytools.timeline_animat
 }
 if ($timelineAck.animation_export.applies -notcontains "timeline_gif_animation") {
     throw "Renderer timeline ack endpoint animation export missing GIF capability"
+}
+if ($timelineAck.animation_export.applies -notcontains "timeline_mp4_video") {
+    throw "Renderer timeline ack endpoint animation export missing MP4 capability"
 }
 if ($timelineAck.camera_keyframe.schema -ne "rrkal_displaytools.timeline_camera_keyframe.v1") {
     throw "Renderer timeline ack endpoint camera keyframe missing or invalid"
@@ -408,6 +417,9 @@ if ($capabilities.timeline_handoff.controls -notcontains "timeline-export-dir") 
 }
 if ($capabilities.timeline_handoff.controls -notcontains "timeline-export-gif") {
     throw "Renderer timeline_handoff timeline-export-gif control missing"
+}
+if ($capabilities.timeline_handoff.controls -notcontains "timeline-export-mp4") {
+    throw "Renderer timeline_handoff timeline-export-mp4 control missing"
 }
 if ($capabilities.timeline_handoff.first_keyframe_apply_schema -ne "rrkal_displaytools.timeline_first_keyframe_apply.v1") {
     throw "Renderer timeline_handoff first keyframe apply schema missing or invalid"
