@@ -61,6 +61,9 @@ if ($launchPacket.active_layer_diagnostics.layer_renderer_diagnostics_summary_sc
 if ($launchPacket.active_layer_diagnostics.layer_renderer_diagnostics_detail_schema -ne "rrkal_displaytools.layer_renderer_diagnostics_detail.v1") {
     throw "Launch packet active_layer_diagnostics layer renderer diagnostics detail schema link missing"
 }
+if ($launchPacket.active_layer_diagnostics.layer_renderer_diagnostics_remediation_schema -ne "rrkal_displaytools.layer_renderer_diagnostics_remediation.v1") {
+    throw "Launch packet active_layer_diagnostics layer renderer diagnostics remediation schema link missing"
+}
 if ($launchPacket.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
     throw "Launch packet layer_capability_matrix schema missing or invalid"
 }
@@ -114,6 +117,12 @@ if ($launchPacket.layer_capability_matrix.renderer_diagnostics_detail.schema -ne
 }
 if ([int]$launchPacket.layer_capability_matrix.renderer_diagnostics_detail.bridge_count -lt 5) {
     throw "Launch packet layer_capability_matrix renderer diagnostics detail bridge count missing"
+}
+if ($launchPacket.layer_capability_matrix.renderer_diagnostics_remediation.schema -ne "rrkal_displaytools.layer_renderer_diagnostics_remediation.v1") {
+    throw "Launch packet layer_capability_matrix renderer diagnostics remediation schema missing or invalid"
+}
+if ([int]$launchPacket.layer_capability_matrix.renderer_diagnostics_remediation.hint_count -lt 1) {
+    throw "Launch packet layer_capability_matrix renderer diagnostics remediation hint count missing"
 }
 if ($launchPacket.layer_capability_matrix.runtime_status_legend.schema -ne "rrkal_displaytools.layer_runtime_status_legend.v1") {
     throw "Launch packet layer_capability_matrix runtime status legend missing or invalid"
@@ -495,6 +504,9 @@ if ($capabilities.layer_capability_matrix.renderer_diagnostics_summary.schema -n
 if ($capabilities.layer_capability_matrix.renderer_diagnostics_detail.schema -ne "rrkal_displaytools.layer_renderer_diagnostics_detail.v1") {
     throw "Renderer layer_capability_matrix renderer diagnostics detail schema missing or invalid"
 }
+if ($capabilities.layer_capability_matrix.renderer_diagnostics_remediation.schema -ne "rrkal_displaytools.layer_renderer_diagnostics_remediation.v1") {
+    throw "Renderer layer_capability_matrix renderer diagnostics remediation schema missing or invalid"
+}
 if ($capabilities.layer_capability_matrix.runtime_status_legend.schema -ne "rrkal_displaytools.layer_runtime_status_legend.v1") {
     throw "Renderer layer_capability_matrix runtime status legend missing or invalid"
 }
@@ -659,6 +671,9 @@ if ($handoff.layer_capability_matrix.renderer_diagnostics_summary_schema -ne "rr
 }
 if ($handoff.layer_capability_matrix.renderer_diagnostics_detail_schema -ne "rrkal_displaytools.layer_renderer_diagnostics_detail.v1") {
     throw "Handoff inspection layer renderer diagnostics detail schema missing or invalid"
+}
+if ($handoff.layer_capability_matrix.renderer_diagnostics_remediation_schema -ne "rrkal_displaytools.layer_renderer_diagnostics_remediation.v1") {
+    throw "Handoff inspection layer renderer diagnostics remediation schema missing or invalid"
 }
 if ($handoff.layer_capability_matrix.runtime_status_legend_schema -ne "rrkal_displaytools.layer_runtime_status_legend.v1") {
     throw "Handoff inspection layer runtime status legend schema missing or invalid"

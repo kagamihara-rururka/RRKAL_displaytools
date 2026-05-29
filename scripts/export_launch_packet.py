@@ -345,6 +345,7 @@ def active_layer_diagnostics_packet(profile: dict[str, object], rrkal_data_manif
         "layer_authoritative_identity_source_schema": "rrkal_displaytools.layer_authoritative_identity_source.v1",
         "layer_renderer_diagnostics_summary_schema": "rrkal_displaytools.layer_renderer_diagnostics_summary.v1",
         "layer_renderer_diagnostics_detail_schema": "rrkal_displaytools.layer_renderer_diagnostics_detail.v1",
+        "layer_renderer_diagnostics_remediation_schema": "rrkal_displaytools.layer_renderer_diagnostics_remediation.v1",
         "runtime_evidence_summary": layer_runtime_evidence_summary_packet(None),
         "runtime_badge_summary": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer, rrkal_data_manifest_ref).get("runtime_badge_summary"),
         "runtime_warning_list": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer, rrkal_data_manifest_ref).get("runtime_warning_list"),
@@ -353,6 +354,7 @@ def active_layer_diagnostics_packet(profile: dict[str, object], rrkal_data_manif
         "authoritative_identity_source": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer, rrkal_data_manifest_ref).get("authoritative_identity_source"),
         "renderer_diagnostics_summary": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer, rrkal_data_manifest_ref).get("renderer_diagnostics_summary"),
         "renderer_diagnostics_detail": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer, rrkal_data_manifest_ref).get("renderer_diagnostics_detail"),
+        "renderer_diagnostics_remediation": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer, rrkal_data_manifest_ref).get("renderer_diagnostics_remediation"),
         "diagnostics_text": "no runtime ack/pick in no-GUI export",
         "runtime_ack_file": "state/renderer_layer_runtime_ack.json",
         "runtime_ack": None,
@@ -722,6 +724,75 @@ def layer_renderer_diagnostics_detail_packet(
         "boundary": "Read-only diagnostics detail; renderer state and RRKAL data governance are not mutated.",
     }
 
+
+def layer_renderer_diagnostics_remediation_packet(
+    renderer_detail: dict[str, object] | None,
+    renderer_summary: dict[str, object] | None,
+    selected_layer: str | None,
+    source: str,
+) -> dict[str, object]:
+    renderer_detail = renderer_detail if isinstance(renderer_detail, dict) else {}
+    renderer_summary = renderer_summary if isinstance(renderer_summary, dict) else {}
+    bridge_items = renderer_detail.get("bridges")
+    bridges = bridge_items if isinstance(bridge_items, list) else []
+    hints: list[dict[str, object]] = []
+    action_by_bridge = {
+        "runtime_ack": "Launch or restart the renderer from Qt, then inspect state/renderer_layer_runtime_ack.json if the ack remains missing.",
+        "layer_pick_state": "Move or click on a selectable renderer layer, then inspect state/renderer_layer_pick_state.json if pick context remains missing.",
+        "authoritative_identity_source": "Set the RRKAL manifest reference when authoritative territory or EEZ identity is required; displaytools keeps this as reference-only handoff.",
+        "warning_list": "Open Runtime warnings in Properties and compare the layer runtime badge summary before treating the layer state as reproducible.",
+        "live_control_coverage": "Treat controls with no live renderer coverage as UI/profile state until renderer support is added.",
+    }
+    title_by_bridge = {
+        "runtime_ack": "Renderer ack bridge",
+        "layer_pick_state": "Layer pick bridge",
+        "authoritative_identity_source": "RRKAL identity source",
+        "warning_list": "Runtime warning list",
+        "live_control_coverage": "Live-control coverage",
+    }
+    for bridge in bridges:
+        if not isinstance(bridge, dict):
+            continue
+        name = str(bridge.get("name") or "unknown")
+        status = str(bridge.get("status") or "unknown")
+        if status not in {"waiting", "not_configured", "warning", "error", "planned", "unknown"}:
+            continue
+        severity = "error" if status == "error" else "warning" if status in {"warning", "waiting", "not_configured"} else "info"
+        hints.append(
+            {
+                "bridge": name,
+                "status": status,
+                "severity": severity,
+                "title": title_by_bridge.get(name, name),
+                "action": action_by_bridge.get(name, "Inspect the corresponding diagnostics bridge before relying on this renderer state."),
+                "evidence": bridge.get("evidence"),
+            }
+        )
+    if not hints:
+        hints.append(
+            {
+                "bridge": "renderer_diagnostics",
+                "status": "ok",
+                "severity": "info",
+                "title": "Renderer diagnostics",
+                "action": "No immediate remediation required; keep the diagnostics packet with exported provenance.",
+                "evidence": renderer_summary.get("summary_text"),
+            }
+        )
+    return {
+        "schema": "rrkal_displaytools.layer_renderer_diagnostics_remediation.v1",
+        "source": source,
+        "selected_layer": selected_layer,
+        "summary_schema": renderer_summary.get("schema"),
+        "detail_schema": renderer_detail.get("schema"),
+        "hint_count": len(hints),
+        "hints": hints,
+        "attention_required": any(hint.get("severity") in {"warning", "error"} for hint in hints),
+        "summary_text": "; ".join(f"{hint.get('bridge')}:{hint.get('status')}" for hint in hints[:5]),
+        "copyable_provenance": True,
+        "boundary": "Read-only remediation hints; renderer state and RRKAL data governance are not mutated.",
+    }
+
 def layer_capability_matrix_packet(
     source: str,
     selected_layer: str | None = None,
@@ -789,6 +860,12 @@ def layer_capability_matrix_packet(
         selected_layer,
         source,
     )
+    renderer_diagnostics_remediation = layer_renderer_diagnostics_remediation_packet(
+        renderer_diagnostics_detail,
+        renderer_diagnostics_summary,
+        selected_layer,
+        source,
+    )
     return {
         "schema": "rrkal_displaytools.layer_capability_matrix.v1",
         "source": source,
@@ -803,6 +880,7 @@ def layer_capability_matrix_packet(
         "authoritative_identity_source": authoritative_identity_source,
         "renderer_diagnostics_summary": renderer_diagnostics_summary,
         "renderer_diagnostics_detail": renderer_diagnostics_detail,
+        "renderer_diagnostics_remediation": renderer_diagnostics_remediation,
         "runtime_status_legend": layer_runtime_status_legend_packet(),
         "selected_layer": selected_layer,
         "selected_layer_capabilities": selected,

@@ -54,6 +54,7 @@ $summary = [ordered]@{
         authoritative_identity_source_schema = $capabilities.layer_capability_matrix.authoritative_identity_source.schema
         renderer_diagnostics_summary_schema = $capabilities.layer_capability_matrix.renderer_diagnostics_summary.schema
         renderer_diagnostics_detail_schema = $capabilities.layer_capability_matrix.renderer_diagnostics_detail.schema
+        renderer_diagnostics_remediation_schema = $capabilities.layer_capability_matrix.renderer_diagnostics_remediation.schema
         runtime_evidence_available = $capabilities.layer_capability_matrix.runtime_evidence.available
         runtime_status_legend_schema = $capabilities.layer_capability_matrix.runtime_status_legend.schema
         layer_count = $capabilities.layer_capability_matrix.layer_count

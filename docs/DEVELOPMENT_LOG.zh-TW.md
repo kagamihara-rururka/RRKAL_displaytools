@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-30 - Layer renderer diagnostics remediation hints
+
+- Added `rrkal_displaytools.layer_renderer_diagnostics_remediation.v1` with read-only next-step hints for renderer ack, layer pick state, RRKAL identity source, warning list and live-control coverage bridges.
+- Surfaced remediation hints in Qt Properties, launch packet, renderer capability discovery, handoff inspection and closed-loop evidence.
+- Smoke: `scripts/smoke.ps1` PASS (2026-05-30).
+
 ## 2026-05-30 - Layer renderer diagnostics detail
 
 - Added `rrkal_displaytools.layer_renderer_diagnostics_detail.v1` to split renderer diagnostics into runtime ack, layer pick state, authoritative identity source, warning list and live-control coverage bridges.
