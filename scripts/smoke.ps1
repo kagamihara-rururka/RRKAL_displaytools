@@ -55,6 +55,9 @@ if ($launchPacket.active_layer_diagnostics.layer_territory_identity_context_sche
 if ($launchPacket.active_layer_diagnostics.layer_authoritative_identity_source_schema -ne "rrkal_displaytools.layer_authoritative_identity_source.v1") {
     throw "Launch packet active_layer_diagnostics layer authoritative identity source schema link missing"
 }
+if ($launchPacket.active_layer_diagnostics.layer_renderer_diagnostics_summary_schema -ne "rrkal_displaytools.layer_renderer_diagnostics_summary.v1") {
+    throw "Launch packet active_layer_diagnostics layer renderer diagnostics summary schema link missing"
+}
 if ($launchPacket.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
     throw "Launch packet layer_capability_matrix schema missing or invalid"
 }
@@ -96,6 +99,12 @@ if ($launchPacket.layer_capability_matrix.authoritative_identity_source.schema -
 }
 if ($launchPacket.layer_capability_matrix.authoritative_identity_source.displaytools_role -ne "reference_only_handoff") {
     throw "Launch packet layer_capability_matrix authoritative identity source must be reference-only"
+}
+if ($launchPacket.layer_capability_matrix.renderer_diagnostics_summary.schema -ne "rrkal_displaytools.layer_renderer_diagnostics_summary.v1") {
+    throw "Launch packet layer_capability_matrix renderer diagnostics summary schema missing or invalid"
+}
+if ($launchPacket.layer_capability_matrix.renderer_diagnostics_summary.runtime_ack_available -ne $false) {
+    throw "Launch packet layer_capability_matrix renderer diagnostics summary should not claim runtime ack in no-GUI export"
 }
 if ($launchPacket.layer_capability_matrix.runtime_status_legend.schema -ne "rrkal_displaytools.layer_runtime_status_legend.v1") {
     throw "Launch packet layer_capability_matrix runtime status legend missing or invalid"
@@ -471,6 +480,9 @@ if ($capabilities.layer_capability_matrix.territory_identity_context.schema -ne 
 if ($capabilities.layer_capability_matrix.authoritative_identity_source.schema -ne "rrkal_displaytools.layer_authoritative_identity_source.v1") {
     throw "Renderer layer_capability_matrix authoritative identity source schema missing or invalid"
 }
+if ($capabilities.layer_capability_matrix.renderer_diagnostics_summary.schema -ne "rrkal_displaytools.layer_renderer_diagnostics_summary.v1") {
+    throw "Renderer layer_capability_matrix renderer diagnostics summary schema missing or invalid"
+}
 if ($capabilities.layer_capability_matrix.runtime_status_legend.schema -ne "rrkal_displaytools.layer_runtime_status_legend.v1") {
     throw "Renderer layer_capability_matrix runtime status legend missing or invalid"
 }
@@ -629,6 +641,9 @@ if ($handoff.layer_capability_matrix.territory_identity_context_schema -ne "rrka
 }
 if ($handoff.layer_capability_matrix.authoritative_identity_source_schema -ne "rrkal_displaytools.layer_authoritative_identity_source.v1") {
     throw "Handoff inspection layer authoritative identity source schema missing or invalid"
+}
+if ($handoff.layer_capability_matrix.renderer_diagnostics_summary_schema -ne "rrkal_displaytools.layer_renderer_diagnostics_summary.v1") {
+    throw "Handoff inspection layer renderer diagnostics summary schema missing or invalid"
 }
 if ($handoff.layer_capability_matrix.runtime_status_legend_schema -ne "rrkal_displaytools.layer_runtime_status_legend.v1") {
     throw "Handoff inspection layer runtime status legend schema missing or invalid"

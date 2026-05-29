@@ -536,6 +536,50 @@ def layer_authoritative_identity_source_packet(source_ref: str | None, source: s
     }
 
 
+
+def layer_renderer_diagnostics_summary_packet(
+    runtime_evidence: dict[str, object] | None,
+    warning_list: dict[str, object] | None,
+    interaction_context: dict[str, object] | None,
+    identity_source: dict[str, object] | None,
+    live_counts: dict[str, object] | None,
+    selected_layer: str | None,
+    source: str,
+) -> dict[str, object]:
+    runtime_evidence = runtime_evidence if isinstance(runtime_evidence, dict) else {}
+    warning_list = warning_list if isinstance(warning_list, dict) else {}
+    interaction_context = interaction_context if isinstance(interaction_context, dict) else {}
+    identity_source = identity_source if isinstance(identity_source, dict) else {}
+    live_counts = live_counts if isinstance(live_counts, dict) else {}
+    ack_available = bool(runtime_evidence.get("available"))
+    pick_available = bool(interaction_context.get("pick_context_available"))
+    identity_ref_configured = bool(identity_source.get("source_ref_configured"))
+    severity = str(warning_list.get("severity") or "unknown")
+    summary_bits = [
+        f"ack={'available' if ack_available else 'waiting'}",
+        f"pick={'available' if pick_available else 'waiting'}",
+        f"warnings={severity}",
+        f"identity_source={'configured' if identity_ref_configured else 'not_configured'}",
+    ]
+    return {
+        "schema": "rrkal_displaytools.layer_renderer_diagnostics_summary.v1",
+        "source": source,
+        "selected_layer": selected_layer,
+        "runtime_ack_available": ack_available,
+        "runtime_ack_event": runtime_evidence.get("event"),
+        "runtime_ack_error": runtime_evidence.get("error"),
+        "pick_context_available": pick_available,
+        "pick_event": interaction_context.get("pick_event"),
+        "pick_hit": interaction_context.get("pick_hit"),
+        "warning_severity": severity,
+        "warning_count": warning_list.get("warning_count"),
+        "identity_source_configured": identity_ref_configured,
+        "live_counts": live_counts,
+        "summary_text": "; ".join(summary_bits),
+        "copyable_provenance": True,
+        "boundary": "Diagnostic summary only; renderer state and RRKAL data governance are not mutated.",
+    }
+
 def layer_capability_matrix_packet(
     source: str,
     selected_layer: str | None = None,
@@ -585,6 +629,16 @@ def layer_capability_matrix_packet(
         pick_state,
         source,
     )
+    authoritative_identity_source = layer_authoritative_identity_source_packet(authoritative_identity_source_ref, source)
+    renderer_diagnostics_summary = layer_renderer_diagnostics_summary_packet(
+        runtime_evidence_summary,
+        runtime_warning_list,
+        runtime_interaction_context,
+        authoritative_identity_source,
+        counts,
+        selected_layer,
+        source,
+    )
     return {
         "schema": "rrkal_displaytools.layer_capability_matrix.v1",
         "source": source,
@@ -596,7 +650,8 @@ def layer_capability_matrix_packet(
         "runtime_warning_list": runtime_warning_list,
         "runtime_interaction_context": runtime_interaction_context,
         "territory_identity_context": layer_territory_identity_context_packet(runtime_interaction_context, selected_layer, source),
-        "authoritative_identity_source": layer_authoritative_identity_source_packet(authoritative_identity_source_ref, source),
+        "authoritative_identity_source": authoritative_identity_source,
+        "renderer_diagnostics_summary": renderer_diagnostics_summary,
         "runtime_status_legend": layer_runtime_status_legend_packet(),
         "selected_layer": selected_layer,
         "selected_layer_capabilities": selected,
@@ -943,6 +998,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "capabilities": QtWidgets.QLabel("-"),
             "runtime_summary": QtWidgets.QLabel("-"),
             "runtime_warnings": QtWidgets.QLabel("-"),
+            "renderer_diagnostics_summary": QtWidgets.QLabel("-"),
             "runtime_context": QtWidgets.QLabel("-"),
             "territory_identity": QtWidgets.QLabel("-"),
             "identity_source": QtWidgets.QLabel("-"),
@@ -960,6 +1016,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         material_form.addRow("Layer capabilities", self.layer_property_labels["capabilities"])
         material_form.addRow("Runtime summary", self.layer_property_labels["runtime_summary"])
         material_form.addRow("Runtime warnings", self.layer_property_labels["runtime_warnings"])
+        material_form.addRow("Renderer summary", self.layer_property_labels["renderer_diagnostics_summary"])
         material_form.addRow("Runtime context", self.layer_property_labels["runtime_context"])
         material_form.addRow("Territory identity", self.layer_property_labels["territory_identity"])
         material_form.addRow("Identity source", self.layer_property_labels["identity_source"])
@@ -4086,6 +4143,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_property_labels["runtime_warnings"].setText(
             str(runtime_warning_list.get("summary_text", "-")) if isinstance(runtime_warning_list, dict) else "-"
         )
+        renderer_diagnostics_summary = matrix.get("renderer_diagnostics_summary") if isinstance(matrix, dict) else None
+        self.layer_property_labels["renderer_diagnostics_summary"].setText(
+            str(renderer_diagnostics_summary.get("summary_text", "-")) if isinstance(renderer_diagnostics_summary, dict) else "-"
+        )
         runtime_context = matrix.get("runtime_interaction_context") if isinstance(matrix, dict) else None
         self.layer_property_labels["runtime_context"].setText(
             str(runtime_context.get("summary_text", "-")) if isinstance(runtime_context, dict) else "-"
@@ -4166,12 +4227,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_runtime_interaction_context_schema": "rrkal_displaytools.layer_runtime_interaction_context.v1",
             "layer_territory_identity_context_schema": "rrkal_displaytools.layer_territory_identity_context.v1",
             "layer_authoritative_identity_source_schema": "rrkal_displaytools.layer_authoritative_identity_source.v1",
+            "layer_renderer_diagnostics_summary_schema": "rrkal_displaytools.layer_renderer_diagnostics_summary.v1",
             "runtime_evidence_summary": self.collect_layer_capability_matrix().get("runtime_evidence_summary"),
             "runtime_badge_summary": self.collect_layer_capability_matrix().get("runtime_badge_summary"),
             "runtime_warning_list": self.collect_layer_capability_matrix().get("runtime_warning_list"),
             "runtime_interaction_context": self.collect_layer_capability_matrix().get("runtime_interaction_context"),
             "territory_identity_context": self.collect_layer_capability_matrix().get("territory_identity_context"),
             "authoritative_identity_source": self.collect_layer_capability_matrix().get("authoritative_identity_source"),
+            "renderer_diagnostics_summary": self.collect_layer_capability_matrix().get("renderer_diagnostics_summary"),
             "diagnostics_text": diagnostics_text,
             "runtime_ack_file": str(LAYER_RUNTIME_ACK_PATH),
             "runtime_ack": self.layer_runtime_ack_payload,
@@ -4698,6 +4761,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_runtime_interaction_context": self.collect_layer_capability_matrix().get("runtime_interaction_context"),
             "layer_territory_identity_context": self.collect_layer_capability_matrix().get("territory_identity_context"),
             "layer_authoritative_identity_source": self.collect_layer_capability_matrix().get("authoritative_identity_source"),
+            "layer_renderer_diagnostics_summary": self.collect_layer_capability_matrix().get("renderer_diagnostics_summary"),
             "active_layer_diagnostics": self.active_layer_diagnostics_packet(),
             "layer_undo": self.collect_layer_undo_state(),
             "session_journal": self.collect_session_journal(),

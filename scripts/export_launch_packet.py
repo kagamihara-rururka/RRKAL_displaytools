@@ -343,12 +343,14 @@ def active_layer_diagnostics_packet(profile: dict[str, object], rrkal_data_manif
         "layer_runtime_interaction_context_schema": "rrkal_displaytools.layer_runtime_interaction_context.v1",
         "layer_territory_identity_context_schema": "rrkal_displaytools.layer_territory_identity_context.v1",
         "layer_authoritative_identity_source_schema": "rrkal_displaytools.layer_authoritative_identity_source.v1",
+        "layer_renderer_diagnostics_summary_schema": "rrkal_displaytools.layer_renderer_diagnostics_summary.v1",
         "runtime_evidence_summary": layer_runtime_evidence_summary_packet(None),
         "runtime_badge_summary": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer, rrkal_data_manifest_ref).get("runtime_badge_summary"),
         "runtime_warning_list": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer, rrkal_data_manifest_ref).get("runtime_warning_list"),
         "runtime_interaction_context": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer, rrkal_data_manifest_ref).get("runtime_interaction_context"),
         "territory_identity_context": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer, rrkal_data_manifest_ref).get("territory_identity_context"),
         "authoritative_identity_source": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer, rrkal_data_manifest_ref).get("authoritative_identity_source"),
+        "renderer_diagnostics_summary": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer, rrkal_data_manifest_ref).get("renderer_diagnostics_summary"),
         "diagnostics_text": "no runtime ack/pick in no-GUI export",
         "runtime_ack_file": "state/renderer_layer_runtime_ack.json",
         "runtime_ack": None,
@@ -600,6 +602,50 @@ def layer_authoritative_identity_source_packet(source_ref: str | None, source: s
     }
 
 
+
+def layer_renderer_diagnostics_summary_packet(
+    runtime_evidence: dict[str, object] | None,
+    warning_list: dict[str, object] | None,
+    interaction_context: dict[str, object] | None,
+    identity_source: dict[str, object] | None,
+    live_counts: dict[str, object] | None,
+    selected_layer: str | None,
+    source: str,
+) -> dict[str, object]:
+    runtime_evidence = runtime_evidence if isinstance(runtime_evidence, dict) else {}
+    warning_list = warning_list if isinstance(warning_list, dict) else {}
+    interaction_context = interaction_context if isinstance(interaction_context, dict) else {}
+    identity_source = identity_source if isinstance(identity_source, dict) else {}
+    live_counts = live_counts if isinstance(live_counts, dict) else {}
+    ack_available = bool(runtime_evidence.get("available"))
+    pick_available = bool(interaction_context.get("pick_context_available"))
+    identity_ref_configured = bool(identity_source.get("source_ref_configured"))
+    severity = str(warning_list.get("severity") or "unknown")
+    summary_bits = [
+        f"ack={'available' if ack_available else 'waiting'}",
+        f"pick={'available' if pick_available else 'waiting'}",
+        f"warnings={severity}",
+        f"identity_source={'configured' if identity_ref_configured else 'not_configured'}",
+    ]
+    return {
+        "schema": "rrkal_displaytools.layer_renderer_diagnostics_summary.v1",
+        "source": source,
+        "selected_layer": selected_layer,
+        "runtime_ack_available": ack_available,
+        "runtime_ack_event": runtime_evidence.get("event"),
+        "runtime_ack_error": runtime_evidence.get("error"),
+        "pick_context_available": pick_available,
+        "pick_event": interaction_context.get("pick_event"),
+        "pick_hit": interaction_context.get("pick_hit"),
+        "warning_severity": severity,
+        "warning_count": warning_list.get("warning_count"),
+        "identity_source_configured": identity_ref_configured,
+        "live_counts": live_counts,
+        "summary_text": "; ".join(summary_bits),
+        "copyable_provenance": True,
+        "boundary": "Diagnostic summary only; renderer state and RRKAL data governance are not mutated.",
+    }
+
 def layer_capability_matrix_packet(
     source: str,
     selected_layer: str | None = None,
@@ -647,6 +693,16 @@ def layer_capability_matrix_packet(
         str(renderer_target) if renderer_target else None,
         source,
     )
+    authoritative_identity_source = layer_authoritative_identity_source_packet(authoritative_identity_source_ref, source)
+    renderer_diagnostics_summary = layer_renderer_diagnostics_summary_packet(
+        runtime_evidence_summary,
+        runtime_warning_list,
+        runtime_interaction_context,
+        authoritative_identity_source,
+        counts,
+        selected_layer,
+        source,
+    )
     return {
         "schema": "rrkal_displaytools.layer_capability_matrix.v1",
         "source": source,
@@ -658,7 +714,8 @@ def layer_capability_matrix_packet(
         "runtime_warning_list": runtime_warning_list,
         "runtime_interaction_context": runtime_interaction_context,
         "territory_identity_context": layer_territory_identity_context_packet(runtime_interaction_context, selected_layer, source),
-        "authoritative_identity_source": layer_authoritative_identity_source_packet(authoritative_identity_source_ref, source),
+        "authoritative_identity_source": authoritative_identity_source,
+        "renderer_diagnostics_summary": renderer_diagnostics_summary,
         "runtime_status_legend": layer_runtime_status_legend_packet(),
         "selected_layer": selected_layer,
         "selected_layer_capabilities": selected,

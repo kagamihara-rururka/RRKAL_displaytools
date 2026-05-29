@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-29 - Layer renderer diagnostics summary
+
+- Added `rrkal_displaytools.layer_renderer_diagnostics_summary.v1` to unify runtime ack availability, pick context availability, warning severity, RRKAL identity source ref status and live layer control counts.
+- Surfaced the summary in Qt Properties, launch packet, renderer capability discovery, handoff inspection and closed-loop evidence.
+- Smoke: `scripts/smoke.ps1` PASS (2026-05-29).
+
 ## 2026-05-29 - Layer authoritative identity source handoff
 
 - Added `rrkal_displaytools.layer_authoritative_identity_source.v1` as a reference-only handoff for RRKAL-governed territory/EEZ polygon identity sources.

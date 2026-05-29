@@ -17710,6 +17710,50 @@ def layer_authoritative_identity_source_packet(source_ref: str | None, source: s
     }
 
 
+
+def layer_renderer_diagnostics_summary_packet(
+    runtime_evidence: dict[str, object] | None,
+    warning_list: dict[str, object] | None,
+    interaction_context: dict[str, object] | None,
+    identity_source: dict[str, object] | None,
+    live_counts: dict[str, object] | None,
+    selected_layer: str | None,
+    source: str,
+) -> dict[str, object]:
+    runtime_evidence = runtime_evidence if isinstance(runtime_evidence, dict) else {}
+    warning_list = warning_list if isinstance(warning_list, dict) else {}
+    interaction_context = interaction_context if isinstance(interaction_context, dict) else {}
+    identity_source = identity_source if isinstance(identity_source, dict) else {}
+    live_counts = live_counts if isinstance(live_counts, dict) else {}
+    ack_available = bool(runtime_evidence.get("available"))
+    pick_available = bool(interaction_context.get("pick_context_available"))
+    identity_ref_configured = bool(identity_source.get("source_ref_configured"))
+    severity = str(warning_list.get("severity") or "unknown")
+    summary_bits = [
+        f"ack={'available' if ack_available else 'waiting'}",
+        f"pick={'available' if pick_available else 'waiting'}",
+        f"warnings={severity}",
+        f"identity_source={'configured' if identity_ref_configured else 'not_configured'}",
+    ]
+    return {
+        "schema": "rrkal_displaytools.layer_renderer_diagnostics_summary.v1",
+        "source": source,
+        "selected_layer": selected_layer,
+        "runtime_ack_available": ack_available,
+        "runtime_ack_event": runtime_evidence.get("event"),
+        "runtime_ack_error": runtime_evidence.get("error"),
+        "pick_context_available": pick_available,
+        "pick_event": interaction_context.get("pick_event"),
+        "pick_hit": interaction_context.get("pick_hit"),
+        "warning_severity": severity,
+        "warning_count": warning_list.get("warning_count"),
+        "identity_source_configured": identity_ref_configured,
+        "live_counts": live_counts,
+        "summary_text": "; ".join(summary_bits),
+        "copyable_provenance": True,
+        "boundary": "Diagnostic summary only; renderer state and RRKAL data governance are not mutated.",
+    }
+
 def layer_capability_matrix_packet() -> dict[str, object]:
     aliases = {
         "show_grid": "grid",
@@ -17814,16 +17858,30 @@ def layer_capability_matrix_packet() -> dict[str, object]:
         None,
         "taichi_global_bathymetry.renderer_capabilities",
     )
+    counts = {
+        "visibility": sum(1 for layer in layers if layer["visibility_live"]),
+        "opacity": sum(1 for layer in layers if layer["opacity_live"]),
+        "blend": sum(1 for layer in layers if layer["blend_live"]),
+        "selected_layer_pick": sum(1 for layer in layers if layer["pick_live"]),
+    }
+    authoritative_identity_source = layer_authoritative_identity_source_packet(
+        None,
+        "taichi_global_bathymetry.renderer_capabilities",
+    )
+    renderer_diagnostics_summary = layer_renderer_diagnostics_summary_packet(
+        runtime_evidence_summary,
+        runtime_warning_list,
+        runtime_interaction_context,
+        authoritative_identity_source,
+        counts,
+        None,
+        "taichi_global_bathymetry.renderer_capabilities",
+    )
     return {
         "schema": "rrkal_displaytools.layer_capability_matrix.v1",
         "source": "taichi_global_bathymetry.renderer_capabilities",
         "layer_count": len(layers),
-        "live_counts": {
-            "visibility": sum(1 for layer in layers if layer["visibility_live"]),
-            "opacity": sum(1 for layer in layers if layer["opacity_live"]),
-            "blend": sum(1 for layer in layers if layer["blend_live"]),
-            "selected_layer_pick": sum(1 for layer in layers if layer["pick_live"]),
-        },
+        "live_counts": counts,
         "runtime_evidence": {
             "schema": "rrkal_displaytools.layer_runtime_evidence.v1",
             "available": False,
@@ -17854,10 +17912,8 @@ def layer_capability_matrix_packet() -> dict[str, object]:
             None,
             "taichi_global_bathymetry.renderer_capabilities",
         ),
-        "authoritative_identity_source": layer_authoritative_identity_source_packet(
-            None,
-            "taichi_global_bathymetry.renderer_capabilities",
-        ),
+        "authoritative_identity_source": authoritative_identity_source,
+        "renderer_diagnostics_summary": renderer_diagnostics_summary,
         "runtime_status_legend": layer_runtime_status_legend_packet(),
         "selected_layer": None,
         "selected_layer_capabilities": None,
