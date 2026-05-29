@@ -61,6 +61,7 @@
    - capability packet schema。
    - launch packet schema。
    - profile schema。
+   - closed-loop status packet。
    - RRKAL handoff notes。
 
 ## 解耦原則

@@ -15,6 +15,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+from closed_loop_status import renderer_closed_loop_status_packet
 from profile_schema import profile_payload_errors
 from pin_projection import pin_projection_contract_packet
 
@@ -1128,6 +1129,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "tool_state": self.collect_tool_state(),
             "pins": self.collect_research_pins(),
             "boundary_highlight": self.collect_boundary_highlight_state(),
+            "closed_loop_status": renderer_closed_loop_status_packet(),
             "boundary_highlight_ack_file": str(BOUNDARY_HIGHLIGHT_ACK_PATH),
             "pin_input_ack_file": str(PIN_INPUT_ACK_PATH),
             "pin_pick_state_file": str(PIN_PICK_STATE_PATH),

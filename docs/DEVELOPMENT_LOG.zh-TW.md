@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - Shared closed-loop status contract
+
+Scope:
+- Added `closed_loop_status.py` as a shared contract module.
+- Renderer capabilities, the standalone closed-loop endpoint, and Qt launch packets now use the same status packet source.
+- Smoke now py-compiles the shared status contract.
+
+Positioning:
+- This prevents capability discovery and launch packet handoff from drifting.
+- It also establishes a small contracts-style module without moving data governance into displaytools.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Closed-loop status endpoint
 
 Scope:

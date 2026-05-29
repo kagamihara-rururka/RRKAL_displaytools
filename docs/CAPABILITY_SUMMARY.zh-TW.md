@@ -70,7 +70,7 @@
 
 ### Launch packets and handoff
 
-- Qt panel 可匯出 launch packet 到 `state/showcase/`。
+- Qt panel 可匯出 launch packet 到 `state/showcase/`，內容包含當下的 `closed_loop_status` snapshot。
 - No-GUI exporter 可從 profile/template 產生 launch packet。
 - Launch packet 內含 profile、portable command、RRKAL/displaytools 責任邊界。
 - `docs/RRKAL_HANDOFF_CONTRACT.zh-TW.md` 定義未來 RRKAL 對接方式。
