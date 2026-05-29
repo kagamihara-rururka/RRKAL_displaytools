@@ -485,3 +485,17 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Photoshop-inspired Qt workspace labels
+
+Scope:
+- Reframed `rrkal_displaytools_qt_panel.py` as `RRKAL_displaytools Studio`.
+- Renamed panel groups toward Photoshop-inspired workspace concepts: tool options, Looks/templates, layers, properties, central preview, and actions.
+- Added a Qt action to display renderer layer manifest JSON from the backend.
+- Updated capability summary and GTD.
+
+Positioning:
+- This starts aligning the Qt frontend with Photoshop's panel/workspace spirit while keeping current renderer behavior unchanged.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

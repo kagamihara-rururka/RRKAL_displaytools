@@ -124,10 +124,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         main.setContentsMargins(18, 16, 18, 16)
         main.setSpacing(12)
 
-        title = QtWidgets.QLabel("RRKAL_displaytools 圖層與展示控制")
+        title = QtWidgets.QLabel("RRKAL_displaytools Studio")
         title.setObjectName("title")
         subtitle = QtWidgets.QLabel(
-            "Qt-first 控制面板：只負責啟動 renderer；RRKAL 仍負責資料下載、manifest、cache governance。"
+            "Photoshop-inspired Qt workspace：左側工具/預設，中間命令與資料預覽，右側圖層與屬性控制。"
         )
         subtitle.setWordWrap(True)
         main.addWidget(title)
@@ -142,7 +142,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         body.addLayout(left, stretch=1)
         body.addLayout(right, stretch=1)
 
-        renderer_group = self._group("Renderer 入口")
+        renderer_group = self._group("工具選項 / Renderer 入口")
         renderer_form = QtWidgets.QFormLayout(renderer_group)
         self.style_combo = self._combo(STYLE_PROFILES)
         self.ui_combo = self._combo(UI_BACKENDS)
@@ -162,7 +162,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         renderer_form.addRow("Taichi arch", self.arch_edit)
         left.addWidget(renderer_group)
 
-        material_group = self._group("海洋材質")
+        material_group = self._group("屬性 / 海洋材質")
         material_form = QtWidgets.QFormLayout(material_group)
         self.wave_edit = QtWidgets.QLineEdit("0.22")
         self.roughness_edit = QtWidgets.QLineEdit("0.28")
@@ -172,7 +172,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         material_form.addRow("Foam", self.foam_edit)
         left.addWidget(material_group)
 
-        preset_group = self._group("快速 preset")
+        preset_group = self._group("預設 / Looks")
         preset_layout = QtWidgets.QGridLayout(preset_group)
         presets = (
             ("昨天風格基線", self.apply_baseline),
@@ -188,7 +188,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             preset_layout.addWidget(button, index // 2, index % 2)
         left.addWidget(preset_group)
 
-        template_group = self._group("內建 profile templates")
+        template_group = self._group("模板 / Profile templates")
         template_layout = QtWidgets.QGridLayout(template_group)
         self.template_combo = QtWidgets.QComboBox()
         load_template_button = QtWidgets.QPushButton("載入模板")
@@ -201,7 +201,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         left.addWidget(template_group)
         left.addStretch(1)
 
-        layers_group = self._group("圖層開關")
+        layers_group = self._group("圖層 / Layers")
         layers_layout = QtWidgets.QGridLayout(layers_group)
         for index, (key, label) in enumerate(LAYER_LABELS):
             check = QtWidgets.QCheckBox(label)
@@ -224,7 +224,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             layers_layout.addWidget(button, 8 + index // 2, index % 2)
         right.addWidget(layers_group)
 
-        command_group = self._group("啟動命令預覽")
+        command_group = self._group("中央預覽 / Command and JSON preview")
         command_layout = QtWidgets.QVBoxLayout(command_group)
         self.command_text = QtWidgets.QPlainTextEdit()
         self.command_text.setReadOnly(True)
@@ -232,7 +232,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         command_layout.addWidget(self.command_text)
         right.addWidget(command_group, stretch=1)
 
-        actions_group = self._group("操作")
+        actions_group = self._group("動作 / Actions")
         actions = QtWidgets.QGridLayout(actions_group)
         refresh_button = QtWidgets.QPushButton("刷新命令")
         copy_button = QtWidgets.QPushButton("複製命令")
@@ -243,6 +243,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         open_local_profiles_button = QtWidgets.QPushButton("本機配置")
         export_packet_button = QtWidgets.QPushButton("匯出啟動包")
         capabilities_button = QtWidgets.QPushButton("Renderer 能力")
+        layer_manifest_button = QtWidgets.QPushButton("圖層 manifest")
         smoke_button = QtWidgets.QPushButton("Smoke check")
         launch_button = QtWidgets.QPushButton("啟動地球儀")
         restart_button = QtWidgets.QPushButton("套用並重啟")
@@ -256,6 +257,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         open_local_profiles_button.clicked.connect(self.open_local_profile_dir)
         export_packet_button.clicked.connect(self.export_launch_packet_dialog)
         capabilities_button.clicked.connect(self.show_renderer_capabilities)
+        layer_manifest_button.clicked.connect(self.show_layer_manifest)
         smoke_button.clicked.connect(self.run_smoke_check)
         launch_button.clicked.connect(self.launch_renderer)
         restart_button.clicked.connect(self.restart_renderer)
@@ -270,6 +272,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             open_local_profiles_button,
             export_packet_button,
             capabilities_button,
+            layer_manifest_button,
             smoke_button,
             launch_button,
             restart_button,
@@ -612,6 +615,22 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             return
         self.command_text.setPlainText(result.stdout.strip())
         self.status.setText("已顯示 renderer capabilities JSON")
+
+    @QtCore.pyqtSlot()
+    def show_layer_manifest(self) -> None:
+        result = subprocess.run(
+            [sys.executable, str(RENDERER), "--print-layer-manifest"],
+            cwd=str(ROOT),
+            text=True,
+            capture_output=True,
+            timeout=90,
+        )
+        if result.returncode != 0:
+            self.status.setText("Layer manifest failed")
+            self.command_text.setPlainText((result.stderr or result.stdout).strip())
+            return
+        self.command_text.setPlainText(result.stdout.strip())
+        self.status.setText("已顯示 renderer layer manifest JSON")
 
     @QtCore.pyqtSlot()
     def load_profile_dialog(self) -> None:

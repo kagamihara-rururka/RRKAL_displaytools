@@ -7,11 +7,13 @@
 ### Qt-first operator UI
 
 - `rrkal_displaytools_qt_panel.py` 提供 Qt/PyQt6 圖層控制面板。
+- 前端方向採 Photoshop-inspired workspace：工具選項、Looks/模板、圖層、屬性、中央預覽、動作分區。
 - 可控制 style profile、UI backend、topography source、data mode、resolution、Taichi arch。
 - 可控制 lake、river、border、territorial sea、EEZ、high seas、aircraft、ocean material、terrain contours、scale bar、vehicle icons 等圖層。
 - 支援水文、海域、交通、視覺輔助四組一鍵切換。
 - 支援啟動、停止、套用並重啟 renderer。
 - 顯示 renderer PID、執行中狀態與 exit code。
+- 可在中央預覽區顯示 renderer capabilities、layer manifest、launch packet 或 smoke 結果。
 
 ### Profiles and templates
 
