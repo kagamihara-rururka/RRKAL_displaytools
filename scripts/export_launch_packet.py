@@ -43,7 +43,7 @@ def resolve_profile(profile: Path | None, template: str | None) -> Path:
     return PROFILE_DIR / f"{template_name}.json"
 
 
-def renderer_args(profile: dict[str, object]) -> list[str]:
+def renderer_args(profile: dict[str, object], rrkal_data_manifest_ref: str = "") -> list[str]:
     renderer = profile["renderer"]
     material = profile["ocean_material"]
     layers = profile["layers"]
@@ -76,6 +76,9 @@ def renderer_args(profile: dict[str, object]) -> list[str]:
     ]
     for key, flag in BOOL_FLAGS.items():
         args.append(f"--{flag}" if layers[key] else f"--no-{flag}")
+    manifest_ref = rrkal_data_manifest_ref or str(renderer.get("rrkal_data_manifest_ref", "")).strip()
+    if manifest_ref:
+        args.extend(["--rrkal-data-manifest-ref", manifest_ref])
     return args
 
 
@@ -86,8 +89,9 @@ def profile_display_path(path: Path) -> str:
         return str(path)
 
 
-def launch_packet(profile_path: Path, profile: dict[str, object]) -> dict[str, object]:
-    portable_command = ["py", "-3", "taichi_global_bathymetry.py", *renderer_args(profile)]
+def launch_packet(profile_path: Path, profile: dict[str, object], rrkal_data_manifest_ref: str = "") -> dict[str, object]:
+    portable_command = ["py", "-3", "taichi_global_bathymetry.py", *renderer_args(profile, rrkal_data_manifest_ref)]
+    manifest_ref = rrkal_data_manifest_ref or str(profile.get("renderer", {}).get("rrkal_data_manifest_ref", "")).strip()
     return {
         "schema": "rrkal_displaytools.launch_packet.v1",
         "created_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
@@ -106,6 +110,8 @@ def launch_packet(profile_path: Path, profile: dict[str, object]) -> dict[str, o
             ],
         },
         "profile": profile,
+        "rrkal_data_manifest_ref": manifest_ref,
+        "rrkal_data_manifest_ref_boundary": "Reference-only handoff field; displaytools does not discover, download, validate, import, or govern this manifest.",
         "closed_loop_status": renderer_closed_loop_status_packet(),
         "portable_command": portable_command,
         "portable_command_line": " ".join(portable_command),
@@ -116,6 +122,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Export an RRKAL_displaytools launch packet")
     parser.add_argument("--profile", type=Path)
     parser.add_argument("--template")
+    parser.add_argument("--rrkal-data-manifest-ref", default="")
     parser.add_argument("--output", type=Path)
     return parser
 
@@ -133,7 +140,7 @@ def main(argv: list[str] | None = None) -> int:
         for error in errors:
             print(error, file=sys.stderr)
         return 1
-    packet = launch_packet(profile_path, profile)
+    packet = launch_packet(profile_path, profile, str(args.rrkal_data_manifest_ref or "").strip())
     text = json.dumps(packet, ensure_ascii=False, indent=2)
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)

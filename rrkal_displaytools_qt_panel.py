@@ -351,6 +351,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.height_edit = QtWidgets.QLineEdit("720")
         self.topo_step_edit = QtWidgets.QLineEdit("48")
         self.arch_edit = QtWidgets.QLineEdit("gpu")
+        self.rrkal_manifest_ref_edit = QtWidgets.QLineEdit("")
+        self.rrkal_manifest_ref_edit.setPlaceholderText("optional RRKAL manifest path/URL/reference")
         renderer_form.addRow("Style profile", self.style_combo)
         renderer_form.addRow("UI backend", self.ui_combo)
         renderer_form.addRow("Topography", self.topo_combo)
@@ -359,6 +361,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         renderer_form.addRow("Height", self.height_edit)
         renderer_form.addRow("Topo step", self.topo_step_edit)
         renderer_form.addRow("Taichi arch", self.arch_edit)
+        renderer_form.addRow("RRKAL manifest ref", self.rrkal_manifest_ref_edit)
         left.addWidget(renderer_group)
 
         material_group = self._group("屬性 / 海洋材質")
@@ -975,6 +978,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.height_edit,
             self.topo_step_edit,
             self.arch_edit,
+            self.rrkal_manifest_ref_edit,
             self.wave_edit,
             self.roughness_edit,
             self.foam_edit,
@@ -1033,6 +1037,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "--ocean-foam",
             self.foam_edit.text().strip() or "0.12",
         ]
+        rrkal_manifest_ref = self.rrkal_manifest_ref_edit.text().strip()
+        if rrkal_manifest_ref:
+            cmd.extend(["--rrkal-data-manifest-ref", rrkal_manifest_ref])
         for key, flag in BOOL_FLAGS.items():
             enabled = self.checks[key].isChecked()
             cmd.append(f"--{flag}" if enabled else f"--no-{flag}")
@@ -1090,6 +1097,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "height": self.height_edit.text().strip(),
                 "topo_step": self.topo_step_edit.text().strip(),
                 "taichi_arch": self.arch_edit.text().strip(),
+                "rrkal_data_manifest_ref": self.rrkal_manifest_ref_edit.text().strip(),
             },
             "ocean_material": {
                 "wave_strength": self.wave_edit.text().strip(),
@@ -1123,6 +1131,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 ],
             },
             "profile": self.collect_profile(),
+            "rrkal_data_manifest_ref": self.rrkal_manifest_ref_edit.text().strip(),
+            "rrkal_data_manifest_ref_boundary": "Reference-only handoff field; displaytools does not discover, download, validate, import, or govern this manifest.",
             "selected_layer": self.selected_layer_key,
             "selected_pin_id": self.selected_pin_id,
             "layer_stack_ui": self.collect_layer_stack_ui(),
@@ -1749,6 +1759,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.height_edit.setText(str(renderer.get("height", self.height_edit.text())))
             self.topo_step_edit.setText(str(renderer.get("topo_step", self.topo_step_edit.text())))
             self.arch_edit.setText(str(renderer.get("taichi_arch", self.arch_edit.text())))
+            self.rrkal_manifest_ref_edit.setText(
+                str(renderer.get("rrkal_data_manifest_ref", self.rrkal_manifest_ref_edit.text()))
+            )
         if isinstance(material, dict):
             self.wave_edit.setText(str(material.get("wave_strength", self.wave_edit.text())))
             self.roughness_edit.setText(str(material.get("roughness", self.roughness_edit.text())))
@@ -2350,6 +2363,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "height": self.height_edit.text().strip(),
                 "topo_step": self.topo_step_edit.text().strip(),
                 "taichi_arch": self.arch_edit.text().strip(),
+                "rrkal_data_manifest_ref": self.rrkal_manifest_ref_edit.text().strip(),
             },
             "active_layer": self.selected_layer_key,
             "active_tool": self.active_tool,
@@ -2394,6 +2408,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             },
             "portable_command_line": subprocess.list2cmdline(self.build_portable_command()),
             "boundary": "UI provenance only; renderer image output and RRKAL data manifest are separate artifacts.",
+            "rrkal_data_manifest_ref": self.rrkal_manifest_ref_edit.text().strip(),
+            "rrkal_data_manifest_ref_boundary": "Reference-only; RRKAL owns manifest/cache governance.",
         }
         return json.dumps(packet, ensure_ascii=False, indent=2)
 

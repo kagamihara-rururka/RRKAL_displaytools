@@ -12714,6 +12714,8 @@ class HybridRenderController:
             "last_layer_pick_result": self.last_layer_pick_result,
             "boundary_highlight": getattr(self, "boundary_highlight_state", {}),
             "closed_loop_status": renderer_closed_loop_status_packet(),
+            "rrkal_data_manifest_ref": getattr(self.args, "rrkal_data_manifest_ref", ""),
+            "rrkal_data_manifest_ref_boundary": "Reference-only; displaytools records the RRKAL manifest reference but does not discover, download, validate, import, or govern it.",
             "rrkal_boundary": {
                 "displaytools_owns": ["renderer output artifact", "visual layer state", "render metadata sidecar"],
                 "rrkal_owns": ["dataset discovery", "download/import/install registry", "manifest/cache governance"],
@@ -15672,6 +15674,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--headless", action=bool_action, default=False)
     parser.add_argument("--once", action=bool_action, default=False)
     parser.add_argument("--output", default=None)
+    parser.add_argument("--rrkal-data-manifest-ref", default=os.environ.get("RRKAL_DATA_MANIFEST_REF", ""))
     parser.add_argument("--fps-log", default=str(CACHE_DIR / "fps_log.jsonl"))
     parser.add_argument("--demo-closed-loop", action=bool_action, default=parse_bool(os.environ.get("DEMO_CLOSED_LOOP"), False))
     parser.add_argument("--write-demo-packet", default=os.environ.get("WRITE_DEMO_PACKET"))
@@ -15879,6 +15882,12 @@ def renderer_capabilities_packet() -> dict[str, object]:
         "pin_overlay": pin_projection_contract_packet(),
         "pin_selected_state": "selected_pin_id from --pin-file/--pin-json is rendered with a highlighted marker ring",
         "pin_marker_styles": pin_marker_style_packet(),
+        "rrkal_data_manifest_reference": {
+            "control": "rrkal-data-manifest-ref",
+            "env": "RRKAL_DATA_MANIFEST_REF",
+            "applies": ["launch_packet", "renderer_output_metadata_sidecar"],
+            "boundary": "reference-only; displaytools records the value and RRKAL owns manifest/cache governance",
+        },
         "pin_controls": [
             "pin-file",
             "pin-json",

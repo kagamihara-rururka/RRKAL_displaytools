@@ -27,6 +27,7 @@ REQUIRED_PROFILE_RENDERER = {
     "topo_step",
     "taichi_arch",
 }
+OPTIONAL_PROFILE_RENDERER = {"rrkal_data_manifest_ref"}
 REQUIRED_PROFILE_OCEAN_MATERIAL = {"wave_strength", "roughness", "foam"}
 REQUIRED_PROFILE_LAYERS = {
     "show_grid",
@@ -302,6 +303,7 @@ def profile_schema_packet() -> dict[str, object]:
         "required_top_level": sorted(REQUIRED_PROFILE_TOP_LEVEL),
         "optional_top_level": sorted(OPTIONAL_PROFILE_TOP_LEVEL),
         "required_renderer": sorted(REQUIRED_PROFILE_RENDERER),
+        "optional_renderer": sorted(OPTIONAL_PROFILE_RENDERER),
         "required_ocean_material": sorted(REQUIRED_PROFILE_OCEAN_MATERIAL),
         "required_layers": sorted(REQUIRED_PROFILE_LAYERS),
         "optional_layer_stack_ui": {

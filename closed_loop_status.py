@@ -56,15 +56,15 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
             },
             {
                 "id": "renderer_output_provenance",
-                "applies": ["image output metadata sidecar"],
-                "pending": ["RRKAL data manifest linkage"],
-                "evidence": ["--output", "renderer_output_metadata.v1"],
+                "applies": ["image output metadata sidecar", "RRKAL manifest reference passthrough"],
+                "pending": ["RRKAL data manifest validation/ingest"],
+                "evidence": ["--output", "--rrkal-data-manifest-ref", "renderer_output_metadata.v1"],
             },
         ],
         "pending": [
             "full territory/EEZ feature identity",
             "open-line area inference",
             "embedded renderer thumbnail",
-            "RRKAL data manifest linkage",
+            "RRKAL data manifest validation/ingest",
         ],
     }

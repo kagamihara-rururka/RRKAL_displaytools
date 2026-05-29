@@ -1,5 +1,20 @@
 ﻿# Development Log
 
+## 2026-05-29 - RRKAL manifest reference passthrough
+
+Scope:
+- Added optional Qt `RRKAL manifest ref` input.
+- Added renderer CLI `--rrkal-data-manifest-ref` / `RRKAL_DATA_MANIFEST_REF`.
+- Qt launch packets, no-GUI launch packets, research provenance, renderer capabilities, and output metadata sidecars now record the reference.
+- The profile schema contract documents `renderer.rrkal_data_manifest_ref` as an optional renderer field.
+
+Positioning:
+- This closes a reference-only handoff loop for future RRKAL data manifest linkage.
+- Displaytools still does not discover, download, validate, import, or govern manifests.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Quick render smoke metadata check
 
 Scope:

@@ -44,7 +44,7 @@
 - Style / Looks panel 的縮圖化模板選擇。
 - Select 工具已接 renderer selected-layer object picking bridge；Canvas Preview 本身仍是 Qt-side hit bands，下一步是 embedded renderer thumbnail。Pin 下一步是補更細的 renderer interaction ack 與 globe mask / depth buffer refinement；Brush/Mask 暫不納入本輪 UI。
 - Boundary highlight 下一步是從目前 line hover outline/glow 與閉合 ring polygon preview 升級到疆域/領海/EEZ feature identity、開放線段面域推論，以及 fill shader 的 gamma/contrast。
-- Renderer headless/once output 會在 image output 旁寫出 `.metadata.json` sidecar，記錄 renderer state、layer state、selected-layer pick、boundary highlight、closed-loop status 與 RRKAL/displaytools 邊界。RRKAL data manifest 對接仍屬後續資料治理銜接。
+- Renderer headless/once output 會在 image output 旁寫出 `.metadata.json` sidecar，記錄 renderer state、layer state、selected-layer pick、boundary highlight、closed-loop status、RRKAL data manifest reference 與 RRKAL/displaytools 邊界。`--rrkal-data-manifest-ref` / Qt `RRKAL manifest ref` 只做 reference passthrough；manifest validation/ingest/governance 仍屬 RRKAL。
 - Timeline / keyframe / animation controls for ocean/cloud/material parameters。
 - Workspace presets 後續要補成可視化 preset manager，並支援保存多組命名工作區。
 
@@ -71,7 +71,7 @@
 ### Launch packets and handoff
 
 - Qt panel 可匯出 launch packet 到 `state/showcase/`，內容包含當下的 `closed_loop_status` snapshot。
-- No-GUI exporter 可從 profile/template 產生 launch packet，並包含 `closed_loop_status` snapshot 與 `pin-layer` renderer flag。
+- No-GUI exporter 可從 profile/template 產生 launch packet，並包含 `closed_loop_status` snapshot、`pin-layer` renderer flag 與 optional `--rrkal-data-manifest-ref` reference-only handoff。
 - Launch packet 內含 profile、portable command、RRKAL/displaytools 責任邊界。
 - `docs/RRKAL_HANDOFF_CONTRACT.zh-TW.md` 定義未來 RRKAL 對接方式。
 
