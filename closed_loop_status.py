@@ -165,10 +165,11 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "renderer discrete keyframe step playback",
                     "renderer ocean material keyframe interpolation",
                     "renderer PNG frame sequence animation export",
+                    "renderer GIF animation export",
                     "renderer discrete camera keyframe apply",
                     "renderer camera keyframe interpolation",
                 ],
-                "pending": ["video_encoding", "non_material_interpolation"],
+                "pending": ["mp4_video_encoding", "non_material_interpolation"],
                 "evidence": [
                     "Timeline dock controls",
                     "rrkal_displaytools.timeline_state.v1",

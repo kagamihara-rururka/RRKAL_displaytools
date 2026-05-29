@@ -2766,14 +2766,14 @@ def timeline_playback_readiness_packet() -> dict[str, object]:
         "renderer_playback_mode": "discrete_keyframe_step",
         "ocean_material_interpolation": True,
         "animation_export": True,
-        "animation_export_mode": "png_frame_sequence",
+        "animation_export_mode": "png_frame_sequence_with_optional_gif",
         "camera_keyframes": True,
         "camera_keyframe_interpolation": True,
         "pending": [
-            "video_encoding",
+            "mp4_video_encoding",
             "non_material_interpolation",
         ],
-        "boundary": "Renderer can interpolate camera keyframes and export PNG frame sequences; video encoding and non-material interpolation remain pending.",
+        "boundary": "Renderer can interpolate camera keyframes and export PNG frame sequences with optional GIF animation; MP4 encoding and non-material interpolation remain pending.",
     }
 
 
@@ -3094,6 +3094,10 @@ def timeline_animation_export_packet(
     fps: float = 24.0,
     manifest_file: str | Path | None = None,
     frames: list[dict[str, object]] | None = None,
+    gif_file: str | Path | None = None,
+    encoded_animation: bool = False,
+    encoding_format: str | None = None,
+    encoding_error: str | None = None,
     executed: bool = False,
 ) -> dict[str, object]:
     return {
@@ -3106,9 +3110,13 @@ def timeline_animation_export_packet(
         "frame_count": max(0, int(frame_count)),
         "fps": max(1.0, float(fps)),
         "frames": frames or [],
-        "applies": ["timeline_png_frame_sequence", "timeline_animation_manifest"],
-        "pending": ["video_encoding", "non_material_interpolation"],
-        "boundary": "Exports PNG frames and a manifest only; video encoding remains pending.",
+        "gif_file": str(gif_file) if gif_file else None,
+        "encoded_animation": bool(encoded_animation),
+        "encoding_format": encoding_format,
+        "encoding_error": encoding_error,
+        "applies": ["timeline_png_frame_sequence", "timeline_animation_manifest", "timeline_gif_animation"],
+        "pending": ["mp4_video_encoding", "non_material_interpolation"],
+        "boundary": "Exports PNG frames, manifest, and optional GIF animation; MP4/video-container encoding remains pending.",
     }
 
 
@@ -13825,8 +13833,12 @@ class HybridRenderController:
         fps = max(1.0, float(getattr(self.args, "timeline_export_fps", 24.0)))
         manifest_path_value = getattr(self.args, "timeline_export_manifest", None)
         manifest_path = Path(manifest_path_value) if manifest_path_value else export_dir / "timeline_animation_manifest.json"
+        gif_path_value = getattr(self.args, "timeline_export_gif", None)
+        gif_path = Path(gif_path_value) if gif_path_value else None
         export_dir.mkdir(parents=True, exist_ok=True)
         manifest_path.parent.mkdir(parents=True, exist_ok=True)
+        if gif_path is not None:
+            gif_path.parent.mkdir(parents=True, exist_ok=True)
         state_payload = self.timeline_runtime_state if isinstance(self.timeline_runtime_state, dict) else {}
         runtime_keyframes = state_payload.get("timeline_keyframes")
         valid_keyframes = [keyframe for keyframe in runtime_keyframes if isinstance(keyframe, dict)] if isinstance(runtime_keyframes, list) else []
@@ -13842,6 +13854,9 @@ class HybridRenderController:
         previous_output_path = self.output_path
         self.output_path = None
         frames: list[dict[str, object]] = []
+        gif_images = []
+        encoded_animation = False
+        encoding_error = None
         try:
             from PIL import Image
 
@@ -13900,7 +13915,10 @@ class HybridRenderController:
                 if frame is None:
                     frame = self.frame_rgba
                 frame_path = export_dir / f"timeline_frame_{frame_index:04d}.png"
-                Image.fromarray(frame, mode="RGBA").save(frame_path)
+                image = Image.fromarray(frame, mode="RGBA")
+                image.save(frame_path)
+                if gif_path is not None:
+                    gif_images.append(image.copy())
                 frames.append(
                     {
                         "index": frame_index,
@@ -13911,6 +13929,20 @@ class HybridRenderController:
                         "camera": camera_interpolation_packet.get("interpolated") or camera_packet.get("camera"),
                     }
                 )
+            if gif_path is not None and gif_images:
+                try:
+                    duration_ms = max(1, int(round(1000.0 / fps)))
+                    gif_images[0].save(
+                        gif_path,
+                        save_all=True,
+                        append_images=gif_images[1:],
+                        duration=duration_ms,
+                        loop=0,
+                        disposal=2,
+                    )
+                    encoded_animation = True
+                except Exception as exc:
+                    encoding_error = str(exc)
         finally:
             self.output_path = previous_output_path
         manifest = timeline_animation_export_packet(
@@ -13919,6 +13951,10 @@ class HybridRenderController:
             fps=fps,
             manifest_file=manifest_path,
             frames=frames,
+            gif_file=gif_path,
+            encoded_animation=encoded_animation,
+            encoding_format="gif" if gif_path is not None else None,
+            encoding_error=encoding_error,
             executed=True,
         )
         self.timeline_animation_export_result = manifest
@@ -17091,6 +17127,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--timeline-export-frames", type=int, default=int(os.environ.get("TIMELINE_EXPORT_FRAMES", "24")))
     parser.add_argument("--timeline-export-fps", type=float, default=float(os.environ.get("TIMELINE_EXPORT_FPS", "24.0")))
     parser.add_argument("--timeline-export-manifest", default=os.environ.get("TIMELINE_EXPORT_MANIFEST"))
+    parser.add_argument("--timeline-export-gif", default=os.environ.get("TIMELINE_EXPORT_GIF"))
 
     parser.add_argument("--adaptive-sampling", action=bool_action, default=parse_bool(os.environ.get("ADAPTIVE_SAMPLING"), True))
     parser.add_argument("--target-fps", type=float, default=float(os.environ.get("TARGET_FPS", "30.0")))
@@ -17349,6 +17386,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "timeline-export-frames",
                 "timeline-export-fps",
                 "timeline-export-manifest",
+                "timeline-export-gif",
             ],
             "input_contracts": [
                 "rrkal_displaytools.timeline_state.v1",
@@ -17376,14 +17414,15 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "renderer discrete keyframe step playback",
                 "renderer ocean material keyframe interpolation",
                 "renderer PNG frame sequence export",
+                "renderer GIF animation export",
                 "renderer discrete camera keyframe apply",
                 "renderer camera keyframe interpolation",
             ],
             "pending": [
-                "video_encoding",
+                "mp4_video_encoding",
                 "non_material_interpolation",
             ],
-            "boundary": "Timeline keyframes are portable UI/profile state; renderer can interpolate camera keyframes and export PNG frames while video encoding and non-material interpolation remain pending.",
+            "boundary": "Timeline keyframes are portable UI/profile state; renderer can interpolate camera keyframes and export PNG/GIF animations while MP4 encoding and non-material interpolation remain pending.",
         },
         "ui_handoff_contracts": {
             "schema": "rrkal_displaytools.ui_handoff_contracts.v1",

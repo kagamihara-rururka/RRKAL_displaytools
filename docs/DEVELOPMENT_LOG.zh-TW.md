@@ -2428,3 +2428,17 @@ Decision:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Timeline GIF animation export fallback
+
+Scope:
+- Added `--timeline-export-gif` as a lightweight encoded animation target for Timeline exports.
+- Timeline export still writes PNG frames and manifest, and now optionally writes an animated GIF using Pillow.
+- Animation export packets now report `gif_file`, `encoded_animation`, `encoding_format`, and `encoding_error`.
+- Renderer capabilities and smoke now gate the `timeline-export-gif` control and `timeline_gif_animation` apply scope.
+
+Decision:
+- GIF is the dependency-light fallback for sharing animations. MP4/container video encoding remains pending because `imageio` / `imageio_ffmpeg` are not installed in this workspace.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

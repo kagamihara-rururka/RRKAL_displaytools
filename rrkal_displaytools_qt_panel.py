@@ -2737,7 +2737,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "renderer_playback_mode": "discrete_keyframe_step",
             "ocean_material_interpolation": True,
             "animation_export": True,
-            "animation_export_mode": "png_frame_sequence",
+            "animation_export_mode": "png_frame_sequence_with_optional_gif",
             "camera_keyframes": True,
             "camera_keyframe_interpolation": True,
             "ready_handoff_files": {
@@ -2745,10 +2745,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "timeline_ack_file": str(TIMELINE_ACK_PATH),
             },
             "pending": [
-                "video_encoding",
+                "mp4_video_encoding",
                 "non_material_interpolation",
             ],
-            "boundary": "Renderer can interpolate camera keyframes and export PNG frame sequences; video encoding and non-material interpolation remain pending.",
+            "boundary": "Renderer can interpolate camera keyframes and export PNG frame sequences with optional GIF animation; MP4 encoding and non-material interpolation remain pending.",
         }
 
     def collect_timeline_camera_state(self) -> dict[str, object]:
@@ -2969,13 +2969,17 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "schema": "rrkal_displaytools.timeline_animation_export.v1",
             "supported": True,
             "executed": False,
-            "mode": "png_frame_sequence",
+            "mode": "png_frame_sequence_with_optional_gif",
             "frame_count": 0,
             "fps": 24.0,
             "frames": [],
-            "applies": ["timeline_png_frame_sequence", "timeline_animation_manifest"],
-            "pending": ["video_encoding", "non_material_interpolation"],
-            "boundary": "Qt exposes renderer animation export capability; renderer writes frames and manifest with interpolated camera keyframes.",
+            "gif_file": None,
+            "encoded_animation": False,
+            "encoding_format": None,
+            "encoding_error": None,
+            "applies": ["timeline_png_frame_sequence", "timeline_animation_manifest", "timeline_gif_animation"],
+            "pending": ["mp4_video_encoding", "non_material_interpolation"],
+            "boundary": "Qt exposes renderer animation export capability; renderer writes frames, manifest, and optional GIF with interpolated camera keyframes.",
         }
 
     def collect_timeline_runtime_state(self) -> dict[str, object]:

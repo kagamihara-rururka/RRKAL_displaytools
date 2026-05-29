@@ -454,14 +454,14 @@ def timeline_playback_readiness_packet() -> dict[str, object]:
         "renderer_playback_mode": "discrete_keyframe_step",
         "ocean_material_interpolation": True,
         "animation_export": True,
-        "animation_export_mode": "png_frame_sequence",
+        "animation_export_mode": "png_frame_sequence_with_optional_gif",
         "camera_keyframes": True,
         "camera_keyframe_interpolation": True,
         "pending": [
-            "video_encoding",
+            "mp4_video_encoding",
             "non_material_interpolation",
         ],
-        "boundary": "No-GUI handoff can export runtime state for renderer PNG frame sequence export and camera keyframe interpolation; video encoding and non-material interpolation remain pending.",
+        "boundary": "No-GUI handoff can export runtime state for renderer PNG frame sequence/GIF export and camera keyframe interpolation; MP4 encoding and non-material interpolation remain pending.",
     }
 
 
@@ -742,13 +742,17 @@ def timeline_animation_export_packet(executed: bool = False) -> dict[str, object
         "schema": "rrkal_displaytools.timeline_animation_export.v1",
         "supported": True,
         "executed": bool(executed),
-        "mode": "png_frame_sequence",
+        "mode": "png_frame_sequence_with_optional_gif",
         "frame_count": 0,
         "fps": 24.0,
         "frames": [],
-        "applies": ["timeline_png_frame_sequence", "timeline_animation_manifest"],
-        "pending": ["video_encoding", "non_material_interpolation"],
-        "boundary": "No-GUI launch packets expose renderer animation export capability; renderer writes frames and manifest with interpolated camera keyframes.",
+        "gif_file": None,
+        "encoded_animation": False,
+        "encoding_format": None,
+        "encoding_error": None,
+        "applies": ["timeline_png_frame_sequence", "timeline_animation_manifest", "timeline_gif_animation"],
+        "pending": ["mp4_video_encoding", "non_material_interpolation"],
+        "boundary": "No-GUI launch packets expose renderer animation export capability; renderer writes frames, manifest, and optional GIF with interpolated camera keyframes.",
     }
 
 
