@@ -456,6 +456,29 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot()
     def run_smoke_check(self) -> None:
+        smoke_script = ROOT / "scripts" / "smoke.ps1"
+        if sys.platform == "win32" and smoke_script.exists():
+            result = subprocess.run(
+                [
+                    "powershell",
+                    "-NoProfile",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    str(smoke_script),
+                ],
+                cwd=str(ROOT),
+                text=True,
+                capture_output=True,
+                timeout=120,
+            )
+            if result.returncode != 0:
+                self.status.setText("Smoke failed")
+                self.command_text.setPlainText((result.stderr or result.stdout).strip())
+                return
+            self.status.setText("Smoke passed")
+            self.command_text.setPlainText(result.stdout.strip())
+            return
         python_result = subprocess.run(
             [
                 sys.executable,

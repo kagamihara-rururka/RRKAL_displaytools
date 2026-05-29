@@ -1,5 +1,16 @@
 ﻿# Development Log
 
+## 2026-05-29 - Qt smoke action uses smoke helper
+
+Scope:
+- Updated the Qt panel `Smoke check` action to call `scripts/smoke.ps1` on Windows.
+- Kept the existing Python/PowerShell fallback for environments where the helper script is unavailable.
+
+Positioning:
+- This keeps panel smoke checks aligned with the pre-commit smoke path.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 ## 2026-05-29 - Centralized smoke helper
 
 Scope:
@@ -263,6 +274,7 @@ Validation:
 Next round rule:
 - Before any new development round, inspect current repo state.
 - After each round, update this log and commit before continuing.
+
 
 
 

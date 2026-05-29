@@ -46,6 +46,7 @@ Last updated: 2026-05-29
 - 2026-05-29: Added Qt panel command copy and profile directory shortcuts.
 - 2026-05-29: Added Qt panel renderer process status polling.
 - 2026-05-29: Added centralized Windows smoke helper script.
+- 2026-05-29: Routed Qt panel smoke action through scripts/smoke.ps1 on Windows.
 - 2026-05-29: Added Windows setup and Qt panel launch scripts for another computer.
 - 2026-05-29: Added Qt panel grouped layer quick actions.
 - 2026-05-29: Added startup profile loading for the Qt panel and run script.
@@ -56,6 +57,7 @@ Last updated: 2026-05-29
 - 2026-05-29: Reworked Qt operator actions into a grid layout.
 - 2026-05-29: Added renderer capabilities JSON CLI output.
 - 2026-05-29: Added Qt panel renderer capabilities display action.
+
 
 
 
