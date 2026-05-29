@@ -32,6 +32,20 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                 ],
             },
             {
+                "id": "diagnostics_handoff_contracts",
+                "scope": [
+                    "active_layer_diagnostics",
+                    "boundary_highlight.identity_status",
+                    "canvas_preview stream provenance",
+                ],
+                "evidence": [
+                    "launch_packet active_layer_diagnostics",
+                    "launch_packet boundary_highlight.identity_status",
+                    "renderer capabilities active_layer_diagnostics",
+                    "profile_schema optional canvas_preview",
+                ],
+            },
+            {
                 "id": "cross_machine_bootstrap_docs",
                 "scope": ["clone", "venv setup", "smoke", "Qt panel launch"],
                 "evidence": ["scripts/run_qt_panel.ps1", "docs/QUICKSTART_CLONE.zh-TW.md", "README.md"],
@@ -48,6 +62,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "closed-ring area hit test",
                     "source-property feature identity",
                     "maritime property key identity",
+                    "boundary identity-status handoff",
                 ],
                 "pending": ["authoritative_polygon_territory_identity", "open_line_area_inference"],
                 "evidence": ["boundary-highlight-json", "boundary-highlight-ack-file"],

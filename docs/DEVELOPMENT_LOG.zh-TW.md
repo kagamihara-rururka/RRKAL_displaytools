@@ -1,5 +1,18 @@
 # Development Log
 
+## 2026-05-29 - Diagnostics handoff closed-loop status
+
+Scope:
+- Closed-loop status now includes `diagnostics_handoff_contracts`.
+- Boundary highlight partial status now lists boundary identity-status handoff as applied.
+- Smoke now parses closed-loop status and fails if that closed-loop id is missing.
+
+Positioning:
+- This keeps `--print-closed-loop-status` aligned with the launch packet, capabilities, and profile schema contracts.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Boundary renderer sync wording
 
 Scope:

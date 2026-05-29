@@ -62,7 +62,20 @@ if ($capabilities.active_layer_diagnostics.schema -ne "rrkal_displaytools.active
 if ($capabilities.boundary_highlight.identity_status_schema -ne "rrkal_displaytools.boundary_identity_status.v1") {
     throw "Renderer boundary_highlight identity_status capability missing or invalid"
 }
-Invoke-CheckedNative py @("-3", "taichi_global_bathymetry.py", "--print-closed-loop-status") | Out-Null
+$closedLoopText = & py -3 taichi_global_bathymetry.py --print-closed-loop-status
+if ($LASTEXITCODE -ne 0) {
+    throw "Command failed: py -3 taichi_global_bathymetry.py --print-closed-loop-status"
+}
+$closedLoopRaw = $closedLoopText -join "`n"
+$closedLoopJsonStart = $closedLoopRaw.IndexOf("{")
+if ($closedLoopJsonStart -lt 0) {
+    throw "Closed-loop status JSON payload not found"
+}
+$closedLoop = $closedLoopRaw.Substring($closedLoopJsonStart) | ConvertFrom-Json
+$closedLoopIds = @($closedLoop.closed | ForEach-Object { $_.id })
+if ($closedLoopIds -notcontains "diagnostics_handoff_contracts") {
+    throw "Closed-loop diagnostics_handoff_contracts missing"
+}
 Invoke-CheckedNative py @("-3", "taichi_global_bathymetry.py", "--print-layer-manifest") | Out-Null
 Invoke-CheckedNative py @("-3", "rrkal_displaytools_qt_panel.py", "--list-templates") | Out-Null
 
