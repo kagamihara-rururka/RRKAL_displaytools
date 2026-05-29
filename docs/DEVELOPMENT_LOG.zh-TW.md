@@ -1,5 +1,18 @@
 ﻿# Development Log
 
+## 2026-05-29 - Capability closed-loop status packet
+
+Scope:
+- Added `closed_loop_status` to renderer capabilities JSON.
+- The packet lists closed loops, partial loops, pending gaps, and the bridge/control evidence for each category.
+
+Positioning:
+- This makes renderer capability discovery more useful for scripts and cross-machine checks.
+- No runtime behavior changed.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - README current-entry refresh
 
 Scope:

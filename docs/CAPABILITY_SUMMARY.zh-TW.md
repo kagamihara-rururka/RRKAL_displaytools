@@ -65,7 +65,7 @@
 - `py -3 profile_schema.py`
 - `py -3 scripts\export_launch_packet.py --template fast_synthetic`
 
-這些入口給腳本查詢 renderer 能力、圖層 manifest、可用 templates、profile schema，以及產生 launch packet。
+這些入口給腳本查詢 renderer 能力、圖層 manifest、可用 templates、profile schema，以及產生 launch packet。Renderer capabilities 內含 `closed_loop_status`，可直接判讀目前 closed、partial 與 pending 的功能邊界。
 
 ### Launch packets and handoff
 
