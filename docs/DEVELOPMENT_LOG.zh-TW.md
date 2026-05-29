@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-29 - Layer authoritative identity source handoff
+
+- Added `rrkal_displaytools.layer_authoritative_identity_source.v1` as a reference-only handoff for RRKAL-governed territory/EEZ polygon identity sources.
+- Qt Properties now reports whether a RRKAL identity source ref is configured; launch packets, renderer capabilities and handoff inspection expose the same boundary.
+- The contract explicitly keeps discovery/download/import/cache governance out of displaytools.
+- Smoke: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1` PASS.
+
 ## 2026-05-29 - Layer territory identity context
 
 - Added `rrkal_displaytools.layer_territory_identity_context.v1` to separate source-property feature identity from authoritative territory/EEZ polygon identity.

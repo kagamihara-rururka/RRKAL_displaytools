@@ -325,7 +325,7 @@ def boundary_highlight_packet(profile: dict[str, object]) -> dict[str, object] |
     return merged
 
 
-def active_layer_diagnostics_packet(profile: dict[str, object]) -> dict[str, object]:
+def active_layer_diagnostics_packet(profile: dict[str, object], rrkal_data_manifest_ref: str | None = None) -> dict[str, object]:
     selected_layer = profile.get("selected_layer")
     selected_layer = selected_layer if isinstance(selected_layer, str) else None
     renderer_target = LAYER_RUNTIME_ID_ALIASES.get(selected_layer) if selected_layer else None
@@ -342,11 +342,13 @@ def active_layer_diagnostics_packet(profile: dict[str, object]) -> dict[str, obj
         "layer_runtime_warning_list_schema": "rrkal_displaytools.layer_runtime_warning_list.v1",
         "layer_runtime_interaction_context_schema": "rrkal_displaytools.layer_runtime_interaction_context.v1",
         "layer_territory_identity_context_schema": "rrkal_displaytools.layer_territory_identity_context.v1",
+        "layer_authoritative_identity_source_schema": "rrkal_displaytools.layer_authoritative_identity_source.v1",
         "runtime_evidence_summary": layer_runtime_evidence_summary_packet(None),
-        "runtime_badge_summary": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer).get("runtime_badge_summary"),
-        "runtime_warning_list": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer).get("runtime_warning_list"),
-        "runtime_interaction_context": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer).get("runtime_interaction_context"),
-        "territory_identity_context": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer).get("territory_identity_context"),
+        "runtime_badge_summary": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer, rrkal_data_manifest_ref).get("runtime_badge_summary"),
+        "runtime_warning_list": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer, rrkal_data_manifest_ref).get("runtime_warning_list"),
+        "runtime_interaction_context": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer, rrkal_data_manifest_ref).get("runtime_interaction_context"),
+        "territory_identity_context": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer, rrkal_data_manifest_ref).get("territory_identity_context"),
+        "authoritative_identity_source": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer, rrkal_data_manifest_ref).get("authoritative_identity_source"),
         "diagnostics_text": "no runtime ack/pick in no-GUI export",
         "runtime_ack_file": "state/renderer_layer_runtime_ack.json",
         "runtime_ack": None,
@@ -577,7 +579,32 @@ def layer_territory_identity_context_packet(
     }
 
 
-def layer_capability_matrix_packet(source: str, selected_layer: str | None = None) -> dict[str, object]:
+def layer_authoritative_identity_source_packet(source_ref: str | None, source: str) -> dict[str, object]:
+    ref = str(source_ref or "").strip()
+    return {
+        "schema": "rrkal_displaytools.layer_authoritative_identity_source.v1",
+        "source": source,
+        "source_ref": ref or None,
+        "source_ref_configured": bool(ref),
+        "owner": "RRKAL/APIkeys_collection",
+        "displaytools_role": "reference_only_handoff",
+        "supported_layers": ["border_layer", "territorial_sea_layer", "eez_layer", "high_seas_layer"],
+        "expected_identity_types": [
+            "authoritative_polygon_territory_identity",
+            "exclusive_economic_zone_identity",
+            "territorial_sea_identity",
+            "high_seas_identity",
+        ],
+        "displaytools_non_goals": ["discovery", "download", "import", "cache_governance", "asset_repair"],
+        "boundary": "Displaytools only carries this RRKAL-governed identity source reference; it does not discover, download, import, validate, repair, or govern identity datasets.",
+    }
+
+
+def layer_capability_matrix_packet(
+    source: str,
+    selected_layer: str | None = None,
+    authoritative_identity_source_ref: str | None = None,
+) -> dict[str, object]:
     layers = [layer_capability_packet(key, label) for key, label in LAYER_LABELS]
     runtime_evidence = {
         "schema": "rrkal_displaytools.layer_runtime_evidence.v1",
@@ -631,6 +658,7 @@ def layer_capability_matrix_packet(source: str, selected_layer: str | None = Non
         "runtime_warning_list": runtime_warning_list,
         "runtime_interaction_context": runtime_interaction_context,
         "territory_identity_context": layer_territory_identity_context_packet(runtime_interaction_context, selected_layer, source),
+        "authoritative_identity_source": layer_authoritative_identity_source_packet(authoritative_identity_source_ref, source),
         "runtime_status_legend": layer_runtime_status_legend_packet(),
         "selected_layer": selected_layer,
         "selected_layer_capabilities": selected,
@@ -1370,10 +1398,10 @@ def launch_packet(
         "rrkal_data_manifest_ref_boundary": "Reference-only handoff field; displaytools does not discover, download, validate, import, or govern this manifest.",
         "layer_filter": layer_filter_packet(profile),
         "layer_group_view": layer_group_view_packet(profile),
-        "layer_capability_matrix": layer_capability_matrix_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None),
+        "layer_capability_matrix": layer_capability_matrix_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None, rrkal_data_manifest_ref),
         "canvas_preview": canvas_preview_packet(profile),
         "boundary_highlight": boundary_highlight_packet(profile),
-        "active_layer_diagnostics": active_layer_diagnostics_packet(profile),
+        "active_layer_diagnostics": active_layer_diagnostics_packet(profile, rrkal_data_manifest_ref),
         "layer_undo": layer_undo_packet(),
         "session_journal": session_journal_packet(),
         "document_undo": document_undo_packet(),

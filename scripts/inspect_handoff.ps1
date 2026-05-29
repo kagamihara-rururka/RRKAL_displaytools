@@ -51,6 +51,7 @@ $summary = [ordered]@{
         runtime_warning_list_schema = $capabilities.layer_capability_matrix.runtime_warning_list.schema
         runtime_interaction_context_schema = $capabilities.layer_capability_matrix.runtime_interaction_context.schema
         territory_identity_context_schema = $capabilities.layer_capability_matrix.territory_identity_context.schema
+        authoritative_identity_source_schema = $capabilities.layer_capability_matrix.authoritative_identity_source.schema
         runtime_evidence_available = $capabilities.layer_capability_matrix.runtime_evidence.available
         runtime_status_legend_schema = $capabilities.layer_capability_matrix.runtime_status_legend.schema
         layer_count = $capabilities.layer_capability_matrix.layer_count

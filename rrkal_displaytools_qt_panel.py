@@ -515,11 +515,33 @@ def layer_territory_identity_context_packet(
     }
 
 
+def layer_authoritative_identity_source_packet(source_ref: str | None, source: str) -> dict[str, object]:
+    ref = str(source_ref or "").strip()
+    return {
+        "schema": "rrkal_displaytools.layer_authoritative_identity_source.v1",
+        "source": source,
+        "source_ref": ref or None,
+        "source_ref_configured": bool(ref),
+        "owner": "RRKAL/APIkeys_collection",
+        "displaytools_role": "reference_only_handoff",
+        "supported_layers": ["border_layer", "territorial_sea_layer", "eez_layer", "high_seas_layer"],
+        "expected_identity_types": [
+            "authoritative_polygon_territory_identity",
+            "exclusive_economic_zone_identity",
+            "territorial_sea_identity",
+            "high_seas_identity",
+        ],
+        "displaytools_non_goals": ["discovery", "download", "import", "cache_governance", "asset_repair"],
+        "boundary": "Displaytools only carries this RRKAL-governed identity source reference; it does not discover, download, import, validate, repair, or govern identity datasets.",
+    }
+
+
 def layer_capability_matrix_packet(
     source: str,
     selected_layer: str | None = None,
     runtime_ack: dict[str, object] | None = None,
     pick_state: dict[str, object] | None = None,
+    authoritative_identity_source_ref: str | None = None,
 ) -> dict[str, object]:
     runtime_evidence = layer_runtime_evidence_packet(runtime_ack)
     layers = [layer_capability_packet(key, label) for key, label in LAYER_LABELS]
@@ -574,6 +596,7 @@ def layer_capability_matrix_packet(
         "runtime_warning_list": runtime_warning_list,
         "runtime_interaction_context": runtime_interaction_context,
         "territory_identity_context": layer_territory_identity_context_packet(runtime_interaction_context, selected_layer, source),
+        "authoritative_identity_source": layer_authoritative_identity_source_packet(authoritative_identity_source_ref, source),
         "runtime_status_legend": layer_runtime_status_legend_packet(),
         "selected_layer": selected_layer,
         "selected_layer_capabilities": selected,
@@ -922,6 +945,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "runtime_warnings": QtWidgets.QLabel("-"),
             "runtime_context": QtWidgets.QLabel("-"),
             "territory_identity": QtWidgets.QLabel("-"),
+            "identity_source": QtWidgets.QLabel("-"),
             "renderer_target": QtWidgets.QLabel("-"),
             "diagnostics": QtWidgets.QLabel("-"),
         }
@@ -938,6 +962,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         material_form.addRow("Runtime warnings", self.layer_property_labels["runtime_warnings"])
         material_form.addRow("Runtime context", self.layer_property_labels["runtime_context"])
         material_form.addRow("Territory identity", self.layer_property_labels["territory_identity"])
+        material_form.addRow("Identity source", self.layer_property_labels["identity_source"])
         material_form.addRow("Renderer target", self.layer_property_labels["renderer_target"])
         material_form.addRow("Renderer diagnostics", self.layer_property_labels["diagnostics"])
         layer_property_actions = QtWidgets.QHBoxLayout()
@@ -2034,7 +2059,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def collect_layer_capability_matrix(self) -> dict[str, object]:
         runtime_ack = self.layer_runtime_ack_payload if isinstance(self.layer_runtime_ack_payload, dict) else None
         pick_state = self.layer_pick_state_payload if isinstance(self.layer_pick_state_payload, dict) else None
-        return layer_capability_matrix_packet("rrkal_displaytools_qt_panel", self.selected_layer_key, runtime_ack, pick_state)
+        identity_source_ref = self.rrkal_manifest_ref_edit.text().strip()
+        return layer_capability_matrix_packet(
+            "rrkal_displaytools_qt_panel",
+            self.selected_layer_key,
+            runtime_ack,
+            pick_state,
+            identity_source_ref,
+        )
 
     def collect_layer_runtime_state(self) -> dict[str, object]:
         layers = self.collect_layer_stack_ui()
@@ -4062,6 +4094,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_property_labels["territory_identity"].setText(
             str(territory_identity.get("summary_text", "-")) if isinstance(territory_identity, dict) else "-"
         )
+        identity_source = matrix.get("authoritative_identity_source") if isinstance(matrix, dict) else None
+        if isinstance(identity_source, dict):
+            source_text = "configured" if identity_source.get("source_ref_configured") else "not configured"
+            self.layer_property_labels["identity_source"].setText(f"RRKAL identity source: {source_text}")
+        else:
+            self.layer_property_labels["identity_source"].setText("-")
         renderer_target = LAYER_RUNTIME_ID_ALIASES.get(key, "-")
         self.layer_property_labels["renderer_target"].setText(str(renderer_target))
         self.layer_property_labels["diagnostics"].setText(self.layer_diagnostics_text(str(renderer_target)))
@@ -4127,11 +4165,13 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_runtime_warning_list_schema": "rrkal_displaytools.layer_runtime_warning_list.v1",
             "layer_runtime_interaction_context_schema": "rrkal_displaytools.layer_runtime_interaction_context.v1",
             "layer_territory_identity_context_schema": "rrkal_displaytools.layer_territory_identity_context.v1",
+            "layer_authoritative_identity_source_schema": "rrkal_displaytools.layer_authoritative_identity_source.v1",
             "runtime_evidence_summary": self.collect_layer_capability_matrix().get("runtime_evidence_summary"),
             "runtime_badge_summary": self.collect_layer_capability_matrix().get("runtime_badge_summary"),
             "runtime_warning_list": self.collect_layer_capability_matrix().get("runtime_warning_list"),
             "runtime_interaction_context": self.collect_layer_capability_matrix().get("runtime_interaction_context"),
             "territory_identity_context": self.collect_layer_capability_matrix().get("territory_identity_context"),
+            "authoritative_identity_source": self.collect_layer_capability_matrix().get("authoritative_identity_source"),
             "diagnostics_text": diagnostics_text,
             "runtime_ack_file": str(LAYER_RUNTIME_ACK_PATH),
             "runtime_ack": self.layer_runtime_ack_payload,
@@ -4657,6 +4697,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_runtime_warning_list": self.collect_layer_capability_matrix().get("runtime_warning_list"),
             "layer_runtime_interaction_context": self.collect_layer_capability_matrix().get("runtime_interaction_context"),
             "layer_territory_identity_context": self.collect_layer_capability_matrix().get("territory_identity_context"),
+            "layer_authoritative_identity_source": self.collect_layer_capability_matrix().get("authoritative_identity_source"),
             "active_layer_diagnostics": self.active_layer_diagnostics_packet(),
             "layer_undo": self.collect_layer_undo_state(),
             "session_journal": self.collect_session_journal(),

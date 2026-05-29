@@ -17689,6 +17689,27 @@ def layer_territory_identity_context_packet(
     }
 
 
+def layer_authoritative_identity_source_packet(source_ref: str | None, source: str) -> dict[str, object]:
+    ref = str(source_ref or "").strip()
+    return {
+        "schema": "rrkal_displaytools.layer_authoritative_identity_source.v1",
+        "source": source,
+        "source_ref": ref or None,
+        "source_ref_configured": bool(ref),
+        "owner": "RRKAL/APIkeys_collection",
+        "displaytools_role": "reference_only_handoff",
+        "supported_layers": ["border_layer", "territorial_sea_layer", "eez_layer", "high_seas_layer"],
+        "expected_identity_types": [
+            "authoritative_polygon_territory_identity",
+            "exclusive_economic_zone_identity",
+            "territorial_sea_identity",
+            "high_seas_identity",
+        ],
+        "displaytools_non_goals": ["discovery", "download", "import", "cache_governance", "asset_repair"],
+        "boundary": "Displaytools only carries this RRKAL-governed identity source reference; it does not discover, download, import, validate, repair, or govern identity datasets.",
+    }
+
+
 def layer_capability_matrix_packet() -> dict[str, object]:
     aliases = {
         "show_grid": "grid",
@@ -17830,6 +17851,10 @@ def layer_capability_matrix_packet() -> dict[str, object]:
         "runtime_interaction_context": runtime_interaction_context,
         "territory_identity_context": layer_territory_identity_context_packet(
             runtime_interaction_context,
+            None,
+            "taichi_global_bathymetry.renderer_capabilities",
+        ),
+        "authoritative_identity_source": layer_authoritative_identity_source_packet(
             None,
             "taichi_global_bathymetry.renderer_capabilities",
         ),

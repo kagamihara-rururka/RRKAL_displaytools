@@ -36,6 +36,7 @@ Last updated: 2026-05-29
 
 ## Done
 
+- 2026-05-29: Added RRKAL-governed authoritative identity source reference-only handoff for territory/EEZ identity.
 - 2026-05-29: Added layer territory identity context that preserves source-property feature identity while marking authoritative polygon identity pending.
 - 2026-05-29: Added layer runtime interaction context tying warnings to renderer pick target, hit status and source-property feature identity.
 - 2026-05-29: Added researcher-facing layer runtime warning list across Qt Properties, provenance, launch packets, renderer capabilities, handoff inspection and smoke.
