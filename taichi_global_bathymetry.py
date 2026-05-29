@@ -10580,6 +10580,8 @@ class HybridRenderController:
             "pins": 100,
         }
         self.runtime_overlay_blend_modes: dict[str, str] = {
+            "lakes": "Normal",
+            "rivers": "Normal",
             "aircraft": "Normal",
             "pins": "Normal",
         }
@@ -10705,6 +10707,9 @@ class HybridRenderController:
             self.layer_blend_mode(layer_id) or "Normal",
         )
 
+    def compose_runtime_blend(self, background: np.ndarray, layer_id: str, overlay: np.ndarray) -> np.ndarray:
+        return alpha_blend_compose(background, overlay, self.layer_blend_mode(layer_id) or "Normal")
+
     def refresh_layer_runtime_state(self) -> bool:
         if self.layer_runtime_state_file is None:
             return False
@@ -10827,7 +10832,7 @@ class HybridRenderController:
             "runtime_layer_aliases": dict(LAYER_RUNTIME_ID_ALIASES),
             "frame_index": getattr(self, "frame_index", 0),
             "applies": ["visibility", "lock_guard_visibility", "opacity", "blend_mode_overlay"],
-            "pending": ["blend_mode_vector_layers"],
+            "pending": ["blend_mode_boundary_aggregate", "blend_mode_vehicle_icons"],
             "error": self.layer_runtime_state_last_error,
             "source": "taichi_global_bathymetry",
         }
@@ -13670,8 +13675,8 @@ class HybridRenderController:
                 self._render_boundaries_if_needed(force=force)
             self.overlay_dirty = False
 
-        self.frame_rgba = alpha_compose(self.globe_rgba, self.lake_overlay_rgba)
-        self.frame_rgba = alpha_compose(self.frame_rgba, self.river_overlay_rgba)
+        self.frame_rgba = self.compose_runtime_blend(self.globe_rgba, "lakes", self.lake_overlay_rgba)
+        self.frame_rgba = self.compose_runtime_blend(self.frame_rgba, "rivers", self.river_overlay_rgba)
         self.frame_rgba = alpha_compose(self.frame_rgba, self.boundary_overlay_rgba)
         self.frame_rgba = alpha_compose(self.frame_rgba, self.overlay_rgba)
         self.frame_rgba = self.compose_runtime_overlay(self.frame_rgba, "aircraft", self.aircraft_overlay_rgba)
@@ -15409,8 +15414,8 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "runtime_layer_aliases": dict(LAYER_RUNTIME_ID_ALIASES),
             "applies": ["visibility", "lock_guard_visibility", "opacity", "blend_mode_overlay"],
             "runtime_overlay_opacity_layers": ["aircraft", "pins"],
-            "runtime_overlay_blend_layers": ["aircraft", "pins"],
-            "pending": ["blend_mode_vector_layers"],
+            "runtime_overlay_blend_layers": ["lakes", "rivers", "aircraft", "pins"],
+            "pending": ["blend_mode_boundary_aggregate", "blend_mode_vehicle_icons"],
         },
         "rrkal_boundary": {
             "displaytools_owns": [

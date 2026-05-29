@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - Hydrology runtime blend mode
+
+Scope:
+- Added runtime blend support for the independent lake and river overlays.
+- Lake/river blend uses the overlay alpha already produced by hydrology opacity, avoiding double opacity application.
+- Renderer capabilities now separate supported overlay blend layers from pending boundary aggregate / vehicle icon blend work.
+
+Positioning:
+- This extends blend mode closure from point overlays into the hydrology overlays that are already separately composited.
+- Remaining blend work is boundary aggregate splitting and vehicle icon overlay implementation.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Overlay runtime blend mode
 
 Scope:
