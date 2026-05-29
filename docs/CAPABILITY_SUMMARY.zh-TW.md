@@ -71,7 +71,7 @@
 ### Launch packets and handoff
 
 - Qt panel 可匯出 launch packet 到 `state/showcase/`，內容包含當下的 `closed_loop_status` snapshot。
-- No-GUI exporter 可從 profile/template 產生 launch packet，並包含 `closed_loop_status` snapshot、`canvas_preview` contract、`pin-layer` renderer flag 與 optional `--rrkal-data-manifest-ref` reference-only handoff。
+- No-GUI exporter 可從 profile/template 產生 launch packet，並包含 `closed_loop_status` snapshot、`canvas_preview` contract、preview frame stream CLI args、`pin-layer` renderer flag 與 optional `--rrkal-data-manifest-ref` reference-only handoff。
 - Launch packet 內含 profile、portable command、RRKAL/displaytools 責任邊界。
 - `docs/RRKAL_HANDOFF_CONTRACT.zh-TW.md` 定義未來 RRKAL 對接方式。
 
@@ -92,6 +92,7 @@
   - Built-in profile validation。
   - No-GUI launch packet export。
   - Launch packet `canvas_preview` schema gate。
+  - Launch packet `--preview-frame-file` gate。
   - Renderer capabilities JSON 與 `preview_frame_stream` schema gate。
   - No-GUI template listing。
   - PowerShell script parse。

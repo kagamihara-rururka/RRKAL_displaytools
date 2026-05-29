@@ -1,5 +1,18 @@
 # Development Log
 
+## 2026-05-29 - Launch packet preview frame handoff
+
+Scope:
+- No-GUI launch packet exporter now includes `--preview-frame-file state/renderer_preview_frame.png`.
+- Default no-GUI canvas preview state now reports `renderer_sync` as `ui_state_preview`.
+- Smoke now fails if the exported portable command omits `--preview-frame-file`.
+
+Positioning:
+- This closes the live preview handoff path for users who export launch packets without opening Qt.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Clone quickstart for live preview
 
 Scope:

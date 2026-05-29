@@ -37,7 +37,7 @@ DEFAULT_CANVAS_PREVIEW = {
     "schema": "rrkal_displaytools.canvas_preview.v1",
     "mode": "state",
     "renderer_thumbnail_path": None,
-    "renderer_sync": "static_renderer_output_thumbnail",
+    "renderer_sync": "ui_state_preview",
 }
 
 
@@ -80,6 +80,10 @@ def renderer_args(profile: dict[str, object], rrkal_data_manifest_ref: str = "")
         str(material["roughness"]),
         "--ocean-foam",
         str(material["foam"]),
+        "--preview-frame-file",
+        "state/renderer_preview_frame.png",
+        "--preview-frame-interval",
+        "0.75",
     ]
     for key, flag in BOOL_FLAGS.items():
         args.append(f"--{flag}" if layers[key] else f"--no-{flag}")

@@ -28,6 +28,9 @@ $launchPacket = $launchPacketText | ConvertFrom-Json
 if ($launchPacket.canvas_preview.schema -ne "rrkal_displaytools.canvas_preview.v1") {
     throw "Launch packet canvas_preview schema missing or invalid"
 }
+if ($launchPacket.portable_command -notcontains "--preview-frame-file") {
+    throw "Launch packet portable command is missing --preview-frame-file"
+}
 $capabilitiesText = & py -3 taichi_global_bathymetry.py --print-renderer-capabilities
 if ($LASTEXITCODE -ne 0) {
     throw "Command failed: py -3 taichi_global_bathymetry.py --print-renderer-capabilities"
