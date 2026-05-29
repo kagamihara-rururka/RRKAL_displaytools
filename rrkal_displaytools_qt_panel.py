@@ -266,6 +266,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_pick_state_mtime_ns: int | None = LAYER_PICK_STATE_PATH.stat().st_mtime_ns if LAYER_PICK_STATE_PATH.exists() else None
         self.layer_pick_state_payload: dict[str, object] | None = None
         self.history_list: QtWidgets.QListWidget | None = None
+        self.document_undo_label: QtWidgets.QLabel | None = None
         self.document_undo_stack: list[dict[str, object]] = []
         self.document_redo_stack: list[dict[str, object]] = []
         self.document_undo_capacity = 12
@@ -946,6 +947,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         history_panel = QtWidgets.QWidget(history_dock)
         history_layout = QtWidgets.QVBoxLayout(history_panel)
         history_layout.setContentsMargins(8, 8, 8, 8)
+        self.document_undo_label = QtWidgets.QLabel("Document history: manual snapshot; undo=0 redo=0")
+        self.document_undo_label.setWordWrap(True)
+        history_layout.addWidget(self.document_undo_label)
         self.history_list = QtWidgets.QListWidget()
         for item in (
             "✅ Qt Studio workspace loaded",
@@ -2264,6 +2268,15 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "boundary": "Undo/redo restores saved Qt profile state snapshots only; it is not a full operation log.",
         }
 
+    def refresh_document_undo_label(self) -> None:
+        if self.document_undo_label is None:
+            return
+        self.document_undo_label.setText(
+            f"Document history: manual snapshot; undo_depth={len(self.document_undo_stack)}, "
+            f"redo_depth={len(self.document_redo_stack)}, capacity={self.document_undo_capacity}; "
+            "automatic change capture pending"
+        )
+
     def capture_document_snapshot(self, label: str = "Manual snapshot", clear_redo: bool = True) -> None:
         if not self.document_undo_tracking_enabled:
             return
@@ -2279,6 +2292,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.document_redo_stack.clear()
         if self.history_list is not None:
             self.history_list.insertItem(0, f"Document snapshot captured: {label}")
+        self.refresh_document_undo_label()
         self.refresh_research_provenance()
         self.status.setText(f"已保存 document snapshot：{label}")
 
@@ -2303,6 +2317,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.document_redo_stack.append(current)
         target = self.document_undo_stack[-1]
         self.apply_document_snapshot(target)
+        self.refresh_document_undo_label()
         if self.history_list is not None:
             self.history_list.insertItem(0, "Document snapshot undo")
         self.status.setText("已回復上一個 document snapshot")
@@ -2315,6 +2330,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         snapshot = self.document_redo_stack.pop()
         self.document_undo_stack.append(snapshot)
         self.apply_document_snapshot(snapshot)
+        self.refresh_document_undo_label()
         if self.history_list is not None:
             self.history_list.insertItem(0, "Document snapshot redo")
         self.status.setText("已重做 document snapshot")

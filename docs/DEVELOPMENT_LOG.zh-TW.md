@@ -1,5 +1,17 @@
 # Development Log
 
+## 2026-05-29 - Document history depth label
+
+Scope:
+- History panel now shows a document history status label.
+- The label reports manual snapshot mode, undo depth, redo depth, capacity, and the automatic-change-capture boundary.
+
+Positioning:
+- This makes the new document snapshot undo/redo loop visible to researchers instead of hiding state in provenance JSON only.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Manual document snapshot undo
 
 Scope:
