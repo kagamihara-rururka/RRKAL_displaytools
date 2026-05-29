@@ -79,6 +79,7 @@ Core docs:
 - `docs/AGENT_HANDOFF.zh-TW.md`
 - `docs/GIT_HANDOFF.md`
 - `docs/WORKSPACE_LAYOUT.zh-TW.md`
+- `docs/PROFILE_SCHEMA.zh-TW.md`
 - `docs/DEVELOPMENT_LOG.zh-TW.md`
 
 Notes:

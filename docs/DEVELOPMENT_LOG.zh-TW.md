@@ -297,3 +297,15 @@ Next round rule:
 
 
 
+
+## 2026-05-29 - Profile schema documentation
+
+Scope:
+- Added `docs/PROFILE_SCHEMA.zh-TW.md` for Qt panel profile templates.
+- Updated docs index, README, and GTD to reference the schema.
+
+Positioning:
+- This gives RRKAL a stable displaytools profile shape for future handoff without mixing dataset governance into renderer UI state.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

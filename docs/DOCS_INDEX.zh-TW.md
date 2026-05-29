@@ -8,6 +8,7 @@
 - `AGENT_HANDOFF.zh-TW.md`: current agent-facing working rules, scope, and known risks.
 - `GIT_HANDOFF.md`: git start/end loop, commit/push rules, and do-not-commit list.
 - `WORKSPACE_LAYOUT.zh-TW.md`: canonical workspace, root files, docs map, and local-only artifact policy.
+- `PROFILE_SCHEMA.zh-TW.md`: Qt panel profile template schema and RRKAL/displaytools handoff rules.
 
 ## Positioning
 
