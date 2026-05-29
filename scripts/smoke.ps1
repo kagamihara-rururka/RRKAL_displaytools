@@ -215,6 +215,12 @@ if ($launchPacket.boundary_emphasis_control.target_layer_types -notcontains "exc
 if ($launchPacket.boundary_emphasis_control.renderer_hook_status -ne "queued_backend_mask") {
     throw "Launch packet boundary_emphasis_control renderer hook status mismatch"
 }
+if ($launchPacket.boundary_emphasis_control.row_double_click_binding -ne "ready") {
+    throw "Launch packet boundary_emphasis_control row double-click binding missing"
+}
+if ($launchPacket.boundary_emphasis_control.row_double_click_layer_keys -notcontains "eez_layer") {
+    throw "Launch packet boundary_emphasis_control row double-click EEZ layer missing"
+}
 if ($launchPacket.style_renderer_entries.schema -ne "rrkal_displaytools.style_renderer_entries.v1") {
     throw "Launch packet style_renderer_entries schema missing or invalid"
 }
@@ -685,6 +691,9 @@ if ($capabilities.boundary_emphasis_control.status -ne "ui_ready") {
 if ($capabilities.boundary_emphasis_control.renderer_hook_status -ne "queued_backend_mask") {
     throw "Renderer boundary_emphasis_control hook status mismatch"
 }
+if ($capabilities.boundary_emphasis_control.row_double_click_binding -ne "ready") {
+    throw "Renderer boundary_emphasis_control row double-click binding missing"
+}
 if ($capabilities.style_renderer_entries.schema -ne "rrkal_displaytools.style_renderer_entries.v1") {
     throw "Renderer style_renderer_entries schema missing or invalid"
 }
@@ -981,6 +990,12 @@ if ($handoff.boundary_emphasis_control.renderer_capabilities_schema -ne "rrkal_d
 }
 if ([int]$handoff.boundary_emphasis_control.control_count -lt 7) {
     throw "Handoff inspection boundary_emphasis_control controls missing"
+}
+if ($handoff.boundary_emphasis_control.row_double_click_binding -ne "ready") {
+    throw "Handoff inspection boundary_emphasis_control row double-click binding missing"
+}
+if ($handoff.boundary_emphasis_control.row_double_click_layer_keys -notcontains "eez_layer") {
+    throw "Handoff inspection boundary_emphasis_control row double-click EEZ layer missing"
 }
 if ($handoff.boundary_emphasis_control.qt_surface -ne "Layers dock boundary emphasis dialog") {
     throw "Handoff inspection boundary_emphasis_control Qt surface mismatch"

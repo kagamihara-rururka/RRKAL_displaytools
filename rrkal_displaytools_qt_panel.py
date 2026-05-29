@@ -1517,8 +1517,10 @@ def boundary_emphasis_control_packet(
         "breathing_enabled": bool(state.get("breathing_enabled", True)),
         "breathing_period_s": _float_value("breathing_period_s", 4.0),
         "hover_behavior": "Records the intended pointer-hover preview for territory, territorial sea, EEZ or maritime boundary masks.",
-        "open_behavior": "Use the Layers dock button to open the dialog; boundary-layer row double-click binding is queued.",
+        "open_behavior": "Use the Layers dock button or double-click a boundary-capable layer row to open the dialog.",
         "qt_surface": "Layers dock boundary emphasis dialog",
+        "row_double_click_binding": "ready",
+        "row_double_click_layer_keys": list(BOUNDARY_EMPHASIS_TARGET_BY_LAYER.keys()),
         "renderer_hook_status": "queued_backend_mask",
         "control_count": len(controls),
         "controls": controls,
@@ -1631,6 +1633,12 @@ BOUNDARY_HIGHLIGHT_LAYER_KEYS = (
     "eez_layer",
     "high_seas_layer",
 )
+BOUNDARY_EMPHASIS_TARGET_BY_LAYER = {
+    "border_layer": "country_boundary",
+    "territorial_sea_layer": "territorial_sea",
+    "eez_layer": "exclusive_economic_zone",
+    "high_seas_layer": "maritime_boundary",
+}
 BLEND_MODES = ("Normal", "Screen", "Multiply", "Overlay", "Soft Light")
 TOOL_MODES = (
     ("move", "Move", "檢視 / 平移"),
@@ -2880,7 +2888,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if event.type() == QtCore.QEvent.Type.MouseButtonDblClick:
             layer_key = self.boundary_layer_event_targets.get(id(watched))
             if layer_key is not None:
-                self.open_boundary_highlight_dialog(layer_key)
+                self.open_boundary_emphasis_dialog(layer_key)
                 return True
         if watched is self.canvas_preview_label and event.type() == QtCore.QEvent.Type.MouseMove:
             position = event.position()
@@ -3261,7 +3269,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "rrkal_displaytools_qt_panel",
         )
 
-    def open_boundary_emphasis_dialog(self) -> None:
+    def open_boundary_emphasis_dialog(self, layer_key: str | bool | None = None) -> None:
+        if isinstance(layer_key, bool):
+            layer_key = None
+        if isinstance(layer_key, str) and layer_key in BOUNDARY_EMPHASIS_TARGET_BY_LAYER:
+            self.select_layer(layer_key)
+            state = getattr(self, "boundary_emphasis_state", None)
+            self.boundary_emphasis_state = dict(state) if isinstance(state, dict) else {}
+            self.boundary_emphasis_state["target_mode"] = BOUNDARY_EMPHASIS_TARGET_BY_LAYER[layer_key]
         packet = self.collect_boundary_emphasis_control()
         dialog = QtWidgets.QDialog(self)
         dialog.setWindowTitle("Boundary emphasis controls")

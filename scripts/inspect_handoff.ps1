@@ -89,6 +89,8 @@ $summary = [ordered]@{
         control_count = $launchPacket.boundary_emphasis_control.control_count
         target_layer_types = $launchPacket.boundary_emphasis_control.target_layer_types
         renderer_hook_status = $launchPacket.boundary_emphasis_control.renderer_hook_status
+        row_double_click_binding = $launchPacket.boundary_emphasis_control.row_double_click_binding
+        row_double_click_layer_keys = $launchPacket.boundary_emphasis_control.row_double_click_layer_keys
         qt_surface = $launchPacket.boundary_emphasis_control.qt_surface
     }
     style_renderer_entries = @{

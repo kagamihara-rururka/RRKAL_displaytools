@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-30 - Boundary emphasis row double-click
+
+- Routed boundary-capable layer row double-clicks to `Boundary emphasis controls...` and hardened the slot for Qt `clicked(bool)` delivery.
+- `rrkal_displaytools.boundary_emphasis_control.v1` now records row double-click binding evidence for boundary, territorial sea, EEZ and high-seas layers.
+- Smoke: PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Boundary emphasis UI control
 
 - Added `rrkal_displaytools.boundary_emphasis_control.v1` for country boundary, territorial sea, EEZ and maritime-boundary emphasis controls.

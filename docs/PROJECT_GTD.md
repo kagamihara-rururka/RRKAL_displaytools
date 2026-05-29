@@ -35,6 +35,7 @@ Last updated: 2026-05-29
 - Decide which local cache artifacts should later be registered by RRKAL as renderer bridge assets.
 
 ## Done
+- 2026-05-30: Routed boundary-capable layer row double-clicks to the Qt boundary emphasis dialog and added smoke-gated contract evidence for the binding.
 - 2026-05-30: Added `rrkal_displaytools.boundary_emphasis_control.v1` and a Qt Layers dock dialog for RGB/contrast/opacity/gamma/breathing territory emphasis controls; renderer mask hook remains queued for backend implementation.
 - 2026-05-30: Added `rrkal_displaytools.layer_research_workflow.v1` and a Qt Layers dock workflow label linking filter/group/selected-layer/runtime-warning/remediation state.
 - 2026-05-30: Added a Qt Layers dock cross-machine clone readiness label and smoke gates for its launch/renderer Qt surface.
