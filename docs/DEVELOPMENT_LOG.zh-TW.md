@@ -3167,3 +3167,17 @@ Decision:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+
+## 2026-05-30 - Qt Boundary identity pending warning badge
+
+Scope:
+- Added a styled `boundaryIdentityWarningBadge` row to the Qt Properties dock below Boundary identity.
+- The warning explicitly lists pending authoritative identity items and the open-line geometry closure status.
+- Smoke now verifies the Qt badge marker and pending warning text.
+
+Decision:
+- Researchers need a visible caution badge before treating Boundary/EEZ emphasis as authoritative territory identity.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+

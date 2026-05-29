@@ -197,6 +197,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "boundary identity source hint handoff",
                     "boundary identity source hint summary",
                     "Qt Boundary identity source_hint visible summary",
+                    "Qt Boundary identity warning badge",
                 ],
                 "pending": ["authoritative_polygon_territory_identity", "open_line_area_inference"],
                 "identity_source_hint": "current preview identity uses source properties / maritime keys / closed rings; authoritative polygon and open-line inference remain pending",
@@ -338,6 +339,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
         ],
         "external_dependencies": ["RRKAL data manifest validation/ingest/governance"],
     }
+
 
 
 

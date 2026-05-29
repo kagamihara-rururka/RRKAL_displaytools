@@ -1960,6 +1960,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.boundary_highlight_state: dict[str, object] = default_boundary_highlight_state()
         self.boundary_highlight_label: QtWidgets.QLabel | None = None
         self.boundary_identity_status_label: QtWidgets.QLabel | None = None
+        self.boundary_identity_warning_label: QtWidgets.QLabel | None = None
         self.boundary_highlight_ack_label: QtWidgets.QLabel | None = None
         self.boundary_highlight_ack_mtime_ns: int | None = (
             BOUNDARY_HIGHLIGHT_ACK_PATH.stat().st_mtime_ns if BOUNDARY_HIGHLIGHT_ACK_PATH.exists() else None
@@ -2197,10 +2198,18 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.boundary_highlight_label.setWordWrap(True)
         self.boundary_identity_status_label = QtWidgets.QLabel(self.boundary_identity_status_summary())
         self.boundary_identity_status_label.setWordWrap(True)
+        self.boundary_identity_warning_label = QtWidgets.QLabel(self.boundary_identity_warning_text())
+        self.boundary_identity_warning_label.setObjectName("boundaryIdentityWarningBadge")
+        self.boundary_identity_warning_label.setWordWrap(True)
+        self.boundary_identity_warning_label.setStyleSheet(
+            "QLabel#boundaryIdentityWarningBadge { color: #7a4a00; background: #fff1c7; "
+            "border: 1px solid #d09a2d; border-radius: 8px; padding: 6px 8px; font-weight: 600; }"
+        )
         boundary_highlight_button = QtWidgets.QPushButton("疆域強調遮罩設定")
         boundary_highlight_button.clicked.connect(lambda _checked=False: self.open_boundary_highlight_dialog())
         material_form.addRow("Boundary highlight", self.boundary_highlight_label)
         material_form.addRow("Boundary identity", self.boundary_identity_status_label)
+        material_form.addRow("Identity warning", self.boundary_identity_warning_label)
         material_form.addRow(boundary_highlight_button)
         self.boundary_highlight_ack_label = QtWidgets.QLabel(
             f"Boundary ack: waiting for {BOUNDARY_HIGHLIGHT_ACK_PATH.name}"
@@ -4157,11 +4166,35 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             )
         return f"applied={applied_count} [{applied_text}]; pending={pending_count} [{pending_text}]; {boundary}"
 
+    def boundary_identity_warning_text(self) -> str:
+        state = self.collect_boundary_highlight_state()
+        identity_status = state.get("identity_status")
+        if not isinstance(identity_status, dict):
+            identity_status = default_boundary_identity_status()
+        pending = identity_status.get("pending", [])
+        pending_items = [str(item) for item in pending] if isinstance(pending, list) else []
+        identity_hint = identity_status.get("identity_source_hint")
+        identity_hint = identity_hint if isinstance(identity_hint, dict) else {}
+        open_line_status = str(
+            identity_hint.get("open_line_area_inference_status", "pending_backend_geometry_closure")
+        )
+        if pending_items:
+            pending_text = ", ".join(pending_items[:3])
+            if len(pending_items) > 3:
+                pending_text = f"{pending_text}, +{len(pending_items) - 3}"
+            return (
+                f"Pending authoritative identity: {pending_text}; open_line={open_line_status}; "
+                "use RRKAL-governed polygon/EEZ source before authoritative boundary claims."
+            )
+        return "Boundary identity source reports no pending authoritative identity items."
+
     def refresh_boundary_highlight_status(self) -> None:
         if self.boundary_highlight_label is not None:
             self.boundary_highlight_label.setText(self.boundary_highlight_summary())
         if self.boundary_identity_status_label is not None:
             self.boundary_identity_status_label.setText(self.boundary_identity_status_summary())
+        if self.boundary_identity_warning_label is not None:
+            self.boundary_identity_warning_label.setText(self.boundary_identity_warning_text())
 
     def refresh_boundary_highlight_ack_state(self) -> None:
         try:

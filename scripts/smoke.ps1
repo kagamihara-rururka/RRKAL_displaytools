@@ -1679,5 +1679,11 @@ $qtBoundaryIdentitySource = Get-Content -LiteralPath (Join-Path $BoundaryIdentit
 if ($qtBoundaryIdentitySource -notmatch 'source_hint=') {
     throw "Qt Boundary identity summary is not visible in Properties/Canvas Preview text"
 }
+if ($qtBoundaryIdentitySource -notmatch 'boundaryIdentityWarningBadge') {
+    throw "Qt Boundary identity warning badge is missing"
+}
+if ($qtBoundaryIdentitySource -notmatch 'Pending authoritative identity') {
+    throw "Qt Boundary identity pending warning text is missing"
+}
 
 Write-Host "Smoke passed."

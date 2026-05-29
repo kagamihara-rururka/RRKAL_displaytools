@@ -304,3 +304,8 @@
 
 - Properties and Canvas Preview now expose Boundary identity `source_hint=` text directly through the shared Qt identity summary helper.
 - Smoke verifies that compact identity provenance is visible in Qt, not only available in JSON contracts.
+
+### 2026-05-30 Qt Boundary identity pending warning badge
+
+- Properties now shows a styled Boundary identity warning badge when authoritative polygon/EEZ identity or open-line inference remains pending.
+- The badge keeps the scientific UI explicit that current Boundary emphasis is visual/provenance state, not authoritative identity resolution.
