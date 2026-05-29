@@ -47,6 +47,9 @@ Export a launch packet without opening Qt:
 py -3 scripts\export_launch_packet.py --template fast_synthetic
 ` 
 
+GitHub Actions:
+- .github/workflows/smoke.yml runs the Windows smoke workflow on push and pull request.
+
 Pre-commit smoke:
 ```powershell
 .\scripts\smoke.ps1
@@ -97,6 +100,7 @@ Core docs:
 Notes:
 - Runtime caches, screenshots, logs, databases, and virtual environments are intentionally excluded from Git.
 - This initial import preserves the current monolithic prototype before later module extraction.
+
 
 
 

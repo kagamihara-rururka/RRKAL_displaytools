@@ -1,5 +1,16 @@
 ﻿# Development Log
 
+## 2026-05-29 - GitHub Actions smoke workflow
+
+Scope:
+- Added `.github/workflows/smoke.yml`.
+- The workflow installs `requirements.txt` on `windows-latest` and runs `scripts/smoke.ps1` on push and pull request.
+
+Positioning:
+- This extends the local pre-commit smoke rule to GitHub-side visibility.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 ## 2026-05-29 - No-GUI launch packet exporter
 
 Scope:
@@ -390,6 +401,7 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 
 
 
