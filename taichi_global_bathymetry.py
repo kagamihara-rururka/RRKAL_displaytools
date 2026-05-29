@@ -10561,6 +10561,7 @@ class HybridRenderController:
         self.ocean_material_policy = OceanMaterialPolicy(args)
         self.hover_boundary_hit = build_empty_boundary_hit()
         self.selected_boundary_hit = build_empty_boundary_hit()
+        self.selected_hydrology_hit: dict[str, object] = {}
         self.last_layer_pick_result: dict[str, object] = {
             "schema": "rrkal_displaytools.renderer_layer_pick_result.v1",
             "event": "none",
@@ -10973,7 +10974,7 @@ class HybridRenderController:
                 "selected_layer_semantic_target",
                 "selected_layer_scoped_object_picking",
             ],
-            "pending": ["polygon_fill_mask", "hydrology_feature_picking"],
+            "pending": ["polygon_fill_mask"],
             "error": self.layer_runtime_state_last_error,
             "source": "taichi_global_bathymetry",
         }
@@ -12547,6 +12548,8 @@ class HybridRenderController:
             return self.pin_hit_info_text(self.selected_pin_hit, "Selected Pin")
         if self.selected_boundary_hit.get("layer_id"):
             return self.boundary_hit_info_text(self.selected_boundary_hit, "Selected Boundary")
+        if self.selected_hydrology_hit.get("layer_id"):
+            return self.boundary_hit_info_text(self.selected_hydrology_hit, "Selected Hydrology")
         if self.hover_pin_hit is not None:
             return self.pin_hit_info_text(self.hover_pin_hit, "Hover Pin")
         if self.selected_vehicle is None:
@@ -12636,6 +12639,7 @@ class HybridRenderController:
             "selected_pin": self.selected_pin_hit,
             "selected_vehicle": self.selected_vehicle_summary(),
             "selected_boundary": self.selected_boundary_hit if self.selected_boundary_hit.get("layer_id") else None,
+            "selected_hydrology": self.selected_hydrology_hit if self.selected_hydrology_hit.get("layer_id") else None,
             "frame_index": self.frame_index,
             "source": "taichi_global_bathymetry",
         }
@@ -12735,6 +12739,7 @@ class HybridRenderController:
         self.selected_pin_id = str(hit.get("id", ""))
         self.selected_vehicle = None
         self.selected_boundary_hit = build_empty_boundary_hit()
+        self.selected_hydrology_hit = {}
         self.overlay_dirty = True
         self.write_pin_pick_state("selected", hit)
         return True
@@ -12752,6 +12757,7 @@ class HybridRenderController:
         self.hover_pin_hit = None
         self.selected_pin_id = None
         self.selected_boundary_hit = build_empty_boundary_hit()
+        self.selected_hydrology_hit = {}
         self.overlay_dirty = True
         if had_pin_state:
             self.write_pin_pick_state("cleared", None)
@@ -12806,10 +12812,67 @@ class HybridRenderController:
                 }
         return best
 
+    def nearest_hydrology_hit(self, x: float, y: float, layer_id: str, radius_px: float = 12.0) -> dict[str, object]:
+        overlay = getattr(self, "hydrology_overlays", {}).get(layer_id)
+        if overlay is None or not self.layer_visible.get(layer_id, True):
+            return {}
+        hit = overlay.hit_test(
+            x,
+            y,
+            self.yaw,
+            self.pitch,
+            self.zoom,
+            self.flip_longitude,
+            self.flip_latitude,
+            radius_px=radius_px,
+        )
+        if not hit:
+            return {}
+        return {
+            "layer_id": layer_id,
+            "name": self.layer_label(layer_id),
+            "line_index": hit.get("line_index"),
+            "distance_px": hit.get("distance_px"),
+            "screen_x": hit.get("screen_x"),
+            "screen_y": hit.get("screen_y"),
+        }
+
+    def pick_hydrology_layer(self, layer_id: str, x: float, y: float) -> bool:
+        hit = self.nearest_hydrology_hit(x, y, layer_id, radius_px=12.0)
+        self.selected_hydrology_hit = hit
+        picked = bool(hit.get("layer_id"))
+        had_pin_state = self.selected_pin_hit is not None or self.hover_pin_hit is not None or self.selected_pin_id is not None
+        self.selected_pin_hit = None
+        self.hover_pin_hit = None
+        self.selected_pin_id = None
+        self.selected_vehicle = None
+        self.selected_boundary_hit = build_empty_boundary_hit()
+        self.last_layer_pick_result = {
+            "schema": "rrkal_displaytools.renderer_layer_pick_result.v1",
+            "event": "selected_layer_pick",
+            "renderer_layer": layer_id,
+            "picker": "hydrology_line",
+            "hit": picked,
+            "hit_detail": hit if picked else None,
+            "frame_index": self.frame_index,
+        }
+        if picked:
+            self.overlay_dirty = True
+        if had_pin_state:
+            self.write_pin_pick_state("cleared", None)
+        self.write_layer_pick_state()
+        return picked
+
     def pick_boundary_layer(self, layer_id: str, x: float, y: float) -> bool:
         hit = self.nearest_boundary_hit(x, y, {layer_id}, radius_px=12.0)
         self.selected_boundary_hit = hit
+        self.selected_hydrology_hit = {}
         picked = bool(hit.get("layer_id"))
+        had_pin_state = self.selected_pin_hit is not None or self.hover_pin_hit is not None or self.selected_pin_id is not None
+        self.selected_pin_hit = None
+        self.hover_pin_hit = None
+        self.selected_pin_id = None
+        self.selected_vehicle = None
         self.last_layer_pick_result = {
             "schema": "rrkal_displaytools.renderer_layer_pick_result.v1",
             "event": "selected_layer_pick",
@@ -12820,24 +12883,29 @@ class HybridRenderController:
             "frame_index": self.frame_index,
         }
         if picked:
-            had_pin_state = self.selected_pin_hit is not None or self.hover_pin_hit is not None or self.selected_pin_id is not None
-            self.selected_pin_hit = None
-            self.hover_pin_hit = None
-            self.selected_pin_id = None
-            self.selected_vehicle = None
             self.hover_boundary_hit = hit
             self.boundary_hover_dirty = True
             self.boundary_dirty = True
             self.overlay_dirty = True
-            if had_pin_state:
-                self.write_pin_pick_state("cleared", None)
+        if had_pin_state:
+            self.write_pin_pick_state("cleared", None)
         self.write_layer_pick_state()
         return picked
 
     def pick_selected_layer_target(self, x: float, y: float) -> bool:
         layer_id = self.selected_renderer_layer_id
         if layer_id == "pins":
+            had_pin_state = self.selected_pin_hit is not None or self.hover_pin_hit is not None or self.selected_pin_id is not None
             picked = self.pick_pin(x, y)
+            if not picked:
+                self.selected_pin_hit = None
+                self.hover_pin_hit = None
+                self.selected_pin_id = None
+                self.selected_vehicle = None
+                self.selected_boundary_hit = build_empty_boundary_hit()
+                self.selected_hydrology_hit = {}
+                if had_pin_state:
+                    self.write_pin_pick_state("cleared", None)
             self.last_layer_pick_result = {
                 "schema": "rrkal_displaytools.renderer_layer_pick_result.v1",
                 "event": "selected_layer_pick",
@@ -12864,7 +12932,16 @@ class HybridRenderController:
             return picked
         if layer_id in BOUNDARY_SPECS:
             return self.pick_boundary_layer(layer_id, x, y)
+        if layer_id in HYDROLOGY_SPECS:
+            return self.pick_hydrology_layer(layer_id, x, y)
         if layer_id:
+            self.selected_hydrology_hit = {}
+            self.selected_boundary_hit = build_empty_boundary_hit()
+            had_pin_state = self.selected_pin_hit is not None or self.hover_pin_hit is not None or self.selected_pin_id is not None
+            self.selected_pin_hit = None
+            self.hover_pin_hit = None
+            self.selected_pin_id = None
+            self.selected_vehicle = None
             self.last_layer_pick_result = {
                 "schema": "rrkal_displaytools.renderer_layer_pick_result.v1",
                 "event": "selected_layer_pick",
@@ -12873,6 +12950,8 @@ class HybridRenderController:
                 "hit": False,
                 "frame_index": self.frame_index,
             }
+            if had_pin_state:
+                self.write_pin_pick_state("cleared", None)
             self.write_layer_pick_state()
             return False
         picked_pin = self.pick_pin(x, y)
@@ -15781,7 +15860,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "vehicle_icons",
             ],
             "runtime_split_blend_layers": ["borders", "territorial_sea", "eez", "high_seas"],
-            "pending": ["polygon_fill_mask", "hydrology_feature_picking"],
+            "pending": ["polygon_fill_mask"],
         },
         "rrkal_boundary": {
             "displaytools_owns": [

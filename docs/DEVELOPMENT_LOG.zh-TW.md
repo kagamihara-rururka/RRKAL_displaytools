@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - Hydrology selected-layer picking
+
+Scope:
+- Selected lake and river layers now use renderer line hit testing when clicked.
+- Layer pick state can report `hydrology_line` results with layer ID, line index, distance, and screen position.
+- Renderer capabilities now keep polygon fill mask as the remaining selected-layer picking gap.
+
+Positioning:
+- This gives researchers a direct inspection loop for hydrology layers without changing data/provider governance.
+- Boundary polygon fill remains separate because it requires area geometry/mask behavior rather than line hit testing.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Layer pick state bridge
 
 Scope:
