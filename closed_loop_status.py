@@ -62,6 +62,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                 "evidence": [
                     "launch_packet active_layer_diagnostics",
                     "launch_packet boundary_highlight.identity_status",
+                    "launch_packet layer_filter",
                     "launch_packet layer_undo",
                     "launch_packet session_journal",
                     "launch_packet document_undo",
@@ -110,6 +111,21 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "state/renderer_preview_frame.png",
                     "renderer_layer_runtime_state.json",
                     "renderer_layer_pick_state.json",
+                ],
+            },
+            {
+                "id": "qt_layer_filter",
+                "applies": [
+                    "Layers panel search/filter box",
+                    "profile layer_filter state",
+                    "launch packet layer_filter contract",
+                    "provenance layer_filter contract",
+                    "renderer capabilities ui_handoff_contracts",
+                ],
+                "pending": [],
+                "evidence": [
+                    "rrkal_displaytools.layer_filter.v1",
+                    "Qt Layers panel filter status",
                 ],
             },
             {

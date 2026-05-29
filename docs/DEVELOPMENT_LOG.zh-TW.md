@@ -1,5 +1,19 @@
 # Development Log
 
+## 2026-05-29 - Layer row search filter
+
+Scope:
+- Layers panel now has a row search/filter box with a clear action and match count label.
+- Filtering matches layer key, visible label, and renderer flag text; it hides rows only and does not change renderer layer state.
+- Qt profiles, launch packets, provenance, No-GUI launch export, profile schema, renderer capabilities, and closed-loop status now expose `rrkal_displaytools.layer_filter.v1`.
+- Smoke now gates launch packet `layer_filter` and renderer `ui_handoff_contracts.layer_filter`.
+
+Positioning:
+- This improves researcher control of dense layer stacks while preserving the separation between UI row filtering and renderer visibility.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Limited automatic document snapshots
 
 Scope:

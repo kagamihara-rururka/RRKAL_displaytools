@@ -204,6 +204,43 @@ def active_layer_diagnostics_packet(profile: dict[str, object]) -> dict[str, obj
     }
 
 
+def layer_filter_packet(profile: dict[str, object]) -> dict[str, object]:
+    payload = profile.get("layer_filter")
+    if isinstance(payload, dict):
+        query = str(payload.get("query", ""))
+    else:
+        query = ""
+    aliases = {
+        "lake_layer": "hydro hydrology water lake lakes",
+        "river_layer": "hydro hydrology water river rivers",
+        "border_layer": "boundary border country territory sovereign",
+        "territorial_sea_layer": "boundary maritime territorial sea territory",
+        "eez_layer": "boundary maritime eez economic exclusive zone",
+        "high_seas_layer": "boundary maritime high seas ocean",
+        "aircraft_layer": "traffic aircraft adsb ads-b",
+        "pin_layer": "pin marker annotation research",
+        "vehicle_icons": "traffic vehicle ais vessel ship",
+    }
+    query_parts = query.lower().split()
+    matched_layers = [
+        key for key in BOOL_FLAGS
+        if key != "demo_closed_loop"
+        and (
+            not query_parts
+            or all(part in f"{key} {BOOL_FLAGS[key]} {aliases.get(key, '')}".lower() for part in query_parts)
+        )
+    ]
+    return {
+        "schema": "rrkal_displaytools.layer_filter.v1",
+        "mode": "no_gui_export_status",
+        "query": query,
+        "matched_layers": matched_layers,
+        "matched_count": len(matched_layers),
+        "total_layers": len([key for key in BOOL_FLAGS if key != "demo_closed_loop"]),
+        "boundary": "No-GUI launch packet preserves Qt row-filter state only; renderer layer state is unchanged.",
+    }
+
+
 def layer_undo_packet() -> dict[str, object]:
     return {
         "schema": "rrkal_displaytools.layer_stack_undo.v1",
@@ -357,6 +394,7 @@ def launch_packet(
         "profile": profile,
         "rrkal_data_manifest_ref": manifest_ref,
         "rrkal_data_manifest_ref_boundary": "Reference-only handoff field; displaytools does not discover, download, validate, import, or govern this manifest.",
+        "layer_filter": layer_filter_packet(profile),
         "canvas_preview": canvas_preview_packet(profile),
         "boundary_highlight": boundary_highlight_packet(profile),
         "active_layer_diagnostics": active_layer_diagnostics_packet(profile),

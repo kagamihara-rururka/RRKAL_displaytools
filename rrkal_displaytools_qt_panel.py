@@ -265,6 +265,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_pick_state_label: QtWidgets.QLabel | None = None
         self.layer_pick_state_mtime_ns: int | None = LAYER_PICK_STATE_PATH.stat().st_mtime_ns if LAYER_PICK_STATE_PATH.exists() else None
         self.layer_pick_state_payload: dict[str, object] | None = None
+        self.layer_filter_edit: QtWidgets.QLineEdit | None = None
+        self.layer_filter_status_label: QtWidgets.QLabel | None = None
+        self.layer_filter_text = ""
         self.history_list: QtWidgets.QListWidget | None = None
         self.document_undo_label: QtWidgets.QLabel | None = None
         self.document_undo_stack: list[dict[str, object]] = []
@@ -527,6 +530,19 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
 
         layers_group = self._group("圖層 / Layers")
         layers_layout = QtWidgets.QVBoxLayout(layers_group)
+        layer_filter_row = QtWidgets.QHBoxLayout()
+        layer_filter_row.addWidget(QtWidgets.QLabel("Filter"))
+        self.layer_filter_edit = QtWidgets.QLineEdit()
+        self.layer_filter_edit.setPlaceholderText("Search layer key/name, e.g. hydro, eez, pin")
+        self.layer_filter_edit.textChanged.connect(self.set_layer_filter_text)
+        clear_layer_filter = QtWidgets.QPushButton("Clear")
+        clear_layer_filter.clicked.connect(lambda _checked=False: self.layer_filter_edit.clear() if self.layer_filter_edit is not None else None)
+        layer_filter_row.addWidget(self.layer_filter_edit)
+        layer_filter_row.addWidget(clear_layer_filter)
+        layers_layout.addLayout(layer_filter_row)
+        self.layer_filter_status_label = QtWidgets.QLabel("Layer filter: all layers")
+        self.layer_filter_status_label.setWordWrap(True)
+        layers_layout.addWidget(self.layer_filter_status_label)
         layer_header = QtWidgets.QWidget()
         layer_header_layout = QtWidgets.QGridLayout(layer_header)
         layer_header_layout.setContentsMargins(0, 0, 0, 0)
@@ -632,6 +648,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             layer_actions_layout.addWidget(button, index // 2, index % 2)
         layers_layout.addLayout(layer_actions_layout)
         self.select_layer("show_grid")
+        self.refresh_layer_filter()
         layers_dock = QtWidgets.QDockWidget("Layers", self)
         layers_dock.setObjectName("layersDock")
         layers_dock.setAllowedAreas(
@@ -1284,6 +1301,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "foam": self.foam_edit.text().strip(),
             },
             "layers": {key: check.isChecked() for key, check in self.checks.items()},
+            "layer_filter": self.collect_layer_filter_state(),
             "selected_layer": self.selected_layer_key,
             "selected_pin_id": self.selected_pin_id,
             "layer_stack_ui": self.collect_layer_stack_ui(),
@@ -1315,6 +1333,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "rrkal_data_manifest_ref": self.rrkal_manifest_ref_edit.text().strip(),
             "rrkal_data_manifest_ref_boundary": "Reference-only handoff field; displaytools does not discover, download, validate, import, or govern this manifest.",
             "selected_layer": self.selected_layer_key,
+            "layer_filter": self.collect_layer_filter_state(),
             "active_layer_diagnostics": self.active_layer_diagnostics_packet(),
             "layer_undo": self.collect_layer_undo_state(),
             "session_journal": self.collect_session_journal(),
@@ -1991,6 +2010,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         renderer = profile.get("renderer", {})
         material = profile.get("ocean_material", {})
         layers = profile.get("layers", {})
+        layer_filter = profile.get("layer_filter")
         selected_layer = profile.get("selected_layer")
         selected_pin_id = profile.get("selected_pin_id")
         layer_stack = profile.get("layer_stack_ui")
@@ -2026,6 +2046,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 self.layer_locks[key].setChecked(bool(value.get("locked", False)))
                 self.layer_opacity[key].setValue(int(value.get("opacity", 100)))
                 self.layer_blends[key].setCurrentText(str(value.get("blend_mode", "Normal")))
+        if isinstance(layer_filter, dict):
+            self.apply_layer_filter_state(layer_filter)
         if isinstance(selected_layer, str) and selected_layer in self.layer_rows:
             self.select_layer(selected_layer)
         elif isinstance(layer_stack, dict):
@@ -2160,6 +2182,67 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.write_layer_runtime_state()
         self.refresh_layer_properties()
         self.refresh_canvas_preview()
+
+    def layer_filter_matches(self, key: str, label: str) -> bool:
+        query = self.layer_filter_text.strip().lower()
+        if not query:
+            return True
+        aliases = {
+            "lake_layer": "hydro hydrology water lake lakes",
+            "river_layer": "hydro hydrology water river rivers",
+            "border_layer": "boundary border country territory sovereign",
+            "territorial_sea_layer": "boundary maritime territorial sea territory",
+            "eez_layer": "boundary maritime eez economic exclusive zone",
+            "high_seas_layer": "boundary maritime high seas ocean",
+            "aircraft_layer": "traffic aircraft adsb ads-b",
+            "pin_layer": "pin marker annotation research",
+            "vehicle_icons": "traffic vehicle ais vessel ship",
+        }
+        haystack = f"{key} {label} {BOOL_FLAGS.get(key, '')} {aliases.get(key, '')}".lower()
+        return all(part in haystack for part in query.split())
+
+    def collect_layer_filter_state(self) -> dict[str, object]:
+        matched = [key for key, label in LAYER_LABELS if self.layer_filter_matches(key, label)]
+        return {
+            "schema": "rrkal_displaytools.layer_filter.v1",
+            "mode": "ui_row_filter",
+            "query": self.layer_filter_text,
+            "matched_layers": matched,
+            "matched_count": len(matched),
+            "total_layers": len(LAYER_LABELS),
+            "boundary": "Qt Layers row filter only; renderer layer state is not changed by filtering rows.",
+        }
+
+    def apply_layer_filter_state(self, state: dict[str, object]) -> None:
+        query = state.get("query", "")
+        self.layer_filter_text = str(query) if isinstance(query, str) else ""
+        if self.layer_filter_edit is not None:
+            self.layer_filter_edit.blockSignals(True)
+            self.layer_filter_edit.setText(self.layer_filter_text)
+            self.layer_filter_edit.blockSignals(False)
+        self.refresh_layer_filter()
+
+    @QtCore.pyqtSlot(str)
+    def set_layer_filter_text(self, text: str) -> None:
+        self.layer_filter_text = text.strip()
+        self.refresh_layer_filter()
+        self.refresh_research_provenance()
+
+    def refresh_layer_filter(self) -> None:
+        matched_count = 0
+        for key, label in LAYER_LABELS:
+            row = self.layer_rows.get(key)
+            if row is None:
+                continue
+            matched = self.layer_filter_matches(key, label)
+            row.setVisible(matched)
+            if matched:
+                matched_count += 1
+        if self.layer_filter_status_label is not None:
+            query = self.layer_filter_text or "all"
+            self.layer_filter_status_label.setText(
+                f"Layer filter: query={query}; matched={matched_count}/{len(LAYER_LABELS)}; renderer state unchanged"
+            )
 
     def collect_layer_undo_snapshot(self) -> dict[str, object]:
         return {
@@ -3346,6 +3429,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "rrkal_data_manifest_ref": self.rrkal_manifest_ref_edit.text().strip(),
             },
             "active_layer": self.selected_layer_key,
+            "layer_filter": self.collect_layer_filter_state(),
             "active_layer_diagnostics": self.active_layer_diagnostics_packet(),
             "layer_undo": self.collect_layer_undo_state(),
             "session_journal": self.collect_session_journal(),

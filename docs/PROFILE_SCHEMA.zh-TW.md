@@ -26,6 +26,7 @@ rrkal_displaytools.qt_panel_profile.v1
 | `layers` | object | required | Renderer layer visibility flags。 |
 | `selected_layer` | string | optional | Qt layer stack 目前選取圖層。 |
 | `selected_pin_id` | string | optional | Qt Pin list 目前選取的科研標記 id。 |
+| `layer_filter` | object | optional | Qt Layers row search/filter 狀態，不改變 renderer layer state。 |
 | `layer_stack_ui` | object | optional | Qt layer stack 的 UI-only state。 |
 | `tool_state` | object | optional | Qt tool palette 的 UI-only state。 |
 | `pins` | array | optional | 科研標記清單。 |
@@ -91,6 +92,20 @@ rrkal_displaytools.qt_panel_profile.v1
 - `terrain_contours`
 - `scale_bar`
 - `vehicle_icons`
+
+## `layer_filter`
+
+可選。此欄位保存 Layers 面板的 row search/filter 狀態，讓 profile / launch packet / provenance 可重現研究者當時如何縮小圖層列表；它只影響 Qt row visibility，不會切換 renderer layer visibility。
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `schema` | string | 固定為 `rrkal_displaytools.layer_filter.v1`。 |
+| `mode` | string | 目前為 `ui_row_filter` 或 no-GUI export 的 `no_gui_export_status`。 |
+| `query` | string | 使用者輸入的搜尋字串。 |
+| `matched_layers` | array | 符合 query 的 layer key 清單。 |
+| `matched_count` | integer | 符合的 row 數。 |
+| `total_layers` | integer | 可過濾的 layer row 總數。 |
+| `boundary` | string | 明確標示 filter 只影響 Qt UI row，不影響 renderer state。 |
 
 ## `layer_stack_ui`
 

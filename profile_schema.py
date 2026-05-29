@@ -9,12 +9,14 @@ PROFILE_SCHEMA_ID = "rrkal_displaytools.qt_panel_profile.v1"
 BOUNDARY_HIGHLIGHT_SCHEMA_ID = "rrkal_displaytools.boundary_highlight_mask.v1"
 BOUNDARY_IDENTITY_STATUS_SCHEMA_ID = "rrkal_displaytools.boundary_identity_status.v1"
 CANVAS_PREVIEW_SCHEMA_ID = "rrkal_displaytools.canvas_preview.v1"
+LAYER_FILTER_SCHEMA_ID = "rrkal_displaytools.layer_filter.v1"
 TIMELINE_KEYFRAME_SCHEMA_ID = "rrkal_displaytools.timeline_keyframe.v1"
 
 REQUIRED_PROFILE_TOP_LEVEL = {"schema", "renderer", "ocean_material", "layers"}
 OPTIONAL_PROFILE_TOP_LEVEL = {
     "selected_layer",
     "selected_pin_id",
+    "layer_filter",
     "layer_stack_ui",
     "tool_state",
     "pins",
@@ -121,6 +123,35 @@ def profile_payload_errors(profile: dict[str, object]) -> list[str]:
     selected_pin_id = profile.get("selected_pin_id")
     if selected_pin_id is not None and not isinstance(selected_pin_id, str):
         errors.append("selected_pin_id must be a string or null")
+    layer_filter = profile.get("layer_filter")
+    if layer_filter is not None:
+        if not isinstance(layer_filter, dict):
+            errors.append("layer_filter must be an object")
+        else:
+            allowed_fields = {
+                "schema",
+                "mode",
+                "query",
+                "matched_layers",
+                "matched_count",
+                "total_layers",
+                "boundary",
+            }
+            for field in sorted(set(layer_filter) - allowed_fields):
+                errors.append(f"unknown layer_filter field: {field}")
+            if layer_filter.get("schema") != LAYER_FILTER_SCHEMA_ID:
+                errors.append(f"layer_filter.schema must be {LAYER_FILTER_SCHEMA_ID}")
+            query = layer_filter.get("query")
+            if not isinstance(query, str):
+                errors.append("layer_filter.query must be a string")
+            matched_layers = layer_filter.get("matched_layers")
+            if matched_layers is not None:
+                if not isinstance(matched_layers, list) or any(not isinstance(item, str) for item in matched_layers):
+                    errors.append("layer_filter.matched_layers must be a list of strings")
+            for field in ("matched_count", "total_layers"):
+                value = layer_filter.get(field)
+                if value is not None and (not isinstance(value, int) or isinstance(value, bool) or value < 0):
+                    errors.append(f"layer_filter.{field} must be a non-negative integer")
     layer_stack = profile.get("layer_stack_ui")
     if layer_stack is not None:
         if not isinstance(layer_stack, dict):
@@ -378,6 +409,11 @@ def profile_schema_packet() -> dict[str, object]:
         "optional_renderer": sorted(OPTIONAL_PROFILE_RENDERER),
         "required_ocean_material": sorted(REQUIRED_PROFILE_OCEAN_MATERIAL),
         "required_layers": sorted(REQUIRED_PROFILE_LAYERS),
+        "optional_layer_filter": {
+            "schema": LAYER_FILTER_SCHEMA_ID,
+            "fields": ["schema", "mode", "query", "matched_layers", "matched_count", "total_layers", "boundary"],
+            "boundary": "Qt Layers row filter only; renderer layer state is unchanged.",
+        },
         "optional_layer_stack_ui": {
             "keys": sorted(REQUIRED_LAYER_STACK_KEYS),
             "required_fields": sorted(REQUIRED_LAYER_STACK_UI_FIELDS),
