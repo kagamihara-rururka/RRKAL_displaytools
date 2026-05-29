@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - Module boundary note
+
+Scope:
+- Added `docs/MODULE_BOUNDARIES.zh-TW.md`.
+- Documented displaytools ownership, RRKAL ownership, suggested split order, and bridge/governance rules.
+- Marked current closed loops and remaining extraction-sensitive gaps.
+
+Positioning:
+- This gives future refactors a clear boundary without moving code yet.
+- The note explicitly keeps discovery/download/import/cache governance out of displaytools.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Layer pick JSON inspector
 
 Scope:
