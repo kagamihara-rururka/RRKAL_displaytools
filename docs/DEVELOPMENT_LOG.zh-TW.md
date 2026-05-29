@@ -1,5 +1,18 @@
 ﻿# Development Log
 
+## 2026-05-29 - Qt panel smoke check action
+
+Scope:
+- Added a `Smoke check` button to `rrkal_displaytools_qt_panel.py`.
+- The panel smoke check runs Python compile for the Qt panel and renderer, plus PowerShell parser checks for helper scripts on Windows.
+- Smoke failures are surfaced in the command preview area for quick operator inspection.
+
+Positioning:
+- This supports the new rule that commits need at least smoke testing.
+
+Validation:
+- Smoke passed before commit: `py -3 -m py_compile rrkal_displaytools_qt_panel.py taichi_global_bathymetry.py`.
+- Smoke passed before commit: PowerShell parser check for `scripts/setup_windows.ps1` and `scripts/run_qt_panel.ps1`.
 ## 2026-05-29 - Qt panel startup profile loading
 
 Scope:
@@ -158,5 +171,6 @@ Validation:
 Next round rule:
 - Before any new development round, inspect current repo state.
 - After each round, update this log and commit before continuing.
+
 
 

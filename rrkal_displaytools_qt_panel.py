@@ -207,6 +207,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         load_button = QtWidgets.QPushButton("載入配置")
         open_templates_button = QtWidgets.QPushButton("模板目錄")
         open_local_profiles_button = QtWidgets.QPushButton("本機配置")
+        smoke_button = QtWidgets.QPushButton("Smoke check")
         launch_button = QtWidgets.QPushButton("啟動地球儀")
         restart_button = QtWidgets.QPushButton("套用並重啟")
         stop_button = QtWidgets.QPushButton("停止本面板啟動的程序")
@@ -216,6 +217,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         load_button.clicked.connect(self.load_profile_dialog)
         open_templates_button.clicked.connect(self.open_template_dir)
         open_local_profiles_button.clicked.connect(self.open_local_profile_dir)
+        smoke_button.clicked.connect(self.run_smoke_check)
         launch_button.clicked.connect(self.launch_renderer)
         restart_button.clicked.connect(self.restart_renderer)
         stop_button.clicked.connect(self.stop_renderer)
@@ -225,6 +227,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         actions.addWidget(load_button)
         actions.addWidget(open_templates_button)
         actions.addWidget(open_local_profiles_button)
+        actions.addWidget(smoke_button)
         actions.addWidget(launch_button)
         actions.addWidget(restart_button)
         actions.addWidget(stop_button)
@@ -402,6 +405,48 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         PROFILE_DIR.mkdir(parents=True, exist_ok=True)
         QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(str(PROFILE_DIR)))
         self.status.setText(f"已開啟本機配置目錄：{PROFILE_DIR}")
+
+    @QtCore.pyqtSlot()
+    def run_smoke_check(self) -> None:
+        python_result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "py_compile",
+                "rrkal_displaytools_qt_panel.py",
+                "taichi_global_bathymetry.py",
+            ],
+            cwd=str(ROOT),
+            text=True,
+            capture_output=True,
+            timeout=90,
+        )
+        if python_result.returncode != 0:
+            self.status.setText("Smoke failed: Python compile")
+            self.command_text.setPlainText((python_result.stderr or python_result.stdout).strip())
+            return
+        if sys.platform == "win32":
+            ps_command = (
+                "$files=@('scripts\\setup_windows.ps1','scripts\\run_qt_panel.ps1');"
+                "foreach($file in $files){"
+                "$tokens=$null;$errors=$null;"
+                "[System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file),[ref]$tokens,[ref]$errors)>$null;"
+                "if($errors -and $errors.Count -gt 0){$errors|Format-List *;exit 1}"
+                "}"
+            )
+            ps_result = subprocess.run(
+                ["powershell", "-NoProfile", "-Command", ps_command],
+                cwd=str(ROOT),
+                text=True,
+                capture_output=True,
+                timeout=30,
+            )
+            if ps_result.returncode != 0:
+                self.status.setText("Smoke failed: PowerShell parse")
+                self.command_text.setPlainText((ps_result.stderr or ps_result.stdout).strip())
+                return
+        self.status.setText("Smoke passed: Python compile and script parse")
+        self.refresh_command_preview()
 
     @QtCore.pyqtSlot()
     def save_profile_dialog(self) -> None:
