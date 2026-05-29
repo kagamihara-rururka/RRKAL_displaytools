@@ -27,4 +27,19 @@ py -3 taichi_global_bathymetry.py `
     --height $Height `
     --output $outputPath
 
-Write-Host "Quick smoke render requested: $outputPath"
+if (-not (Test-Path -LiteralPath $outputPath)) {
+    throw "Quick smoke render output missing: $outputPath"
+}
+
+$metadataPath = "$outputPath.metadata.json"
+if (-not (Test-Path -LiteralPath $metadataPath)) {
+    throw "Quick smoke render metadata missing: $metadataPath"
+}
+
+$metadata = Get-Content -LiteralPath $metadataPath -Raw -Encoding UTF8 | ConvertFrom-Json
+if ($metadata.schema -ne "rrkal_displaytools.renderer_output_metadata.v1") {
+    throw "Unexpected quick smoke metadata schema: $($metadata.schema)"
+}
+
+Write-Host "Quick smoke render output: $outputPath"
+Write-Host "Quick smoke render metadata: $metadataPath"

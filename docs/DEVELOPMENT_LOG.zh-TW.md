@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - Quick render smoke metadata check
+
+Scope:
+- `scripts/render_quick_smoke.ps1` now verifies the rendered image exists.
+- The script also verifies the `.metadata.json` sidecar exists and has schema `rrkal_displaytools.renderer_output_metadata.v1`.
+- Clone quickstart now documents the optional quick render smoke output pair.
+
+Positioning:
+- Renderer output provenance is now script-verifiable beyond regular compile/profile smoke.
+- This does not make quick render smoke part of the mandatory pre-commit smoke because it can be heavier than syntax/profile checks.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Renderer output metadata sidecar
 
 Scope:

@@ -36,6 +36,14 @@ Profile validation passed: 5 templates
 Smoke passed.
 ```
 
+可選的 renderer output smoke：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\render_quick_smoke.ps1
+```
+
+這會產生 `state/showcase/quick_smoke.png` 與 `state/showcase/quick_smoke.png.metadata.json`。
+
 ## 4. 開 Qt 控制面板
 
 ```powershell
