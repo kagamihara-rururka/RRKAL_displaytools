@@ -177,6 +177,16 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         demo.stateChanged.connect(self.refresh_command_preview)
         self.checks["demo_closed_loop"] = demo
         layers_layout.addWidget(demo, 7, 0, 1, 2)
+        layer_actions = (
+            ("水文開/關", self.toggle_hydrology_layers),
+            ("海域開/關", self.toggle_maritime_layers),
+            ("交通開/關", self.toggle_transport_layers),
+            ("輔助開/關", self.toggle_visual_aids),
+        )
+        for index, (label, callback) in enumerate(layer_actions):
+            button = QtWidgets.QPushButton(label)
+            button.clicked.connect(callback)
+            layers_layout.addWidget(button, 8 + index // 2, index % 2)
         right.addWidget(layers_group)
 
         command_group = self._group("啟動命令預覽")
@@ -467,6 +477,28 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             check.setChecked(enabled.get(key, False))
             check.blockSignals(False)
         self.refresh_command_preview()
+
+    def _toggle_group(self, keys: tuple[str, ...]) -> None:
+        target = not all(self.checks[key].isChecked() for key in keys)
+        for key in keys:
+            self.checks[key].setChecked(target)
+        self.refresh_command_preview()
+
+    @QtCore.pyqtSlot()
+    def toggle_hydrology_layers(self) -> None:
+        self._toggle_group(("lake_layer", "river_layer"))
+
+    @QtCore.pyqtSlot()
+    def toggle_maritime_layers(self) -> None:
+        self._toggle_group(("territorial_sea_layer", "eez_layer", "high_seas_layer"))
+
+    @QtCore.pyqtSlot()
+    def toggle_transport_layers(self) -> None:
+        self._toggle_group(("aircraft_layer", "vehicle_icons"))
+
+    @QtCore.pyqtSlot()
+    def toggle_visual_aids(self) -> None:
+        self._toggle_group(("show_grid", "show_stars", "terrain_contours", "scale_bar"))
 
     @QtCore.pyqtSlot()
     def apply_baseline(self) -> None:

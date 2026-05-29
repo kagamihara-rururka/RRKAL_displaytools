@@ -1,5 +1,17 @@
 ﻿# Development Log
 
+## 2026-05-29 - Qt panel grouped layer quick actions
+
+Scope:
+- Added grouped layer toggle actions to `rrkal_displaytools_qt_panel.py`.
+- Groups cover hydrology, maritime zones, transport, and visual aids.
+
+Positioning:
+- This improves operator control over existing renderer flags without changing renderer internals.
+
+Validation:
+- Smoke passed before commit: `py -3 -m py_compile rrkal_displaytools_qt_panel.py taichi_global_bathymetry.py`.
+- Smoke passed before commit: PowerShell parser check for `scripts/setup_windows.ps1` and `scripts/run_qt_panel.ps1`.
 ## 2026-05-29 - Windows setup and launch helpers
 
 Scope:
@@ -133,3 +145,4 @@ Validation:
 Next round rule:
 - Before any new development round, inspect current repo state.
 - After each round, update this log and commit before continuing.
+
