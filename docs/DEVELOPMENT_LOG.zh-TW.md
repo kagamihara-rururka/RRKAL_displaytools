@@ -229,6 +229,20 @@ Positioning:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+## 2026-05-30 - Cursor geodesy renderer state bridge
+
+Scope:
+- Wired renderer mouse press/move events to write cursor geodesy state and ack JSON files.
+- Added `--cursor-geodesy-state-file` and `--cursor-geodesy-ack-file` to the renderer CLI and Qt launcher command.
+- Launch packets, renderer capabilities, handoff inspection, and smoke now report `renderer_mouse_state_wired`.
+- Cursor raycast state includes screen position, viewport size, hit status, lat/lon, camera yaw/pitch, frame index, and update time.
+
+Decision:
+- Mouse-move state writes are throttled to 20 Hz to avoid excessive cloud-drive churn on `L:`.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Layers runtime evidence badges
 
 Scope:

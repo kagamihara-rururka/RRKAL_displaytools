@@ -15,6 +15,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from cursor_geodesy import cursor_raycast_ack_payload, cursor_raycast_state_payload
 from closed_loop_status import renderer_closed_loop_status_packet
 from pin_projection import pin_projection_contract_packet, project_pins_to_screen
 try:
@@ -11481,6 +11482,13 @@ class HybridRenderController:
         self.pin_input_ack_file = Path(args.pin_input_ack_file) if getattr(args, "pin_input_ack_file", None) else None
         self.pin_pick_state_file = Path(args.pin_pick_state_file) if getattr(args, "pin_pick_state_file", None) else None
         self.layer_pick_state_file = Path(args.layer_pick_state_file) if getattr(args, "layer_pick_state_file", None) else None
+        self.cursor_geodesy_state_file = (
+            Path(args.cursor_geodesy_state_file) if getattr(args, "cursor_geodesy_state_file", None) else None
+        )
+        self.cursor_geodesy_ack_file = (
+            Path(args.cursor_geodesy_ack_file) if getattr(args, "cursor_geodesy_ack_file", None) else None
+        )
+        self.cursor_geodesy_last_write = 0.0
         self.write_pin_input_ack()
         self.boundary_highlight_state, self.boundary_highlight_error = load_boundary_highlight_state(
             getattr(args, "boundary_highlight_json", None)
@@ -11648,6 +11656,53 @@ class HybridRenderController:
         self.zoom = max(0.08, min(self.zoom * scale, 4.0))
         self.globe_dirty = True
         self.overlay_dirty = True
+
+    def write_cursor_geodesy_state(self, screen_x: float, screen_y: float, event: str = "mouse_move") -> None:
+        if self.cursor_geodesy_state_file is None and self.cursor_geodesy_ack_file is None:
+            return
+        now = time.time()
+        if event.endswith("mouse_move") and now - self.cursor_geodesy_last_write < 0.05:
+            return
+        self.cursor_geodesy_last_write = now
+        try:
+            payload = cursor_raycast_state_payload(
+                screen_x,
+                screen_y,
+                self.width,
+                self.height,
+                camera_yaw_deg=math.degrees(float(self.yaw)),
+                camera_pitch_deg=math.degrees(float(self.pitch)),
+                frame_index=int(self.frame_index),
+                event=event,
+                source="taichi_global_bathymetry",
+            )
+            if self.cursor_geodesy_state_file is not None:
+                self.cursor_geodesy_state_file.parent.mkdir(parents=True, exist_ok=True)
+                self.cursor_geodesy_state_file.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+            if self.cursor_geodesy_ack_file is not None:
+                ack = cursor_raycast_ack_payload(
+                    str(self.cursor_geodesy_state_file) if self.cursor_geodesy_state_file is not None else None,
+                    payload,
+                    source="taichi_global_bathymetry",
+                )
+                self.cursor_geodesy_ack_file.parent.mkdir(parents=True, exist_ok=True)
+                self.cursor_geodesy_ack_file.write_text(json.dumps(ack, ensure_ascii=False, indent=2), encoding="utf-8")
+        except Exception as exc:
+            if self.cursor_geodesy_ack_file is None:
+                return
+            error_ack = {
+                "schema": "rrkal_displaytools.renderer_cursor_geodesy_ack.v1",
+                "source": "taichi_global_bathymetry",
+                "event": event,
+                "state_file": str(self.cursor_geodesy_state_file) if self.cursor_geodesy_state_file is not None else None,
+                "error": str(exc),
+                "updated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            }
+            try:
+                self.cursor_geodesy_ack_file.parent.mkdir(parents=True, exist_ok=True)
+                self.cursor_geodesy_ack_file.write_text(json.dumps(error_ack, ensure_ascii=False, indent=2), encoding="utf-8")
+            except OSError:
+                return
 
     def current_km_per_pixel(self) -> float:
         return max(0.001, 6371.0 * float(self.zoom) * 2.0 / max(1.0, float(min(self.width, self.height))))
@@ -15881,6 +15936,7 @@ class VisPyHybridViewer:
 
     def on_mouse_press(self, event) -> None:
         if event.button == 1:
+            self.controller.write_cursor_geodesy_state(float(event.pos[0]), float(event.pos[1]), "vispy_mouse_press")
             self.dragging = True
             self.last_pos = event.pos
 
@@ -15891,6 +15947,7 @@ class VisPyHybridViewer:
             self.last_pos = None
 
     def on_mouse_move(self, event) -> None:
+        self.controller.write_cursor_geodesy_state(float(event.pos[0]), float(event.pos[1]), "vispy_mouse_move")
         if not self.dragging or self.last_pos is None:
             return
         dx = event.pos[0] - self.last_pos[0]
@@ -17195,6 +17252,7 @@ class QtHybridWindow:
 
     def on_mouse_press(self, event) -> None:
         if event.button == 1:
+            self.controller.write_cursor_geodesy_state(float(event.pos[0]), float(event.pos[1]), "qt_mouse_press")
             if "scale" not in self.locked_layers and self.controller.hit_test_scale_bar(float(event.pos[0]), float(event.pos[1])):
                 self.dragging_scale_bar = True
                 self.scale_bar_drag_offset = (
@@ -17224,6 +17282,7 @@ class QtHybridWindow:
             self.last_pos = None
 
     def on_mouse_move(self, event) -> None:
+        self.controller.write_cursor_geodesy_state(float(event.pos[0]), float(event.pos[1]), "qt_mouse_move")
         if self.data_mode == "timeseries" and float(event.pos[1]) > float(self.controller.height) - 90.0:
             self._show_timeline_temporarily()
         if self.dragging_scale_bar:
@@ -17360,6 +17419,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--pin-pick-state-file", default=os.environ.get("PIN_PICK_STATE_FILE"))
     parser.add_argument("--pin-input-ack-file", default=os.environ.get("PIN_INPUT_ACK_FILE"))
     parser.add_argument("--layer-pick-state-file", default=os.environ.get("LAYER_PICK_STATE_FILE"))
+    parser.add_argument("--cursor-geodesy-state-file", default=os.environ.get("CURSOR_GEODESY_STATE_FILE"))
+    parser.add_argument("--cursor-geodesy-ack-file", default=os.environ.get("CURSOR_GEODESY_ACK_FILE"))
     parser.add_argument("--boundary-highlight-json", default=os.environ.get("BOUNDARY_HIGHLIGHT_JSON"))
     parser.add_argument("--boundary-highlight-ack-file", default=os.environ.get("BOUNDARY_HIGHLIGHT_ACK_FILE"))
     parser.add_argument("--layer-runtime-state-file", default=os.environ.get("LAYER_RUNTIME_STATE_FILE"))
@@ -18726,11 +18787,13 @@ def cursor_geodesy_readout_packet(source: str) -> dict[str, object]:
         "renderer_raycast_inputs": ["screen_x", "screen_y", "viewport_width", "viewport_height", "camera_yaw_deg", "camera_pitch_deg"],
         "renderer_raycast_outputs": ["hit", "latitude", "longitude", "front_hemisphere"],
         "raycast_smoke_cases": ["center_hit", "outside_globe_miss"],
-        "runtime_bridge_status": "state_ack_contract_ready",
+        "runtime_bridge_status": "renderer_mouse_state_wired",
         "renderer_raycast_state_file": "state/renderer_cursor_geodesy_state.json",
         "renderer_raycast_ack_file": "state/renderer_cursor_geodesy_ack.json",
-        "runtime_bridge_fields": ["screen_x", "screen_y", "latitude", "longitude", "hit", "camera_yaw_deg", "camera_pitch_deg"],
-        "researcher_note": "Canvas preview gives immediate lon/lat feedback; renderer-facing globe raycast math and state/ack file contract are smoke-gated for Taichi mouse-state wiring.",
+        "renderer_controls": ["cursor-geodesy-state-file", "cursor-geodesy-ack-file"],
+        "runtime_events": ["qt_mouse_press", "qt_mouse_move", "vispy_mouse_press", "vispy_mouse_move"],
+        "runtime_bridge_fields": ["screen_x", "screen_y", "latitude", "longitude", "hit", "camera_yaw_deg", "camera_pitch_deg", "frame_index", "updated_at_utc"],
+        "researcher_note": "Canvas preview gives immediate lon/lat feedback; renderer mouse events now write a smoke-gated state/ack bridge for Taichi globe raycast results.",
     }
 
 

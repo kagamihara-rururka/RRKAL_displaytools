@@ -7,9 +7,11 @@ discovery can prove the math contract without starting the Qt panel or Taichi GU
 from __future__ import annotations
 
 import math
+import datetime
 from typing import Any
 
 CURSOR_GEODESY_RAYCAST_SCHEMA = "rrkal_displaytools.cursor_geodesy_raycast.v1"
+CURSOR_GEODESY_ACK_SCHEMA = "rrkal_displaytools.renderer_cursor_geodesy_ack.v1"
 
 
 def _rotate_y(vector: tuple[float, float, float], degrees: float) -> tuple[float, float, float]:
@@ -74,6 +76,9 @@ def viewport_sphere_raycast(
             "latitude": None,
             "longitude": None,
             "normalized_xy": [x, y],
+            "camera_yaw_deg": float(camera_yaw_deg),
+            "camera_pitch_deg": float(camera_pitch_deg),
+            "method": "orthographic_globe_disc_intersection",
             "reason": "outside_globe_disc",
         }
     z = math.sqrt(max(0.0, 1.0 - radius_sq))
@@ -93,4 +98,70 @@ def viewport_sphere_raycast(
         "camera_yaw_deg": float(camera_yaw_deg),
         "camera_pitch_deg": float(camera_pitch_deg),
         "method": "orthographic_globe_disc_intersection",
+    }
+
+
+def cursor_raycast_state_payload(
+    screen_x: float,
+    screen_y: float,
+    viewport_width: float,
+    viewport_height: float,
+    *,
+    camera_yaw_deg: float = 0.0,
+    camera_pitch_deg: float = 0.0,
+    frame_index: int | None = None,
+    event: str = "mouse_move",
+    source: str = "taichi_global_bathymetry",
+) -> dict[str, Any]:
+    """Build the renderer state payload written for cursor geodesy readout."""
+
+    ray = viewport_sphere_raycast(
+        screen_x,
+        screen_y,
+        viewport_width,
+        viewport_height,
+        camera_yaw_deg=camera_yaw_deg,
+        camera_pitch_deg=camera_pitch_deg,
+    )
+    payload = dict(ray)
+    payload.update(
+        {
+            "source": source,
+            "event": str(event),
+            "screen_x": float(screen_x),
+            "screen_y": float(screen_y),
+            "viewport_width": float(viewport_width),
+            "viewport_height": float(viewport_height),
+            "camera_yaw_deg": float(camera_yaw_deg),
+            "camera_pitch_deg": float(camera_pitch_deg),
+            "frame_index": int(frame_index) if frame_index is not None else None,
+            "updated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        }
+    )
+    return payload
+
+
+def cursor_raycast_ack_payload(
+    state_file: str | None,
+    state_payload: dict[str, Any],
+    *,
+    source: str = "taichi_global_bathymetry",
+) -> dict[str, Any]:
+    """Build the renderer ack payload for the cursor geodesy state bridge."""
+
+    return {
+        "schema": CURSOR_GEODESY_ACK_SCHEMA,
+        "source": source,
+        "event": state_payload.get("event", "unknown"),
+        "state_file": state_file,
+        "state_schema": state_payload.get("schema"),
+        "hit": bool(state_payload.get("hit")),
+        "latitude": state_payload.get("latitude"),
+        "longitude": state_payload.get("longitude"),
+        "screen_x": state_payload.get("screen_x"),
+        "screen_y": state_payload.get("screen_y"),
+        "camera_yaw_deg": state_payload.get("camera_yaw_deg"),
+        "camera_pitch_deg": state_payload.get("camera_pitch_deg"),
+        "frame_index": state_payload.get("frame_index"),
+        "updated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
     }

@@ -30,6 +30,8 @@ BOUNDARY_HIGHLIGHT_ACK_PATH = ROOT / "state" / "renderer_boundary_highlight_ack.
 LAYER_RUNTIME_STATE_PATH = ROOT / "state" / "renderer_layer_runtime_state.json"
 LAYER_RUNTIME_ACK_PATH = ROOT / "state" / "renderer_layer_runtime_ack.json"
 LAYER_PICK_STATE_PATH = ROOT / "state" / "renderer_layer_pick_state.json"
+CURSOR_GEODESY_STATE_PATH = ROOT / "state" / "renderer_cursor_geodesy_state.json"
+CURSOR_GEODESY_ACK_PATH = ROOT / "state" / "renderer_cursor_geodesy_ack.json"
 TIMELINE_STATE_PATH = ROOT / "state" / "renderer_timeline_state.json"
 TIMELINE_ACK_PATH = ROOT / "state" / "renderer_timeline_ack.json"
 TIMELINE_EXPORT_DIR = ROOT / "state" / "timeline_exports"
@@ -1611,11 +1613,13 @@ def cursor_geodesy_readout_packet(
         "renderer_raycast_inputs": ["screen_x", "screen_y", "viewport_width", "viewport_height", "camera_yaw_deg", "camera_pitch_deg"],
         "renderer_raycast_outputs": ["hit", "latitude", "longitude", "front_hemisphere"],
         "raycast_smoke_cases": ["center_hit", "outside_globe_miss"],
-        "runtime_bridge_status": "state_ack_contract_ready",
+        "runtime_bridge_status": "renderer_mouse_state_wired",
         "renderer_raycast_state_file": "state/renderer_cursor_geodesy_state.json",
         "renderer_raycast_ack_file": "state/renderer_cursor_geodesy_ack.json",
-        "runtime_bridge_fields": ["screen_x", "screen_y", "latitude", "longitude", "hit", "camera_yaw_deg", "camera_pitch_deg"],
-        "researcher_note": "Canvas preview gives immediate lon/lat feedback; renderer-facing globe raycast math and state/ack file contract are smoke-gated for Taichi mouse-state wiring.",
+        "renderer_controls": ["cursor-geodesy-state-file", "cursor-geodesy-ack-file"],
+        "runtime_events": ["qt_mouse_press", "qt_mouse_move", "vispy_mouse_press", "vispy_mouse_move"],
+        "runtime_bridge_fields": ["screen_x", "screen_y", "latitude", "longitude", "hit", "camera_yaw_deg", "camera_pitch_deg", "frame_index", "updated_at_utc"],
+        "researcher_note": "Canvas preview gives immediate lon/lat feedback; renderer mouse events now write a smoke-gated state/ack bridge for Taichi globe raycast results.",
     }
 
 
@@ -3079,6 +3083,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 str(LAYER_RUNTIME_ACK_PATH),
                 "--layer-pick-state-file",
                 str(LAYER_PICK_STATE_PATH),
+                "--cursor-geodesy-state-file",
+                str(CURSOR_GEODESY_STATE_PATH),
+                "--cursor-geodesy-ack-file",
+                str(CURSOR_GEODESY_ACK_PATH),
                 "--timeline-state-file",
                 str(TIMELINE_STATE_PATH),
                 "--timeline-ack-file",
@@ -3201,6 +3209,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_research_workflow": self.collect_layer_research_workflow(),
             "boundary_emphasis_control": self.collect_boundary_emphasis_control(),
             "cursor_geodesy_readout": self.collect_cursor_geodesy_readout(),
+            "cursor_geodesy_state_file": str(CURSOR_GEODESY_STATE_PATH),
+            "cursor_geodesy_ack_file": str(CURSOR_GEODESY_ACK_PATH),
             "style_renderer_entries": self.collect_style_renderer_entries(),
             "style_profile_renderer_routes": self.collect_style_profile_renderer_routes(),
             "module_boundary_registry": self.collect_module_boundary_registry(),
@@ -6248,6 +6258,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_research_workflow": self.collect_layer_research_workflow(),
             "boundary_emphasis_control": self.collect_boundary_emphasis_control(),
             "cursor_geodesy_readout": self.collect_cursor_geodesy_readout(),
+            "cursor_geodesy_state_file": str(CURSOR_GEODESY_STATE_PATH),
+            "cursor_geodesy_ack_file": str(CURSOR_GEODESY_ACK_PATH),
             "style_renderer_entries": self.collect_style_renderer_entries(),
             "style_profile_renderer_routes": self.collect_style_profile_renderer_routes(),
             "module_boundary_registry": self.collect_module_boundary_registry(),

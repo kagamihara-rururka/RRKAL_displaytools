@@ -147,3 +147,4 @@ Last updated: 2026-05-29
 - 2026-05-29: Added Timeline GIF animation export fallback for dependency-light sharing.
 - 2026-05-29: Added Timeline layer opacity interpolation for renderer playback and export manifests.
 - 2026-05-29: Added Timeline layer visibility/blend discrete hold contract for renderer playback and export manifests.
+- 2026-05-30: Wired cursor geodesy renderer state/ack bridge for mouse press/move lat-lon readout.

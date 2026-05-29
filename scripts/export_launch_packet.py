@@ -13,6 +13,8 @@ ROOT = Path(__file__).resolve().parents[1]
 PROFILE_DIR = ROOT / "profiles"
 PREVIEW_FRAME_PATH = "state/renderer_preview_frame.png"
 PREVIEW_FRAME_INTERVAL_S = 0.75
+CURSOR_GEODESY_STATE_PATH = "state/renderer_cursor_geodesy_state.json"
+CURSOR_GEODESY_ACK_PATH = "state/renderer_cursor_geodesy_ack.json"
 TIMELINE_STATE_PATH = "state/renderer_timeline_state.json"
 TIMELINE_ACK_PATH = "state/renderer_timeline_ack.json"
 TIMELINE_EXPORT_DIR = "state/timeline_exports"
@@ -241,6 +243,10 @@ def renderer_args(
         timeline_state_file,
         "--timeline-ack-file",
         timeline_ack_file,
+        "--cursor-geodesy-state-file",
+        CURSOR_GEODESY_STATE_PATH,
+        "--cursor-geodesy-ack-file",
+        CURSOR_GEODESY_ACK_PATH,
     ]
     for key, flag in BOOL_FLAGS.items():
         args.append(f"--{flag}" if layers[key] else f"--no-{flag}")
@@ -335,11 +341,13 @@ def cursor_geodesy_readout_packet(canvas_preview: dict[str, object] | None, sour
         "renderer_raycast_inputs": ["screen_x", "screen_y", "viewport_width", "viewport_height", "camera_yaw_deg", "camera_pitch_deg"],
         "renderer_raycast_outputs": ["hit", "latitude", "longitude", "front_hemisphere"],
         "raycast_smoke_cases": ["center_hit", "outside_globe_miss"],
-        "runtime_bridge_status": "state_ack_contract_ready",
+        "runtime_bridge_status": "renderer_mouse_state_wired",
         "renderer_raycast_state_file": "state/renderer_cursor_geodesy_state.json",
         "renderer_raycast_ack_file": "state/renderer_cursor_geodesy_ack.json",
-        "runtime_bridge_fields": ["screen_x", "screen_y", "latitude", "longitude", "hit", "camera_yaw_deg", "camera_pitch_deg"],
-        "researcher_note": "Canvas preview gives immediate lon/lat feedback; renderer-facing globe raycast math and state/ack file contract are smoke-gated for Taichi mouse-state wiring.",
+        "renderer_controls": ["cursor-geodesy-state-file", "cursor-geodesy-ack-file"],
+        "runtime_events": ["qt_mouse_press", "qt_mouse_move", "vispy_mouse_press", "vispy_mouse_move"],
+        "runtime_bridge_fields": ["screen_x", "screen_y", "latitude", "longitude", "hit", "camera_yaw_deg", "camera_pitch_deg", "frame_index", "updated_at_utc"],
+        "researcher_note": "Canvas preview gives immediate lon/lat feedback; renderer mouse events now write a smoke-gated state/ack bridge for Taichi globe raycast results.",
     }
 
 

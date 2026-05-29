@@ -156,3 +156,9 @@
 - displaytools 不負責 dataset discovery、download、import、install registry、cache/manifest governance。
 - RRKAL / `APIkeys_collection` 仍是資料治理與 renderer bridge asset ownership 的來源。
 - `state/`、generated images、runtime cache、logs、secrets 不提交 Git。
+
+### 2026-05-30 cursor geodesy renderer bridge
+
+- Renderer mouse press/move events now write `state/renderer_cursor_geodesy_state.json` and `state/renderer_cursor_geodesy_ack.json`.
+- Qt launcher and no-GUI launch packets pass `--cursor-geodesy-state-file` and `--cursor-geodesy-ack-file`.
+- Launch packets, renderer capabilities, handoff inspection, and smoke expose `renderer_mouse_state_wired` for the cursor geodesy bridge.

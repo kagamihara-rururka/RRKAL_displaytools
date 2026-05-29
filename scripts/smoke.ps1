@@ -539,6 +539,12 @@ if ($launchPacket.portable_command -notcontains "--timeline-state-file") {
 if ($launchPacket.portable_command -notcontains "--timeline-ack-file") {
     throw "Launch packet portable command is missing --timeline-ack-file"
 }
+if ($launchPacket.portable_command -notcontains "--cursor-geodesy-state-file") {
+    throw "Launch packet portable command is missing --cursor-geodesy-state-file"
+}
+if ($launchPacket.portable_command -notcontains "--cursor-geodesy-ack-file") {
+    throw "Launch packet portable command is missing --cursor-geodesy-ack-file"
+}
 if ($launchPacket.canvas_preview.preview_frame_path -ne "state/renderer_preview_frame.png") {
     throw "Launch packet canvas_preview preview_frame_path missing or invalid"
 }
@@ -560,7 +566,7 @@ if ($launchPacket.cursor_geodesy_readout.renderer_raycast_helper -ne "cursor_geo
 if ($launchPacket.cursor_geodesy_readout.raycast_smoke_cases -notcontains "center_hit") {
     throw "Launch packet cursor_geodesy_readout center raycast smoke case missing"
 }
-if ($launchPacket.cursor_geodesy_readout.runtime_bridge_status -ne "state_ack_contract_ready") {
+if ($launchPacket.cursor_geodesy_readout.runtime_bridge_status -ne "renderer_mouse_state_wired") {
     throw "Launch packet cursor_geodesy_readout runtime bridge status mismatch"
 }
 if ($launchPacket.cursor_geodesy_readout.renderer_raycast_state_file -ne "state/renderer_cursor_geodesy_state.json") {
@@ -568,6 +574,12 @@ if ($launchPacket.cursor_geodesy_readout.renderer_raycast_state_file -ne "state/
 }
 if ($launchPacket.cursor_geodesy_readout.runtime_bridge_fields -notcontains "latitude") {
     throw "Launch packet cursor_geodesy_readout latitude bridge field missing"
+}
+if ($launchPacket.cursor_geodesy_readout.runtime_bridge_fields -notcontains "updated_at_utc") {
+    throw "Launch packet cursor_geodesy_readout updated_at_utc bridge field missing"
+}
+if ($launchPacket.cursor_geodesy_readout.renderer_controls -notcontains "cursor-geodesy-state-file") {
+    throw "Launch packet cursor_geodesy_readout state-file renderer control missing"
 }
 if ($launchPacket.pin_overlay.schema -ne "rrkal_displaytools.pin_projection.v1") {
     throw "Launch packet pin_overlay schema missing or invalid"
@@ -772,7 +784,7 @@ if ($capabilities.cursor_geodesy_readout.renderer_raycast_schema -ne "rrkal_disp
 if ($capabilities.cursor_geodesy_readout.raycast_smoke_cases -notcontains "outside_globe_miss") {
     throw "Renderer cursor_geodesy_readout outside-globe raycast smoke case missing"
 }
-if ($capabilities.cursor_geodesy_readout.runtime_bridge_status -ne "state_ack_contract_ready") {
+if ($capabilities.cursor_geodesy_readout.runtime_bridge_status -ne "renderer_mouse_state_wired") {
     throw "Renderer cursor_geodesy_readout runtime bridge status mismatch"
 }
 if ($capabilities.cursor_geodesy_readout.renderer_raycast_ack_file -ne "state/renderer_cursor_geodesy_ack.json") {
@@ -780,6 +792,9 @@ if ($capabilities.cursor_geodesy_readout.renderer_raycast_ack_file -ne "state/re
 }
 if ($capabilities.cursor_geodesy_readout.runtime_bridge_fields -notcontains "hit") {
     throw "Renderer cursor_geodesy_readout hit bridge field missing"
+}
+if ($capabilities.cursor_geodesy_readout.runtime_events -notcontains "qt_mouse_move") {
+    throw "Renderer cursor_geodesy_readout qt_mouse_move runtime event missing"
 }
 if ($capabilities.pin_overlay.schema -ne "rrkal_displaytools.pin_projection.v1") {
     throw "Renderer pin_overlay schema missing or invalid"
@@ -1132,7 +1147,7 @@ if ($handoff.cursor_geodesy_readout.backend_raycast_status -ne "renderer_globe_i
 if ($handoff.cursor_geodesy_readout.renderer_raycast_helper -ne "cursor_geodesy.viewport_sphere_raycast") {
     throw "Handoff inspection cursor_geodesy_readout raycast helper missing"
 }
-if ($handoff.cursor_geodesy_readout.runtime_bridge_status -ne "state_ack_contract_ready") {
+if ($handoff.cursor_geodesy_readout.runtime_bridge_status -ne "renderer_mouse_state_wired") {
     throw "Handoff inspection cursor_geodesy_readout runtime bridge status mismatch"
 }
 if ($handoff.cursor_geodesy_readout.renderer_raycast_state_file -ne "state/renderer_cursor_geodesy_state.json") {
@@ -1140,6 +1155,9 @@ if ($handoff.cursor_geodesy_readout.renderer_raycast_state_file -ne "state/rende
 }
 if ($handoff.cursor_geodesy_readout.renderer_raycast_ack_file -ne "state/renderer_cursor_geodesy_ack.json") {
     throw "Handoff inspection cursor_geodesy_readout ack file mismatch"
+}
+if ($handoff.cursor_geodesy_readout.renderer_controls -notcontains "cursor-geodesy-ack-file") {
+    throw "Handoff inspection cursor_geodesy_readout ack-file renderer control missing"
 }
 if ($handoff.launch_packet_contracts.pin_overlay -ne "rrkal_displaytools.pin_projection.v1") {
     throw "Handoff inspection pin_overlay launch contract missing or invalid"
@@ -1377,7 +1395,7 @@ if ([int]$handoff.layer_capability_matrix.live_counts.blend -le 0) {
 }
 Invoke-CheckedNative py @("-3", "taichi_global_bathymetry.py", "--print-layer-manifest") | Out-Null
 Invoke-CheckedNative py @("-3", "rrkal_displaytools_qt_panel.py", "--list-templates") | Out-Null
-Invoke-CheckedNative py @("-3", "-c", "from cursor_geodesy import viewport_sphere_raycast; c=viewport_sphere_raycast(50,50,100,100); m=viewport_sphere_raycast(120,120,100,100); assert c['hit'] and abs(c['latitude']) < 1e-9 and abs(c['longitude']) < 1e-9 and not m['hit']") | Out-Null
+Invoke-CheckedNative py @("-3", "-c", "from cursor_geodesy import viewport_sphere_raycast, cursor_raycast_state_payload, cursor_raycast_ack_payload; c=viewport_sphere_raycast(50,50,100,100); m=viewport_sphere_raycast(120,120,100,100); s=cursor_raycast_state_payload(50,50,100,100,event='smoke',frame_index=7); a=cursor_raycast_ack_payload('state/renderer_cursor_geodesy_state.json',s); assert c['hit'] and abs(c['latitude']) < 1e-9 and abs(c['longitude']) < 1e-9 and not m['hit'] and s['screen_x']==50.0 and s['frame_index']==7 and a['schema']=='rrkal_displaytools.renderer_cursor_geodesy_ack.v1'") | Out-Null
 
 $qtPanelSource = Get-Content -Raw -Encoding UTF8 rrkal_displaytools_qt_panel.py
 if ($qtPanelSource -like "*Boundary emphasis: UI ready, renderer mask hook queued*") {

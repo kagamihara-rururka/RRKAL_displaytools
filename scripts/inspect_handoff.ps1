@@ -108,6 +108,8 @@ $summary = [ordered]@{
         runtime_bridge_status = $launchPacket.cursor_geodesy_readout.runtime_bridge_status
         renderer_raycast_state_file = $launchPacket.cursor_geodesy_readout.renderer_raycast_state_file
         renderer_raycast_ack_file = $launchPacket.cursor_geodesy_readout.renderer_raycast_ack_file
+        renderer_controls = $launchPacket.cursor_geodesy_readout.renderer_controls
+        runtime_events = $launchPacket.cursor_geodesy_readout.runtime_events
         runtime_bridge_fields = $launchPacket.cursor_geodesy_readout.runtime_bridge_fields
         qt_surface = $launchPacket.cursor_geodesy_readout.qt_surface
     }
