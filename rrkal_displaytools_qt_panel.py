@@ -261,6 +261,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.selected_layer_key: str | None = None
         self.boundary_highlight_state: dict[str, object] = default_boundary_highlight_state()
         self.boundary_highlight_label: QtWidgets.QLabel | None = None
+        self.boundary_identity_status_label: QtWidgets.QLabel | None = None
         self.boundary_highlight_ack_label: QtWidgets.QLabel | None = None
         self.boundary_highlight_ack_mtime_ns: int | None = (
             BOUNDARY_HIGHLIGHT_ACK_PATH.stat().st_mtime_ns if BOUNDARY_HIGHLIGHT_ACK_PATH.exists() else None
@@ -431,9 +432,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         material_form.addRow(layer_property_actions)
         self.boundary_highlight_label = QtWidgets.QLabel(self.boundary_highlight_summary())
         self.boundary_highlight_label.setWordWrap(True)
+        self.boundary_identity_status_label = QtWidgets.QLabel(self.boundary_identity_status_summary())
+        self.boundary_identity_status_label.setWordWrap(True)
         boundary_highlight_button = QtWidgets.QPushButton("疆域強調遮罩設定")
         boundary_highlight_button.clicked.connect(lambda _checked=False: self.open_boundary_highlight_dialog())
         material_form.addRow("Boundary highlight", self.boundary_highlight_label)
+        material_form.addRow("Boundary identity", self.boundary_identity_status_label)
         material_form.addRow(boundary_highlight_button)
         self.boundary_highlight_ack_label = QtWidgets.QLabel(
             f"Boundary ack: waiting for {BOUNDARY_HIGHLIGHT_ACK_PATH.name}"
@@ -1623,9 +1627,23 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"breath={'on' if breathing_enabled else 'off'}; targets={target_count}; line mask live; closed-ring fill live"
         )
 
+    def boundary_identity_status_summary(self) -> str:
+        state = self.collect_boundary_highlight_state()
+        identity_status = state.get("identity_status")
+        if not isinstance(identity_status, dict):
+            identity_status = default_boundary_identity_status()
+        applied = identity_status.get("applied", [])
+        pending = identity_status.get("pending", [])
+        applied_count = len(applied) if isinstance(applied, list) else "-"
+        pending_count = len(pending) if isinstance(pending, list) else "-"
+        boundary = str(identity_status.get("boundary", "visual/source-property preview only"))
+        return f"applied={applied_count}; pending={pending_count}; {boundary}"
+
     def refresh_boundary_highlight_status(self) -> None:
         if self.boundary_highlight_label is not None:
             self.boundary_highlight_label.setText(self.boundary_highlight_summary())
+        if self.boundary_identity_status_label is not None:
+            self.boundary_identity_status_label.setText(self.boundary_identity_status_summary())
 
     def refresh_boundary_highlight_ack_state(self) -> None:
         try:

@@ -1,5 +1,18 @@
 # Development Log
 
+## 2026-05-29 - Boundary identity status summary
+
+Scope:
+- Properties panel now shows a `Boundary identity` summary beside Boundary highlight controls.
+- The summary reports applied/pending identity-status counts and the non-authoritative boundary note.
+- Capability summary now documents the user-visible status row.
+
+Positioning:
+- This makes the boundary/EEZ identity limitation visible without requiring users to open JSON or the settings dialog.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Boundary identity status handoff
 
 Scope:
