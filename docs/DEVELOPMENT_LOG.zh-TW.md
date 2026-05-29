@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - RRKAL-aligned documentation governance
+
+Scope:
+- Added a product positioning document that defines `RRKAL_displaytools` as RRKAL's visualization/display layer.
+- Added project GTD, Git handoff, and workspace layout docs based on the governance pattern from `APIkeys_collection`.
+- Updated README, docs index, and agent handoff with the launcher-vs-renderer boundary.
+
+Positioning:
+- RRKAL / `APIkeys_collection` owns dataset discovery, download, import, install registry, manifest, cache governance, and renderer bridge asset registration.
+- `RRKAL_displaytools` owns renderer consumption contracts, Taichi globe output, material/style controls, LOD/display diagnostics, and visualization frontends.
+
+Validation:
+- Not run; documentation-governance-only slice.
+
 ## 2026-05-29 - Initial project repo import
 
 Scope:
