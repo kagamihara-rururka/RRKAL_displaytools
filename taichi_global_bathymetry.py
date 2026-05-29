@@ -16359,6 +16359,27 @@ def renderer_capabilities_packet() -> dict[str, object]:
             ],
             "pending": [],
         },
+        "ui_handoff_contracts": {
+            "schema": "rrkal_displaytools.ui_handoff_contracts.v1",
+            "contracts": [
+                "canvas_preview",
+                "active_layer_diagnostics",
+                "layer_undo",
+                "session_journal",
+                "boundary_highlight.identity_status",
+            ],
+            "applies": [
+                "Qt launch packet handoff",
+                "No-GUI launch packet export",
+                "research provenance summary",
+                "cross-machine clone inspection",
+            ],
+            "pending": [
+                "global_document_undo",
+                "persisted_lab_notebook",
+            ],
+            "boundary": "Renderer capability discovery only; displaytools does not own RRKAL data discovery/cache governance.",
+        },
         "rrkal_boundary": {
             "displaytools_owns": [
                 "renderer launch flags",

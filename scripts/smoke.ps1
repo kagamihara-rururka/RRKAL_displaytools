@@ -65,6 +65,9 @@ if ($capabilities.preview_frame_stream.schema -ne "rrkal_displaytools.preview_fr
 if ($capabilities.active_layer_diagnostics.schema -ne "rrkal_displaytools.active_layer_diagnostics.v1") {
     throw "Renderer active_layer_diagnostics capability missing or invalid"
 }
+if ($capabilities.ui_handoff_contracts.schema -ne "rrkal_displaytools.ui_handoff_contracts.v1") {
+    throw "Renderer ui_handoff_contracts capability missing or invalid"
+}
 if ($capabilities.boundary_highlight.identity_status_schema -ne "rrkal_displaytools.boundary_identity_status.v1") {
     throw "Renderer boundary_highlight identity_status capability missing or invalid"
 }

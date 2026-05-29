@@ -66,7 +66,7 @@
 - `py -3 profile_schema.py`
 - `py -3 scripts\export_launch_packet.py --template fast_synthetic`
 
-這些入口給腳本查詢 renderer 能力、closed-loop status、圖層 manifest、可用 templates、profile schema，以及產生 launch packet。Renderer capabilities 內含 `closed_loop_status`、`preview_frame_stream` 與 `active_layer_diagnostics` contract，也可用 `--print-closed-loop-status` 只輸出目前 closed、partial 與 pending 的功能邊界；closed-loop status 會列出 `diagnostics_handoff_contracts`。
+這些入口給腳本查詢 renderer 能力、closed-loop status、圖層 manifest、可用 templates、profile schema，以及產生 launch packet。Renderer capabilities 內含 `closed_loop_status`、`preview_frame_stream`、`active_layer_diagnostics` 與 `ui_handoff_contracts` contract，也可用 `--print-closed-loop-status` 只輸出目前 closed、partial 與 pending 的功能邊界；closed-loop status 會列出 `diagnostics_handoff_contracts`。
 
 ### Launch packets and handoff
 
@@ -98,7 +98,7 @@
   - Launch packet `boundary_highlight.identity_status` schema gate。
   - Launch packet `--preview-frame-file` gate。
   - Launch packet `canvas_preview.preview_frame_path` / `preview_frame_interval_s` gate。
-  - Renderer capabilities JSON 與 `preview_frame_stream` / `active_layer_diagnostics` schema gate。
+  - Renderer capabilities JSON 與 `preview_frame_stream` / `active_layer_diagnostics` / `ui_handoff_contracts` schema gate。
   - Closed-loop status `diagnostics_handoff_contracts` gate。
   - Closed-loop status `layer_stack_undo_snapshots` gate。
   - Closed-loop status `session_journal_handoff` gate。

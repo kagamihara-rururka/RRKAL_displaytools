@@ -64,6 +64,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "launch_packet layer_undo",
                     "launch_packet session_journal",
                     "renderer capabilities active_layer_diagnostics",
+                    "renderer capabilities ui_handoff_contracts",
                     "profile_schema optional canvas_preview",
                 ],
             },

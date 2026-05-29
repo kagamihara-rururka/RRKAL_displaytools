@@ -1,5 +1,19 @@
 # Development Log
 
+## 2026-05-29 - Renderer UI handoff capability discovery
+
+Scope:
+- Renderer capabilities now expose `ui_handoff_contracts`.
+- The capability lists `canvas_preview`, `active_layer_diagnostics`, `layer_undo`, `session_journal`, and `boundary_highlight.identity_status`.
+- Smoke now gates `capabilities.ui_handoff_contracts.schema`.
+- Closed-loop evidence now links diagnostics handoff to renderer capability discovery.
+
+Positioning:
+- This lets another machine inspect UIUX handoff support without opening Qt, while keeping data discovery/cache governance outside displaytools.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Session journal handoff contract
 
 Scope:
