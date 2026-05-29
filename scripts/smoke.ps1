@@ -218,6 +218,21 @@ if ($launchPacket.profile_launch_readiness_ui.readiness -ne "ready") {
 if ($launchPacket.profile_launch_readiness_ui.qt_surface -ne "Layers dock readiness label") {
     throw "Launch packet profile_launch_readiness_ui surface mismatch"
 }
+if ($launchPacket.layer_visual_presets.schema -ne "rrkal_displaytools.layer_visual_presets.v1") {
+    throw "Launch packet layer_visual_presets schema missing or invalid"
+}
+if ([int]$launchPacket.layer_visual_presets.preset_count -lt 4) {
+    throw "Launch packet layer_visual_presets preset count missing"
+}
+if ($launchPacket.layer_visual_presets.preset_ids -notcontains "hydrology_focus") {
+    throw "Launch packet layer_visual_presets missing hydrology preset"
+}
+if ($launchPacket.layer_visual_presets.preset_ids -notcontains "boundary_focus") {
+    throw "Launch packet layer_visual_presets missing boundary preset"
+}
+if ($launchPacket.layer_visual_presets.respects_layer_locks -ne $true) {
+    throw "Launch packet layer_visual_presets must preserve locked layers"
+}
 if ($launchPacket.layer_undo.schema -ne "rrkal_displaytools.layer_stack_undo.v1") {
     throw "Launch packet layer_undo schema missing or invalid"
 }
@@ -571,6 +586,15 @@ if ($capabilities.profile_launch_readiness_ui.schema -ne "rrkal_displaytools.pro
 if ($capabilities.profile_launch_readiness_ui.readiness -ne "ready") {
     throw "Renderer profile_launch_readiness_ui should be ready"
 }
+if ($capabilities.layer_visual_presets.schema -ne "rrkal_displaytools.layer_visual_presets.v1") {
+    throw "Renderer layer_visual_presets schema missing or invalid"
+}
+if ($capabilities.layer_visual_presets.preset_ids -notcontains "boundary_focus") {
+    throw "Renderer layer_visual_presets missing boundary preset"
+}
+if ($capabilities.layer_visual_presets.respects_layer_locks -ne $true) {
+    throw "Renderer layer_visual_presets must preserve locked layers"
+}
 if ($capabilities.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
     throw "Renderer layer_capability_matrix capability missing or invalid"
 }
@@ -801,6 +825,21 @@ if ($handoff.profile_launch_readiness_ui.renderer_capabilities_schema -ne "rrkal
 }
 if ($handoff.profile_launch_readiness_ui.qt_surface -ne "Layers dock readiness label") {
     throw "Handoff inspection profile_launch_readiness_ui surface mismatch"
+}
+if ($handoff.launch_packet_contracts.layer_visual_presets -ne "rrkal_displaytools.layer_visual_presets.v1") {
+    throw "Handoff inspection layer_visual_presets launch contract missing or invalid"
+}
+if ($handoff.layer_visual_presets.launch_packet_schema -ne "rrkal_displaytools.layer_visual_presets.v1") {
+    throw "Handoff inspection layer_visual_presets launch schema missing or invalid"
+}
+if ($handoff.layer_visual_presets.renderer_capabilities_schema -ne "rrkal_displaytools.layer_visual_presets.v1") {
+    throw "Handoff inspection layer_visual_presets renderer schema missing or invalid"
+}
+if ($handoff.layer_visual_presets.preset_ids -notcontains "hydrology_focus") {
+    throw "Handoff inspection layer_visual_presets missing hydrology preset"
+}
+if ($handoff.layer_visual_presets.respects_layer_locks -ne $true) {
+    throw "Handoff inspection layer_visual_presets must preserve locked layers"
 }
 if ($handoff.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
     throw "Handoff inspection layer_capability_matrix summary missing or invalid"

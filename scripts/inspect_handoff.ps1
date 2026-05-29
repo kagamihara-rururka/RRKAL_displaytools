@@ -42,6 +42,7 @@ $summary = [ordered]@{
         style_renderer_entries = $launchPacket.style_renderer_entries.schema
         profile_launch_readiness = $launchPacket.profile_launch_readiness.schema
         profile_launch_readiness_ui = $launchPacket.profile_launch_readiness_ui.schema
+        layer_visual_presets = $launchPacket.layer_visual_presets.schema
         layer_undo = $launchPacket.layer_undo.schema
         session_journal = $launchPacket.session_journal.schema
         timeline_state = $launchPacket.timeline_state.schema
@@ -85,6 +86,14 @@ $summary = [ordered]@{
         readiness = $launchPacket.profile_launch_readiness_ui.readiness
         qt_surface = $launchPacket.profile_launch_readiness_ui.qt_surface
         visible_fields = $launchPacket.profile_launch_readiness_ui.visible_fields
+    }
+    layer_visual_presets = @{
+        launch_packet_schema = $launchPacket.layer_visual_presets.schema
+        renderer_capabilities_schema = $capabilities.layer_visual_presets.schema
+        preset_count = $launchPacket.layer_visual_presets.preset_count
+        preset_ids = $launchPacket.layer_visual_presets.preset_ids
+        qt_surface = $launchPacket.layer_visual_presets.qt_surface
+        respects_layer_locks = $launchPacket.layer_visual_presets.respects_layer_locks
     }
     layer_capability_matrix = @{
         schema = $capabilities.layer_capability_matrix.schema

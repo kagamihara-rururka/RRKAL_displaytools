@@ -35,6 +35,7 @@ Last updated: 2026-05-29
 - Decide which local cache artifacts should later be registered by RRKAL as renderer bridge assets.
 
 ## Done
+- 2026-05-30: Added `rrkal_displaytools.layer_visual_presets.v1` and Qt Layers dock preset buttons for All / Hydrology / Boundary / Annotations, preserving locked layers and exposing the contract through launch packets, renderer capabilities, handoff and smoke.
 - 2026-05-30: Added `rrkal_displaytools.profile_launch_readiness_ui.v1` and a Qt Layers dock readiness label so profile/launch readiness is visible in the UI and verifiable through launch packets, renderer capabilities, handoff and smoke.
 - 2026-05-30: Added `rrkal_displaytools.profile_launch_readiness.v1` so cross-machine profile/launch/portable-command/renderer-discovery readiness is visible through Qt, launch packets, renderer capabilities, handoff and smoke.
 - 2026-05-30: Added `rrkal_displaytools.style_renderer_entries.v1` so scientific / nautical / parchment / tactical renderer entries are discoverable through Qt, launch packets, renderer capabilities, handoff and smoke.

@@ -18032,6 +18032,55 @@ def profile_launch_readiness_ui_packet(
     }
 
 
+def layer_visual_presets_packet(
+    source: str,
+    selected_preset: str | None = None,
+) -> dict[str, object]:
+    presets = [
+        {
+            "id": "all_context",
+            "label": "All context",
+            "visible_layer_keys": ["__all__"],
+            "intent": "Show every available layer for broad orientation and clone-after-setup review.",
+        },
+        {
+            "id": "hydrology_focus",
+            "label": "Hydrology focus",
+            "visible_layer_keys": ["lake_layer", "river_layer", "bathymetry_layer", "coastline_layer"],
+            "intent": "Focus water, bathymetry, coastline and river/lake layers for scientific hydrology review.",
+        },
+        {
+            "id": "boundary_focus",
+            "label": "Boundary focus",
+            "visible_layer_keys": ["border_layer", "territorial_sea_layer", "eez_layer", "high_seas_layer"],
+            "intent": "Focus border, territorial sea, EEZ and high-seas context for jurisdiction review.",
+        },
+        {
+            "id": "annotation_focus",
+            "label": "Annotation focus",
+            "visible_layer_keys": ["pin_layer", "aircraft_layer", "vehicle_layer", "traffic_layer"],
+            "intent": "Focus researcher annotations and operational point/icon overlays without brush or mask tools.",
+        },
+    ]
+    preset_ids = [preset["id"] for preset in presets]
+    selected = selected_preset if selected_preset in preset_ids else "custom"
+    return {
+        "schema": "rrkal_displaytools.layer_visual_presets.v1",
+        "source": source,
+        "selected_preset": selected,
+        "preset_count": len(presets),
+        "preset_ids": preset_ids,
+        "presets": presets,
+        "qt_surface": "Layers dock preset buttons",
+        "profile_effect": "layer_stack_ui",
+        "respects_layer_locks": True,
+        "brush_mask_scope": "excluded",
+        "launch_packet_fields": ["layer_visual_presets", "layer_stack_ui"],
+        "renderer_capability_field": "layer_visual_presets",
+        "boundary": "Qt layer visibility preset contract only; renderer state follows existing layer runtime sync and RRKAL data governance is not mutated.",
+    }
+
+
 def layer_operator_shortcuts_packet(
     source: str,
     selected_layer: str | None = None,
@@ -18473,6 +18522,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
         "style_renderer_entries": style_renderer_entries_packet("taichi_global_bathymetry.renderer_capabilities"),
         "profile_launch_readiness": profile_launch_readiness_packet("taichi_global_bathymetry.renderer_capabilities", style_renderer_entries_packet("taichi_global_bathymetry.renderer_capabilities"), layer_operator_groups_packet(layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"), "taichi_global_bathymetry.renderer_capabilities")),
         "profile_launch_readiness_ui": profile_launch_readiness_ui_packet(profile_launch_readiness_packet("taichi_global_bathymetry.renderer_capabilities", style_renderer_entries_packet("taichi_global_bathymetry.renderer_capabilities"), layer_operator_groups_packet(layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"), "taichi_global_bathymetry.renderer_capabilities")), "taichi_global_bathymetry.renderer_capabilities"),
+        "layer_visual_presets": layer_visual_presets_packet("taichi_global_bathymetry.renderer_capabilities"),
         "layer_capability_matrix": layer_capability_matrix_packet(),
         "pin_controls": [
             "pin-file",

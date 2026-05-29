@@ -194,6 +194,55 @@ def profile_launch_readiness_ui_packet(
     }
 
 
+def layer_visual_presets_packet(
+    source: str,
+    selected_preset: str | None = None,
+) -> dict[str, object]:
+    presets = [
+        {
+            "id": "all_context",
+            "label": "All context",
+            "visible_layer_keys": ["__all__"],
+            "intent": "Show every available layer for broad orientation and clone-after-setup review.",
+        },
+        {
+            "id": "hydrology_focus",
+            "label": "Hydrology focus",
+            "visible_layer_keys": ["lake_layer", "river_layer", "bathymetry_layer", "coastline_layer"],
+            "intent": "Focus water, bathymetry, coastline and river/lake layers for scientific hydrology review.",
+        },
+        {
+            "id": "boundary_focus",
+            "label": "Boundary focus",
+            "visible_layer_keys": ["border_layer", "territorial_sea_layer", "eez_layer", "high_seas_layer"],
+            "intent": "Focus border, territorial sea, EEZ and high-seas context for jurisdiction review.",
+        },
+        {
+            "id": "annotation_focus",
+            "label": "Annotation focus",
+            "visible_layer_keys": ["pin_layer", "aircraft_layer", "vehicle_layer", "traffic_layer"],
+            "intent": "Focus researcher annotations and operational point/icon overlays without brush or mask tools.",
+        },
+    ]
+    preset_ids = [preset["id"] for preset in presets]
+    selected = selected_preset if selected_preset in preset_ids else "custom"
+    return {
+        "schema": "rrkal_displaytools.layer_visual_presets.v1",
+        "source": source,
+        "selected_preset": selected,
+        "preset_count": len(presets),
+        "preset_ids": preset_ids,
+        "presets": presets,
+        "qt_surface": "Layers dock preset buttons",
+        "profile_effect": "layer_stack_ui",
+        "respects_layer_locks": True,
+        "brush_mask_scope": "excluded",
+        "launch_packet_fields": ["layer_visual_presets", "layer_stack_ui"],
+        "renderer_capability_field": "layer_visual_presets",
+        "boundary": "Qt layer visibility preset contract only; renderer state follows existing layer runtime sync and RRKAL data governance is not mutated.",
+    }
+
+
 if "--list-templates" in sys.argv[1:]:
     print(json.dumps(profile_template_packet(), ensure_ascii=False, indent=2))
     raise SystemExit(0)
@@ -1291,6 +1340,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_filter_status_label: QtWidgets.QLabel | None = None
         self.layer_filter_text = ""
         self.layer_filter_preset = "all"
+        self.layer_visual_preset = "custom"
         self.layer_group_collapsed: set[str] = set()
         self.layer_group_status_label: QtWidgets.QLabel | None = None
         self.history_list: QtWidgets.QListWidget | None = None
@@ -1732,6 +1782,21 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.profile_launch_readiness_label = QtWidgets.QLabel("Profile/launch readiness: pending")
         self.profile_launch_readiness_label.setWordWrap(True)
         layers_layout.addWidget(self.profile_launch_readiness_label)
+        self.layer_visual_presets_label = QtWidgets.QLabel("Layer presets: custom")
+        self.layer_visual_presets_label.setWordWrap(True)
+        layers_layout.addWidget(self.layer_visual_presets_label)
+        preset_buttons = QtWidgets.QHBoxLayout()
+        for preset_id, label in (
+            ("all_context", "All"),
+            ("hydrology_focus", "Hydrology"),
+            ("boundary_focus", "Boundary"),
+            ("annotation_focus", "Annotations"),
+        ):
+            button = QtWidgets.QPushButton(label)
+            button.setToolTip(f"Apply layer visibility preset: {preset_id}")
+            button.clicked.connect(lambda _checked=False, preset_id=preset_id: self.apply_layer_visual_preset(preset_id))
+            preset_buttons.addWidget(button)
+        layers_layout.addLayout(preset_buttons)
         self.layer_runtime_legend_label = QtWidgets.QLabel(
             "Runtime badge: no_ack=等待 ack, ok=無近期變更, target=目前 renderer target, changed=renderer 已套用, locked=locked skip, error=ack error"
         )
@@ -2555,6 +2620,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "style_renderer_entries": self.collect_style_renderer_entries(),
             "profile_launch_readiness": self.collect_profile_launch_readiness(),
             "profile_launch_readiness_ui": self.collect_profile_launch_readiness_ui(),
+            "layer_visual_presets": self.collect_layer_visual_presets(),
             "layer_capability_matrix": self.collect_layer_capability_matrix(),
             "layer_runtime_evidence_summary": self.collect_layer_capability_matrix().get("runtime_evidence_summary"),
             "active_layer_diagnostics": self.active_layer_diagnostics_packet(),
@@ -2665,6 +2731,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         return profile_launch_readiness_ui_packet(
             self.collect_profile_launch_readiness(),
             "rrkal_displaytools_qt_panel",
+        )
+
+    def collect_layer_visual_presets(self) -> dict[str, object]:
+        return layer_visual_presets_packet(
+            "rrkal_displaytools_qt_panel",
+            getattr(self, "layer_visual_preset", "custom"),
         )
 
     def collect_layer_operator_groups(self) -> dict[str, object]:
@@ -3460,6 +3532,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 f"{readiness_ui.get('label_prefix', 'Profile/launch readiness')}: "
                 f"{readiness_ui.get('readiness', 'unknown')} "
                 f"({readiness_ui.get('ready_check_count', 0)}/{readiness_ui.get('check_count', 0)} checks)"
+            )
+        visual_presets = self.collect_layer_visual_presets()
+        if hasattr(self, "layer_visual_presets_label"):
+            self.layer_visual_presets_label.setText(
+                f"Layer presets: {visual_presets.get('selected_preset', 'custom')} "
+                f"({visual_presets.get('preset_count', 0)} available, locked layers preserved)"
             )
         self.layer_stack_note.setText(
             f"可見圖層 {visible}/{len(LAYER_LABELS)}；鎖定 {locked}；"
@@ -5345,6 +5423,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "style_renderer_entries": self.collect_style_renderer_entries(),
             "profile_launch_readiness": self.collect_profile_launch_readiness(),
             "profile_launch_readiness_ui": self.collect_profile_launch_readiness_ui(),
+            "layer_visual_presets": self.collect_layer_visual_presets(),
             "layer_capability_matrix": self.collect_layer_capability_matrix(),
             "layer_runtime_evidence_summary": self.collect_layer_capability_matrix().get("runtime_evidence_summary"),
             "layer_runtime_badge_summary": self.collect_layer_capability_matrix().get("runtime_badge_summary"),
@@ -5442,6 +5521,48 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             text = json.dumps(self.collect_layer_runtime_state(), ensure_ascii=False, indent=2)
         self.command_text.setPlainText(text)
         self.status.setText(f"已顯示 layer runtime state JSON：{LAYER_RUNTIME_STATE_PATH}")
+
+    def apply_layer_visual_preset(self, preset_id: str) -> None:
+        presets_packet = self.collect_layer_visual_presets()
+        presets = {
+            str(preset.get("id")): preset
+            for preset in presets_packet.get("presets", [])
+            if isinstance(preset, dict) and preset.get("id")
+        }
+        preset = presets.get(str(preset_id))
+        if not preset:
+            self.status.setText(f"Unknown layer preset: {preset_id}")
+            return
+        known_keys = {key for key, _label in LAYER_LABELS}
+        raw_visible_keys = preset.get("visible_layer_keys")
+        raw_visible_keys = raw_visible_keys if isinstance(raw_visible_keys, list) else []
+        if "__all__" in raw_visible_keys:
+            visible_keys = set(known_keys)
+        else:
+            visible_keys = {str(key) for key in raw_visible_keys if str(key) in known_keys}
+            if not visible_keys:
+                visible_keys = set(known_keys)
+        skipped_locked: list[str] = []
+        for key, _label in LAYER_LABELS:
+            if key not in self.checks:
+                continue
+            locked = bool(self.layer_locks.get(key).isChecked()) if key in self.layer_locks else False
+            if locked:
+                skipped_locked.append(key)
+                continue
+            self.checks[key].setChecked(key in visible_keys)
+            if key in visible_keys and key in self.layer_opacity:
+                self.layer_opacity[key].setValue(100)
+            if key in visible_keys and key in self.layer_blends:
+                self.layer_blends[key].setCurrentText("Normal")
+        self.layer_visual_preset = str(preset_id)
+        self.refresh_command_preview()
+        self.refresh_layer_stack_status()
+        label = str(preset.get("label", preset_id))
+        if skipped_locked:
+            self.status.setText(f"Applied layer preset: {label}; skipped locked layers: {len(skipped_locked)}")
+        else:
+            self.status.setText(f"Applied layer preset: {label}")
 
     def show_layer_capability_matrix(self) -> None:
         self.command_text.setPlainText(
