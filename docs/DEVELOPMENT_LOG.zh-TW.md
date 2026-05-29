@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - Visual aid runtime visibility
+
+Scope:
+- Added runtime aliases for `show_grid`, `show_stars`, and `ocean_material`.
+- Renderer `set_layer_visible()` now updates `args.show_grid`, `args.show_stars`, `args.ocean_material`, and `args.terrain_contours` with globe dirty flags.
+- Added `pin_layer` to the renderer layer manifest visual-aids group.
+
+Positioning:
+- This closes the basic visual-aid runtime visibility loop that Qt already exposed in the layer stack.
+- Remaining visual layer work is vehicle icon rendering and boundary aggregate blend splitting.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Hydrology runtime blend mode
 
 Scope:

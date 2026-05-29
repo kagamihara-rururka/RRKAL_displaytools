@@ -2495,6 +2495,8 @@ BOUNDARY_HIGHLIGHT_LAYER_MAP = {
 }
 BOUNDARY_HIGHLIGHT_TRIGGERS = {"hover", "selected", "hover_or_selected"}
 LAYER_RUNTIME_ID_ALIASES = {
+    "show_grid": "grid",
+    "show_stars": "stars",
     "lake_layer": "lakes",
     "river_layer": "rivers",
     "border_layer": "borders",
@@ -2503,6 +2505,7 @@ LAYER_RUNTIME_ID_ALIASES = {
     "high_seas_layer": "high_seas",
     "aircraft_layer": "aircraft",
     "pin_layer": "pins",
+    "ocean_material": "ocean_material",
     "terrain_contours": "contours",
     "scale_bar": "scale",
     "vehicle_icons": "vehicle_icons",
@@ -10559,6 +10562,8 @@ class HybridRenderController:
         ]
         self.layer_visible = {
             "globe": True,
+            "grid": bool(getattr(args, "show_grid", True)),
+            "stars": bool(getattr(args, "show_stars", True)),
             "lakes": bool(getattr(args, "lake_layer", True)),
             "rivers": bool(getattr(args, "river_layer", True)),
             "borders": bool(getattr(args, "border_layer", True)),
@@ -10569,6 +10574,7 @@ class HybridRenderController:
             "aircraft": bool(getattr(args, "aircraft_layer", False)),
             "pins": bool(getattr(args, "pin_layer", True)),
             "vehicle_icons": bool(getattr(args, "vehicle_icons", False)),
+            "ocean_material": bool(getattr(args, "ocean_material", True)),
             "clouds": bool(getattr(args, "cloud_layer", False)),
             "ice": bool(getattr(args, "ice_layer", True)),
             "forest": bool(getattr(args, "forest_layer", True)),
@@ -12345,6 +12351,12 @@ class HybridRenderController:
 
     def set_layer_visible(self, layer_id: str, visible: bool) -> None:
         self.layer_visible[layer_id] = bool(visible)
+        if layer_id == "grid":
+            self.args.show_grid = bool(visible)
+            self.globe_dirty = True
+        if layer_id == "stars":
+            self.args.show_stars = bool(visible)
+            self.globe_dirty = True
         if layer_id in HYDROLOGY_SPECS:
             setattr(self.args, f"{HYDROLOGY_SPECS[layer_id]['prefix']}_layer", bool(visible))
             self.hydrology_dirty = True
@@ -12355,8 +12367,14 @@ class HybridRenderController:
             self.boundary_dirty = True
         if layer_id == "scale":
             self.args.scale_bar = bool(visible)
+        if layer_id == "contours":
+            self.args.terrain_contours = bool(visible)
+            self.globe_dirty = True
+        if layer_id == "ocean_material":
+            self.args.ocean_material = bool(visible)
+            self.globe_dirty = True
         self.overlay_dirty = True
-        self.globe_dirty = self.globe_dirty or layer_id in {"globe", "ice", "forest", "clouds", "contours"}
+        self.globe_dirty = self.globe_dirty or layer_id in {"globe", "ice", "forest", "clouds", "contours", "grid", "stars", "ocean_material"}
 
     def set_layer_order(self, order: list[str]) -> None:
         known = [layer for layer in order if layer in self.LAYER_LABELS]
@@ -15473,6 +15491,7 @@ def renderer_layer_manifest_packet() -> dict[str, object]:
                 "layers": [
                     {"id": "show_grid", "flag": "show-grid", "default": True},
                     {"id": "show_stars", "flag": "show-stars", "default": True},
+                    {"id": "pin_layer", "flag": "pin-layer", "default": True},
                     {"id": "terrain_contours", "flag": "terrain-contours", "default": False},
                     {"id": "scale_bar", "flag": "scale-bar", "default": True},
                 ],
