@@ -626,3 +626,17 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Qt tool palette UI state
+
+Scope:
+- Added a Photoshop-like tool palette to the Qt `Tools` dock: Move, Select, Brush, Mask, and Erase.
+- Added UI-only tool options for brush size, hardness, tool opacity, mask mode, and selection mode.
+- Bound the active tool to the selected layer target.
+- Added optional `tool_state` to profile schema, profile save/load, and launch packets.
+
+Positioning:
+- This keeps development on the UIUX closure path. Brush, Mask, and Selection now have a complete Qt state loop before renderer backend sync is implemented.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

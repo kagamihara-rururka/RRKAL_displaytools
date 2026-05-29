@@ -100,6 +100,15 @@ LAYER_LABELS = (
 )
 
 BLEND_MODES = ("Normal", "Screen", "Multiply", "Overlay", "Soft Light")
+TOOL_MODES = (
+    ("move", "Move", "檢視 / 平移"),
+    ("select", "Select", "🚧 選取範圍"),
+    ("brush", "Brush", "🚧 筆刷"),
+    ("mask", "Mask", "🚧 遮罩"),
+    ("erase", "Erase", "🚧 擦除"),
+)
+MASK_MODES = ("Reveal", "Hide", "Refine")
+SELECTION_MODES = ("Replace", "Add", "Subtract", "Intersect")
 
 class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def __init__(self, initial_profile: Path | None = None) -> None:
@@ -114,6 +123,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_rows: dict[str, QtWidgets.QWidget] = {}
         self.layer_property_labels: dict[str, QtWidgets.QLabel] = {}
         self.selected_layer_key: str | None = None
+        self.active_tool = "move"
+        self.tool_buttons: dict[str, QtWidgets.QToolButton] = {}
+        self.tool_target_label: QtWidgets.QLabel | None = None
+        self.brush_size_slider: QtWidgets.QSlider | None = None
+        self.brush_hardness_slider: QtWidgets.QSlider | None = None
+        self.tool_opacity_slider: QtWidgets.QSlider | None = None
+        self.mask_mode_combo: QtWidgets.QComboBox | None = None
+        self.selection_mode_combo: QtWidgets.QComboBox | None = None
         self.docks: dict[str, QtWidgets.QDockWidget] = {}
         self.template_paths: list[Path] = []
         self._build_ui()
@@ -414,6 +431,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             QWidget#layerRow { border-bottom: 1px solid #d6e0ea; }
             QWidget#layerRow[selected="true"] { background: #dceeff; border: 1px solid #5b8db8; }
             QLabel#selectedLayer { color: #23435f; font-weight: 700; padding-top: 6px; }
+            QLabel#toolPaletteTitle { color: #23435f; font-weight: 700; padding-top: 6px; }
             """
         )
 
@@ -457,6 +475,56 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         tools = QtWidgets.QWidget(dock)
         layout = QtWidgets.QVBoxLayout(tools)
         layout.setContentsMargins(8, 8, 8, 8)
+        palette_title = QtWidgets.QLabel("工具箱 / Tool Palette")
+        palette_title.setObjectName("toolPaletteTitle")
+        layout.addWidget(palette_title)
+        tool_grid = QtWidgets.QGridLayout()
+        for index, (mode, label, hint) in enumerate(TOOL_MODES):
+            button = QtWidgets.QToolButton()
+            button.setText(label)
+            button.setToolButtonStyle(QtCore.Qt.ToolButtonStyle.ToolButtonTextOnly)
+            button.setCheckable(True)
+            button.setToolTip(hint)
+            button.clicked.connect(lambda _checked=False, tool_mode=mode: self.set_active_tool(tool_mode))
+            self.tool_buttons[mode] = button
+            tool_grid.addWidget(button, index // 2, index % 2)
+        layout.addLayout(tool_grid)
+        self.tool_target_label = QtWidgets.QLabel("Target layer: -")
+        self.tool_target_label.setWordWrap(True)
+        layout.addWidget(self.tool_target_label)
+
+        options_group = QtWidgets.QGroupBox("Tool Options")
+        options_form = QtWidgets.QFormLayout(options_group)
+        self.brush_size_slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+        self.brush_size_slider.setRange(1, 200)
+        self.brush_size_slider.setValue(32)
+        self.brush_hardness_slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+        self.brush_hardness_slider.setRange(0, 100)
+        self.brush_hardness_slider.setValue(75)
+        self.tool_opacity_slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+        self.tool_opacity_slider.setRange(0, 100)
+        self.tool_opacity_slider.setValue(100)
+        self.mask_mode_combo = QtWidgets.QComboBox()
+        self.mask_mode_combo.addItems(MASK_MODES)
+        self.selection_mode_combo = QtWidgets.QComboBox()
+        self.selection_mode_combo.addItems(SELECTION_MODES)
+        for slider in (self.brush_size_slider, self.brush_hardness_slider, self.tool_opacity_slider):
+            slider.valueChanged.connect(lambda _value, self=self: self.refresh_tool_target())
+        self.mask_mode_combo.currentTextChanged.connect(lambda _text, self=self: self.refresh_tool_target())
+        self.selection_mode_combo.currentTextChanged.connect(lambda _text, self=self: self.refresh_tool_target())
+        options_form.addRow("Brush size", self.brush_size_slider)
+        options_form.addRow("Hardness", self.brush_hardness_slider)
+        options_form.addRow("Tool opacity", self.tool_opacity_slider)
+        options_form.addRow("Mask mode", self.mask_mode_combo)
+        options_form.addRow("Selection mode", self.selection_mode_combo)
+        tool_note = QtWidgets.QLabel("🚧 Brush / Mask / Selection 目前只綁定 active layer UI state，renderer sync 後端之後再接。")
+        tool_note.setWordWrap(True)
+        options_form.addRow("Status", tool_note)
+        layout.addWidget(options_group)
+
+        quick_title = QtWidgets.QLabel("快捷 / Presets")
+        quick_title.setObjectName("toolPaletteTitle")
+        layout.addWidget(quick_title)
         tool_actions = (
             ("Baseline", self.apply_baseline),
             ("Maritime", self.apply_maritime),
@@ -472,6 +540,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             button.setToolButtonStyle(QtCore.Qt.ToolButtonStyle.ToolButtonTextOnly)
             button.clicked.connect(callback)
             layout.addWidget(button)
+        self.set_active_tool("move")
         layout.addStretch(1)
         dock.setWidget(tools)
         self.docks["tools"] = dock
@@ -669,6 +738,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layers": {key: check.isChecked() for key, check in self.checks.items()},
             "selected_layer": self.selected_layer_key,
             "layer_stack_ui": self.collect_layer_stack_ui(),
+            "tool_state": self.collect_tool_state(),
         }
 
     def collect_launch_packet(self) -> dict[str, object]:
@@ -691,6 +761,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "profile": self.collect_profile(),
             "selected_layer": self.selected_layer_key,
             "layer_stack_ui": self.collect_layer_stack_ui(),
+            "tool_state": self.collect_tool_state(),
             "command": self.build_command(),
             "command_line": subprocess.list2cmdline(self.build_command()),
             "portable_command": self.build_portable_command(),
@@ -709,6 +780,20 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             }
         return stack
 
+    def collect_tool_state(self) -> dict[str, object]:
+        return {
+            "active_tool": self.active_tool,
+            "target_layer": self.selected_layer_key,
+            "brush_size": self.brush_size_slider.value() if self.brush_size_slider is not None else 32,
+            "brush_hardness": self.brush_hardness_slider.value() if self.brush_hardness_slider is not None else 75,
+            "tool_opacity": self.tool_opacity_slider.value() if self.tool_opacity_slider is not None else 100,
+            "mask_mode": self.mask_mode_combo.currentText() if self.mask_mode_combo is not None else "Reveal",
+            "selection_mode": (
+                self.selection_mode_combo.currentText() if self.selection_mode_combo is not None else "Replace"
+            ),
+            "renderer_sync": "planned",
+        }
+
     def apply_profile(self, profile: dict[str, object]) -> None:
         errors = profile_payload_errors(profile)
         if errors:
@@ -720,6 +805,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         layers = profile.get("layers", {})
         selected_layer = profile.get("selected_layer")
         layer_stack = profile.get("layer_stack_ui")
+        tool_state = profile.get("tool_state")
         if isinstance(renderer, dict):
             self._set_combo(self.style_combo, str(renderer.get("style_profile", self.style_combo.currentText())))
             self._set_combo(self.ui_combo, str(renderer.get("ui_backend", self.ui_combo.currentText())))
@@ -751,6 +837,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 if key in self.layer_rows and isinstance(value, dict) and value.get("selected") is True:
                     self.select_layer(key)
                     break
+        if isinstance(tool_state, dict):
+            self.apply_tool_state(tool_state)
         self.refresh_command_preview()
         self.refresh_layer_stack_status()
 
@@ -834,6 +922,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.refresh_layer_stack_status()
         if hasattr(self, "status"):
             self.status.setText(f"已選取圖層：{label}")
+        self.refresh_tool_target()
 
     def refresh_layer_properties(self) -> None:
         if not self.layer_property_labels:
@@ -850,6 +939,51 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_property_labels["locked"].setText("Locked" if self.layer_locks[key].isChecked() else "Unlocked")
         self.layer_property_labels["opacity"].setText(f"{self.layer_opacity[key].value()}%")
         self.layer_property_labels["blend"].setText(self.layer_blends[key].currentText())
+
+    def set_active_tool(self, mode: str) -> None:
+        if mode not in self.tool_buttons:
+            return
+        self.active_tool = mode
+        for tool_mode, button in self.tool_buttons.items():
+            button.setChecked(tool_mode == mode)
+        self.refresh_tool_target()
+        label = next((text for tool_mode, text, _hint in TOOL_MODES if tool_mode == mode), mode)
+        if hasattr(self, "status"):
+            self.status.setText(f"已選取工具：{label}")
+
+    def apply_tool_state(self, state: dict[str, object]) -> None:
+        active_tool = state.get("active_tool")
+        if isinstance(active_tool, str) and active_tool in self.tool_buttons:
+            self.set_active_tool(active_tool)
+        target_layer = state.get("target_layer")
+        if isinstance(target_layer, str) and target_layer in self.layer_rows:
+            self.select_layer(target_layer)
+        if self.brush_size_slider is not None and isinstance(state.get("brush_size"), int):
+            self.brush_size_slider.setValue(int(state["brush_size"]))
+        if self.brush_hardness_slider is not None and isinstance(state.get("brush_hardness"), int):
+            self.brush_hardness_slider.setValue(int(state["brush_hardness"]))
+        if self.tool_opacity_slider is not None and isinstance(state.get("tool_opacity"), int):
+            self.tool_opacity_slider.setValue(int(state["tool_opacity"]))
+        if self.mask_mode_combo is not None and isinstance(state.get("mask_mode"), str):
+            self.mask_mode_combo.setCurrentText(str(state["mask_mode"]))
+        if self.selection_mode_combo is not None and isinstance(state.get("selection_mode"), str):
+            self.selection_mode_combo.setCurrentText(str(state["selection_mode"]))
+        self.refresh_tool_target()
+
+    def refresh_tool_target(self) -> None:
+        if self.tool_target_label is None:
+            return
+        layer_label = next(
+            (text for layer_key, text in LAYER_LABELS if layer_key == self.selected_layer_key),
+            self.selected_layer_key or "-",
+        )
+        tool_label = next((text for mode, text, _hint in TOOL_MODES if mode == self.active_tool), self.active_tool)
+        self.tool_target_label.setText(
+            f"Active tool: {tool_label}\n"
+            f"Target layer: {layer_label}\n"
+            f"Brush {self.collect_tool_state()['brush_size']}px / "
+            f"{self.collect_tool_state()['tool_opacity']}% opacity"
+        )
 
     def toggle_selected_layer_visibility(self) -> None:
         key = self.selected_layer_key

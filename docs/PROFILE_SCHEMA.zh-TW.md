@@ -26,6 +26,7 @@ rrkal_displaytools.qt_panel_profile.v1
 | `layers` | object | required | Renderer layer visibility flags。 |
 | `selected_layer` | string | optional | Qt layer stack 目前選取圖層。 |
 | `layer_stack_ui` | object | optional | Qt layer stack 的 UI-only state。 |
+| `tool_state` | object | optional | Qt tool palette 的 UI-only state。 |
 
 ## `renderer`
 
@@ -96,6 +97,23 @@ rrkal_displaytools.qt_panel_profile.v1
 | `blend_mode` | string | `Normal`、`Screen`、`Multiply`、`Overlay` 或 `Soft Light`。 |
 | `selected` | boolean | 可選，記錄該 layer 是否為 active layer。 |
 | `renderer_sync` | string | 可選，通常為 `planned`。 |
+
+## `tool_state`
+
+可選。此欄位保存左側 tool palette 的 UI-only 狀態，方便本機 profile 保存、跨機器載入與 launch packet handoff。
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `active_tool` | string | `move`、`select`、`brush`、`mask` 或 `erase`。 |
+| `target_layer` | string or null | 工具目前綁定的 active layer key。 |
+| `brush_size` | integer 1-200 | UI-only brush size。 |
+| `brush_hardness` | integer 0-100 | UI-only brush hardness。 |
+| `tool_opacity` | integer 0-100 | UI-only tool opacity。 |
+| `mask_mode` | string | `Reveal`、`Hide` 或 `Refine`。 |
+| `selection_mode` | string | `Replace`、`Add`、`Subtract` 或 `Intersect`。 |
+| `renderer_sync` | string | 可選，通常為 `planned`。 |
+
+目前 `tool_state` 不會直接改 renderer。Brush / Mask / Selection 會先完成 Qt UIUX 閉環，後端 renderer sync 之後再接。
 
 ## Handoff rules
 
