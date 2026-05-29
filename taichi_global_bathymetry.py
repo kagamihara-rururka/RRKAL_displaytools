@@ -17470,6 +17470,25 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 
+def layer_runtime_status_legend_packet() -> dict[str, object]:
+    badge_styles = {
+        "no_ack": ("No ack", "#5c6470", "#f4f6f8"),
+        "ok": ("No recent change", "#2f6f4e", "#e7f5ed"),
+        "target": ("Selected renderer target", "#1f5f99", "#e7f1fb"),
+        "changed": ("Renderer changed this layer", "#9a641f", "#fff4df"),
+        "locked": ("Skipped because locked", "#7b4a9e", "#f4eafb"),
+        "error": ("Renderer ack error", "#a53636", "#fdeaea"),
+    }
+    return {
+        "schema": "rrkal_displaytools.layer_runtime_status_legend.v1",
+        "statuses": [
+            {"id": status_id, "label": label, "foreground": foreground, "background": background}
+            for status_id, (label, foreground, background) in badge_styles.items()
+        ],
+        "boundary": "Qt badge colors summarize renderer ack evidence; they do not change renderer state.",
+    }
+
+
 def layer_capability_matrix_packet() -> dict[str, object]:
     aliases = {
         "show_grid": "grid",
@@ -17596,6 +17615,7 @@ def layer_capability_matrix_packet() -> dict[str, object]:
             },
             "boundary": "Renderer capability discovery is static; runtime ack evidence appears in Qt layer capability matrix after renderer launch.",
         },
+        "runtime_status_legend": layer_runtime_status_legend_packet(),
         "selected_layer": None,
         "selected_layer_capabilities": None,
         "layers": layers,

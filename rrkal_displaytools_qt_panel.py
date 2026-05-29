@@ -187,6 +187,34 @@ LAYER_PICK_LIVE_KEYS = {
     "pin_layer",
     "vehicle_icons",
 }
+LAYER_RUNTIME_BADGE_STYLES = {
+    "no_ack": ("No ack", "#5c6470", "#f4f6f8"),
+    "ok": ("No recent change", "#2f6f4e", "#e7f5ed"),
+    "target": ("Selected renderer target", "#1f5f99", "#e7f1fb"),
+    "changed": ("Renderer changed this layer", "#9a641f", "#fff4df"),
+    "locked": ("Skipped because locked", "#7b4a9e", "#f4eafb"),
+    "error": ("Renderer ack error", "#a53636", "#fdeaea"),
+}
+
+
+def layer_runtime_status_legend_packet() -> dict[str, object]:
+    return {
+        "schema": "rrkal_displaytools.layer_runtime_status_legend.v1",
+        "statuses": [
+            {"id": status_id, "label": label, "foreground": foreground, "background": background}
+            for status_id, (label, foreground, background) in LAYER_RUNTIME_BADGE_STYLES.items()
+        ],
+        "boundary": "Qt badge colors summarize renderer ack evidence; they do not change renderer state.",
+    }
+
+
+def layer_runtime_badge_style(status_id: str) -> str:
+    _label, foreground, background = LAYER_RUNTIME_BADGE_STYLES.get(status_id, LAYER_RUNTIME_BADGE_STYLES["no_ack"])
+    return (
+        f"QLabel#layerRuntimeBadge {{ color: {foreground}; background: {background}; "
+        "border: 1px solid rgba(20, 30, 40, 0.18); border-radius: 7px; "
+        "padding: 2px 6px; font-weight: 600; }}"
+    )
 
 
 def layer_capability_packet(key: str, label: str | None = None) -> dict[str, object]:
@@ -304,6 +332,7 @@ def layer_capability_matrix_packet(
         "layer_count": len(layers),
         "live_counts": counts,
         "runtime_evidence": runtime_evidence,
+        "runtime_status_legend": layer_runtime_status_legend_packet(),
         "selected_layer": selected_layer,
         "selected_layer_capabilities": selected,
         "layers": layers,
@@ -822,6 +851,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.layer_blends[key] = blend
             runtime_badge = QtWidgets.QLabel("no_ack")
             runtime_badge.setObjectName("layerRuntimeBadge")
+            runtime_badge.setStyleSheet(layer_runtime_badge_style("no_ack"))
             runtime_badge.setToolTip("Last renderer layer runtime ack status for this layer.")
             self.layer_runtime_badges[key] = runtime_badge
             if key in BOUNDARY_HIGHLIGHT_LAYER_KEYS:
@@ -847,6 +877,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_stack_note = QtWidgets.QLabel("Lock / Opacity / Blend 已接 renderer runtime；未支援圖層會在 renderer_sync 標示。")
         self.layer_stack_note.setWordWrap(True)
         layers_layout.addWidget(self.layer_stack_note)
+        self.layer_runtime_legend_label = QtWidgets.QLabel(
+            "Runtime badge: no_ack=等待 ack, ok=無近期變更, target=目前 renderer target, changed=renderer 已套用, locked=locked skip, error=ack error"
+        )
+        self.layer_runtime_legend_label.setWordWrap(True)
+        layers_layout.addWidget(self.layer_runtime_legend_label)
         self.layer_undo_label = QtWidgets.QLabel("Layer undo: 0 snapshots")
         self.layer_undo_label.setWordWrap(True)
         layers_layout.addWidget(self.layer_undo_label)
@@ -1951,6 +1986,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             else:
                 text = "no_ack"
             badge.setText(text)
+            badge.setStyleSheet(layer_runtime_badge_style(text))
             badge.setToolTip(", ".join(statuses))
 
     def refresh_layer_pick_state(self) -> None:

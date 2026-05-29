@@ -47,6 +47,7 @@ $summary = [ordered]@{
         launch_packet_schema = $launchPacket.layer_capability_matrix.schema
         runtime_evidence_schema = $capabilities.layer_capability_matrix.runtime_evidence.schema
         runtime_evidence_available = $capabilities.layer_capability_matrix.runtime_evidence.available
+        runtime_status_legend_schema = $capabilities.layer_capability_matrix.runtime_status_legend.schema
         layer_count = $capabilities.layer_capability_matrix.layer_count
         live_counts = $capabilities.layer_capability_matrix.live_counts
         selected_layer = $launchPacket.layer_capability_matrix.selected_layer

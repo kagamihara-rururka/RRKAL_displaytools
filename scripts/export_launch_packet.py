@@ -125,6 +125,25 @@ LAYER_PICK_LIVE_KEYS = {
     "pin_layer",
     "vehicle_icons",
 }
+LAYER_RUNTIME_BADGE_STYLES = {
+    "no_ack": ("No ack", "#5c6470", "#f4f6f8"),
+    "ok": ("No recent change", "#2f6f4e", "#e7f5ed"),
+    "target": ("Selected renderer target", "#1f5f99", "#e7f1fb"),
+    "changed": ("Renderer changed this layer", "#9a641f", "#fff4df"),
+    "locked": ("Skipped because locked", "#7b4a9e", "#f4eafb"),
+    "error": ("Renderer ack error", "#a53636", "#fdeaea"),
+}
+
+
+def layer_runtime_status_legend_packet() -> dict[str, object]:
+    return {
+        "schema": "rrkal_displaytools.layer_runtime_status_legend.v1",
+        "statuses": [
+            {"id": status_id, "label": label, "foreground": foreground, "background": background}
+            for status_id, (label, foreground, background) in LAYER_RUNTIME_BADGE_STYLES.items()
+        ],
+        "boundary": "Qt badge colors summarize renderer ack evidence; they do not change renderer state.",
+    }
 
 DEFAULT_CANVAS_PREVIEW = {
     "schema": "rrkal_displaytools.canvas_preview.v1",
@@ -388,6 +407,7 @@ def layer_capability_matrix_packet(source: str, selected_layer: str | None = Non
         "layer_count": len(layers),
         "live_counts": counts,
         "runtime_evidence": runtime_evidence,
+        "runtime_status_legend": layer_runtime_status_legend_packet(),
         "selected_layer": selected_layer,
         "selected_layer_capabilities": selected,
         "layers": layers,

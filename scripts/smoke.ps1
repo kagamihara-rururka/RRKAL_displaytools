@@ -43,6 +43,9 @@ if ($launchPacket.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_c
 if ($launchPacket.layer_capability_matrix.runtime_evidence.schema -ne "rrkal_displaytools.layer_runtime_evidence.v1") {
     throw "Launch packet layer_capability_matrix runtime evidence schema missing or invalid"
 }
+if ($launchPacket.layer_capability_matrix.runtime_status_legend.schema -ne "rrkal_displaytools.layer_runtime_status_legend.v1") {
+    throw "Launch packet layer_capability_matrix runtime status legend missing or invalid"
+}
 if ($launchPacket.layer_capability_matrix.runtime_evidence.available -ne $false) {
     throw "Launch packet layer_capability_matrix should not claim runtime evidence in no-GUI export"
 }
@@ -396,6 +399,9 @@ if ($capabilities.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_c
 if ($capabilities.layer_capability_matrix.runtime_evidence.schema -ne "rrkal_displaytools.layer_runtime_evidence.v1") {
     throw "Renderer layer_capability_matrix runtime evidence schema missing or invalid"
 }
+if ($capabilities.layer_capability_matrix.runtime_status_legend.schema -ne "rrkal_displaytools.layer_runtime_status_legend.v1") {
+    throw "Renderer layer_capability_matrix runtime status legend missing or invalid"
+}
 if ([int]$capabilities.layer_capability_matrix.live_counts.selected_layer_pick -le 0) {
     throw "Renderer layer_capability_matrix selected-layer pick count missing"
 }
@@ -533,6 +539,9 @@ if ($handoff.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capabi
 }
 if ($handoff.layer_capability_matrix.runtime_evidence_schema -ne "rrkal_displaytools.layer_runtime_evidence.v1") {
     throw "Handoff inspection layer runtime evidence schema missing or invalid"
+}
+if ($handoff.layer_capability_matrix.runtime_status_legend_schema -ne "rrkal_displaytools.layer_runtime_status_legend.v1") {
+    throw "Handoff inspection layer runtime status legend schema missing or invalid"
 }
 if ([int]$handoff.layer_capability_matrix.live_counts.blend -le 0) {
     throw "Handoff inspection layer_capability_matrix blend live count missing"

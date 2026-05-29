@@ -1,5 +1,18 @@
 # Development Log
 
+## 2026-05-29 - Layer runtime badge legend
+
+Scope:
+- Added `rrkal_displaytools.layer_runtime_status_legend.v1` to the layer capability matrix.
+- Qt runtime badges now use stable color semantics for `no_ack`, `ok`, `target`, `changed`, `locked`, and `error`.
+- Layers dock now includes a compact runtime badge legend, and handoff/smoke verify the legend schema.
+
+Positioning:
+- This makes renderer feedback easier to read at a glance without weakening the underlying JSON contract.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Layers runtime evidence badges
 
 Scope:
