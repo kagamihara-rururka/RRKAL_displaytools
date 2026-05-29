@@ -968,3 +968,18 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Layer runtime history
+
+Scope:
+- Added a short layer runtime history list in the existing History panel.
+- History entries are recorded only when the layer runtime summary changes, not on every UI refresh.
+- Entries include update time, selected layer, visible count, locked count, and Solo snapshot state.
+- Research provenance now includes the latest layer runtime history entries.
+
+Positioning:
+- This gives researchers a quick audit trail for recent layer sync changes while keeping the UI lightweight.
+- The next step is persisted history or renderer-side sync acknowledgements after opacity/blend/lock are wired.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

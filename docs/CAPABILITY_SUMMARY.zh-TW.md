@@ -12,7 +12,7 @@
 - 可控制 style profile、UI backend、topography source、data mode、resolution、Taichi arch。
 - 可控制 lake、river、border、territorial sea、EEZ、high seas、aircraft、ocean material、terrain contours、scale bar、vehicle icons 等圖層。
 - 支援水文、海域、交通、視覺輔助四組一鍵切換，並可對目前選取圖層執行 Solo / restore visibility。
-- Layers 面板已具備 Photoshop-like layer stack 雛形：active layer selection、visibility、lock、opacity、blend mode、UI-only state reset。Visibility 已接 renderer flags，並支援 Solo selected layer / restore previous visibility snapshot，方便科研者快速隔離水文、海域、交通或輔助圖層；Qt lock 會停用 locked layer 的 visibility checkbox，並讓 group toggle、Solo、restore 與 selected-layer visibility toggle 跳過 locked layers。Qt 會寫出 `state/renderer_layer_runtime_state.json`，renderer 可用 `--layer-runtime-state-file` 讀取並即時套用 visibility 變更。Layers 面板會顯示 layer runtime bridge 的 selected layer、visible count、last write 與 pending 狀態，也可把目前 runtime JSON 顯示到中央文字區。selected layer/opacity/blend 目前是 🚧 UI state，會寫入 launch packet 供後續 renderer sync。
+- Layers 面板已具備 Photoshop-like layer stack 雛形：active layer selection、visibility、lock、opacity、blend mode、UI-only state reset。Visibility 已接 renderer flags，並支援 Solo selected layer / restore previous visibility snapshot，方便科研者快速隔離水文、海域、交通或輔助圖層；Qt lock 會停用 locked layer 的 visibility checkbox，並讓 group toggle、Solo、restore 與 selected-layer visibility toggle 跳過 locked layers。Qt 會寫出 `state/renderer_layer_runtime_state.json`，renderer 可用 `--layer-runtime-state-file` 讀取並即時套用 visibility 變更。Layers 面板會顯示 layer runtime bridge 的 selected layer、visible count、last write 與 pending 狀態，也可把目前 runtime JSON 顯示到中央文字區；History 面板會記錄最近 layer runtime 摘要變更，provenance 也會保留最近幾筆 layer runtime history。selected layer/opacity/blend 目前是 🚧 UI state，會寫入 launch packet 供後續 renderer sync。
 - Properties 面板已接 active layer inspector，可查看目前選取圖層的 visibility、lock、opacity、blend mode，並可切換選取圖層 visibility 或重設選取圖層 UI state。
 - Qt profile save/load 已支援 selected layer 與 layer stack UI state，因此 active layer、lock、opacity、blend mode 可以隨本機 profile 保存與載入；既有 repo templates 仍相容。
 - 左側 Tools dock 已新增科研導向 tool palette：Move、Select、Pin。Select 用於指定 active layer，並可在 Canvas Preview 以垂直 hit bands 點選目前可見圖層；Pin 用於科研標記，可保存 type、label、note、latitude、longitude，並加入 marker list。Pin list 已支援選取、欄位回填與 selected pin 狀態保存。Brush/Mask 暫不納入本輪 UI。`tool_state`、`pins` 與 `selected_pin_id` 會寫入 profile 與 launch packet。
@@ -31,7 +31,7 @@
 
 - Dockable panels 的更完整 Photoshop-like 版面：Layers / Properties / Navigator / History / Timeline。
 - 中央 Canvas Preview 後續要從 UI-only 摘要升級為可嵌入或可同步的 renderer 畫面預覽。
-- Renderer layer runtime sync 下一步擴充 opacity、blend mode、renderer-side lock enforcement；目前 visibility 已可透過 `state/renderer_layer_runtime_state.json` 即時同步，Qt 端已有 bridge diagnostics 與 lock 防誤改。
+- Renderer layer runtime sync 下一步擴充 opacity、blend mode、renderer-side lock enforcement；目前 visibility 已可透過 `state/renderer_layer_runtime_state.json` 即時同步，Qt 端已有 bridge diagnostics、history 與 lock 防誤改。
 - Layer stack 的 selected layer、lock、opacity、blend mode 接 renderer 即時同步。
 - Style / Looks panel 的縮圖化模板選擇。
 - Select 工具下一步是從 UI-only Canvas Preview hit bands 升級到 renderer 實際圖層/物件 picking；Pin 下一步是把 renderer bridge 狀態做成更完整的 history/diagnostic UI，再補 globe mask / depth buffer refinement；Brush/Mask 暫不納入本輪 UI。

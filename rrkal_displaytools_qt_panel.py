@@ -132,6 +132,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_runtime_state_label: QtWidgets.QLabel | None = None
         self.layer_runtime_state_last_write_utc: str | None = None
         self.layer_runtime_state_write_error: str | None = None
+        self.layer_runtime_history: list[str] = []
+        self.layer_runtime_history_signature: str | None = None
+        self.history_list: QtWidgets.QListWidget | None = None
         self.selected_layer_key: str | None = None
         self.active_tool = "move"
         self.tool_buttons: dict[str, QtWidgets.QToolButton] = {}
@@ -671,12 +674,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "✅ Qt Studio workspace loaded",
             "✅ Profile/template launch flow",
             "✅ Layer manifest/capabilities preview",
-            "🚧 Live renderer layer sync",
+            "✅ Live renderer layer visibility sync",
             "🚧 Brush/mask tools",
             "🚧 Timeline/keyframes",
             "🚧 Undo stack",
         ):
             self.history_list.addItem(item)
+        for item in self.layer_runtime_history:
+            self.history_list.insertItem(0, item)
         history_dock.setWidget(self.history_list)
         self.docks["history"] = history_dock
         self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, history_dock)
@@ -982,6 +987,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.layer_runtime_state_last_write_utc = str(payload.get("updated_at_utc", ""))
             self.layer_runtime_state_write_error = None
             self.refresh_layer_runtime_state_label(payload)
+            self.append_layer_runtime_history(payload)
         except OSError as exc:
             self.layer_runtime_state_write_error = str(exc)
             self.refresh_layer_runtime_state_label(payload)
@@ -1006,6 +1012,39 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"visible={visible_count}/{len(LAYER_LABELS)}; last_write={last_write}; "
             "visibility live, opacity/blend/lock pending"
         )
+
+    def append_layer_runtime_history(self, payload: dict[str, object]) -> None:
+        visible_layers = payload.get("visible_layers", [])
+        locked_layers = payload.get("locked_layers", [])
+        visible_count = len(visible_layers) if isinstance(visible_layers, list) else 0
+        locked_count = len(locked_layers) if isinstance(locked_layers, list) else 0
+        signature = json.dumps(
+            {
+                "selected_layer": payload.get("selected_layer"),
+                "visible_layers": visible_layers,
+                "locked_layers": locked_layers,
+                "snapshot": payload.get("layer_visibility_snapshot_active"),
+            },
+            ensure_ascii=False,
+            sort_keys=True,
+        )
+        if signature == self.layer_runtime_history_signature:
+            return
+        self.layer_runtime_history_signature = signature
+        updated_at = str(payload.get("updated_at_utc", "-"))
+        selected_layer = str(payload.get("selected_layer") or "-")
+        snapshot = "snapshot" if payload.get("layer_visibility_snapshot_active") else "no snapshot"
+        entry = (
+            f"↻ Layer runtime {updated_at}: selected={selected_layer}, "
+            f"visible={visible_count}/{len(LAYER_LABELS)}, locked={locked_count}, {snapshot}"
+        )
+        self.layer_runtime_history.insert(0, entry)
+        del self.layer_runtime_history[10:]
+        if self.history_list is None:
+            return
+        self.history_list.insertItem(0, entry)
+        while self.history_list.count() > 18:
+            self.history_list.takeItem(self.history_list.count() - 1)
 
     def current_pin_label_mode(self) -> str:
         if self.pin_label_mode_combo is None:
@@ -1602,6 +1641,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_runtime_state_file": str(LAYER_RUNTIME_STATE_PATH),
             "layer_runtime_state_last_write_utc": self.layer_runtime_state_last_write_utc,
             "layer_runtime_state_write_error": self.layer_runtime_state_write_error,
+            "layer_runtime_history": self.layer_runtime_history[:5],
             "canvas_select_hit_targets": self.canvas_layer_hit_keys(),
             "pin_overlay_boundary": "Pins are geodetic annotations; renderer sync must rotate them with the globe and apply horizon/depth occlusion.",
             "pin_projection_contract": pin_projection_contract_packet(),
