@@ -561,3 +561,16 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Photoshop-like Qt layer stack controls
+
+Scope:
+- Reworked the Qt `Layers` panel into a layer-stack table with visibility, lock, opacity, and blend-mode columns.
+- Visibility remains connected to renderer flags.
+- Lock, opacity, and blend mode are explicit 🚧 UI state and are included in Qt launch packets as `layer_stack_ui` for the next renderer-sync step.
+
+Positioning:
+- This moves the Qt UI closer to Photoshop's Layers panel while keeping renderer behavior unchanged in this small slice.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

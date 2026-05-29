@@ -99,6 +99,8 @@ LAYER_LABELS = (
     ("vehicle_icons", "交通工具圖示"),
 )
 
+BLEND_MODES = ("Normal", "Screen", "Multiply", "Overlay", "Soft Light")
+
 class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def __init__(self, initial_profile: Path | None = None) -> None:
         super().__init__()
@@ -106,6 +108,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.resize(1120, 780)
         self.process: subprocess.Popen[bytes] | None = None
         self.checks: dict[str, QtWidgets.QCheckBox] = {}
+        self.layer_locks: dict[str, QtWidgets.QCheckBox] = {}
+        self.layer_opacity: dict[str, QtWidgets.QSlider] = {}
+        self.layer_blends: dict[str, QtWidgets.QComboBox] = {}
         self.template_paths: list[Path] = []
         self._build_ui()
         self._build_menu_bar()
@@ -215,26 +220,74 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         left.addStretch(1)
 
         layers_group = self._group("圖層 / Layers")
-        layers_layout = QtWidgets.QGridLayout(layers_group)
-        for index, (key, label) in enumerate(LAYER_LABELS):
-            check = QtWidgets.QCheckBox(label)
+        layers_layout = QtWidgets.QVBoxLayout(layers_group)
+        layer_header = QtWidgets.QWidget()
+        layer_header_layout = QtWidgets.QGridLayout(layer_header)
+        layer_header_layout.setContentsMargins(0, 0, 0, 0)
+        headers = ("Vis", "Layer", "Lock", "Opacity", "Blend")
+        for column, text in enumerate(headers):
+            header_label = QtWidgets.QLabel(text)
+            header_label.setObjectName("layerHeader")
+            layer_header_layout.addWidget(header_label, 0, column)
+        layers_layout.addWidget(layer_header)
+        for key, label in LAYER_LABELS:
+            row = QtWidgets.QWidget()
+            row.setObjectName("layerRow")
+            row_layout = QtWidgets.QGridLayout(row)
+            row_layout.setContentsMargins(4, 2, 4, 2)
+            row_layout.setHorizontalSpacing(8)
+
+            check = QtWidgets.QCheckBox()
+            check.setToolTip(f"Renderer visibility flag: {BOOL_FLAGS[key]}")
             check.stateChanged.connect(self.refresh_command_preview)
+            check.stateChanged.connect(lambda _state, self=self: self.refresh_layer_stack_status())
             self.checks[key] = check
-            layers_layout.addWidget(check, index // 2, index % 2)
+
+            layer_label = QtWidgets.QLabel(label)
+
+            lock = QtWidgets.QCheckBox()
+            lock.setToolTip("🚧 UI-only lock state; renderer sync pending")
+            lock.stateChanged.connect(lambda _state, self=self: self.refresh_layer_stack_status())
+            self.layer_locks[key] = lock
+
+            opacity = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+            opacity.setRange(0, 100)
+            opacity.setValue(100)
+            opacity.setToolTip("🚧 UI-only opacity; renderer material/layer sync pending")
+            opacity.valueChanged.connect(lambda _value, self=self: self.refresh_layer_stack_status())
+            self.layer_opacity[key] = opacity
+
+            blend = QtWidgets.QComboBox()
+            blend.addItems(BLEND_MODES)
+            blend.setToolTip("🚧 UI-only blend mode; renderer compositing sync pending")
+            blend.currentTextChanged.connect(lambda _text, self=self: self.refresh_layer_stack_status())
+            self.layer_blends[key] = blend
+
+            row_layout.addWidget(check, 0, 0)
+            row_layout.addWidget(layer_label, 0, 1)
+            row_layout.addWidget(lock, 0, 2)
+            row_layout.addWidget(opacity, 0, 3)
+            row_layout.addWidget(blend, 0, 4)
+            layers_layout.addWidget(row)
+        self.layer_stack_note = QtWidgets.QLabel("🚧 Lock / Opacity / Blend 目前是 UI state，下一步接 renderer 即時同步。")
+        self.layer_stack_note.setWordWrap(True)
+        layers_layout.addWidget(self.layer_stack_note)
         demo = QtWidgets.QCheckBox("閉環展示 preset（會覆蓋部分設定）")
         demo.stateChanged.connect(self.refresh_command_preview)
         self.checks["demo_closed_loop"] = demo
-        layers_layout.addWidget(demo, 7, 0, 1, 2)
+        layers_layout.addWidget(demo)
         layer_actions = (
             ("水文開/關", self.toggle_hydrology_layers),
             ("海域開/關", self.toggle_maritime_layers),
             ("交通開/關", self.toggle_transport_layers),
             ("輔助開/關", self.toggle_visual_aids),
         )
+        layer_actions_layout = QtWidgets.QGridLayout()
         for index, (label, callback) in enumerate(layer_actions):
             button = QtWidgets.QPushButton(label)
             button.clicked.connect(callback)
-            layers_layout.addWidget(button, 8 + index // 2, index % 2)
+            layer_actions_layout.addWidget(button, index // 2, index % 2)
+        layers_layout.addLayout(layer_actions_layout)
         layers_dock = QtWidgets.QDockWidget("Layers", self)
         layers_dock.setObjectName("layersDock")
         layers_dock.setAllowedAreas(
@@ -315,6 +368,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             QPushButton { padding: 7px 10px; }
             QPlainTextEdit { font-family: Consolas, 'Cascadia Mono', monospace; }
             QLabel#navigatorPreview { background: #202832; color: #d8e6f3; border: 1px dashed #8aa0b6; }
+            QLabel#layerHeader { color: #587087; font-size: 8.5pt; font-weight: 700; }
+            QWidget#layerRow { border-bottom: 1px solid #d6e0ea; }
             """
         )
 
@@ -547,11 +602,23 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 ],
             },
             "profile": self.collect_profile(),
+            "layer_stack_ui": self.collect_layer_stack_ui(),
             "command": self.build_command(),
             "command_line": subprocess.list2cmdline(self.build_command()),
             "portable_command": self.build_portable_command(),
             "portable_command_line": subprocess.list2cmdline(self.build_portable_command()),
         }
+
+    def collect_layer_stack_ui(self) -> dict[str, dict[str, object]]:
+        stack: dict[str, dict[str, object]] = {}
+        for key, _label in LAYER_LABELS:
+            stack[key] = {
+                "locked": self.layer_locks[key].isChecked(),
+                "opacity": self.layer_opacity[key].value(),
+                "blend_mode": self.layer_blends[key].currentText(),
+                "renderer_sync": "planned",
+            }
+        return stack
 
     def apply_profile(self, profile: dict[str, object]) -> None:
         errors = profile_payload_errors(profile)
@@ -630,6 +697,21 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     @QtCore.pyqtSlot()
     def refresh_command_preview(self) -> None:
         self.command_text.setPlainText(subprocess.list2cmdline(self.build_command()))
+
+    def refresh_layer_stack_status(self) -> None:
+        if not hasattr(self, "layer_stack_note"):
+            return
+        visible = sum(1 for key, _label in LAYER_LABELS if self.checks[key].isChecked())
+        locked = sum(1 for key, _label in LAYER_LABELS if self.layer_locks[key].isChecked())
+        non_default = sum(
+            1
+            for key, _label in LAYER_LABELS
+            if self.layer_opacity[key].value() != 100 or self.layer_blends[key].currentText() != "Normal"
+        )
+        self.layer_stack_note.setText(
+            f"可見圖層 {visible}/{len(LAYER_LABELS)}；鎖定 {locked}；"
+            f"非預設 opacity/blend {non_default}。🚧 Lock/Opacity/Blend 下一步接 renderer sync。"
+        )
 
     @QtCore.pyqtSlot()
     def copy_command_to_clipboard(self) -> None:
@@ -851,6 +933,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             check.setChecked(enabled.get(key, False))
             check.blockSignals(False)
         self.refresh_command_preview()
+        self.refresh_layer_stack_status()
 
     def _toggle_group(self, keys: tuple[str, ...]) -> None:
         target = not all(self.checks[key].isChecked() for key in keys)

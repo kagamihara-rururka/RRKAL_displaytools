@@ -11,6 +11,7 @@
 - 可控制 style profile、UI backend、topography source、data mode、resolution、Taichi arch。
 - 可控制 lake、river、border、territorial sea、EEZ、high seas、aircraft、ocean material、terrain contours、scale bar、vehicle icons 等圖層。
 - 支援水文、海域、交通、視覺輔助四組一鍵切換。
+- Layers 面板已具備 Photoshop-like layer stack 雛形：visibility、lock、opacity、blend mode 欄位。Visibility 已接 renderer flags；lock/opacity/blend 目前是 🚧 UI state，會寫入 launch packet 供後續 renderer sync。
 - 支援啟動、停止、套用並重啟 renderer。
 - 顯示 renderer PID、執行中狀態與 exit code。
 - 可在中央預覽區顯示 renderer capabilities、layer manifest、launch packet 或 smoke 結果。
@@ -22,7 +23,7 @@
 - Dockable panels 的更完整 Photoshop-like 版面：Layers / Properties / Navigator / History / Timeline。
 - 中央 renderer preview 從命令 JSON 預覽升級為可嵌入或可同步的畫面預覽。
 - 圖層即時同步，不再只靠重啟 renderer 套用。
-- Layer stack 的可見性、鎖定、opacity、blend/mode 類控制。
+- Layer stack 的 lock、opacity、blend mode 接 renderer 即時同步與 profile schema。
 - Style / Looks panel 的縮圖化模板選擇。
 - Brush / mask / selection 類工具先做 UI placeholder，再逐步接 renderer。
 - Timeline / keyframe / animation controls for ocean/cloud/material parameters。
