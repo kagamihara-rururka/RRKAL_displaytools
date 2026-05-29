@@ -130,7 +130,7 @@ rrkal_displaytools.qt_panel_profile.v1
 
 Renderer overlay 接上後，Pin 不應是螢幕固定標籤，而應是 geodetic surface anchor：每個 frame 由 latitude/longitude 投影到球面，套用地球旋轉與 camera/view transform，再用 horizon/depth occlusion 判斷是否被地球背面或地形/海面遮蔽。
 
-目前共用投影 hook 位於 `pin_projection.py`。它已能計算 `screen_x`、`screen_y`、`view_z`、`visible` 與 `occlusion`，先覆蓋跟隨地球旋轉與背面 horizon clipping。Renderer 已可透過 `--pin-file` 或 `--pin-json` 接收 Pins 並畫出可見 marker；若 payload 包含 `selected_pin_id`，renderer 會以高亮外圈標示該 Pin。Marker 顏色會依 `style_profile` 套用 scientific、nautical、tactical 或 parchment palette；label 目前使用簡單四象限候選位置與碰撞避讓，並支援 auto / selected / priority / hidden 顯示模式。後續再以 globe mask/depth buffer refine 地形或海面遮蔽。
+目前共用投影 hook 位於 `pin_projection.py`。它已能計算 `screen_x`、`screen_y`、`view_z`、`visible` 與 `occlusion`，先覆蓋跟隨地球旋轉與背面 horizon clipping。Renderer 已可透過 `--pin-file` 或 `--pin-json` 接收 Pins 並畫出可見 marker；若 payload 包含 `selected_pin_id`，renderer 會以高亮外圈標示該 Pin。Marker 顏色會依 `style_profile` 套用 scientific、nautical、tactical 或 parchment palette；label 目前使用簡單四象限候選位置與碰撞避讓，並支援 auto / selected / priority / hidden 顯示模式。Renderer 目前也支援畫面中的 Pin hover 與 click pick；後續再以 globe mask/depth buffer refine 地形或海面遮蔽。
 
 | Field | Type | Description |
 | --- | --- | --- |

@@ -832,3 +832,19 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Renderer Pin hover and pick
+
+Scope:
+- Added renderer-side nearest visible Pin hit testing.
+- Added `--pin-pick-radius` for click/hover tolerance.
+- Mouse hover now exposes Pin information in the Qt renderer selection panel.
+- Mouse click now selects a Pin before falling back to AIS/ADS-B vehicle pick.
+- Picked Pins update `selected_pin_id` and redraw the selected marker ring.
+
+Positioning:
+- This closes the first renderer-side interaction loop for scientific Pins.
+- Remaining Pin work is sending renderer pick state back to the external Qt control panel and deeper globe-mask/depth-buffer occlusion refinement.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

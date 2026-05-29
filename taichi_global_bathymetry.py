@@ -10233,6 +10233,8 @@ class HybridRenderController:
         self.current_aircraft_projected = pd.DataFrame(columns=["screen_x", "screen_y"])
         self.current_aircraft_sampled_projected = pd.DataFrame(columns=["screen_x", "screen_y"])
         self.selected_vehicle = None
+        self.selected_pin_hit: dict[str, object] | None = None
+        self.hover_pin_hit: dict[str, object] | None = None
         self.visible_count = 0
         self.rendered_count = 0
         self.total_count = 0
@@ -11924,6 +11926,10 @@ class HybridRenderController:
         }.get(mode, mode)
 
     def selected_info_text(self) -> str:
+        if self.selected_pin_hit is not None:
+            return self.pin_hit_info_text(self.selected_pin_hit, "Selected Pin")
+        if self.hover_pin_hit is not None:
+            return self.pin_hit_info_text(self.hover_pin_hit, "Hover Pin")
         if self.selected_vehicle is None:
             return "No vehicle selected."
         row = self.selected_vehicle
@@ -11935,7 +11941,59 @@ class HybridRenderController:
             return "\n".join(lines)
         return str(row)
 
+    def pin_hit_info_text(self, hit: dict[str, object], title: str) -> str:
+        lines = [title]
+        for key in ("id", "type", "label", "latitude", "longitude", "label_priority", "occlusion"):
+            value = hit.get(key)
+            if value is not None:
+                lines.append(f"- {key}: {value}")
+        if "screen_x" in hit and "screen_y" in hit:
+            lines.append(f"- screen: {float(hit['screen_x']):.1f}, {float(hit['screen_y']):.1f}")
+        if "pick_distance_px" in hit:
+            lines.append(f"- pick_distance_px: {float(hit['pick_distance_px']):.1f}")
+        return "\n".join(lines)
+
+    def nearest_pin_hit(self, x: float, y: float, radius: float | None = None) -> dict[str, object] | None:
+        if not self.layer_visible.get("pins", True):
+            return None
+        if not self.current_pin_projections:
+            return None
+        pick_radius = float(radius if radius is not None else getattr(self.args, "pin_pick_radius", 18.0))
+        best: dict[str, object] | None = None
+        best_dist2 = pick_radius * pick_radius
+        for pin in self.current_pin_projections:
+            if pin.get("visible") is not True:
+                continue
+            try:
+                dx = float(pin["screen_x"]) - float(x)
+                dy = float(pin["screen_y"]) - float(y)
+            except (KeyError, TypeError, ValueError):
+                continue
+            dist2 = dx * dx + dy * dy
+            if dist2 <= best_dist2:
+                best_dist2 = dist2
+                best = dict(pin)
+                best["pick_distance_px"] = math.sqrt(dist2)
+        return best
+
+    def pick_pin(self, x: float, y: float) -> bool:
+        hit = self.nearest_pin_hit(x, y)
+        if hit is None:
+            return False
+        self.selected_pin_hit = hit
+        self.selected_pin_id = str(hit.get("id", ""))
+        self.selected_vehicle = None
+        self.overlay_dirty = True
+        return True
+
+    def set_pin_hover(self, x: float, y: float) -> None:
+        self.hover_pin_hit = self.nearest_pin_hit(x, y, radius=float(getattr(self.args, "pin_pick_radius", 18.0)))
+
     def pick_vehicle(self, x: float, y: float) -> None:
+        self.selected_pin_hit = None
+        self.hover_pin_hit = None
+        self.selected_pin_id = None
+        self.overlay_dirty = True
         radius = float(getattr(self.args, "icon_pick_radius", 14.0))
         best_row = None
         best_dist2 = radius * radius
@@ -14475,7 +14533,9 @@ class QtHybridWindow:
                 return
             was_dragging = self.dragging
             if self.mouse_down_pos is not None and not self.dragging:
-                self.controller.pick_vehicle(float(event.pos[0]), float(event.pos[1]))
+                picked_pin = self.controller.pick_pin(float(event.pos[0]), float(event.pos[1]))
+                if not picked_pin:
+                    self.controller.pick_vehicle(float(event.pos[0]), float(event.pos[1]))
                 self.selection_label.setText(self.controller.selected_info_text())
             if was_dragging:
                 self.controller.set_interaction_active(False)
@@ -14506,6 +14566,7 @@ class QtHybridWindow:
             self.controller.set_interaction_active(True)
             self.controller.rotate(-dx, -dy)
         else:
+            self.controller.set_pin_hover(float(event.pos[0]), float(event.pos[1]))
             self.controller.set_boundary_hover(float(event.pos[0]), float(event.pos[1]))
         self.last_pos = event.pos
 
@@ -14608,6 +14669,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--pin-horizon-eps", type=float, default=float(os.environ.get("PIN_HORIZON_EPS", "0.006")))
     parser.add_argument("--pin-label-mode", choices=["auto", "selected", "priority", "hidden"], default=os.environ.get("PIN_LABEL_MODE", "auto"))
     parser.add_argument("--pin-label-min-priority", type=int, default=int(os.environ.get("PIN_LABEL_MIN_PRIORITY", "50")))
+    parser.add_argument("--pin-pick-radius", type=float, default=float(os.environ.get("PIN_PICK_RADIUS", "18.0")))
 
     parser.add_argument("--adaptive-sampling", action=bool_action, default=parse_bool(os.environ.get("ADAPTIVE_SAMPLING"), True))
     parser.add_argument("--target-fps", type=float, default=float(os.environ.get("TARGET_FPS", "30.0")))
@@ -14753,6 +14815,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "pin-horizon-eps",
             "pin-label-mode",
             "pin-label-min-priority",
+            "pin-pick-radius",
         ],
         "rrkal_boundary": {
             "displaytools_owns": [
