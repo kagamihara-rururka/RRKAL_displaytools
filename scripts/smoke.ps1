@@ -1177,6 +1177,15 @@ if ($handoff.cursor_geodesy_readout.renderer_controls -notcontains "cursor-geode
 if ($handoff.launch_packet_contracts.pin_overlay -ne "rrkal_displaytools.pin_projection.v1") {
     throw "Handoff inspection pin_overlay launch contract missing or invalid"
 }
+if ($handoff.active_layer_diagnostics.launch_packet_schema -ne "rrkal_displaytools.active_layer_diagnostics.v1") {
+    throw "Handoff inspection active_layer_diagnostics launch schema missing or invalid"
+}
+if ($handoff.active_layer_diagnostics.layer_pick_screen_position_field -ne "screen_position") {
+    throw "Handoff inspection active_layer_diagnostics screen position field missing"
+}
+if ($handoff.active_layer_diagnostics.renderer_runtime_fields -notcontains "screen_position") {
+    throw "Handoff inspection active_layer_diagnostics renderer screen_position field missing"
+}
 if ($handoff.pin_overlay.launch_packet_schema -ne "rrkal_displaytools.pin_projection.v1") {
     throw "Handoff inspection pin_overlay launch schema missing or invalid"
 }

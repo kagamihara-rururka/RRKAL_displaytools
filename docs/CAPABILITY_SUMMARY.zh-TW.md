@@ -193,3 +193,8 @@
 
 - Active layer diagnostics now exposes the selected-layer pick `screen_position` contract and its source file.
 - Launch packet, renderer capability discovery, and smoke all verify that layer pick screen-position provenance is available for cross-machine handoff.
+
+### 2026-05-30 Handoff active layer pick position inspection
+
+- Handoff inspection now reports active-layer `screen_position` diagnostics contract from launch packets and renderer capabilities.
+- Cross-machine users can verify selected-layer pick provenance through `scripts/inspect_handoff.ps1` without inspecting renderer internals.

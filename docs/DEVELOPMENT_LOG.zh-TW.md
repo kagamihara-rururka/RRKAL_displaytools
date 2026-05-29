@@ -2875,3 +2875,16 @@ Decision:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Handoff active layer pick position inspection
+
+Scope:
+- `scripts/inspect_handoff.ps1` now exposes active-layer diagnostics screen-position fields.
+- Handoff JSON includes launch-packet schema, renderer capability schema, `screen_position` field name, source file, status, and renderer runtime fields.
+- Smoke now gates the handoff active-layer screen-position contract.
+
+Decision:
+- Cross-machine verification should not require manual JSON spelunking in renderer state files; the handoff inspection output must summarize the selected-layer pick provenance contract directly.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

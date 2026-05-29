@@ -154,3 +154,4 @@ Last updated: 2026-05-29
 - 2026-05-30: Added Tools dock status for Pin cursor fill source provenance.
 - 2026-05-30: Added screen-position provenance to renderer layer pick state and Qt diagnostics.
 - 2026-05-30: Promoted layer pick screen-position diagnostics into active-layer launch/capability contracts.
+- 2026-05-30: Added active-layer screen-position diagnostics to handoff inspection and smoke gates.

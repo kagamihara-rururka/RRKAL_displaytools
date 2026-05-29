@@ -60,6 +60,14 @@ $summary = [ordered]@{
         timeline_state = $launchPacket.timeline_state.schema
         boundary_identity_status = $launchPacket.boundary_highlight.identity_status.schema
     }
+    active_layer_diagnostics = @{
+        launch_packet_schema = $launchPacket.active_layer_diagnostics.schema
+        renderer_capabilities_schema = $capabilities.active_layer_diagnostics.schema
+        layer_pick_screen_position_field = $launchPacket.active_layer_diagnostics.layer_pick_screen_position_field
+        layer_pick_screen_position_source = $launchPacket.active_layer_diagnostics.layer_pick_screen_position_source
+        layer_pick_screen_position_status = $launchPacket.active_layer_diagnostics.layer_pick_screen_position_status
+        renderer_runtime_fields = $capabilities.active_layer_diagnostics.runtime_fields
+    }
     layer_operator_shortcuts = @{
         launch_packet_schema = $launchPacket.layer_operator_shortcuts.schema
         renderer_capabilities_schema = $capabilities.layer_operator_shortcuts.schema
