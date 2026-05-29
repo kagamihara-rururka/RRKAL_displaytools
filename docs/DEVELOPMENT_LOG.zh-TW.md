@@ -1,5 +1,18 @@
 # Development Log
 
+## 2026-05-29 - Layer stack undo snapshots
+
+Scope:
+- Layers panel now keeps a bounded layer undo stack for visibility, lock, opacity, blend mode, and active layer state.
+- Added an `Undo 圖層狀態` action and a Layer undo status label.
+- History now records layer undo snapshot saves and distinguishes this local layer undo from the still-pending global document undo stack.
+
+Positioning:
+- This closes a practical Photoshop-like undo loop for layer controls without pretending to implement full document-wide undo.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Diagnostics handoff closed-loop status
 
 Scope:

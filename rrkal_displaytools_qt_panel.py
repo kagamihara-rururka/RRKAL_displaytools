@@ -246,6 +246,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_rows: dict[str, QtWidgets.QWidget] = {}
         self.layer_property_labels: dict[str, QtWidgets.QLabel] = {}
         self.layer_visibility_snapshot: dict[str, bool] | None = None
+        self.layer_undo_stack: list[dict[str, object]] = []
+        self.layer_last_state_snapshot: dict[str, object] | None = None
+        self.layer_last_state_signature: str | None = None
+        self.layer_undo_restore_active = False
+        self.layer_undo_tracking_enabled = False
+        self.layer_undo_label: QtWidgets.QLabel | None = None
         self.layer_runtime_state_label: QtWidgets.QLabel | None = None
         self.layer_runtime_state_last_write_utc: str | None = None
         self.layer_runtime_state_write_error: str | None = None
@@ -344,6 +350,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if initial_profile is not None:
             self.load_profile_path(initial_profile)
         self.refresh_command_preview()
+        self.refresh_layer_stack_status()
+        self.layer_undo_stack = []
+        self.layer_last_state_snapshot = self.collect_layer_undo_snapshot()
+        self.layer_last_state_signature = self.layer_undo_signature(self.layer_last_state_snapshot)
+        self.layer_undo_tracking_enabled = True
+        self.refresh_layer_undo_label()
 
     def _build_ui(self) -> None:
         central = QtWidgets.QWidget(self)
@@ -555,6 +567,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_stack_note = QtWidgets.QLabel("Lock / Opacity / Blend 已接 renderer runtime；未支援圖層會在 renderer_sync 標示。")
         self.layer_stack_note.setWordWrap(True)
         layers_layout.addWidget(self.layer_stack_note)
+        self.layer_undo_label = QtWidgets.QLabel("Layer undo: 0 snapshots")
+        self.layer_undo_label.setWordWrap(True)
+        layers_layout.addWidget(self.layer_undo_label)
         self.layer_runtime_state_label = QtWidgets.QLabel(f"Layer runtime bridge: waiting for {LAYER_RUNTIME_STATE_PATH.name}")
         self.layer_runtime_state_label.setWordWrap(True)
         layers_layout.addWidget(self.layer_runtime_state_label)
@@ -575,6 +590,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ("輔助開/關", self.toggle_visual_aids),
             ("Solo 選取圖層", self.solo_selected_layer_visibility),
             ("還原 Solo 前可見性", self.restore_layer_visibility_snapshot),
+            ("Undo 圖層狀態", self.undo_layer_stack_state),
             ("顯示 layer runtime JSON", self.show_layer_runtime_state),
             ("顯示 layer pick JSON", self.show_layer_pick_state),
             ("重設 UI 圖層狀態", self.reset_layer_stack_controls),
@@ -906,8 +922,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "✅ Layer manifest/capabilities preview",
             "✅ Live renderer layer visibility/opacity/blend sync",
             "✅ Selected-layer renderer picking bridge",
+            "✅ Layer stack undo snapshots",
             "🚧 Timeline/keyframes",
-            "🚧 Undo stack",
+            "🚧 Global document undo stack",
         ):
             self.history_list.addItem(item)
         for item in self.layer_runtime_history:
@@ -2004,6 +2021,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def refresh_layer_stack_status(self) -> None:
         if not hasattr(self, "layer_stack_note"):
             return
+        self.track_layer_undo_snapshot()
         visible = sum(1 for key, _label in LAYER_LABELS if self.checks[key].isChecked())
         locked = sum(1 for key, _label in LAYER_LABELS if self.layer_locks[key].isChecked())
         for key, _label in LAYER_LABELS:
@@ -2020,9 +2038,94 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"solo snapshot={'active' if self.layer_visibility_snapshot is not None else 'none'}。"
             "Visibility/Opacity/Blend 已接 renderer runtime sync。"
         )
+        self.refresh_layer_undo_label()
         self.write_layer_runtime_state()
         self.refresh_layer_properties()
         self.refresh_canvas_preview()
+
+    def collect_layer_undo_snapshot(self) -> dict[str, object]:
+        return {
+            "schema": "rrkal_displaytools.layer_stack_undo_snapshot.v1",
+            "selected_layer": self.selected_layer_key,
+            "layers": {
+                key: {
+                    "visible": self.checks[key].isChecked(),
+                    "locked": self.layer_locks[key].isChecked(),
+                    "opacity": self.layer_opacity[key].value(),
+                    "blend_mode": self.layer_blends[key].currentText(),
+                }
+                for key, _label in LAYER_LABELS
+                if key in self.checks and key in self.layer_locks
+            },
+        }
+
+    def layer_undo_signature(self, snapshot: dict[str, object]) -> str:
+        return json.dumps(snapshot, sort_keys=True, ensure_ascii=False)
+
+    def track_layer_undo_snapshot(self) -> None:
+        snapshot = self.collect_layer_undo_snapshot()
+        signature = self.layer_undo_signature(snapshot)
+        if (
+            not self.layer_undo_restore_active
+            and self.layer_undo_tracking_enabled
+            and self.layer_last_state_snapshot is not None
+            and self.layer_last_state_signature is not None
+            and signature != self.layer_last_state_signature
+        ):
+            self.layer_undo_stack.append(self.layer_last_state_snapshot)
+            while len(self.layer_undo_stack) > 24:
+                self.layer_undo_stack.pop(0)
+            if self.history_list is not None:
+                self.history_list.insertItem(0, f"Layer undo snapshot saved: {len(self.layer_undo_stack)}")
+        self.layer_last_state_snapshot = snapshot
+        self.layer_last_state_signature = signature
+
+    def refresh_layer_undo_label(self) -> None:
+        if self.layer_undo_label is None:
+            return
+        self.layer_undo_label.setText(
+            f"Layer undo: {len(self.layer_undo_stack)} snapshots; "
+            "covers visibility/lock/opacity/blend/active layer"
+        )
+
+    @QtCore.pyqtSlot()
+    def undo_layer_stack_state(self) -> None:
+        if not self.layer_undo_stack:
+            self.status.setText("沒有可回復的 layer undo snapshot")
+            return
+        snapshot = self.layer_undo_stack.pop()
+        layers = snapshot.get("layers")
+        if not isinstance(layers, dict):
+            self.status.setText("Layer undo snapshot 格式不正確")
+            return
+        self.layer_undo_restore_active = True
+        try:
+            for key, value in layers.items():
+                if key not in self.checks or key not in self.layer_locks or not isinstance(value, dict):
+                    continue
+                self.checks[key].blockSignals(True)
+                self.layer_locks[key].blockSignals(True)
+                self.layer_opacity[key].blockSignals(True)
+                self.layer_blends[key].blockSignals(True)
+                self.checks[key].setChecked(bool(value.get("visible", False)))
+                self.layer_locks[key].setChecked(bool(value.get("locked", False)))
+                self.layer_opacity[key].setValue(_coerce_int(value.get("opacity"), 100, 0, 100))
+                blend_mode = str(value.get("blend_mode", "Normal"))
+                self.layer_blends[key].setCurrentText(blend_mode if blend_mode in BLEND_MODES else "Normal")
+                self.checks[key].blockSignals(False)
+                self.layer_locks[key].blockSignals(False)
+                self.layer_opacity[key].blockSignals(False)
+                self.layer_blends[key].blockSignals(False)
+            selected_layer = snapshot.get("selected_layer")
+            if isinstance(selected_layer, str) and selected_layer in self.layer_rows:
+                self.select_layer(selected_layer)
+        finally:
+            self.layer_undo_restore_active = False
+        self.layer_last_state_snapshot = self.collect_layer_undo_snapshot()
+        self.layer_last_state_signature = self.layer_undo_signature(self.layer_last_state_snapshot)
+        self.refresh_command_preview()
+        self.refresh_layer_stack_status()
+        self.status.setText("已回復上一個 layer undo snapshot")
 
     def select_layer(self, key: str) -> None:
         if key not in self.layer_rows:
