@@ -1,5 +1,18 @@
 ﻿# Development Log
 
+## 2026-05-29 - RRKAL handoff boundary status
+
+Scope:
+- Closed-loop status now treats RRKAL manifest validation/ingest/governance as an external dependency instead of a displaytools pending item.
+- Renderer output provenance still marks `--rrkal-data-manifest-ref` passthrough and image metadata sidecars as applied displaytools behavior.
+
+Positioning:
+- This keeps displaytools focused on visualization, Qt UI, renderer bridge, and provenance references.
+- Dataset discovery/download/import/cache governance remains RRKAL-owned.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Qt renderer thumbnail preview
 
 Scope:

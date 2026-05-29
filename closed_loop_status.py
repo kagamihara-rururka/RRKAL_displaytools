@@ -65,7 +65,8 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
             {
                 "id": "renderer_output_provenance",
                 "applies": ["image output metadata sidecar", "RRKAL manifest reference passthrough"],
-                "pending": ["RRKAL data manifest validation/ingest"],
+                "pending": [],
+                "external_dependencies": ["RRKAL-side data manifest validation/ingest/governance"],
                 "evidence": ["--output", "--rrkal-data-manifest-ref", "renderer_output_metadata.v1"],
             },
         ],
@@ -73,6 +74,6 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
             "authoritative polygon territory/EEZ identity",
             "open-line area inference",
             "live renderer frame stream",
-            "RRKAL data manifest validation/ingest",
         ],
+        "external_dependencies": ["RRKAL data manifest validation/ingest/governance"],
     }
