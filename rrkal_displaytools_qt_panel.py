@@ -172,7 +172,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         material_form.addRow("Wave strength", self.wave_edit)
         material_form.addRow("Roughness", self.roughness_edit)
         material_form.addRow("Foam", self.foam_edit)
-        left.addWidget(material_group)
+        properties_dock = QtWidgets.QDockWidget("Properties", self)
+        properties_dock.setObjectName("propertiesDock")
+        properties_dock.setAllowedAreas(
+            QtCore.Qt.DockWidgetArea.LeftDockWidgetArea
+            | QtCore.Qt.DockWidgetArea.RightDockWidgetArea
+        )
+        properties_dock.setWidget(material_group)
+        self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, properties_dock)
 
         preset_group = self._group("預設 / Looks")
         preset_layout = QtWidgets.QGridLayout(preset_group)

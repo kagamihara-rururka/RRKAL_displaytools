@@ -523,3 +523,15 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Dockable Qt Properties panel
+
+Scope:
+- Moved ocean material controls into a dockable `Properties` panel.
+- Kept wave strength, roughness, and foam controls unchanged.
+
+Positioning:
+- This continues the Photoshop-like workspace direction by separating Layers and Properties as dockable panels.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
