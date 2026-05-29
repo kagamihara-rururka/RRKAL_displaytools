@@ -9,7 +9,7 @@
 - `rrkal_displaytools_qt_panel.py` 提供 Qt/PyQt6 圖層控制面板。
 - 產品定位是科研視覺化工作台：UI 借鑑 Photoshop 的面板精神，但優先服務科研者對圖層狀態、資料來源、profile 可重現性、manifest/launch packet 可追蹤性的需求。
 - 模組邊界與後續解耦順序記錄於 `docs/MODULE_BOUNDARIES.zh-TW.md`；displaytools 只負責視覺化/UI/renderer bridge，不接手 RRKAL 的資料 discovery/download/cache governance。
-- 跨機器 clone / smoke / Qt 啟動步驟記錄於 `docs/QUICKSTART_CLONE.zh-TW.md`；`scripts/run_qt_panel.ps1` 是建議啟動入口，會優先使用 repo `.venv`，也支援 `-SmokeFirst`。
+- 跨機器 clone / smoke / Qt 啟動步驟記錄於 `docs/QUICKSTART_CLONE.zh-TW.md`；`scripts/run_qt_panel.ps1` 是建議啟動入口，會優先使用 repo `.venv`，也支援 `-SmokeFirst` 與 `-HandoffFirst`。
 - 前端方向採 Photoshop-inspired workspace：menu bar、左側 Tools dock、右側 dockable Layers/Properties/Navigator/History/Timeline panels、工具選項、Looks/模板、圖層、屬性、中央預覽、動作分區。
 - 可控制 style profile、UI backend、topography source、data mode、resolution、Taichi arch。
 - 可控制 lake、river、border、territorial sea、EEZ、high seas、aircraft、Pin marker、ocean material、terrain contours、scale bar、vehicle icons 等圖層。
@@ -32,7 +32,7 @@
 - `rrkal_displaytools.style_renderer_entries.v1` exposes scientific, nautical, parchment and tactical renderer entry contracts. Each entry records the `--style-profile <id>` CLI args, `profile.style_profile` field, portable-command support and renderer entrypoint; Qt launch/provenance packets, No-GUI launch packets, renderer capabilities, handoff inspection, closed-loop evidence and smoke gates verify parchment/tactical availability.
 - `rrkal_displaytools.style_profile_renderer_routes.v1` turns those entries into explicit renderer routes with `py -3 taichi_global_bathymetry.py --style-profile <id>` portable commands, with parchment and tactical routes required by smoke and handoff inspection.
 - `rrkal_displaytools.module_boundary_registry.v1` marks extraction seams for contracts, Qt UI, Taichi render core, ocean material, style profiles, overlays, RRKAL-owned data sources and diagnostics. It explicitly keeps Qt as primary UI, blocks Tk as primary UI, and keeps RRKAL data discovery/import/cache governance outside displaytools.
-- `rrkal_displaytools.cross_machine_clone_readiness.v1` records the public repo URL, Windows setup doc, required first-run commands, smoke-before-push rule, Qt-first boundary and handoff inspection steps so another machine can verify clone/setup/run state through launch packets, renderer capabilities, handoff inspection and smoke gates.
+- `rrkal_displaytools.cross_machine_clone_readiness.v1` records the public repo URL, Windows setup doc, required first-run commands, launcher options including `-HandoffFirst`, smoke-before-push rule, Qt-first boundary and handoff inspection steps so another machine can verify clone/setup/run state through launch packets, renderer capabilities, handoff inspection and smoke gates.
 - Qt Layers dock shows `Cross-machine clone readiness`, making clone/setup status visible beside profile/launch readiness instead of only inside JSON packets.
 - `rrkal_displaytools.profile_launch_readiness.v1` summarizes cross-machine readiness for profile schema, built-in templates, launch packet export, portable command, renderer capability discovery, style renderer entries and layer operator workflow groups. Qt launch/provenance packets, No-GUI launch packets, renderer capabilities, handoff inspection, closed-loop evidence and smoke gates must all report readiness as `ready`.
 - `rrkal_displaytools.profile_launch_readiness_ui.v1` makes that readiness visible in the Qt Layers dock as a `Profile/launch readiness` label, and the same UI surface is exposed through launch packets, renderer capabilities, handoff inspection, closed-loop evidence and smoke gates.
@@ -102,7 +102,7 @@
 ### Windows workflow
 
 - `scripts/setup_windows.ps1` 安裝依賴。
-- `scripts/run_qt_panel.ps1` 啟動 Qt panel，支援 `-Profile` 與 `-Template`。
+- `scripts/run_qt_panel.ps1` 啟動 Qt panel，支援 `-Profile`、`-Template`、`-SmokeFirst` 與 `-HandoffFirst`。
 - `scripts/inspect_handoff.ps1` 輸出 read-only handoff inspection JSON，方便跨機器 clone 後先確認 UI/renderer contract，包含 layer capability matrix 摘要。
 - `scripts/render_quick_smoke.ps1` 要求快速 synthetic/headless render，並驗證 preview frame PNG 寫檔。
 - `scripts/smoke.ps1` 是提交前 smoke helper。

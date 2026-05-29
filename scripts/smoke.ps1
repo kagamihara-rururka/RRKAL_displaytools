@@ -293,6 +293,12 @@ if ($launchPacket.cross_machine_clone_readiness.setup_doc -ne "docs/SETUP_WINDOW
 if ($launchPacket.cross_machine_clone_readiness.qt_surface -ne "Layers dock cross-machine readiness label") {
     throw "Launch packet cross_machine_clone_readiness Qt surface mismatch"
 }
+if ($launchPacket.cross_machine_clone_readiness.launcher_options -notcontains "-HandoffFirst") {
+    throw "Launch packet cross_machine_clone_readiness missing HandoffFirst launcher option"
+}
+if ($launchPacket.cross_machine_clone_readiness.handoff_first_command -notlike "*run_qt_panel.ps1 -HandoffFirst") {
+    throw "Launch packet cross_machine_clone_readiness handoff-first command mismatch"
+}
 if ($launchPacket.profile_launch_readiness.schema -ne "rrkal_displaytools.profile_launch_readiness.v1") {
     throw "Launch packet profile_launch_readiness schema missing or invalid"
 }
@@ -805,6 +811,12 @@ if ($capabilities.cross_machine_clone_readiness.required_commands -notcontains "
 if ($capabilities.cross_machine_clone_readiness.qt_surface -ne "Layers dock cross-machine readiness label") {
     throw "Renderer cross_machine_clone_readiness Qt surface mismatch"
 }
+if ($capabilities.cross_machine_clone_readiness.launcher_options -notcontains "-HandoffFirst") {
+    throw "Renderer cross_machine_clone_readiness missing HandoffFirst launcher option"
+}
+if ($capabilities.cross_machine_clone_readiness.handoff_first_command -notlike "*run_qt_panel.ps1 -HandoffFirst") {
+    throw "Renderer cross_machine_clone_readiness handoff-first command mismatch"
+}
 if ($capabilities.profile_launch_readiness.schema -ne "rrkal_displaytools.profile_launch_readiness.v1") {
     throw "Renderer profile_launch_readiness schema missing or invalid"
 }
@@ -1179,6 +1191,12 @@ if ($handoff.cross_machine_clone_readiness.renderer_capabilities_schema -ne "rrk
 }
 if ($handoff.cross_machine_clone_readiness.required_commands -notcontains "scripts/inspect_handoff.ps1") {
     throw "Handoff inspection cross_machine_clone_readiness missing handoff command"
+}
+if ($handoff.cross_machine_clone_readiness.launcher_options -notcontains "-HandoffFirst") {
+    throw "Handoff inspection cross_machine_clone_readiness missing HandoffFirst launcher option"
+}
+if ($handoff.cross_machine_clone_readiness.handoff_first_command -notlike "*run_qt_panel.ps1 -HandoffFirst") {
+    throw "Handoff inspection cross_machine_clone_readiness handoff-first command mismatch"
 }
 if ($handoff.launch_packet_contracts.profile_launch_readiness -ne "rrkal_displaytools.profile_launch_readiness.v1") {
     throw "Handoff inspection profile_launch_readiness launch contract missing or invalid"

@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-30 - Handoff-first Qt launcher
+
+- Added `-HandoffFirst` to `scripts/run_qt_panel.ps1`, allowing clone-after-setup users to run `scripts/inspect_handoff.ps1` before the Qt panel opens.
+- `rrkal_displaytools.cross_machine_clone_readiness.v1`, renderer capabilities, handoff inspection and smoke now expose and verify the handoff-first launcher option and command.
+- Smoke: PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Layer selection tool contract
 
 - Added `rrkal_displaytools.layer_selection_tool.v1` so Qt row selection, filtered-layer selection, reveal-selected-row and renderer pick-state inspection have one smoke-gated selection-tool contract.

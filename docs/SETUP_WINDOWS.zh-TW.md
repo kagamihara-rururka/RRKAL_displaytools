@@ -54,6 +54,12 @@ Smoke 會做：
 .\scripts\run_qt_panel.ps1 -Template maritime_hydrology
 ```
 
+Run handoff inspection before opening Qt on a newly cloned machine:
+
+```powershell
+.\scripts\run_qt_panel.ps1 -HandoffFirst
+```
+
 可用模板先用：
 
 ```powershell

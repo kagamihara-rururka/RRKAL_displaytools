@@ -158,6 +158,8 @@ $summary = [ordered]@{
         repo_url = $launchPacket.cross_machine_clone_readiness.repo_url
         setup_doc = $launchPacket.cross_machine_clone_readiness.setup_doc
         required_commands = $launchPacket.cross_machine_clone_readiness.required_commands
+        launcher_options = $launchPacket.cross_machine_clone_readiness.launcher_options
+        handoff_first_command = $launchPacket.cross_machine_clone_readiness.handoff_first_command
         smoke_required_before_push = $launchPacket.cross_machine_clone_readiness.smoke_required_before_push
         qt_first = $launchPacket.cross_machine_clone_readiness.qt_first
     }

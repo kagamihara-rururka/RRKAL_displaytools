@@ -76,6 +76,12 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\run_qt_panel.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts\run_qt_panel.ps1 -SmokeFirst
 ```
 
+Run handoff inspection before opening Qt on a newly cloned machine:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\run_qt_panel.ps1 -HandoffFirst
+```
+
 載入 repo 內建 template：
 
 ```powershell

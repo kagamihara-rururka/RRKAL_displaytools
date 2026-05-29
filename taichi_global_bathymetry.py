@@ -18372,6 +18372,8 @@ def cross_machine_clone_readiness_packet(
         "scripts/run_qt_panel.ps1",
         "scripts/inspect_handoff.ps1",
     ]
+    launcher_options = ["-SmokeFirst", "-HandoffFirst", "-Template", "-Profile"]
+    handoff_first_command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run_qt_panel.ps1 -HandoffFirst"
     first_run_order = [
         "git clone https://github.com/Kagamihara-Ruruka/RRKAL_displaytools.git",
         "cd RRKAL_displaytools",
@@ -18391,6 +18393,8 @@ def cross_machine_clone_readiness_packet(
         "setup_doc": "docs/SETUP_WINDOWS.zh-TW.md",
         "qt_surface": "Layers dock cross-machine readiness label",
         "required_commands": required_commands,
+        "launcher_options": launcher_options,
+        "handoff_first_command": handoff_first_command,
         "first_run_order": first_run_order,
         "qt_first": qt_first,
         "tk_primary_ui_allowed": not tk_not_primary,
@@ -18398,7 +18402,7 @@ def cross_machine_clone_readiness_packet(
         "profile_launch_readiness": profile_readiness.get("readiness", "unknown"),
         "module_boundary_registry_schema": module_boundaries.get("schema"),
         "smoke_required_before_push": True,
-        "clone_after_setup_verification": ["smoke", "handoff inspection", "renderer capability discovery", "Qt panel launch"],
+        "clone_after_setup_verification": ["smoke", "handoff inspection", "renderer capability discovery", "Qt panel launch", "handoff-first Qt launch"],
         "launch_packet_fields": ["cross_machine_clone_readiness", "profile_launch_readiness", "module_boundary_registry", "portable_command"],
         "renderer_capability_field": "cross_machine_clone_readiness",
         "boundary": "Cross-machine readiness covers clone/setup/smoke/run handoff only; data discovery, download, import and cache governance remain RRKAL-owned.",
