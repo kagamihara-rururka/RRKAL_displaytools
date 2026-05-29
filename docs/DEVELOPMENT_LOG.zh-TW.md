@@ -923,3 +923,18 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Renderer layer visibility live sync
+
+Scope:
+- Qt launch commands now pass `--layer-runtime-state-file`.
+- Renderer now accepts `--layer-runtime-state-file` / `LAYER_RUNTIME_STATE_FILE`.
+- The render loop polls the layer runtime bridge by file mtime and applies per-layer `visible` values through the existing `set_layer_visible()` path.
+- Renderer capabilities now document the layer runtime state contract and mark opacity/blend/lock as pending.
+
+Positioning:
+- This closes the first renderer-backed layer live sync loop for visibility, reducing reliance on restart for layer on/off work.
+- Remaining layer sync work is opacity, blend mode, lock semantics, diagnostics, and renderer-backed picking.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

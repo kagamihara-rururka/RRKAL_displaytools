@@ -850,6 +850,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 str(self.pin_label_min_priority_spin.value() if self.pin_label_min_priority_spin is not None else 50),
                 "--pin-pick-state-file",
                 str(PIN_PICK_STATE_PATH),
+                "--layer-runtime-state-file",
+                str(LAYER_RUNTIME_STATE_PATH),
             ]
         )
         pins = self.collect_research_pins()

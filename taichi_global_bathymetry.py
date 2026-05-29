@@ -10313,6 +10313,11 @@ class HybridRenderController:
             getattr(args, "pin_json", None),
         )
         self.pin_pick_state_file = Path(args.pin_pick_state_file) if getattr(args, "pin_pick_state_file", None) else None
+        self.layer_runtime_state_file = (
+            Path(args.layer_runtime_state_file) if getattr(args, "layer_runtime_state_file", None) else None
+        )
+        self.layer_runtime_state_mtime_ns: int | None = None
+        self.layer_runtime_state_last_error: str | None = None
         self.current_pin_projections: list[dict[str, object]] = []
         self.pin_visible_count = 0
         self.output_path = Path(args.output) if args.output else None
@@ -10429,6 +10434,42 @@ class HybridRenderController:
             self.hydrology_dirty = True
             self.boundary_dirty = True
             self.overlay_dirty = True
+        return changed
+
+    def refresh_layer_runtime_state(self) -> bool:
+        if self.layer_runtime_state_file is None:
+            return False
+        try:
+            stat = self.layer_runtime_state_file.stat()
+        except FileNotFoundError:
+            self.layer_runtime_state_mtime_ns = None
+            return False
+        except OSError as exc:
+            self.layer_runtime_state_last_error = str(exc)
+            return False
+        if stat.st_mtime_ns == self.layer_runtime_state_mtime_ns:
+            return False
+        next_mtime_ns = stat.st_mtime_ns
+        try:
+            payload = json.loads(self.layer_runtime_state_file.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            self.layer_runtime_state_last_error = str(exc)
+            return False
+        if not isinstance(payload, dict):
+            self.layer_runtime_state_last_error = "runtime state root is not an object"
+            return False
+        changed = False
+        layers = payload.get("layers")
+        if isinstance(layers, dict):
+            for layer_id, state in layers.items():
+                if layer_id not in self.layer_visible or not isinstance(state, dict):
+                    continue
+                visible = state.get("visible")
+                if isinstance(visible, bool) and self.layer_visible.get(layer_id) != visible:
+                    self.set_layer_visible(str(layer_id), bool(visible))
+                    changed = True
+        self.layer_runtime_state_mtime_ns = next_mtime_ns
+        self.layer_runtime_state_last_error = None
         return changed
 
     def basemap_lod_label(self) -> str:
@@ -13008,6 +13049,7 @@ class HybridRenderController:
 
     def render_if_needed(self, force: bool = False) -> np.ndarray | None:
         start = time.time()
+        self.refresh_layer_runtime_state()
         self.refresh_ais_if_due(force=force)
         self.refresh_aircraft_if_due(force=force)
         self.update_basemap_lod()
@@ -14702,6 +14744,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--pin-label-min-priority", type=int, default=int(os.environ.get("PIN_LABEL_MIN_PRIORITY", "50")))
     parser.add_argument("--pin-pick-radius", type=float, default=float(os.environ.get("PIN_PICK_RADIUS", "18.0")))
     parser.add_argument("--pin-pick-state-file", default=os.environ.get("PIN_PICK_STATE_FILE"))
+    parser.add_argument("--layer-runtime-state-file", default=os.environ.get("LAYER_RUNTIME_STATE_FILE"))
 
     parser.add_argument("--adaptive-sampling", action=bool_action, default=parse_bool(os.environ.get("ADAPTIVE_SAMPLING"), True))
     parser.add_argument("--target-fps", type=float, default=float(os.environ.get("TARGET_FPS", "30.0")))
@@ -14850,6 +14893,12 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "pin-pick-radius",
             "pin-pick-state-file",
         ],
+        "layer_runtime_state": {
+            "schema": "rrkal_displaytools.layer_runtime_state.v1",
+            "control": "layer-runtime-state-file",
+            "applies": ["visibility"],
+            "pending": ["opacity", "blend_mode", "lock"],
+        },
         "rrkal_boundary": {
             "displaytools_owns": [
                 "renderer launch flags",
