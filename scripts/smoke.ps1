@@ -254,6 +254,12 @@ if ($launchPacket.boundary_emphasis_control.dialog_feedback -notcontains "rgb_sw
 if ($launchPacket.boundary_emphasis_control.dialog_feedback -notcontains "live_numeric_readout") {
     throw "Launch packet boundary_emphasis_control live numeric readout missing"
 }
+if ($launchPacket.boundary_emphasis_control.value_preview_fields -notcontains "target_alignment") {
+    throw "Launch packet boundary_emphasis_control target alignment preview missing"
+}
+if (-not $launchPacket.boundary_emphasis_control.target_alignment) {
+    throw "Launch packet boundary_emphasis_control target alignment field missing"
+}
 if ($launchPacket.boundary_emphasis_control.row_double_click_binding -ne "ready") {
     throw "Launch packet boundary_emphasis_control row double-click binding missing"
 }
@@ -870,6 +876,12 @@ if ($capabilities.boundary_emphasis_control.dialog_feedback -notcontains "rgb_sw
 }
 if ($capabilities.boundary_emphasis_control.dialog_feedback -notcontains "live_numeric_readout") {
     throw "Renderer boundary_emphasis_control live numeric readout missing"
+}
+if ($capabilities.boundary_emphasis_control.value_preview_fields -notcontains "target_alignment") {
+    throw "Renderer boundary_emphasis_control target alignment preview missing"
+}
+if (-not $capabilities.boundary_emphasis_control.target_alignment) {
+    throw "Renderer boundary_emphasis_control target alignment field missing"
 }
 if ($capabilities.boundary_emphasis_control.row_double_click_binding -ne "ready") {
     throw "Renderer boundary_emphasis_control row double-click binding missing"
@@ -1505,6 +1517,9 @@ if ($qtPanelSource -notlike "*layerActionBadge*") {
 }
 if ($qtPanelSource -notlike "*Emphasis*") {
     throw "Qt boundary layer emphasis action label missing"
+}
+if ($qtPanelSource -notlike "*target_alignment_label*") {
+    throw "Qt boundary emphasis target alignment label missing"
 }
 if ($qtPanelSource -notlike "*Boundary identity:*") {
     throw "Qt canvas boundary identity summary line missing"

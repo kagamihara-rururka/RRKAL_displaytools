@@ -2980,3 +2980,16 @@ Decision:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Boundary emphasis target alignment
+
+Scope:
+- Boundary emphasis contracts now expose target layer key, selected-layer match status and a researcher-readable target alignment label.
+- Qt Boundary emphasis status label now shows target mode, resolved target layer and whether the selected layer matches that target.
+- Smoke verifies target alignment preview fields in launch packet, renderer capabilities and Qt source.
+
+Decision:
+- Boundary emphasis controls should make the active target explicit so researchers know whether a tuned EEZ/territorial overlay is applied to the layer they are currently inspecting.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

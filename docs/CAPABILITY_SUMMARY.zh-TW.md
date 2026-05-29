@@ -233,3 +233,8 @@
 
 - Boundary-capable layer rows now expose a visible Emphasis action badge in the Qt Layers dock.
 - Launch packet and renderer capabilities advertise the boundary emphasis row action so cross-machine clone checks can verify the UI affordance.
+
+### 2026-05-30 Boundary emphasis target alignment
+
+- Boundary emphasis UI now reports the resolved target layer and whether it matches the selected layer.
+- Launch packet and renderer capabilities expose target alignment fields for handoff and clone-after-setup inspection.

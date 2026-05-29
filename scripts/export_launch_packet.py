@@ -1686,6 +1686,36 @@ def boundary_emphasis_control_packet(
     if not isinstance(color, (list, tuple)) or len(color) != 3:
         color = [80, 180, 255]
     color_rgb = [max(0, min(255, int(channel))) for channel in color]
+    target_mode = str(state.get("target_mode", "auto_selected_boundary_layer") or "auto_selected_boundary_layer")
+    target_layer_by_mode = {
+        "country_boundary": "border_layer",
+        "territorial_sea": "territorial_sea_layer",
+        "exclusive_economic_zone": "eez_layer",
+        "maritime_boundary": "high_seas_layer",
+    }
+    boundary_layer_keys = set(target_layer_by_mode.values())
+    selected_layer_key = selected_layer if isinstance(selected_layer, str) else None
+    target_layer_key = target_layer_by_mode.get(target_mode)
+    if target_mode == "auto_selected_boundary_layer":
+        if selected_layer_key in boundary_layer_keys:
+            target_layer_key = selected_layer_key
+            target_alignment = "selected_layer_matches_target"
+        elif selected_layer_key:
+            target_alignment = "selected_layer_not_boundary_capable"
+        else:
+            target_alignment = "no_selected_layer"
+    elif selected_layer_key == target_layer_key:
+        target_alignment = "selected_layer_matches_target"
+    elif selected_layer_key:
+        target_alignment = "selected_layer_differs_from_target"
+    else:
+        target_alignment = "no_selected_layer"
+    target_alignment_labels = {
+        "selected_layer_matches_target": "Selected layer matches emphasis target",
+        "selected_layer_differs_from_target": "Selected layer differs from emphasis target",
+        "selected_layer_not_boundary_capable": "Selected layer is not boundary-capable",
+        "no_selected_layer": "No selected layer",
+    }
     controls = [
         {"id": "target_mode", "label": "Boundary target", "kind": "combo"},
         {"id": "color_rgb", "label": "RGB emphasis color", "kind": "rgb"},
@@ -1700,7 +1730,11 @@ def boundary_emphasis_control_packet(
         "source": source,
         "status": "ui_ready",
         "selected_layer": selected_layer,
-        "target_mode": state.get("target_mode", "auto_selected_boundary_layer"),
+        "target_mode": target_mode,
+        "target_layer_key": target_layer_key,
+        "selected_layer_matches_target": target_alignment == "selected_layer_matches_target",
+        "target_alignment": target_alignment,
+        "target_alignment_label": target_alignment_labels.get(target_alignment, target_alignment),
         "target_layer_types": ["country_boundary", "territorial_sea", "exclusive_economic_zone", "maritime_boundary"],
         "color_rgb": color_rgb,
         "contrast": _float_value("contrast", 1.35),
@@ -1717,7 +1751,7 @@ def boundary_emphasis_control_packet(
         "renderer_bridge_contract": "rrkal_displaytools.boundary_highlight_mask.v1",
         "renderer_controls_mapped": ["target_layers", "color_rgb", "contrast", "alpha", "gamma", "breathing"],
         "dialog_feedback": ["rgb_swatch", "live_numeric_readout", "renderer_bridge_summary"],
-        "value_preview_fields": ["target_mode", "color_rgb", "contrast", "opacity", "gamma", "breathing_period_s"],
+        "value_preview_fields": ["target_mode", "target_alignment", "color_rgb", "contrast", "opacity", "gamma", "breathing_period_s"],
         "pending_renderer_refinements": ["authoritative_polygon_identity", "open_line_area_inference", "full_polygon_fill_mask"],
         "control_count": len(controls),
         "controls": controls,
