@@ -22,6 +22,7 @@ from pin_projection import pin_projection_contract_packet
 ROOT = Path(__file__).resolve().parent
 PROFILE_TEMPLATE_DIR = ROOT / "profiles"
 PIN_PICK_STATE_PATH = ROOT / "state" / "renderer_pin_pick_state.json"
+PIN_INPUT_ACK_PATH = ROOT / "state" / "renderer_pin_input_ack.json"
 PIN_PICK_ACK_PATH = ROOT / "state" / "qt_pin_pick_ack.json"
 LAYER_RUNTIME_STATE_PATH = ROOT / "state" / "renderer_layer_runtime_state.json"
 LAYER_RUNTIME_ACK_PATH = ROOT / "state" / "renderer_layer_runtime_ack.json"
@@ -153,6 +154,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.pin_label_mode_combo: QtWidgets.QComboBox | None = None
         self.pin_label_min_priority_spin: QtWidgets.QSpinBox | None = None
         self.pin_list: QtWidgets.QListWidget | None = None
+        self.pin_input_ack_label: QtWidgets.QLabel | None = None
+        self.pin_input_ack_mtime_ns: int | None = PIN_INPUT_ACK_PATH.stat().st_mtime_ns if PIN_INPUT_ACK_PATH.exists() else None
+        self.pin_input_ack_payload: dict[str, object] | None = None
         self.pin_pick_state_label: QtWidgets.QLabel | None = None
         self.pin_pick_ack_label: QtWidgets.QLabel | None = None
         self.pin_pick_state_mtime_ns: int | None = PIN_PICK_STATE_PATH.stat().st_mtime_ns if PIN_PICK_STATE_PATH.exists() else None
@@ -186,6 +190,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.pin_pick_state_timer.setInterval(800)
         self.pin_pick_state_timer.timeout.connect(self.refresh_renderer_pin_pick_state)
         self.pin_pick_state_timer.start()
+        self.pin_input_ack_timer = QtCore.QTimer(self)
+        self.pin_input_ack_timer.setInterval(1000)
+        self.pin_input_ack_timer.timeout.connect(self.refresh_pin_input_ack_state)
+        self.pin_input_ack_timer.start()
         self.layer_runtime_ack_timer = QtCore.QTimer(self)
         self.layer_runtime_ack_timer.setInterval(1000)
         self.layer_runtime_ack_timer.timeout.connect(self.refresh_layer_runtime_ack_state)
@@ -636,6 +644,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.pin_list.setMinimumHeight(110)
         self.pin_list.currentRowChanged.connect(self.select_pin_marker)
         pin_form.addRow("Pins", self.pin_list)
+        self.pin_input_ack_label = QtWidgets.QLabel(f"Renderer input ack: waiting for {PIN_INPUT_ACK_PATH.name}")
+        self.pin_input_ack_label.setWordWrap(True)
+        pin_form.addRow("Renderer Input", self.pin_input_ack_label)
         self.pin_pick_state_label = QtWidgets.QLabel(f"Renderer bridge: waiting for {PIN_PICK_STATE_PATH.name}")
         self.pin_pick_state_label.setWordWrap(True)
         pin_form.addRow("Renderer Pick", self.pin_pick_state_label)
@@ -888,6 +899,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 str(self.pin_label_min_priority_spin.value() if self.pin_label_min_priority_spin is not None else 50),
                 "--pin-pick-state-file",
                 str(PIN_PICK_STATE_PATH),
+                "--pin-input-ack-file",
+                str(PIN_INPUT_ACK_PATH),
                 "--layer-runtime-state-file",
                 str(LAYER_RUNTIME_STATE_PATH),
                 "--layer-runtime-ack-file",
@@ -963,6 +976,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_stack_ui": self.collect_layer_stack_ui(),
             "tool_state": self.collect_tool_state(),
             "pins": self.collect_research_pins(),
+            "pin_input_ack_file": str(PIN_INPUT_ACK_PATH),
             "pin_pick_state_file": str(PIN_PICK_STATE_PATH),
             "pin_pick_ack_file": str(PIN_PICK_ACK_PATH),
             "layer_runtime_state_file": str(LAYER_RUNTIME_STATE_PATH),
@@ -1118,6 +1132,46 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             return
         self.layer_runtime_ack_label.setText(
             f"Renderer ack: event={event}, changed_layers={changed_count}, frame={frame_index}, updated={updated_at}"
+        )
+
+    def refresh_pin_input_ack_state(self) -> None:
+        try:
+            stat = PIN_INPUT_ACK_PATH.stat()
+        except FileNotFoundError:
+            if self.pin_input_ack_mtime_ns is not None:
+                self.pin_input_ack_mtime_ns = None
+                if self.pin_input_ack_label is not None:
+                    self.pin_input_ack_label.setText(f"Renderer input ack: waiting for {PIN_INPUT_ACK_PATH.name}")
+            return
+        except OSError as exc:
+            if self.pin_input_ack_label is not None:
+                self.pin_input_ack_label.setText(f"Renderer input ack read failed: {exc}")
+            return
+        if stat.st_mtime_ns == self.pin_input_ack_mtime_ns:
+            return
+        next_mtime_ns = stat.st_mtime_ns
+        try:
+            payload = json.loads(PIN_INPUT_ACK_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            if self.pin_input_ack_label is not None:
+                self.pin_input_ack_label.setText(f"Renderer input ack parse failed: {exc}")
+            return
+        self.pin_input_ack_mtime_ns = next_mtime_ns
+        if isinstance(payload, dict):
+            self.pin_input_ack_payload = payload
+            self.refresh_pin_input_ack_label(payload)
+            self.refresh_research_provenance()
+
+    def refresh_pin_input_ack_label(self, payload: dict[str, object]) -> None:
+        if self.pin_input_ack_label is None:
+            return
+        pin_count = payload.get("pin_count", "-")
+        selected_pin_id = str(payload.get("selected_pin_id") or "-")
+        selected_exists = payload.get("selected_pin_exists", "-")
+        updated_at = str(payload.get("updated_at_utc", "-"))
+        self.pin_input_ack_label.setText(
+            f"Renderer input ack: pins={pin_count}, selected={selected_pin_id}, "
+            f"selected_exists={selected_exists}, updated={updated_at}"
         )
 
     def current_pin_label_mode(self) -> str:
@@ -1784,6 +1838,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "selected_pin_id": self.selected_pin_id,
             "selected_pin": self.selected_pin_packet(),
             "pins": self.collect_research_pins(),
+            "pin_input_ack_file": str(PIN_INPUT_ACK_PATH),
+            "pin_input_ack": self.pin_input_ack_payload,
             "pin_pick_state_file": str(PIN_PICK_STATE_PATH),
             "pin_pick_state_last_event": self.pin_pick_state_last_event,
             "pin_pick_state": self.pin_pick_state_payload,

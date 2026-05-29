@@ -10312,7 +10312,9 @@ class HybridRenderController:
             getattr(args, "pin_file", None),
             getattr(args, "pin_json", None),
         )
+        self.pin_input_ack_file = Path(args.pin_input_ack_file) if getattr(args, "pin_input_ack_file", None) else None
         self.pin_pick_state_file = Path(args.pin_pick_state_file) if getattr(args, "pin_pick_state_file", None) else None
+        self.write_pin_input_ack()
         self.layer_runtime_state_file = (
             Path(args.layer_runtime_state_file) if getattr(args, "layer_runtime_state_file", None) else None
         )
@@ -12054,6 +12056,27 @@ class HybridRenderController:
             self.pin_pick_state_file.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
         except OSError as exc:
             print(f"Unable to write pin pick state: {exc}")
+
+    def write_pin_input_ack(self) -> None:
+        if self.pin_input_ack_file is None:
+            return
+        pin_ids = [str(pin.get("id", "")) for pin in self.pin_records if isinstance(pin, dict)]
+        selected_pin_exists = self.selected_pin_id in pin_ids if self.selected_pin_id is not None else False
+        payload = {
+            "schema": "rrkal_displaytools.renderer_pin_input_ack.v1",
+            "updated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "pin_count": len(self.pin_records),
+            "pin_ids_preview": pin_ids[:10],
+            "selected_pin_id": self.selected_pin_id,
+            "selected_pin_exists": selected_pin_exists,
+            "pin_layer_enabled": bool(getattr(getattr(self, "args", None), "pin_layer", True)),
+            "source": "taichi_global_bathymetry",
+        }
+        try:
+            self.pin_input_ack_file.parent.mkdir(parents=True, exist_ok=True)
+            self.pin_input_ack_file.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        except OSError as exc:
+            print(f"Unable to write pin input ack: {exc}")
 
     def nearest_pin_hit(self, x: float, y: float, radius: float | None = None) -> dict[str, object] | None:
         if not self.layer_visible.get("pins", True):
@@ -14782,6 +14805,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--pin-label-min-priority", type=int, default=int(os.environ.get("PIN_LABEL_MIN_PRIORITY", "50")))
     parser.add_argument("--pin-pick-radius", type=float, default=float(os.environ.get("PIN_PICK_RADIUS", "18.0")))
     parser.add_argument("--pin-pick-state-file", default=os.environ.get("PIN_PICK_STATE_FILE"))
+    parser.add_argument("--pin-input-ack-file", default=os.environ.get("PIN_INPUT_ACK_FILE"))
     parser.add_argument("--layer-runtime-state-file", default=os.environ.get("LAYER_RUNTIME_STATE_FILE"))
     parser.add_argument("--layer-runtime-ack-file", default=os.environ.get("LAYER_RUNTIME_ACK_FILE"))
 
@@ -14931,6 +14955,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "pin-label-min-priority",
             "pin-pick-radius",
             "pin-pick-state-file",
+            "pin-input-ack-file",
         ],
         "layer_runtime_state": {
             "schema": "rrkal_displaytools.layer_runtime_state.v1",

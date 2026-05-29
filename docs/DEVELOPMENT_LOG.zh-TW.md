@@ -1044,3 +1044,19 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Renderer Pin input acknowledgement
+
+Scope:
+- Qt launch commands now pass `--pin-input-ack-file`.
+- Renderer now writes `renderer_pin_input_ack.json` after loading `--pin-file` / `--pin-json`.
+- The ack records pin count, a preview of Pin IDs, selected Pin ID, whether the selected Pin exists in the loaded set, and Pin layer enablement.
+- The Pin Annotation panel now polls and displays renderer Pin input acknowledgement.
+- Launch packets and research provenance include the Pin input ack file and latest payload.
+
+Positioning:
+- This confirms renderer receipt of Qt Pin annotations before any hover/click interaction happens.
+- Remaining Pin work is finer interaction acknowledgement and deeper globe-mask/depth-buffer occlusion refinement.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
