@@ -1033,6 +1033,18 @@ if ($capabilities.ui_handoff_contracts.contracts -notcontains "layer_group_view"
 if ($capabilities.ui_handoff_contracts.contracts -notcontains "document_undo") {
     throw "Renderer ui_handoff_contracts document_undo contract missing"
 }
+if ($capabilities.ui_handoff_contracts.contracts -notcontains "cursor_geodesy_readout") {
+    throw "Renderer ui_handoff_contracts cursor_geodesy_readout contract missing"
+}
+if ($capabilities.ui_handoff_contracts.contracts -notcontains "pin_overlay") {
+    throw "Renderer ui_handoff_contracts pin_overlay contract missing"
+}
+if ($capabilities.ui_handoff_contracts.contracts -notcontains "boundary_emphasis_control") {
+    throw "Renderer ui_handoff_contracts boundary_emphasis_control contract missing"
+}
+if ($capabilities.ui_handoff_contracts.contracts -notcontains "boundary_highlight.ack_history") {
+    throw "Renderer ui_handoff_contracts boundary ack history contract missing"
+}
 if ($capabilities.timeline_handoff.schema -ne "rrkal_displaytools.timeline_handoff.v1") {
     throw "Renderer timeline_handoff capability missing or invalid"
 }

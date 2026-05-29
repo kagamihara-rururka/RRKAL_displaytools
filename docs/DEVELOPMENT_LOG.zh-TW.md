@@ -3100,3 +3100,15 @@ Decision:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Renderer UI handoff contract list refresh
+
+Scope:
+- Renderer `ui_handoff_contracts` now lists `cursor_geodesy_readout`, `pin_overlay`, `boundary_emphasis_control`, and `boundary_highlight.ack_history` in addition to the existing canvas/layer/timeline contracts.
+- Smoke now gates these new renderer capability discovery entries.
+
+Decision:
+- Cross-machine capability discovery should summarize the same Pin/Boundary UI loops that handoff inspection and Qt now expose, so users can verify them from `--print-renderer-capabilities` without opening Qt.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

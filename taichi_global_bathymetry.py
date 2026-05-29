@@ -19352,7 +19352,11 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "session_journal",
                 "document_undo",
                 "timeline_state",
+                "cursor_geodesy_readout",
+                "pin_overlay",
+                "boundary_emphasis_control",
                 "boundary_highlight.identity_status",
+                "boundary_highlight.ack_history",
             ],
             "applies": [
                 "Qt launch packet handoff",

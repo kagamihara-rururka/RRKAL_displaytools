@@ -278,3 +278,8 @@
 
 - Profile schema now documents Pin coordinate source metadata, Boundary emphasis target alignment and Timeline boundary-emphasis keyframe preservation.
 - Canvas Preview profile docs now include Boundary emphasis target alignment provenance fields.
+
+### 2026-05-30 Renderer UI handoff contract list refresh
+
+- Renderer capability discovery now lists cursor geodesy, Pin overlay, Boundary emphasis and Boundary ack history in `ui_handoff_contracts`.
+- Smoke verifies the refreshed handoff contract list.
