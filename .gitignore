@@ -1,0 +1,37 @@
+﻿# Python / local runtime
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Logs and runtime state
+*.log
+*.err.log
+fps_log.csv
+fps_log.summary.json
+state/
+.cache/
+
+# Data/cache artifacts
+*.sqlite
+*.db
+*.npy
+*.npz
+*.csv.gz
+
+# Generated images/videos
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+*.mp4
+*.mov
+*.avi
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

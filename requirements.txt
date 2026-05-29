@@ -1,0 +1,6 @@
+numpy
+pandas
+datashader
+vispy
+PyQt5
+Pillow
