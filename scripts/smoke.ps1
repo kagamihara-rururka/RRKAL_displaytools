@@ -212,8 +212,14 @@ if ([int]$launchPacket.boundary_emphasis_control.control_count -lt 7) {
 if ($launchPacket.boundary_emphasis_control.target_layer_types -notcontains "exclusive_economic_zone") {
     throw "Launch packet boundary_emphasis_control EEZ target missing"
 }
-if ($launchPacket.boundary_emphasis_control.renderer_hook_status -ne "queued_backend_mask") {
-    throw "Launch packet boundary_emphasis_control renderer hook status mismatch"
+if ($launchPacket.boundary_emphasis_control.renderer_hook_status -ne "wired_via_boundary_highlight_mask") {
+    throw "Launch packet boundary_emphasis_control renderer hook is not wired through boundary highlight mask"
+}
+if ($launchPacket.boundary_emphasis_control.renderer_bridge_contract -ne "rrkal_displaytools.boundary_highlight_mask.v1") {
+    throw "Launch packet boundary_emphasis_control renderer bridge contract missing"
+}
+if ($launchPacket.boundary_emphasis_control.renderer_controls_mapped -notcontains "gamma") {
+    throw "Launch packet boundary_emphasis_control gamma bridge mapping missing"
 }
 if ($launchPacket.boundary_emphasis_control.row_double_click_binding -ne "ready") {
     throw "Launch packet boundary_emphasis_control row double-click binding missing"
@@ -727,8 +733,14 @@ if ($capabilities.boundary_emphasis_control.schema -ne "rrkal_displaytools.bound
 if ($capabilities.boundary_emphasis_control.status -ne "ui_ready") {
     throw "Renderer boundary_emphasis_control not UI ready"
 }
-if ($capabilities.boundary_emphasis_control.renderer_hook_status -ne "queued_backend_mask") {
-    throw "Renderer boundary_emphasis_control hook status mismatch"
+if ($capabilities.boundary_emphasis_control.renderer_hook_status -ne "wired_via_boundary_highlight_mask") {
+    throw "Renderer boundary_emphasis_control hook is not wired through boundary highlight mask"
+}
+if ($capabilities.boundary_emphasis_control.renderer_bridge_contract -ne "rrkal_displaytools.boundary_highlight_mask.v1") {
+    throw "Renderer boundary_emphasis_control bridge contract missing"
+}
+if ($capabilities.boundary_emphasis_control.renderer_controls_mapped -notcontains "breathing") {
+    throw "Renderer boundary_emphasis_control breathing bridge mapping missing"
 }
 if ($capabilities.boundary_emphasis_control.row_double_click_binding -ne "ready") {
     throw "Renderer boundary_emphasis_control row double-click binding missing"
@@ -1062,6 +1074,15 @@ if ($handoff.boundary_emphasis_control.row_double_click_binding -ne "ready") {
 }
 if ($handoff.boundary_emphasis_control.row_double_click_layer_keys -notcontains "eez_layer") {
     throw "Handoff inspection boundary_emphasis_control row double-click EEZ layer missing"
+}
+if ($handoff.boundary_emphasis_control.renderer_hook_status -ne "wired_via_boundary_highlight_mask") {
+    throw "Handoff inspection boundary_emphasis_control renderer hook is not wired"
+}
+if ($handoff.boundary_emphasis_control.renderer_bridge_contract -ne "rrkal_displaytools.boundary_highlight_mask.v1") {
+    throw "Handoff inspection boundary_emphasis_control renderer bridge contract missing"
+}
+if ($handoff.boundary_emphasis_control.renderer_controls_mapped -notcontains "alpha") {
+    throw "Handoff inspection boundary_emphasis_control alpha bridge mapping missing"
 }
 if ($handoff.boundary_emphasis_control.qt_surface -ne "Layers dock boundary emphasis dialog") {
     throw "Handoff inspection boundary_emphasis_control Qt surface mismatch"

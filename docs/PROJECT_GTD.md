@@ -35,6 +35,7 @@ Last updated: 2026-05-29
 - Decide which local cache artifacts should later be registered by RRKAL as renderer bridge assets.
 
 ## Done
+- 2026-05-30: Mapped Qt boundary emphasis Apply state into the existing boundary highlight renderer bridge and smoke-gated RGB/contrast/alpha/gamma/breathing mapping evidence.
 - 2026-05-30: Added smoke-gated Pin projection evidence for globe-rotation tracking and horizon occlusion through `rrkal_displaytools.pin_projection.v1`.
 - 2026-05-30: Added smoke-gated `rrkal_displaytools.cursor_geodesy_readout.v1` for guarded canvas mouse lon/lat readout; renderer globe raycast remains queued.
 - 2026-05-30: Routed boundary-capable layer row double-clicks to the Qt boundary emphasis dialog and added smoke-gated contract evidence for the binding.

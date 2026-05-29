@@ -1516,15 +1516,18 @@ def boundary_emphasis_control_packet(
         "gamma": _float_value("gamma", 1.0),
         "breathing_enabled": bool(state.get("breathing_enabled", True)),
         "breathing_period_s": _float_value("breathing_period_s", 4.0),
-        "hover_behavior": "Records the intended pointer-hover preview for territory, territorial sea, EEZ or maritime boundary masks.",
+        "hover_behavior": "Pointer hover preview is bridged through rrkal_displaytools.boundary_highlight_mask.v1.",
         "open_behavior": "Use the Layers dock button or double-click a boundary-capable layer row to open the dialog.",
         "qt_surface": "Layers dock boundary emphasis dialog",
         "row_double_click_binding": "ready",
         "row_double_click_layer_keys": list(BOUNDARY_EMPHASIS_TARGET_BY_LAYER.keys()),
-        "renderer_hook_status": "queued_backend_mask",
+        "renderer_hook_status": "wired_via_boundary_highlight_mask",
+        "renderer_bridge_contract": BOUNDARY_HIGHLIGHT_SCHEMA,
+        "renderer_controls_mapped": ["target_layers", "color_rgb", "contrast", "alpha", "gamma", "breathing"],
+        "pending_renderer_refinements": ["authoritative_polygon_identity", "open_line_area_inference", "full_polygon_fill_mask"],
         "control_count": len(controls),
         "controls": controls,
-        "boundary": "UI profile and launch-packet state only; renderer mask rasterization and geospatial ownership remain backend work.",
+        "boundary": "UI profile state is mapped to the existing boundary highlight renderer bridge; governed geospatial ownership remains outside displaytools.",
     }
 
 
@@ -1663,6 +1666,7 @@ BOUNDARY_EMPHASIS_TARGET_BY_LAYER = {
     "eez_layer": "exclusive_economic_zone",
     "high_seas_layer": "maritime_boundary",
 }
+BOUNDARY_EMPHASIS_LAYER_BY_TARGET = {value: key for key, value in BOUNDARY_EMPHASIS_TARGET_BY_LAYER.items()}
 BLEND_MODES = ("Normal", "Screen", "Multiply", "Overlay", "Soft Light")
 TOOL_MODES = (
     ("move", "Move", "檢視 / 平移"),
@@ -3398,23 +3402,55 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         layout.addLayout(buttons)
 
         def _apply_state() -> None:
+            target_mode = target_combo.currentText()
+            color_rgb = [spin.value() for spin in rgb_widgets]
+            contrast = contrast_slider.value() / 100.0
+            opacity = opacity_slider.value() / 100.0
+            gamma = gamma_slider.value() / 100.0
+            breathing_enabled = breathing_checkbox.isChecked()
+            breathing_period_s = breathing_period_slider.value() / 10.0
             self.boundary_emphasis_state = {
-                "target_mode": target_combo.currentText(),
-                "color_rgb": [spin.value() for spin in rgb_widgets],
-                "contrast": contrast_slider.value() / 100.0,
-                "opacity": opacity_slider.value() / 100.0,
-                "gamma": gamma_slider.value() / 100.0,
-                "breathing_enabled": breathing_checkbox.isChecked(),
-                "breathing_period_s": breathing_period_slider.value() / 10.0,
+                "target_mode": target_mode,
+                "color_rgb": color_rgb,
+                "contrast": contrast,
+                "opacity": opacity,
+                "gamma": gamma,
+                "breathing_enabled": breathing_enabled,
+                "breathing_period_s": breathing_period_s,
             }
+            target_layer = BOUNDARY_EMPHASIS_LAYER_BY_TARGET.get(target_mode)
+            selected_layer_key = getattr(self, "selected_layer_key", None)
+            if target_layer is None and selected_layer_key in BOUNDARY_EMPHASIS_TARGET_BY_LAYER:
+                target_layer = selected_layer_key
+            target_layers = [target_layer] if isinstance(target_layer, str) else list(BOUNDARY_HIGHLIGHT_LAYER_KEYS)
+            self.boundary_highlight_state = normalized_boundary_highlight_state(
+                {
+                    "schema": BOUNDARY_HIGHLIGHT_SCHEMA,
+                    "enabled": True,
+                    "trigger": "hover",
+                    "target_layers": target_layers,
+                    "color_rgb": color_rgb,
+                    "contrast": max(0, min(100, int(round(contrast * 50.0)))),
+                    "alpha": max(0, min(100, int(round(opacity * 100.0)))),
+                    "gamma": max(25, min(300, int(round(gamma * 100.0)))),
+                    "feather": 14,
+                    "breathing": {
+                        "enabled": breathing_enabled,
+                        "speed": max(0, min(100, int(round(100.0 / max(1.0, breathing_period_s))))),
+                        "amplitude": 16,
+                    },
+                }
+            )
+            self.refresh_boundary_highlight_status()
+            self.refresh_command_preview()
+            self.refresh_canvas_preview()
             updated = self.collect_boundary_emphasis_control()
             if hasattr(self, "boundary_emphasis_label"):
                 self.boundary_emphasis_label.setText(
                     f"Boundary emphasis: {updated.get('status', 'unknown')} "
                     f"target={updated.get('target_mode')} color={updated.get('color_rgb')} "
-                    f"opacity={updated.get('opacity')}"
+                    f"opacity={updated.get('opacity')} bridge={updated.get('renderer_bridge_contract')}"
                 )
-
         apply_button.clicked.connect(_apply_state)
         close_button.clicked.connect(dialog.accept)
         if hasattr(dialog, "exec"):

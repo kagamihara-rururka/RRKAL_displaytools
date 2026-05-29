@@ -1610,15 +1610,18 @@ def boundary_emphasis_control_packet(
         "gamma": _float_value("gamma", 1.0),
         "breathing_enabled": bool(state.get("breathing_enabled", True)),
         "breathing_period_s": _float_value("breathing_period_s", 4.0),
-        "hover_behavior": "Records the intended pointer-hover preview for territory, territorial sea, EEZ or maritime boundary masks.",
+        "hover_behavior": "Pointer hover preview is bridged through rrkal_displaytools.boundary_highlight_mask.v1.",
         "open_behavior": "Use the Layers dock button or double-click a boundary-capable layer row to open the dialog.",
         "qt_surface": "Layers dock boundary emphasis dialog",
         "row_double_click_binding": "ready",
         "row_double_click_layer_keys": ["border_layer", "territorial_sea_layer", "eez_layer", "high_seas_layer"],
-        "renderer_hook_status": "queued_backend_mask",
+        "renderer_hook_status": "wired_via_boundary_highlight_mask",
+        "renderer_bridge_contract": "rrkal_displaytools.boundary_highlight_mask.v1",
+        "renderer_controls_mapped": ["target_layers", "color_rgb", "contrast", "alpha", "gamma", "breathing"],
+        "pending_renderer_refinements": ["authoritative_polygon_identity", "open_line_area_inference", "full_polygon_fill_mask"],
         "control_count": len(controls),
         "controls": controls,
-        "boundary": "UI profile and launch-packet state only; renderer mask rasterization and geospatial ownership remain backend work.",
+        "boundary": "UI profile state is mapped to the existing boundary highlight renderer bridge; governed geospatial ownership remains outside displaytools.",
     }
 
 

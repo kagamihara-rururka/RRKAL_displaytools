@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-30 - Boundary emphasis renderer bridge
+
+- Mapped `Boundary emphasis controls...` Apply state into the existing `rrkal_displaytools.boundary_highlight_mask.v1` renderer bridge.
+- Launch packets, renderer capabilities, handoff inspection and smoke now verify RGB/contrast/alpha/gamma/breathing mapping through the boundary highlight bridge; full polygon fill mask remains a renderer refinement.
+- Smoke: PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Pin projection occlusion evidence
 
 - Updated `rrkal_displaytools.pin_projection.v1` to reflect the current renderer path: Pins are projected every frame from geodetic anchors and composed through `pin_overlay_rgba`.
