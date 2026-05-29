@@ -341,10 +341,12 @@ def active_layer_diagnostics_packet(profile: dict[str, object]) -> dict[str, obj
         "layer_runtime_badge_summary_schema": "rrkal_displaytools.layer_runtime_badge_summary.v1",
         "layer_runtime_warning_list_schema": "rrkal_displaytools.layer_runtime_warning_list.v1",
         "layer_runtime_interaction_context_schema": "rrkal_displaytools.layer_runtime_interaction_context.v1",
+        "layer_territory_identity_context_schema": "rrkal_displaytools.layer_territory_identity_context.v1",
         "runtime_evidence_summary": layer_runtime_evidence_summary_packet(None),
         "runtime_badge_summary": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer).get("runtime_badge_summary"),
         "runtime_warning_list": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer).get("runtime_warning_list"),
         "runtime_interaction_context": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer).get("runtime_interaction_context"),
+        "territory_identity_context": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer).get("territory_identity_context"),
         "diagnostics_text": "no runtime ack/pick in no-GUI export",
         "runtime_ack_file": "state/renderer_layer_runtime_ack.json",
         "runtime_ack": None,
@@ -533,6 +535,48 @@ def layer_runtime_interaction_context_packet(
     }
 
 
+def layer_territory_identity_context_packet(
+    interaction_context: dict[str, object] | None,
+    selected_layer: str | None,
+    source: str,
+) -> dict[str, object]:
+    interaction_context = interaction_context if isinstance(interaction_context, dict) else {}
+    feature_identity = interaction_context.get("feature_identity")
+    feature_identity = feature_identity if isinstance(feature_identity, dict) else {}
+    feature_label = interaction_context.get("feature_label")
+    renderer_target = interaction_context.get("renderer_target")
+    jurisdiction_kinds = {
+        "border_layer": "land_or_administrative_boundary",
+        "territorial_sea_layer": "territorial_sea",
+        "eez_layer": "exclusive_economic_zone",
+        "high_seas_layer": "high_seas",
+    }
+    jurisdiction_kind = jurisdiction_kinds.get(str(selected_layer), "not_territory_layer")
+    source_identity_available = bool(feature_identity or (isinstance(feature_label, str) and feature_label.strip()))
+    if jurisdiction_kind == "not_territory_layer":
+        summary_text = "Selected layer is not a territory/EEZ identity layer."
+    elif source_identity_available:
+        summary_text = f"Source-property identity available for {jurisdiction_kind}; authoritative polygon identity pending."
+    else:
+        summary_text = f"No source-property identity yet for {jurisdiction_kind}; authoritative polygon identity pending."
+    return {
+        "schema": "rrkal_displaytools.layer_territory_identity_context.v1",
+        "source": source,
+        "selected_layer": selected_layer,
+        "renderer_target": renderer_target,
+        "jurisdiction_kind": jurisdiction_kind,
+        "source_property_identity_available": source_identity_available,
+        "source_property_feature_label": feature_label,
+        "source_property_feature_identity": feature_identity,
+        "authoritative_identity_available": False,
+        "authoritative_identity_status": "pending_authoritative_polygon_identity",
+        "open_line_area_inference": "pending",
+        "summary_text": summary_text,
+        "copyable_provenance": True,
+        "boundary": "Source-property feature identity is runtime evidence; authoritative territory/EEZ polygon identity remains pending until a governed spatial identity source is connected.",
+    }
+
+
 def layer_capability_matrix_packet(source: str, selected_layer: str | None = None) -> dict[str, object]:
     layers = [layer_capability_packet(key, label) for key, label in LAYER_LABELS]
     runtime_evidence = {
@@ -570,6 +614,12 @@ def layer_capability_matrix_packet(source: str, selected_layer: str | None = Non
     runtime_badge_summary = layer_runtime_badge_summary_packet(layers, selected_layer, source)
     runtime_warning_list = layer_runtime_warning_list_packet(runtime_badge_summary, runtime_evidence_summary, source)
     renderer_target = selected.get("renderer_target") if isinstance(selected, dict) else None
+    runtime_interaction_context = layer_runtime_interaction_context_packet(
+        runtime_warning_list,
+        selected_layer,
+        str(renderer_target) if renderer_target else None,
+        source,
+    )
     return {
         "schema": "rrkal_displaytools.layer_capability_matrix.v1",
         "source": source,
@@ -579,12 +629,8 @@ def layer_capability_matrix_packet(source: str, selected_layer: str | None = Non
         "runtime_evidence_summary": runtime_evidence_summary,
         "runtime_badge_summary": runtime_badge_summary,
         "runtime_warning_list": runtime_warning_list,
-        "runtime_interaction_context": layer_runtime_interaction_context_packet(
-            runtime_warning_list,
-            selected_layer,
-            str(renderer_target) if renderer_target else None,
-            source,
-        ),
+        "runtime_interaction_context": runtime_interaction_context,
+        "territory_identity_context": layer_territory_identity_context_packet(runtime_interaction_context, selected_layer, source),
         "runtime_status_legend": layer_runtime_status_legend_packet(),
         "selected_layer": selected_layer,
         "selected_layer_capabilities": selected,

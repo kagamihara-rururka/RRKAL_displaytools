@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-29 - Layer territory identity context
+
+- Added `rrkal_displaytools.layer_territory_identity_context.v1` to separate source-property feature identity from authoritative territory/EEZ polygon identity.
+- Qt Properties now shows `Territory identity`; research provenance, launch packets, renderer capabilities and handoff inspection carry the same contract.
+- The contract explicitly marks authoritative polygon identity and open-line area inference as pending while preserving runtime source-property identity evidence.
+- Smoke: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1` PASS.
+
 ## 2026-05-29 - Layer runtime interaction context
 
 - Added `rrkal_displaytools.layer_runtime_interaction_context.v1` to connect runtime warnings with selected-layer renderer pick context and source-property feature identity.
