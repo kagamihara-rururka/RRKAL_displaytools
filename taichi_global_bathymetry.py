@@ -3147,22 +3147,103 @@ def _append_geojson_geometry_lines(geometry: dict | None, out: list[np.ndarray])
             _append_geojson_geometry_lines(geom, out)
 
 
-def geojson_to_lines(obj: dict | None, decimate: int = 1) -> list[np.ndarray]:
+def vector_feature_identity(properties: dict | None, feature_index: int | None = None) -> dict[str, object]:
+    props = properties if isinstance(properties, dict) else {}
+    preview_keys = (
+        "name",
+        "NAME",
+        "Name",
+        "territory",
+        "TERRITORY",
+        "sovereignt",
+        "SOVEREIGNT",
+        "admin",
+        "ADMIN",
+        "geonunit",
+        "GEONUNIT",
+        "featurecla",
+        "FEATURECLA",
+        "type",
+        "TYPE",
+        "mrgid",
+        "MRGID",
+        "id",
+        "ID",
+    )
+    preview = {key: props[key] for key in preview_keys if key in props and props[key] not in (None, "")}
+    label = None
+    for key in ("name", "NAME", "Name", "territory", "TERRITORY", "admin", "ADMIN", "sovereignt", "SOVEREIGNT"):
+        value = preview.get(key)
+        if value not in (None, ""):
+            label = str(value)
+            break
+    return {
+        "feature_index": feature_index,
+        "label": label or (f"feature-{feature_index}" if feature_index is not None else "feature"),
+        "properties": preview,
+    }
+
+
+def _append_geojson_geometry_line_features(
+    geometry: dict | None,
+    out_lines: list[np.ndarray],
+    out_features: list[dict[str, object]],
+    feature_identity: dict[str, object],
+) -> None:
+    if not geometry:
+        return
+    gtype = geometry.get("type")
+    coords = geometry.get("coordinates")
+    if not coords:
+        return
+
+    def append_line(coords_value, geometry_type: str) -> None:
+        arr = np.asarray(coords_value, dtype=np.float32)
+        if arr.ndim == 2 and arr.shape[0] >= 2:
+            out_lines.append(arr[:, :2])
+            item = dict(feature_identity)
+            item["geometry_type"] = geometry_type
+            item["line_part_index"] = len(out_features)
+            out_features.append(item)
+
+    if gtype == "LineString":
+        append_line(coords, "LineString")
+    elif gtype == "MultiLineString":
+        for line in coords:
+            append_line(line, "MultiLineString")
+    elif gtype == "Polygon":
+        for ring in coords:
+            append_line(ring, "Polygon")
+    elif gtype == "MultiPolygon":
+        for polygon in coords:
+            for ring in polygon:
+                append_line(ring, "MultiPolygon")
+    elif gtype == "GeometryCollection":
+        for geom in geometry.get("geometries", []):
+            _append_geojson_geometry_line_features(geom, out_lines, out_features, feature_identity)
+
+
+def geojson_to_line_features(obj: dict | None, decimate: int = 1) -> tuple[list[np.ndarray], list[dict[str, object]]]:
     if not obj:
-        return []
+        return [], []
     lines: list[np.ndarray] = []
+    features: list[dict[str, object]] = []
     if obj.get("type") == "FeatureCollection":
-        for feature in obj.get("features", []):
-            _append_geojson_geometry_lines(feature.get("geometry"), lines)
+        for feature_index, feature in enumerate(obj.get("features", [])):
+            identity = vector_feature_identity(feature.get("properties"), feature_index)
+            _append_geojson_geometry_line_features(feature.get("geometry"), lines, features, identity)
     elif obj.get("type") == "Feature":
-        _append_geojson_geometry_lines(obj.get("geometry"), lines)
+        identity = vector_feature_identity(obj.get("properties"), 0)
+        _append_geojson_geometry_line_features(obj.get("geometry"), lines, features, identity)
     else:
-        _append_geojson_geometry_lines(obj, lines)
+        identity = vector_feature_identity({}, None)
+        _append_geojson_geometry_line_features(obj, lines, features, identity)
     step = max(1, int(decimate))
     if step <= 1:
-        return lines
-    decimated = []
-    for line in lines:
+        return lines, features
+    decimated: list[np.ndarray] = []
+    decimated_features: list[dict[str, object]] = []
+    for line, feature in zip(lines, features):
         if len(line) <= 2:
             decimated.append(line)
         else:
@@ -3170,18 +3251,35 @@ def geojson_to_lines(obj: dict | None, decimate: int = 1) -> list[np.ndarray]:
             if not np.array_equal(sampled[-1], line[-1]):
                 sampled = np.vstack([sampled, line[-1]])
             decimated.append(np.ascontiguousarray(sampled))
-    return decimated
+        decimated_features.append(feature)
+    return decimated, decimated_features
+
+
+def geojson_to_lines(obj: dict | None, decimate: int = 1) -> list[np.ndarray]:
+    lines, _features = geojson_to_line_features(obj, decimate=decimate)
+    return lines
 
 
 class GeoVectorLineOverlay:
-    def __init__(self, width: int, height: int, lines: list[np.ndarray], name: str):
+    def __init__(self, width: int, height: int, lines: list[np.ndarray], name: str, line_features: list[dict[str, object]] | None = None):
         self.width = int(width)
         self.height = int(height)
         self.lines = lines
         self.name = name
+        self.line_features = list(line_features or [])
+        if len(self.line_features) < len(self.lines):
+            self.line_features.extend({} for _ in range(len(self.lines) - len(self.line_features)))
         self.empty = np.zeros((height, width, 4), dtype=np.uint8)
         if not lines:
             print(f"{name} layer has no vector geometry loaded.")
+
+    def line_feature(self, line_index: int | None) -> dict[str, object] | None:
+        if line_index is None:
+            return None
+        if 0 <= int(line_index) < len(self.line_features):
+            feature = self.line_features[int(line_index)]
+            return dict(feature) if isinstance(feature, dict) else None
+        return None
 
     def render(
         self,
@@ -3418,6 +3516,9 @@ class GeoVectorLineOverlay:
                         "screen_x": px,
                         "screen_y": py,
                     }
+                    feature = self.line_feature(line_index)
+                    if feature:
+                        best["feature"] = feature
         return best
 
 
@@ -11968,8 +12069,8 @@ class HybridRenderController:
             natural_earth_layer=decision["natural_earth_layer"],
             natural_earth_source=decision["natural_earth_source"],
         )
-        lines = geojson_to_lines(obj, decimate=max(1, int(render_profile["decimate"])))
-        return GeoVectorLineOverlay(self.width, self.height, lines, spec["name"])
+        lines, features = geojson_to_line_features(obj, decimate=max(1, int(render_profile["decimate"])))
+        return GeoVectorLineOverlay(self.width, self.height, lines, spec["name"], features)
 
     def _load_boundary_overlays(self) -> dict[str, GeoVectorLineOverlay]:
         overlays: dict[str, GeoVectorLineOverlay] = {}
@@ -11990,8 +12091,8 @@ class HybridRenderController:
             natural_earth_layer=decision["natural_earth_layer"],
             natural_earth_source=decision["natural_earth_source"],
         )
-        lines = geojson_to_lines(obj, decimate=max(1, int(decision["decimate"])))
-        return GeoVectorLineOverlay(self.width, self.height, lines, spec["name"])
+        lines, features = geojson_to_line_features(obj, decimate=max(1, int(decision["decimate"])))
+        return GeoVectorLineOverlay(self.width, self.height, lines, spec["name"], features)
 
     def _vector_cache_limit(self) -> int:
         megapixels = max(1.0, (int(self.width) * int(self.height)) / 1_000_000.0)
@@ -12613,6 +12714,14 @@ class HybridRenderController:
             value = hit.get(key)
             if value is not None:
                 lines.append(f"- {key}: {value}")
+        feature = hit.get("feature")
+        if isinstance(feature, dict):
+            if feature.get("label") is not None:
+                lines.append(f"- feature: {feature.get('label')}")
+            properties = feature.get("properties")
+            if isinstance(properties, dict) and properties:
+                preview = ", ".join(f"{key}={value}" for key, value in list(properties.items())[:4])
+                lines.append(f"- feature_properties: {preview}")
         return "\n".join(lines)
 
     def write_pin_pick_state(self, event_kind: str, hit: dict[str, object] | None = None) -> None:
@@ -12775,7 +12884,7 @@ class HybridRenderController:
             ],
             "pending": [
                 "fill_shader_contrast_gamma",
-                "territory_feature_identity",
+                "authoritative_polygon_territory_identity",
                 "open_line_area_inference",
             ],
             "error": getattr(self, "boundary_highlight_error", None),
@@ -12889,6 +12998,8 @@ class HybridRenderController:
                     "line_index": hit.get("line_index"),
                     "distance_px": hit["distance_px"],
                 }
+                if isinstance(hit.get("feature"), dict):
+                    best["feature"] = hit["feature"]
         return best
 
     def nearest_hydrology_hit(self, x: float, y: float, layer_id: str, radius_px: float = 12.0) -> dict[str, object]:
@@ -12907,7 +13018,7 @@ class HybridRenderController:
         )
         if not hit:
             return {}
-        return {
+        out = {
             "layer_id": layer_id,
             "name": self.layer_label(layer_id),
             "line_index": hit.get("line_index"),
@@ -12915,6 +13026,9 @@ class HybridRenderController:
             "screen_x": hit.get("screen_x"),
             "screen_y": hit.get("screen_y"),
         }
+        if isinstance(hit.get("feature"), dict):
+            out["feature"] = hit["feature"]
+        return out
 
     def pick_hydrology_layer(self, layer_id: str, x: float, y: float) -> bool:
         hit = self.nearest_hydrology_hit(x, y, layer_id, radius_px=12.0)
@@ -15917,10 +16031,11 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "outline_glow_preview",
                 "hover_contrast_gamma_color",
                 "closed_ring_polygon_fill_preview",
+                "source_property_feature_identity",
             ],
             "pending": [
                 "fill_shader_contrast_gamma",
-                "territory_feature_identity",
+                "authoritative_polygon_territory_identity",
                 "open_line_area_inference",
             ],
         },

@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - Vector pick source-property identity
+
+Scope:
+- GeoJSON vector loading now keeps a compact source-property identity per rendered line.
+- Boundary and hydrology line hit tests now include `feature.label`, `feature_index`, geometry type, and a small properties preview when available.
+- Selected-layer pick state and renderer selected-info text can now show feature identity instead of only layer/line index.
+
+Positioning:
+- This closes source-property feature identity for loaded line/ring geometry.
+- Authoritative polygon territory identity and open-line area inference remain separate future work.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - RRKAL manifest reference passthrough
 
 Scope:
