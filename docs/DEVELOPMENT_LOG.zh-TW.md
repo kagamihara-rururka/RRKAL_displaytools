@@ -1,5 +1,19 @@
 # Development Log
 
+## 2026-05-29 - Timeline PNG frame sequence export
+
+Scope:
+- Added `rrkal_displaytools.timeline_animation_export.v1`.
+- Renderer now supports `--timeline-export-dir`, `--timeline-export-frames`, `--timeline-export-fps`, and `--timeline-export-manifest`.
+- Export writes PNG frames plus `timeline_animation_manifest.json`, using active Timeline keyframes and ocean/material interpolation.
+- Qt/No-GUI launch packets, renderer ack, renderer capabilities, closed-loop status, docs, and smoke gates now expose the export contract.
+
+Positioning:
+- This closes a first renderer animation export loop for scientific review while leaving video encoding, camera keyframes, and non-material interpolation pending.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Timeline ocean material interpolation
 
 Scope:

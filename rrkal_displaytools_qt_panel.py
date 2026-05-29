@@ -1385,6 +1385,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "timeline_active_step_state": self.collect_timeline_active_step_state(),
             "timeline_step_playback": self.collect_timeline_step_playback_state(),
             "timeline_ocean_material_interpolation": self.collect_timeline_ocean_material_interpolation_state(),
+            "timeline_animation_export": self.collect_timeline_animation_export_state(),
             "timeline_runtime_state_file": str(TIMELINE_STATE_PATH),
             "timeline_ack_file": str(TIMELINE_ACK_PATH),
             "timeline_ack": self.timeline_ack_payload,
@@ -2695,16 +2696,17 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "renderer_timeline_playback": True,
             "renderer_playback_mode": "discrete_keyframe_step",
             "ocean_material_interpolation": True,
-            "animation_export": False,
+            "animation_export": True,
+            "animation_export_mode": "png_frame_sequence",
             "ready_handoff_files": {
                 "timeline_runtime_state_file": str(TIMELINE_STATE_PATH),
                 "timeline_ack_file": str(TIMELINE_ACK_PATH),
             },
             "pending": [
-                "animation_export",
+                "video_encoding",
                 "camera_keyframe_interpolation",
             ],
-            "boundary": "Renderer can advance discrete keyframe steps when playback is active; interpolation and export are not claimed yet.",
+            "boundary": "Renderer can export PNG frame sequences; video encoding and camera keyframes remain pending.",
         }
 
     def collect_timeline_playback_plan(self) -> dict[str, object]:
@@ -2836,6 +2838,20 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "boundary": "Qt exports the interpolation contract; renderer owns runtime interpolation.",
         }
 
+    def collect_timeline_animation_export_state(self) -> dict[str, object]:
+        return {
+            "schema": "rrkal_displaytools.timeline_animation_export.v1",
+            "supported": True,
+            "executed": False,
+            "mode": "png_frame_sequence",
+            "frame_count": 0,
+            "fps": 24.0,
+            "frames": [],
+            "applies": ["timeline_png_frame_sequence", "timeline_animation_manifest"],
+            "pending": ["video_encoding", "camera_keyframes", "non_material_interpolation"],
+            "boundary": "Qt exposes renderer animation export capability; renderer writes frames and manifest.",
+        }
+
     def collect_timeline_runtime_state(self) -> dict[str, object]:
         return {
             "schema": "rrkal_displaytools.timeline_runtime_state.v1",
@@ -2847,6 +2863,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "active_step_state": self.collect_timeline_active_step_state(),
             "step_playback": self.collect_timeline_step_playback_state(),
             "ocean_material_interpolation": self.collect_timeline_ocean_material_interpolation_state(),
+            "animation_export": self.collect_timeline_animation_export_state(),
             "timeline_keyframes": [dict(keyframe) for keyframe in self.timeline_keyframes],
             "source": "rrkal_displaytools_qt_panel",
             "boundary": "Renderer receives Timeline keyframes for discrete step playback; interpolation/export remain pending.",
@@ -3805,6 +3822,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "timeline_active_step_state": self.collect_timeline_active_step_state(),
             "timeline_step_playback": self.collect_timeline_step_playback_state(),
             "timeline_ocean_material_interpolation": self.collect_timeline_ocean_material_interpolation_state(),
+            "timeline_animation_export": self.collect_timeline_animation_export_state(),
             "timeline_runtime_state_file": str(TIMELINE_STATE_PATH),
             "timeline_state_last_write_utc": self.timeline_state_last_write_utc,
             "timeline_state_write_error": self.timeline_state_write_error,

@@ -435,6 +435,7 @@ def timeline_runtime_state_packet(profile: dict[str, object], target_file: str =
         "active_step_state": active_step_state,
         "step_playback": timeline_step_playback_packet(timeline_state, keyframes, instantiated=False),
         "ocean_material_interpolation": timeline_ocean_material_interpolation_packet(timeline_state, keyframes, instantiated=False),
+        "animation_export": timeline_animation_export_packet(executed=False),
         "timeline_keyframes": keyframes,
         "source": "scripts/export_launch_packet.py",
         "target_file": target_file,
@@ -450,12 +451,13 @@ def timeline_playback_readiness_packet() -> dict[str, object]:
         "renderer_timeline_playback": True,
         "renderer_playback_mode": "discrete_keyframe_step",
         "ocean_material_interpolation": True,
-        "animation_export": False,
+        "animation_export": True,
+        "animation_export_mode": "png_frame_sequence",
         "pending": [
-            "animation_export",
+            "video_encoding",
             "camera_keyframe_interpolation",
         ],
-        "boundary": "No-GUI handoff can export runtime state for renderer discrete step playback; interpolation/export are not claimed yet.",
+        "boundary": "No-GUI handoff can export runtime state for renderer PNG frame sequence export; video encoding and camera keyframes remain pending.",
     }
 
 
@@ -620,6 +622,21 @@ def timeline_ocean_material_interpolation_packet(
     }
 
 
+def timeline_animation_export_packet(executed: bool = False) -> dict[str, object]:
+    return {
+        "schema": "rrkal_displaytools.timeline_animation_export.v1",
+        "supported": True,
+        "executed": bool(executed),
+        "mode": "png_frame_sequence",
+        "frame_count": 0,
+        "fps": 24.0,
+        "frames": [],
+        "applies": ["timeline_png_frame_sequence", "timeline_animation_manifest"],
+        "pending": ["video_encoding", "camera_keyframes", "non_material_interpolation"],
+        "boundary": "No-GUI launch packets expose renderer animation export capability; renderer writes frames and manifest.",
+    }
+
+
 def launch_packet(
     profile_path: Path,
     profile: dict[str, object],
@@ -673,6 +690,7 @@ def launch_packet(
         "timeline_active_step_state": timeline_active_step_state,
         "timeline_step_playback": timeline_step_playback_packet(timeline_state, timeline_keyframes, instantiated=False),
         "timeline_ocean_material_interpolation": timeline_ocean_material_interpolation_packet(timeline_state, timeline_keyframes, instantiated=False),
+        "timeline_animation_export": timeline_animation_export_packet(executed=False),
         "timeline_runtime_state": timeline_runtime_state_packet(profile, timeline_state_file),
         "timeline_runtime_state_file": timeline_state_file,
         "timeline_ack_file": timeline_ack_file,

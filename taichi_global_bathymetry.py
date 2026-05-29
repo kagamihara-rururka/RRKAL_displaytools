@@ -2739,6 +2739,7 @@ def timeline_ack_payload_from_state_file(timeline_state_file: str | Path | None)
         "active_step_state": active_step_state,
         "step_playback": timeline_step_playback_packet(timeline_state, runtime_keyframes, instantiated=False),
         "ocean_material_interpolation": timeline_ocean_material_interpolation_packet(timeline_state, runtime_keyframes, instantiated=False),
+        "animation_export": timeline_animation_export_packet(executed=False),
         "first_keyframe_apply": timeline_first_keyframe_apply_preview_packet(
             runtime_keyframes,
             applied=False,
@@ -2763,12 +2764,14 @@ def timeline_playback_readiness_packet() -> dict[str, object]:
         "renderer_timeline_playback": True,
         "renderer_playback_mode": "discrete_keyframe_step",
         "ocean_material_interpolation": True,
-        "animation_export": False,
+        "animation_export": True,
+        "animation_export_mode": "png_frame_sequence",
         "pending": [
-            "animation_export",
+            "video_encoding",
+            "non_material_interpolation",
             "camera_keyframe_interpolation",
         ],
-        "boundary": "Renderer can drive discrete keyframe step playback; interpolation/export are not claimed yet.",
+        "boundary": "Renderer can export PNG frame sequences; video encoding, non-material interpolation, and camera keyframes remain pending.",
     }
 
 
@@ -2964,6 +2967,30 @@ def timeline_ocean_material_interpolation_packet(
         "applies": ["ocean_material_keyframe_interpolation"],
         "pending": ["non_material_interpolation", "animation_export", "camera_keyframes"],
         "boundary": "Only ocean material scalar fields are interpolated; style/layers/pins/boundary remain discrete.",
+    }
+
+
+def timeline_animation_export_packet(
+    export_dir: str | Path | None = None,
+    frame_count: int = 0,
+    fps: float = 24.0,
+    manifest_file: str | Path | None = None,
+    frames: list[dict[str, object]] | None = None,
+    executed: bool = False,
+) -> dict[str, object]:
+    return {
+        "schema": "rrkal_displaytools.timeline_animation_export.v1",
+        "supported": True,
+        "executed": bool(executed),
+        "mode": "png_frame_sequence",
+        "export_dir": str(export_dir) if export_dir else None,
+        "manifest_file": str(manifest_file) if manifest_file else None,
+        "frame_count": max(0, int(frame_count)),
+        "fps": max(1.0, float(fps)),
+        "frames": frames or [],
+        "applies": ["timeline_png_frame_sequence", "timeline_animation_manifest"],
+        "pending": ["video_encoding", "camera_keyframes", "non_material_interpolation"],
+        "boundary": "Exports PNG frames and a manifest only; video encoding and camera keyframes remain pending.",
     }
 
 
@@ -13619,6 +13646,97 @@ class HybridRenderController:
         except OSError as exc:
             print(f"Unable to write output metadata: {exc}")
 
+    def export_timeline_animation_frames(self) -> dict[str, object]:
+        export_dir_value = getattr(self.args, "timeline_export_dir", None)
+        if not export_dir_value:
+            return timeline_animation_export_packet(executed=False)
+        export_dir = Path(export_dir_value)
+        frame_count = max(1, int(getattr(self.args, "timeline_export_frames", 24)))
+        fps = max(1.0, float(getattr(self.args, "timeline_export_fps", 24.0)))
+        manifest_path_value = getattr(self.args, "timeline_export_manifest", None)
+        manifest_path = Path(manifest_path_value) if manifest_path_value else export_dir / "timeline_animation_manifest.json"
+        export_dir.mkdir(parents=True, exist_ok=True)
+        manifest_path.parent.mkdir(parents=True, exist_ok=True)
+        state_payload = self.timeline_runtime_state if isinstance(self.timeline_runtime_state, dict) else {}
+        runtime_keyframes = state_payload.get("timeline_keyframes")
+        valid_keyframes = [keyframe for keyframe in runtime_keyframes if isinstance(keyframe, dict)] if isinstance(runtime_keyframes, list) else []
+        timeline_state = state_payload.get("timeline_state")
+        timeline_state = timeline_state if isinstance(timeline_state, dict) else {}
+        playback = timeline_state.get("playback")
+        playback = playback if isinstance(playback, dict) else {}
+        playback["active"] = False
+        playback["interval_ms"] = max(1, int(round(1000.0 / fps)))
+        timeline_state["playback"] = playback
+        state_payload["timeline_state"] = timeline_state
+        self.timeline_runtime_state = state_payload
+        previous_output_path = self.output_path
+        self.output_path = None
+        frames: list[dict[str, object]] = []
+        try:
+            from PIL import Image
+
+            for frame_index in range(frame_count):
+                position = 0.0
+                if len(valid_keyframes) >= 2 and frame_count > 1:
+                    position = frame_index * (len(valid_keyframes) - 1) / (frame_count - 1)
+                active_index = int(math.floor(position)) if valid_keyframes else 0
+                active_index = max(0, min(active_index, max(0, len(valid_keyframes) - 1)))
+                fraction = max(0.0, min(1.0, position - active_index))
+                playback["next_index"] = active_index
+                timeline_state["playback"] = playback
+                state_payload["timeline_state"] = timeline_state
+                self.timeline_runtime_state = state_payload
+                self.timeline_first_keyframe_apply_result = self.apply_timeline_first_keyframe_runtime_state()
+                interpolation_state = dict(timeline_state)
+                interpolation_playback = dict(playback)
+                interpolation_playback["active"] = True
+                interpolation_state["playback"] = interpolation_playback
+                interval_s = max(0.05, float(playback["interval_ms"]) / 1000.0)
+                packet = timeline_ocean_material_interpolation_packet(
+                    interpolation_state,
+                    valid_keyframes,
+                    instantiated=True,
+                    last_step_at=time.time() - fraction * interval_s,
+                )
+                self.timeline_ocean_material_interpolation_result = packet
+                interpolated = packet.get("interpolated")
+                if isinstance(interpolated, dict):
+                    for field, attr in {
+                        "wave_strength": "ocean_wave_strength",
+                        "roughness": "ocean_roughness",
+                        "foam": "ocean_foam",
+                    }.items():
+                        if field in interpolated:
+                            setattr(self.args, attr, max(0.0, min(1.0, float(interpolated[field]))))
+                frame = self.render_if_needed(force=True)
+                if frame is None:
+                    frame = self.frame_rgba
+                frame_path = export_dir / f"timeline_frame_{frame_index:04d}.png"
+                Image.fromarray(frame, mode="RGBA").save(frame_path)
+                frames.append(
+                    {
+                        "index": frame_index,
+                        "file": str(frame_path),
+                        "active_index": active_index,
+                        "fraction": fraction,
+                        "ocean_material": packet.get("interpolated", {}),
+                    }
+                )
+        finally:
+            self.output_path = previous_output_path
+        manifest = timeline_animation_export_packet(
+            export_dir=export_dir,
+            frame_count=frame_count,
+            fps=fps,
+            manifest_file=manifest_path,
+            frames=frames,
+            executed=True,
+        )
+        self.timeline_animation_export_result = manifest
+        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+        self.write_timeline_ack()
+        return manifest
+
     def write_preview_frame_if_due(self, force: bool = False) -> None:
         if self.preview_frame_path is None:
             return
@@ -13743,6 +13861,7 @@ class HybridRenderController:
             "active_step_state": active_step_state,
             "step_playback": step_playback,
             "ocean_material_interpolation": ocean_material_interpolation,
+            "animation_export": getattr(self, "timeline_animation_export_result", timeline_animation_export_packet(executed=False)),
             "first_keyframe_apply": getattr(
                 self,
                 "timeline_first_keyframe_apply_result",
@@ -16766,6 +16885,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--layer-runtime-ack-file", default=os.environ.get("LAYER_RUNTIME_ACK_FILE"))
     parser.add_argument("--timeline-state-file", default=os.environ.get("TIMELINE_STATE_FILE"))
     parser.add_argument("--timeline-ack-file", default=os.environ.get("TIMELINE_ACK_FILE"))
+    parser.add_argument("--timeline-export-dir", default=os.environ.get("TIMELINE_EXPORT_DIR"))
+    parser.add_argument("--timeline-export-frames", type=int, default=int(os.environ.get("TIMELINE_EXPORT_FRAMES", "24")))
+    parser.add_argument("--timeline-export-fps", type=float, default=float(os.environ.get("TIMELINE_EXPORT_FPS", "24.0")))
+    parser.add_argument("--timeline-export-manifest", default=os.environ.get("TIMELINE_EXPORT_MANIFEST"))
 
     parser.add_argument("--adaptive-sampling", action=bool_action, default=parse_bool(os.environ.get("ADAPTIVE_SAMPLING"), True))
     parser.add_argument("--target-fps", type=float, default=float(os.environ.get("TARGET_FPS", "30.0")))
@@ -17011,9 +17134,18 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "active_step_state_schema": "rrkal_displaytools.timeline_active_step_state.v1",
             "step_playback_schema": "rrkal_displaytools.timeline_step_playback.v1",
             "ocean_material_interpolation_schema": "rrkal_displaytools.timeline_ocean_material_interpolation.v1",
+            "animation_export_schema": "rrkal_displaytools.timeline_animation_export.v1",
             "first_keyframe_apply_schema": "rrkal_displaytools.timeline_first_keyframe_apply.v1",
             "playback_readiness": timeline_playback_readiness_packet(),
-            "controls": ["timeline-state-file", "timeline-ack-file", "ack-timeline-state-and-exit"],
+            "controls": [
+                "timeline-state-file",
+                "timeline-ack-file",
+                "ack-timeline-state-and-exit",
+                "timeline-export-dir",
+                "timeline-export-frames",
+                "timeline-export-fps",
+                "timeline-export-manifest",
+            ],
             "input_contracts": [
                 "rrkal_displaytools.timeline_state.v1",
                 "rrkal_displaytools.timeline_keyframe.v1",
@@ -17023,6 +17155,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "rrkal_displaytools.timeline_active_step_state.v1",
                 "rrkal_displaytools.timeline_step_playback.v1",
                 "rrkal_displaytools.timeline_ocean_material_interpolation.v1",
+                "rrkal_displaytools.timeline_animation_export.v1",
                 "rrkal_displaytools.timeline_first_keyframe_apply.v1",
                 "profile.timeline_keyframes",
             ],
@@ -17036,12 +17169,13 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "no-GUI timeline ack smoke endpoint",
                 "renderer discrete keyframe step playback",
                 "renderer ocean material keyframe interpolation",
+                "renderer PNG frame sequence export",
             ],
             "pending": [
-                "animation_export",
+                "video_encoding",
                 "camera_keyframe_interpolation",
             ],
-            "boundary": "Timeline keyframes are portable UI/profile state; renderer discrete step playback and ocean/material interpolation are supported while camera/export remain pending.",
+            "boundary": "Timeline keyframes are portable UI/profile state; renderer PNG frame export is supported while video encoding and camera keyframes remain pending.",
         },
         "ui_handoff_contracts": {
             "schema": "rrkal_displaytools.ui_handoff_contracts.v1",
@@ -17249,6 +17383,10 @@ def main(argv: list[str] | None = None) -> None:
     ensure_dependencies(bool(args.headless))
     init_taichi(args.ti_arch)
     controller = HybridRenderController(args)
+    if args.timeline_export_dir:
+        manifest = controller.export_timeline_animation_frames()
+        print(json.dumps(manifest, ensure_ascii=False, indent=2, default=str))
+        return
     if args.headless or args.once:
         controller.render_if_needed(force=True)
         return
