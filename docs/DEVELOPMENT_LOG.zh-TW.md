@@ -1,5 +1,18 @@
 # Development Log
 
+## 2026-05-29 - Reveal selected layer row
+
+Scope:
+- Layers panel now includes `Reveal selected`.
+- The action clears the row filter when it hides the active layer and expands the active layer's group when needed.
+- `layer_filter.selected_layer_reveal_available` is now exposed in Qt state, No-GUI launch packets, profile schema, closed-loop status, docs, and smoke gates.
+
+Positioning:
+- This closes the common researcher workflow where a layer remains selected but its row is hidden by filter/collapse; renderer layer state remains unchanged.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Layer group active selection diagnostics
 
 Scope:

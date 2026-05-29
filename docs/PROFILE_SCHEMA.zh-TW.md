@@ -107,6 +107,7 @@ rrkal_displaytools.qt_panel_profile.v1
 | `query` | string | 使用者輸入的搜尋字串。 |
 | `first_matched_layer` | string or null | 目前 filter 結果中的第一個 layer key，可供 Qt `Select first` 使用。 |
 | `selected_layer_visible` | boolean | 目前 active layer 是否仍在 filter 結果中可見。 |
+| `selected_layer_reveal_available` | boolean | active layer 是否可用 `Reveal selected` 清除 filter 或展開 group 找回 row。 |
 | `matched_layers` | array | 符合 query 的 layer key 清單。 |
 | `matched_count` | integer | 符合的 row 數。 |
 | `visible_matched_layers` | array | 同時符合 filter 且未被 group collapse 隱藏的 layer key 清單。 |

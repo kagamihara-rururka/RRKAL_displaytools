@@ -546,7 +546,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         layer_focus_row = QtWidgets.QHBoxLayout()
         select_first_match = QtWidgets.QPushButton("Select first")
         select_first_match.clicked.connect(self.select_first_filtered_layer)
+        reveal_selected_layer = QtWidgets.QPushButton("Reveal selected")
+        reveal_selected_layer.clicked.connect(self.reveal_selected_layer_row)
         layer_focus_row.addWidget(select_first_match)
+        layer_focus_row.addWidget(reveal_selected_layer)
         for preset_id, label in (
             ("hydrology", "Hydro"),
             ("maritime", "Maritime"),
@@ -2276,6 +2279,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def collect_layer_filter_state(self) -> dict[str, object]:
         matched = [key for key, label in LAYER_LABELS if self.layer_filter_matches(key, label)]
         visible_matches = [key for key in matched if self.layer_group_allows_row(key)]
+        selected_layer_visible = self.selected_layer_key in visible_matches if self.selected_layer_key is not None else False
         return {
             "schema": "rrkal_displaytools.layer_filter.v1",
             "mode": "ui_row_filter",
@@ -2283,7 +2287,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "available_presets": ["all", "hydrology", "maritime", "traffic", "visual_aids", "custom"],
             "query": self.layer_filter_text,
             "first_matched_layer": visible_matches[0] if visible_matches else None,
-            "selected_layer_visible": self.selected_layer_key in visible_matches if self.selected_layer_key is not None else False,
+            "selected_layer_visible": selected_layer_visible,
+            "selected_layer_reveal_available": self.selected_layer_key is not None and not selected_layer_visible,
             "matched_layers": matched,
             "matched_count": len(matched),
             "visible_matched_layers": visible_matches,
@@ -2386,6 +2391,33 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 self.status.setText(f"已選取目前 filter 第一個圖層：{key}")
                 return
         self.status.setText("目前 layer filter 沒有符合圖層")
+
+    @QtCore.pyqtSlot()
+    def reveal_selected_layer_row(self) -> None:
+        if self.selected_layer_key is None or self.selected_layer_key not in self.layer_rows:
+            self.status.setText("目前沒有可 reveal 的 active layer")
+            return
+        labels = dict(LAYER_LABELS)
+        selected_label = labels.get(self.selected_layer_key, self.selected_layer_key)
+        changed = False
+        if not self.layer_filter_matches(self.selected_layer_key, selected_label):
+            self.layer_filter_text = ""
+            self.layer_filter_preset = "all"
+            if self.layer_filter_edit is not None:
+                self.layer_filter_edit.blockSignals(True)
+                self.layer_filter_edit.setText("")
+                self.layer_filter_edit.blockSignals(False)
+            changed = True
+        selected_group = self.layer_group_for_key(self.selected_layer_key)
+        if selected_group is not None and selected_group in self.layer_group_collapsed:
+            self.layer_group_collapsed.remove(selected_group)
+            changed = True
+        self.refresh_layer_filter()
+        self.refresh_research_provenance()
+        if changed:
+            self.status.setText(f"已 reveal active layer row：{self.selected_layer_key}；renderer state unchanged")
+        else:
+            self.status.setText(f"Active layer row 已可見：{self.selected_layer_key}")
 
     def refresh_layer_filter(self) -> None:
         matched_count = 0

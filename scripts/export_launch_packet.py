@@ -255,6 +255,8 @@ def layer_filter_packet(profile: dict[str, object]) -> dict[str, object]:
     visible_matched_layers = [
         key for key in matched_layers if group_for_layer.get(key) not in collapsed_groups
     ]
+    selected_layer = str(profile.get("selected_layer", ""))
+    selected_layer_visible = selected_layer in visible_matched_layers
     return {
         "schema": "rrkal_displaytools.layer_filter.v1",
         "mode": "no_gui_export_status",
@@ -262,7 +264,8 @@ def layer_filter_packet(profile: dict[str, object]) -> dict[str, object]:
         "available_presets": ["all", "hydrology", "maritime", "traffic", "visual_aids", "custom"],
         "query": query,
         "first_matched_layer": visible_matched_layers[0] if visible_matched_layers else None,
-        "selected_layer_visible": str(profile.get("selected_layer", "")) in visible_matched_layers,
+        "selected_layer_visible": selected_layer_visible,
+        "selected_layer_reveal_available": bool(selected_layer) and not selected_layer_visible,
         "matched_layers": matched_layers,
         "matched_count": len(matched_layers),
         "visible_matched_layers": visible_matched_layers,

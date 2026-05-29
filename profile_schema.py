@@ -138,6 +138,7 @@ def profile_payload_errors(profile: dict[str, object]) -> list[str]:
                 "query",
                 "first_matched_layer",
                 "selected_layer_visible",
+                "selected_layer_reveal_available",
                 "matched_layers",
                 "matched_count",
                 "visible_matched_layers",
@@ -169,6 +170,9 @@ def profile_payload_errors(profile: dict[str, object]) -> list[str]:
             selected_layer_visible = layer_filter.get("selected_layer_visible")
             if selected_layer_visible is not None and not isinstance(selected_layer_visible, bool):
                 errors.append("layer_filter.selected_layer_visible must be boolean")
+            selected_layer_reveal_available = layer_filter.get("selected_layer_reveal_available")
+            if selected_layer_reveal_available is not None and not isinstance(selected_layer_reveal_available, bool):
+                errors.append("layer_filter.selected_layer_reveal_available must be boolean")
             visible_matched_layers = layer_filter.get("visible_matched_layers")
             if visible_matched_layers is not None:
                 if not isinstance(visible_matched_layers, list) or any(not isinstance(item, str) for item in visible_matched_layers):
@@ -509,6 +513,7 @@ def profile_schema_packet() -> dict[str, object]:
                 "query",
                 "first_matched_layer",
                 "selected_layer_visible",
+                "selected_layer_reveal_available",
                 "matched_layers",
                 "matched_count",
                 "visible_matched_layers",

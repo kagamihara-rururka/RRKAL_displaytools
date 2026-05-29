@@ -43,6 +43,9 @@ if ($launchPacket.layer_filter.available_presets -notcontains "visual_aids") {
 if ($null -eq $launchPacket.layer_filter.first_matched_layer) {
     throw "Launch packet layer_filter first_matched_layer missing"
 }
+if ($null -eq $launchPacket.layer_filter.selected_layer_reveal_available) {
+    throw "Launch packet layer_filter reveal diagnostic missing"
+}
 if ($launchPacket.layer_group_view.schema -ne "rrkal_displaytools.layer_group_view.v1") {
     throw "Launch packet layer_group_view schema missing or invalid"
 }
