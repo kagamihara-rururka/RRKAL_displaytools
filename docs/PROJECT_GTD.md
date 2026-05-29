@@ -96,3 +96,4 @@ Last updated: 2026-05-29
 - 2026-05-29: Added renderer layer manifest JSON output and smoke coverage.
 - 2026-05-29: Reframed Qt panel labels toward a Photoshop-inspired workspace and added layer manifest display action.
 - 2026-05-29: Added Qt Studio menu bar and left tools dock toward Photoshop-like workspace structure.
+- 2026-05-29: Moved layer controls into a right-side dockable Qt Layers panel.

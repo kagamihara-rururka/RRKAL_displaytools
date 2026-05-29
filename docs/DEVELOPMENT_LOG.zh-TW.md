@@ -511,3 +511,15 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Dockable Qt Layers panel
+
+Scope:
+- Moved the Qt layer controls into a right-side dockable `Layers` panel.
+- Preserved existing layer toggles and grouped layer quick actions.
+
+Positioning:
+- This makes the frontend closer to Photoshop's dockable Layers panel model without changing renderer behavior.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

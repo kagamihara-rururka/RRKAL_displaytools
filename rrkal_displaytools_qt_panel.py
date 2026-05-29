@@ -224,7 +224,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             button = QtWidgets.QPushButton(label)
             button.clicked.connect(callback)
             layers_layout.addWidget(button, 8 + index // 2, index % 2)
-        right.addWidget(layers_group)
+        layers_dock = QtWidgets.QDockWidget("Layers", self)
+        layers_dock.setObjectName("layersDock")
+        layers_dock.setAllowedAreas(
+            QtCore.Qt.DockWidgetArea.LeftDockWidgetArea
+            | QtCore.Qt.DockWidgetArea.RightDockWidgetArea
+        )
+        layers_dock.setWidget(layers_group)
+        self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, layers_dock)
 
         command_group = self._group("中央預覽 / Command and JSON preview")
         command_layout = QtWidgets.QVBoxLayout(command_group)
