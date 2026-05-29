@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - UI construction label cleanup
+
+Scope:
+- Updated stale Qt labels that still called lock/opacity/blend UI-only or renderer-sync pending.
+- Removed Brush/Mask from the active History construction list because it is intentionally out of this UI round.
+- Boundary highlight UI copy now states line mask/picking is live while polygon fill remains pending.
+
+Positioning:
+- This keeps the Photoshop-inspired UI honest for researchers using the current build.
+- No renderer behavior or data governance changed in this step.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Hydrology selected-layer picking
 
 Scope:

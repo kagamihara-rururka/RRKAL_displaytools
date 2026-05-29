@@ -368,7 +368,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         material_form.addRow("Wave strength", self.wave_edit)
         material_form.addRow("Roughness", self.roughness_edit)
         material_form.addRow("Foam", self.foam_edit)
-        layer_inspector_note = QtWidgets.QLabel("🚧 Active layer inspector：先同步 UI state，renderer sync 下一步接。")
+        layer_inspector_note = QtWidgets.QLabel("Active layer inspector：已同步 layer runtime；renderer pick state 會回寫選取結果。")
         layer_inspector_note.setWordWrap(True)
         self.layer_property_labels = {
             "name": QtWidgets.QLabel("尚未選取"),
@@ -475,20 +475,20 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             layer_label = QtWidgets.QLabel(label)
 
             lock = QtWidgets.QCheckBox()
-            lock.setToolTip("🚧 UI-only lock state; renderer sync pending")
+            lock.setToolTip("Lock is honored by renderer runtime sync for visibility, opacity, and blend updates.")
             lock.stateChanged.connect(lambda _state, self=self: self.refresh_layer_stack_status())
             self.layer_locks[key] = lock
 
             opacity = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
             opacity.setRange(0, 100)
             opacity.setValue(100)
-            opacity.setToolTip("🚧 UI-only opacity; renderer material/layer sync pending")
+            opacity.setToolTip("Renderer runtime opacity sync is live for supported layers.")
             opacity.valueChanged.connect(lambda _value, self=self: self.refresh_layer_stack_status())
             self.layer_opacity[key] = opacity
 
             blend = QtWidgets.QComboBox()
             blend.addItems(BLEND_MODES)
-            blend.setToolTip("🚧 UI-only blend mode; renderer compositing sync pending")
+            blend.setToolTip("Renderer runtime blend sync is live for hydrology, boundary, and point/icon overlays.")
             blend.currentTextChanged.connect(lambda _text, self=self: self.refresh_layer_stack_status())
             self.layer_blends[key] = blend
             if key in BOUNDARY_HIGHLIGHT_LAYER_KEYS:
@@ -510,7 +510,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.selected_layer_label = QtWidgets.QLabel("目前選取圖層：尚未選取")
         self.selected_layer_label.setObjectName("selectedLayer")
         layers_layout.addWidget(self.selected_layer_label)
-        self.layer_stack_note = QtWidgets.QLabel("🚧 Lock / Opacity / Blend 目前是 UI state，下一步接 renderer 即時同步。")
+        self.layer_stack_note = QtWidgets.QLabel("Lock / Opacity / Blend 已接 renderer runtime；未支援圖層會在 renderer_sync 標示。")
         self.layer_stack_note.setWordWrap(True)
         layers_layout.addWidget(self.layer_stack_note)
         self.layer_runtime_state_label = QtWidgets.QLabel(f"Layer runtime bridge: waiting for {LAYER_RUNTIME_STATE_PATH.name}")
@@ -727,7 +727,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.pin_type_combo = QtWidgets.QComboBox()
         self.pin_type_combo.addItems(PIN_TYPES)
         self.pin_label_edit = QtWidgets.QLineEdit("Station A")
-        self.pin_note_edit = QtWidgets.QLineEdit("UI-only marker; geospatial placement pending")
+        self.pin_note_edit = QtWidgets.QLineEdit("Geodetic marker; renderer rotates and occludes it with the globe")
         self.pin_lat_edit = QtWidgets.QLineEdit("0.0")
         self.pin_lon_edit = QtWidgets.QLineEdit("0.0")
         self.pin_priority_spin = QtWidgets.QSpinBox()
@@ -842,8 +842,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "✅ Qt Studio workspace loaded",
             "✅ Profile/template launch flow",
             "✅ Layer manifest/capabilities preview",
-            "✅ Live renderer layer visibility sync",
-            "🚧 Brush/mask tools",
+            "✅ Live renderer layer visibility/opacity/blend sync",
+            "✅ Selected-layer renderer picking bridge",
             "🚧 Timeline/keyframes",
             "🚧 Undo stack",
         ):
@@ -1506,7 +1506,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"{'On' if state.get('enabled') else 'Off'}; trigger={state.get('trigger', 'hover')}; "
             f"RGB={color_text}; contrast={state.get('contrast')}%; alpha={state.get('alpha')}%; "
             f"gamma={gamma:.2f}; feather={state.get('feather')}%; "
-            f"breath={'on' if breathing_enabled else 'off'}; targets={target_count}; 🚧 renderer overlay pending"
+            f"breath={'on' if breathing_enabled else 'off'}; targets={target_count}; line mask live; polygon fill pending"
         )
 
     def refresh_boundary_highlight_status(self) -> None:
@@ -1577,7 +1577,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         layout = QtWidgets.QVBoxLayout(dialog)
         note = QtWidgets.QLabel(
             "控制國界/領海/EEZ/公海 hover 強調遮罩。這是科研定位用的圖層強調狀態，"
-            "本輪寫入 profile / launch packet / provenance；renderer 實際 polygon mask 仍為下一步。"
+            "已寫入 profile / launch packet / provenance；renderer 線段遮罩已 live，polygon fill 仍為下一步。"
         )
         note.setWordWrap(True)
         layout.addWidget(note)
@@ -1847,7 +1847,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"可見圖層 {visible}/{len(LAYER_LABELS)}；鎖定 {locked}；"
             f"非預設 opacity/blend {non_default}；"
             f"solo snapshot={'active' if self.layer_visibility_snapshot is not None else 'none'}。"
-            "Visibility/Opacity 已接 renderer runtime sync；🚧 Blend 下一步接。"
+            "Visibility/Opacity/Blend 已接 renderer runtime sync。"
         )
         self.write_layer_runtime_state()
         self.refresh_layer_properties()
@@ -2316,7 +2316,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"Selected pin: {selected_pin_text}\n"
             f"Pin markers: {pin_markers}\n"
             f"Cursor estimate: {cursor_text}\n\n"
-            "🚧 UI preview only: renderer embed/sync pending"
+            "Qt preview only; renderer state sync and pick bridges are live, embedded thumbnail pending"
         )
         self.canvas_meta_label.setText(
             f"Canvas state mirrors Qt UI only：active tool={self.active_tool}, "
@@ -2376,7 +2376,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "boundary_highlight": self.collect_boundary_highlight_state(),
             "boundary_highlight_ack_file": str(BOUNDARY_HIGHLIGHT_ACK_PATH),
             "boundary_highlight_ack": self.boundary_highlight_ack_payload,
-            "boundary_highlight_boundary": "UI/profile/launch state only; renderer hover polygon mask and EEZ/territorial geometry picking are pending.",
+            "boundary_highlight_boundary": "Line hover mask and selected-layer line picking are live; polygon fill mask and territory feature identity remain pending.",
             "visible_layers": visible_layers,
             "locked_layers": locked_layers,
             "layer_visibility_snapshot_active": self.layer_visibility_snapshot is not None,
