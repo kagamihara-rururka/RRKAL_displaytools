@@ -574,3 +574,15 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Qt workspace preset menu
+
+Scope:
+- Added `Window > Workspace Presets` entries for Default, Maritime, Tactical, Parchment, and Review.
+- Presets restore core docks, arrange key panels into tabs, and apply the matching display preset where appropriate.
+
+Positioning:
+- This gives the Qt frontend a Photoshop-like workspace preset flow while keeping persisted custom layouts local.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

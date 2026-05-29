@@ -17,6 +17,7 @@
 - 可在中央預覽區顯示 renderer capabilities、layer manifest、launch packet 或 smoke 結果。
 - 未完成的 live preview、brush/mask、timeline、undo stack 會以 🚧 施工中標示。
 - 可保存、載入、重置本機 workspace layout，狀態位於 `state/ui_workspace.json`。
+- Window menu 提供 workspace presets：Default、Maritime、Tactical、Parchment、Review，可切換 dock/tab 排版並套用對應顯示 preset。
 
 ## 預計實現功能
 
@@ -27,7 +28,7 @@
 - Style / Looks panel 的縮圖化模板選擇。
 - Brush / mask / selection 類工具先做 UI placeholder，再逐步接 renderer。
 - Timeline / keyframe / animation controls for ocean/cloud/material parameters。
-- Workspace preset：Default、Maritime、Tactical、Parchment、Review。
+- Workspace presets 後續要補成可視化 preset manager，並支援保存多組命名工作區。
 
 ### Profiles and templates
 

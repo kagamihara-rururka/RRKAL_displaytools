@@ -111,6 +111,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_locks: dict[str, QtWidgets.QCheckBox] = {}
         self.layer_opacity: dict[str, QtWidgets.QSlider] = {}
         self.layer_blends: dict[str, QtWidgets.QComboBox] = {}
+        self.docks: dict[str, QtWidgets.QDockWidget] = {}
         self.template_paths: list[Path] = []
         self._build_ui()
         self._build_menu_bar()
@@ -188,6 +189,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             | QtCore.Qt.DockWidgetArea.RightDockWidgetArea
         )
         properties_dock.setWidget(material_group)
+        self.docks["properties"] = properties_dock
         self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, properties_dock)
 
         preset_group = self._group("預設 / Looks")
@@ -295,6 +297,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             | QtCore.Qt.DockWidgetArea.RightDockWidgetArea
         )
         layers_dock.setWidget(layers_group)
+        self.docks["layers"] = layers_dock
         self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, layers_dock)
 
         command_group = self._group("中央預覽 / Command and JSON preview")
@@ -396,6 +399,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         window_menu.addAction("Save Workspace Layout", self.save_workspace_layout)
         window_menu.addAction("Load Workspace Layout", self.load_workspace_layout)
         window_menu.addAction("Reset Saved Workspace Layout", self.reset_workspace_layout)
+        workspace_presets = window_menu.addMenu("Workspace Presets")
+        workspace_presets.addAction("Default", lambda _checked=False: self.apply_workspace_preset("default"))
+        workspace_presets.addAction("Maritime", lambda _checked=False: self.apply_workspace_preset("maritime"))
+        workspace_presets.addAction("Tactical", lambda _checked=False: self.apply_workspace_preset("tactical"))
+        workspace_presets.addAction("Parchment", lambda _checked=False: self.apply_workspace_preset("parchment"))
+        workspace_presets.addAction("Review", lambda _checked=False: self.apply_workspace_preset("review"))
 
         help_menu = self.menuBar().addMenu("Help")
         help_menu.addAction("Smoke Check", self.run_smoke_check)
@@ -424,6 +433,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             layout.addWidget(button)
         layout.addStretch(1)
         dock.setWidget(tools)
+        self.docks["tools"] = dock
         self.addDockWidget(QtCore.Qt.DockWidgetArea.LeftDockWidgetArea, dock)
 
     def _build_auxiliary_docks(self) -> None:
@@ -445,6 +455,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         zoom_row.addWidget(self.zoom_placeholder)
         navigator_layout.addLayout(zoom_row)
         navigator_dock.setWidget(navigator)
+        self.docks["navigator"] = navigator_dock
         self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, navigator_dock)
 
         history_dock = QtWidgets.QDockWidget("History", self)
@@ -461,6 +472,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         ):
             self.history_list.addItem(item)
         history_dock.setWidget(self.history_list)
+        self.docks["history"] = history_dock
         self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, history_dock)
 
     @QtCore.pyqtSlot()
@@ -505,6 +517,38 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             WORKSPACE_STATE_PATH.unlink()
         self.status.setText("已移除已儲存 workspace layout；下次啟動使用預設佈局")
         self.statusBar().showMessage("Saved workspace layout reset", 4000)
+
+    def apply_workspace_preset(self, preset: str) -> None:
+        for dock in self.docks.values():
+            dock.setFloating(False)
+            dock.show()
+        self.addDockWidget(QtCore.Qt.DockWidgetArea.LeftDockWidgetArea, self.docks["tools"])
+        self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.docks["layers"])
+        self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.docks["properties"])
+        self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.docks["navigator"])
+        self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.docks["history"])
+        if preset == "maritime":
+            self.apply_maritime()
+            self.tabifyDockWidget(self.docks["layers"], self.docks["properties"])
+            self.docks["layers"].raise_()
+        elif preset == "tactical":
+            self.apply_tactical()
+            self.tabifyDockWidget(self.docks["navigator"], self.docks["history"])
+            self.docks["layers"].raise_()
+        elif preset == "parchment":
+            self.apply_parchment()
+            self.tabifyDockWidget(self.docks["properties"], self.docks["navigator"])
+            self.docks["properties"].raise_()
+        elif preset == "review":
+            self.apply_baseline()
+            self.tabifyDockWidget(self.docks["layers"], self.docks["properties"])
+            self.tabifyDockWidget(self.docks["navigator"], self.docks["history"])
+            self.docks["history"].raise_()
+        else:
+            self.apply_baseline()
+            self.docks["layers"].raise_()
+        self.status.setText(f"已套用 workspace preset：{preset}")
+        self.statusBar().showMessage(f"Workspace preset applied: {preset}", 4000)
 
     def _group(self, title: str) -> QtWidgets.QGroupBox:
         return QtWidgets.QGroupBox(title)
