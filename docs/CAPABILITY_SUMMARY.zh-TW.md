@@ -344,3 +344,8 @@
 
 - Renderer capability discovery now includes the Layers workflow hint under `layer_research_workflow`.
 - The hint is now aligned across Qt UI, no-GUI launch packet, handoff inspection and renderer capabilities.
+
+### 2026-05-30 Closed-loop Layers workflow hint handoff evidence
+
+- Closed-loop status now lists `layer_workflow_hint_handoff` for the layer workflow guidance loop.
+- Evidence spans Qt UI, launch packet, handoff inspection, renderer capabilities and smoke gates.

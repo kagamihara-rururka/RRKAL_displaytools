@@ -3280,3 +3280,17 @@ Decision:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+
+## 2026-05-30 - Closed-loop Layers workflow hint handoff evidence
+
+Scope:
+- Closed-loop status now includes `layer_workflow_hint_handoff` for the UI/operator guidance loop.
+- The evidence covers Qt `layerWorkflowHint`, launch packet `layer_research_workflow.workflow_hint`, handoff inspection, renderer capability discovery and smoke gates.
+- The boundary note keeps renderer layer picking and backend geospatial identity refinements separate.
+
+Decision:
+- Layer operation guidance is now a verifiable cross-machine UX contract, not just an in-UI note.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+

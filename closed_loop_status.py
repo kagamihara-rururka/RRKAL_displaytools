@@ -201,6 +201,25 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                 ],
                 "boundary": "Closed warning/provenance loop only; authoritative polygon territory identity and open-line area inference remain pending backend work.",
             },
+            {
+                "id": "layer_workflow_hint_handoff",
+                "scope": [
+                    "Qt Layers workflow hint",
+                    "launch packet layer_research_workflow workflow_hint",
+                    "handoff inspection workflow_hint output",
+                    "renderer capability workflow_hint discovery",
+                    "smoke-gated row selection and Boundary emphasis wording",
+                ],
+                "evidence": [
+                    "layerWorkflowHint",
+                    "layer_research_workflow.workflow_hint",
+                    "layer_research_workflow.workflow_hint_surface",
+                    "scripts/inspect_handoff.ps1 layer_research_workflow workflow_hint",
+                    "taichi_global_bathymetry.py layer_research_workflow workflow_hint",
+                    "scripts/smoke.ps1 layer workflow hint gates",
+                ],
+                "boundary": "Closed UI/operator guidance loop only; renderer layer picking and backend geospatial identity refinements remain separate.",
+            },
         ],
         "partial": [
             {

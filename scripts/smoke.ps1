@@ -1739,5 +1739,11 @@ if ($closedLoopSource -notmatch 'boundary_identity_warning_handoff') {
 if ($closedLoopSource -notmatch 'Closed warning/provenance loop only') {
     throw "Closed-loop boundary identity warning boundary note is missing"
 }
+if ($closedLoopSource -notmatch 'layer_workflow_hint_handoff') {
+    throw "Closed-loop layer workflow hint handoff evidence is missing"
+}
+if ($closedLoopSource -notmatch 'Closed UI/operator guidance loop only') {
+    throw "Closed-loop layer workflow hint boundary note is missing"
+}
 
 Write-Host "Smoke passed."
