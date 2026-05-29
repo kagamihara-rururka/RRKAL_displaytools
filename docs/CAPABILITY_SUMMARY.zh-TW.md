@@ -91,6 +91,7 @@
   - Profile schema contract JSON。
   - Built-in profile validation。
   - No-GUI launch packet export。
+  - Launch packet `canvas_preview` schema gate。
   - Renderer capabilities JSON。
   - No-GUI template listing。
   - PowerShell script parse。

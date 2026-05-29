@@ -1,5 +1,17 @@
 ﻿# Development Log
 
+## 2026-05-29 - Smoke gate for canvas preview handoff
+
+Scope:
+- `scripts/smoke.ps1` now parses the no-GUI launch packet from `fast_synthetic`.
+- Smoke fails if the exported launch packet does not include `canvas_preview.schema == rrkal_displaytools.canvas_preview.v1`.
+
+Positioning:
+- This makes the Canvas Preview profile/no-GUI handoff contract verifiable in the required pre-commit smoke gate.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Canvas thumbnail auto-refresh
 
 Scope:
