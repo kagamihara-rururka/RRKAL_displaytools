@@ -548,3 +548,16 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Qt workspace layout persistence
+
+Scope:
+- Added Window menu actions to save, load, and reset local Qt workspace layout.
+- Workspace geometry and dock state are saved to `state/ui_workspace.json`.
+- Updated reporting rule: every push report includes current capabilities and planned/next capabilities.
+
+Positioning:
+- This follows Photoshop's saved workspace concept while keeping layout state local-only.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

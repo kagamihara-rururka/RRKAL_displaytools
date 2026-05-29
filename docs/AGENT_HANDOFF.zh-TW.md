@@ -30,7 +30,7 @@
 - Update `docs/PROJECT_GTD.md` or this handoff if scope/status changed.
 - Commit scoped code/docs before starting the next round.
 - Push main when network/GitHub access is available.
-- After every push, report in Chinese what capabilities the program currently has.
+- After every push, report in Chinese what capabilities the program currently has, then add a second section summarizing planned/next capabilities.
 
 ## Current source of truth
 

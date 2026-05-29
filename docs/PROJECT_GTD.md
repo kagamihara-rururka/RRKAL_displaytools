@@ -22,7 +22,7 @@ Last updated: 2026-05-29
 - Qt/PyQt6-first for displaytools control UI; do not introduce Tk as the main UI path.
 - RRKAL-first data governance: dataset discovery, download, import, install registry, manifest, cache lifecycle, and asset repair belong to `APIkeys_collection`.
 - Do not commit generated caches, screenshots, logs, databases, virtual environments, secrets, or heavy local data.
-- Every development round ends with docs/log update, smoke test, commit, push, and a Chinese summary of current program capabilities.
+- Every development round ends with docs/log update, smoke test, commit, push, a Chinese summary of current program capabilities, and a second summary of planned/next capabilities.
 - Current user rule: before each commit, run at least a smoke test and record the result in `docs/DEVELOPMENT_LOG.zh-TW.md`.
 
 ## Backlog
@@ -99,3 +99,4 @@ Last updated: 2026-05-29
 - 2026-05-29: Moved layer controls into a right-side dockable Qt Layers panel.
 - 2026-05-29: Moved ocean material controls into a dockable Qt Properties panel.
 - 2026-05-29: Added dockable Qt Navigator and History panels with construction placeholders.
+- 2026-05-29: Added local workspace layout save/load/reset for dock/window state.

@@ -15,6 +15,18 @@
 - 顯示 renderer PID、執行中狀態與 exit code。
 - 可在中央預覽區顯示 renderer capabilities、layer manifest、launch packet 或 smoke 結果。
 - 未完成的 live preview、brush/mask、timeline、undo stack 會以 🚧 施工中標示。
+- 可保存、載入、重置本機 workspace layout，狀態位於 `state/ui_workspace.json`。
+
+## 預計實現功能
+
+- Dockable panels 的更完整 Photoshop-like 版面：Layers / Properties / Navigator / History / Timeline。
+- 中央 renderer preview 從命令 JSON 預覽升級為可嵌入或可同步的畫面預覽。
+- 圖層即時同步，不再只靠重啟 renderer 套用。
+- Layer stack 的可見性、鎖定、opacity、blend/mode 類控制。
+- Style / Looks panel 的縮圖化模板選擇。
+- Brush / mask / selection 類工具先做 UI placeholder，再逐步接 renderer。
+- Timeline / keyframe / animation controls for ocean/cloud/material parameters。
+- Workspace preset：Default、Maritime、Tactical、Parchment、Review。
 
 ### Profiles and templates
 

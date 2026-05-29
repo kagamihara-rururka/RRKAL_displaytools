@@ -59,6 +59,7 @@ except ImportError as exc:
 RENDERER = ROOT / "taichi_global_bathymetry.py"
 PROFILE_DIR = ROOT / "state" / "ui_profiles"
 SHOWCASE_DIR = ROOT / "state" / "showcase"
+WORKSPACE_STATE_PATH = ROOT / "state" / "ui_workspace.json"
 
 STYLE_PROFILES = ("scientific", "nautical", "parchment", "tactical")
 UI_BACKENDS = ("qt", "vispy")
@@ -110,6 +111,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self._build_menu_bar()
         self._build_tool_dock()
         self._build_auxiliary_docks()
+        self.load_workspace_layout(silent=True)
         self.statusBar().showMessage("Ready")
         self.process_timer = QtCore.QTimer(self)
         self.process_timer.setInterval(1500)
@@ -335,6 +337,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         window_menu = self.menuBar().addMenu("Window")
         window_menu.addAction("Open Template Folder", self.open_template_dir)
         window_menu.addAction("Open Local Profile Folder", self.open_local_profile_dir)
+        window_menu.addSeparator()
+        window_menu.addAction("Save Workspace Layout", self.save_workspace_layout)
+        window_menu.addAction("Load Workspace Layout", self.load_workspace_layout)
+        window_menu.addAction("Reset Saved Workspace Layout", self.reset_workspace_layout)
 
         help_menu = self.menuBar().addMenu("Help")
         help_menu.addAction("Smoke Check", self.run_smoke_check)
@@ -401,6 +407,49 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.history_list.addItem(item)
         history_dock.setWidget(self.history_list)
         self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, history_dock)
+
+    @QtCore.pyqtSlot()
+    def save_workspace_layout(self) -> None:
+        WORKSPACE_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "schema": "rrkal_displaytools.qt_workspace_layout.v1",
+            "geometry": bytes(self.saveGeometry().toBase64()).decode("ascii"),
+            "window_state": bytes(self.saveState().toBase64()).decode("ascii"),
+        }
+        WORKSPACE_STATE_PATH.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        self.status.setText(f"已儲存 workspace layout：{WORKSPACE_STATE_PATH}")
+        self.statusBar().showMessage("Workspace layout saved", 4000)
+
+    def load_workspace_layout(self, silent: bool = False) -> None:
+        if not WORKSPACE_STATE_PATH.exists():
+            if not silent:
+                self.status.setText("尚未儲存 workspace layout")
+            return
+        try:
+            payload = json.loads(WORKSPACE_STATE_PATH.read_text(encoding="utf-8"))
+            geometry = QtCore.QByteArray.fromBase64(str(payload.get("geometry", "")).encode("ascii"))
+            window_state = QtCore.QByteArray.fromBase64(str(payload.get("window_state", "")).encode("ascii"))
+            if not geometry.isEmpty():
+                self.restoreGeometry(geometry)
+            if not window_state.isEmpty():
+                self.restoreState(window_state)
+        except Exception as exc:
+            if not silent:
+                self.status.setText(f"Workspace layout 載入失敗：{exc}")
+            return
+        if not silent:
+            self.status.setText(f"已載入 workspace layout：{WORKSPACE_STATE_PATH}")
+        self.statusBar().showMessage("Workspace layout loaded", 4000)
+
+    @QtCore.pyqtSlot()
+    def reset_workspace_layout(self) -> None:
+        if WORKSPACE_STATE_PATH.exists():
+            WORKSPACE_STATE_PATH.unlink()
+        self.status.setText("已移除已儲存 workspace layout；下次啟動使用預設佈局")
+        self.statusBar().showMessage("Saved workspace layout reset", 4000)
 
     def _group(self, title: str) -> QtWidgets.QGroupBox:
         return QtWidgets.QGroupBox(title)
