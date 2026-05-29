@@ -2658,37 +2658,23 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         launch_button.clicked.connect(self.launch_renderer)
         restart_button.clicked.connect(self.restart_renderer)
         stop_button.clicked.connect(self.stop_renderer)
-        action_buttons = (
-            refresh_button,
-            copy_button,
-            copy_portable_button,
-            save_button,
-            load_button,
-            open_templates_button,
-            open_local_profiles_button,
-            export_packet_button,
-            profile_replay_button,
-            ocean_port_button,
-            hydro_lod_button,
-            style_routes_button,
-            module_seams_button,
-            clone_ready_button,
-            pin_pick_button,
-            cursor_geo_button,
-            boundary_state_button,
-            capabilities_button,
-            closed_loop_button,
-            layer_manifest_button,
-            canvas_state_button,
-            thumbnail_button,
-            live_preview_button,
-            smoke_button,
-            launch_button,
-            restart_button,
-            stop_button,
+        action_sections = (
+            ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button)),
+            ("Inspect: Replay/contracts", (profile_replay_button, module_seams_button, clone_ready_button)),
+            ("Inspect: Renderer ports", (hydro_lod_button, ocean_port_button, style_routes_button)),
+            ("Inspect: Research interaction", (pin_pick_button, cursor_geo_button, boundary_state_button)),
+            ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, canvas_state_button, thumbnail_button, live_preview_button, smoke_button)),
+            ("Process", (launch_button, restart_button, stop_button)),
         )
-        for index, button in enumerate(action_buttons):
-            actions.addWidget(button, index // 4, index % 4)
+        row = 0
+        for section_title, section_buttons in action_sections:
+            section_label = QtWidgets.QLabel(section_title)
+            section_label.setObjectName("actionSectionHeader")
+            actions.addWidget(section_label, row, 0, 1, 4)
+            row += 1
+            for index, button in enumerate(section_buttons):
+                actions.addWidget(button, row + index // 4, index % 4)
+            row += (len(section_buttons) + 3) // 4
         right.addWidget(actions_group)
 
         self.status = QtWidgets.QLabel("尚未啟動 renderer")
@@ -2702,6 +2688,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             QGroupBox { font-weight: 700; border: 1px solid #8aa0b6; border-radius: 8px; margin-top: 12px; padding: 10px; }
             QGroupBox::title { subcontrol-origin: margin; left: 12px; padding: 0 4px; }
             QPushButton { padding: 7px 10px; }
+            QLabel#actionSectionHeader { color: #38516a; font-weight: 700; padding-top: 6px; }
             QPlainTextEdit { font-family: Consolas, 'Cascadia Mono', monospace; }
             QLabel#navigatorPreview { background: #202832; color: #d8e6f3; border: 1px dashed #8aa0b6; }
             QLabel#layerHeader { color: #587087; font-size: 8.5pt; font-weight: 700; }

@@ -1740,6 +1740,15 @@ if ($qtPanelSource -notlike "*Inspect: Profile replay*") {
 if ($qtPanelSource -notlike "*Inspect: Boundary JSON*") {
     throw "Qt Boundary JSON inspector prefix is missing"
 }
+if ($qtPanelSource -notlike "*actionSectionHeader*") {
+    throw "Qt Actions section headers are missing"
+}
+if ($qtPanelSource -notlike "*Inspect: Replay/contracts*") {
+    throw "Qt Actions Replay/contracts section is missing"
+}
+if ($qtPanelSource -notlike "*Inspect: Research interaction*") {
+    throw "Qt Actions Research interaction section is missing"
+}
 if ($qtPanelSource -notlike "*show_boundary_state*") {
     throw "Qt Boundary JSON action is missing"
 }

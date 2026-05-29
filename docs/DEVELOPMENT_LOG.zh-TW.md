@@ -230,6 +230,20 @@ Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
 
+## 2026-05-30 - Qt Actions section layout
+
+Scope:
+- Split the Qt Actions grid into section headers: Run / profile, Inspect: Replay/contracts, Inspect: Renderer ports, Inspect: Research interaction, Renderer diagnostics and Process.
+- Added the `actionSectionHeader` object name and stylesheet hook for section labels.
+- Smoke verifies section header presence and representative Inspect group headers.
+
+Decision:
+- The Actions panel should be readable as grouped scientific/operator controls instead of a flat button wall.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+
 ## 2026-05-30 - Qt grouped Inspect tooltips
 
 Scope:

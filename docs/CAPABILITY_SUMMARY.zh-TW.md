@@ -449,3 +449,8 @@
 
 - Qt Inspect button tooltips and accessible descriptions now include their group names: Replay/contracts, Renderer ports and Research interaction.
 - Smoke verifies grouped tooltip text so the UI reflects the same grouping exposed in profile replay contracts.
+
+### 2026-05-30 Qt Actions section layout
+
+- Qt Actions now uses section headers for Run/profile, Inspect Replay/contracts, Inspect Renderer ports, Inspect Research interaction, Renderer diagnostics and Process.
+- Smoke verifies the section header marker and representative Inspect group headers.
