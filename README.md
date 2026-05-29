@@ -34,9 +34,11 @@ Governance rule:
 Primary files:
 - `rrkal_displaytools_qt_panel.py`: Qt operator panel for layer/style/material launch control.
 - `taichi_global_bathymetry.py`: current monolithic renderer prototype.
+- `profiles/*.json`: repo-shared Qt panel profile templates.
 
 Qt panel capabilities:
 - Toggle renderer layers without memorizing CLI flags.
+- Load repo-shared profile templates from `profiles/`.
 - Save/load local layer profiles as JSON under `state/ui_profiles/`.
 - Apply current settings by restarting the renderer from the panel.
 

@@ -24,6 +24,7 @@ except ImportError as exc:
 ROOT = Path(__file__).resolve().parent
 RENDERER = ROOT / "taichi_global_bathymetry.py"
 PROFILE_DIR = ROOT / "state" / "ui_profiles"
+PROFILE_TEMPLATE_DIR = ROOT / "profiles"
 
 STYLE_PROFILES = ("scientific", "nautical", "parchment", "tactical")
 UI_BACKENDS = ("qt", "vispy")
@@ -71,8 +72,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.resize(1120, 780)
         self.process: subprocess.Popen[bytes] | None = None
         self.checks: dict[str, QtWidgets.QCheckBox] = {}
+        self.template_paths: list[Path] = []
         self._build_ui()
         self.apply_baseline()
+        self.refresh_template_list()
         self.refresh_command_preview()
 
     def _build_ui(self) -> None:
@@ -145,6 +148,18 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             button.clicked.connect(callback)
             preset_layout.addWidget(button, index // 2, index % 2)
         left.addWidget(preset_group)
+
+        template_group = self._group("內建 profile templates")
+        template_layout = QtWidgets.QGridLayout(template_group)
+        self.template_combo = QtWidgets.QComboBox()
+        load_template_button = QtWidgets.QPushButton("載入模板")
+        rescan_template_button = QtWidgets.QPushButton("重掃模板")
+        load_template_button.clicked.connect(self.load_selected_template)
+        rescan_template_button.clicked.connect(self.refresh_template_list)
+        template_layout.addWidget(self.template_combo, 0, 0, 1, 2)
+        template_layout.addWidget(load_template_button, 1, 0)
+        template_layout.addWidget(rescan_template_button, 1, 1)
+        left.addWidget(template_group)
         left.addStretch(1)
 
         layers_group = self._group("圖層開關")
@@ -301,6 +316,34 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 if key in self.checks:
                     self.checks[key].setChecked(bool(value))
         self.refresh_command_preview()
+
+    @QtCore.pyqtSlot()
+    def refresh_template_list(self) -> None:
+        PROFILE_TEMPLATE_DIR.mkdir(parents=True, exist_ok=True)
+        self.template_paths = sorted(PROFILE_TEMPLATE_DIR.glob("*.json"))
+        self.template_combo.clear()
+        if not self.template_paths:
+            self.template_combo.addItem("沒有內建模板")
+            return
+        for path in self.template_paths:
+            self.template_combo.addItem(path.stem.replace("_", " "), str(path))
+
+    @QtCore.pyqtSlot()
+    def load_selected_template(self) -> None:
+        if not self.template_paths:
+            self.status.setText("沒有可載入的內建模板")
+            return
+        index = self.template_combo.currentIndex()
+        if index < 0 or index >= len(self.template_paths):
+            self.status.setText("模板選取無效")
+            return
+        path = self.template_paths[index]
+        profile = json.loads(path.read_text(encoding="utf-8"))
+        if not isinstance(profile, dict):
+            self.status.setText("模板格式錯誤：root 不是 JSON object")
+            return
+        self.apply_profile(profile)
+        self.status.setText(f"已載入內建模板：{path.name}")
 
     @QtCore.pyqtSlot()
     def refresh_command_preview(self) -> None:

@@ -7,7 +7,8 @@ Last updated: 2026-05-29
 | Area | Status | Current progress | Next step |
 | --- | --- | --- | --- |
 | Product positioning | MVP | Repo is positioned as RRKAL's visualization/display layer, not a duplicate data launcher. `docs/PRODUCT_POSITIONING.zh-TW.md` records the launcher-vs-renderer boundary. | Keep future code changes aligned with RRKAL-owned data governance and displaytools-owned renderer contracts. |
-| Qt operator UI | MVP | Added `rrkal_displaytools_qt_panel.py`, a PyQt6 control panel for layer toggles, style profiles, topo source, data mode, ocean material values, renderer launch/stop/restart, and local JSON layer profiles. Tk is not the primary UI direction. | Wire deeper in-app layer control after the renderer loop is easier to separate. |
+| Qt operator UI | MVP | Added `rrkal_displaytools_qt_panel.py`, a PyQt6 control panel for layer toggles, style profiles, topo source, data mode, ocean material values, renderer launch/stop/restart, local JSON layer profiles, and repo-shared profile templates. Tk is not the primary UI direction. | Wire deeper in-app layer control after the renderer loop is easier to separate. |
+| Profile templates | MVP | Added baseline scientific, maritime hydrology, parchment review, tactical ops, and fast synthetic templates under `profiles/`. | Tune the preferred visual baseline after user review, then add project-specific templates as needed. |
 | Taichi globe prototype | MVP | `taichi_global_bathymetry.py` is imported as the current monolithic source of truth for the globe/bathymetry prototype. A bounded `--demo-closed-loop` preset exists, but the Qt panel defaults back to scientific/non-tactical baseline control. | Use the Qt panel for near-term visual review, then continue small reversible renderer slices inside the repo copy. |
 | Hydrology and LOD hook | In progress | Hydrology readiness, layer diagnostics, LOD invalidation and layer-count contracts are represented in the prototype. The Qt panel exposes lake/river/border/maritime layer switches. | Converge water/hydrology layers into stable renderer-facing contract names. |
 | Ocean material and sea-state port | In progress | Ocean material controls and sea-condition diagnostics exist as contract-oriented scaffolding. The Qt panel exposes wave strength, roughness, foam, and ocean material toggle. | Add a clearer Taichi material control boundary after visual review. |
@@ -28,7 +29,7 @@ Last updated: 2026-05-29
 - Move future development fully into `C:\Users\lyn59\Documents\Codex\RRKAL_displaytools`; avoid editing the old scratch source unless explicitly requested.
 - Define the minimal renderer input contract expected from RRKAL tile/cache manifests.
 - Create in-renderer layer toggles after the Qt launch panel proves the control model.
-- Add profile templates for common use cases after the preferred visual baseline is confirmed.
+- Tune profile templates after the preferred visual baseline is confirmed.
 - Separate diagnostics from render-loop code after contracts stabilize.
 - Decide which local cache artifacts should later be registered by RRKAL as renderer bridge assets.
 
@@ -40,3 +41,4 @@ Last updated: 2026-05-29
 - 2026-05-29: Added `--demo-closed-loop` as the first bounded showcase path for the existing renderer stack.
 - 2026-05-29: Added a PyQt6 operator panel for layer/style/material launch control.
 - 2026-05-29: Added Qt panel save/load JSON profiles and apply-by-restart flow.
+- 2026-05-29: Added repo-shared profile templates and Qt template loading.

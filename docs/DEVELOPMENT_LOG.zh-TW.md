@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - Repo-shared Qt profile templates
+
+Scope:
+- Added `profiles/*.json` templates for baseline scientific, maritime hydrology, parchment review, tactical ops, and fast synthetic use cases.
+- Added a Qt panel template selector with load/rescan actions.
+- Updated README and GTD so another computer can clone the repo and start from shared templates.
+
+Positioning:
+- Templates are displaytools launch profiles only.
+- Runtime/user-saved profiles remain local under `state/ui_profiles/` and should not be committed.
+
+Validation:
+- Not run; no test/validation requested.
+
 ## 2026-05-29 - Qt panel layer profile workflow
 
 Scope:
