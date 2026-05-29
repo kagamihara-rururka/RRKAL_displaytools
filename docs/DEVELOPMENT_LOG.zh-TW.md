@@ -1,5 +1,18 @@
 ﻿# Development Log
 
+## 2026-05-29 - Portable command handoff
+
+Scope:
+- Added `複製可攜命令` to the Qt panel.
+- Added `portable_command` and `portable_command_line` fields to launch packets.
+- Updated README and GTD for cross-machine command handoff.
+
+Positioning:
+- Portable commands use `py -3 taichi_global_bathymetry.py ...` so another Windows machine is not tied to the original Python executable path.
+
+Validation:
+- Smoke passed before commit: `py -3 -m py_compile rrkal_displaytools_qt_panel.py taichi_global_bathymetry.py`.
+- Smoke passed before commit: PowerShell parser check for all scripts under `scripts/`.
 ## 2026-05-29 - Windows quick headless render helper
 
 Scope:
@@ -199,6 +212,7 @@ Validation:
 Next round rule:
 - Before any new development round, inspect current repo state.
 - After each round, update this log and commit before continuing.
+
 
 
 

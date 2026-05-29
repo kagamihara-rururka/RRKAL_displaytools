@@ -205,6 +205,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         actions = QtWidgets.QHBoxLayout()
         refresh_button = QtWidgets.QPushButton("刷新命令")
         copy_button = QtWidgets.QPushButton("複製命令")
+        copy_portable_button = QtWidgets.QPushButton("複製可攜命令")
         save_button = QtWidgets.QPushButton("儲存配置")
         load_button = QtWidgets.QPushButton("載入配置")
         open_templates_button = QtWidgets.QPushButton("模板目錄")
@@ -216,6 +217,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         stop_button = QtWidgets.QPushButton("停止本面板啟動的程序")
         refresh_button.clicked.connect(self.refresh_command_preview)
         copy_button.clicked.connect(self.copy_command_to_clipboard)
+        copy_portable_button.clicked.connect(self.copy_portable_command_to_clipboard)
         save_button.clicked.connect(self.save_profile_dialog)
         load_button.clicked.connect(self.load_profile_dialog)
         open_templates_button.clicked.connect(self.open_template_dir)
@@ -227,6 +229,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         stop_button.clicked.connect(self.stop_renderer)
         actions.addWidget(refresh_button)
         actions.addWidget(copy_button)
+        actions.addWidget(copy_portable_button)
         actions.addWidget(save_button)
         actions.addWidget(load_button)
         actions.addWidget(open_templates_button)
@@ -307,6 +310,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             cmd.append(f"--{flag}" if enabled else f"--no-{flag}")
         return cmd
 
+    def build_portable_command(self) -> list[str]:
+        return ["py", "-3", "taichi_global_bathymetry.py", *self.build_command()[2:]]
+
     def collect_profile(self) -> dict[str, object]:
         return {
             "schema": "rrkal_displaytools.qt_panel_profile.v1",
@@ -348,6 +354,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "profile": self.collect_profile(),
             "command": self.build_command(),
             "command_line": subprocess.list2cmdline(self.build_command()),
+            "portable_command": self.build_portable_command(),
+            "portable_command_line": subprocess.list2cmdline(self.build_portable_command()),
         }
 
     def apply_profile(self, profile: dict[str, object]) -> None:
@@ -420,6 +428,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def copy_command_to_clipboard(self) -> None:
         QtWidgets.QApplication.clipboard().setText(self.command_text.toPlainText())
         self.status.setText("已複製目前啟動命令")
+
+    @QtCore.pyqtSlot()
+    def copy_portable_command_to_clipboard(self) -> None:
+        QtWidgets.QApplication.clipboard().setText(subprocess.list2cmdline(self.build_portable_command()))
+        self.status.setText("已複製可攜啟動命令")
 
     @QtCore.pyqtSlot()
     def open_template_dir(self) -> None:
