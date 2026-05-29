@@ -1700,4 +1700,12 @@ if ($launchPacketSource -notmatch 'No-GUI launch packet / Qt Canvas Preview / re
     throw "No-GUI launch packet boundary warning surface is missing"
 }
 
+$handoffInspectorSource = Get-Content -LiteralPath (Join-Path $BoundaryIdentityRoot "scripts\inspect_handoff.ps1") -Raw -Encoding UTF8
+if ($handoffInspectorSource -notmatch 'boundary_identity_warning') {
+    throw "Handoff inspection boundary identity warning output is missing"
+}
+if ($handoffInspectorSource -notmatch 'boundary_identity_warning_surface') {
+    throw "Handoff inspection boundary identity warning surface output is missing"
+}
+
 Write-Host "Smoke passed."

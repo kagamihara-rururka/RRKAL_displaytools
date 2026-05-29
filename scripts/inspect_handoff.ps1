@@ -60,6 +60,12 @@ $summary = [ordered]@{
         timeline_state = $launchPacket.timeline_state.schema
         boundary_identity_status = $launchPacket.boundary_highlight.identity_status.schema
     }
+    canvas_preview = @{
+        launch_packet_schema = $launchPacket.canvas_preview.schema
+        renderer_sync = $launchPacket.canvas_preview.renderer_sync
+        boundary_identity_warning = $launchPacket.canvas_preview.boundary_identity_warning
+        boundary_identity_warning_surface = $launchPacket.canvas_preview.boundary_identity_warning_surface
+    }
     active_layer_diagnostics = @{
         launch_packet_schema = $launchPacket.active_layer_diagnostics.schema
         renderer_capabilities_schema = $capabilities.active_layer_diagnostics.schema

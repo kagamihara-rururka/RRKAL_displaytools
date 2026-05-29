@@ -319,3 +319,8 @@
 
 - No-GUI launch packets now expose `canvas_preview.boundary_identity_warning` by default.
 - Clone/handoff users can see pending authoritative polygon/EEZ identity and open-line closure warnings without starting Qt.
+
+### 2026-05-30 Handoff inspection Boundary identity warning
+
+- `scripts\inspect_handoff.ps1` now reports `canvas_preview.boundary_identity_warning` and its surface description.
+- Cross-machine inspection can show Boundary/EEZ identity warnings without launching Qt.

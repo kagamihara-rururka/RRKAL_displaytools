@@ -3210,3 +3210,17 @@ Decision:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+
+## 2026-05-30 - Handoff inspection Boundary identity warning
+
+Scope:
+- `scripts\inspect_handoff.ps1` now emits a `canvas_preview` summary section for renderer sync and Boundary identity warning fields.
+- Handoff inspection exposes `boundary_identity_warning` and `boundary_identity_warning_surface` from the launch packet.
+- Smoke verifies the handoff script contains both warning output fields.
+
+Decision:
+- Cross-machine users should see the same Boundary/EEZ non-authoritative warning through one inspection command, without opening Qt or reading raw launch packet JSON.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
