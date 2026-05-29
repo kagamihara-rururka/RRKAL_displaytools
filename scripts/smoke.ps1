@@ -323,6 +323,12 @@ if ($launchPacket.cross_machine_clone_readiness.launcher_options -notcontains "-
 if ($launchPacket.cross_machine_clone_readiness.handoff_first_command -notlike "*run_qt_panel.ps1 -HandoffFirst") {
     throw "Launch packet cross_machine_clone_readiness handoff-first command mismatch"
 }
+if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "boundary_json") {
+    throw "Launch packet profile_ui_state_replay Boundary inspector action missing"
+}
+if ([int]$launchPacket.profile_ui_state_replay.qt_inspector_action_count -lt 9) {
+    throw "Launch packet profile_ui_state_replay inspector action count missing"
+}
 if ($launchPacket.profile_launch_readiness.schema -ne "rrkal_displaytools.profile_launch_readiness.v1") {
     throw "Launch packet profile_launch_readiness schema missing or invalid"
 }
@@ -930,6 +936,12 @@ if ($capabilities.cross_machine_clone_readiness.launcher_options -notcontains "-
 }
 if ($capabilities.cross_machine_clone_readiness.handoff_first_command -notlike "*run_qt_panel.ps1 -HandoffFirst") {
     throw "Renderer cross_machine_clone_readiness handoff-first command mismatch"
+}
+if ($capabilities.profile_ui_state_replay.qt_inspector_action_ids -notcontains "cursor_geo") {
+    throw "Renderer profile_ui_state_replay Cursor inspector action missing"
+}
+if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontains "Inspect: Clone ready") {
+    throw "Renderer profile_ui_state_replay Clone inspector label missing"
 }
 if ($capabilities.profile_launch_readiness.schema -ne "rrkal_displaytools.profile_launch_readiness.v1") {
     throw "Renderer profile_launch_readiness schema missing or invalid"
@@ -1728,6 +1740,9 @@ if ($qtPanelSource -notlike "*replay_surfaces*") {
 if ($qtPanelSource -notlike "*Qt Inspect actions*") {
     throw "Qt profile UI state replay Inspect surface is missing"
 }
+if ($qtPanelSource -notlike "*qt_inspector_action_ids*") {
+    throw "Qt profile UI state replay inspector action ids are missing"
+}
 
 $rendererSource = Get-Content -Raw -Encoding UTF8 taichi_global_bathymetry.py
 if ($rendererSource -notlike "*last_layer_pick_screen*") {
@@ -1750,6 +1765,9 @@ if ($rendererSource -notlike "*replay_surfaces*") {
 }
 if ($rendererSource -notlike "*Qt Inspect actions*") {
     throw "Renderer capability profile UI state replay Inspect surface missing"
+}
+if ($rendererSource -notlike "*qt_inspector_action_ids*") {
+    throw "Renderer capability profile UI state replay inspector ids missing"
 }
 
 $scripts = Get-ChildItem scripts -Filter *.ps1
@@ -1842,6 +1860,9 @@ if ($launchPacketSource -notmatch 'replay_surfaces') {
 if ($launchPacketSource -notmatch 'Qt Inspect actions') {
     throw "Launch packet profile UI state replay Inspect surface missing"
 }
+if ($launchPacketSource -notmatch 'qt_inspector_action_ids') {
+    throw "Launch packet profile UI state replay inspector ids missing"
+}
 if ($handoffInspectorSource -notmatch 'profile_ui_state_replay') {
     throw "Handoff inspection profile UI state replay output is missing"
 }
@@ -1881,6 +1902,9 @@ if ($profileSchemaDoc -notmatch 'replay_surfaces') {
 }
 if ($profileSchemaDoc -notmatch 'Qt Inspect actions') {
     throw "Profile schema docs missing profile UI state replay Inspect surface"
+}
+if ($profileSchemaDoc -notmatch 'qt_inspector_action_ids') {
+    throw "Profile schema docs missing profile UI state replay inspector action ids"
 }
 
 $cloneQuickstartDoc = Get-Content -LiteralPath (Join-Path $BoundaryIdentityRoot "docs\QUICKSTART_CLONE.zh-TW.md") -Raw -Encoding UTF8

@@ -230,6 +230,20 @@ Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
 
+## 2026-05-30 - Profile replay inspector action IDs
+
+Scope:
+- Added `qt_inspector_action_ids`, `qt_inspector_action_labels` and `qt_inspector_action_count` to `profile_ui_state_replay` in Qt, no-GUI launch packet and renderer capability discovery.
+- Updated profile schema docs for the new inspector action fields.
+- Smoke verifies Boundary, Cursor and Clone inspector entries across launch packet, renderer capabilities, source contracts and schema docs.
+
+Decision:
+- Qt `Inspect:` actions should be machine-readable profile replay coverage, not only human-readable button labels.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+
 ## 2026-05-30 - Profile replay Inspect surface
 
 Scope:

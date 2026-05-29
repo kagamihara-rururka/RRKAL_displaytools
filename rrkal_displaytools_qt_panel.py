@@ -258,6 +258,17 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         "renderer first-keyframe apply",
         "research provenance summary",
     ]
+    qt_inspector_actions = [
+        ("profile_replay", "Inspect: Profile replay"),
+        ("ocean_port", "Inspect: Ocean port"),
+        ("hydro_lod", "Inspect: Hydro LOD"),
+        ("style_routes", "Inspect: Style routes"),
+        ("module_seams", "Inspect: Module seams"),
+        ("clone_ready", "Inspect: Clone ready"),
+        ("pin_pick", "Inspect: Pin pick"),
+        ("cursor_geo", "Inspect: Cursor geo"),
+        ("boundary_json", "Inspect: Boundary JSON"),
+    ]
     return {
         "schema": "rrkal_displaytools.profile_ui_state_replay.v1",
         "source": source,
@@ -266,6 +277,9 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         "saved_state_group_count": len(saved_groups),
         "replay_surfaces": replay_surfaces,
         "replay_surface_count": len(replay_surfaces),
+        "qt_inspector_action_ids": [action_id for action_id, _label in qt_inspector_actions],
+        "qt_inspector_action_labels": [label for _action_id, label in qt_inspector_actions],
+        "qt_inspector_action_count": len(qt_inspector_actions),
         "qt_surface": "Layers dock profile UI replay label",
         "launch_packet_fields": ["profile_ui_state_replay", "profile", "timeline_keyframes", "timeline_runtime_state"],
         "renderer_capability_field": "profile_ui_state_replay",

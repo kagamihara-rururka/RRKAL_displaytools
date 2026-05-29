@@ -201,3 +201,4 @@ Last updated: 2026-05-29
 - 2026-05-30: Added `Inspect:` prefixes to Qt JSON inspector action buttons to clarify which buttons inspect state rather than mutate renderer/profile state.
 - 2026-05-30: Added clone quickstart guidance for the Qt `Inspect:` actions and smoke-gated the clone-readiness / Boundary JSON references.
 - 2026-05-30: Added `Qt Inspect actions` to `profile_ui_state_replay.replay_surfaces` across Qt, launch packet, renderer capabilities, schema docs and smoke.
+- 2026-05-30: Added `qt_inspector_action_ids/labels/count` to `profile_ui_state_replay` and smoke-gated Boundary/Cursor/Clone inspector entries.

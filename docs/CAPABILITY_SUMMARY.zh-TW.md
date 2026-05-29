@@ -429,3 +429,8 @@
 
 - `profile_ui_state_replay.replay_surfaces` now includes `Qt Inspect actions` in Qt, no-GUI launch packets and renderer capability discovery.
 - The profile schema and smoke gates now keep this direct Qt inspection surface aligned across clone/handoff workflows.
+
+### 2026-05-30 Profile replay inspector action IDs
+
+- `profile_ui_state_replay` now exposes `qt_inspector_action_ids`, `qt_inspector_action_labels` and `qt_inspector_action_count`.
+- Smoke verifies Boundary, Cursor and Clone inspector entries through launch packets, renderer capabilities and schema docs.
