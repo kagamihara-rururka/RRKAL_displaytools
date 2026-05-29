@@ -2743,6 +2743,7 @@ def timeline_ack_payload_from_state_file(timeline_state_file: str | Path | None)
         "camera_keyframe": timeline_camera_keyframe_packet(timeline_state, runtime_keyframes, instantiated=False),
         "camera_interpolation": timeline_camera_interpolation_packet(timeline_state, runtime_keyframes, instantiated=False),
         "layer_opacity_interpolation": timeline_layer_opacity_interpolation_packet(timeline_state, runtime_keyframes, instantiated=False),
+        "layer_discrete_hold": timeline_layer_discrete_hold_packet(timeline_state, runtime_keyframes, instantiated=False),
         "first_keyframe_apply": timeline_first_keyframe_apply_preview_packet(
             runtime_keyframes,
             applied=False,
@@ -2751,8 +2752,8 @@ def timeline_ack_payload_from_state_file(timeline_state_file: str | Path | None)
         ),
         "applies": ["input_acknowledgement"],
         "pending": [
-            "layer_blend_interpolation",
-            "visibility_interpolation",
+            "blend_crossfade_interpolation",
+            "visibility_fade_interpolation",
         ],
         "error": state_error,
         "source": "taichi_global_bathymetry",
@@ -2772,12 +2773,13 @@ def timeline_playback_readiness_packet() -> dict[str, object]:
         "camera_keyframes": True,
         "camera_keyframe_interpolation": True,
         "layer_opacity_interpolation": True,
+        "layer_discrete_hold": True,
         "pending": [
             "mp4_video_encoding",
-            "layer_blend_interpolation",
-            "visibility_interpolation",
+            "blend_crossfade_interpolation",
+            "visibility_fade_interpolation",
         ],
-        "boundary": "Renderer can interpolate camera keyframes, layer opacity, and ocean material, and export PNG frame sequences with optional GIF animation; MP4 encoding, layer blend interpolation, and visibility interpolation remain pending.",
+        "boundary": "Renderer can interpolate camera keyframes, layer opacity, and ocean material, hold active-keyframe layer visibility/blend states, and export PNG frame sequences with optional GIF animation; MP4 encoding, blend crossfade, and visibility fade interpolation remain pending.",
     }
 
 
@@ -2819,12 +2821,13 @@ def timeline_playback_plan_packet(keyframes: list[object] | None = None) -> dict
             "boundary_highlight",
             "camera",
             "layer_opacity",
+            "layer_discrete_hold",
         ],
         "pending": [
-            "layer_blend_interpolation",
-            "visibility_interpolation",
+            "blend_crossfade_interpolation",
+            "visibility_fade_interpolation",
         ],
-        "boundary": "Plan can drive renderer discrete keyframe steps, camera interpolation, ocean/material interpolation, and layer opacity interpolation; layer blend and visibility interpolation remain pending.",
+        "boundary": "Plan can drive renderer discrete keyframe steps, camera interpolation, ocean/material interpolation, layer opacity interpolation, and active-keyframe layer visibility/blend hold.",
     }
 
 
@@ -2844,7 +2847,7 @@ def timeline_segment_state_packet(
             "from_keyframe_id": str(keyframes[segment_index].get("id", "")),
             "to_keyframe_id": str(keyframes[segment_index + 1].get("id", "")),
             "interpolatable_fields": ["ocean_material", "camera", "layer_opacity"],
-            "discrete_fields": ["style_profile", "layer_visibility", "layer_blend", "pins", "boundary_highlight"],
+            "discrete_fields": ["style_profile", "layer_visibility", "layer_blend", "layer_discrete_hold", "pins", "boundary_highlight"],
         }
     return {
         "schema": "rrkal_displaytools.timeline_segment_state.v1",
@@ -2854,8 +2857,8 @@ def timeline_segment_state_packet(
         "active_segment": active_segment,
         "segment_available": active_segment is not None,
         "segment_count": max(0, len(keyframes) - 1),
-        "pending": ["layer_blend_interpolation", "visibility_interpolation"],
-        "boundary": "Renderer exposes segment state; camera, ocean material, and layer opacity are interpolatable fields.",
+        "pending": ["blend_crossfade_interpolation", "visibility_fade_interpolation"],
+        "boundary": "Renderer exposes segment state; camera, ocean material, and layer opacity are interpolatable fields, while layer visibility/blend are held discretely from the active keyframe.",
     }
 
 
@@ -2888,7 +2891,7 @@ def timeline_active_step_state_packet(
         "keyframe_count": len(keyframes),
         "step_available": active_index is not None,
         "applies": ["renderer_startup_selection_hint"],
-        "pending": ["layer_blend_interpolation", "visibility_interpolation"],
+        "pending": ["blend_crossfade_interpolation", "visibility_fade_interpolation"],
         "boundary": "Active step is a discrete keyframe selection contract for renderer step playback.",
     }
 
@@ -3080,8 +3083,63 @@ def timeline_layer_opacity_interpolation_packet(
         "interpolated_layer_opacity": interpolated,
         "layer_count": len(interpolated),
         "applies": ["layer_opacity_keyframe_interpolation"],
-        "pending": ["layer_blend_interpolation", "visibility_interpolation"],
+        "pending": ["blend_crossfade_interpolation", "visibility_fade_interpolation"],
         "boundary": "Layer opacity is linearly interpolated between Timeline keyframes; layer blend mode and visibility remain discrete/pending.",
+    }
+
+
+def timeline_layer_discrete_hold_payload(keyframe: dict[str, object] | None) -> dict[str, dict[str, object]]:
+    if not isinstance(keyframe, dict):
+        return {"visible": {}, "blend_mode": {}}
+    snapshot = keyframe.get("layer_stack_snapshot")
+    snapshot = snapshot if isinstance(snapshot, dict) else {}
+    layers = snapshot.get("layers")
+    layers = layers if isinstance(layers, dict) else snapshot
+    visible: dict[str, bool] = {}
+    blend_mode: dict[str, str] = {}
+    for layer_key, layer_state in layers.items():
+        if not isinstance(layer_state, dict):
+            continue
+        if isinstance(layer_state.get("visible"), bool):
+            visible[str(layer_key)] = bool(layer_state["visible"])
+        raw_blend = layer_state.get("blend_mode")
+        if isinstance(raw_blend, str) and raw_blend:
+            blend_mode[str(layer_key)] = raw_blend
+    return {"visible": visible, "blend_mode": blend_mode}
+
+
+def timeline_layer_discrete_hold_packet(
+    timeline_state: dict[str, object] | None = None,
+    keyframes: list[object] | None = None,
+    instantiated: bool = False,
+) -> dict[str, object]:
+    timeline_state = timeline_state if isinstance(timeline_state, dict) else {}
+    keyframes = [keyframe for keyframe in keyframes if isinstance(keyframe, dict)] if isinstance(keyframes, list) else []
+    playback = timeline_state.get("playback")
+    playback = playback if isinstance(playback, dict) else {}
+    active_step = timeline_active_step_state_packet(timeline_state, keyframes)
+    active_index = active_step.get("active_index")
+    active_keyframe_id = active_step.get("active_keyframe_id")
+    held = {"visible": {}, "blend_mode": {}}
+    if isinstance(active_index, int) and 0 <= active_index < len(keyframes):
+        held = timeline_layer_discrete_hold_payload(keyframes[active_index])
+    visible = held.get("visible", {}) if isinstance(held, dict) else {}
+    blend_mode = held.get("blend_mode", {}) if isinstance(held, dict) else {}
+    return {
+        "schema": "rrkal_displaytools.timeline_layer_discrete_hold.v1",
+        "supported": True,
+        "instantiated": bool(instantiated),
+        "mode": "active_keyframe_layer_discrete_hold",
+        "playback_active": parse_bool(playback.get("active"), False),
+        "active_index": active_index,
+        "active_keyframe_id": active_keyframe_id,
+        "fields": ["layer_stack_snapshot.layers.*.visible", "layer_stack_snapshot.layers.*.blend_mode"],
+        "held_layer_visible": visible,
+        "held_layer_blend_mode": blend_mode,
+        "layer_count": len(set(visible) | set(blend_mode)),
+        "applies": ["layer_visibility_discrete_hold", "layer_blend_mode_discrete_hold"],
+        "pending": ["blend_crossfade_interpolation", "visibility_fade_interpolation"],
+        "boundary": "Layer visibility and blend mode are categorical states held from the active keyframe during Timeline segments; opacity handles scalar interpolation.",
     }
 
 
@@ -3113,7 +3171,7 @@ def timeline_step_playback_packet(
         "step_count": max(0, int(step_count)),
         "last_step_at_utc": last_step_at_utc,
         "applies": ["renderer_discrete_keyframe_step"],
-        "pending": ["layer_blend_interpolation", "visibility_interpolation"],
+        "pending": ["blend_crossfade_interpolation", "visibility_fade_interpolation"],
         "boundary": "Renderer can advance whole-keyframe steps and apply discrete camera state; layer blend interpolation and visibility interpolation remain pending.",
     }
 
@@ -3167,7 +3225,7 @@ def timeline_ocean_material_interpolation_packet(
         "fields": fields,
         "interpolated": interpolated,
         "applies": ["ocean_material_keyframe_interpolation"],
-        "pending": ["layer_blend_interpolation", "visibility_interpolation"],
+        "pending": ["blend_crossfade_interpolation", "visibility_fade_interpolation"],
         "boundary": "Only ocean material scalar fields are interpolated here; layer opacity is handled by the layer opacity interpolation contract, while style/blend/visibility/pins/boundary remain discrete.",
     }
 
@@ -3199,7 +3257,7 @@ def timeline_animation_export_packet(
         "encoding_format": encoding_format,
         "encoding_error": encoding_error,
         "applies": ["timeline_png_frame_sequence", "timeline_animation_manifest", "timeline_gif_animation"],
-        "pending": ["mp4_video_encoding", "layer_blend_interpolation", "visibility_interpolation"],
+        "pending": ["mp4_video_encoding", "blend_crossfade_interpolation", "visibility_fade_interpolation"],
         "boundary": "Exports PNG frames, manifest, and optional GIF animation; MP4/video-container encoding remains pending.",
     }
 
@@ -14017,6 +14075,12 @@ class HybridRenderController:
                     last_step_at=export_last_step_at,
                 )
                 self.timeline_layer_opacity_interpolation_result = layer_opacity_packet
+                layer_discrete_hold_packet = timeline_layer_discrete_hold_packet(
+                    interpolation_state,
+                    valid_keyframes,
+                    instantiated=True,
+                )
+                self.timeline_layer_discrete_hold_result = layer_discrete_hold_packet
                 interpolated = packet.get("interpolated")
                 if isinstance(interpolated, dict):
                     for field, attr in {
@@ -14056,6 +14120,8 @@ class HybridRenderController:
                         "ocean_material": packet.get("interpolated", {}),
                         "camera": camera_interpolation_packet.get("interpolated") or camera_packet.get("camera"),
                         "layer_opacity": layer_opacity_packet.get("interpolated_layer_opacity", {}),
+                        "layer_visible": layer_discrete_hold_packet.get("held_layer_visible", {}),
+                        "layer_blend_mode": layer_discrete_hold_packet.get("held_layer_blend_mode", {}),
                     }
                 )
             if gif_path is not None and gif_images:
@@ -14238,6 +14304,11 @@ class HybridRenderController:
                     last_step_at=getattr(self, "timeline_playback_last_step_at", None),
                 ),
             ),
+            "layer_discrete_hold": getattr(
+                self,
+                "timeline_layer_discrete_hold_result",
+                timeline_layer_discrete_hold_packet(timeline_state, runtime_keyframes, instantiated=True),
+            ),
             "first_keyframe_apply": getattr(
                 self,
                 "timeline_first_keyframe_apply_result",
@@ -14245,8 +14316,8 @@ class HybridRenderController:
             ),
             "applies": ["input_acknowledgement"],
             "pending": [
-                "layer_blend_interpolation",
-                "visibility_interpolation",
+                "blend_crossfade_interpolation",
+                "visibility_fade_interpolation",
             ],
             "error": self.timeline_runtime_state_error,
             "source": "taichi_global_bathymetry",
@@ -17519,6 +17590,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "camera_keyframe_schema": "rrkal_displaytools.timeline_camera_keyframe.v1",
             "camera_interpolation_schema": "rrkal_displaytools.timeline_camera_interpolation.v1",
             "layer_opacity_interpolation_schema": "rrkal_displaytools.timeline_layer_opacity_interpolation.v1",
+            "layer_discrete_hold_schema": "rrkal_displaytools.timeline_layer_discrete_hold.v1",
             "first_keyframe_apply_schema": "rrkal_displaytools.timeline_first_keyframe_apply.v1",
             "playback_readiness": timeline_playback_readiness_packet(),
             "controls": [
@@ -17544,6 +17616,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "rrkal_displaytools.timeline_camera_keyframe.v1",
                 "rrkal_displaytools.timeline_camera_interpolation.v1",
                 "rrkal_displaytools.timeline_layer_opacity_interpolation.v1",
+                "rrkal_displaytools.timeline_layer_discrete_hold.v1",
                 "rrkal_displaytools.timeline_first_keyframe_apply.v1",
                 "profile.timeline_keyframes",
             ],
@@ -17562,13 +17635,14 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "renderer discrete camera keyframe apply",
                 "renderer camera keyframe interpolation",
                 "renderer layer opacity keyframe interpolation",
+                "renderer layer visibility/blend discrete hold",
             ],
             "pending": [
                 "mp4_video_encoding",
-                "layer_blend_interpolation",
-                "visibility_interpolation",
+                "blend_crossfade_interpolation",
+                "visibility_fade_interpolation",
             ],
-            "boundary": "Timeline keyframes are portable UI/profile state; renderer can interpolate camera keyframes, layer opacity, and export PNG/GIF animations while MP4 encoding, layer blend interpolation, and visibility interpolation remain pending.",
+            "boundary": "Timeline keyframes are portable UI/profile state; renderer can interpolate camera keyframes/layer opacity, hold active-keyframe layer visibility/blend states, and export PNG/GIF animations while MP4 encoding, blend crossfade, and visibility fade interpolation remain pending.",
         },
         "ui_handoff_contracts": {
             "schema": "rrkal_displaytools.ui_handoff_contracts.v1",
@@ -17791,4 +17865,3 @@ def main(argv: list[str] | None = None) -> None:
 
 if __name__ == "__main__":
     main()
-

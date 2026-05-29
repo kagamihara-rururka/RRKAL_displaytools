@@ -1,5 +1,19 @@
 # Development Log
 
+## 2026-05-29 - Timeline layer visibility/blend discrete hold
+
+Scope:
+- Added `rrkal_displaytools.timeline_layer_discrete_hold.v1`.
+- Renderer/Qt/No-GUI Timeline handoff now exposes active-keyframe layer visibility and blend mode hold state.
+- Timeline PNG/GIF export manifests now record held layer visibility and blend mode per frame.
+- Renderer capabilities, closed-loop status, docs, and smoke gates now cover the layer discrete hold contract.
+
+Positioning:
+- Visibility and blend mode are categorical layer states, so this closes their honest Timeline handoff without pretending they are continuous interpolation targets. True blend crossfade and visibility fade remain pending.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Timeline layer opacity interpolation
 
 Scope:

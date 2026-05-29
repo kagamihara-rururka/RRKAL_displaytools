@@ -104,3 +104,4 @@ Last updated: 2026-05-29
 - 2026-05-29: Added Timeline camera keyframe interpolation for renderer playback and PNG export manifests.
 - 2026-05-29: Added Timeline GIF animation export fallback for dependency-light sharing.
 - 2026-05-29: Added Timeline layer opacity interpolation for renderer playback and export manifests.
+- 2026-05-29: Added Timeline layer visibility/blend discrete hold contract for renderer playback and export manifests.
