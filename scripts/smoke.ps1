@@ -326,8 +326,11 @@ if ($launchPacket.cross_machine_clone_readiness.handoff_first_command -notlike "
 if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "boundary_json") {
     throw "Launch packet profile_ui_state_replay Boundary inspector action missing"
 }
-if ([int]$launchPacket.profile_ui_state_replay.qt_inspector_action_count -lt 11) {
+if ([int]$launchPacket.profile_ui_state_replay.qt_inspector_action_count -lt 12) {
     throw "Launch packet profile_ui_state_replay inspector action count missing"
+}
+if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "layer_matrix") {
+    throw "Launch packet profile_ui_state_replay layer matrix inspector action missing"
 }
 if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "layer_runtime") {
     throw "Launch packet profile_ui_state_replay layer runtime inspector action missing"
@@ -954,6 +957,9 @@ if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontain
 }
 if ($capabilities.profile_ui_state_replay.qt_inspector_action_ids -notcontains "layer_pick") {
     throw "Renderer profile_ui_state_replay layer pick inspector action missing"
+}
+if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontains "Inspect: Layer matrix") {
+    throw "Renderer profile_ui_state_replay layer matrix inspector label missing"
 }
 if ($capabilities.profile_ui_state_replay.qt_inspector_action_groups.id -notcontains "renderer_ports") {
     throw "Renderer profile_ui_state_replay renderer ports group missing"
@@ -1716,8 +1722,14 @@ if ($qtPanelSource -notlike "*Replay/contracts: inspect portable UI/profile repl
 if ($qtPanelSource -notlike "*Renderer ports: inspect scalar ocean material and sea-state handoff JSON*") {
     throw "Qt Renderer ports inspector tooltip is missing"
 }
+if ($qtPanelSource -notlike "*Renderer ports: inspect layer capability matrix JSON*") {
+    throw "Qt Layer matrix inspector tooltip is missing"
+}
 if ($qtPanelSource -notlike "*Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON*") {
     throw "Qt Research interaction inspector tooltip is missing"
+}
+if ($qtPanelSource -notlike "*Inspect: Layer matrix*") {
+    throw "Qt Layer matrix inspector button is missing"
 }
 if ($qtPanelSource -notlike "*Inspect: Layer runtime*") {
     throw "Qt Layer runtime inspector button is missing"
@@ -1953,6 +1965,9 @@ if ($profileSchemaDoc -notmatch 'qt_inspector_action_ids') {
 }
 if ($profileSchemaDoc -notmatch 'layer_runtime') {
     throw "Profile schema docs missing layer runtime inspector action id"
+}
+if ($profileSchemaDoc -notmatch 'layer_matrix') {
+    throw "Profile schema docs missing layer matrix inspector action id"
 }
 if ($profileSchemaDoc -notmatch 'qt_inspector_action_groups') {
     throw "Profile schema docs missing profile UI state replay inspector action groups"

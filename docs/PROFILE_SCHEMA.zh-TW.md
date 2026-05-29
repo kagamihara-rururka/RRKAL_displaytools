@@ -312,7 +312,7 @@ Timeline playback plan 目前把 style、layer visibility/blend、pins、boundar
 | `saved_state_group_count` | integer | `saved_state_groups` 的數量。 |
 | `replay_surfaces` | array | 可讀取或復現這些狀態的入口，目前包含 Qt save/load profile、Qt startup `--profile` / `--template`、Qt Inspect actions（Qt `Inspect:` buttons）、No-GUI launch packet、renderer first-keyframe apply、research provenance summary。 |
 | `replay_surface_count` | integer | `replay_surfaces` 的數量。 |
-| `qt_inspector_action_ids` | array | Qt `Inspect:` action IDs，例如 `profile_replay`、`clone_ready`、`layer_runtime`、`layer_pick`、`cursor_geo`、`boundary_json`。 |
+| `qt_inspector_action_ids` | array | Qt `Inspect:` action IDs，例如 `profile_replay`、`clone_ready`、`layer_matrix`、`layer_runtime`、`layer_pick`、`cursor_geo`、`boundary_json`。 |
 | `qt_inspector_action_labels` | array | Qt `Inspect:` action 顯示文字，例如 `Inspect: Profile replay`、`Inspect: Boundary JSON`。 |
 | `qt_inspector_action_count` | integer | Qt `Inspect:` action 數量。 |
 | `qt_inspector_action_groups` | array | Qt `Inspect:` action 分組，目前包含 `replay_contracts`、`renderer_ports`、`research_interaction`。 |

@@ -207,3 +207,4 @@ Last updated: 2026-05-29
 - 2026-05-30: Added Inspect group names to Qt tooltips/accessibility descriptions and smoke-gated grouped tooltip text.
 - 2026-05-30: Split the Qt Actions grid into section headers for Run/profile, Inspect groups, Renderer diagnostics and Process, with smoke-gated section markers.
 - 2026-05-30: Added Qt `Inspect: Layer runtime` and `Inspect: Layer pick` actions, and included them in profile replay inspector IDs/groups and clone quickstart guidance.
+- 2026-05-30: Added Qt `Inspect: Layer matrix` action for direct layer capability matrix inspection and synced it to profile replay inspector contracts and quickstart.

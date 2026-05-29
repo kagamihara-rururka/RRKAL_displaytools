@@ -230,6 +230,21 @@ Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
 
+## 2026-05-30 - Qt Layer matrix Inspect action
+
+Scope:
+- Added `Inspect: Layer matrix` to the grouped Qt Actions panel.
+- The action reuses the existing `show_layer_capability_matrix()` JSON view.
+- Added `layer_matrix` to `profile_ui_state_replay.qt_inspector_action_ids` and the renderer ports group across Qt, no-GUI launch packet and renderer capability discovery.
+- Updated clone quickstart and profile schema docs; smoke verifies the button, tooltip, action id and renderer capability label.
+
+Decision:
+- Layer capability matrix is a core layer-control closure surface and should be directly available from the grouped Actions panel.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+
 ## 2026-05-30 - Qt Layer Inspect actions
 
 Scope:
