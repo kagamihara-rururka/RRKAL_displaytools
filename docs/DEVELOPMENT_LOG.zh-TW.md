@@ -1,5 +1,18 @@
 # Development Log
 
+## 2026-05-29 - Layer capability matrix UI contract
+
+Scope:
+- Added `rrkal_displaytools.layer_capability_matrix.v1` to Qt launch packets, No-GUI launch packets, renderer capabilities, active layer diagnostics, runtime state, and smoke gates.
+- Qt Properties now shows the selected layer's live renderer capabilities: visibility, opacity, blend, and selected-layer picking.
+- Layers dock can display the full capability matrix JSON, and the layer status line now summarizes live capability counts.
+
+Positioning:
+- This makes layer controls more honest for researchers: UI controls can remain visible, but unsupported renderer live paths are explicitly marked `planned` instead of implied.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Qt Timeline export options controls
 
 Scope:

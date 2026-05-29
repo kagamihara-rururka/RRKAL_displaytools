@@ -31,6 +31,15 @@ if ($launchPacket.canvas_preview.schema -ne "rrkal_displaytools.canvas_preview.v
 if ($launchPacket.active_layer_diagnostics.schema -ne "rrkal_displaytools.active_layer_diagnostics.v1") {
     throw "Launch packet active_layer_diagnostics schema missing or invalid"
 }
+if ($launchPacket.active_layer_diagnostics.layer_capability_matrix_schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
+    throw "Launch packet active_layer_diagnostics layer capability matrix schema link missing"
+}
+if ($launchPacket.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
+    throw "Launch packet layer_capability_matrix schema missing or invalid"
+}
+if ([int]$launchPacket.layer_capability_matrix.live_counts.opacity -le 0) {
+    throw "Launch packet layer_capability_matrix opacity live count missing"
+}
 if ($launchPacket.layer_filter.schema -ne "rrkal_displaytools.layer_filter.v1") {
     throw "Launch packet layer_filter schema missing or invalid"
 }
@@ -371,6 +380,12 @@ if ($capabilities.preview_frame_stream.schema -ne "rrkal_displaytools.preview_fr
 }
 if ($capabilities.active_layer_diagnostics.schema -ne "rrkal_displaytools.active_layer_diagnostics.v1") {
     throw "Renderer active_layer_diagnostics capability missing or invalid"
+}
+if ($capabilities.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
+    throw "Renderer layer_capability_matrix capability missing or invalid"
+}
+if ([int]$capabilities.layer_capability_matrix.live_counts.selected_layer_pick -le 0) {
+    throw "Renderer layer_capability_matrix selected-layer pick count missing"
 }
 if ($capabilities.ui_handoff_contracts.schema -ne "rrkal_displaytools.ui_handoff_contracts.v1") {
     throw "Renderer ui_handoff_contracts capability missing or invalid"

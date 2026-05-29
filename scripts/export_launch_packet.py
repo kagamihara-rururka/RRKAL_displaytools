@@ -58,6 +58,73 @@ LAYER_RUNTIME_ID_ALIASES = {
     "scale_bar": "scale",
     "vehicle_icons": "vehicle_icons",
 }
+LAYER_LABELS = (
+    ("show_grid", "經緯網格"),
+    ("show_stars", "星空背景"),
+    ("lake_layer", "湖泊圖層"),
+    ("river_layer", "河流圖層"),
+    ("border_layer", "國界圖層"),
+    ("territorial_sea_layer", "領海圖層"),
+    ("eez_layer", "EEZ 圖層"),
+    ("high_seas_layer", "公海圖層"),
+    ("aircraft_layer", "航機圖層"),
+    ("pin_layer", "科研 Pin 標記"),
+    ("ocean_material", "海洋材質"),
+    ("terrain_contours", "地形等高線"),
+    ("scale_bar", "比例尺"),
+    ("vehicle_icons", "交通工具圖示"),
+)
+LAYER_VISIBILITY_LIVE_KEYS = {
+    "show_grid",
+    "show_stars",
+    "lake_layer",
+    "river_layer",
+    "border_layer",
+    "territorial_sea_layer",
+    "eez_layer",
+    "high_seas_layer",
+    "aircraft_layer",
+    "pin_layer",
+    "vehicle_icons",
+    "ocean_material",
+    "terrain_contours",
+    "scale_bar",
+}
+LAYER_OPACITY_LIVE_KEYS = {
+    "lake_layer",
+    "river_layer",
+    "border_layer",
+    "territorial_sea_layer",
+    "eez_layer",
+    "high_seas_layer",
+    "aircraft_layer",
+    "pin_layer",
+    "vehicle_icons",
+    "terrain_contours",
+    "scale_bar",
+}
+LAYER_BLEND_LIVE_KEYS = {
+    "lake_layer",
+    "river_layer",
+    "border_layer",
+    "territorial_sea_layer",
+    "eez_layer",
+    "high_seas_layer",
+    "aircraft_layer",
+    "pin_layer",
+    "vehicle_icons",
+}
+LAYER_PICK_LIVE_KEYS = {
+    "lake_layer",
+    "river_layer",
+    "border_layer",
+    "territorial_sea_layer",
+    "eez_layer",
+    "high_seas_layer",
+    "aircraft_layer",
+    "pin_layer",
+    "vehicle_icons",
+}
 
 DEFAULT_CANVAS_PREVIEW = {
     "schema": "rrkal_displaytools.canvas_preview.v1",
@@ -243,15 +310,62 @@ def active_layer_diagnostics_packet(profile: dict[str, object]) -> dict[str, obj
     selected_layer = profile.get("selected_layer")
     selected_layer = selected_layer if isinstance(selected_layer, str) else None
     renderer_target = LAYER_RUNTIME_ID_ALIASES.get(selected_layer) if selected_layer else None
+    selected_label = next((label for key, label in LAYER_LABELS if key == selected_layer), selected_layer)
     return {
         "schema": "rrkal_displaytools.active_layer_diagnostics.v1",
         "selected_layer": selected_layer,
         "renderer_target": renderer_target,
+        "capabilities": layer_capability_packet(selected_layer, selected_label) if selected_layer else None,
+        "layer_capability_matrix_schema": "rrkal_displaytools.layer_capability_matrix.v1",
         "diagnostics_text": "no runtime ack/pick in no-GUI export",
         "runtime_ack_file": "state/renderer_layer_runtime_ack.json",
         "runtime_ack": None,
         "pick_state_file": "state/renderer_layer_pick_state.json",
         "pick_state": None,
+    }
+
+
+def layer_capability_packet(key: str, label: str | None = None) -> dict[str, object]:
+    live = []
+    if key in LAYER_VISIBILITY_LIVE_KEYS:
+        live.append("visibility")
+    if key in LAYER_OPACITY_LIVE_KEYS:
+        live.append("opacity")
+    if key in LAYER_BLEND_LIVE_KEYS:
+        live.append("blend")
+    if key in LAYER_PICK_LIVE_KEYS:
+        live.append("selected_layer_pick")
+    return {
+        "key": key,
+        "label": label or key,
+        "renderer_target": LAYER_RUNTIME_ID_ALIASES.get(key),
+        "visibility_live": key in LAYER_VISIBILITY_LIVE_KEYS,
+        "opacity_live": key in LAYER_OPACITY_LIVE_KEYS,
+        "blend_live": key in LAYER_BLEND_LIVE_KEYS,
+        "pick_live": key in LAYER_PICK_LIVE_KEYS,
+        "live_controls": live,
+        "renderer_sync": f"live: {', '.join(live)}" if live else "planned",
+    }
+
+
+def layer_capability_matrix_packet(source: str, selected_layer: str | None = None) -> dict[str, object]:
+    layers = [layer_capability_packet(key, label) for key, label in LAYER_LABELS]
+    counts = {
+        "visibility": sum(1 for layer in layers if layer["visibility_live"]),
+        "opacity": sum(1 for layer in layers if layer["opacity_live"]),
+        "blend": sum(1 for layer in layers if layer["blend_live"]),
+        "selected_layer_pick": sum(1 for layer in layers if layer["pick_live"]),
+    }
+    selected = next((layer for layer in layers if layer["key"] == selected_layer), None)
+    return {
+        "schema": "rrkal_displaytools.layer_capability_matrix.v1",
+        "source": source,
+        "layer_count": len(layers),
+        "live_counts": counts,
+        "selected_layer": selected_layer,
+        "selected_layer_capabilities": selected,
+        "layers": layers,
+        "boundary": "Documents launch-packet layer controls and renderer live support; unsupported controls remain visible UI/profile state but are explicitly marked planned.",
     }
 
 
@@ -986,6 +1100,7 @@ def launch_packet(
         "rrkal_data_manifest_ref_boundary": "Reference-only handoff field; displaytools does not discover, download, validate, import, or govern this manifest.",
         "layer_filter": layer_filter_packet(profile),
         "layer_group_view": layer_group_view_packet(profile),
+        "layer_capability_matrix": layer_capability_matrix_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None),
         "canvas_preview": canvas_preview_packet(profile),
         "boundary_highlight": boundary_highlight_packet(profile),
         "active_layer_diagnostics": active_layer_diagnostics_packet(profile),

@@ -136,6 +136,102 @@ LAYER_RUNTIME_ID_ALIASES = {
     "vehicle_icons": "vehicle_icons",
 }
 
+LAYER_VISIBILITY_LIVE_KEYS = {
+    "show_grid",
+    "show_stars",
+    "lake_layer",
+    "river_layer",
+    "border_layer",
+    "territorial_sea_layer",
+    "eez_layer",
+    "high_seas_layer",
+    "aircraft_layer",
+    "pin_layer",
+    "vehicle_icons",
+    "ocean_material",
+    "terrain_contours",
+    "scale_bar",
+}
+LAYER_OPACITY_LIVE_KEYS = {
+    "lake_layer",
+    "river_layer",
+    "border_layer",
+    "territorial_sea_layer",
+    "eez_layer",
+    "high_seas_layer",
+    "aircraft_layer",
+    "pin_layer",
+    "vehicle_icons",
+    "terrain_contours",
+    "scale_bar",
+}
+LAYER_BLEND_LIVE_KEYS = {
+    "lake_layer",
+    "river_layer",
+    "border_layer",
+    "territorial_sea_layer",
+    "eez_layer",
+    "high_seas_layer",
+    "aircraft_layer",
+    "pin_layer",
+    "vehicle_icons",
+}
+LAYER_PICK_LIVE_KEYS = {
+    "lake_layer",
+    "river_layer",
+    "border_layer",
+    "territorial_sea_layer",
+    "eez_layer",
+    "high_seas_layer",
+    "aircraft_layer",
+    "pin_layer",
+    "vehicle_icons",
+}
+
+
+def layer_capability_packet(key: str, label: str | None = None) -> dict[str, object]:
+    live = []
+    if key in LAYER_VISIBILITY_LIVE_KEYS:
+        live.append("visibility")
+    if key in LAYER_OPACITY_LIVE_KEYS:
+        live.append("opacity")
+    if key in LAYER_BLEND_LIVE_KEYS:
+        live.append("blend")
+    if key in LAYER_PICK_LIVE_KEYS:
+        live.append("selected_layer_pick")
+    return {
+        "key": key,
+        "label": label or key,
+        "renderer_target": LAYER_RUNTIME_ID_ALIASES.get(key),
+        "visibility_live": key in LAYER_VISIBILITY_LIVE_KEYS,
+        "opacity_live": key in LAYER_OPACITY_LIVE_KEYS,
+        "blend_live": key in LAYER_BLEND_LIVE_KEYS,
+        "pick_live": key in LAYER_PICK_LIVE_KEYS,
+        "live_controls": live,
+        "renderer_sync": f"live: {', '.join(live)}" if live else "planned",
+    }
+
+
+def layer_capability_matrix_packet(source: str, selected_layer: str | None = None) -> dict[str, object]:
+    layers = [layer_capability_packet(key, label) for key, label in LAYER_LABELS]
+    counts = {
+        "visibility": sum(1 for layer in layers if layer["visibility_live"]),
+        "opacity": sum(1 for layer in layers if layer["opacity_live"]),
+        "blend": sum(1 for layer in layers if layer["blend_live"]),
+        "selected_layer_pick": sum(1 for layer in layers if layer["pick_live"]),
+    }
+    selected = next((layer for layer in layers if layer["key"] == selected_layer), None)
+    return {
+        "schema": "rrkal_displaytools.layer_capability_matrix.v1",
+        "source": source,
+        "layer_count": len(layers),
+        "live_counts": counts,
+        "selected_layer": selected_layer,
+        "selected_layer_capabilities": selected,
+        "layers": layers,
+        "boundary": "Documents Qt layer controls and renderer live support; unsupported controls remain visible UI state but are explicitly marked planned.",
+    }
+
 BOUNDARY_HIGHLIGHT_SCHEMA = "rrkal_displaytools.boundary_highlight_mask.v1"
 BOUNDARY_IDENTITY_STATUS_SCHEMA = "rrkal_displaytools.boundary_identity_status.v1"
 BOUNDARY_HIGHLIGHT_LAYER_KEYS = (
@@ -471,6 +567,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "locked": QtWidgets.QLabel("-"),
             "opacity": QtWidgets.QLabel("-"),
             "blend": QtWidgets.QLabel("-"),
+            "capabilities": QtWidgets.QLabel("-"),
             "renderer_target": QtWidgets.QLabel("-"),
             "diagnostics": QtWidgets.QLabel("-"),
         }
@@ -482,6 +579,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         material_form.addRow("Locked", self.layer_property_labels["locked"])
         material_form.addRow("Opacity", self.layer_property_labels["opacity"])
         material_form.addRow("Blend mode", self.layer_property_labels["blend"])
+        material_form.addRow("Layer capabilities", self.layer_property_labels["capabilities"])
         material_form.addRow("Renderer target", self.layer_property_labels["renderer_target"])
         material_form.addRow("Renderer diagnostics", self.layer_property_labels["diagnostics"])
         layer_property_actions = QtWidgets.QHBoxLayout()
@@ -689,6 +787,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ("Solo 選取圖層", self.solo_selected_layer_visibility),
             ("還原 Solo 前可見性", self.restore_layer_visibility_snapshot),
             ("Undo 圖層狀態", self.undo_layer_stack_state),
+            ("顯示 layer capabilities", self.show_layer_capability_matrix),
             ("顯示 layer runtime JSON", self.show_layer_runtime_state),
             ("顯示 layer pick JSON", self.show_layer_pick_state),
             ("重設 UI 圖層狀態", self.reset_layer_stack_controls),
@@ -1477,6 +1576,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "selected_layer": self.selected_layer_key,
             "layer_filter": self.collect_layer_filter_state(),
             "layer_group_view": self.collect_layer_group_view_state(),
+            "layer_capability_matrix": self.collect_layer_capability_matrix(),
             "active_layer_diagnostics": self.active_layer_diagnostics_packet(),
             "layer_undo": self.collect_layer_undo_state(),
             "session_journal": self.collect_session_journal(),
@@ -1559,56 +1659,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         return stack
 
     def layer_renderer_sync_status(self, key: str) -> str:
-        visibility_live = {
-            "show_grid",
-            "show_stars",
-            "lake_layer",
-            "river_layer",
-            "border_layer",
-            "territorial_sea_layer",
-            "eez_layer",
-            "high_seas_layer",
-            "aircraft_layer",
-            "pin_layer",
-            "vehicle_icons",
-            "ocean_material",
-            "terrain_contours",
-            "scale_bar",
-        }
-        opacity_live = {
-            "lake_layer",
-            "river_layer",
-            "border_layer",
-            "territorial_sea_layer",
-            "eez_layer",
-            "high_seas_layer",
-            "aircraft_layer",
-            "pin_layer",
-            "vehicle_icons",
-            "terrain_contours",
-            "scale_bar",
-        }
-        blend_live = {
-            "lake_layer",
-            "river_layer",
-            "border_layer",
-            "territorial_sea_layer",
-            "eez_layer",
-            "high_seas_layer",
-            "aircraft_layer",
-            "pin_layer",
-            "vehicle_icons",
-        }
-        live = []
-        if key in visibility_live:
-            live.append("visibility")
-        if key in opacity_live:
-            live.append("opacity")
-        if key in blend_live:
-            live.append("blend")
-        if not live:
-            return "planned"
-        return f"live: {', '.join(live)}"
+        return str(layer_capability_packet(key).get("renderer_sync", "planned"))
+
+    def collect_layer_capability_matrix(self) -> dict[str, object]:
+        return layer_capability_matrix_packet("rrkal_displaytools_qt_panel", self.selected_layer_key)
 
     def collect_layer_runtime_state(self) -> dict[str, object]:
         layers = self.collect_layer_stack_ui()
@@ -1645,6 +1699,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "locked_layers": locked_layers,
             "layer_visibility_snapshot_active": self.layer_visibility_snapshot is not None,
             "layer_visibility_snapshot": self.layer_visibility_snapshot,
+            "layer_capability_matrix": self.collect_layer_capability_matrix(),
             "layers": layers,
         }
 
@@ -2333,11 +2388,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             for key, _label in LAYER_LABELS
             if self.layer_opacity[key].value() != 100 or self.layer_blends[key].currentText() != "Normal"
         )
+        capabilities = self.collect_layer_capability_matrix()
+        live_counts = capabilities.get("live_counts", {})
         self.layer_stack_note.setText(
             f"可見圖層 {visible}/{len(LAYER_LABELS)}；鎖定 {locked}；"
             f"非預設 opacity/blend {non_default}；"
             f"solo snapshot={'active' if self.layer_visibility_snapshot is not None else 'none'}。"
-            "Visibility/Opacity/Blend 已接 renderer runtime sync。"
+            f"Live controls: vis={live_counts.get('visibility', 0)}, opacity={live_counts.get('opacity', 0)}, "
+            f"blend={live_counts.get('blend', 0)}, pick={live_counts.get('selected_layer_pick', 0)}。"
         )
         self.refresh_layer_undo_label()
         self.write_layer_runtime_state()
@@ -3573,6 +3631,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_property_labels["locked"].setText("Locked" if self.layer_locks[key].isChecked() else "Unlocked")
         self.layer_property_labels["opacity"].setText(f"{self.layer_opacity[key].value()}%")
         self.layer_property_labels["blend"].setText(self.layer_blends[key].currentText())
+        capabilities = layer_capability_packet(key, label)
+        self.layer_property_labels["capabilities"].setText(", ".join(capabilities["live_controls"]) or "planned")
         renderer_target = LAYER_RUNTIME_ID_ALIASES.get(key, "-")
         self.layer_property_labels["renderer_target"].setText(str(renderer_target))
         self.layer_property_labels["diagnostics"].setText(self.layer_diagnostics_text(str(renderer_target)))
@@ -3630,6 +3690,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "selected_layer": key,
             "label": label,
             "renderer_target": renderer_target,
+            "capabilities": layer_capability_packet(key, label) if key is not None else None,
+            "layer_capability_matrix_schema": "rrkal_displaytools.layer_capability_matrix.v1",
             "diagnostics_text": diagnostics_text,
             "runtime_ack_file": str(LAYER_RUNTIME_ACK_PATH),
             "runtime_ack": self.layer_runtime_ack_payload,
@@ -4236,6 +4298,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             text = json.dumps(self.collect_layer_runtime_state(), ensure_ascii=False, indent=2)
         self.command_text.setPlainText(text)
         self.status.setText(f"已顯示 layer runtime state JSON：{LAYER_RUNTIME_STATE_PATH}")
+
+    def show_layer_capability_matrix(self) -> None:
+        self.command_text.setPlainText(
+            json.dumps(self.collect_layer_capability_matrix(), ensure_ascii=False, indent=2)
+        )
+        self.status.setText("已顯示 layer capability matrix JSON")
 
     def show_pin_pick_state(self) -> None:
         try:

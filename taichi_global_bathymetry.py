@@ -17470,6 +17470,116 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 
+def layer_capability_matrix_packet() -> dict[str, object]:
+    aliases = {
+        "show_grid": "grid",
+        "show_stars": "stars",
+        "lake_layer": "lakes",
+        "river_layer": "rivers",
+        "border_layer": "borders",
+        "territorial_sea_layer": "territorial_sea",
+        "eez_layer": "eez",
+        "high_seas_layer": "high_seas",
+        "aircraft_layer": "aircraft",
+        "pin_layer": "pins",
+        "ocean_material": "ocean_material",
+        "terrain_contours": "contours",
+        "scale_bar": "scale",
+        "vehicle_icons": "vehicle_icons",
+    }
+    labels = {
+        "show_grid": "grid",
+        "show_stars": "stars",
+        "lake_layer": "lakes",
+        "river_layer": "rivers",
+        "border_layer": "borders",
+        "territorial_sea_layer": "territorial sea",
+        "eez_layer": "EEZ",
+        "high_seas_layer": "high seas",
+        "aircraft_layer": "aircraft",
+        "pin_layer": "pins",
+        "ocean_material": "ocean material",
+        "terrain_contours": "terrain contours",
+        "scale_bar": "scale bar",
+        "vehicle_icons": "vehicle icons",
+    }
+    visibility_live = set(aliases)
+    opacity_live = {
+        "lake_layer",
+        "river_layer",
+        "border_layer",
+        "territorial_sea_layer",
+        "eez_layer",
+        "high_seas_layer",
+        "aircraft_layer",
+        "pin_layer",
+        "vehicle_icons",
+        "terrain_contours",
+        "scale_bar",
+    }
+    blend_live = {
+        "lake_layer",
+        "river_layer",
+        "border_layer",
+        "territorial_sea_layer",
+        "eez_layer",
+        "high_seas_layer",
+        "aircraft_layer",
+        "pin_layer",
+        "vehicle_icons",
+    }
+    pick_live = {
+        "lake_layer",
+        "river_layer",
+        "border_layer",
+        "territorial_sea_layer",
+        "eez_layer",
+        "high_seas_layer",
+        "aircraft_layer",
+        "pin_layer",
+        "vehicle_icons",
+    }
+    layers = []
+    for key, renderer_target in aliases.items():
+        live = []
+        if key in visibility_live:
+            live.append("visibility")
+        if key in opacity_live:
+            live.append("opacity")
+        if key in blend_live:
+            live.append("blend")
+        if key in pick_live:
+            live.append("selected_layer_pick")
+        layers.append(
+            {
+                "key": key,
+                "label": labels.get(key, key),
+                "renderer_target": renderer_target,
+                "visibility_live": key in visibility_live,
+                "opacity_live": key in opacity_live,
+                "blend_live": key in blend_live,
+                "pick_live": key in pick_live,
+                "live_controls": live,
+                "renderer_sync": f"live: {', '.join(live)}" if live else "planned",
+            }
+        )
+    return {
+        "schema": "rrkal_displaytools.layer_capability_matrix.v1",
+        "source": "taichi_global_bathymetry.renderer_capabilities",
+        "layer_count": len(layers),
+        "live_counts": {
+            "visibility": sum(1 for layer in layers if layer["visibility_live"]),
+            "opacity": sum(1 for layer in layers if layer["opacity_live"]),
+            "blend": sum(1 for layer in layers if layer["blend_live"]),
+            "selected_layer_pick": sum(1 for layer in layers if layer["pick_live"]),
+        },
+        "selected_layer": None,
+        "selected_layer_capabilities": None,
+        "layers": layers,
+        "boundary": "Renderer capability discovery for Qt layer controls; unsupported controls remain UI/profile state until renderer support is implemented.",
+    }
+
+
 def renderer_capabilities_packet() -> dict[str, object]:
     return {
         "schema": "rrkal_displaytools.renderer_capabilities.v1",
@@ -17524,6 +17634,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "pending": ["low_latency_ipc_or_gpu_texture_stream"],
             "output": "RGBA PNG replaced atomically at the requested interval",
         },
+        "layer_capability_matrix": layer_capability_matrix_packet(),
         "pin_controls": [
             "pin-file",
             "pin-json",
