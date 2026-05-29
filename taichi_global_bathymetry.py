@@ -10634,6 +10634,10 @@ class HybridRenderController:
         self.runtime_overlay_blend_modes: dict[str, str] = {
             "lakes": "Normal",
             "rivers": "Normal",
+            "borders": "Normal",
+            "territorial_sea": "Normal",
+            "eez": "Normal",
+            "high_seas": "Normal",
             "aircraft": "Normal",
             "pins": "Normal",
             "vehicle_icons": "Normal",
@@ -10763,6 +10767,13 @@ class HybridRenderController:
     def compose_runtime_blend(self, background: np.ndarray, layer_id: str, overlay: np.ndarray) -> np.ndarray:
         return alpha_blend_compose(background, overlay, self.layer_blend_mode(layer_id) or "Normal")
 
+    def boundary_aggregate_blend_mode(self) -> str:
+        for layer_id in ("borders", "territorial_sea", "eez", "high_seas"):
+            mode = self.layer_blend_mode(layer_id)
+            if mode and mode != "Normal":
+                return mode
+        return "Normal"
+
     def refresh_layer_runtime_state(self) -> bool:
         if self.layer_runtime_state_file is None:
             return False
@@ -10882,10 +10893,11 @@ class HybridRenderController:
             "layer_visible": {layer_id: bool(visible) for layer_id, visible in self.layer_visible.items()},
             "layer_opacity": layer_opacity,
             "layer_blend_mode": layer_blend_mode,
+            "boundary_aggregate_blend_mode": self.boundary_aggregate_blend_mode(),
             "runtime_layer_aliases": dict(LAYER_RUNTIME_ID_ALIASES),
             "frame_index": getattr(self, "frame_index", 0),
-            "applies": ["visibility", "lock_guard_visibility", "opacity", "blend_mode_overlay"],
-            "pending": ["blend_mode_boundary_aggregate"],
+            "applies": ["visibility", "lock_guard_visibility", "opacity", "blend_mode_overlay", "blend_mode_boundary_aggregate"],
+            "pending": ["blend_mode_per_boundary_split"],
             "error": self.layer_runtime_state_last_error,
             "source": "taichi_global_bathymetry",
         }
@@ -13758,7 +13770,11 @@ class HybridRenderController:
 
         self.frame_rgba = self.compose_runtime_blend(self.globe_rgba, "lakes", self.lake_overlay_rgba)
         self.frame_rgba = self.compose_runtime_blend(self.frame_rgba, "rivers", self.river_overlay_rgba)
-        self.frame_rgba = alpha_compose(self.frame_rgba, self.boundary_overlay_rgba)
+        self.frame_rgba = alpha_blend_compose(
+            self.frame_rgba,
+            self.boundary_overlay_rgba,
+            self.boundary_aggregate_blend_mode(),
+        )
         self.frame_rgba = alpha_compose(self.frame_rgba, self.overlay_rgba)
         self.frame_rgba = self.compose_runtime_overlay(self.frame_rgba, "aircraft", self.aircraft_overlay_rgba)
         self.frame_rgba = self.compose_runtime_overlay(self.frame_rgba, "vehicle_icons", self.vehicle_icon_overlay_rgba)
@@ -15494,10 +15510,17 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "ack_control": "layer-runtime-ack-file",
             "ack_schema": "rrkal_displaytools.renderer_layer_runtime_ack.v1",
             "runtime_layer_aliases": dict(LAYER_RUNTIME_ID_ALIASES),
-            "applies": ["visibility", "lock_guard_visibility", "opacity", "blend_mode_overlay"],
+            "applies": ["visibility", "lock_guard_visibility", "opacity", "blend_mode_overlay", "blend_mode_boundary_aggregate"],
             "runtime_overlay_opacity_layers": ["aircraft", "pins", "vehicle_icons"],
-            "runtime_overlay_blend_layers": ["lakes", "rivers", "aircraft", "pins", "vehicle_icons"],
-            "pending": ["blend_mode_boundary_aggregate"],
+            "runtime_overlay_blend_layers": [
+                "lakes",
+                "rivers",
+                "aircraft",
+                "pins",
+                "vehicle_icons",
+            ],
+            "runtime_aggregate_blend_layers": ["borders", "territorial_sea", "eez", "high_seas"],
+            "pending": ["blend_mode_per_boundary_split"],
         },
         "rrkal_boundary": {
             "displaytools_owns": [

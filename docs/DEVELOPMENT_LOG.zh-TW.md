@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - Boundary aggregate runtime blend
+
+Scope:
+- Added runtime blend storage for boundary layer keys.
+- Boundary composition now applies the first non-Normal boundary blend mode to the aggregate boundary overlay.
+- Renderer ack reports `boundary_aggregate_blend_mode`; capabilities distinguish aggregate boundary blend from pending per-boundary split blend.
+
+Positioning:
+- This closes a truthful boundary blend loop for the current aggregate renderer path.
+- Remaining boundary blend work is splitting the boundary overlay so borders, territorial sea, EEZ, and high seas can each use different blend modes.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Vehicle icon overlay closure
 
 Scope:

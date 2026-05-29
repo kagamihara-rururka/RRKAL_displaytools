@@ -1171,7 +1171,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_runtime_state_label.setText(
             f"Layer runtime bridge: {LAYER_RUNTIME_STATE_PATH.name}; selected={selected_layer}; "
             f"visible={visible_count}/{len(LAYER_LABELS)}; last_write={last_write}; "
-            "visibility/opacity live, overlay blend live, vector blend pending, lock guard live"
+            "visibility/opacity live, overlay/aggregate blend live, split blend pending, lock guard live"
         )
 
     def append_layer_runtime_history(self, payload: dict[str, object]) -> None:
@@ -1247,6 +1247,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         changed_blend_count = len(changed_blend_layers) if isinstance(changed_blend_layers, list) else "-"
         skipped_locked_layers = payload.get("skipped_locked_layers", [])
         skipped_count = len(skipped_locked_layers) if isinstance(skipped_locked_layers, list) else "-"
+        boundary_blend = str(payload.get("boundary_aggregate_blend_mode", "-"))
         frame_index = payload.get("frame_index", "-")
         updated_at = str(payload.get("updated_at_utc", "-"))
         error = payload.get("error")
@@ -1256,7 +1257,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_runtime_ack_label.setText(
             f"Renderer ack: event={event}, changed={changed_count}, opacity={changed_opacity_count}, "
             f"blend={changed_blend_count}, "
-            f"skipped_locked={skipped_count}, frame={frame_index}, updated={updated_at}"
+            f"boundary_blend={boundary_blend}, skipped_locked={skipped_count}, frame={frame_index}, updated={updated_at}"
         )
 
     def refresh_pin_input_ack_state(self) -> None:
