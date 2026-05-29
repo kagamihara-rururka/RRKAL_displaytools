@@ -271,6 +271,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.document_redo_stack: list[dict[str, object]] = []
         self.document_undo_capacity = 12
         self.document_undo_tracking_enabled = False
+        self.document_auto_snapshot_count = 0
         self.timeline_state_label: QtWidgets.QLabel | None = None
         self.timeline_keyframe_list: QtWidgets.QListWidget | None = None
         self.timeline_keyframes: list[dict[str, object]] = []
@@ -1981,6 +1982,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         dialog.exec()
 
     def apply_profile(self, profile: dict[str, object]) -> None:
+        self.auto_capture_document_snapshot("Before profile apply")
         errors = profile_payload_errors(profile)
         if errors:
             self.status.setText("配置格式錯誤")
@@ -2254,17 +2256,25 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "capacity": self.document_undo_capacity,
             "implemented": [
                 "manual_snapshot_capture",
+                "limited_automatic_change_capture",
                 "profile_state_undo",
                 "profile_state_redo",
                 "history_panel_controls",
                 "launch_packet_status_contract",
                 "provenance_status_contract",
             ],
+            "auto_capture_points": [
+                "profile_apply",
+                "renderer_preset_apply",
+                "timeline_keyframe_apply",
+                "timeline_keyframe_clear",
+                "layer_stack_reset",
+            ],
             "pending": [
-                "automatic_change_capture",
                 "operation_level_history",
                 "persisted_lab_notebook",
             ],
+            "auto_snapshot_count": self.document_auto_snapshot_count,
             "boundary": "Undo/redo restores saved Qt profile state snapshots only; it is not a full operation log.",
         }
 
@@ -2273,11 +2283,16 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             return
         self.document_undo_label.setText(
             f"Document history: manual snapshot; undo_depth={len(self.document_undo_stack)}, "
-            f"redo_depth={len(self.document_redo_stack)}, capacity={self.document_undo_capacity}; "
-            "automatic change capture pending"
+            f"redo_depth={len(self.document_redo_stack)}, auto={self.document_auto_snapshot_count}, "
+            f"capacity={self.document_undo_capacity}; operation-level history pending"
         )
 
-    def capture_document_snapshot(self, label: str = "Manual snapshot", clear_redo: bool = True) -> None:
+    def capture_document_snapshot(
+        self,
+        label: str = "Manual snapshot",
+        clear_redo: bool = True,
+        source: str = "manual",
+    ) -> None:
         if not self.document_undo_tracking_enabled:
             return
         snapshot = self.collect_document_snapshot()
@@ -2291,10 +2306,18 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if clear_redo:
             self.document_redo_stack.clear()
         if self.history_list is not None:
-            self.history_list.insertItem(0, f"Document snapshot captured: {label}")
+            marker = "auto" if source == "auto" else "manual"
+            self.history_list.insertItem(0, f"Document snapshot captured ({marker}): {label}")
+        if source == "auto":
+            self.document_auto_snapshot_count += 1
         self.refresh_document_undo_label()
         self.refresh_research_provenance()
         self.status.setText(f"已保存 document snapshot：{label}")
+
+    def auto_capture_document_snapshot(self, label: str) -> None:
+        if not label or not self.document_undo_tracking_enabled or not self.document_undo_stack:
+            return
+        self.capture_document_snapshot(label, source="auto")
 
     def apply_document_snapshot(self, snapshot: dict[str, object]) -> None:
         profile = snapshot.get("profile")
@@ -2511,6 +2534,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.status.setText("尚未選取 Timeline keyframe")
             return
         keyframe = self.timeline_keyframes[row]
+        self.auto_capture_document_snapshot(f"Before Timeline keyframe {keyframe.get('id', '-')}")
         renderer = keyframe.get("renderer")
         if isinstance(renderer, dict):
             self._set_combo(self.style_combo, str(renderer.get("style_profile", self.style_combo.currentText())))
@@ -2605,6 +2629,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot()
     def clear_timeline_keyframes(self) -> None:
+        self.auto_capture_document_snapshot("Before clearing Timeline keyframes")
         self.stop_timeline_keyframes()
         self.timeline_keyframes.clear()
         if self.timeline_keyframe_list is not None:
@@ -3431,6 +3456,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if key not in self.layer_locks:
             self.status.setText("尚未選取圖層")
             return
+        self.auto_capture_document_snapshot("Before selected layer reset")
         self.layer_locks[key].setChecked(False)
         self.layer_opacity[key].setValue(100)
         self.layer_blends[key].setCurrentText("Normal")
@@ -3439,6 +3465,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.status.setText(f"已重設選取圖層 UI 狀態：{label}")
 
     def reset_layer_stack_controls(self) -> None:
+        self.auto_capture_document_snapshot("Before layer stack reset")
         for key, _label in LAYER_LABELS:
             self.layer_locks[key].blockSignals(True)
             self.layer_opacity[key].blockSignals(True)
@@ -3719,7 +3746,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self._toggle_group(("show_grid", "show_stars", "terrain_contours", "scale_bar", "pin_layer"))
 
     @QtCore.pyqtSlot()
-    def apply_baseline(self) -> None:
+    def apply_baseline(self, snapshot_label: str | bool = "Before Baseline preset") -> None:
+        if isinstance(snapshot_label, bool):
+            snapshot_label = "Before Baseline preset"
+        self.auto_capture_document_snapshot(snapshot_label)
         self._set_combo(self.style_combo, "scientific")
         self._set_combo(self.topo_combo, "gebco")
         self._set_combo(self.data_combo, "static")
@@ -3742,7 +3772,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot()
     def apply_maritime(self) -> None:
-        self.apply_baseline()
+        self.auto_capture_document_snapshot("Before Maritime preset")
+        self.apply_baseline(snapshot_label="")
         self._set_combo(self.style_combo, "nautical")
         current = {key: self.checks[key].isChecked() for key in self.checks}
         current.update(
@@ -3757,13 +3788,15 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot()
     def apply_parchment(self) -> None:
-        self.apply_baseline()
+        self.auto_capture_document_snapshot("Before Parchment preset")
+        self.apply_baseline(snapshot_label="")
         self._set_combo(self.style_combo, "parchment")
         self.checks["show_stars"].setChecked(False)
         self.checks["terrain_contours"].setChecked(True)
 
     @QtCore.pyqtSlot()
     def apply_tactical(self) -> None:
+        self.auto_capture_document_snapshot("Before Tactical preset")
         self.apply_maritime()
         self._set_combo(self.style_combo, "tactical")
         self.checks["aircraft_layer"].setChecked(True)
@@ -3777,7 +3810,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
 
     @QtCore.pyqtSlot()
     def apply_fast_synthetic(self) -> None:
-        self.apply_baseline()
+        self.auto_capture_document_snapshot("Before Fast synthetic preset")
+        self.apply_baseline(snapshot_label="")
         self._set_combo(self.topo_combo, "synthetic")
         self.topo_step_edit.setText("64")
 

@@ -243,17 +243,25 @@ def document_undo_packet() -> dict[str, object]:
         "capacity": 0,
         "implemented": [
             "manual_snapshot_capture",
+            "limited_automatic_change_capture",
             "profile_state_undo",
             "profile_state_redo",
             "history_panel_controls",
             "launch_packet_status_contract",
             "provenance_status_contract",
         ],
+        "auto_capture_points": [
+            "profile_apply",
+            "renderer_preset_apply",
+            "timeline_keyframe_apply",
+            "timeline_keyframe_clear",
+            "layer_stack_reset",
+        ],
         "pending": [
-            "automatic_change_capture",
             "operation_level_history",
             "persisted_lab_notebook",
         ],
+        "auto_snapshot_count": 0,
         "boundary": "No-GUI export reports the UI contract only; runtime snapshots are created in the Qt panel.",
     }
 

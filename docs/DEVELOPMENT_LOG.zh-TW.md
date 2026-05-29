@@ -1,5 +1,20 @@
 # Development Log
 
+## 2026-05-29 - Limited automatic document snapshots
+
+Scope:
+- Document snapshot undo now performs limited automatic capture before high-impact UI state changes.
+- Auto capture points cover profile apply, renderer preset apply, Timeline keyframe apply/clear, and layer stack resets.
+- Document history status now reports auto snapshot count.
+- Launch packet `document_undo` now exposes `limited_automatic_change_capture` and `auto_capture_points`.
+- Smoke now gates the limited automatic capture contract.
+
+Positioning:
+- This improves recovery for researcher-facing UI workflows without claiming complete operation-level history or a persisted lab notebook.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Document history depth label
 
 Scope:

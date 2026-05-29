@@ -40,6 +40,12 @@ if ($launchPacket.session_journal.schema -ne "rrkal_displaytools.session_journal
 if ($launchPacket.document_undo.schema -ne "rrkal_displaytools.document_snapshot_undo.v1") {
     throw "Launch packet document_undo schema missing or invalid"
 }
+if ($launchPacket.document_undo.implemented -notcontains "limited_automatic_change_capture") {
+    throw "Launch packet document_undo limited automatic capture missing"
+}
+if ($launchPacket.document_undo.auto_capture_points -notcontains "profile_apply") {
+    throw "Launch packet document_undo auto_capture_points missing profile_apply"
+}
 if ($launchPacket.timeline_state.schema -ne "rrkal_displaytools.timeline_state.v1") {
     throw "Launch packet timeline_state schema missing or invalid"
 }

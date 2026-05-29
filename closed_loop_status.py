@@ -139,18 +139,19 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                 "applies": [
                     "History panel Snapshot/Undo/Redo controls",
                     "manual profile-state snapshot capture",
+                    "limited automatic snapshot capture",
                     "manual snapshot undo",
                     "manual snapshot redo",
                     "launch packet document_undo contract",
                     "provenance document_undo contract",
                 ],
                 "pending": [
-                    "automatic_change_capture",
                     "operation_level_history",
                     "persisted_lab_notebook",
                 ],
                 "evidence": [
                     "rrkal_displaytools.document_snapshot_undo.v1",
+                    "document_undo.auto_capture_points",
                     "History dock controls",
                 ],
             },

@@ -16508,7 +16508,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "cross-machine clone inspection",
             ],
             "pending": [
-                "automatic_document_undo_capture",
+                "operation_level_document_history",
                 "persisted_lab_notebook",
             ],
             "boundary": "Renderer capability discovery only; displaytools does not own RRKAL data discovery/cache governance.",
