@@ -2791,6 +2791,7 @@ def timeline_playback_plan_packet(keyframes: list[object] | None = None) -> dict
             continue
         pins = keyframe.get("pins")
         camera = keyframe.get("camera")
+        boundary_emphasis = keyframe.get("boundary_emphasis_control")
         plan_keyframes.append(
             {
                 "index": index,
@@ -2802,6 +2803,7 @@ def timeline_playback_plan_packet(keyframes: list[object] | None = None) -> dict
                 "has_layer_stack_snapshot": isinstance(keyframe.get("layer_stack_snapshot"), dict),
                 "pin_count": len(pins) if isinstance(pins, list) else 0,
                 "has_boundary_highlight": isinstance(keyframe.get("boundary_highlight"), dict),
+                "has_boundary_emphasis_control": isinstance(boundary_emphasis, dict),
                 "has_camera": isinstance(camera, dict),
             }
         )
@@ -2819,6 +2821,7 @@ def timeline_playback_plan_packet(keyframes: list[object] | None = None) -> dict
             "layer_stack_snapshot",
             "pins",
             "boundary_highlight",
+            "boundary_emphasis_control",
             "camera",
             "layer_opacity",
             "layer_discrete_hold",
@@ -2847,7 +2850,15 @@ def timeline_segment_state_packet(
             "from_keyframe_id": str(keyframes[segment_index].get("id", "")),
             "to_keyframe_id": str(keyframes[segment_index + 1].get("id", "")),
             "interpolatable_fields": ["ocean_material", "camera", "layer_opacity"],
-            "discrete_fields": ["style_profile", "layer_visibility", "layer_blend", "layer_discrete_hold", "pins", "boundary_highlight"],
+            "discrete_fields": [
+                "style_profile",
+                "layer_visibility",
+                "layer_blend",
+                "layer_discrete_hold",
+                "pins",
+                "boundary_highlight",
+                "boundary_emphasis_control",
+            ],
         }
     return {
         "schema": "rrkal_displaytools.timeline_segment_state.v1",
@@ -3303,6 +3314,7 @@ def timeline_first_keyframe_apply_preview_packet(
             "layer_stack_snapshot": isinstance(layers, dict),
             "pins": isinstance(first.get("pins"), list) if isinstance(first, dict) else False,
             "boundary_highlight": isinstance(first.get("boundary_highlight"), dict) if isinstance(first, dict) else False,
+            "boundary_emphasis_control": isinstance(first.get("boundary_emphasis_control"), dict) if isinstance(first, dict) else False,
             "camera": camera is not None,
         },
         "changed": {
@@ -3315,6 +3327,7 @@ def timeline_first_keyframe_apply_preview_packet(
             "pins": False,
             "selected_pin_id": False,
             "boundary_highlight": False,
+            "boundary_emphasis_control": False,
             "camera": False,
         },
         "unsupported_scope": [],

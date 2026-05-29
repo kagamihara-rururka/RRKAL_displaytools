@@ -5273,6 +5273,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             material = keyframe.get("ocean_material")
             layer_stack = keyframe.get("layer_stack_snapshot")
             boundary_highlight = keyframe.get("boundary_highlight")
+            boundary_emphasis = keyframe.get("boundary_emphasis_control")
             camera = keyframe.get("camera")
             keyframes.append(
                 {
@@ -5285,6 +5286,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                     "has_layer_stack_snapshot": isinstance(layer_stack, dict),
                     "pin_count": len(pins) if isinstance(pins, list) else 0,
                     "has_boundary_highlight": isinstance(boundary_highlight, dict),
+                    "has_boundary_emphasis_control": isinstance(boundary_emphasis, dict),
                     "has_camera": isinstance(camera, dict),
                 }
             )
@@ -5302,6 +5304,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "layer_stack_snapshot",
                 "pins",
                 "boundary_highlight",
+                "boundary_emphasis_control",
                 "camera",
                 "layer_opacity",
                 "layer_discrete_hold",
@@ -5327,7 +5330,15 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "from_keyframe_id": str(first.get("id", "")),
                 "to_keyframe_id": str(second.get("id", "")),
                 "interpolatable_fields": ["ocean_material", "camera", "layer_opacity"],
-                "discrete_fields": ["style_profile", "layer_visibility", "layer_blend", "layer_discrete_hold", "pins", "boundary_highlight"],
+                "discrete_fields": [
+                    "style_profile",
+                    "layer_visibility",
+                    "layer_blend",
+                    "layer_discrete_hold",
+                    "pins",
+                    "boundary_highlight",
+                    "boundary_emphasis_control",
+                ],
             }
         return {
             "schema": "rrkal_displaytools.timeline_segment_state.v1",
@@ -5570,6 +5581,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_stack_snapshot": self.collect_layer_undo_snapshot(),
             "pins": self.collect_research_pins(),
             "boundary_highlight": self.collect_boundary_highlight_state(),
+            "boundary_emphasis_control": self.collect_boundary_emphasis_control(),
         }
 
     def refresh_timeline_state_label(self) -> None:
@@ -5662,6 +5674,17 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if isinstance(boundary_highlight, dict):
             self.boundary_highlight_state = normalized_boundary_highlight_state(boundary_highlight)
             self.refresh_boundary_highlight_status()
+        boundary_emphasis = keyframe.get("boundary_emphasis_control")
+        if isinstance(boundary_emphasis, dict):
+            self.boundary_emphasis_state = {
+                "target_mode": boundary_emphasis.get("target_mode", "auto_selected_boundary_layer"),
+                "color_rgb": boundary_emphasis.get("color_rgb", [80, 180, 255]),
+                "contrast": boundary_emphasis.get("contrast", 1.35),
+                "opacity": boundary_emphasis.get("opacity", 0.42),
+                "gamma": boundary_emphasis.get("gamma", 1.0),
+                "breathing_enabled": boundary_emphasis.get("breathing_enabled", True),
+                "breathing_period_s": boundary_emphasis.get("breathing_period_s", 4.0),
+            }
         self.refresh_command_preview()
         self.refresh_layer_stack_status()
         self.refresh_canvas_preview()

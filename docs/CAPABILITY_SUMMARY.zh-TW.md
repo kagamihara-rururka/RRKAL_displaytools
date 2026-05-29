@@ -243,3 +243,8 @@
 
 - Canvas Preview now reports Boundary target mode, resolved target layer and selected-layer alignment.
 - Canvas preview provenance carries the same boundary emphasis target alignment fields.
+
+### 2026-05-30 Timeline boundary emphasis state
+
+- Timeline keyframes now preserve Boundary emphasis control state and restore it when keyframes are applied in Qt.
+- Timeline launch/renderer contracts include Boundary emphasis as a discrete keyframe field for reproducible demonstrations.

@@ -3006,3 +3006,17 @@ Decision:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Timeline boundary emphasis state
+
+Scope:
+- Qt timeline keyframes now capture `boundary_emphasis_control` alongside `boundary_highlight`.
+- Applying a Qt timeline keyframe restores boundary emphasis target/color/contrast/opacity/gamma/breathing UI state.
+- Timeline playback plan and segment state now include `boundary_emphasis_control` as a discrete keyframe field in Qt, no-GUI launch packet and renderer contracts.
+- Renderer timeline ack preview now reports `boundary_emphasis_control` in detected/changed scope.
+
+Decision:
+- Boundary emphasis target state must be reproducible during demonstrations; the visual highlight mask alone is not enough to explain which research layer was intended as the active target.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

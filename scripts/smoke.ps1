@@ -455,6 +455,9 @@ if ($launchPacket.timeline_playback_plan.planned_apply_scope -notcontains "layer
 if ($launchPacket.timeline_playback_plan.planned_apply_scope -notcontains "layer_discrete_hold") {
     throw "Launch packet timeline playback plan missing layer discrete hold apply scope"
 }
+if ($launchPacket.timeline_playback_plan.planned_apply_scope -notcontains "boundary_emphasis_control") {
+    throw "Launch packet timeline playback plan missing boundary emphasis apply scope"
+}
 if ($launchPacket.timeline_segment_state.schema -ne "rrkal_displaytools.timeline_segment_state.v1") {
     throw "Launch packet timeline segment state schema missing or invalid"
 }
@@ -753,6 +756,9 @@ if ($null -eq $timelineAck.first_keyframe_apply.changed.pins) {
 }
 if ($null -eq $timelineAck.first_keyframe_apply.changed.boundary_highlight) {
     throw "Renderer timeline first keyframe apply boundary changed field missing"
+}
+if ($null -eq $timelineAck.first_keyframe_apply.changed.boundary_emphasis_control) {
+    throw "Renderer timeline first keyframe apply boundary emphasis changed field missing"
 }
 if ($null -eq $timelineAck.first_keyframe_apply.changed.camera) {
     throw "Renderer timeline first keyframe apply camera changed field missing"
