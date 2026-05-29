@@ -2342,14 +2342,25 @@ def _extract_pin_records(payload: object) -> list[dict[str, object]]:
     return [dict(pin) for pin in pins if isinstance(pin, dict)]
 
 
-def load_pin_records(pin_file: str | None, pin_json: str | None) -> list[dict[str, object]]:
+def _extract_selected_pin_id(payload: object) -> str | None:
+    if not isinstance(payload, dict):
+        return None
+    selected_pin_id = payload.get("selected_pin_id")
+    return selected_pin_id if isinstance(selected_pin_id, str) else None
+
+
+def load_pin_records(pin_file: str | None, pin_json: str | None) -> tuple[list[dict[str, object]], str | None]:
     records: list[dict[str, object]] = []
+    selected_pin_id: str | None = None
     if pin_file:
         payload = json.loads(Path(pin_file).read_text(encoding="utf-8-sig"))
         records.extend(_extract_pin_records(payload))
+        selected_pin_id = selected_pin_id or _extract_selected_pin_id(payload)
     if pin_json:
-        records.extend(_extract_pin_records(json.loads(pin_json)))
-    return records
+        payload = json.loads(pin_json)
+        records.extend(_extract_pin_records(payload))
+        selected_pin_id = selected_pin_id or _extract_selected_pin_id(payload)
+    return records, selected_pin_id
 
 
 def render_pin_overlay(
@@ -2357,6 +2368,7 @@ def render_pin_overlay(
     height: int,
     projected_pins: list[dict[str, object]],
     pin_size: int = 9,
+    selected_pin_id: str | None = None,
 ) -> np.ndarray:
     overlay = np.zeros((height, width, 4), dtype=np.uint8)
     radius = max(2, int(pin_size) // 2)
@@ -2368,18 +2380,24 @@ def render_pin_overlay(
             y = int(round(float(pin["screen_y"])))
         except (KeyError, TypeError, ValueError):
             continue
+        selected = selected_pin_id is not None and pin.get("id") == selected_pin_id
         color = PIN_MARKER_COLORS.get(str(pin.get("type", "Observation")), PIN_MARKER_COLORS["Observation"])
-        for dy in range(-radius, radius + 1):
+        marker_radius = radius + (2 if selected else 0)
+        ring_radius = marker_radius + (3 if selected else 0)
+        for dy in range(-ring_radius, ring_radius + 1):
             py = y + dy
             if py < 0 or py >= height:
                 continue
-            for dx in range(-radius, radius + 1):
+            for dx in range(-ring_radius, ring_radius + 1):
                 px = x + dx
                 if px < 0 or px >= width:
                     continue
                 dist2 = dx * dx + dy * dy
-                if dist2 <= radius * radius or dx == 0 or dy == 0:
-                    alpha = color[3] if dist2 <= radius * radius else 190
+                if selected and marker_radius * marker_radius < dist2 <= ring_radius * ring_radius:
+                    overlay[py, px, :3] = (255, 255, 255)
+                    overlay[py, px, 3] = max(int(overlay[py, px, 3]), 220)
+                elif dist2 <= marker_radius * marker_radius or dx == 0 or dy == 0:
+                    alpha = color[3] if dist2 <= marker_radius * marker_radius else 190
                     overlay[py, px, :3] = color[:3]
                     overlay[py, px, 3] = max(int(overlay[py, px, 3]), alpha)
         if 0 <= x < width and 0 <= y < height:
@@ -10021,7 +10039,10 @@ class HybridRenderController:
         self.pin_overlay_rgba = np.zeros_like(self.globe_rgba)
         self.frame_rgba = np.zeros_like(self.globe_rgba)
         self.globe_mask = np.zeros((args.height, args.width), dtype=np.uint8)
-        self.pin_records = load_pin_records(getattr(args, "pin_file", None), getattr(args, "pin_json", None))
+        self.pin_records, self.selected_pin_id = load_pin_records(
+            getattr(args, "pin_file", None),
+            getattr(args, "pin_json", None),
+        )
         self.current_pin_projections: list[dict[str, object]] = []
         self.pin_visible_count = 0
         self.output_path = Path(args.output) if args.output else None
@@ -12752,6 +12773,7 @@ class HybridRenderController:
                         self.height,
                         self.current_pin_projections,
                         int(getattr(self.args, "pin_size", 9)),
+                        self.selected_pin_id,
                     ),
                     self.globe_mask,
                 )
@@ -14450,6 +14472,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "cloud-detail",
         ],
         "pin_overlay": pin_projection_contract_packet(),
+        "pin_selected_state": "selected_pin_id from --pin-file/--pin-json is rendered with a highlighted marker ring",
         "pin_controls": [
             "pin-file",
             "pin-json",

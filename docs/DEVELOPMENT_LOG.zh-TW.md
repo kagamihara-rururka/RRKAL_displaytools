@@ -756,3 +756,17 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Renderer selected Pin highlight
+
+Scope:
+- Renderer Pin loading now preserves `selected_pin_id` from `--pin-file` or `--pin-json`.
+- The Pin overlay renderer now draws the selected marker with a white highlight ring.
+- Renderer capabilities now document that selected Pin state is consumed by the overlay.
+
+Positioning:
+- This connects Qt Pin selection to actual renderer output, so selected scientific annotations are not just UI state.
+- Remaining Pin work is label layout, pick/hover, and deeper globe-mask/depth-buffer occlusion refinement.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
