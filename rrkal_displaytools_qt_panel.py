@@ -21,6 +21,7 @@ from pin_projection import pin_projection_contract_packet
 
 ROOT = Path(__file__).resolve().parent
 PROFILE_TEMPLATE_DIR = ROOT / "profiles"
+PIN_PICK_STATE_PATH = ROOT / "state" / "renderer_pin_pick_state.json"
 
 
 def profile_template_packet() -> dict[str, object]:
@@ -825,6 +826,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 self.current_pin_label_mode(),
                 "--pin-label-min-priority",
                 str(self.pin_label_min_priority_spin.value() if self.pin_label_min_priority_spin is not None else 50),
+                "--pin-pick-state-file",
+                str(PIN_PICK_STATE_PATH),
             ]
         )
         pins = self.collect_research_pins()
@@ -896,6 +899,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_stack_ui": self.collect_layer_stack_ui(),
             "tool_state": self.collect_tool_state(),
             "pins": self.collect_research_pins(),
+            "pin_pick_state_file": str(PIN_PICK_STATE_PATH),
             "command": self.build_command(),
             "command_line": subprocess.list2cmdline(self.build_command()),
             "portable_command": self.build_portable_command(),

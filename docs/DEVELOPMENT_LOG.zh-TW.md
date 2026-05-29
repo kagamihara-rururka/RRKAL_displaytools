@@ -848,3 +848,18 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Renderer Pin pick state bridge
+
+Scope:
+- Added `--pin-pick-state-file` to the renderer.
+- Renderer now writes selected/hover/cleared Pin pick state as JSON.
+- Qt launch commands now pass `state/renderer_pin_pick_state.json` as the default bridge file.
+- Launch packets include the Pin pick state file path.
+
+Positioning:
+- This creates the first bridge for syncing renderer-side Pin interaction back to the external Qt control panel.
+- The next step is for the Qt control panel to watch/read this state file and update its selected Pin UI.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

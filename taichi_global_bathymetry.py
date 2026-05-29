@@ -10235,6 +10235,7 @@ class HybridRenderController:
         self.selected_vehicle = None
         self.selected_pin_hit: dict[str, object] | None = None
         self.hover_pin_hit: dict[str, object] | None = None
+        self._last_hover_pin_id: str | None = None
         self.visible_count = 0
         self.rendered_count = 0
         self.total_count = 0
@@ -10311,6 +10312,7 @@ class HybridRenderController:
             getattr(args, "pin_file", None),
             getattr(args, "pin_json", None),
         )
+        self.pin_pick_state_file = Path(args.pin_pick_state_file) if getattr(args, "pin_pick_state_file", None) else None
         self.current_pin_projections: list[dict[str, object]] = []
         self.pin_visible_count = 0
         self.output_path = Path(args.output) if args.output else None
@@ -11953,6 +11955,27 @@ class HybridRenderController:
             lines.append(f"- pick_distance_px: {float(hit['pick_distance_px']):.1f}")
         return "\n".join(lines)
 
+    def write_pin_pick_state(self, event_kind: str, hit: dict[str, object] | None = None) -> None:
+        if self.pin_pick_state_file is None:
+            return
+        payload = {
+            "schema": "rrkal_displaytools.renderer_pin_pick_state.v1",
+            "updated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "event": event_kind,
+            "selected_pin_id": self.selected_pin_id,
+            "selected_pin": self.selected_pin_hit,
+            "hover_pin": self.hover_pin_hit,
+            "event_pin": hit,
+            "pin_visible_count": self.pin_visible_count,
+            "frame_index": self.frame_index,
+            "source": "taichi_global_bathymetry",
+        }
+        try:
+            self.pin_pick_state_file.parent.mkdir(parents=True, exist_ok=True)
+            self.pin_pick_state_file.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        except OSError as exc:
+            print(f"Unable to write pin pick state: {exc}")
+
     def nearest_pin_hit(self, x: float, y: float, radius: float | None = None) -> dict[str, object] | None:
         if not self.layer_visible.get("pins", True):
             return None
@@ -11984,16 +12007,24 @@ class HybridRenderController:
         self.selected_pin_id = str(hit.get("id", ""))
         self.selected_vehicle = None
         self.overlay_dirty = True
+        self.write_pin_pick_state("selected", hit)
         return True
 
     def set_pin_hover(self, x: float, y: float) -> None:
         self.hover_pin_hit = self.nearest_pin_hit(x, y, radius=float(getattr(self.args, "pin_pick_radius", 18.0)))
+        hover_id = str(self.hover_pin_hit.get("id")) if self.hover_pin_hit is not None else None
+        if hover_id != self._last_hover_pin_id:
+            self._last_hover_pin_id = hover_id
+            self.write_pin_pick_state("hover", self.hover_pin_hit)
 
     def pick_vehicle(self, x: float, y: float) -> None:
+        had_pin_state = self.selected_pin_hit is not None or self.hover_pin_hit is not None or self.selected_pin_id is not None
         self.selected_pin_hit = None
         self.hover_pin_hit = None
         self.selected_pin_id = None
         self.overlay_dirty = True
+        if had_pin_state:
+            self.write_pin_pick_state("cleared", None)
         radius = float(getattr(self.args, "icon_pick_radius", 14.0))
         best_row = None
         best_dist2 = radius * radius
@@ -14670,6 +14701,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--pin-label-mode", choices=["auto", "selected", "priority", "hidden"], default=os.environ.get("PIN_LABEL_MODE", "auto"))
     parser.add_argument("--pin-label-min-priority", type=int, default=int(os.environ.get("PIN_LABEL_MIN_PRIORITY", "50")))
     parser.add_argument("--pin-pick-radius", type=float, default=float(os.environ.get("PIN_PICK_RADIUS", "18.0")))
+    parser.add_argument("--pin-pick-state-file", default=os.environ.get("PIN_PICK_STATE_FILE"))
 
     parser.add_argument("--adaptive-sampling", action=bool_action, default=parse_bool(os.environ.get("ADAPTIVE_SAMPLING"), True))
     parser.add_argument("--target-fps", type=float, default=float(os.environ.get("TARGET_FPS", "30.0")))
@@ -14816,6 +14848,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "pin-label-mode",
             "pin-label-min-priority",
             "pin-pick-radius",
+            "pin-pick-state-file",
         ],
         "rrkal_boundary": {
             "displaytools_owns": [
