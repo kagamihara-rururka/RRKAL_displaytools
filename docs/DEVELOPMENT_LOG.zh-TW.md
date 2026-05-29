@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - Qt panel layer profile workflow
+
+Scope:
+- Added save/load JSON profile support to `rrkal_displaytools_qt_panel.py`.
+- Added `套用並重啟` so current layer/style/material settings can be applied without manually stopping and launching.
+- Documented local profile storage under `state/ui_profiles/`.
+
+Positioning:
+- Profiles are local operator UI state only.
+- They do not replace RRKAL manifest, cache, install registry, or dataset governance.
+
+Validation:
+- Not run; no test/validation requested.
+
 ## 2026-05-29 - Qt operator layer control panel
 
 Scope:

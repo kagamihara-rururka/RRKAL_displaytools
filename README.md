@@ -35,6 +35,11 @@ Primary files:
 - `rrkal_displaytools_qt_panel.py`: Qt operator panel for layer/style/material launch control.
 - `taichi_global_bathymetry.py`: current monolithic renderer prototype.
 
+Qt panel capabilities:
+- Toggle renderer layers without memorizing CLI flags.
+- Save/load local layer profiles as JSON under `state/ui_profiles/`.
+- Apply current settings by restarting the renderer from the panel.
+
 Core docs:
 - `docs/PRODUCT_POSITIONING.zh-TW.md`
 - `docs/PROJECT_GTD.md`

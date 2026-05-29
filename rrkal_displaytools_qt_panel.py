@@ -8,6 +8,7 @@ governance; this file is only a displaytools control surface.
 
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -22,6 +23,7 @@ except ImportError as exc:
 
 ROOT = Path(__file__).resolve().parent
 RENDERER = ROOT / "taichi_global_bathymetry.py"
+PROFILE_DIR = ROOT / "state" / "ui_profiles"
 
 STYLE_PROFILES = ("scientific", "nautical", "parchment", "tactical")
 UI_BACKENDS = ("qt", "vispy")
@@ -66,7 +68,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("RRKAL DisplayTools Qt 控制面板")
-        self.resize(1100, 760)
+        self.resize(1120, 780)
         self.process: subprocess.Popen[bytes] | None = None
         self.checks: dict[str, QtWidgets.QCheckBox] = {}
         self._build_ui()
@@ -168,13 +170,22 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
 
         actions = QtWidgets.QHBoxLayout()
         refresh_button = QtWidgets.QPushButton("刷新命令")
+        save_button = QtWidgets.QPushButton("儲存配置")
+        load_button = QtWidgets.QPushButton("載入配置")
         launch_button = QtWidgets.QPushButton("啟動地球儀")
+        restart_button = QtWidgets.QPushButton("套用並重啟")
         stop_button = QtWidgets.QPushButton("停止本面板啟動的程序")
         refresh_button.clicked.connect(self.refresh_command_preview)
+        save_button.clicked.connect(self.save_profile_dialog)
+        load_button.clicked.connect(self.load_profile_dialog)
         launch_button.clicked.connect(self.launch_renderer)
+        restart_button.clicked.connect(self.restart_renderer)
         stop_button.clicked.connect(self.stop_renderer)
         actions.addWidget(refresh_button)
+        actions.addWidget(save_button)
+        actions.addWidget(load_button)
         actions.addWidget(launch_button)
+        actions.addWidget(restart_button)
         actions.addWidget(stop_button)
         right.addLayout(actions)
 
@@ -247,9 +258,89 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             cmd.append(f"--{flag}" if enabled else f"--no-{flag}")
         return cmd
 
+    def collect_profile(self) -> dict[str, object]:
+        return {
+            "schema": "rrkal_displaytools.qt_panel_profile.v1",
+            "renderer": {
+                "style_profile": self.style_combo.currentText(),
+                "ui_backend": self.ui_combo.currentText(),
+                "topo_source": self.topo_combo.currentText(),
+                "data_mode": self.data_combo.currentText(),
+                "width": self.width_edit.text().strip(),
+                "height": self.height_edit.text().strip(),
+                "topo_step": self.topo_step_edit.text().strip(),
+                "taichi_arch": self.arch_edit.text().strip(),
+            },
+            "ocean_material": {
+                "wave_strength": self.wave_edit.text().strip(),
+                "roughness": self.roughness_edit.text().strip(),
+                "foam": self.foam_edit.text().strip(),
+            },
+            "layers": {key: check.isChecked() for key, check in self.checks.items()},
+        }
+
+    def apply_profile(self, profile: dict[str, object]) -> None:
+        renderer = profile.get("renderer", {})
+        material = profile.get("ocean_material", {})
+        layers = profile.get("layers", {})
+        if isinstance(renderer, dict):
+            self._set_combo(self.style_combo, str(renderer.get("style_profile", self.style_combo.currentText())))
+            self._set_combo(self.ui_combo, str(renderer.get("ui_backend", self.ui_combo.currentText())))
+            self._set_combo(self.topo_combo, str(renderer.get("topo_source", self.topo_combo.currentText())))
+            self._set_combo(self.data_combo, str(renderer.get("data_mode", self.data_combo.currentText())))
+            self.width_edit.setText(str(renderer.get("width", self.width_edit.text())))
+            self.height_edit.setText(str(renderer.get("height", self.height_edit.text())))
+            self.topo_step_edit.setText(str(renderer.get("topo_step", self.topo_step_edit.text())))
+            self.arch_edit.setText(str(renderer.get("taichi_arch", self.arch_edit.text())))
+        if isinstance(material, dict):
+            self.wave_edit.setText(str(material.get("wave_strength", self.wave_edit.text())))
+            self.roughness_edit.setText(str(material.get("roughness", self.roughness_edit.text())))
+            self.foam_edit.setText(str(material.get("foam", self.foam_edit.text())))
+        if isinstance(layers, dict):
+            for key, value in layers.items():
+                if key in self.checks:
+                    self.checks[key].setChecked(bool(value))
+        self.refresh_command_preview()
+
     @QtCore.pyqtSlot()
     def refresh_command_preview(self) -> None:
         self.command_text.setPlainText(subprocess.list2cmdline(self.build_command()))
+
+    @QtCore.pyqtSlot()
+    def save_profile_dialog(self) -> None:
+        PROFILE_DIR.mkdir(parents=True, exist_ok=True)
+        default_path = PROFILE_DIR / "panel_profile.json"
+        path, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self,
+            "儲存圖層配置",
+            str(default_path),
+            "JSON profiles (*.json)",
+        )
+        if not path:
+            return
+        Path(path).write_text(
+            json.dumps(self.collect_profile(), ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        self.status.setText(f"已儲存配置：{path}")
+
+    @QtCore.pyqtSlot()
+    def load_profile_dialog(self) -> None:
+        PROFILE_DIR.mkdir(parents=True, exist_ok=True)
+        path, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self,
+            "載入圖層配置",
+            str(PROFILE_DIR),
+            "JSON profiles (*.json)",
+        )
+        if not path:
+            return
+        profile = json.loads(Path(path).read_text(encoding="utf-8"))
+        if not isinstance(profile, dict):
+            self.status.setText("配置格式錯誤：root 不是 JSON object")
+            return
+        self.apply_profile(profile)
+        self.status.setText(f"已載入配置：{path}")
 
     @QtCore.pyqtSlot()
     def launch_renderer(self) -> None:
@@ -272,6 +363,13 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             return
         self.process.terminate()
         self.status.setText(f"已要求停止 renderer，PID={self.process.pid}")
+
+    @QtCore.pyqtSlot()
+    def restart_renderer(self) -> None:
+        if self.process is not None and self.process.poll() is None:
+            self.process.terminate()
+        self.process = None
+        self.launch_renderer()
 
     def _set_combo(self, combo: QtWidgets.QComboBox, value: str) -> None:
         index = combo.findText(value)
@@ -310,18 +408,16 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def apply_maritime(self) -> None:
         self.apply_baseline()
         self._set_combo(self.style_combo, "nautical")
-        self._set_layers(
+        current = {key: self.checks[key].isChecked() for key in self.checks}
+        current.update(
             {
-                key: self.checks[key].isChecked()
-                for key in self.checks
-            }
-            | {
                 "territorial_sea_layer": True,
                 "eez_layer": True,
                 "high_seas_layer": True,
                 "terrain_contours": True,
             }
         )
+        self._set_layers(current)
 
     @QtCore.pyqtSlot()
     def apply_parchment(self) -> None:
