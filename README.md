@@ -27,9 +27,9 @@ py -3 rrkal_displaytools_qt_panel.py
 ```
 
 List shared templates without opening the panel:
-`powershell
+```powershell
 py -3 rrkal_displaytools_qt_panel.py --list-templates
-` 
+```
 
 Open the panel with a shared template already loaded:
 ```powershell
@@ -43,22 +43,27 @@ Optional quick headless render request:
 ```
 
 Export a launch packet without opening Qt:
-`powershell
+```powershell
 py -3 scripts\export_launch_packet.py --template fast_synthetic
-` 
+```
+
+Print the profile schema contract as JSON:
+```powershell
+py -3 profile_schema.py
+```
+
+Renderer capabilities JSON:
+```powershell
+py -3 taichi_global_bathymetry.py --print-renderer-capabilities
+```
 
 GitHub Actions:
-- .github/workflows/smoke.yml runs the Windows smoke workflow on push and pull request.
+- `.github/workflows/smoke.yml` runs the Windows smoke workflow on push and pull request.
 
 Pre-commit smoke:
 ```powershell
 .\scripts\smoke.ps1
 ```
-
-Renderer capabilities JSON:
-`powershell
-py -3 taichi_global_bathymetry.py --print-renderer-capabilities
-` 
 
 Direct renderer launch:
 ```powershell
@@ -75,18 +80,21 @@ Primary files:
 - `rrkal_displaytools_qt_panel.py`: Qt operator panel for layer/style/material launch control.
 - `taichi_global_bathymetry.py`: current monolithic renderer prototype.
 - `profiles/*.json`: repo-shared Qt panel profile templates.
+- `profile_schema.py`: shared profile schema validator and JSON schema-contract output.
 - `scripts/setup_windows.ps1`: Windows dependency setup helper.
 - `scripts/run_qt_panel.ps1`: Windows Qt panel launch helper.
 - `scripts/render_quick_smoke.ps1`: Windows headless quick render helper.
-- scripts/smoke.ps1: pre-commit smoke test helper.
-- scripts/validate_profiles.py: profile template schema smoke validator.
+- `scripts/smoke.ps1`: pre-commit smoke test helper.
+- `scripts/validate_profiles.py`: profile template schema smoke validator.
+- `scripts/export_launch_packet.py`: no-GUI launch packet exporter for templates/profiles.
 
 Qt panel capabilities:
 - Toggle renderer layers without memorizing CLI flags.
 - Load repo-shared profile templates from `profiles/`.
 - Save/load local layer profiles as JSON under `state/ui_profiles/`.
 - Apply current settings by restarting the renderer from the panel.
-- Export a local launch packet JSON under state/showcase/ for handoff/debugging.
+- Export a local launch packet JSON under `state/showcase/` for handoff/debugging.
+- Copy either the local executable command or a portable `py -3 ...` command for another Windows machine.
 
 Core docs:
 - `docs/PRODUCT_POSITIONING.zh-TW.md`
@@ -101,10 +109,3 @@ Core docs:
 Notes:
 - Runtime caches, screenshots, logs, databases, and virtual environments are intentionally excluded from Git.
 - This initial import preserves the current monolithic prototype before later module extraction.
-
-
-
-
-
-
-

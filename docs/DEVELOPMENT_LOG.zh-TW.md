@@ -434,3 +434,16 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Profile schema JSON output and README repair
+
+Scope:
+- Added `profile_schema.py` JSON contract output to README usage instructions.
+- Repaired malformed README PowerShell code fences.
+- Documented `profile_schema.py` and no-GUI launch packet exporter as primary files.
+
+Positioning:
+- This improves RRKAL/script handoff and cross-machine copy/paste reliability.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

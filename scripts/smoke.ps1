@@ -18,6 +18,7 @@ function Invoke-CheckedNative {
 }
 
 Invoke-CheckedNative py @("-3", "-m", "py_compile", "rrkal_displaytools_qt_panel.py", "taichi_global_bathymetry.py")
+Invoke-CheckedNative py @("-3", "profile_schema.py") | Out-Null
 Invoke-CheckedNative py @("-3", "scripts\validate_profiles.py")
 Invoke-CheckedNative py @("-3", "scripts\export_launch_packet.py", "--template", "fast_synthetic") | Out-Null
 Invoke-CheckedNative py @("-3", "taichi_global_bathymetry.py", "--print-renderer-capabilities") | Out-Null

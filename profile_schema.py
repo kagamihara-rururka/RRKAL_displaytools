@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 
@@ -71,3 +72,31 @@ def load_profile_payload(path: Path) -> dict[str, object]:
     if not isinstance(payload, dict):
         raise ValueError("root must be an object")
     return payload
+
+
+def profile_schema_packet() -> dict[str, object]:
+    return {
+        "schema": "rrkal_displaytools.profile_schema_contract.v1",
+        "profile_schema_id": PROFILE_SCHEMA_ID,
+        "required_top_level": sorted(REQUIRED_PROFILE_TOP_LEVEL),
+        "required_renderer": sorted(REQUIRED_PROFILE_RENDERER),
+        "required_ocean_material": sorted(REQUIRED_PROFILE_OCEAN_MATERIAL),
+        "required_layers": sorted(REQUIRED_PROFILE_LAYERS),
+        "local_only_paths": [
+            "state/ui_profiles/",
+            "state/showcase/",
+        ],
+        "repo_shared_paths": [
+            "profiles/",
+            "docs/PROFILE_SCHEMA.zh-TW.md",
+        ],
+    }
+
+
+def main() -> int:
+    print(json.dumps(profile_schema_packet(), ensure_ascii=False, indent=2))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
