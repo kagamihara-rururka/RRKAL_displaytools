@@ -2584,6 +2584,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         module_seams_button = QtWidgets.QPushButton("Module seams")
         clone_ready_button = QtWidgets.QPushButton("Clone ready")
         pin_pick_button = QtWidgets.QPushButton("Pin pick")
+        cursor_geo_button = QtWidgets.QPushButton("Cursor geo")
         capabilities_button = QtWidgets.QPushButton("Renderer 能力")
         closed_loop_button = QtWidgets.QPushButton("閉環狀態")
         layer_manifest_button = QtWidgets.QPushButton("圖層 manifest")
@@ -2602,6 +2603,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (module_seams_button, "Inspect future module extraction seam registry JSON."),
             (clone_ready_button, "Inspect cross-machine clone readiness JSON."),
             (pin_pick_button, "Inspect renderer Pin hover/click pick bridge JSON."),
+            (cursor_geo_button, "Inspect mouse cursor latitude/longitude geodesy bridge JSON."),
         ):
             button.setToolTip(tooltip)
             button.setAccessibleDescription(tooltip)
@@ -2620,6 +2622,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         module_seams_button.clicked.connect(self.show_module_boundary_registry)
         clone_ready_button.clicked.connect(self.show_cross_machine_clone_readiness)
         pin_pick_button.clicked.connect(self.show_pin_pick_state)
+        cursor_geo_button.clicked.connect(self.show_cursor_geodesy_state)
         capabilities_button.clicked.connect(self.show_renderer_capabilities)
         closed_loop_button.clicked.connect(self.show_closed_loop_status)
         layer_manifest_button.clicked.connect(self.show_layer_manifest)
@@ -2646,6 +2649,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             module_seams_button,
             clone_ready_button,
             pin_pick_button,
+            cursor_geo_button,
             capabilities_button,
             closed_loop_button,
             layer_manifest_button,
@@ -6994,6 +6998,22 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             json.dumps(self.collect_cross_machine_clone_readiness(), ensure_ascii=False, indent=2)
         )
         self.status.setText("已顯示 cross-machine clone readiness JSON")
+
+    def show_cursor_geodesy_state(self) -> None:
+        self.command_text.setPlainText(
+            json.dumps(
+                {
+                    "cursor_geodesy_readout": self.collect_cursor_geodesy_readout(),
+                    "cursor_geodesy_state_file": str(CURSOR_GEODESY_STATE_PATH),
+                    "cursor_geodesy_ack_file": str(CURSOR_GEODESY_ACK_PATH),
+                    "cursor_geodesy_state": self.cursor_geodesy_state_payload,
+                    "cursor_geodesy_ack": self.cursor_geodesy_ack_payload,
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        self.status.setText("已顯示 cursor geodesy bridge JSON")
 
     def show_pin_pick_state(self) -> None:
         try:

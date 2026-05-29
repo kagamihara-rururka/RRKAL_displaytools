@@ -404,3 +404,8 @@
 
 - Qt Actions now includes `Pin pick`, which displays the renderer Pin hover/click pick bridge JSON from the panel.
 - This gives researchers a direct inspection path for Pin selection feedback while keeping Pins as globe-following geodetic anchors.
+
+### 2026-05-30 Qt Cursor geodesy JSON action
+
+- Qt Actions now includes `Cursor geo`, which displays `cursor_geodesy_readout`, renderer cursor state/ack file paths and the latest state/ack payloads.
+- This gives researchers a direct JSON inspection path for mouse-position latitude/longitude inference and renderer raycast feedback.

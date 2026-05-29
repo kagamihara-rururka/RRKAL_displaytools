@@ -230,6 +230,20 @@ Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
 
+## 2026-05-30 - Qt Cursor geodesy JSON action
+
+Scope:
+- Added a `Cursor geo` action button to the Qt Actions panel.
+- The action displays `cursor_geodesy_readout`, renderer cursor geodesy state/ack file paths, and the latest state/ack payloads.
+- Smoke verifies the button, handler and researcher-facing tooltip.
+
+Decision:
+- Mouse-position longitude/latitude inference should be directly inspectable from Qt so researchers can audit cursor-derived coordinates and renderer raycast readback without browsing state files.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+
 ## 2026-05-30 - Qt Pin pick JSON action
 
 Scope:

@@ -1695,6 +1695,15 @@ if ($qtPanelSource -notlike "*Pin pick*") {
 if ($qtPanelSource -notlike "*Inspect renderer Pin hover/click pick bridge JSON*") {
     throw "Qt Pin pick action tooltip is missing"
 }
+if ($qtPanelSource -notlike "*Cursor geo*") {
+    throw "Qt Cursor geo action button is missing"
+}
+if ($qtPanelSource -notlike "*show_cursor_geodesy_state*") {
+    throw "Qt Cursor geo JSON action is missing"
+}
+if ($qtPanelSource -notlike "*Inspect mouse cursor latitude/longitude geodesy bridge JSON*") {
+    throw "Qt Cursor geo action tooltip is missing"
+}
 if ($qtPanelSource -notlike "*saved_state_groups*") {
     throw "Qt profile UI state replay saved groups are missing"
 }
