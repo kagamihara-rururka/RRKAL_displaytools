@@ -1120,6 +1120,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "tool_state": self.collect_tool_state(),
             "pins": self.collect_research_pins(),
             "boundary_highlight": self.collect_boundary_highlight_state(),
+            "canvas_preview": self.collect_canvas_preview_state(),
         }
 
     def collect_launch_packet(self) -> dict[str, object]:
@@ -1148,6 +1149,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "tool_state": self.collect_tool_state(),
             "pins": self.collect_research_pins(),
             "boundary_highlight": self.collect_boundary_highlight_state(),
+            "canvas_preview": self.collect_canvas_preview_state(),
             "closed_loop_status": renderer_closed_loop_status_packet(),
             "boundary_highlight_ack_file": str(BOUNDARY_HIGHLIGHT_ACK_PATH),
             "pin_input_ack_file": str(PIN_INPUT_ACK_PATH),
@@ -1160,6 +1162,22 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "command_line": subprocess.list2cmdline(self.build_command()),
             "portable_command": self.build_portable_command(),
             "portable_command_line": subprocess.list2cmdline(self.build_portable_command()),
+        }
+
+    def renderer_thumbnail_profile_path(self) -> str | None:
+        if self.renderer_thumbnail_path is None:
+            return None
+        try:
+            return str(self.renderer_thumbnail_path.relative_to(ROOT))
+        except ValueError:
+            return str(self.renderer_thumbnail_path)
+
+    def collect_canvas_preview_state(self) -> dict[str, object]:
+        return {
+            "schema": "rrkal_displaytools.canvas_preview.v1",
+            "mode": self.canvas_preview_mode,
+            "renderer_thumbnail_path": self.renderer_thumbnail_profile_path(),
+            "renderer_sync": "static_renderer_output_thumbnail",
         }
 
     def collect_layer_stack_ui(self) -> dict[str, dict[str, object]]:
@@ -1769,6 +1787,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         tool_state = profile.get("tool_state")
         pins = profile.get("pins")
         boundary_highlight = profile.get("boundary_highlight")
+        canvas_preview = profile.get("canvas_preview")
         if isinstance(renderer, dict):
             self._set_combo(self.style_combo, str(renderer.get("style_profile", self.style_combo.currentText())))
             self._set_combo(self.ui_combo, str(renderer.get("ui_backend", self.ui_combo.currentText())))
@@ -1810,6 +1829,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if isinstance(boundary_highlight, dict):
             self.boundary_highlight_state = normalized_boundary_highlight_state(boundary_highlight)
             self.refresh_boundary_highlight_status()
+        if isinstance(canvas_preview, dict):
+            self.apply_canvas_preview_state(canvas_preview)
         self.selected_pin_id = selected_pin_id if isinstance(selected_pin_id, str) else None
         if self.selected_pin_id is not None and self.selected_pin_packet() is None:
             self.selected_pin_id = None
@@ -1817,6 +1838,26 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.populate_selected_pin_fields()
         self.refresh_command_preview()
         self.refresh_layer_stack_status()
+
+    def apply_canvas_preview_state(self, state: dict[str, object]) -> None:
+        mode = str(state.get("mode", "state"))
+        if mode == "thumbnail":
+            thumbnail_path: Path | None = None
+            raw_path = state.get("renderer_thumbnail_path")
+            if isinstance(raw_path, str) and raw_path.strip():
+                candidate = Path(raw_path.strip())
+                if not candidate.is_absolute():
+                    candidate = ROOT / candidate
+                if candidate.exists():
+                    thumbnail_path = candidate
+            if thumbnail_path is None:
+                thumbnail_path = self.latest_renderer_thumbnail_path()
+            if thumbnail_path is not None:
+                self.canvas_preview_mode = "thumbnail"
+                self.renderer_thumbnail_path = thumbnail_path
+                return
+        self.canvas_preview_mode = "state"
+        self.renderer_thumbnail_path = None
 
     def load_profile_path(self, path: Path) -> None:
         if not path.exists():
@@ -2469,8 +2510,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_pick_state_file": str(LAYER_PICK_STATE_PATH),
             "layer_pick_state": self.layer_pick_state_payload,
             "canvas_select_hit_targets": self.canvas_layer_hit_keys(),
-            "canvas_preview_mode": self.canvas_preview_mode,
-            "renderer_thumbnail_path": str(self.renderer_thumbnail_path) if self.renderer_thumbnail_path else None,
+            "canvas_preview": self.collect_canvas_preview_state(),
             "pin_overlay_boundary": "Pins are geodetic annotations; renderer sync must rotate them with the globe and apply horizon/depth occlusion.",
             "pin_projection_contract": pin_projection_contract_packet(),
             "boundary_highlight": self.collect_boundary_highlight_state(),

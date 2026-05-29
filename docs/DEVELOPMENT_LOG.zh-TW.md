@@ -1,5 +1,20 @@
 ﻿# Development Log
 
+## 2026-05-29 - Canvas preview profile state
+
+Scope:
+- Added optional `canvas_preview` state to Qt profiles and launch packets.
+- The contract records state-vs-thumbnail mode plus an optional renderer PNG reference path.
+- Profile loading restores thumbnail mode when the referenced PNG exists, falls back to the latest `state/showcase/*.png`, then falls back to state preview.
+- Updated profile schema validation and docs for `rrkal_displaytools.canvas_preview.v1`.
+
+Positioning:
+- This closes the static renderer thumbnail UI state loop across profile save/load and launch packet handoff.
+- Live renderer frame streaming remains future work.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Maritime feature identity keys
 
 Scope:

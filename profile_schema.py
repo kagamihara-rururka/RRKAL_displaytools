@@ -7,6 +7,7 @@ from pathlib import Path
 
 PROFILE_SCHEMA_ID = "rrkal_displaytools.qt_panel_profile.v1"
 BOUNDARY_HIGHLIGHT_SCHEMA_ID = "rrkal_displaytools.boundary_highlight_mask.v1"
+CANVAS_PREVIEW_SCHEMA_ID = "rrkal_displaytools.canvas_preview.v1"
 
 REQUIRED_PROFILE_TOP_LEVEL = {"schema", "renderer", "ocean_material", "layers"}
 OPTIONAL_PROFILE_TOP_LEVEL = {
@@ -16,6 +17,7 @@ OPTIONAL_PROFILE_TOP_LEVEL = {
     "tool_state",
     "pins",
     "boundary_highlight",
+    "canvas_preview",
 }
 REQUIRED_PROFILE_RENDERER = {
     "style_profile",
@@ -53,6 +55,7 @@ BLEND_MODES = {"Normal", "Screen", "Multiply", "Overlay", "Soft Light"}
 TOOL_MODES = {"move", "select", "pin"}
 PIN_TYPES = {"Observation", "Sample Site", "Anomaly", "Reference", "Event"}
 PIN_LABEL_MODES = {"auto", "selected", "priority", "hidden"}
+CANVAS_PREVIEW_MODES = {"state", "thumbnail"}
 BOUNDARY_HIGHLIGHT_LAYER_KEYS = {"border_layer", "territorial_sea_layer", "eez_layer", "high_seas_layer"}
 BOUNDARY_HIGHLIGHT_TRIGGERS = {"hover", "selected", "hover_or_selected"}
 REQUIRED_BOUNDARY_HIGHLIGHT_FIELDS = {
@@ -238,6 +241,25 @@ def profile_payload_errors(profile: dict[str, object]) -> list[str]:
                 pin_ids = {pin.get("id") for pin in pins if isinstance(pin, dict)}
                 if selected_pin_id not in pin_ids:
                     errors.append("selected_pin_id must match an id in pins")
+    canvas_preview = profile.get("canvas_preview")
+    if canvas_preview is not None:
+        if not isinstance(canvas_preview, dict):
+            errors.append("canvas_preview must be an object")
+        else:
+            allowed_fields = {"schema", "mode", "renderer_thumbnail_path", "renderer_sync"}
+            for field in sorted(set(canvas_preview) - allowed_fields):
+                errors.append(f"unknown canvas_preview field: {field}")
+            if canvas_preview.get("schema") != CANVAS_PREVIEW_SCHEMA_ID:
+                errors.append(f"canvas_preview.schema must be {CANVAS_PREVIEW_SCHEMA_ID}")
+            mode = canvas_preview.get("mode")
+            if not isinstance(mode, str) or mode not in CANVAS_PREVIEW_MODES:
+                errors.append(f"canvas_preview.mode must be one of {sorted(CANVAS_PREVIEW_MODES)}")
+            thumbnail_path = canvas_preview.get("renderer_thumbnail_path")
+            if thumbnail_path is not None and not isinstance(thumbnail_path, str):
+                errors.append("canvas_preview.renderer_thumbnail_path must be a string or null")
+            renderer_sync = canvas_preview.get("renderer_sync")
+            if renderer_sync is not None and not isinstance(renderer_sync, str):
+                errors.append("canvas_preview.renderer_sync must be a string")
     boundary_highlight = profile.get("boundary_highlight")
     if boundary_highlight is not None:
         if not isinstance(boundary_highlight, dict):
