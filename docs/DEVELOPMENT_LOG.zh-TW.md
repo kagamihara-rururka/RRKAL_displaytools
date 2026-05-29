@@ -2915,3 +2915,17 @@ Decision:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Boundary ack history handoff contract
+
+Scope:
+- Launch packets now declare the boundary ack history contract, source file, fields, Qt surface, and provenance field.
+- Renderer capabilities expose the same boundary ack history contract.
+- Handoff inspection now summarizes the boundary ack history contract for cross-machine verification.
+- Smoke gates launch packet, renderer capability, and handoff evidence for boundary ack history.
+
+Decision:
+- Boundary emphasis state changes need the same cross-machine discoverability as other UI/runtime bridges, because the feature is used for scientific review and reproducibility.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

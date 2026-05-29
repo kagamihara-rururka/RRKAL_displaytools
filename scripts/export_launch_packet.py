@@ -364,6 +364,19 @@ def boundary_highlight_packet(profile: dict[str, object]) -> dict[str, object] |
         }
     else:
         merged["identity_status"] = dict(DEFAULT_BOUNDARY_IDENTITY_STATUS)
+    merged["ack_history_contract"] = "boundary_highlight_ack_history"
+    merged["ack_history_source"] = "state/renderer_boundary_highlight_ack.json"
+    merged["ack_history_fields"] = [
+        "enabled",
+        "trigger",
+        "target_layers",
+        "renderer_target_layers",
+        "applies",
+        "pending",
+        "updated_at_utc",
+    ]
+    merged["ack_history_qt_surface"] = "History panel boundary ack history"
+    merged["ack_history_provenance_field"] = "boundary_highlight_ack_history"
     return merged
 
 

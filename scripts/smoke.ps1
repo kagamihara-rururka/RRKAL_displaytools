@@ -536,6 +536,12 @@ if ($launchPacket.timeline_ack_file -ne "state/renderer_timeline_ack.json") {
 if ($launchPacket.boundary_highlight.identity_status.schema -ne "rrkal_displaytools.boundary_identity_status.v1") {
     throw "Launch packet boundary_highlight identity_status schema missing or invalid"
 }
+if ($launchPacket.boundary_highlight.ack_history_contract -ne "boundary_highlight_ack_history") {
+    throw "Launch packet boundary_highlight ack history contract missing"
+}
+if ($launchPacket.boundary_highlight.ack_history_fields -notcontains "pending") {
+    throw "Launch packet boundary_highlight ack history pending field missing"
+}
 if ($launchPacket.portable_command -notcontains "--preview-frame-file") {
     throw "Launch packet portable command is missing --preview-frame-file"
 }
@@ -1051,6 +1057,12 @@ if ($capabilities.timeline_handoff.controls -notcontains "ack-timeline-state-and
 if ($capabilities.boundary_highlight.identity_status_schema -ne "rrkal_displaytools.boundary_identity_status.v1") {
     throw "Renderer boundary_highlight identity_status capability missing or invalid"
 }
+if ($capabilities.boundary_highlight.ack_history_contract -ne "boundary_highlight_ack_history") {
+    throw "Renderer boundary_highlight ack history contract missing"
+}
+if ($capabilities.boundary_highlight.ack_history_provenance_field -ne "boundary_highlight_ack_history") {
+    throw "Renderer boundary_highlight ack history provenance field missing"
+}
 $closedLoopText = & py -3 taichi_global_bathymetry.py --print-closed-loop-status
 if ($LASTEXITCODE -ne 0) {
     throw "Command failed: py -3 taichi_global_bathymetry.py --print-closed-loop-status"
@@ -1233,6 +1245,12 @@ if ($handoff.boundary_emphasis_control.renderer_controls_mapped -notcontains "al
 }
 if ($handoff.boundary_emphasis_control.qt_surface -ne "Layers dock boundary emphasis dialog") {
     throw "Handoff inspection boundary_emphasis_control Qt surface mismatch"
+}
+if ($handoff.boundary_highlight.ack_history_contract -ne "boundary_highlight_ack_history") {
+    throw "Handoff inspection boundary_highlight ack history contract missing"
+}
+if ($handoff.boundary_highlight.ack_history_fields -notcontains "updated_at_utc") {
+    throw "Handoff inspection boundary_highlight ack history timestamp field missing"
 }
 if ($handoff.launch_packet_contracts.style_renderer_entries -ne "rrkal_displaytools.style_renderer_entries.v1") {
     throw "Handoff inspection style_renderer_entries launch contract missing or invalid"

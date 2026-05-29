@@ -157,3 +157,4 @@ Last updated: 2026-05-29
 - 2026-05-30: Added active-layer screen-position diagnostics to handoff inspection and smoke gates.
 - 2026-05-30: Added layer pick history entries with screen-position provenance.
 - 2026-05-30: Added boundary highlight ack history to Qt History and research provenance.
+- 2026-05-30: Promoted boundary highlight ack history into launch/capability/handoff contracts.

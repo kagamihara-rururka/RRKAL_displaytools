@@ -208,3 +208,8 @@
 
 - Qt History now records renderer boundary highlight ack changes with enabled state, trigger, targets, renderer targets, live scopes, pending refinements, and update time.
 - Research provenance includes `boundary_highlight_ack_history`, making boundary emphasis state changes reproducible after renderer handoff.
+
+### 2026-05-30 Boundary ack history handoff contract
+
+- Launch packets, renderer capabilities, and handoff inspection now expose the boundary ack history contract, source file, fields, Qt History surface, and provenance field.
+- Smoke verifies that boundary emphasis ack history is discoverable across machines.

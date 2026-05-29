@@ -147,6 +147,16 @@ $summary = [ordered]@{
         row_double_click_layer_keys = $launchPacket.boundary_emphasis_control.row_double_click_layer_keys
         qt_surface = $launchPacket.boundary_emphasis_control.qt_surface
     }
+    boundary_highlight = @{
+        launch_packet_schema = $launchPacket.boundary_highlight.schema
+        renderer_capabilities_schema = $capabilities.boundary_highlight.schema
+        ack_schema = $capabilities.boundary_highlight.ack_schema
+        ack_history_contract = $launchPacket.boundary_highlight.ack_history_contract
+        ack_history_source = $launchPacket.boundary_highlight.ack_history_source
+        ack_history_fields = $launchPacket.boundary_highlight.ack_history_fields
+        ack_history_qt_surface = $launchPacket.boundary_highlight.ack_history_qt_surface
+        ack_history_provenance_field = $launchPacket.boundary_highlight.ack_history_provenance_field
+    }
     style_renderer_entries = @{
         launch_packet_schema = $launchPacket.style_renderer_entries.schema
         renderer_capabilities_schema = $capabilities.style_renderer_entries.schema
