@@ -551,6 +551,7 @@ def cross_machine_clone_readiness_packet(
         "status": "ready" if profile_ready and boundaries_ready and qt_first and tk_not_primary else "partial",
         "repo_url": "https://github.com/Kagamihara-Ruruka/RRKAL_displaytools.git",
         "setup_doc": "docs/SETUP_WINDOWS.zh-TW.md",
+        "qt_surface": "Layers dock cross-machine readiness label",
         "required_commands": required_commands,
         "first_run_order": first_run_order,
         "qt_first": qt_first,
@@ -2105,6 +2106,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.profile_launch_readiness_label = QtWidgets.QLabel("Profile/launch readiness: pending")
         self.profile_launch_readiness_label.setWordWrap(True)
         layers_layout.addWidget(self.profile_launch_readiness_label)
+        self.cross_machine_readiness_label = QtWidgets.QLabel("Cross-machine clone readiness: pending")
+        self.cross_machine_readiness_label.setWordWrap(True)
+        layers_layout.addWidget(self.cross_machine_readiness_label)
         self.layer_visual_presets_label = QtWidgets.QLabel("Layer presets: custom")
         self.layer_visual_presets_label.setWordWrap(True)
         layers_layout.addWidget(self.layer_visual_presets_label)
@@ -3917,6 +3921,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 f"{readiness_ui.get('label_prefix', 'Profile/launch readiness')}: "
                 f"{readiness_ui.get('readiness', 'unknown')} "
                 f"({readiness_ui.get('ready_check_count', 0)}/{readiness_ui.get('check_count', 0)} checks)"
+            )
+        clone_readiness = self.collect_cross_machine_clone_readiness()
+        if hasattr(self, "cross_machine_readiness_label"):
+            self.cross_machine_readiness_label.setText(
+                f"Cross-machine clone readiness: {clone_readiness.get('status', 'unknown')} "
+                f"({len(clone_readiness.get('required_commands', []))} commands, setup={clone_readiness.get('setup_doc', '-')})"
             )
         visual_presets = self.collect_layer_visual_presets()
         if hasattr(self, "layer_visual_presets_label"):

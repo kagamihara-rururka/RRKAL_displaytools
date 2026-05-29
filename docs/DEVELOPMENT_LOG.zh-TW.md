@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-30 - Cross-machine readiness Qt surface
+
+- Added a Qt Layers dock `Cross-machine clone readiness` label and exposed its `qt_surface` in `rrkal_displaytools.cross_machine_clone_readiness.v1`.
+- Smoke now verifies the launch packet and renderer capability Qt surface for clone readiness.
+- Smoke: PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Cross-machine clone readiness
 
 - Added `rrkal_displaytools.cross_machine_clone_readiness.v1` to make clone/setup/smoke/run/inspect steps explicit for another Windows machine.

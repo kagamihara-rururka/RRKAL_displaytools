@@ -236,6 +236,9 @@ if ($launchPacket.cross_machine_clone_readiness.required_commands -notcontains "
 if ($launchPacket.cross_machine_clone_readiness.setup_doc -ne "docs/SETUP_WINDOWS.zh-TW.md") {
     throw "Launch packet cross_machine_clone_readiness setup doc mismatch"
 }
+if ($launchPacket.cross_machine_clone_readiness.qt_surface -ne "Layers dock cross-machine readiness label") {
+    throw "Launch packet cross_machine_clone_readiness Qt surface mismatch"
+}
 if ($launchPacket.profile_launch_readiness.schema -ne "rrkal_displaytools.profile_launch_readiness.v1") {
     throw "Launch packet profile_launch_readiness schema missing or invalid"
 }
@@ -669,6 +672,9 @@ if ($capabilities.cross_machine_clone_readiness.schema -ne "rrkal_displaytools.c
 }
 if ($capabilities.cross_machine_clone_readiness.required_commands -notcontains "scripts/run_qt_panel.ps1") {
     throw "Renderer cross_machine_clone_readiness missing run command"
+}
+if ($capabilities.cross_machine_clone_readiness.qt_surface -ne "Layers dock cross-machine readiness label") {
+    throw "Renderer cross_machine_clone_readiness Qt surface mismatch"
 }
 if ($capabilities.profile_launch_readiness.schema -ne "rrkal_displaytools.profile_launch_readiness.v1") {
     throw "Renderer profile_launch_readiness schema missing or invalid"

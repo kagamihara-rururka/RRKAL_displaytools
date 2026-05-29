@@ -1285,6 +1285,7 @@ def cross_machine_clone_readiness_packet(
         "status": "ready" if profile_ready and boundaries_ready and qt_first and tk_not_primary else "partial",
         "repo_url": "https://github.com/Kagamihara-Ruruka/RRKAL_displaytools.git",
         "setup_doc": "docs/SETUP_WINDOWS.zh-TW.md",
+        "qt_surface": "Layers dock cross-machine readiness label",
         "required_commands": required_commands,
         "first_run_order": first_run_order,
         "qt_first": qt_first,
