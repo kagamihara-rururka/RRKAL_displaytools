@@ -64,6 +64,12 @@ if ($launchPacket.active_layer_diagnostics.layer_renderer_diagnostics_detail_sch
 if ($launchPacket.active_layer_diagnostics.layer_renderer_diagnostics_remediation_schema -ne "rrkal_displaytools.layer_renderer_diagnostics_remediation.v1") {
     throw "Launch packet active_layer_diagnostics layer renderer diagnostics remediation schema link missing"
 }
+if ($launchPacket.active_layer_diagnostics.layer_pick_screen_position_field -ne "screen_position") {
+    throw "Launch packet active_layer_diagnostics screen position field missing"
+}
+if ($launchPacket.active_layer_diagnostics.layer_pick_screen_position_source -ne "state/renderer_layer_pick_state.json") {
+    throw "Launch packet active_layer_diagnostics screen position source mismatch"
+}
 if ($launchPacket.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
     throw "Launch packet layer_capability_matrix schema missing or invalid"
 }
@@ -738,6 +744,9 @@ if ($capabilities.preview_frame_stream.schema -ne "rrkal_displaytools.preview_fr
 }
 if ($capabilities.active_layer_diagnostics.schema -ne "rrkal_displaytools.active_layer_diagnostics.v1") {
     throw "Renderer active_layer_diagnostics capability missing or invalid"
+}
+if ($capabilities.active_layer_diagnostics.runtime_fields -notcontains "screen_position") {
+    throw "Renderer active_layer_diagnostics screen_position runtime field missing"
 }
 if ($capabilities.layer_operator_shortcuts.schema -ne "rrkal_displaytools.layer_operator_shortcuts.v1") {
     throw "Renderer layer_operator_shortcuts schema missing or invalid"

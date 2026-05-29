@@ -2861,3 +2861,17 @@ Decision:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Active layer pick position contract
+
+Scope:
+- Active layer diagnostics now exposes `layer_pick_screen_position`, `layer_pick_screen_position_field`, and `layer_pick_screen_position_source`.
+- No-GUI launch packets declare that screen-position diagnostics come from `state/renderer_layer_pick_state.json`.
+- Renderer capabilities now list `screen_position` as an active-layer diagnostics runtime field.
+- Smoke gates launch packet and renderer capability discovery for the screen-position diagnostics contract.
+
+Decision:
+- The previous runtime JSON field is now promoted into handoff/capability contracts so cross-machine users can verify selected-layer pick provenance without reading renderer internals.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

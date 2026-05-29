@@ -5802,11 +5802,17 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             if renderer_target is not None
             else "no active layer selected"
         )
+        pick_payload = self.layer_pick_state_payload if isinstance(self.layer_pick_state_payload, dict) else {}
+        screen_position = pick_payload.get("screen_position")
+        screen_position = screen_position if isinstance(screen_position, dict) else None
         return {
             "schema": "rrkal_displaytools.active_layer_diagnostics.v1",
             "selected_layer": key,
             "label": label,
             "renderer_target": renderer_target,
+            "layer_pick_screen_position": screen_position,
+            "layer_pick_screen_position_field": "screen_position",
+            "layer_pick_screen_position_source": "state/renderer_layer_pick_state.json",
             "capabilities": self.collect_layer_capability_matrix().get("selected_layer_capabilities") if key is not None else None,
             "layer_capability_matrix_schema": "rrkal_displaytools.layer_capability_matrix.v1",
             "layer_runtime_evidence_schema": "rrkal_displaytools.layer_runtime_evidence.v1",

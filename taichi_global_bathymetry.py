@@ -19188,6 +19188,9 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "renderer_layer_runtime_ack.v1",
                 "renderer_layer_pick_state.v1",
             ],
+            "runtime_fields": ["selected_renderer_layer", "selected_layer_semantic_target", "screen_position", "pick_result"],
+            "layer_pick_screen_position_field": "screen_position",
+            "layer_pick_screen_position_source": "state/renderer_layer_pick_state.json",
             "applies": [
                 "Qt Properties active layer inspector",
                 "Qt launch packet handoff",

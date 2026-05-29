@@ -188,3 +188,8 @@
 
 - Renderer layer pick state now records click `screen_position`.
 - Qt layer diagnostics show click position with hit/no-hit results so researchers can trace selected-layer picking behavior.
+
+### 2026-05-30 Active layer pick position contract
+
+- Active layer diagnostics now exposes the selected-layer pick `screen_position` contract and its source file.
+- Launch packet, renderer capability discovery, and smoke all verify that layer pick screen-position provenance is available for cross-machine handoff.
