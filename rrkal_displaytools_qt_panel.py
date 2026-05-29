@@ -1380,6 +1380,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "document_undo": self.collect_document_undo_state(),
             "timeline_state": self.collect_timeline_state(),
             "timeline_playback_readiness": self.collect_timeline_playback_readiness(),
+            "timeline_playback_plan": self.collect_timeline_playback_plan(),
             "timeline_runtime_state_file": str(TIMELINE_STATE_PATH),
             "timeline_ack_file": str(TIMELINE_ACK_PATH),
             "timeline_ack": self.timeline_ack_payload,
@@ -2703,12 +2704,58 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "boundary": "Timeline can be stored, previewed in Qt, exported as runtime state, and acknowledged by renderer; renderer playback/export are not claimed yet.",
         }
 
+    def collect_timeline_playback_plan(self) -> dict[str, object]:
+        keyframes = []
+        for index, keyframe in enumerate(self.timeline_keyframes[:24]):
+            if not isinstance(keyframe, dict):
+                continue
+            pins = keyframe.get("pins")
+            material = keyframe.get("ocean_material")
+            layer_stack = keyframe.get("layer_stack_snapshot")
+            boundary_highlight = keyframe.get("boundary_highlight")
+            keyframes.append(
+                {
+                    "index": index,
+                    "id": str(keyframe.get("id", "")),
+                    "label": str(keyframe.get("label", "")),
+                    "style_profile": str(keyframe.get("style_profile", "")),
+                    "selected_layer": keyframe.get("selected_layer"),
+                    "has_ocean_material": isinstance(material, dict),
+                    "has_layer_stack_snapshot": isinstance(layer_stack, dict),
+                    "pin_count": len(pins) if isinstance(pins, list) else 0,
+                    "has_boundary_highlight": isinstance(boundary_highlight, dict),
+                }
+            )
+        return {
+            "schema": "rrkal_displaytools.timeline_playback_plan.v1",
+            "mode": "ordered_keyframe_plan",
+            "playback_driver": "qt_preview_timer",
+            "renderer_contract": "acknowledge_plan_only",
+            "keyframe_count": len(keyframes),
+            "segment_count": max(0, len(keyframes) - 1),
+            "keyframes": keyframes,
+            "planned_apply_scope": [
+                "style_profile",
+                "ocean_material",
+                "layer_stack_snapshot",
+                "pins",
+                "boundary_highlight",
+            ],
+            "pending": [
+                "renderer_timeline_playback",
+                "animation_export",
+                "inter_keyframe_interpolation",
+            ],
+            "boundary": "Playback plan describes ordered keyframes for future renderer playback; current renderer only acknowledges the plan.",
+        }
+
     def collect_timeline_runtime_state(self) -> dict[str, object]:
         return {
             "schema": "rrkal_displaytools.timeline_runtime_state.v1",
             "updated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             "timeline_state": self.collect_timeline_state(),
             "playback_readiness": self.collect_timeline_playback_readiness(),
+            "playback_plan": self.collect_timeline_playback_plan(),
             "timeline_keyframes": [dict(keyframe) for keyframe in self.timeline_keyframes],
             "source": "rrkal_displaytools_qt_panel",
             "boundary": "Renderer receives Timeline keyframes as state only; renderer playback/interpolation/export remain pending.",
@@ -3662,6 +3709,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "document_undo": self.collect_document_undo_state(),
             "timeline_state": self.collect_timeline_state(),
             "timeline_playback_readiness": self.collect_timeline_playback_readiness(),
+            "timeline_playback_plan": self.collect_timeline_playback_plan(),
             "timeline_runtime_state_file": str(TIMELINE_STATE_PATH),
             "timeline_state_last_write_utc": self.timeline_state_last_write_utc,
             "timeline_state_write_error": self.timeline_state_write_error,

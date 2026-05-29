@@ -1,5 +1,18 @@
 # Development Log
 
+## 2026-05-29 - Timeline playback plan contract
+
+Scope:
+- Added `rrkal_displaytools.timeline_playback_plan.v1`.
+- Qt launch/provenance packets, No-GUI launch packets, Timeline runtime state, renderer ack payloads, renderer capabilities, closed-loop status, docs, and smoke gates now expose ordered keyframes, segment count, planned apply scope, and the ack-only renderer boundary.
+- The plan does not claim renderer timeline playback; it fixes the input contract for the next interpolation work.
+
+Positioning:
+- This is the smallest reversible step from Timeline handoff toward renderer-side playback.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Timeline playback readiness contract
 
 Scope:

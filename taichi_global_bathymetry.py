@@ -2733,6 +2733,7 @@ def timeline_ack_payload_from_state_file(timeline_state_file: str | Path | None)
         "keyframe_count": keyframe_count,
         "playback_mode": playback.get("mode"),
         "playback_readiness": timeline_playback_readiness_packet(),
+        "playback_plan": timeline_playback_plan_packet(runtime_keyframes),
         "applies": ["input_acknowledgement"],
         "pending": [
             "renderer_timeline_playback",
@@ -2759,6 +2760,50 @@ def timeline_playback_readiness_packet() -> dict[str, object]:
             "camera_keyframe_interpolation",
         ],
         "boundary": "Renderer can acknowledge Timeline runtime state, but does not yet drive animation playback/export from it.",
+    }
+
+
+def timeline_playback_plan_packet(keyframes: list[object] | None = None) -> dict[str, object]:
+    keyframes = keyframes if isinstance(keyframes, list) else []
+    plan_keyframes = []
+    for index, keyframe in enumerate(keyframes[:24]):
+        if not isinstance(keyframe, dict):
+            continue
+        pins = keyframe.get("pins")
+        plan_keyframes.append(
+            {
+                "index": index,
+                "id": str(keyframe.get("id", "")),
+                "label": str(keyframe.get("label", "")),
+                "style_profile": str(keyframe.get("style_profile", "")),
+                "selected_layer": keyframe.get("selected_layer"),
+                "has_ocean_material": isinstance(keyframe.get("ocean_material"), dict),
+                "has_layer_stack_snapshot": isinstance(keyframe.get("layer_stack_snapshot"), dict),
+                "pin_count": len(pins) if isinstance(pins, list) else 0,
+                "has_boundary_highlight": isinstance(keyframe.get("boundary_highlight"), dict),
+            }
+        )
+    return {
+        "schema": "rrkal_displaytools.timeline_playback_plan.v1",
+        "mode": "ordered_keyframe_plan",
+        "playback_driver": "renderer_ack_plan_only",
+        "renderer_contract": "acknowledge_plan_only",
+        "keyframe_count": len(plan_keyframes),
+        "segment_count": max(0, len(plan_keyframes) - 1),
+        "keyframes": plan_keyframes,
+        "planned_apply_scope": [
+            "style_profile",
+            "ocean_material",
+            "layer_stack_snapshot",
+            "pins",
+            "boundary_highlight",
+        ],
+        "pending": [
+            "renderer_timeline_playback",
+            "animation_export",
+            "inter_keyframe_interpolation",
+        ],
+        "boundary": "Plan is acknowledged for future renderer playback; it is not executed by the renderer yet.",
     }
 
 
@@ -13229,6 +13274,7 @@ class HybridRenderController:
             if isinstance(timeline_state.get("playback"), dict)
             else None,
             "playback_readiness": timeline_playback_readiness_packet(),
+            "playback_plan": timeline_playback_plan_packet(runtime_keyframes),
             "applies": ["input_acknowledgement"],
             "pending": [
                 "renderer_timeline_playback",
@@ -16485,12 +16531,14 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "schema": "rrkal_displaytools.timeline_handoff.v1",
             "state_schema": "rrkal_displaytools.timeline_runtime_state.v1",
             "ack_schema": "rrkal_displaytools.renderer_timeline_ack.v1",
+            "playback_plan_schema": "rrkal_displaytools.timeline_playback_plan.v1",
             "playback_readiness": timeline_playback_readiness_packet(),
             "controls": ["timeline-state-file", "timeline-ack-file", "ack-timeline-state-and-exit"],
             "input_contracts": [
                 "rrkal_displaytools.timeline_state.v1",
                 "rrkal_displaytools.timeline_keyframe.v1",
                 "rrkal_displaytools.timeline_runtime_state.v1",
+                "rrkal_displaytools.timeline_playback_plan.v1",
                 "profile.timeline_keyframes",
             ],
             "applies": [

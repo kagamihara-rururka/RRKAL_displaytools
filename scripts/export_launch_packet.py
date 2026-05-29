@@ -429,6 +429,7 @@ def timeline_runtime_state_packet(profile: dict[str, object], target_file: str =
         "updated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "timeline_state": timeline_state_packet(profile),
         "playback_readiness": timeline_playback_readiness_packet(),
+        "playback_plan": timeline_playback_plan_packet(keyframes),
         "timeline_keyframes": keyframes,
         "source": "scripts/export_launch_packet.py",
         "target_file": target_file,
@@ -453,6 +454,47 @@ def timeline_playback_readiness_packet() -> dict[str, object]:
     }
 
 
+def timeline_playback_plan_packet(keyframes: list[dict[str, object]]) -> dict[str, object]:
+    plan_keyframes = []
+    for index, keyframe in enumerate(keyframes[:24]):
+        pins = keyframe.get("pins")
+        plan_keyframes.append(
+            {
+                "index": index,
+                "id": str(keyframe.get("id", "")),
+                "label": str(keyframe.get("label", "")),
+                "style_profile": str(keyframe.get("style_profile", "")),
+                "selected_layer": keyframe.get("selected_layer"),
+                "has_ocean_material": isinstance(keyframe.get("ocean_material"), dict),
+                "has_layer_stack_snapshot": isinstance(keyframe.get("layer_stack_snapshot"), dict),
+                "pin_count": len(pins) if isinstance(pins, list) else 0,
+                "has_boundary_highlight": isinstance(keyframe.get("boundary_highlight"), dict),
+            }
+        )
+    return {
+        "schema": "rrkal_displaytools.timeline_playback_plan.v1",
+        "mode": "ordered_keyframe_plan",
+        "playback_driver": "no_gui_export_plan_only",
+        "renderer_contract": "acknowledge_plan_only",
+        "keyframe_count": len(plan_keyframes),
+        "segment_count": max(0, len(plan_keyframes) - 1),
+        "keyframes": plan_keyframes,
+        "planned_apply_scope": [
+            "style_profile",
+            "ocean_material",
+            "layer_stack_snapshot",
+            "pins",
+            "boundary_highlight",
+        ],
+        "pending": [
+            "renderer_timeline_playback",
+            "animation_export",
+            "inter_keyframe_interpolation",
+        ],
+        "boundary": "Playback plan is exported for renderer handoff; current renderer only acknowledges it.",
+    }
+
+
 def launch_packet(
     profile_path: Path,
     profile: dict[str, object],
@@ -467,6 +509,8 @@ def launch_packet(
         *renderer_args(profile, rrkal_data_manifest_ref, timeline_state_file, timeline_ack_file),
     ]
     manifest_ref = rrkal_data_manifest_ref or str(profile.get("renderer", {}).get("rrkal_data_manifest_ref", "")).strip()
+    profile_keyframes = profile.get("timeline_keyframes")
+    timeline_keyframes = [dict(keyframe) for keyframe in profile_keyframes if isinstance(keyframe, dict)] if isinstance(profile_keyframes, list) else []
     return {
         "schema": "rrkal_displaytools.launch_packet.v1",
         "created_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
@@ -497,6 +541,7 @@ def launch_packet(
         "document_undo": document_undo_packet(),
         "timeline_state": timeline_state_packet(profile),
         "timeline_playback_readiness": timeline_playback_readiness_packet(),
+        "timeline_playback_plan": timeline_playback_plan_packet(timeline_keyframes),
         "timeline_runtime_state": timeline_runtime_state_packet(profile, timeline_state_file),
         "timeline_runtime_state_file": timeline_state_file,
         "timeline_ack_file": timeline_ack_file,
