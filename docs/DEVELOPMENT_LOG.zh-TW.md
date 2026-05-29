@@ -863,3 +863,18 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Qt Pin pick bridge sync
+
+Scope:
+- Added a Qt-side poller for `state/renderer_pin_pick_state.json`.
+- The Pin Annotation panel now shows renderer bridge event, selected Pin, hovered Pin, visible count, frame, and update timestamp.
+- Renderer `selected` events sync back into the external Qt Pin list, Pin form fields, command preview, canvas preview, and provenance.
+- Renderer `cleared` events clear the Qt selected Pin without affecting saved Pin annotations.
+
+Positioning:
+- This closes the first bidirectional Pin loop: Qt sends Pins to renderer, renderer performs visible-globe hit testing, and Qt consumes renderer pick state.
+- Remaining Pin work is richer bridge diagnostics/history and deeper globe-mask/depth-buffer occlusion refinement.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

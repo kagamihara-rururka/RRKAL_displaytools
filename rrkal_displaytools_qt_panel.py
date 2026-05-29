@@ -140,6 +140,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.pin_label_mode_combo: QtWidgets.QComboBox | None = None
         self.pin_label_min_priority_spin: QtWidgets.QSpinBox | None = None
         self.pin_list: QtWidgets.QListWidget | None = None
+        self.pin_pick_state_label: QtWidgets.QLabel | None = None
+        self.pin_pick_state_mtime_ns: int | None = PIN_PICK_STATE_PATH.stat().st_mtime_ns if PIN_PICK_STATE_PATH.exists() else None
+        self.pin_pick_state_last_event: str | None = None
         self.selected_pin_id: str | None = None
         self.research_pins: list[dict[str, object]] = []
         self.canvas_preview_label: QtWidgets.QLabel | None = None
@@ -160,6 +163,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.process_timer.setInterval(1500)
         self.process_timer.timeout.connect(self.update_process_status)
         self.process_timer.start()
+        self.pin_pick_state_timer = QtCore.QTimer(self)
+        self.pin_pick_state_timer.setInterval(800)
+        self.pin_pick_state_timer.timeout.connect(self.refresh_renderer_pin_pick_state)
+        self.pin_pick_state_timer.start()
         self.apply_baseline()
         self.refresh_template_list()
         if initial_profile is not None:
@@ -594,7 +601,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.pin_list.setMinimumHeight(110)
         self.pin_list.currentRowChanged.connect(self.select_pin_marker)
         pin_form.addRow("Pins", self.pin_list)
-        pin_form.addRow("Status", QtWidgets.QLabel("Manual lat/lon pins now; globe hit-test pending."))
+        self.pin_pick_state_label = QtWidgets.QLabel(f"Renderer bridge: waiting for {PIN_PICK_STATE_PATH.name}")
+        self.pin_pick_state_label.setWordWrap(True)
+        pin_form.addRow("Renderer Pick", self.pin_pick_state_label)
+        pin_form.addRow("Status", QtWidgets.QLabel("Manual lat/lon Pins; renderer click/hover sync uses JSON bridge."))
         layout.addWidget(pin_group)
 
         quick_title = QtWidgets.QLabel("快捷 / Presets")
@@ -1250,6 +1260,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 return dict(pin)
         return None
 
+    def pin_id_exists(self, pin_id: str) -> bool:
+        return any(str(pin.get("id", "")) == pin_id for pin in self.research_pins)
+
     def populate_selected_pin_fields(self) -> None:
         pin = self.selected_pin_packet()
         if pin is None:
@@ -1290,6 +1303,67 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if self.selected_pin_id is not None and self.selected_pin_packet() is None:
             self.selected_pin_id = None
         self.refresh_pin_list()
+
+    def refresh_renderer_pin_pick_state(self) -> None:
+        try:
+            stat = PIN_PICK_STATE_PATH.stat()
+        except FileNotFoundError:
+            if self.pin_pick_state_mtime_ns is not None:
+                self.pin_pick_state_mtime_ns = None
+                if self.pin_pick_state_label is not None:
+                    self.pin_pick_state_label.setText(f"Renderer bridge: waiting for {PIN_PICK_STATE_PATH.name}")
+            return
+        except OSError as exc:
+            if self.pin_pick_state_label is not None:
+                self.pin_pick_state_label.setText(f"Renderer bridge read failed: {exc}")
+            return
+        if stat.st_mtime_ns == self.pin_pick_state_mtime_ns:
+            return
+        next_mtime_ns = stat.st_mtime_ns
+        try:
+            payload = json.loads(PIN_PICK_STATE_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            if self.pin_pick_state_label is not None:
+                self.pin_pick_state_label.setText(f"Renderer bridge parse failed: {exc}")
+            return
+        self.pin_pick_state_mtime_ns = next_mtime_ns
+        if isinstance(payload, dict):
+            self.apply_renderer_pin_pick_state(payload)
+
+    def apply_renderer_pin_pick_state(self, payload: dict[str, object]) -> None:
+        event = str(payload.get("event", "unknown"))
+        selected_pin_id = payload.get("selected_pin_id")
+        hover_pin = payload.get("hover_pin")
+        hover_pin_id = "-"
+        if isinstance(hover_pin, dict) and hover_pin.get("id") is not None:
+            hover_pin_id = str(hover_pin.get("id"))
+        selected_text = str(selected_pin_id) if isinstance(selected_pin_id, str) and selected_pin_id else "-"
+        visible_count = payload.get("pin_visible_count", "-")
+        frame_index = payload.get("frame_index", "-")
+        updated_at = str(payload.get("updated_at_utc", "-"))
+        if self.pin_pick_state_label is not None:
+            self.pin_pick_state_label.setText(
+                f"Renderer bridge: event={event}, selected={selected_text}, hover={hover_pin_id}, "
+                f"visible={visible_count}, frame={frame_index}, updated={updated_at}"
+            )
+        self.pin_pick_state_last_event = event
+        if event == "selected":
+            if isinstance(selected_pin_id, str) and self.pin_id_exists(selected_pin_id):
+                self.selected_pin_id = selected_pin_id
+                self.refresh_pin_list()
+                self.populate_selected_pin_fields()
+                self.refresh_command_preview()
+                pin = self.selected_pin_packet()
+                label = pin.get("label", selected_pin_id) if pin is not None else selected_pin_id
+                self.status.setText(f"Renderer 已同步選取 Pin：{label}")
+            else:
+                self.status.setText(f"Renderer pick 的 Pin 不在目前 Qt Pin list：{selected_text}")
+        elif event == "cleared":
+            if self.selected_pin_id is not None:
+                self.selected_pin_id = None
+                self.refresh_pin_list()
+                self.refresh_command_preview()
+                self.status.setText("Renderer 已清除 Pin 選取")
 
     def refresh_canvas_preview(self) -> None:
         if self.canvas_preview_label is None or self.canvas_meta_label is None:
@@ -1366,6 +1440,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "selected_pin_id": self.selected_pin_id,
             "selected_pin": self.selected_pin_packet(),
             "pins": self.collect_research_pins(),
+            "pin_pick_state_file": str(PIN_PICK_STATE_PATH),
+            "pin_pick_state_last_event": self.pin_pick_state_last_event,
             "pin_overlay_boundary": "Pins are geodetic annotations; renderer sync must rotate them with the globe and apply horizon/depth occlusion.",
             "pin_projection_contract": pin_projection_contract_packet(),
             "visible_layers": visible_layers,
