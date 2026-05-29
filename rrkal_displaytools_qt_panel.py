@@ -1421,10 +1421,20 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         target = str(payload.get("selected_renderer_layer") or result.get("renderer_layer") or "-")
         picker = str(result.get("picker") or "-")
         hit = result.get("hit")
+        hit_detail = result.get("hit_detail")
+        hit_detail = hit_detail if isinstance(hit_detail, dict) else {}
+        feature = hit_detail.get("feature")
+        feature_text = ""
+        if isinstance(feature, dict):
+            feature_label = str(feature.get("label") or feature.get("feature_index") or "-")
+            if len(feature_label) > 72:
+                feature_label = f"{feature_label[:69]}..."
+            if feature_label != "-":
+                feature_text = f", feature={feature_label}"
         frame_index = payload.get("frame_index", "-")
         updated_at = str(payload.get("updated_at_utc", "-"))
         self.layer_pick_state_label.setText(
-            f"Layer pick: event={event}, target={target}, picker={picker}, hit={hit}, "
+            f"Layer pick: event={event}, target={target}, picker={picker}, hit={hit}{feature_text}, "
             f"frame={frame_index}, updated={updated_at}"
         )
 

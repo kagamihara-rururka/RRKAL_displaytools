@@ -1,5 +1,18 @@
 ﻿# Development Log
 
+## 2026-05-29 - Qt layer pick feature label
+
+Scope:
+- Qt layer pick status now reads `pick_result.hit_detail.feature` from the renderer bridge.
+- When a boundary or hydrology vector hit includes source-property identity, the Layers status label shows the feature label directly.
+
+Positioning:
+- This tightens the selected-layer picking loop for researcher-facing inspection.
+- Authoritative polygon territory identity and open-line area inference remain separate future work.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Vector pick source-property identity
 
 Scope:
