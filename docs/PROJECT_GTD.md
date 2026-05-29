@@ -100,3 +100,4 @@ Last updated: 2026-05-29
 - 2026-05-29: Moved ocean material controls into a dockable Qt Properties panel.
 - 2026-05-29: Added dockable Qt Navigator and History panels with construction placeholders.
 - 2026-05-29: Added local workspace layout save/load/reset for dock/window state.
+- 2026-05-29: Added Timeline camera keyframe controls and renderer discrete camera apply contract.

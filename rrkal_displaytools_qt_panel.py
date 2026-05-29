@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import datetime
 import json
+import math
 import subprocess
 import sys
 from pathlib import Path
@@ -285,6 +286,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.timeline_playback_active = False
         self.timeline_playback_index = 0
         self.timeline_playback_interval_ms = 1200
+        self.timeline_camera_yaw_spin: QtWidgets.QDoubleSpinBox | None = None
+        self.timeline_camera_pitch_spin: QtWidgets.QDoubleSpinBox | None = None
+        self.timeline_camera_zoom_spin: QtWidgets.QDoubleSpinBox | None = None
         self.timeline_ack_label: QtWidgets.QLabel | None = None
         self.timeline_ack_mtime_ns: int | None = TIMELINE_ACK_PATH.stat().st_mtime_ns if TIMELINE_ACK_PATH.exists() else None
         self.timeline_ack_payload: dict[str, object] | None = None
@@ -1044,7 +1048,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         timeline_layout = QtWidgets.QVBoxLayout(timeline)
         timeline_layout.setContentsMargins(10, 10, 10, 10)
         timeline_note = QtWidgets.QLabel(
-            "🚧 Timeline/keyframes：UI contract 已建立；實際 keyframe playback / animation export 尚未完成。"
+            "Timeline/keyframes：Qt storage、renderer step playback、ocean material interpolation、PNG export 已接上；camera keyframe 先做離散套用。"
         )
         timeline_note.setWordWrap(True)
         timeline_layout.addWidget(timeline_note)
@@ -1053,6 +1057,36 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         playhead.setValue(0)
         playhead.setEnabled(False)
         timeline_layout.addWidget(playhead)
+        camera_group = QtWidgets.QGroupBox("Camera keyframe")
+        camera_form = QtWidgets.QFormLayout(camera_group)
+        self.timeline_camera_yaw_spin = QtWidgets.QDoubleSpinBox()
+        self.timeline_camera_yaw_spin.setRange(-360.0, 360.0)
+        self.timeline_camera_yaw_spin.setDecimals(2)
+        self.timeline_camera_yaw_spin.setSingleStep(5.0)
+        self.timeline_camera_yaw_spin.setSuffix(" deg")
+        self.timeline_camera_yaw_spin.setToolTip("Renderer yaw; saved into Timeline keyframes and applied by the Taichi renderer.")
+        self.timeline_camera_pitch_spin = QtWidgets.QDoubleSpinBox()
+        self.timeline_camera_pitch_spin.setRange(-89.0, 89.0)
+        self.timeline_camera_pitch_spin.setDecimals(2)
+        self.timeline_camera_pitch_spin.setSingleStep(5.0)
+        self.timeline_camera_pitch_spin.setSuffix(" deg")
+        self.timeline_camera_pitch_spin.setToolTip("Renderer pitch, clamped to avoid flipping the globe camera.")
+        self.timeline_camera_zoom_spin = QtWidgets.QDoubleSpinBox()
+        self.timeline_camera_zoom_spin.setRange(0.08, 4.0)
+        self.timeline_camera_zoom_spin.setDecimals(3)
+        self.timeline_camera_zoom_spin.setSingleStep(0.05)
+        self.timeline_camera_zoom_spin.setValue(1.0)
+        self.timeline_camera_zoom_spin.setToolTip("Renderer zoom scale; smaller values zoom in, larger values zoom out.")
+        for spin in (
+            self.timeline_camera_yaw_spin,
+            self.timeline_camera_pitch_spin,
+            self.timeline_camera_zoom_spin,
+        ):
+            spin.valueChanged.connect(lambda _value, self=self: self.refresh_timeline_state_label())
+        camera_form.addRow("Yaw", self.timeline_camera_yaw_spin)
+        camera_form.addRow("Pitch", self.timeline_camera_pitch_spin)
+        camera_form.addRow("Zoom", self.timeline_camera_zoom_spin)
+        timeline_layout.addWidget(camera_group)
         self.timeline_state_label = QtWidgets.QLabel(
             "Timeline status: construction; planned targets include ocean/material and camera states."
         )
@@ -1386,6 +1420,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "timeline_step_playback": self.collect_timeline_step_playback_state(),
             "timeline_ocean_material_interpolation": self.collect_timeline_ocean_material_interpolation_state(),
             "timeline_animation_export": self.collect_timeline_animation_export_state(),
+            "timeline_camera_keyframe": self.collect_timeline_camera_keyframe_state(),
             "timeline_runtime_state_file": str(TIMELINE_STATE_PATH),
             "timeline_ack_file": str(TIMELINE_ACK_PATH),
             "timeline_ack": self.timeline_ack_payload,
@@ -2657,6 +2692,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "label": str(keyframe.get("label", "")),
                 "style_profile": str(keyframe.get("style_profile", "")),
                 "selected_layer": keyframe.get("selected_layer"),
+                "has_camera": isinstance(keyframe.get("camera"), dict),
             }
             for keyframe in self.timeline_keyframes[:12]
         ]
@@ -2671,10 +2707,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "launch_packet_status_contract",
                 "renderer_timeline_ack_handoff",
                 "renderer_discrete_step_playback",
+                "renderer_ocean_material_interpolation",
+                "renderer_animation_export",
+                "camera_keyframe_storage",
             ],
             "pending": [
-                "animation_export",
-                "camera_keyframes",
+                "video_encoding",
+                "camera_keyframe_interpolation",
+                "non_material_interpolation",
             ],
             "playhead": 0,
             "keyframe_count": len(self.timeline_keyframes),
@@ -2685,7 +2725,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "interval_ms": self.timeline_playback_interval_ms,
                 "next_index": self.timeline_playback_index,
             },
-            "boundary": "UIUX keyframe storage/restore/playback plus renderer discrete step playback are available; interpolation and export are not claimed yet.",
+            "boundary": "UIUX keyframe storage/restore/playback plus renderer discrete step playback, ocean material interpolation, PNG export, and discrete camera keyframes are available.",
         }
 
     def collect_timeline_playback_readiness(self) -> dict[str, object]:
@@ -2698,6 +2738,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "ocean_material_interpolation": True,
             "animation_export": True,
             "animation_export_mode": "png_frame_sequence",
+            "camera_keyframes": True,
             "ready_handoff_files": {
                 "timeline_runtime_state_file": str(TIMELINE_STATE_PATH),
                 "timeline_ack_file": str(TIMELINE_ACK_PATH),
@@ -2706,7 +2747,67 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "video_encoding",
                 "camera_keyframe_interpolation",
             ],
-            "boundary": "Renderer can export PNG frame sequences; video encoding and camera keyframes remain pending.",
+            "boundary": "Renderer can apply discrete camera keyframes and export PNG frame sequences; video encoding and camera interpolation remain pending.",
+        }
+
+    def collect_timeline_camera_state(self) -> dict[str, object]:
+        yaw_degrees = self.timeline_camera_yaw_spin.value() if self.timeline_camera_yaw_spin is not None else 0.0
+        pitch_degrees = self.timeline_camera_pitch_spin.value() if self.timeline_camera_pitch_spin is not None else 0.0
+        zoom = self.timeline_camera_zoom_spin.value() if self.timeline_camera_zoom_spin is not None else 1.0
+        return {
+            "schema": "rrkal_displaytools.timeline_camera_keyframe.v1",
+            "source": "qt_timeline_camera_controls",
+            "yaw_degrees": float(yaw_degrees),
+            "pitch_degrees": float(pitch_degrees),
+            "yaw": float(math.radians(yaw_degrees)),
+            "pitch": float(math.radians(pitch_degrees)),
+            "zoom": float(max(0.08, min(zoom, 4.0))),
+        }
+
+    def apply_timeline_camera_state(self, camera: object) -> None:
+        if not isinstance(camera, dict):
+            return
+        try:
+            raw_yaw_degrees = camera.get("yaw_degrees")
+            raw_pitch_degrees = camera.get("pitch_degrees")
+            yaw_degrees = (
+                float(raw_yaw_degrees)
+                if raw_yaw_degrees is not None
+                else math.degrees(float(camera.get("yaw", 0.0)))
+            )
+            pitch_degrees = (
+                float(raw_pitch_degrees)
+                if raw_pitch_degrees is not None
+                else math.degrees(float(camera.get("pitch", 0.0)))
+            )
+            zoom = float(camera.get("zoom", 1.0))
+        except (TypeError, ValueError):
+            return
+        if self.timeline_camera_yaw_spin is not None:
+            self.timeline_camera_yaw_spin.setValue(max(-360.0, min(360.0, yaw_degrees)))
+        if self.timeline_camera_pitch_spin is not None:
+            self.timeline_camera_pitch_spin.setValue(max(-89.0, min(89.0, pitch_degrees)))
+        if self.timeline_camera_zoom_spin is not None:
+            self.timeline_camera_zoom_spin.setValue(max(0.08, min(4.0, zoom)))
+
+    def collect_timeline_camera_keyframe_state(self) -> dict[str, object]:
+        active_step = self.collect_timeline_active_step_state()
+        active_index = active_step.get("active_index")
+        active_camera = None
+        if isinstance(active_index, int) and 0 <= active_index < len(self.timeline_keyframes):
+            camera = self.timeline_keyframes[active_index].get("camera")
+            active_camera = camera if isinstance(camera, dict) else None
+        return {
+            "schema": "rrkal_displaytools.timeline_camera_keyframe.v1",
+            "supported": True,
+            "instantiated": False,
+            "mode": "qt_handoff_contract",
+            "active_index": active_index,
+            "active_camera": active_camera,
+            "current_camera_controls": self.collect_timeline_camera_state(),
+            "applies": ["qt_camera_keyframe_capture", "renderer_discrete_camera_apply"],
+            "pending": ["camera_keyframe_interpolation"],
+            "boundary": "Camera keyframes are captured and applied discretely; smooth camera interpolation is a later renderer task.",
         }
 
     def collect_timeline_playback_plan(self) -> dict[str, object]:
@@ -2718,6 +2819,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             material = keyframe.get("ocean_material")
             layer_stack = keyframe.get("layer_stack_snapshot")
             boundary_highlight = keyframe.get("boundary_highlight")
+            camera = keyframe.get("camera")
             keyframes.append(
                 {
                     "index": index,
@@ -2729,6 +2831,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                     "has_layer_stack_snapshot": isinstance(layer_stack, dict),
                     "pin_count": len(pins) if isinstance(pins, list) else 0,
                     "has_boundary_highlight": isinstance(boundary_highlight, dict),
+                    "has_camera": isinstance(camera, dict),
                 }
             )
         return {
@@ -2745,12 +2848,13 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "layer_stack_snapshot",
                 "pins",
                 "boundary_highlight",
+                "camera",
             ],
             "pending": [
-                "animation_export",
                 "non_material_interpolation",
+                "camera_keyframe_interpolation",
             ],
-            "boundary": "Playback plan drives renderer discrete keyframe steps and ocean/material interpolation; non-material interpolation/export remain pending.",
+            "boundary": "Playback plan drives renderer discrete keyframe steps, camera apply, and ocean/material interpolation; non-material and camera interpolation remain pending.",
         }
 
     def collect_timeline_segment_state(self) -> dict[str, object]:
@@ -2767,7 +2871,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "from_keyframe_id": str(first.get("id", "")),
                 "to_keyframe_id": str(second.get("id", "")),
                 "interpolatable_fields": ["ocean_material"],
-                "discrete_fields": ["style_profile", "layer_visibility", "layer_blend", "pins", "boundary_highlight"],
+                "discrete_fields": ["style_profile", "layer_visibility", "layer_blend", "pins", "boundary_highlight", "camera"],
             }
         return {
             "schema": "rrkal_displaytools.timeline_segment_state.v1",
@@ -2777,8 +2881,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "active_segment": active_segment,
             "segment_available": active_segment is not None,
             "segment_count": max(0, len(self.timeline_keyframes) - 1),
-            "pending": ["non_material_interpolation", "animation_export"],
-            "boundary": "Segment state describes the next playback segment; renderer step playback is not claimed yet.",
+            "pending": ["non_material_interpolation", "camera_keyframe_interpolation"],
+            "boundary": "Segment state describes the next playback segment; camera currently applies as a discrete field.",
         }
 
     def collect_timeline_active_step_state(self) -> dict[str, object]:
@@ -2801,8 +2905,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "keyframe_count": keyframe_count,
             "step_available": active_index is not None,
             "applies": ["qt_preview_step_selection", "renderer_startup_selection_hint"],
-            "pending": ["non_material_interpolation", "animation_export"],
-            "boundary": "Active step is a discrete keyframe selection contract; renderer playback, interpolation, and export remain pending.",
+            "pending": ["non_material_interpolation", "camera_keyframe_interpolation"],
+            "boundary": "Active step is a discrete keyframe selection contract for renderer step playback and camera apply.",
         }
 
     def collect_timeline_step_playback_state(self) -> dict[str, object]:
@@ -2818,7 +2922,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "keyframe_count": len(self.timeline_keyframes),
             "step_count": 0,
             "applies": ["renderer_discrete_keyframe_step"],
-            "pending": ["non_material_interpolation", "animation_export", "camera_keyframes"],
+            "pending": ["non_material_interpolation", "camera_keyframe_interpolation"],
             "boundary": "Qt exports the step playback contract; renderer owns runtime stepping.",
         }
 
@@ -2834,7 +2938,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "fields": ["wave_strength", "roughness", "foam"],
             "fraction": 0.0,
             "applies": ["ocean_material_keyframe_interpolation"],
-            "pending": ["non_material_interpolation", "animation_export", "camera_keyframes"],
+            "pending": ["non_material_interpolation", "camera_keyframe_interpolation"],
             "boundary": "Qt exports the interpolation contract; renderer owns runtime interpolation.",
         }
 
@@ -2848,8 +2952,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "fps": 24.0,
             "frames": [],
             "applies": ["timeline_png_frame_sequence", "timeline_animation_manifest"],
-            "pending": ["video_encoding", "camera_keyframes", "non_material_interpolation"],
-            "boundary": "Qt exposes renderer animation export capability; renderer writes frames and manifest.",
+            "pending": ["video_encoding", "camera_keyframe_interpolation", "non_material_interpolation"],
+            "boundary": "Qt exposes renderer animation export capability; renderer writes frames and manifest with discrete camera keyframes.",
         }
 
     def collect_timeline_runtime_state(self) -> dict[str, object]:
@@ -2864,9 +2968,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "step_playback": self.collect_timeline_step_playback_state(),
             "ocean_material_interpolation": self.collect_timeline_ocean_material_interpolation_state(),
             "animation_export": self.collect_timeline_animation_export_state(),
+            "camera_keyframe": self.collect_timeline_camera_keyframe_state(),
             "timeline_keyframes": [dict(keyframe) for keyframe in self.timeline_keyframes],
             "source": "rrkal_displaytools_qt_panel",
-            "boundary": "Renderer receives Timeline keyframes for discrete step playback; interpolation/export remain pending.",
+            "boundary": "Renderer receives Timeline keyframes for discrete step playback, camera apply, material interpolation, and PNG export.",
         }
 
     def write_timeline_runtime_state(self) -> None:
@@ -2946,6 +3051,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "roughness": self.roughness_edit.text().strip(),
                 "foam": self.foam_edit.text().strip(),
             },
+            "camera": self.collect_timeline_camera_state(),
             "selected_layer": self.selected_layer_key,
             "layer_stack_snapshot": self.collect_layer_undo_snapshot(),
             "pins": self.collect_research_pins(),
@@ -2956,9 +3062,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if self.timeline_state_label is None:
             return
         playback = "playing" if self.timeline_playback_active else "idle"
+        camera = self.collect_timeline_camera_state()
         self.timeline_state_label.setText(
             f"Timeline status: {len(self.timeline_keyframes)} UI keyframes stored; "
-            f"UI playback={playback}; renderer ack via {TIMELINE_ACK_PATH.name}; playback/export pending."
+            f"UI playback={playback}; camera yaw={camera['yaw_degrees']:.1f}, pitch={camera['pitch_degrees']:.1f}, zoom={camera['zoom']:.2f}; "
+            f"renderer ack via {TIMELINE_ACK_PATH.name}."
         )
         self.write_timeline_runtime_state()
 
@@ -2967,9 +3075,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if self.timeline_keyframe_list is not None:
             self.timeline_keyframe_list.clear()
             for keyframe in self.timeline_keyframes:
+                camera = keyframe.get("camera")
+                camera_label = f" · camera={float(camera.get('zoom', 1.0)):.2f}z" if isinstance(camera, dict) else ""
                 self.timeline_keyframe_list.addItem(
                     f"{keyframe.get('id', '-')} · {keyframe.get('style_profile', '-')} · "
-                    f"layer={keyframe.get('selected_layer') or '-'}"
+                    f"layer={keyframe.get('selected_layer') or '-'}{camera_label}"
                 )
         self.refresh_timeline_state_label()
 
@@ -2979,7 +3089,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.timeline_keyframes.append(keyframe)
         if self.timeline_keyframe_list is not None:
             self.timeline_keyframe_list.addItem(
-                f"{keyframe['id']} · {keyframe['style_profile']} · layer={keyframe['selected_layer'] or '-'}"
+                f"{keyframe['id']} · {keyframe['style_profile']} · "
+                f"layer={keyframe['selected_layer'] or '-'} · camera={keyframe['camera']['zoom']:.2f}z"
             )
         self.refresh_timeline_state_label()
         self.refresh_research_provenance()
@@ -3012,6 +3123,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.wave_edit.setText(str(material.get("wave_strength", self.wave_edit.text())))
             self.roughness_edit.setText(str(material.get("roughness", self.roughness_edit.text())))
             self.foam_edit.setText(str(material.get("foam", self.foam_edit.text())))
+        self.apply_timeline_camera_state(keyframe.get("camera"))
         snapshot = keyframe.get("layer_stack_snapshot")
         if isinstance(snapshot, dict):
             layers = snapshot.get("layers")
@@ -3823,6 +3935,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "timeline_step_playback": self.collect_timeline_step_playback_state(),
             "timeline_ocean_material_interpolation": self.collect_timeline_ocean_material_interpolation_state(),
             "timeline_animation_export": self.collect_timeline_animation_export_state(),
+            "timeline_camera_keyframe": self.collect_timeline_camera_keyframe_state(),
             "timeline_runtime_state_file": str(TIMELINE_STATE_PATH),
             "timeline_state_last_write_utc": self.timeline_state_last_write_utc,
             "timeline_state_write_error": self.timeline_state_write_error,

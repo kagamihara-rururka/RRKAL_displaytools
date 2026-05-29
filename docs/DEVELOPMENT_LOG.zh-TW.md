@@ -2399,3 +2399,17 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Timeline camera keyframe closed loop
+
+Scope:
+- Added Qt Timeline camera controls for yaw, pitch, and zoom.
+- Timeline keyframes now store camera state and restore it in the Qt panel.
+- No-GUI launch packets, runtime state, renderer ack, and renderer capabilities now expose `rrkal_displaytools.timeline_camera_keyframe.v1`.
+- Renderer startup/step playback now applies discrete camera keyframes to yaw/pitch/zoom; PNG frame export records the active frame camera in the manifest.
+
+Decision:
+- Camera is intentionally discrete in this slice. Smooth camera interpolation stays pending so the current change remains small and reversible.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
