@@ -47,6 +47,8 @@ $summary = [ordered]@{
         launch_packet_schema = $launchPacket.layer_operator_shortcuts.schema
         renderer_capabilities_schema = $capabilities.layer_operator_shortcuts.schema
         action_count = $launchPacket.layer_operator_shortcuts.action_count
+        keyboard_shortcut_count = $launchPacket.layer_operator_shortcuts.keyboard_shortcut_count
+        installed_shortcut_ids = $launchPacket.layer_operator_shortcuts.installed_shortcut_ids
         implemented_action_ids = $launchPacket.layer_operator_shortcuts.implemented_action_ids
     }
     layer_capability_matrix = @{

@@ -17904,6 +17904,15 @@ def layer_operator_shortcuts_packet(
     solo_snapshot_active: bool = False,
     undo_depth: int | None = None,
 ) -> dict[str, object]:
+    keyboard_shortcuts = {
+        "toggle_visibility": "Ctrl+Alt+V",
+        "toggle_lock": "Ctrl+Alt+L",
+        "solo_selected_layer": "Ctrl+Alt+S",
+        "restore_solo_visibility": "Ctrl+Alt+R",
+        "undo_layer_state": "Ctrl+Alt+Z",
+        "reset_layer_ui_state": "Ctrl+Alt+0",
+        "show_layer_diagnostics": "Ctrl+Alt+D",
+    }
     actions = [
         {
             "id": "select_layer",
@@ -17986,6 +17995,10 @@ def layer_operator_shortcuts_packet(
             "profile_effect": "none",
         },
     ]
+    for action in actions:
+        shortcut = keyboard_shortcuts.get(str(action.get("id") or ""))
+        if shortcut:
+            action["keyboard_shortcut"] = shortcut
     return {
         "schema": "rrkal_displaytools.layer_operator_shortcuts.v1",
         "source": source,
@@ -17996,6 +18009,9 @@ def layer_operator_shortcuts_packet(
         "action_count": len(actions),
         "actions": actions,
         "implemented_action_ids": [action["id"] for action in actions if action.get("qt_available")],
+        "keyboard_shortcut_count": len(keyboard_shortcuts),
+        "keyboard_shortcuts": keyboard_shortcuts,
+        "installed_shortcut_ids": [action["id"] for action in actions if action.get("keyboard_shortcut")],
         "profile_state_fields": ["selected_layer", "layer_stack_ui"],
         "launch_packet_fields": ["layer_operator_shortcuts", "layer_stack_ui", "layer_undo"],
         "summary_text": "select/toggle/lock/opacity/blend/solo/restore/undo/reset/diagnostics",

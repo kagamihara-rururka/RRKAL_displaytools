@@ -173,6 +173,12 @@ if ($launchLayerOperatorActions -notcontains "restore_solo_visibility") {
 if ($launchLayerOperatorActions -notcontains "undo_layer_state") {
     throw "Launch packet layer_operator_shortcuts missing layer undo action"
 }
+if ([int]$launchPacket.layer_operator_shortcuts.keyboard_shortcut_count -lt 7) {
+    throw "Launch packet layer_operator_shortcuts keyboard shortcut count missing"
+}
+if ($launchPacket.layer_operator_shortcuts.keyboard_shortcuts.solo_selected_layer -ne "Ctrl+Alt+S") {
+    throw "Launch packet layer_operator_shortcuts solo shortcut mismatch"
+}
 if ($launchPacket.layer_undo.schema -ne "rrkal_displaytools.layer_stack_undo.v1") {
     throw "Launch packet layer_undo schema missing or invalid"
 }
@@ -493,6 +499,9 @@ if ($capabilities.layer_operator_shortcuts.schema -ne "rrkal_displaytools.layer_
 if ($capabilities.layer_operator_shortcuts.implemented_action_ids -notcontains "solo_selected_layer") {
     throw "Renderer layer_operator_shortcuts missing solo action"
 }
+if ([int]$capabilities.layer_operator_shortcuts.keyboard_shortcut_count -lt 7) {
+    throw "Renderer layer_operator_shortcuts keyboard shortcut count missing"
+}
 if ($capabilities.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
     throw "Renderer layer_capability_matrix capability missing or invalid"
 }
@@ -666,6 +675,9 @@ if ($handoff.layer_operator_shortcuts.launch_packet_schema -ne "rrkal_displaytoo
 }
 if ($handoff.layer_operator_shortcuts.renderer_capabilities_schema -ne "rrkal_displaytools.layer_operator_shortcuts.v1") {
     throw "Handoff inspection layer_operator_shortcuts renderer schema missing or invalid"
+}
+if ([int]$handoff.layer_operator_shortcuts.keyboard_shortcut_count -lt 7) {
+    throw "Handoff inspection layer_operator_shortcuts keyboard shortcut count missing"
 }
 if ($handoff.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
     throw "Handoff inspection layer_capability_matrix summary missing or invalid"

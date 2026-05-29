@@ -36,7 +36,7 @@ Last updated: 2026-05-29
 
 ## Done
 
-- 2026-05-30: Added layer operator shortcuts contract for Qt-first Photoshop-like layer operations across launch packets, renderer capabilities, handoff inspection and smoke.
+- 2026-05-30: Added layer operator shortcuts contract and Qt keyboard shortcuts for Photoshop-like layer operations across launch packets, renderer capabilities, handoff inspection and smoke.
 - 2026-05-30: Added renderer diagnostics remediation hints across Qt Properties, launch packets, renderer capabilities, handoff inspection and smoke.
 - 2026-05-30: Added renderer diagnostics detail bridge breakdown across Qt Properties, launch packets, renderer capabilities, handoff inspection and smoke.
 - 2026-05-29: Added renderer diagnostics summary across Qt Properties, launch packets, renderer capabilities, handoff inspection and smoke.

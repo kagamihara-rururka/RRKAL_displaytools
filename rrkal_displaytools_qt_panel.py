@@ -730,6 +730,15 @@ def layer_operator_shortcuts_packet(
     solo_snapshot_active: bool = False,
     undo_depth: int | None = None,
 ) -> dict[str, object]:
+    keyboard_shortcuts = {
+        "toggle_visibility": "Ctrl+Alt+V",
+        "toggle_lock": "Ctrl+Alt+L",
+        "solo_selected_layer": "Ctrl+Alt+S",
+        "restore_solo_visibility": "Ctrl+Alt+R",
+        "undo_layer_state": "Ctrl+Alt+Z",
+        "reset_layer_ui_state": "Ctrl+Alt+0",
+        "show_layer_diagnostics": "Ctrl+Alt+D",
+    }
     actions = [
         {
             "id": "select_layer",
@@ -812,6 +821,10 @@ def layer_operator_shortcuts_packet(
             "profile_effect": "none",
         },
     ]
+    for action in actions:
+        shortcut = keyboard_shortcuts.get(str(action.get("id") or ""))
+        if shortcut:
+            action["keyboard_shortcut"] = shortcut
     return {
         "schema": "rrkal_displaytools.layer_operator_shortcuts.v1",
         "source": source,
@@ -822,6 +835,9 @@ def layer_operator_shortcuts_packet(
         "action_count": len(actions),
         "actions": actions,
         "implemented_action_ids": [action["id"] for action in actions if action.get("qt_available")],
+        "keyboard_shortcut_count": len(keyboard_shortcuts),
+        "keyboard_shortcuts": keyboard_shortcuts,
+        "installed_shortcut_ids": [action["id"] for action in actions if action.get("keyboard_shortcut")],
         "profile_state_fields": ["selected_layer", "layer_stack_ui"],
         "launch_packet_fields": ["layer_operator_shortcuts", "layer_stack_ui", "layer_undo"],
         "summary_text": "select/toggle/lock/opacity/blend/solo/restore/undo/reset/diagnostics",
@@ -1042,6 +1058,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_blends: dict[str, QtWidgets.QComboBox] = {}
         self.layer_rows: dict[str, QtWidgets.QWidget] = {}
         self.layer_property_labels: dict[str, QtWidgets.QLabel] = {}
+        self.layer_operator_shortcut_handles: list[QtGui.QShortcut] = []
         self.layer_visibility_snapshot: dict[str, bool] | None = None
         self.layer_undo_stack: list[dict[str, object]] = []
         self.layer_last_state_snapshot: dict[str, object] | None = None
@@ -1146,6 +1163,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self._build_menu_bar()
         self._build_tool_dock()
         self._build_auxiliary_docks()
+        self.install_layer_operator_shortcuts()
         self.load_workspace_layout(silent=True)
         self.statusBar().showMessage("Ready")
         self.process_timer = QtCore.QTimer(self)
@@ -1197,6 +1215,23 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.refresh_timeline_state_label()
         self.document_undo_tracking_enabled = True
         self.capture_document_snapshot("Initial workspace", clear_redo=False)
+
+    def install_layer_operator_shortcuts(self) -> None:
+        shortcut_specs = (
+            ("Ctrl+Alt+V", self.toggle_selected_layer_visibility),
+            ("Ctrl+Alt+L", self.toggle_selected_layer_lock),
+            ("Ctrl+Alt+S", self.solo_selected_layer_visibility),
+            ("Ctrl+Alt+R", self.restore_layer_visibility_snapshot),
+            ("Ctrl+Alt+Z", self.undo_layer_stack_state),
+            ("Ctrl+Alt+0", self.reset_layer_stack_controls),
+            ("Ctrl+Alt+D", self.show_layer_capability_matrix),
+        )
+        self.layer_operator_shortcut_handles.clear()
+        for sequence, callback in shortcut_specs:
+            shortcut = QtGui.QShortcut(QtGui.QKeySequence(sequence), self)
+            shortcut.setContext(QtCore.Qt.ShortcutContext.ApplicationShortcut)
+            shortcut.activated.connect(callback)
+            self.layer_operator_shortcut_handles.append(shortcut)
 
     def _build_ui(self) -> None:
         central = QtWidgets.QWidget(self)
@@ -5177,6 +5212,17 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             return
         self.checks[key].setChecked(not self.checks[key].isChecked())
         self.refresh_command_preview()
+        self.refresh_layer_stack_status()
+
+    def toggle_selected_layer_lock(self) -> None:
+        key = self.selected_layer_key
+        if key not in self.layer_locks:
+            self.status.setText("No selected layer")
+            return
+        self.layer_locks[key].setChecked(not self.layer_locks[key].isChecked())
+        label = next((text for layer_key, text in LAYER_LABELS if layer_key == key), key)
+        state = "locked" if self.layer_locks[key].isChecked() else "unlocked"
+        self.status.setText(f"Selected layer lock: {label} -> {state}")
         self.refresh_layer_stack_status()
 
     def reset_selected_layer_controls(self) -> None:
