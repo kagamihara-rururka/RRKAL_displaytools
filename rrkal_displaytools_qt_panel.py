@@ -69,6 +69,7 @@ RENDERER = ROOT / "taichi_global_bathymetry.py"
 PROFILE_DIR = ROOT / "state" / "ui_profiles"
 SHOWCASE_DIR = ROOT / "state" / "showcase"
 RENDERER_PREVIEW_FRAME_PATH = ROOT / "state" / "renderer_preview_frame.png"
+RENDERER_PREVIEW_FRAME_INTERVAL_S = 0.75
 WORKSPACE_STATE_PATH = ROOT / "state" / "ui_workspace.json"
 
 STYLE_PROFILES = ("scientific", "nautical", "parchment", "tactical")
@@ -1061,7 +1062,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "--preview-frame-file",
             str(RENDERER_PREVIEW_FRAME_PATH),
             "--preview-frame-interval",
-            "0.75",
+            str(RENDERER_PREVIEW_FRAME_INTERVAL_S),
         ]
         rrkal_manifest_ref = self.rrkal_manifest_ref_edit.text().strip()
         if rrkal_manifest_ref:
@@ -1205,6 +1206,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "schema": "rrkal_displaytools.canvas_preview.v1",
             "mode": self.canvas_preview_mode,
             "renderer_thumbnail_path": self.renderer_thumbnail_profile_path(),
+            "preview_frame_path": str(RENDERER_PREVIEW_FRAME_PATH.relative_to(ROOT)),
+            "preview_frame_interval_s": RENDERER_PREVIEW_FRAME_INTERVAL_S,
             "renderer_sync": renderer_sync,
         }
 

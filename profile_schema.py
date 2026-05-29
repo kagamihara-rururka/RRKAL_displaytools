@@ -246,7 +246,14 @@ def profile_payload_errors(profile: dict[str, object]) -> list[str]:
         if not isinstance(canvas_preview, dict):
             errors.append("canvas_preview must be an object")
         else:
-            allowed_fields = {"schema", "mode", "renderer_thumbnail_path", "renderer_sync"}
+            allowed_fields = {
+                "schema",
+                "mode",
+                "renderer_thumbnail_path",
+                "preview_frame_path",
+                "preview_frame_interval_s",
+                "renderer_sync",
+            }
             for field in sorted(set(canvas_preview) - allowed_fields):
                 errors.append(f"unknown canvas_preview field: {field}")
             if canvas_preview.get("schema") != CANVAS_PREVIEW_SCHEMA_ID:
@@ -257,6 +264,17 @@ def profile_payload_errors(profile: dict[str, object]) -> list[str]:
             thumbnail_path = canvas_preview.get("renderer_thumbnail_path")
             if thumbnail_path is not None and not isinstance(thumbnail_path, str):
                 errors.append("canvas_preview.renderer_thumbnail_path must be a string or null")
+            preview_frame_path = canvas_preview.get("preview_frame_path")
+            if preview_frame_path is not None and not isinstance(preview_frame_path, str):
+                errors.append("canvas_preview.preview_frame_path must be a string or null")
+            preview_frame_interval = canvas_preview.get("preview_frame_interval_s")
+            if preview_frame_interval is not None:
+                if (
+                    not isinstance(preview_frame_interval, (int, float))
+                    or isinstance(preview_frame_interval, bool)
+                    or preview_frame_interval <= 0
+                ):
+                    errors.append("canvas_preview.preview_frame_interval_s must be a positive number")
             renderer_sync = canvas_preview.get("renderer_sync")
             if renderer_sync is not None and not isinstance(renderer_sync, str):
                 errors.append("canvas_preview.renderer_sync must be a string")
@@ -344,7 +362,14 @@ def profile_schema_packet() -> dict[str, object]:
         "optional_canvas_preview": {
             "schema": CANVAS_PREVIEW_SCHEMA_ID,
             "modes": sorted(CANVAS_PREVIEW_MODES),
-            "fields": ["schema", "mode", "renderer_thumbnail_path", "renderer_sync"],
+            "fields": [
+                "schema",
+                "mode",
+                "renderer_thumbnail_path",
+                "preview_frame_path",
+                "preview_frame_interval_s",
+                "renderer_sync",
+            ],
             "live_file_stream_path": "state/renderer_preview_frame.png",
         },
         "optional_boundary_highlight": {

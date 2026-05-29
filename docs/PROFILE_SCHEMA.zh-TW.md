@@ -177,6 +177,8 @@ Renderer overlay 接上後，Pin 不應是螢幕固定標籤，而應是 geodeti
 | `schema` | string | 固定為 `rrkal_displaytools.canvas_preview.v1`。 |
 | `mode` | string | `state`、`thumbnail` 或 `live_file_stream`。 |
 | `renderer_thumbnail_path` | string or null | 可選的 renderer PNG 相對路徑，例如 `state/showcase/quick_smoke.png` 或 `state/renderer_preview_frame.png`。`thumbnail` 載入時若不存在，Qt 會 fallback 到最近的 `state/showcase/*.png`；`live_file_stream` 會等待 renderer 寫出 live preview frame。 |
+| `preview_frame_path` | string or null | live preview renderer frame 的預設本機路徑，目前為 `state/renderer_preview_frame.png`。 |
+| `preview_frame_interval_s` | number | live preview file stream 的建議寫入間隔秒數，目前 Qt 預設為 `0.75`。 |
 | `renderer_sync` | string | `state` 為 UI-only preview；`thumbnail` 為 static renderer output contract；`live_file_stream` 為 file-based live renderer frame stream。 |
 
 ## Handoff rules

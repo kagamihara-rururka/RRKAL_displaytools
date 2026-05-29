@@ -9,6 +9,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PROFILE_DIR = ROOT / "profiles"
+PREVIEW_FRAME_PATH = "state/renderer_preview_frame.png"
+PREVIEW_FRAME_INTERVAL_S = 0.75
 sys.path.insert(0, str(ROOT))
 
 from closed_loop_status import renderer_closed_loop_status_packet  # noqa: E402
@@ -37,6 +39,8 @@ DEFAULT_CANVAS_PREVIEW = {
     "schema": "rrkal_displaytools.canvas_preview.v1",
     "mode": "state",
     "renderer_thumbnail_path": None,
+    "preview_frame_path": PREVIEW_FRAME_PATH,
+    "preview_frame_interval_s": PREVIEW_FRAME_INTERVAL_S,
     "renderer_sync": "ui_state_preview",
 }
 
@@ -81,9 +85,9 @@ def renderer_args(profile: dict[str, object], rrkal_data_manifest_ref: str = "")
         "--ocean-foam",
         str(material["foam"]),
         "--preview-frame-file",
-        "state/renderer_preview_frame.png",
+        PREVIEW_FRAME_PATH,
         "--preview-frame-interval",
-        "0.75",
+        str(PREVIEW_FRAME_INTERVAL_S),
     ]
     for key, flag in BOOL_FLAGS.items():
         args.append(f"--{flag}" if layers[key] else f"--no-{flag}")

@@ -31,6 +31,12 @@ if ($launchPacket.canvas_preview.schema -ne "rrkal_displaytools.canvas_preview.v
 if ($launchPacket.portable_command -notcontains "--preview-frame-file") {
     throw "Launch packet portable command is missing --preview-frame-file"
 }
+if ($launchPacket.canvas_preview.preview_frame_path -ne "state/renderer_preview_frame.png") {
+    throw "Launch packet canvas_preview preview_frame_path missing or invalid"
+}
+if ([double]$launchPacket.canvas_preview.preview_frame_interval_s -le 0) {
+    throw "Launch packet canvas_preview preview_frame_interval_s missing or invalid"
+}
 $capabilitiesText = & py -3 taichi_global_bathymetry.py --print-renderer-capabilities
 if ($LASTEXITCODE -ne 0) {
     throw "Command failed: py -3 taichi_global_bathymetry.py --print-renderer-capabilities"

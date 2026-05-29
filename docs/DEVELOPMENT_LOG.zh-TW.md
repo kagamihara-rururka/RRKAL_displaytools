@@ -1,5 +1,18 @@
 # Development Log
 
+## 2026-05-29 - Canvas preview stream provenance
+
+Scope:
+- Qt `canvas_preview` state now records `preview_frame_path` and `preview_frame_interval_s`.
+- No-GUI launch packets use the same live preview path and interval fields.
+- Profile schema validation and smoke now gate those fields.
+
+Positioning:
+- This makes live preview observable in profiles, launch packets, and provenance instead of only being implicit in the command line.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Navigator live preview wording
 
 Scope:
