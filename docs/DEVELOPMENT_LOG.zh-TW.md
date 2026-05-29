@@ -655,3 +655,30 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Qt research provenance dock
+
+Scope:
+- Added a dockable `Provenance` panel for research reproducibility.
+- The panel renders a copyable JSON summary with style profile, topo source, data mode, renderer dimensions, active tool, active layer, visible layers, locked layers, layer counts, and portable command line.
+- Added the dock to workspace preset restoration, especially the Review workspace.
+
+Positioning:
+- This reframes the Photoshop-like UI into a scientific visualization workstation: the core value is traceable, reproducible visualization state for researchers, not generic image editing.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Qt research pin tool
+
+Scope:
+- Added a research-oriented `Pin` tool to the Qt tool palette.
+- Added Pin Annotation UI fields for marker type, label, and note.
+- Added optional pin metadata to `tool_state` schema, profile save/load, and launch packets.
+
+Positioning:
+- This better matches scientific workflows: researchers often need to mark observation points, sample sites, anomalies, reference locations, and events on the globe.
+- Actual globe/canvas hit-testing and latitude/longitude placement remain backend work for later.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

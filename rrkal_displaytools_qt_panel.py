@@ -103,7 +103,9 @@ BLEND_MODES = ("Normal", "Screen", "Multiply", "Overlay", "Soft Light")
 TOOL_MODES = (
     ("move", "Move", "檢視 / 平移"),
     ("select", "Select", "選取圖層 / active layer target"),
+    ("pin", "Pin", "科研標記 / observation marker"),
 )
+PIN_TYPES = ("Observation", "Sample Site", "Anomaly", "Reference", "Event")
 
 class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def __init__(self, initial_profile: Path | None = None) -> None:
@@ -121,9 +123,13 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.active_tool = "move"
         self.tool_buttons: dict[str, QtWidgets.QToolButton] = {}
         self.tool_target_label: QtWidgets.QLabel | None = None
+        self.pin_type_combo: QtWidgets.QComboBox | None = None
+        self.pin_label_edit: QtWidgets.QLineEdit | None = None
+        self.pin_note_edit: QtWidgets.QLineEdit | None = None
         self.canvas_preview_label: QtWidgets.QLabel | None = None
         self.canvas_meta_label: QtWidgets.QLabel | None = None
         self.canvas_zoom_slider: QtWidgets.QSlider | None = None
+        self.provenance_text: QtWidgets.QPlainTextEdit | None = None
         self.docks: dict[str, QtWidgets.QDockWidget] = {}
         self.template_paths: list[Path] = []
         self._build_ui()
@@ -516,6 +522,20 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         tool_note = QtWidgets.QLabel("Select 只負責選取/指定 active layer；Brush/Mask 暫不納入本輪 UI。")
         tool_note.setWordWrap(True)
         layout.addWidget(tool_note)
+        pin_group = QtWidgets.QGroupBox("Pin Annotation")
+        pin_form = QtWidgets.QFormLayout(pin_group)
+        self.pin_type_combo = QtWidgets.QComboBox()
+        self.pin_type_combo.addItems(PIN_TYPES)
+        self.pin_label_edit = QtWidgets.QLineEdit("Station A")
+        self.pin_note_edit = QtWidgets.QLineEdit("UI-only marker; geospatial placement pending")
+        self.pin_type_combo.currentTextChanged.connect(lambda _text, self=self: self.refresh_tool_target())
+        self.pin_label_edit.textChanged.connect(lambda _text, self=self: self.refresh_tool_target())
+        self.pin_note_edit.textChanged.connect(lambda _text, self=self: self.refresh_tool_target())
+        pin_form.addRow("Type", self.pin_type_combo)
+        pin_form.addRow("Label", self.pin_label_edit)
+        pin_form.addRow("Note", self.pin_note_edit)
+        pin_form.addRow("Status", QtWidgets.QLabel("🚧 Pin placement on globe pending renderer/canvas hit-test."))
+        layout.addWidget(pin_group)
 
         quick_title = QtWidgets.QLabel("快捷 / Presets")
         quick_title.setObjectName("toolPaletteTitle")
@@ -580,6 +600,25 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.docks["history"] = history_dock
         self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, history_dock)
 
+        provenance_dock = QtWidgets.QDockWidget("Provenance", self)
+        provenance_dock.setObjectName("provenanceDock")
+        provenance = QtWidgets.QWidget(provenance_dock)
+        provenance_layout = QtWidgets.QVBoxLayout(provenance)
+        provenance_layout.setContentsMargins(10, 10, 10, 10)
+        provenance_note = QtWidgets.QLabel("科研可重現性摘要：目前 UI 狀態、資料來源、圖層、profile 與可攜命令。")
+        provenance_note.setWordWrap(True)
+        provenance_layout.addWidget(provenance_note)
+        self.provenance_text = QtWidgets.QPlainTextEdit()
+        self.provenance_text.setReadOnly(True)
+        self.provenance_text.setMinimumHeight(180)
+        provenance_layout.addWidget(self.provenance_text)
+        copy_provenance = QtWidgets.QPushButton("複製 provenance summary")
+        copy_provenance.clicked.connect(self.copy_research_provenance)
+        provenance_layout.addWidget(copy_provenance)
+        provenance_dock.setWidget(provenance)
+        self.docks["provenance"] = provenance_dock
+        self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, provenance_dock)
+
     @QtCore.pyqtSlot()
     def save_workspace_layout(self) -> None:
         WORKSPACE_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -632,6 +671,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.docks["properties"])
         self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.docks["navigator"])
         self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.docks["history"])
+        self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, self.docks["provenance"])
         if preset == "maritime":
             self.apply_maritime()
             self.tabifyDockWidget(self.docks["layers"], self.docks["properties"])
@@ -648,6 +688,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.apply_baseline()
             self.tabifyDockWidget(self.docks["layers"], self.docks["properties"])
             self.tabifyDockWidget(self.docks["navigator"], self.docks["history"])
+            self.tabifyDockWidget(self.docks["history"], self.docks["provenance"])
             self.docks["history"].raise_()
         else:
             self.apply_baseline()
@@ -779,6 +820,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         return {
             "active_tool": self.active_tool,
             "target_layer": self.selected_layer_key,
+            "pin": {
+                "type": self.pin_type_combo.currentText() if self.pin_type_combo is not None else "Observation",
+                "label": self.pin_label_edit.text().strip() if self.pin_label_edit is not None else "",
+                "note": self.pin_note_edit.text().strip() if self.pin_note_edit is not None else "",
+                "placement": "pending_canvas_hit_test",
+            },
             "renderer_sync": "planned",
         }
 
@@ -880,6 +927,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def refresh_command_preview(self) -> None:
         self.command_text.setPlainText(subprocess.list2cmdline(self.build_command()))
         self.refresh_canvas_preview()
+        self.refresh_research_provenance()
 
     def refresh_layer_stack_status(self) -> None:
         if not hasattr(self, "layer_stack_note"):
@@ -949,6 +997,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         target_layer = state.get("target_layer")
         if isinstance(target_layer, str) and target_layer in self.layer_rows:
             self.select_layer(target_layer)
+        pin = state.get("pin")
+        if isinstance(pin, dict):
+            if self.pin_type_combo is not None and isinstance(pin.get("type"), str):
+                self.pin_type_combo.setCurrentText(str(pin["type"]))
+            if self.pin_label_edit is not None and isinstance(pin.get("label"), str):
+                self.pin_label_edit.setText(str(pin["label"]))
+            if self.pin_note_edit is not None and isinstance(pin.get("note"), str):
+                self.pin_note_edit.setText(str(pin["note"]))
         self.refresh_tool_target()
 
     def refresh_tool_target(self) -> None:
@@ -962,7 +1018,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.tool_target_label.setText(
             f"Active tool: {tool_label}\n"
             f"Target layer: {layer_label}\n"
-            "Select tool updates the active layer target."
+            f"Pin: {self.collect_tool_state()['pin']['type']} / {self.collect_tool_state()['pin']['label']}"
         )
         self.refresh_canvas_preview()
 
@@ -990,6 +1046,47 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"Canvas state mirrors Qt UI only：active tool={self.active_tool}, "
             f"target layer={self.selected_layer_key or '-'}, style={style}, visible_layers={visible}."
         )
+        self.refresh_research_provenance()
+
+    def build_research_provenance(self) -> str:
+        visible_layers = [key for key, _label in LAYER_LABELS if key in self.checks and self.checks[key].isChecked()]
+        locked_layers = [key for key, _label in LAYER_LABELS if key in self.layer_locks and self.layer_locks[key].isChecked()]
+        packet = {
+            "schema": "rrkal_displaytools.research_provenance_summary.v1",
+            "generated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "purpose": "research visualization reproducibility summary",
+            "renderer": {
+                "style_profile": self.style_combo.currentText(),
+                "ui_backend": self.ui_combo.currentText(),
+                "topo_source": self.topo_combo.currentText(),
+                "data_mode": self.data_combo.currentText(),
+                "width": self.width_edit.text().strip(),
+                "height": self.height_edit.text().strip(),
+                "topo_step": self.topo_step_edit.text().strip(),
+                "taichi_arch": self.arch_edit.text().strip(),
+            },
+            "active_layer": self.selected_layer_key,
+            "active_tool": self.active_tool,
+            "visible_layers": visible_layers,
+            "locked_layers": locked_layers,
+            "layer_count": {
+                "visible": len(visible_layers),
+                "total": len(LAYER_LABELS),
+            },
+            "portable_command_line": subprocess.list2cmdline(self.build_portable_command()),
+            "boundary": "UI provenance only; renderer image output and RRKAL data manifest are separate artifacts.",
+        }
+        return json.dumps(packet, ensure_ascii=False, indent=2)
+
+    def refresh_research_provenance(self) -> None:
+        if self.provenance_text is None:
+            return
+        self.provenance_text.setPlainText(self.build_research_provenance())
+
+    def copy_research_provenance(self) -> None:
+        QtWidgets.QApplication.clipboard().setText(self.build_research_provenance())
+        if hasattr(self, "status"):
+            self.status.setText("已複製科研可重現性摘要")
 
     def toggle_selected_layer_visibility(self) -> None:
         key = self.selected_layer_key

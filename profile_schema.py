@@ -40,12 +40,13 @@ REQUIRED_LAYER_STACK_KEYS = REQUIRED_PROFILE_LAYERS - {"demo_closed_loop"}
 REQUIRED_LAYER_STACK_UI_FIELDS = {"locked", "opacity", "blend_mode"}
 OPTIONAL_LAYER_STACK_UI_FIELDS = {"selected", "renderer_sync"}
 BLEND_MODES = {"Normal", "Screen", "Multiply", "Overlay", "Soft Light"}
-TOOL_MODES = {"move", "select"}
+TOOL_MODES = {"move", "select", "pin"}
+PIN_TYPES = {"Observation", "Sample Site", "Anomaly", "Reference", "Event"}
 REQUIRED_TOOL_STATE_FIELDS = {
     "active_tool",
     "target_layer",
 }
-OPTIONAL_TOOL_STATE_FIELDS = {"renderer_sync"}
+OPTIONAL_TOOL_STATE_FIELDS = {"renderer_sync", "pin"}
 
 
 def profile_payload_errors(profile: dict[str, object]) -> list[str]:
@@ -132,6 +133,17 @@ def profile_payload_errors(profile: dict[str, object]) -> list[str]:
                     errors.append("tool_state.target_layer must be a string or null")
                 elif target_layer not in REQUIRED_LAYER_STACK_KEYS:
                     errors.append(f"tool_state.target_layer is not a known layer stack key: {target_layer}")
+            pin = tool_state.get("pin")
+            if pin is not None:
+                if not isinstance(pin, dict):
+                    errors.append("tool_state.pin must be an object")
+                else:
+                    pin_type = pin.get("type")
+                    if not isinstance(pin_type, str) or pin_type not in PIN_TYPES:
+                        errors.append(f"tool_state.pin.type must be one of {sorted(PIN_TYPES)}")
+                    for field in ("label", "note", "placement"):
+                        if field in pin and not isinstance(pin[field], str):
+                            errors.append(f"tool_state.pin.{field} must be a string")
             if "renderer_sync" in tool_state and not isinstance(tool_state["renderer_sync"], str):
                 errors.append("tool_state.renderer_sync must be a string")
     return errors
@@ -163,6 +175,7 @@ def profile_schema_packet() -> dict[str, object]:
             "required_fields": sorted(REQUIRED_TOOL_STATE_FIELDS),
             "optional_fields": sorted(OPTIONAL_TOOL_STATE_FIELDS),
             "tool_modes": sorted(TOOL_MODES),
+            "pin_types": sorted(PIN_TYPES),
         },
         "local_only_paths": [
             "state/ui_profiles/",

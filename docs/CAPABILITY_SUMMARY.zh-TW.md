@@ -15,10 +15,11 @@
 - Layers 面板已具備 Photoshop-like layer stack 雛形：active layer selection、visibility、lock、opacity、blend mode、UI-only state reset。Visibility 已接 renderer flags；selected layer/lock/opacity/blend 目前是 🚧 UI state，會寫入 launch packet 供後續 renderer sync。
 - Properties 面板已接 active layer inspector，可查看目前選取圖層的 visibility、lock、opacity、blend mode，並可切換選取圖層 visibility 或重設選取圖層 UI state。
 - Qt profile save/load 已支援 selected layer 與 layer stack UI state，因此 active layer、lock、opacity、blend mode 可以隨本機 profile 保存與載入；既有 repo templates 仍相容。
-- 左側 Tools dock 已新增 Photoshop-like tool palette：Move、Select。Select 用於指定 active layer；Brush/Mask 暫不納入本輪 UI。`tool_state` 會寫入 profile 與 launch packet。
+- 左側 Tools dock 已新增科研導向 tool palette：Move、Select、Pin。Select 用於指定 active layer；Pin 用於科研標記意圖，可保存 type、label、note。Brush/Mask 暫不納入本輪 UI。`tool_state` 會寫入 profile 與 launch packet。
 - 支援啟動、停止、套用並重啟 renderer。
 - 顯示 renderer PID、執行中狀態與 exit code。
 - 中央 Canvas Preview 已可用 UI-only 方式顯示 style/topography/data mode、active tool、active layer、visible layer count 與 zoom；也可顯示 renderer capabilities、layer manifest、launch packet 或 smoke 結果。
+- 右側 `Provenance` dock 已提供科研可重現性摘要，可複製 JSON，內容包含 style/topo/data mode、active layer、active tool、visible/locked layers、layer count 與 portable command line。
 - 未完成的 live preview、brush/mask、timeline、undo stack 會以 🚧 施工中標示。
 - 可保存、載入、重置本機 workspace layout，狀態位於 `state/ui_workspace.json`。
 - Window menu 提供 workspace presets：Default、Maritime、Tactical、Parchment、Review，可切換 dock/tab 排版並套用對應顯示 preset。
@@ -30,7 +31,8 @@
 - 圖層即時同步，不再只靠重啟 renderer 套用。
 - Layer stack 的 selected layer、lock、opacity、blend mode 接 renderer 即時同步。
 - Style / Looks panel 的縮圖化模板選擇。
-- Select 工具下一步是補完整圖層選取流程與 canvas/preview 操作回饋；Brush/Mask 暫不納入本輪 UI。
+- Select 工具下一步是補完整圖層選取流程與 canvas/preview 操作回饋；Pin 下一步是接 canvas/globe hit-test 與經緯度欄位；Brush/Mask 暫不納入本輪 UI。
+- Provenance 下一步要對接 renderer output artifact 與 RRKAL data manifest，但在 UIUX 閉環完成前只保留 UI provenance summary。
 - Timeline / keyframe / animation controls for ocean/cloud/material parameters。
 - Workspace presets 後續要補成可視化 preset manager，並支援保存多組命名工作區。
 

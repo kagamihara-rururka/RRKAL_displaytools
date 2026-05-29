@@ -104,11 +104,21 @@ rrkal_displaytools.qt_panel_profile.v1
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `active_tool` | string | `move` 或 `select`。 |
+| `active_tool` | string | `move`、`select` 或 `pin`。 |
 | `target_layer` | string or null | 工具目前綁定的 active layer key。 |
+| `pin` | object | 可選，科研地理標記 UI state。 |
 | `renderer_sync` | string | 可選，通常為 `planned`。 |
 
-目前 `tool_state` 不會直接改 renderer。Brush / Mask 暫不納入本輪 UI；Select 用於指定 active layer，供後續圖層操作閉環使用。
+`pin` object 目前支援：
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `type` | string | `Observation`、`Sample Site`、`Anomaly`、`Reference` 或 `Event`。 |
+| `label` | string | 標記名稱。 |
+| `note` | string | 標記備註。 |
+| `placement` | string | 目前通常是 `pending_canvas_hit_test`，代表地球點擊定位後端尚未接。 |
+
+目前 `tool_state` 不會直接改 renderer。Brush / Mask 暫不納入本輪 UI；Select 用於指定 active layer，Pin 用於先保存科研標記意圖，後續再接 canvas/globe hit-test。
 
 ## Handoff rules
 
