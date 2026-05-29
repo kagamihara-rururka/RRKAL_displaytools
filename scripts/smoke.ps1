@@ -1647,6 +1647,12 @@ if ($qtPanelSource -notlike "*profileUiStateReplay*") {
 if ($qtPanelSource -notlike "*profile_ui_state_replay_packet*") {
     throw "Qt profile UI state replay contract is missing"
 }
+if ($qtPanelSource -notlike "*show_profile_ui_state_replay*") {
+    throw "Qt profile UI state replay JSON action is missing"
+}
+if ($qtPanelSource -notlike "*Profile replay*") {
+    throw "Qt Profile replay action button is missing"
+}
 if ($qtPanelSource -notlike "*saved_state_groups*") {
     throw "Qt profile UI state replay saved groups are missing"
 }

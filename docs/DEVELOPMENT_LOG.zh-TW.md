@@ -3337,3 +3337,16 @@ Decision:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+
+## 2026-05-30 - Qt Profile replay JSON action
+
+Scope:
+- Added a `Profile replay` action button to the Qt Actions panel.
+- The action renders `collect_profile_ui_state_replay()` as JSON in the command/JSON preview pane.
+- Closed-loop evidence now includes the Qt action, and smoke verifies the button plus `show_profile_ui_state_replay` handler.
+
+Decision:
+- Profile replay coverage should be inspectable directly inside Qt, not only through labels, launch packet or handoff output.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

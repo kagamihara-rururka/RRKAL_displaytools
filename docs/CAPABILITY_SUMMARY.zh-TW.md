@@ -364,3 +364,8 @@
 
 - Smoke now checks `saved_state_groups` and `replay_surfaces` across Qt, renderer capabilities, launch packet and handoff inspection.
 - This keeps profile replay coverage machine-verifiable across clone-after-setup workflows.
+
+### 2026-05-30 Qt Profile replay JSON action
+
+- Qt Actions now includes `Profile replay`, which displays the live `profile_ui_state_replay` payload in the JSON preview pane.
+- Smoke verifies the action button and handler so replay coverage remains inspectable from the UI.

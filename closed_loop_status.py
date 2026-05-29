@@ -224,6 +224,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                 "id": "profile_ui_state_replay_handoff",
                 "scope": [
                     "Qt profile UI replay label",
+                    "Qt Profile replay JSON action",
                     "launch packet profile_ui_state_replay contract",
                     "renderer capability profile_ui_state_replay discovery",
                     "handoff inspection profile_ui_state_replay output",
@@ -232,6 +233,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                 ],
                 "evidence": [
                     "profileUiStateReplay",
+                    "show_profile_ui_state_replay",
                     "rrkal_displaytools.profile_ui_state_replay.v1",
                     "profile_ui_state_replay.saved_state_groups",
                     "profile_ui_state_replay.replay_surfaces",
