@@ -1685,5 +1685,11 @@ if ($qtBoundaryIdentitySource -notmatch 'boundaryIdentityWarningBadge') {
 if ($qtBoundaryIdentitySource -notmatch 'Pending authoritative identity') {
     throw "Qt Boundary identity pending warning text is missing"
 }
+if ($qtBoundaryIdentitySource -notmatch 'boundary_identity_warning') {
+    throw "Qt Canvas Preview boundary identity warning provenance is missing"
+}
+if ($qtBoundaryIdentitySource -notmatch 'Boundary warning:') {
+    throw "Qt Canvas Preview visible boundary warning line is missing"
+}
 
 Write-Host "Smoke passed."

@@ -309,3 +309,8 @@
 
 - Properties now shows a styled Boundary identity warning badge when authoritative polygon/EEZ identity or open-line inference remains pending.
 - The badge keeps the scientific UI explicit that current Boundary emphasis is visual/provenance state, not authoritative identity resolution.
+
+### 2026-05-30 Canvas Preview Boundary identity warning provenance
+
+- Canvas Preview now shows a `Boundary warning:` line and mirrors the warning in canvas meta text.
+- Research provenance now records `canvas_preview.boundary_identity_warning` so exported UI state preserves the non-authoritative identity warning.

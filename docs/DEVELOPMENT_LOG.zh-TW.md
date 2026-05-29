@@ -3181,3 +3181,18 @@ Decision:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+
+## 2026-05-30 - Canvas Preview Boundary identity warning provenance
+
+Scope:
+- Canvas Preview text now includes a `Boundary warning:` line using the same pending identity warning helper as Properties.
+- Canvas meta text now includes `boundary_warning=...` for quick UI-state inspection.
+- `canvas_preview` provenance now carries `boundary_identity_warning` and its UI surface description.
+- Smoke verifies the visible Canvas Preview warning line and provenance field.
+
+Decision:
+- Boundary/EEZ provenance warnings must survive beyond the Properties dock so shared research state and copied provenance remain explicit.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+

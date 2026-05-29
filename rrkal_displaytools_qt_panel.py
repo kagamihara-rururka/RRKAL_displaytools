@@ -3386,6 +3386,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "live_file_stream": "file_based_live_renderer_frame_stream",
         }.get(self.canvas_preview_mode, "ui_state_preview")
         boundary_emphasis = self.collect_boundary_emphasis_control()
+        boundary_identity_warning = self.boundary_identity_warning_text()
         return {
             "schema": "rrkal_displaytools.canvas_preview.v1",
             "mode": self.canvas_preview_mode,
@@ -3403,6 +3404,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "boundary_emphasis_target_layer": boundary_emphasis.get("target_layer_key"),
             "boundary_emphasis_target_alignment": boundary_emphasis.get("target_alignment"),
             "boundary_emphasis_target_alignment_label": boundary_emphasis.get("target_alignment_label"),
+            "boundary_identity_warning": boundary_identity_warning,
+            "boundary_identity_warning_surface": "Properties dock Identity warning / Canvas Preview / research provenance",
             "renderer_sync": renderer_sync,
         }
 
@@ -6541,6 +6544,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             hit_map = "-"
         boundary_summary = self.boundary_highlight_summary()
         boundary_identity_summary = self.boundary_identity_status_summary()
+        boundary_identity_warning = self.boundary_identity_warning_text()
         boundary_emphasis = self.collect_boundary_emphasis_control()
         boundary_target_text = (
             f"{boundary_emphasis.get('target_mode')}->{boundary_emphasis.get('target_layer_key') or '-'}; "
@@ -6555,6 +6559,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"Select hit map: {hit_map}\n"
             f"Boundary highlight: {boundary_summary}\n"
             f"Boundary identity: {boundary_identity_summary}\n"
+            f"Boundary warning: {boundary_identity_warning}\n"
             f"Boundary target: {boundary_target_text}\n"
             f"Selected pin: {selected_pin_text}\n"
             f"Pin markers: {pin_markers}\n"
@@ -6568,6 +6573,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"selected_pin={self.selected_pin_id or '-'}, cursor={cursor_text}, "
             f"renderer_cursor_bridge={renderer_cursor_text}, "
             f"boundary_target={boundary_target_text}, "
+            f"boundary_warning={boundary_identity_warning}, "
             f"boundary_highlight={'on' if self.boundary_highlight_state.get('enabled') else 'off'}."
         )
         self.refresh_research_provenance()
