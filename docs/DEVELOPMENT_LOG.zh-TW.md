@@ -1122,3 +1122,18 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Boundary highlight contrast gamma preview
+
+Scope:
+- Added renderer-side color adjustment for Boundary highlight hover outline/glow.
+- `boundary_highlight.contrast` now increases hover color separation around the midtone.
+- `boundary_highlight.gamma` now adjusts hover color brightness before contrast is applied.
+- Renderer ack/capabilities now mark hover contrast/gamma color control as applied, while polygon-fill shader contrast/gamma remains pending.
+
+Positioning:
+- This closes the current line-hover visual loop for all Boundary highlight sliders except polygon-fill behavior.
+- Remaining Boundary highlight work is feature identity, polygon fill masks, and fill-shader contrast/gamma behavior.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

@@ -2476,6 +2476,19 @@ def _clamp_int_value(value: object, default: int, minimum: int, maximum: int) ->
     return max(minimum, min(maximum, number))
 
 
+def apply_boundary_highlight_color_controls(color_rgb: object, contrast: object, gamma: object) -> tuple[int, int, int]:
+    if isinstance(color_rgb, list) and len(color_rgb) >= 3:
+        base = [_clamp_int_value(color_rgb[index], 255, 0, 255) for index in range(3)]
+    else:
+        base = [255, 190, 72]
+    rgb = np.asarray(base, dtype=np.float32) / 255.0
+    gamma_value = _clamp_int_value(gamma, 100, 25, 300) / 100.0
+    rgb = np.power(np.clip(rgb, 0.0, 1.0), 1.0 / max(0.25, gamma_value))
+    contrast_factor = 1.0 + (_clamp_int_value(contrast, 45, 0, 100) / 100.0) * 1.4
+    rgb = np.clip((rgb - 0.5) * contrast_factor + 0.5, 0.0, 1.0)
+    return tuple(int(round(float(value) * 255.0)) for value in rgb)
+
+
 def default_boundary_highlight_state(received: bool = False) -> dict[str, object]:
     return {
         "schema": BOUNDARY_HIGHLIGHT_SCHEMA,
@@ -11692,6 +11705,8 @@ class HybridRenderController:
             boundary_highlight.get("trigger", "hover") if isinstance(boundary_highlight, dict) else "hover",
             tuple(boundary_highlight.get("renderer_target_layers", [])) if isinstance(boundary_highlight, dict) else (),
             tuple(boundary_highlight.get("color_rgb", [])) if isinstance(boundary_highlight, dict) else (),
+            boundary_highlight.get("contrast", 45) if isinstance(boundary_highlight, dict) else 45,
+            boundary_highlight.get("gamma", 100) if isinstance(boundary_highlight, dict) else 100,
             boundary_highlight.get("alpha", 48) if isinstance(boundary_highlight, dict) else 48,
             boundary_highlight.get("feather", 14) if isinstance(boundary_highlight, dict) else 14,
             bool(breathing.get("enabled", True)) if isinstance(breathing, dict) else True,
@@ -11793,10 +11808,11 @@ class HybridRenderController:
         if highlight_layer not in highlight_targets:
             highlight_layer = None
         highlight_line_index = self.hover_boundary_hit.get("line_index") if highlight_layer is not None else None
-        color_rgb = boundary_highlight.get("color_rgb", [255, 190, 72]) if isinstance(boundary_highlight, dict) else [255, 190, 72]
-        if not isinstance(color_rgb, list) or len(color_rgb) < 3:
-            color_rgb = [255, 190, 72]
-        highlight_color = tuple(_clamp_int_value(color_rgb[index], 255, 0, 255) for index in range(3))
+        highlight_color = apply_boundary_highlight_color_controls(
+            boundary_highlight.get("color_rgb", [255, 190, 72]) if isinstance(boundary_highlight, dict) else [255, 190, 72],
+            boundary_highlight.get("contrast", 45) if isinstance(boundary_highlight, dict) else 45,
+            boundary_highlight.get("gamma", 100) if isinstance(boundary_highlight, dict) else 100,
+        )
         highlight_alpha_scale = (
             max(0.0, min(_clamp_int_value(boundary_highlight.get("alpha"), 48, 0, 100) / 48.0, 2.0))
             if isinstance(boundary_highlight, dict)
@@ -12250,10 +12266,15 @@ class HybridRenderController:
             "gamma": state.get("gamma", 100),
             "feather": state.get("feather", 14),
             "breathing": state.get("breathing", {}),
-            "applies": ["input_acknowledgement", "hover_hit_gate", "outline_glow_preview"],
+            "applies": [
+                "input_acknowledgement",
+                "hover_hit_gate",
+                "outline_glow_preview",
+                "hover_contrast_gamma_color",
+            ],
             "pending": [
                 "polygon_fill_mask",
-                "shader_contrast_gamma",
+                "fill_shader_contrast_gamma",
                 "territory_feature_identity",
             ],
             "error": getattr(self, "boundary_highlight_error", None),
@@ -15171,10 +15192,15 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "target_layers": list(BOUNDARY_HIGHLIGHT_LAYER_MAP),
             "renderer_target_layers": list(BOUNDARY_HIGHLIGHT_LAYER_MAP.values()),
             "triggers": sorted(BOUNDARY_HIGHLIGHT_TRIGGERS),
-            "applies": ["input_acknowledgement", "hover_hit_gate", "outline_glow_preview"],
+            "applies": [
+                "input_acknowledgement",
+                "hover_hit_gate",
+                "outline_glow_preview",
+                "hover_contrast_gamma_color",
+            ],
             "pending": [
                 "polygon_fill_mask",
-                "shader_contrast_gamma",
+                "fill_shader_contrast_gamma",
                 "territory_feature_identity",
             ],
         },
