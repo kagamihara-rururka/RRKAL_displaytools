@@ -198,3 +198,8 @@
 
 - Handoff inspection now reports active-layer `screen_position` diagnostics contract from launch packets and renderer capabilities.
 - Cross-machine users can verify selected-layer pick provenance through `scripts/inspect_handoff.ps1` without inspecting renderer internals.
+
+### 2026-05-30 Layer pick history provenance
+
+- History panel now records renderer layer pick attempts with target, picker, hit/no-hit, feature, frame, and screen position.
+- This preserves a short interaction trail for selected-layer picking during research inspection.

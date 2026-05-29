@@ -2888,3 +2888,16 @@ Decision:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Layer pick history provenance
+
+Scope:
+- History panel now records each renderer layer pick update.
+- Layer pick history entries include target, picker, hit/no-hit, feature text, frame, and screen position.
+- Smoke now gates the Layer pick history entry hook.
+
+Decision:
+- Researchers need a short interaction trail for selected-layer picking, not only the latest Properties label, so repeated pick attempts remain traceable.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

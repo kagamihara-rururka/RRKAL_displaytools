@@ -3836,6 +3836,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"Layer pick: event={event}, target={target}, picker={picker}, hit={hit}{feature_text}, "
             f"frame={frame_index}{screen_text}, updated={updated_at}"
         )
+        if self.history_list is not None:
+            self.history_list.insertItem(
+                0,
+                f"Layer pick history {updated_at}: target={target}, picker={picker}, hit={hit}{feature_text}, "
+                f"frame={frame_index}{screen_text}",
+            )
+            while self.history_list.count() > 18:
+                self.history_list.takeItem(self.history_list.count() - 1)
 
     def refresh_pin_input_ack_state(self) -> None:
         try:

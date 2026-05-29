@@ -1455,6 +1455,9 @@ if ($qtPanelSource -notlike "*pin_cursor_fill_source_text*") {
 if ($qtPanelSource -notlike "*screen_position*") {
     throw "Qt panel layer pick screen position diagnostics missing"
 }
+if ($qtPanelSource -notlike "*Layer pick history*") {
+    throw "Qt panel layer pick history entry missing"
+}
 
 $rendererSource = Get-Content -Raw -Encoding UTF8 taichi_global_bathymetry.py
 if ($rendererSource -notlike "*last_layer_pick_screen*") {
