@@ -68,6 +68,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "launch_packet session_journal",
                     "launch_packet document_undo",
                     "launch_packet timeline_state",
+                    "launch_packet timeline_playback_readiness",
                     "renderer capabilities active_layer_diagnostics",
                     "renderer capabilities timeline_handoff",
                     "renderer capabilities ui_handoff_contracts",
@@ -154,6 +155,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "provenance timeline_state",
                     "renderer timeline ack handoff",
                     "no-GUI renderer ack endpoint",
+                    "timeline playback readiness contract",
                 ],
                 "pending": ["renderer_timeline_playback", "animation_export"],
                 "evidence": [
@@ -161,6 +163,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "rrkal_displaytools.timeline_state.v1",
                     "rrkal_displaytools.timeline_runtime_state.v1",
                     "rrkal_displaytools.renderer_timeline_ack.v1",
+                    "rrkal_displaytools.timeline_playback_readiness.v1",
                     "renderer capabilities timeline_handoff",
                 ],
             },

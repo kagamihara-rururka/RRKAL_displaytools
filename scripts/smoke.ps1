@@ -76,6 +76,15 @@ if ($launchPacket.document_undo.auto_capture_points -notcontains "profile_apply"
 if ($launchPacket.timeline_state.schema -ne "rrkal_displaytools.timeline_state.v1") {
     throw "Launch packet timeline_state schema missing or invalid"
 }
+if ($launchPacket.timeline_playback_readiness.schema -ne "rrkal_displaytools.timeline_playback_readiness.v1") {
+    throw "Launch packet timeline playback readiness schema missing or invalid"
+}
+if ($launchPacket.timeline_playback_readiness.renderer_ack_available -ne $true) {
+    throw "Launch packet timeline playback readiness renderer ack unavailable"
+}
+if ($launchPacket.timeline_playback_readiness.renderer_timeline_playback -ne $false) {
+    throw "Launch packet timeline playback readiness must not claim renderer playback"
+}
 if ($launchPacket.timeline_state.implemented -notcontains "profile_timeline_keyframe_handoff") {
     throw "Launch packet timeline_state profile keyframe handoff missing"
 }
@@ -87,6 +96,9 @@ if ($launchPacket.timeline_runtime_state.schema -ne "rrkal_displaytools.timeline
 }
 if ($launchPacket.timeline_runtime_state.timeline_state.schema -ne "rrkal_displaytools.timeline_state.v1") {
     throw "Launch packet timeline_runtime_state nested timeline_state schema missing or invalid"
+}
+if ($launchPacket.timeline_runtime_state.playback_readiness.schema -ne "rrkal_displaytools.timeline_playback_readiness.v1") {
+    throw "Launch packet timeline_runtime_state playback readiness missing or invalid"
 }
 if ($launchPacket.timeline_runtime_state_file -ne "state/renderer_timeline_state.json") {
     throw "Launch packet timeline runtime state file missing or invalid"
@@ -160,6 +172,9 @@ if ($timelineAck.received -ne $true) {
 if ($timelineAck.timeline_runtime_state_schema -ne "rrkal_displaytools.timeline_runtime_state.v1") {
     throw "Renderer timeline ack endpoint runtime state schema missing or invalid"
 }
+if ($timelineAck.playback_readiness.schema -ne "rrkal_displaytools.timeline_playback_readiness.v1") {
+    throw "Renderer timeline ack endpoint playback readiness missing or invalid"
+}
 Remove-Item -LiteralPath $timelineAckOut -Force
 Remove-Item -LiteralPath $timelineStateOut -Force
 $capabilitiesText = & py -3 taichi_global_bathymetry.py --print-renderer-capabilities
@@ -195,6 +210,9 @@ if ($capabilities.timeline_handoff.schema -ne "rrkal_displaytools.timeline_hando
 }
 if ($capabilities.timeline_handoff.ack_schema -ne "rrkal_displaytools.renderer_timeline_ack.v1") {
     throw "Renderer timeline_handoff ack schema missing or invalid"
+}
+if ($capabilities.timeline_handoff.playback_readiness.schema -ne "rrkal_displaytools.timeline_playback_readiness.v1") {
+    throw "Renderer timeline_handoff playback readiness missing or invalid"
 }
 if ($capabilities.timeline_handoff.controls -notcontains "timeline-state-file") {
     throw "Renderer timeline_handoff timeline-state-file control missing"

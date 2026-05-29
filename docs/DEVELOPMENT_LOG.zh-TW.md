@@ -1,5 +1,18 @@
 # Development Log
 
+## 2026-05-29 - Timeline playback readiness contract
+
+Scope:
+- Added `rrkal_displaytools.timeline_playback_readiness.v1`.
+- Qt launch/provenance packets, No-GUI launch packets, Timeline runtime state, renderer ack payloads, renderer capabilities, closed-loop status, docs, and smoke gates now expose whether Timeline supports Qt preview playback, renderer ack, renderer playback, and animation export.
+- The contract explicitly keeps renderer timeline playback/export pending instead of implying support.
+
+Positioning:
+- This improves cross-machine handoff clarity before implementing renderer-side animation playback.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Reveal selected layer row
 
 Scope:

@@ -1379,6 +1379,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "session_journal": self.collect_session_journal(),
             "document_undo": self.collect_document_undo_state(),
             "timeline_state": self.collect_timeline_state(),
+            "timeline_playback_readiness": self.collect_timeline_playback_readiness(),
             "timeline_runtime_state_file": str(TIMELINE_STATE_PATH),
             "timeline_ack_file": str(TIMELINE_ACK_PATH),
             "timeline_ack": self.timeline_ack_payload,
@@ -2682,11 +2683,32 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "boundary": "UIUX keyframe storage/restore/playback only; no renderer animation playback or export is claimed yet.",
         }
 
+    def collect_timeline_playback_readiness(self) -> dict[str, object]:
+        return {
+            "schema": "rrkal_displaytools.timeline_playback_readiness.v1",
+            "ui_preview_playback_available": True,
+            "renderer_ack_available": True,
+            "renderer_timeline_playback": False,
+            "animation_export": False,
+            "ready_handoff_files": {
+                "timeline_runtime_state_file": str(TIMELINE_STATE_PATH),
+                "timeline_ack_file": str(TIMELINE_ACK_PATH),
+            },
+            "pending": [
+                "renderer_timeline_playback",
+                "animation_export",
+                "ocean_material_keyframe_interpolation",
+                "camera_keyframe_interpolation",
+            ],
+            "boundary": "Timeline can be stored, previewed in Qt, exported as runtime state, and acknowledged by renderer; renderer playback/export are not claimed yet.",
+        }
+
     def collect_timeline_runtime_state(self) -> dict[str, object]:
         return {
             "schema": "rrkal_displaytools.timeline_runtime_state.v1",
             "updated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             "timeline_state": self.collect_timeline_state(),
+            "playback_readiness": self.collect_timeline_playback_readiness(),
             "timeline_keyframes": [dict(keyframe) for keyframe in self.timeline_keyframes],
             "source": "rrkal_displaytools_qt_panel",
             "boundary": "Renderer receives Timeline keyframes as state only; renderer playback/interpolation/export remain pending.",
@@ -3639,6 +3661,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "session_journal": self.collect_session_journal(),
             "document_undo": self.collect_document_undo_state(),
             "timeline_state": self.collect_timeline_state(),
+            "timeline_playback_readiness": self.collect_timeline_playback_readiness(),
             "timeline_runtime_state_file": str(TIMELINE_STATE_PATH),
             "timeline_state_last_write_utc": self.timeline_state_last_write_utc,
             "timeline_state_write_error": self.timeline_state_write_error,

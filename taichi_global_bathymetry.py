@@ -2732,6 +2732,7 @@ def timeline_ack_payload_from_state_file(timeline_state_file: str | Path | None)
         "timeline_state_schema": timeline_state.get("schema"),
         "keyframe_count": keyframe_count,
         "playback_mode": playback.get("mode"),
+        "playback_readiness": timeline_playback_readiness_packet(),
         "applies": ["input_acknowledgement"],
         "pending": [
             "renderer_timeline_playback",
@@ -2741,6 +2742,23 @@ def timeline_ack_payload_from_state_file(timeline_state_file: str | Path | None)
         ],
         "error": state_error,
         "source": "taichi_global_bathymetry",
+    }
+
+
+def timeline_playback_readiness_packet() -> dict[str, object]:
+    return {
+        "schema": "rrkal_displaytools.timeline_playback_readiness.v1",
+        "ui_preview_playback_available": True,
+        "renderer_ack_available": True,
+        "renderer_timeline_playback": False,
+        "animation_export": False,
+        "pending": [
+            "renderer_timeline_playback",
+            "animation_export",
+            "ocean_material_keyframe_interpolation",
+            "camera_keyframe_interpolation",
+        ],
+        "boundary": "Renderer can acknowledge Timeline runtime state, but does not yet drive animation playback/export from it.",
     }
 
 
@@ -13210,6 +13228,7 @@ class HybridRenderController:
             "playback_mode": timeline_state.get("playback", {}).get("mode")
             if isinstance(timeline_state.get("playback"), dict)
             else None,
+            "playback_readiness": timeline_playback_readiness_packet(),
             "applies": ["input_acknowledgement"],
             "pending": [
                 "renderer_timeline_playback",
@@ -16466,6 +16485,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "schema": "rrkal_displaytools.timeline_handoff.v1",
             "state_schema": "rrkal_displaytools.timeline_runtime_state.v1",
             "ack_schema": "rrkal_displaytools.renderer_timeline_ack.v1",
+            "playback_readiness": timeline_playback_readiness_packet(),
             "controls": ["timeline-state-file", "timeline-ack-file", "ack-timeline-state-and-exit"],
             "input_contracts": [
                 "rrkal_displaytools.timeline_state.v1",

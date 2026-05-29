@@ -428,10 +428,28 @@ def timeline_runtime_state_packet(profile: dict[str, object], target_file: str =
         "schema": "rrkal_displaytools.timeline_runtime_state.v1",
         "updated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "timeline_state": timeline_state_packet(profile),
+        "playback_readiness": timeline_playback_readiness_packet(),
         "timeline_keyframes": keyframes,
         "source": "scripts/export_launch_packet.py",
         "target_file": target_file,
         "boundary": "Save this payload to the target file before launching the renderer; renderer playback/export remain pending.",
+    }
+
+
+def timeline_playback_readiness_packet() -> dict[str, object]:
+    return {
+        "schema": "rrkal_displaytools.timeline_playback_readiness.v1",
+        "ui_preview_playback_available": True,
+        "renderer_ack_available": True,
+        "renderer_timeline_playback": False,
+        "animation_export": False,
+        "pending": [
+            "renderer_timeline_playback",
+            "animation_export",
+            "ocean_material_keyframe_interpolation",
+            "camera_keyframe_interpolation",
+        ],
+        "boundary": "No-GUI handoff can export timeline runtime state and receive renderer ack; renderer playback/export are not claimed yet.",
     }
 
 
@@ -478,6 +496,7 @@ def launch_packet(
         "session_journal": session_journal_packet(),
         "document_undo": document_undo_packet(),
         "timeline_state": timeline_state_packet(profile),
+        "timeline_playback_readiness": timeline_playback_readiness_packet(),
         "timeline_runtime_state": timeline_runtime_state_packet(profile, timeline_state_file),
         "timeline_runtime_state_file": timeline_state_file,
         "timeline_ack_file": timeline_ack_file,
