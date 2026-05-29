@@ -53,6 +53,9 @@ $capabilities = $capabilitiesRaw.Substring($capabilitiesJsonStart) | ConvertFrom
 if ($capabilities.preview_frame_stream.schema -ne "rrkal_displaytools.preview_frame_stream.v1") {
     throw "Renderer preview_frame_stream capability missing or invalid"
 }
+if ($capabilities.active_layer_diagnostics.schema -ne "rrkal_displaytools.active_layer_diagnostics.v1") {
+    throw "Renderer active_layer_diagnostics capability missing or invalid"
+}
 Invoke-CheckedNative py @("-3", "taichi_global_bathymetry.py", "--print-closed-loop-status") | Out-Null
 Invoke-CheckedNative py @("-3", "taichi_global_bathymetry.py", "--print-layer-manifest") | Out-Null
 Invoke-CheckedNative py @("-3", "rrkal_displaytools_qt_panel.py", "--list-templates") | Out-Null

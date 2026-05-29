@@ -1,5 +1,18 @@
 # Development Log
 
+## 2026-05-29 - Active layer diagnostics capability
+
+Scope:
+- Renderer capabilities now expose `active_layer_diagnostics`.
+- Smoke now gates `capabilities.active_layer_diagnostics.schema`.
+- Capability summary now documents the contract as part of renderer capability discovery.
+
+Positioning:
+- This keeps capability discovery aligned with the Qt/provenance/no-GUI handoff contract.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Active layer diagnostics handoff
 
 Scope:

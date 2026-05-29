@@ -16316,6 +16316,22 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "runtime_split_blend_layers": ["borders", "territorial_sea", "eez", "high_seas"],
             "pending": ["polygon_fill_mask"],
         },
+        "active_layer_diagnostics": {
+            "schema": "rrkal_displaytools.active_layer_diagnostics.v1",
+            "sources": [
+                "selected_layer",
+                "selected_renderer_layer",
+                "renderer_layer_runtime_ack.v1",
+                "renderer_layer_pick_state.v1",
+            ],
+            "applies": [
+                "Qt Properties active layer inspector",
+                "Qt launch packet handoff",
+                "research provenance summary",
+                "no-GUI launch packet contract",
+            ],
+            "pending": [],
+        },
         "rrkal_boundary": {
             "displaytools_owns": [
                 "renderer launch flags",
