@@ -1689,6 +1689,12 @@ if ($qtPanelSource -notlike "*Inspect portable UI/profile replay coverage JSON*"
 if ($qtPanelSource -notlike "*setAccessibleDescription*") {
     throw "Qt contract inspector accessible descriptions are missing"
 }
+if ($qtPanelSource -notlike "*Pin pick*") {
+    throw "Qt Pin pick action button is missing"
+}
+if ($qtPanelSource -notlike "*Inspect renderer Pin hover/click pick bridge JSON*") {
+    throw "Qt Pin pick action tooltip is missing"
+}
 if ($qtPanelSource -notlike "*saved_state_groups*") {
     throw "Qt profile UI state replay saved groups are missing"
 }

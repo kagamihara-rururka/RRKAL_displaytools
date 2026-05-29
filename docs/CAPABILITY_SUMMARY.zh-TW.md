@@ -399,3 +399,8 @@
 
 - The Qt Actions inspector buttons now include tooltips and accessible descriptions for Profile replay, Ocean port, Hydro LOD, Style routes, Module seams and Clone ready.
 - This makes the smoke-gated JSON inspection surface easier to understand for researchers using the panel directly.
+
+### 2026-05-30 Qt Pin pick JSON action
+
+- Qt Actions now includes `Pin pick`, which displays the renderer Pin hover/click pick bridge JSON from the panel.
+- This gives researchers a direct inspection path for Pin selection feedback while keeping Pins as globe-following geodetic anchors.

@@ -230,6 +230,20 @@ Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
 
+## 2026-05-30 - Qt Pin pick JSON action
+
+Scope:
+- Added a `Pin pick` action button to the Qt Actions panel.
+- The action opens the existing renderer Pin hover/click pick bridge JSON through `show_pin_pick_state()`.
+- Smoke verifies the button and researcher-facing tooltip.
+
+Decision:
+- Pin selection feedback should be reachable from the primary Qt UI so researchers can inspect marker interaction state without browsing `state/` files.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+
 ## 2026-05-30 - Qt contract inspector tooltips
 
 Scope:

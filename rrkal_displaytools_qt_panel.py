@@ -2583,6 +2583,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         style_routes_button = QtWidgets.QPushButton("Style routes")
         module_seams_button = QtWidgets.QPushButton("Module seams")
         clone_ready_button = QtWidgets.QPushButton("Clone ready")
+        pin_pick_button = QtWidgets.QPushButton("Pin pick")
         capabilities_button = QtWidgets.QPushButton("Renderer 能力")
         closed_loop_button = QtWidgets.QPushButton("閉環狀態")
         layer_manifest_button = QtWidgets.QPushButton("圖層 manifest")
@@ -2600,6 +2601,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (style_routes_button, "Inspect parchment and tactical style renderer route JSON."),
             (module_seams_button, "Inspect future module extraction seam registry JSON."),
             (clone_ready_button, "Inspect cross-machine clone readiness JSON."),
+            (pin_pick_button, "Inspect renderer Pin hover/click pick bridge JSON."),
         ):
             button.setToolTip(tooltip)
             button.setAccessibleDescription(tooltip)
@@ -2617,6 +2619,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         style_routes_button.clicked.connect(self.show_style_renderer_routes)
         module_seams_button.clicked.connect(self.show_module_boundary_registry)
         clone_ready_button.clicked.connect(self.show_cross_machine_clone_readiness)
+        pin_pick_button.clicked.connect(self.show_pin_pick_state)
         capabilities_button.clicked.connect(self.show_renderer_capabilities)
         closed_loop_button.clicked.connect(self.show_closed_loop_status)
         layer_manifest_button.clicked.connect(self.show_layer_manifest)
@@ -2642,6 +2645,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             style_routes_button,
             module_seams_button,
             clone_ready_button,
+            pin_pick_button,
             capabilities_button,
             closed_loop_button,
             layer_manifest_button,
