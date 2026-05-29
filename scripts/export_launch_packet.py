@@ -15,6 +15,10 @@ PREVIEW_FRAME_PATH = "state/renderer_preview_frame.png"
 PREVIEW_FRAME_INTERVAL_S = 0.75
 TIMELINE_STATE_PATH = "state/renderer_timeline_state.json"
 TIMELINE_ACK_PATH = "state/renderer_timeline_ack.json"
+TIMELINE_EXPORT_DIR = "state/timeline_exports"
+TIMELINE_EXPORT_MANIFEST = "timeline_animation_manifest.json"
+TIMELINE_EXPORT_GIF = "timeline_animation.gif"
+TIMELINE_EXPORT_MP4 = "timeline_animation.mp4"
 sys.path.insert(0, str(ROOT))
 
 from closed_loop_status import renderer_closed_loop_status_packet  # noqa: E402
@@ -111,6 +115,7 @@ def renderer_args(
     rrkal_data_manifest_ref: str = "",
     timeline_state_file: str = TIMELINE_STATE_PATH,
     timeline_ack_file: str = TIMELINE_ACK_PATH,
+    timeline_export_options: dict[str, object] | None = None,
 ) -> list[str]:
     renderer = profile["renderer"]
     material = profile["ocean_material"]
@@ -155,7 +160,51 @@ def renderer_args(
     manifest_ref = rrkal_data_manifest_ref or str(renderer.get("rrkal_data_manifest_ref", "")).strip()
     if manifest_ref:
         args.extend(["--rrkal-data-manifest-ref", manifest_ref])
+    export_options = timeline_export_options if isinstance(timeline_export_options, dict) else {}
+    if export_options.get("enabled") is True:
+        args.extend(
+            [
+                "--timeline-export-dir",
+                str(export_options["export_dir"]),
+                "--timeline-export-frames",
+                str(export_options["frame_count"]),
+                "--timeline-export-fps",
+                str(export_options["fps"]),
+                "--timeline-export-manifest",
+                str(export_options["manifest_file"]),
+            ]
+        )
+        if export_options.get("gif_enabled") is True:
+            args.extend(["--timeline-export-gif", str(export_options["gif_file"])])
+        if export_options.get("mp4_enabled") is True:
+            args.extend(["--timeline-export-mp4", str(export_options["mp4_file"])])
     return args
+
+
+def timeline_export_options_packet(
+    export_dir: str | None = None,
+    frame_count: int = 24,
+    fps: float = 24.0,
+    gif_file: str | None = None,
+    mp4_file: str | None = None,
+) -> dict[str, object]:
+    enabled = bool(export_dir)
+    export_dir_value = export_dir or TIMELINE_EXPORT_DIR
+    manifest_file = str(Path(export_dir_value) / TIMELINE_EXPORT_MANIFEST)
+    return {
+        "schema": "rrkal_displaytools.timeline_export_options.v1",
+        "enabled": enabled,
+        "export_dir": export_dir_value,
+        "frame_count": max(1, int(frame_count)),
+        "fps": max(1.0, float(fps)),
+        "manifest_file": manifest_file,
+        "gif_enabled": bool(gif_file),
+        "gif_file": gif_file or str(Path(export_dir_value) / TIMELINE_EXPORT_GIF),
+        "mp4_enabled": bool(mp4_file),
+        "mp4_file": mp4_file or str(Path(export_dir_value) / TIMELINE_EXPORT_MP4),
+        "applies": ["no_gui_timeline_export_options", "renderer_timeline_export_cli"],
+        "boundary": "No-GUI launch packets prepare renderer Timeline export flags only; renderer writes PNG/GIF/MP4 artifacts, and RRKAL remains responsible for data governance.",
+    }
 
 
 def profile_display_path(path: Path) -> str:
@@ -901,12 +950,14 @@ def launch_packet(
     rrkal_data_manifest_ref: str = "",
     timeline_state_file: str = TIMELINE_STATE_PATH,
     timeline_ack_file: str = TIMELINE_ACK_PATH,
+    timeline_export_options: dict[str, object] | None = None,
 ) -> dict[str, object]:
+    export_options = timeline_export_options if isinstance(timeline_export_options, dict) else timeline_export_options_packet()
     portable_command = [
         "py",
         "-3",
         "taichi_global_bathymetry.py",
-        *renderer_args(profile, rrkal_data_manifest_ref, timeline_state_file, timeline_ack_file),
+        *renderer_args(profile, rrkal_data_manifest_ref, timeline_state_file, timeline_ack_file, export_options),
     ]
     manifest_ref = rrkal_data_manifest_ref or str(profile.get("renderer", {}).get("rrkal_data_manifest_ref", "")).strip()
     profile_keyframes = profile.get("timeline_keyframes")
@@ -949,6 +1000,7 @@ def launch_packet(
         "timeline_step_playback": timeline_step_playback_packet(timeline_state, timeline_keyframes, instantiated=False),
         "timeline_ocean_material_interpolation": timeline_ocean_material_interpolation_packet(timeline_state, timeline_keyframes, instantiated=False),
         "timeline_animation_export": timeline_animation_export_packet(executed=False),
+        "timeline_export_options": export_options,
         "timeline_camera_keyframe": timeline_camera_keyframe_packet(timeline_state, timeline_keyframes, instantiated=False),
         "timeline_camera_interpolation": timeline_camera_interpolation_packet(timeline_state, timeline_keyframes, instantiated=False),
         "timeline_layer_opacity_interpolation": timeline_layer_opacity_interpolation_packet(timeline_state, timeline_keyframes, instantiated=False),
@@ -969,6 +1021,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--rrkal-data-manifest-ref", default="")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--timeline-state-out", type=Path)
+    parser.add_argument("--timeline-export-dir")
+    parser.add_argument("--timeline-export-frames", type=int, default=24)
+    parser.add_argument("--timeline-export-fps", type=float, default=24.0)
+    parser.add_argument("--timeline-export-gif")
+    parser.add_argument("--timeline-export-mp4")
     return parser
 
 
@@ -986,11 +1043,20 @@ def main(argv: list[str] | None = None) -> int:
             print(error, file=sys.stderr)
         return 1
     timeline_state_file = str(args.timeline_state_out) if args.timeline_state_out else TIMELINE_STATE_PATH
+    timeline_export_options = timeline_export_options_packet(
+        args.timeline_export_dir,
+        args.timeline_export_frames,
+        args.timeline_export_fps,
+        args.timeline_export_gif,
+        args.timeline_export_mp4,
+    )
     packet = launch_packet(
         profile_path,
         profile,
         str(args.rrkal_data_manifest_ref or "").strip(),
         timeline_state_file,
+        TIMELINE_ACK_PATH,
+        timeline_export_options,
     )
     if args.timeline_state_out:
         args.timeline_state_out.parent.mkdir(parents=True, exist_ok=True)

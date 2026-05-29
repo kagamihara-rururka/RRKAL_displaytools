@@ -1,5 +1,18 @@
 # Development Log
 
+## 2026-05-29 - Qt Timeline export options controls
+
+Scope:
+- Added a Qt Timeline `Renderer export` control group for export-on-launch, output directory, frame count, FPS, GIF fallback, and MP4 video.
+- Added `rrkal_displaytools.timeline_export_options.v1` to Qt profiles, launch packets, runtime state, No-GUI launch packet export, profile schema, closed-loop status, and smoke gates.
+- No-GUI launch packet export now accepts Timeline export flags and includes them in the portable renderer command.
+
+Positioning:
+- This keeps Timeline export operator-facing and reproducible without moving artifact/data governance into displaytools. Export paths default under `state/` and remain local runtime artifacts.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Timeline MP4 video export
 
 Scope:

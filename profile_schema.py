@@ -12,6 +12,7 @@ CANVAS_PREVIEW_SCHEMA_ID = "rrkal_displaytools.canvas_preview.v1"
 LAYER_FILTER_SCHEMA_ID = "rrkal_displaytools.layer_filter.v1"
 LAYER_GROUP_VIEW_SCHEMA_ID = "rrkal_displaytools.layer_group_view.v1"
 TIMELINE_KEYFRAME_SCHEMA_ID = "rrkal_displaytools.timeline_keyframe.v1"
+TIMELINE_EXPORT_OPTIONS_SCHEMA_ID = "rrkal_displaytools.timeline_export_options.v1"
 
 REQUIRED_PROFILE_TOP_LEVEL = {"schema", "renderer", "ocean_material", "layers"}
 OPTIONAL_PROFILE_TOP_LEVEL = {
@@ -24,6 +25,7 @@ OPTIONAL_PROFILE_TOP_LEVEL = {
     "pins",
     "boundary_highlight",
     "canvas_preview",
+    "timeline_export",
     "timeline_keyframes",
 }
 REQUIRED_PROFILE_RENDERER = {
@@ -429,6 +431,47 @@ def profile_payload_errors(profile: dict[str, object]) -> list[str]:
                         errors.append(f"timeline_keyframes[{index}].selected_layer must be a string or null")
                     elif selected_layer not in REQUIRED_LAYER_STACK_KEYS:
                         errors.append(f"timeline_keyframes[{index}].selected_layer is not a known layer stack key")
+    timeline_export = profile.get("timeline_export")
+    if timeline_export is not None:
+        if not isinstance(timeline_export, dict):
+            errors.append("timeline_export must be an object")
+        else:
+            allowed_fields = {
+                "schema",
+                "enabled",
+                "export_dir",
+                "frame_count",
+                "fps",
+                "manifest_file",
+                "gif_enabled",
+                "gif_file",
+                "mp4_enabled",
+                "mp4_file",
+                "applies",
+                "boundary",
+            }
+            for field in sorted(set(timeline_export) - allowed_fields):
+                errors.append(f"unknown timeline_export field: {field}")
+            if timeline_export.get("schema") != TIMELINE_EXPORT_OPTIONS_SCHEMA_ID:
+                errors.append(f"timeline_export.schema must be {TIMELINE_EXPORT_OPTIONS_SCHEMA_ID!r}")
+            for field in ("enabled", "gif_enabled", "mp4_enabled"):
+                value = timeline_export.get(field)
+                if value is not None and not isinstance(value, bool):
+                    errors.append(f"timeline_export.{field} must be a boolean")
+            for field in ("export_dir", "manifest_file", "gif_file", "mp4_file", "boundary"):
+                value = timeline_export.get(field)
+                if value is not None and not isinstance(value, str):
+                    errors.append(f"timeline_export.{field} must be a string")
+            frame_count = timeline_export.get("frame_count")
+            if frame_count is not None and (not isinstance(frame_count, int) or isinstance(frame_count, bool) or frame_count <= 0):
+                errors.append("timeline_export.frame_count must be a positive integer")
+            fps = timeline_export.get("fps")
+            if fps is not None and (
+                not isinstance(fps, (int, float))
+                or isinstance(fps, bool)
+                or fps <= 0
+            ):
+                errors.append("timeline_export.fps must be a positive number")
     boundary_highlight = profile.get("boundary_highlight")
     if boundary_highlight is not None:
         if not isinstance(boundary_highlight, dict):
@@ -568,6 +611,25 @@ def profile_schema_packet() -> dict[str, object]:
                 "renderer_sync",
             ],
             "live_file_stream_path": "state/renderer_preview_frame.png",
+        },
+        "optional_timeline_export": {
+            "schema": TIMELINE_EXPORT_OPTIONS_SCHEMA_ID,
+            "fields": [
+                "schema",
+                "enabled",
+                "export_dir",
+                "frame_count",
+                "fps",
+                "manifest_file",
+                "gif_enabled",
+                "gif_file",
+                "mp4_enabled",
+                "mp4_file",
+                "applies",
+                "boundary",
+            ],
+            "default_export_dir": "state/timeline_exports",
+            "boundary": "Qt/profile state only prepares renderer export flags; renderer writes artifacts, RRKAL owns data governance.",
         },
         "optional_boundary_highlight": {
             "schema": BOUNDARY_HIGHLIGHT_SCHEMA_ID,

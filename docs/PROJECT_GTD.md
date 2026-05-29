@@ -36,6 +36,7 @@ Last updated: 2026-05-29
 
 ## Done
 
+- 2026-05-29: Added Qt/No-GUI Timeline export options controls and profile schema support for export-on-launch, GIF, and MP4.
 - 2026-05-29: Added optional Timeline MP4 video export through `--timeline-export-mp4` / `TIMELINE_EXPORT_MP4`, with Qt/No-GUI/capability/smoke contracts.
 - 2026-05-29: Created and pushed the GitHub repo `Kagamihara-Ruruka/RRKAL_displaytools`.
 - 2026-05-29: Imported the current Taichi globe prototype and minimal governance docs.

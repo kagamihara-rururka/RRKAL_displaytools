@@ -171,6 +171,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "renderer camera keyframe interpolation",
                     "renderer layer opacity keyframe interpolation",
                     "renderer layer visibility/blend discrete hold",
+                    "Qt/No-GUI Timeline export option controls",
                 ],
                 "pending": ["blend_crossfade_interpolation", "visibility_fade_interpolation"],
                 "evidence": [

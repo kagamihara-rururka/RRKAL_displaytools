@@ -33,6 +33,7 @@ rrkal_displaytools.qt_panel_profile.v1
 | `pins` | array | optional | 科研標記清單。 |
 | `boundary_highlight` | object | optional | 疆域/領海/EEZ hover 強調遮罩控制。 |
 | `canvas_preview` | object | optional | 中央 Canvas Preview 模式、static renderer thumbnail 或 live renderer frame stream 參考。 |
+| `timeline_export` | object | optional | Timeline renderer export UI 狀態，只準備 renderer flags 與本機輸出路徑。 |
 
 ## `renderer`
 
@@ -223,6 +224,25 @@ Renderer overlay 接上後，Pin 不應是螢幕固定標籤，而應是 geodeti
 | `preview_frame_path` | string or null | live preview renderer frame 的預設本機路徑，目前為 `state/renderer_preview_frame.png`。 |
 | `preview_frame_interval_s` | number | live preview file stream 的建議寫入間隔秒數，目前 Qt 預設為 `0.75`。 |
 | `renderer_sync` | string | `state` 為 UI-only preview；`thumbnail` 為 static renderer output contract；`live_file_stream` 為 file-based live renderer frame stream。 |
+
+## `timeline_export`
+
+可選。此欄位保存 Timeline dock 的 renderer export options，讓研究者可在 profile / launch packet 中重現「是否在下次 renderer launch 輸出動畫」與輸出格式。它只準備 renderer CLI flags；實際 PNG/GIF/MP4 寫檔由 renderer 負責，資料 discovery/download/cache governance 仍屬 RRKAL。
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `schema` | string | 固定為 `rrkal_displaytools.timeline_export_options.v1`。 |
+| `enabled` | boolean | 是否在 renderer launch 時加入 Timeline export flags。 |
+| `export_dir` | string | 匯出資料夾，預設建議位於 `state/timeline_exports`。 |
+| `frame_count` | integer | 匯出 frame 數，必須大於 0。 |
+| `fps` | number | 匯出 FPS，必須大於 0。 |
+| `manifest_file` | string | Timeline animation manifest 路徑。 |
+| `gif_enabled` | boolean | 是否同時要求 `--timeline-export-gif`。 |
+| `gif_file` | string | GIF fallback 輸出路徑。 |
+| `mp4_enabled` | boolean | 是否同時要求 `--timeline-export-mp4`。 |
+| `mp4_file` | string | MP4 video 輸出路徑。 |
+| `applies` | array | 目前包含 Qt/No-GUI export controls 與 renderer Timeline export CLI。 |
+| `boundary` | string | 明確標示此欄位不負責 RRKAL data governance。 |
 
 ## Handoff rules
 

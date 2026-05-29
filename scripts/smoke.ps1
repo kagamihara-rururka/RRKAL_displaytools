@@ -139,6 +139,9 @@ if ($launchPacket.timeline_animation_export.applies -notcontains "timeline_gif_a
 if ($launchPacket.timeline_animation_export.applies -notcontains "timeline_mp4_video") {
     throw "Launch packet timeline animation export missing MP4 video capability"
 }
+if ($launchPacket.timeline_export_options.schema -ne "rrkal_displaytools.timeline_export_options.v1") {
+    throw "Launch packet timeline_export_options schema missing or invalid"
+}
 if ($launchPacket.timeline_camera_keyframe.schema -ne "rrkal_displaytools.timeline_camera_keyframe.v1") {
     throw "Launch packet timeline camera keyframe schema missing or invalid"
 }
@@ -225,6 +228,26 @@ if ($launchPacket.canvas_preview.preview_frame_path -ne "state/renderer_preview_
 }
 if ([double]$launchPacket.canvas_preview.preview_frame_interval_s -le 0) {
     throw "Launch packet canvas_preview preview_frame_interval_s missing or invalid"
+}
+$timelineExportDir = Join-Path $env:TEMP "rrkal_displaytools_smoke_timeline_export"
+$timelineExportGif = Join-Path $timelineExportDir "smoke.gif"
+$timelineExportMp4 = Join-Path $timelineExportDir "smoke.mp4"
+$timelineExportPacketText = & py -3 scripts\export_launch_packet.py --template fast_synthetic --timeline-export-dir $timelineExportDir --timeline-export-frames 3 --timeline-export-fps 12 --timeline-export-gif $timelineExportGif --timeline-export-mp4 $timelineExportMp4
+if ($LASTEXITCODE -ne 0) {
+    throw "Command failed: py -3 scripts\export_launch_packet.py --template fast_synthetic --timeline-export-dir"
+}
+$timelineExportPacket = $timelineExportPacketText | ConvertFrom-Json
+if ($timelineExportPacket.timeline_export_options.enabled -ne $true) {
+    throw "No-GUI timeline export options did not enable export"
+}
+if ($timelineExportPacket.timeline_export_options.mp4_enabled -ne $true) {
+    throw "No-GUI timeline export options did not enable MP4"
+}
+if ($timelineExportPacket.portable_command -notcontains "--timeline-export-dir") {
+    throw "No-GUI timeline export portable command missing --timeline-export-dir"
+}
+if ($timelineExportPacket.portable_command -notcontains "--timeline-export-mp4") {
+    throw "No-GUI timeline export portable command missing --timeline-export-mp4"
 }
 $timelineStateOut = Join-Path $env:TEMP "rrkal_displaytools_smoke_timeline_state.json"
 if (Test-Path $timelineStateOut) {

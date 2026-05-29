@@ -32,6 +32,10 @@ LAYER_RUNTIME_ACK_PATH = ROOT / "state" / "renderer_layer_runtime_ack.json"
 LAYER_PICK_STATE_PATH = ROOT / "state" / "renderer_layer_pick_state.json"
 TIMELINE_STATE_PATH = ROOT / "state" / "renderer_timeline_state.json"
 TIMELINE_ACK_PATH = ROOT / "state" / "renderer_timeline_ack.json"
+TIMELINE_EXPORT_DIR = ROOT / "state" / "timeline_exports"
+TIMELINE_EXPORT_MANIFEST_PATH = TIMELINE_EXPORT_DIR / "timeline_animation_manifest.json"
+TIMELINE_EXPORT_GIF_PATH = TIMELINE_EXPORT_DIR / "timeline_animation.gif"
+TIMELINE_EXPORT_MP4_PATH = TIMELINE_EXPORT_DIR / "timeline_animation.mp4"
 
 
 def profile_template_packet() -> dict[str, object]:
@@ -289,6 +293,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.timeline_camera_yaw_spin: QtWidgets.QDoubleSpinBox | None = None
         self.timeline_camera_pitch_spin: QtWidgets.QDoubleSpinBox | None = None
         self.timeline_camera_zoom_spin: QtWidgets.QDoubleSpinBox | None = None
+        self.timeline_export_enabled_check: QtWidgets.QCheckBox | None = None
+        self.timeline_export_dir_edit: QtWidgets.QLineEdit | None = None
+        self.timeline_export_frames_spin: QtWidgets.QSpinBox | None = None
+        self.timeline_export_fps_spin: QtWidgets.QDoubleSpinBox | None = None
+        self.timeline_export_gif_check: QtWidgets.QCheckBox | None = None
+        self.timeline_export_mp4_check: QtWidgets.QCheckBox | None = None
         self.timeline_ack_label: QtWidgets.QLabel | None = None
         self.timeline_ack_mtime_ns: int | None = TIMELINE_ACK_PATH.stat().st_mtime_ns if TIMELINE_ACK_PATH.exists() else None
         self.timeline_ack_payload: dict[str, object] | None = None
@@ -1048,7 +1058,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         timeline_layout = QtWidgets.QVBoxLayout(timeline)
         timeline_layout.setContentsMargins(10, 10, 10, 10)
         timeline_note = QtWidgets.QLabel(
-            "Timeline/keyframes：Qt storage、renderer step playback、ocean material interpolation、PNG export 已接上；camera keyframe 先做離散套用。"
+            "Timeline/keyframes：Qt storage、renderer step playback、ocean/camera/layer interpolation、PNG/GIF/MP4 export 已接上；blend/visibility fade 仍待做。"
         )
         timeline_note.setWordWrap(True)
         timeline_layout.addWidget(timeline_note)
@@ -1087,6 +1097,46 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         camera_form.addRow("Pitch", self.timeline_camera_pitch_spin)
         camera_form.addRow("Zoom", self.timeline_camera_zoom_spin)
         timeline_layout.addWidget(camera_group)
+        export_group = QtWidgets.QGroupBox("Renderer export")
+        export_form = QtWidgets.QFormLayout(export_group)
+        self.timeline_export_enabled_check = QtWidgets.QCheckBox("Export on renderer launch")
+        self.timeline_export_enabled_check.setToolTip(
+            "When enabled, the next renderer launch writes Timeline PNG frames and optional GIF/MP4 into the selected state path."
+        )
+        self.timeline_export_dir_edit = QtWidgets.QLineEdit(str(TIMELINE_EXPORT_DIR))
+        self.timeline_export_dir_edit.setToolTip("Renderer export directory; kept under state/ by default and not committed.")
+        self.timeline_export_frames_spin = QtWidgets.QSpinBox()
+        self.timeline_export_frames_spin.setRange(1, 9999)
+        self.timeline_export_frames_spin.setValue(24)
+        self.timeline_export_fps_spin = QtWidgets.QDoubleSpinBox()
+        self.timeline_export_fps_spin.setRange(1.0, 240.0)
+        self.timeline_export_fps_spin.setDecimals(2)
+        self.timeline_export_fps_spin.setValue(24.0)
+        self.timeline_export_gif_check = QtWidgets.QCheckBox("GIF fallback")
+        self.timeline_export_gif_check.setChecked(True)
+        self.timeline_export_mp4_check = QtWidgets.QCheckBox("MP4 video")
+        self.timeline_export_mp4_check.setChecked(False)
+        for widget in (
+            self.timeline_export_enabled_check,
+            self.timeline_export_dir_edit,
+            self.timeline_export_frames_spin,
+            self.timeline_export_fps_spin,
+            self.timeline_export_gif_check,
+            self.timeline_export_mp4_check,
+        ):
+            if isinstance(widget, QtWidgets.QLineEdit):
+                widget.textChanged.connect(lambda _value, self=self: self.refresh_timeline_state_label())
+            elif isinstance(widget, QtWidgets.QAbstractSpinBox):
+                widget.valueChanged.connect(lambda _value, self=self: self.refresh_timeline_state_label())
+            else:
+                widget.stateChanged.connect(lambda _value, self=self: self.refresh_timeline_state_label())
+        export_form.addRow(self.timeline_export_enabled_check)
+        export_form.addRow("Directory", self.timeline_export_dir_edit)
+        export_form.addRow("Frames", self.timeline_export_frames_spin)
+        export_form.addRow("FPS", self.timeline_export_fps_spin)
+        export_form.addRow("Containers", self.timeline_export_gif_check)
+        export_form.addRow("", self.timeline_export_mp4_check)
+        timeline_layout.addWidget(export_group)
         self.timeline_state_label = QtWidgets.QLabel(
             "Timeline status: construction; planned targets include ocean/material and camera states."
         )
@@ -1333,6 +1383,24 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 str(TIMELINE_ACK_PATH),
             ]
         )
+        timeline_export = self.collect_timeline_export_options()
+        if timeline_export.get("enabled") is True:
+            cmd.extend(
+                [
+                    "--timeline-export-dir",
+                    str(timeline_export["export_dir"]),
+                    "--timeline-export-frames",
+                    str(timeline_export["frame_count"]),
+                    "--timeline-export-fps",
+                    str(timeline_export["fps"]),
+                    "--timeline-export-manifest",
+                    str(timeline_export["manifest_file"]),
+                ]
+            )
+            if timeline_export.get("gif_enabled") is True:
+                cmd.extend(["--timeline-export-gif", str(timeline_export["gif_file"])])
+            if timeline_export.get("mp4_enabled") is True:
+                cmd.extend(["--timeline-export-mp4", str(timeline_export["mp4_file"])])
         pins = self.collect_research_pins()
         if pins:
             cmd.extend(
@@ -1382,6 +1450,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "pins": self.collect_research_pins(),
             "boundary_highlight": self.collect_boundary_highlight_state(),
             "canvas_preview": self.collect_canvas_preview_state(),
+            "timeline_export": self.collect_timeline_export_options(),
             "timeline_keyframes": self.timeline_keyframes,
         }
 
@@ -1420,6 +1489,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "timeline_step_playback": self.collect_timeline_step_playback_state(),
             "timeline_ocean_material_interpolation": self.collect_timeline_ocean_material_interpolation_state(),
             "timeline_animation_export": self.collect_timeline_animation_export_state(),
+            "timeline_export_options": self.collect_timeline_export_options(),
             "timeline_camera_keyframe": self.collect_timeline_camera_keyframe_state(),
             "timeline_camera_interpolation": self.collect_timeline_camera_interpolation_state(),
             "timeline_layer_opacity_interpolation": self.collect_timeline_layer_opacity_interpolation_state(),
@@ -2104,6 +2174,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         pins = profile.get("pins")
         boundary_highlight = profile.get("boundary_highlight")
         canvas_preview = profile.get("canvas_preview")
+        timeline_export = profile.get("timeline_export")
         timeline_keyframes = profile.get("timeline_keyframes")
         if isinstance(renderer, dict):
             self._set_combo(self.style_combo, str(renderer.get("style_profile", self.style_combo.currentText())))
@@ -2152,6 +2223,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.refresh_boundary_highlight_status()
         if isinstance(canvas_preview, dict):
             self.apply_canvas_preview_state(canvas_preview)
+        if isinstance(timeline_export, dict):
+            self.apply_timeline_export_options(timeline_export)
         if isinstance(timeline_keyframes, list):
             self.apply_timeline_keyframes(timeline_keyframes)
         self.selected_pin_id = selected_pin_id if isinstance(selected_pin_id, str) else None
@@ -3034,6 +3107,51 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "boundary": "Qt exports the interpolation contract; renderer owns runtime interpolation.",
         }
 
+    def collect_timeline_export_options(self) -> dict[str, object]:
+        export_dir_text = self.timeline_export_dir_edit.text().strip() if self.timeline_export_dir_edit is not None else ""
+        export_dir = Path(export_dir_text) if export_dir_text else TIMELINE_EXPORT_DIR
+        frames = self.timeline_export_frames_spin.value() if self.timeline_export_frames_spin is not None else 24
+        fps = self.timeline_export_fps_spin.value() if self.timeline_export_fps_spin is not None else 24.0
+        gif_enabled = self.timeline_export_gif_check.isChecked() if self.timeline_export_gif_check is not None else True
+        mp4_enabled = self.timeline_export_mp4_check.isChecked() if self.timeline_export_mp4_check is not None else False
+        return {
+            "schema": "rrkal_displaytools.timeline_export_options.v1",
+            "enabled": bool(self.timeline_export_enabled_check.isChecked()) if self.timeline_export_enabled_check is not None else False,
+            "export_dir": str(export_dir),
+            "frame_count": int(frames),
+            "fps": float(fps),
+            "manifest_file": str(export_dir / TIMELINE_EXPORT_MANIFEST_PATH.name),
+            "gif_enabled": bool(gif_enabled),
+            "gif_file": str(export_dir / TIMELINE_EXPORT_GIF_PATH.name),
+            "mp4_enabled": bool(mp4_enabled),
+            "mp4_file": str(export_dir / TIMELINE_EXPORT_MP4_PATH.name),
+            "applies": ["qt_timeline_export_controls", "renderer_timeline_export_cli"],
+            "boundary": "Qt only prepares renderer Timeline export flags and suggested state paths; renderer writes PNG/GIF/MP4 artifacts, and RRKAL remains responsible for data governance.",
+        }
+
+    def apply_timeline_export_options(self, state: dict[str, object]) -> None:
+        if self.timeline_export_enabled_check is not None:
+            self.timeline_export_enabled_check.setChecked(bool(state.get("enabled", False)))
+        if self.timeline_export_dir_edit is not None:
+            export_dir = state.get("export_dir")
+            if isinstance(export_dir, str) and export_dir.strip():
+                self.timeline_export_dir_edit.setText(export_dir)
+        if self.timeline_export_frames_spin is not None:
+            try:
+                self.timeline_export_frames_spin.setValue(max(1, int(state.get("frame_count", 24))))
+            except (TypeError, ValueError):
+                pass
+        if self.timeline_export_fps_spin is not None:
+            try:
+                self.timeline_export_fps_spin.setValue(max(1.0, float(state.get("fps", 24.0))))
+            except (TypeError, ValueError):
+                pass
+        if self.timeline_export_gif_check is not None:
+            self.timeline_export_gif_check.setChecked(bool(state.get("gif_enabled", True)))
+        if self.timeline_export_mp4_check is not None:
+            self.timeline_export_mp4_check.setChecked(bool(state.get("mp4_enabled", False)))
+        self.refresh_timeline_state_label()
+
     def collect_timeline_animation_export_state(self) -> dict[str, object]:
         return {
             "schema": "rrkal_displaytools.timeline_animation_export.v1",
@@ -3069,13 +3187,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "step_playback": self.collect_timeline_step_playback_state(),
             "ocean_material_interpolation": self.collect_timeline_ocean_material_interpolation_state(),
             "animation_export": self.collect_timeline_animation_export_state(),
+            "export_options": self.collect_timeline_export_options(),
             "camera_keyframe": self.collect_timeline_camera_keyframe_state(),
             "camera_interpolation": self.collect_timeline_camera_interpolation_state(),
             "layer_opacity_interpolation": self.collect_timeline_layer_opacity_interpolation_state(),
             "layer_discrete_hold": self.collect_timeline_layer_discrete_hold_state(),
             "timeline_keyframes": [dict(keyframe) for keyframe in self.timeline_keyframes],
             "source": "rrkal_displaytools_qt_panel",
-            "boundary": "Renderer receives Timeline keyframes for discrete step playback, camera apply, material interpolation, layer opacity interpolation, and PNG/GIF export.",
+            "boundary": "Renderer receives Timeline keyframes for discrete step playback, camera apply, material interpolation, layer opacity interpolation, and optional PNG/GIF/MP4 export.",
         }
 
     def write_timeline_runtime_state(self) -> None:
@@ -3167,9 +3286,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             return
         playback = "playing" if self.timeline_playback_active else "idle"
         camera = self.collect_timeline_camera_state()
+        export_options = self.collect_timeline_export_options()
+        export_state = "enabled" if export_options.get("enabled") is True else "disabled"
         self.timeline_state_label.setText(
             f"Timeline status: {len(self.timeline_keyframes)} UI keyframes stored; "
             f"UI playback={playback}; camera yaw={camera['yaw_degrees']:.1f}, pitch={camera['pitch_degrees']:.1f}, zoom={camera['zoom']:.2f}; "
+            f"export={export_state}, frames={export_options['frame_count']}, fps={export_options['fps']:.1f}; "
             f"renderer ack via {TIMELINE_ACK_PATH.name}."
         )
         self.write_timeline_runtime_state()
