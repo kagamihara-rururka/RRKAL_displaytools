@@ -105,6 +105,9 @@ if ($handoff.schema -ne "rrkal_displaytools.handoff_inspection.v1") {
 if ($handoff.launch_packet_contracts.session_journal -ne "rrkal_displaytools.session_journal.v1") {
     throw "Handoff inspection session_journal contract missing or invalid"
 }
+if ($handoff.launch_packet_contracts.timeline_state -ne "rrkal_displaytools.timeline_state.v1") {
+    throw "Handoff inspection timeline_state contract missing or invalid"
+}
 Invoke-CheckedNative py @("-3", "taichi_global_bathymetry.py", "--print-layer-manifest") | Out-Null
 Invoke-CheckedNative py @("-3", "rrkal_displaytools_qt_panel.py", "--list-templates") | Out-Null
 

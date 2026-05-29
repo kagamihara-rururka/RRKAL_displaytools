@@ -16366,6 +16366,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "active_layer_diagnostics",
                 "layer_undo",
                 "session_journal",
+                "timeline_state",
                 "boundary_highlight.identity_status",
             ],
             "applies": [

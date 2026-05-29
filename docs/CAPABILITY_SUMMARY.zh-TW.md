@@ -67,7 +67,7 @@
 - `py -3 scripts\export_launch_packet.py --template fast_synthetic`
 - `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_handoff.ps1`
 
-這些入口給腳本查詢 renderer 能力、closed-loop status、圖層 manifest、可用 templates、profile schema、產生 launch packet，以及檢查跨機器 handoff summary。Renderer capabilities 內含 `closed_loop_status`、`preview_frame_stream`、`active_layer_diagnostics` 與 `ui_handoff_contracts` contract，也可用 `--print-closed-loop-status` 只輸出目前 closed、partial 與 pending 的功能邊界；closed-loop status 會列出 `diagnostics_handoff_contracts`。
+這些入口給腳本查詢 renderer 能力、closed-loop status、圖層 manifest、可用 templates、profile schema、產生 launch packet，以及檢查跨機器 handoff summary。Renderer capabilities 內含 `closed_loop_status`、`preview_frame_stream`、`active_layer_diagnostics` 與 `ui_handoff_contracts` contract；`ui_handoff_contracts` 會列出 `timeline_state`。也可用 `--print-closed-loop-status` 只輸出目前 closed、partial 與 pending 的功能邊界；closed-loop status 會列出 `diagnostics_handoff_contracts`。
 
 ### Launch packets and handoff
 
@@ -105,7 +105,7 @@
   - Closed-loop status `diagnostics_handoff_contracts` gate。
   - Closed-loop status `layer_stack_undo_snapshots` gate。
   - Closed-loop status `session_journal_handoff` gate。
-  - Handoff inspection `session_journal` contract gate。
+  - Handoff inspection `session_journal` / `timeline_state` contract gate。
   - No-GUI template listing。
   - PowerShell script parse。
 

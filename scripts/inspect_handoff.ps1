@@ -38,6 +38,7 @@ $summary = [ordered]@{
         active_layer_diagnostics = $launchPacket.active_layer_diagnostics.schema
         layer_undo = $launchPacket.layer_undo.schema
         session_journal = $launchPacket.session_journal.schema
+        timeline_state = $launchPacket.timeline_state.schema
         boundary_identity_status = $launchPacket.boundary_highlight.identity_status.schema
     }
     rrkal_boundary = $launchPacket.rrkal_boundary

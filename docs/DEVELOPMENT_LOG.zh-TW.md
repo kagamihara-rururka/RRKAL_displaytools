@@ -1,5 +1,18 @@
 # Development Log
 
+## 2026-05-29 - Timeline handoff discovery
+
+Scope:
+- Renderer `ui_handoff_contracts` now lists `timeline_state`.
+- `scripts\inspect_handoff.ps1` now reports launch packet `timeline_state`.
+- Smoke now gates the handoff inspection `timeline_state` contract.
+
+Positioning:
+- This keeps capability discovery and clone-time handoff inspection aligned with the new Timeline UI status contract.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Timeline UI status contract
 
 Scope:
