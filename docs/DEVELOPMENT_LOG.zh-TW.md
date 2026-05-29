@@ -600,3 +600,16 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Qt active layer properties inspector
+
+Scope:
+- Extended the Qt `Properties` dock with an active-layer inspector.
+- The inspector shows selected-layer visibility, lock, opacity, and blend mode.
+- Added Properties actions to toggle selected-layer visibility and reset selected-layer UI-only state.
+
+Positioning:
+- This connects the Layers and Properties panels into one operator loop, preparing the selected-layer target for brush, mask, and renderer-sync work.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

@@ -112,6 +112,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_opacity: dict[str, QtWidgets.QSlider] = {}
         self.layer_blends: dict[str, QtWidgets.QComboBox] = {}
         self.layer_rows: dict[str, QtWidgets.QWidget] = {}
+        self.layer_property_labels: dict[str, QtWidgets.QLabel] = {}
         self.selected_layer_key: str | None = None
         self.docks: dict[str, QtWidgets.QDockWidget] = {}
         self.template_paths: list[Path] = []
@@ -184,6 +185,29 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         material_form.addRow("Wave strength", self.wave_edit)
         material_form.addRow("Roughness", self.roughness_edit)
         material_form.addRow("Foam", self.foam_edit)
+        layer_inspector_note = QtWidgets.QLabel("🚧 Active layer inspector：先同步 UI state，renderer sync 下一步接。")
+        layer_inspector_note.setWordWrap(True)
+        self.layer_property_labels = {
+            "name": QtWidgets.QLabel("尚未選取"),
+            "visible": QtWidgets.QLabel("-"),
+            "locked": QtWidgets.QLabel("-"),
+            "opacity": QtWidgets.QLabel("-"),
+            "blend": QtWidgets.QLabel("-"),
+        }
+        material_form.addRow("Layer inspector", layer_inspector_note)
+        material_form.addRow("Active layer", self.layer_property_labels["name"])
+        material_form.addRow("Visible", self.layer_property_labels["visible"])
+        material_form.addRow("Locked", self.layer_property_labels["locked"])
+        material_form.addRow("Opacity", self.layer_property_labels["opacity"])
+        material_form.addRow("Blend mode", self.layer_property_labels["blend"])
+        layer_property_actions = QtWidgets.QHBoxLayout()
+        toggle_selected_visibility = QtWidgets.QPushButton("切換選取可見")
+        reset_selected_state = QtWidgets.QPushButton("重設選取 UI 狀態")
+        toggle_selected_visibility.clicked.connect(self.toggle_selected_layer_visibility)
+        reset_selected_state.clicked.connect(self.reset_selected_layer_controls)
+        layer_property_actions.addWidget(toggle_selected_visibility)
+        layer_property_actions.addWidget(reset_selected_state)
+        material_form.addRow(layer_property_actions)
         properties_dock = QtWidgets.QDockWidget("Properties", self)
         properties_dock.setObjectName("propertiesDock")
         properties_dock.setAllowedAreas(
@@ -775,6 +799,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"可見圖層 {visible}/{len(LAYER_LABELS)}；鎖定 {locked}；"
             f"非預設 opacity/blend {non_default}。🚧 Lock/Opacity/Blend 下一步接 renderer sync。"
         )
+        self.refresh_layer_properties()
 
     def select_layer(self, key: str) -> None:
         if key not in self.layer_rows:
@@ -790,6 +815,43 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.refresh_layer_stack_status()
         if hasattr(self, "status"):
             self.status.setText(f"已選取圖層：{label}")
+
+    def refresh_layer_properties(self) -> None:
+        if not self.layer_property_labels:
+            return
+        key = self.selected_layer_key
+        if key not in self.checks:
+            for label in self.layer_property_labels.values():
+                label.setText("-")
+            self.layer_property_labels["name"].setText("尚未選取")
+            return
+        label = next((text for layer_key, text in LAYER_LABELS if layer_key == key), key)
+        self.layer_property_labels["name"].setText(f"{label} / {key}")
+        self.layer_property_labels["visible"].setText("On" if self.checks[key].isChecked() else "Off")
+        self.layer_property_labels["locked"].setText("Locked" if self.layer_locks[key].isChecked() else "Unlocked")
+        self.layer_property_labels["opacity"].setText(f"{self.layer_opacity[key].value()}%")
+        self.layer_property_labels["blend"].setText(self.layer_blends[key].currentText())
+
+    def toggle_selected_layer_visibility(self) -> None:
+        key = self.selected_layer_key
+        if key not in self.checks:
+            self.status.setText("尚未選取圖層")
+            return
+        self.checks[key].setChecked(not self.checks[key].isChecked())
+        self.refresh_command_preview()
+        self.refresh_layer_stack_status()
+
+    def reset_selected_layer_controls(self) -> None:
+        key = self.selected_layer_key
+        if key not in self.layer_locks:
+            self.status.setText("尚未選取圖層")
+            return
+        self.layer_locks[key].setChecked(False)
+        self.layer_opacity[key].setValue(100)
+        self.layer_blends[key].setCurrentText("Normal")
+        self.refresh_layer_stack_status()
+        label = next((text for layer_key, text in LAYER_LABELS if layer_key == key), key)
+        self.status.setText(f"已重設選取圖層 UI 狀態：{label}")
 
     def reset_layer_stack_controls(self) -> None:
         for key, _label in LAYER_LABELS:
