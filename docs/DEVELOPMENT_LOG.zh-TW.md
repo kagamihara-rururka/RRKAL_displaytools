@@ -908,3 +908,18 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Layer runtime state bridge
+
+Scope:
+- Added `state/renderer_layer_runtime_state.json` as a Qt-authored layer runtime bridge.
+- The bridge records selected layer, visible layers, locked layers, opacity, blend mode, per-layer visibility, and Solo visibility snapshot state.
+- Qt writes the bridge whenever the layer stack status refreshes.
+- Launch packets and research provenance now include the layer runtime state file path.
+
+Positioning:
+- This creates the stable handoff needed for renderer-backed live layer sync without changing the renderer loop in this step.
+- The next step is teaching the renderer to watch/read this bridge and apply visibility changes without restart.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

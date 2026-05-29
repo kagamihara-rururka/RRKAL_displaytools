@@ -22,6 +22,7 @@ from pin_projection import pin_projection_contract_packet
 ROOT = Path(__file__).resolve().parent
 PROFILE_TEMPLATE_DIR = ROOT / "profiles"
 PIN_PICK_STATE_PATH = ROOT / "state" / "renderer_pin_pick_state.json"
+LAYER_RUNTIME_STATE_PATH = ROOT / "state" / "renderer_layer_runtime_state.json"
 
 
 def profile_template_packet() -> dict[str, object]:
@@ -921,6 +922,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "tool_state": self.collect_tool_state(),
             "pins": self.collect_research_pins(),
             "pin_pick_state_file": str(PIN_PICK_STATE_PATH),
+            "layer_runtime_state_file": str(LAYER_RUNTIME_STATE_PATH),
             "command": self.build_command(),
             "command_line": subprocess.list2cmdline(self.build_command()),
             "portable_command": self.build_portable_command(),
@@ -938,6 +940,37 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "renderer_sync": "planned",
             }
         return stack
+
+    def collect_layer_runtime_state(self) -> dict[str, object]:
+        layers = self.collect_layer_stack_ui()
+        for key, _label in LAYER_LABELS:
+            if key in self.checks and key in layers:
+                layers[key]["visible"] = self.checks[key].isChecked()
+        visible_layers = [key for key, _label in LAYER_LABELS if key in self.checks and self.checks[key].isChecked()]
+        locked_layers = [key for key, _label in LAYER_LABELS if key in self.layer_locks and self.layer_locks[key].isChecked()]
+        return {
+            "schema": "rrkal_displaytools.layer_runtime_state.v1",
+            "updated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "source": "rrkal_displaytools_qt_panel",
+            "selected_layer": self.selected_layer_key,
+            "visible_layers": visible_layers,
+            "locked_layers": locked_layers,
+            "layer_visibility_snapshot_active": self.layer_visibility_snapshot is not None,
+            "layer_visibility_snapshot": self.layer_visibility_snapshot,
+            "layers": layers,
+        }
+
+    def write_layer_runtime_state(self) -> None:
+        if not self.checks:
+            return
+        try:
+            LAYER_RUNTIME_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+            LAYER_RUNTIME_STATE_PATH.write_text(
+                json.dumps(self.collect_layer_runtime_state(), ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+        except OSError as exc:
+            print(f"Unable to write layer runtime state: {exc}")
 
     def current_pin_label_mode(self) -> str:
         if self.pin_label_mode_combo is None:
@@ -1100,6 +1133,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"solo snapshot={'active' if self.layer_visibility_snapshot is not None else 'none'}。"
             "🚧 Lock/Opacity/Blend 下一步接 renderer sync。"
         )
+        self.write_layer_runtime_state()
         self.refresh_layer_properties()
         self.refresh_canvas_preview()
 
@@ -1515,6 +1549,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "pins": self.collect_research_pins(),
             "pin_pick_state_file": str(PIN_PICK_STATE_PATH),
             "pin_pick_state_last_event": self.pin_pick_state_last_event,
+            "layer_runtime_state_file": str(LAYER_RUNTIME_STATE_PATH),
             "canvas_select_hit_targets": self.canvas_layer_hit_keys(),
             "pin_overlay_boundary": "Pins are geodetic annotations; renderer sync must rotate them with the globe and apply horizon/depth occlusion.",
             "pin_projection_contract": pin_projection_contract_packet(),
