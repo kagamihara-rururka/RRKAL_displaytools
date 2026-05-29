@@ -208,9 +208,22 @@ def layer_filter_packet(profile: dict[str, object]) -> dict[str, object]:
     payload = profile.get("layer_filter")
     if isinstance(payload, dict):
         query = str(payload.get("query", ""))
+        preset = str(payload.get("preset", "custom"))
     else:
         query = ""
+        preset = "all"
+    preset_queries = {
+        "all": "",
+        "hydrology": "hydro",
+        "maritime": "maritime",
+        "traffic": "traffic",
+        "visual_aids": "aids",
+    }
+    if not query and preset in preset_queries:
+        query = preset_queries[preset]
     aliases = {
+        "show_grid": "visual aids grid graticule",
+        "show_stars": "visual aids stars background",
         "lake_layer": "hydro hydrology water lake lakes",
         "river_layer": "hydro hydrology water river rivers",
         "border_layer": "boundary border country territory sovereign",
@@ -219,6 +232,9 @@ def layer_filter_packet(profile: dict[str, object]) -> dict[str, object]:
         "high_seas_layer": "boundary maritime high seas ocean",
         "aircraft_layer": "traffic aircraft adsb ads-b",
         "pin_layer": "pin marker annotation research",
+        "ocean_material": "ocean material sea surface",
+        "terrain_contours": "visual aids terrain contours",
+        "scale_bar": "visual aids scale bar",
         "vehicle_icons": "traffic vehicle ais vessel ship",
     }
     query_parts = query.lower().split()
@@ -233,6 +249,8 @@ def layer_filter_packet(profile: dict[str, object]) -> dict[str, object]:
     return {
         "schema": "rrkal_displaytools.layer_filter.v1",
         "mode": "no_gui_export_status",
+        "preset": preset if preset else "all",
+        "available_presets": ["all", "hydrology", "maritime", "traffic", "visual_aids", "custom"],
         "query": query,
         "matched_layers": matched_layers,
         "matched_count": len(matched_layers),

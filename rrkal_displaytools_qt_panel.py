@@ -268,6 +268,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_filter_edit: QtWidgets.QLineEdit | None = None
         self.layer_filter_status_label: QtWidgets.QLabel | None = None
         self.layer_filter_text = ""
+        self.layer_filter_preset = "all"
         self.history_list: QtWidgets.QListWidget | None = None
         self.document_undo_label: QtWidgets.QLabel | None = None
         self.document_undo_stack: list[dict[str, object]] = []
@@ -536,10 +537,22 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_filter_edit.setPlaceholderText("Search layer key/name, e.g. hydro, eez, pin")
         self.layer_filter_edit.textChanged.connect(self.set_layer_filter_text)
         clear_layer_filter = QtWidgets.QPushButton("Clear")
-        clear_layer_filter.clicked.connect(lambda _checked=False: self.layer_filter_edit.clear() if self.layer_filter_edit is not None else None)
+        clear_layer_filter.clicked.connect(lambda _checked=False: self.apply_layer_filter_preset("all"))
         layer_filter_row.addWidget(self.layer_filter_edit)
         layer_filter_row.addWidget(clear_layer_filter)
         layers_layout.addLayout(layer_filter_row)
+        layer_focus_row = QtWidgets.QHBoxLayout()
+        for preset_id, label in (
+            ("hydrology", "Hydro"),
+            ("maritime", "Maritime"),
+            ("traffic", "Traffic"),
+            ("visual_aids", "Aids"),
+            ("all", "All"),
+        ):
+            button = QtWidgets.QPushButton(label)
+            button.clicked.connect(lambda _checked=False, preset=preset_id: self.apply_layer_filter_preset(preset))
+            layer_focus_row.addWidget(button)
+        layers_layout.addLayout(layer_focus_row)
         self.layer_filter_status_label = QtWidgets.QLabel("Layer filter: all layers")
         self.layer_filter_status_label.setWordWrap(True)
         layers_layout.addWidget(self.layer_filter_status_label)
@@ -2188,6 +2201,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if not query:
             return True
         aliases = {
+            "show_grid": "visual aids grid graticule",
+            "show_stars": "visual aids stars background",
             "lake_layer": "hydro hydrology water lake lakes",
             "river_layer": "hydro hydrology water river rivers",
             "border_layer": "boundary border country territory sovereign",
@@ -2196,16 +2211,30 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "high_seas_layer": "boundary maritime high seas ocean",
             "aircraft_layer": "traffic aircraft adsb ads-b",
             "pin_layer": "pin marker annotation research",
+            "ocean_material": "ocean material sea surface",
+            "terrain_contours": "visual aids terrain contours",
+            "scale_bar": "visual aids scale bar",
             "vehicle_icons": "traffic vehicle ais vessel ship",
         }
         haystack = f"{key} {label} {BOOL_FLAGS.get(key, '')} {aliases.get(key, '')}".lower()
         return all(part in haystack for part in query.split())
+
+    def layer_filter_preset_query(self, preset: str) -> str:
+        return {
+            "all": "",
+            "hydrology": "hydro",
+            "maritime": "maritime",
+            "traffic": "traffic",
+            "visual_aids": "aids",
+        }.get(preset, self.layer_filter_text)
 
     def collect_layer_filter_state(self) -> dict[str, object]:
         matched = [key for key, label in LAYER_LABELS if self.layer_filter_matches(key, label)]
         return {
             "schema": "rrkal_displaytools.layer_filter.v1",
             "mode": "ui_row_filter",
+            "preset": self.layer_filter_preset,
+            "available_presets": ["all", "hydrology", "maritime", "traffic", "visual_aids", "custom"],
             "query": self.layer_filter_text,
             "matched_layers": matched,
             "matched_count": len(matched),
@@ -2215,6 +2244,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
 
     def apply_layer_filter_state(self, state: dict[str, object]) -> None:
         query = state.get("query", "")
+        preset = state.get("preset", "custom")
+        self.layer_filter_preset = preset if isinstance(preset, str) else "custom"
         self.layer_filter_text = str(query) if isinstance(query, str) else ""
         if self.layer_filter_edit is not None:
             self.layer_filter_edit.blockSignals(True)
@@ -2225,6 +2256,17 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     @QtCore.pyqtSlot(str)
     def set_layer_filter_text(self, text: str) -> None:
         self.layer_filter_text = text.strip()
+        self.layer_filter_preset = "custom" if self.layer_filter_text else "all"
+        self.refresh_layer_filter()
+        self.refresh_research_provenance()
+
+    def apply_layer_filter_preset(self, preset: str) -> None:
+        self.layer_filter_preset = preset if preset in {"all", "hydrology", "maritime", "traffic", "visual_aids"} else "custom"
+        self.layer_filter_text = self.layer_filter_preset_query(self.layer_filter_preset)
+        if self.layer_filter_edit is not None:
+            self.layer_filter_edit.blockSignals(True)
+            self.layer_filter_edit.setText(self.layer_filter_text)
+            self.layer_filter_edit.blockSignals(False)
         self.refresh_layer_filter()
         self.refresh_research_provenance()
 
@@ -2241,7 +2283,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if self.layer_filter_status_label is not None:
             query = self.layer_filter_text or "all"
             self.layer_filter_status_label.setText(
-                f"Layer filter: query={query}; matched={matched_count}/{len(LAYER_LABELS)}; renderer state unchanged"
+                f"Layer filter: preset={self.layer_filter_preset}, query={query}; "
+                f"matched={matched_count}/{len(LAYER_LABELS)}; renderer state unchanged"
             )
 
     def collect_layer_undo_snapshot(self) -> dict[str, object]:

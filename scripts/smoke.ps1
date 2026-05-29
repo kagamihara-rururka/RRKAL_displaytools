@@ -34,6 +34,12 @@ if ($launchPacket.active_layer_diagnostics.schema -ne "rrkal_displaytools.active
 if ($launchPacket.layer_filter.schema -ne "rrkal_displaytools.layer_filter.v1") {
     throw "Launch packet layer_filter schema missing or invalid"
 }
+if ($launchPacket.layer_filter.available_presets -notcontains "hydrology") {
+    throw "Launch packet layer_filter hydrology preset missing"
+}
+if ($launchPacket.layer_filter.available_presets -notcontains "visual_aids") {
+    throw "Launch packet layer_filter visual_aids preset missing"
+}
 if ($launchPacket.layer_undo.schema -ne "rrkal_displaytools.layer_stack_undo.v1") {
     throw "Launch packet layer_undo schema missing or invalid"
 }

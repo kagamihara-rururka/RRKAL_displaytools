@@ -117,6 +117,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                 "id": "qt_layer_filter",
                 "applies": [
                     "Layers panel search/filter box",
+                    "Hydrology/Maritime/Traffic/Aids/All focus preset buttons",
                     "profile layer_filter state",
                     "launch packet layer_filter contract",
                     "provenance layer_filter contract",
@@ -125,6 +126,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                 "pending": [],
                 "evidence": [
                     "rrkal_displaytools.layer_filter.v1",
+                    "layer_filter.available_presets",
                     "Qt Layers panel filter status",
                 ],
             },

@@ -101,6 +101,8 @@ rrkal_displaytools.qt_panel_profile.v1
 | --- | --- | --- |
 | `schema` | string | 固定為 `rrkal_displaytools.layer_filter.v1`。 |
 | `mode` | string | 目前為 `ui_row_filter` 或 no-GUI export 的 `no_gui_export_status`。 |
+| `preset` | string | `all`、`hydrology`、`maritime`、`traffic`、`visual_aids` 或 `custom`。 |
+| `available_presets` | array | Qt 目前提供的 focus preset 清單。 |
 | `query` | string | 使用者輸入的搜尋字串。 |
 | `matched_layers` | array | 符合 query 的 layer key 清單。 |
 | `matched_count` | integer | 符合的 row 數。 |

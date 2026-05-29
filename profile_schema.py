@@ -131,6 +131,8 @@ def profile_payload_errors(profile: dict[str, object]) -> list[str]:
             allowed_fields = {
                 "schema",
                 "mode",
+                "preset",
+                "available_presets",
                 "query",
                 "matched_layers",
                 "matched_count",
@@ -141,6 +143,13 @@ def profile_payload_errors(profile: dict[str, object]) -> list[str]:
                 errors.append(f"unknown layer_filter field: {field}")
             if layer_filter.get("schema") != LAYER_FILTER_SCHEMA_ID:
                 errors.append(f"layer_filter.schema must be {LAYER_FILTER_SCHEMA_ID}")
+            preset = layer_filter.get("preset")
+            if preset is not None and not isinstance(preset, str):
+                errors.append("layer_filter.preset must be a string")
+            available_presets = layer_filter.get("available_presets")
+            if available_presets is not None:
+                if not isinstance(available_presets, list) or any(not isinstance(item, str) for item in available_presets):
+                    errors.append("layer_filter.available_presets must be a list of strings")
             query = layer_filter.get("query")
             if not isinstance(query, str):
                 errors.append("layer_filter.query must be a string")
@@ -411,7 +420,18 @@ def profile_schema_packet() -> dict[str, object]:
         "required_layers": sorted(REQUIRED_PROFILE_LAYERS),
         "optional_layer_filter": {
             "schema": LAYER_FILTER_SCHEMA_ID,
-            "fields": ["schema", "mode", "query", "matched_layers", "matched_count", "total_layers", "boundary"],
+            "fields": [
+                "schema",
+                "mode",
+                "preset",
+                "available_presets",
+                "query",
+                "matched_layers",
+                "matched_count",
+                "total_layers",
+                "boundary",
+            ],
+            "presets": ["all", "hydrology", "maritime", "traffic", "visual_aids", "custom"],
             "boundary": "Qt Layers row filter only; renderer layer state is unchanged.",
         },
         "optional_layer_stack_ui": {

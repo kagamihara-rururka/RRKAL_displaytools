@@ -1,5 +1,19 @@
 # Development Log
 
+## 2026-05-29 - Layer filter focus presets
+
+Scope:
+- Layers panel row filter now has Hydro, Maritime, Traffic, Aids, and All focus preset buttons.
+- `layer_filter` state now records `preset` and `available_presets`.
+- The filter aliases include hydrology, maritime boundaries, traffic, Pins, and visual aids terms.
+- No-GUI launch packets, profile schema, closed-loop status, and smoke gates now expose the focus preset contract.
+
+Positioning:
+- This gives researchers one-click layer focus without changing renderer visibility, preserving the distinction between UI navigation and rendering state.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Layer row search filter
 
 Scope:
