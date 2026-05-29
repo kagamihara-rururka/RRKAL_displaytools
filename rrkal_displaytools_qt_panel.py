@@ -1907,6 +1907,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             BOUNDARY_HIGHLIGHT_ACK_PATH.stat().st_mtime_ns if BOUNDARY_HIGHLIGHT_ACK_PATH.exists() else None
         )
         self.boundary_highlight_ack_payload: dict[str, object] | None = None
+        self.boundary_highlight_ack_history: list[str] = []
+        self.boundary_highlight_ack_history_signature: str | None = None
         self.boundary_layer_event_targets: dict[int, str] = {}
         self.active_tool = "move"
         self.tool_buttons: dict[str, QtWidgets.QToolButton] = {}
@@ -4053,24 +4055,71 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.refresh_research_provenance()
 
     def refresh_boundary_highlight_ack_label(self, payload: dict[str, object]) -> None:
-        if self.boundary_highlight_ack_label is None:
-            return
         enabled = payload.get("enabled", "-")
         target_layers = payload.get("target_layers", [])
         target_count = len(target_layers) if isinstance(target_layers, list) else "-"
         renderer_layers = payload.get("renderer_target_layers", [])
         renderer_count = len(renderer_layers) if isinstance(renderer_layers, list) else "-"
+        applies = payload.get("applies", [])
+        applies_count = len(applies) if isinstance(applies, list) else "-"
+        pending = payload.get("pending", [])
+        pending_count = len(pending) if isinstance(pending, list) else "-"
         updated_at = str(payload.get("updated_at_utc", "-"))
         error = payload.get("error")
         if error:
-            self.boundary_highlight_ack_label.setText(
-                f"Boundary ack: error={error}, updated={updated_at}"
-            )
+            text = f"Boundary ack: error={error}, updated={updated_at}"
+            if self.boundary_highlight_ack_label is not None:
+                self.boundary_highlight_ack_label.setText(text)
+            self.append_boundary_highlight_ack_history(payload)
             return
-        self.boundary_highlight_ack_label.setText(
+        text = (
             f"Boundary ack: enabled={enabled}, targets={target_count}, renderer_targets={renderer_count}, "
-            f"updated={updated_at}"
+            f"live_scopes={applies_count}, pending={pending_count}, updated={updated_at}"
         )
+        if self.boundary_highlight_ack_label is not None:
+            self.boundary_highlight_ack_label.setText(text)
+        self.append_boundary_highlight_ack_history(payload)
+
+    def append_boundary_highlight_ack_history(self, payload: dict[str, object]) -> None:
+        target_layers = payload.get("target_layers", [])
+        target_layers = target_layers if isinstance(target_layers, list) else []
+        renderer_layers = payload.get("renderer_target_layers", [])
+        renderer_layers = renderer_layers if isinstance(renderer_layers, list) else []
+        applies = payload.get("applies", [])
+        applies = applies if isinstance(applies, list) else []
+        pending = payload.get("pending", [])
+        pending = pending if isinstance(pending, list) else []
+        signature = json.dumps(
+            {
+                "enabled": payload.get("enabled"),
+                "trigger": payload.get("trigger"),
+                "target_layers": target_layers,
+                "renderer_target_layers": renderer_layers,
+                "applies": applies,
+                "pending": pending,
+                "error": payload.get("error"),
+            },
+            ensure_ascii=False,
+            sort_keys=True,
+        )
+        if signature == self.boundary_highlight_ack_history_signature:
+            return
+        self.boundary_highlight_ack_history_signature = signature
+        updated_at = str(payload.get("updated_at_utc", "-"))
+        target_text = ",".join(str(layer) for layer in target_layers[:3]) or "-"
+        if len(target_layers) > 3:
+            target_text = f"{target_text},+{len(target_layers) - 3}"
+        entry = (
+            f"Boundary ack history {updated_at}: enabled={payload.get('enabled')}, trigger={payload.get('trigger')}, "
+            f"targets={target_text}, renderer_targets={len(renderer_layers)}, live_scopes={len(applies)}, pending={len(pending)}"
+        )
+        self.boundary_highlight_ack_history.insert(0, entry)
+        del self.boundary_highlight_ack_history[10:]
+        if self.history_list is None:
+            return
+        self.history_list.insertItem(0, entry)
+        while self.history_list.count() > 18:
+            self.history_list.takeItem(self.history_list.count() - 1)
 
     def open_boundary_highlight_dialog(self, layer_key: str | None = None) -> None:
         if not isinstance(layer_key, str) or layer_key not in BOUNDARY_HIGHLIGHT_LAYER_KEYS:
@@ -6479,6 +6528,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "boundary_highlight": self.collect_boundary_highlight_state(),
             "boundary_highlight_ack_file": str(BOUNDARY_HIGHLIGHT_ACK_PATH),
             "boundary_highlight_ack": self.boundary_highlight_ack_payload,
+            "boundary_highlight_ack_history": self.boundary_highlight_ack_history[:5],
             "boundary_highlight_boundary": "Line hover mask, selected-layer line picking, and closed-ring fill preview are live; full territory feature identity and open-line area inference remain pending.",
             "visible_layers": visible_layers,
             "locked_layers": locked_layers,

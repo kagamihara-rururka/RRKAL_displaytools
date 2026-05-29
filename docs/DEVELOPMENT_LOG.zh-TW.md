@@ -2901,3 +2901,17 @@ Decision:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Boundary ack history provenance
+
+Scope:
+- Qt now records renderer boundary highlight ack changes into the History panel.
+- Boundary ack history entries include enabled state, trigger, target layers, renderer target count, live scope count, pending refinement count, and update time.
+- Research provenance now includes `boundary_highlight_ack_history`.
+- Smoke gates the boundary ack history UI hook and provenance field.
+
+Decision:
+- Boundary emphasis is a researcher-facing visual analysis tool; renderer acknowledgement history must be visible and reproducible, not only shown as the latest Properties label.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

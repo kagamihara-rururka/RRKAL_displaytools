@@ -1458,6 +1458,12 @@ if ($qtPanelSource -notlike "*screen_position*") {
 if ($qtPanelSource -notlike "*Layer pick history*") {
     throw "Qt panel layer pick history entry missing"
 }
+if ($qtPanelSource -notlike "*Boundary ack history*") {
+    throw "Qt panel boundary ack history entry missing"
+}
+if ($qtPanelSource -notlike "*boundary_highlight_ack_history*") {
+    throw "Qt panel boundary ack history provenance missing"
+}
 
 $rendererSource = Get-Content -Raw -Encoding UTF8 taichi_global_bathymetry.py
 if ($rendererSource -notlike "*last_layer_pick_screen*") {

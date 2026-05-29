@@ -203,3 +203,8 @@
 
 - History panel now records renderer layer pick attempts with target, picker, hit/no-hit, feature, frame, and screen position.
 - This preserves a short interaction trail for selected-layer picking during research inspection.
+
+### 2026-05-30 Boundary ack history provenance
+
+- Qt History now records renderer boundary highlight ack changes with enabled state, trigger, targets, renderer targets, live scopes, pending refinements, and update time.
+- Research provenance includes `boundary_highlight_ack_history`, making boundary emphasis state changes reproducible after renderer handoff.
