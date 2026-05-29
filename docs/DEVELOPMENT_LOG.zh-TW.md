@@ -230,6 +230,20 @@ Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
 
+## 2026-05-30 - Clone quickstart Inspect groups
+
+Scope:
+- Updated `docs\QUICKSTART_CLONE.zh-TW.md` so the Qt `Inspect:` checklist follows the same groups as `profile_ui_state_replay.qt_inspector_action_groups`.
+- The groups are Replay/contracts, Renderer ports and Research interaction.
+- Smoke verifies quickstart group guidance for Replay/contracts and Research interaction.
+
+Decision:
+- Cross-machine onboarding should match the machine-readable Inspect grouping so users have a clear first-run order after opening Qt.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+
 ## 2026-05-30 - Profile replay inspector groups
 
 Scope:

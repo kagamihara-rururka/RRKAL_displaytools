@@ -439,3 +439,8 @@
 
 - `profile_ui_state_replay` now exposes `qt_inspector_action_groups` and `qt_inspector_group_count`.
 - Inspector groups separate replay/contracts, renderer ports and research interaction checks for Qt-first onboarding and capability discovery.
+
+### 2026-05-30 Clone quickstart Inspect groups
+
+- The clone quickstart now mirrors the machine-readable Inspect groups: Replay/contracts, Renderer ports and Research interaction.
+- Smoke verifies quickstart group guidance so onboarding remains aligned with `profile_ui_state_replay.qt_inspector_action_groups`.

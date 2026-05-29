@@ -1935,5 +1935,11 @@ if ($cloneQuickstartDoc -notmatch 'Inspect: Clone ready') {
 if ($cloneQuickstartDoc -notmatch 'Inspect: Boundary JSON') {
     throw "Clone quickstart missing Qt Inspect Boundary JSON guidance"
 }
+if ($cloneQuickstartDoc -notmatch 'Replay/contracts') {
+    throw "Clone quickstart missing Qt Inspect Replay/contracts group guidance"
+}
+if ($cloneQuickstartDoc -notmatch 'Research interaction') {
+    throw "Clone quickstart missing Qt Inspect Research interaction group guidance"
+}
 
 Write-Host "Smoke passed."
