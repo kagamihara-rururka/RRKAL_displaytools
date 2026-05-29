@@ -1521,6 +1521,12 @@ if ($qtPanelSource -notlike "*Emphasis*") {
 if ($qtPanelSource -notlike "*target_alignment_label*") {
     throw "Qt boundary emphasis target alignment label missing"
 }
+if ($qtPanelSource -notlike "*Boundary target:*") {
+    throw "Qt canvas boundary target summary line missing"
+}
+if ($qtPanelSource -notlike "*boundary_emphasis_target_alignment*") {
+    throw "Qt canvas provenance boundary emphasis target alignment missing"
+}
 if ($qtPanelSource -notlike "*Boundary identity:*") {
     throw "Qt canvas boundary identity summary line missing"
 }

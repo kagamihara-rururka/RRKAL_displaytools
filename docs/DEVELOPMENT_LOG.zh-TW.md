@@ -2993,3 +2993,16 @@ Decision:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Boundary target in Canvas Preview
+
+Scope:
+- Canvas Preview now shows Boundary target mode, resolved target layer and target alignment label next to Boundary highlight/identity.
+- Canvas preview state/provenance now carries boundary emphasis target alignment fields for handoff inspection from the UI state packet.
+- Smoke verifies the visible Boundary target line and provenance alignment fields.
+
+Decision:
+- The display view should expose which boundary layer is being emphasized, so a researcher can demonstrate or review the target state without switching back to the Layers dock.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

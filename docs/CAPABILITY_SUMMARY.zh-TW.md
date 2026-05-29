@@ -238,3 +238,8 @@
 
 - Boundary emphasis UI now reports the resolved target layer and whether it matches the selected layer.
 - Launch packet and renderer capabilities expose target alignment fields for handoff and clone-after-setup inspection.
+
+### 2026-05-30 Boundary target in Canvas Preview
+
+- Canvas Preview now reports Boundary target mode, resolved target layer and selected-layer alignment.
+- Canvas preview provenance carries the same boundary emphasis target alignment fields.

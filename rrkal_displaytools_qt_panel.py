@@ -3350,6 +3350,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "thumbnail": "static_renderer_output_thumbnail",
             "live_file_stream": "file_based_live_renderer_frame_stream",
         }.get(self.canvas_preview_mode, "ui_state_preview")
+        boundary_emphasis = self.collect_boundary_emphasis_control()
         return {
             "schema": "rrkal_displaytools.canvas_preview.v1",
             "mode": self.canvas_preview_mode,
@@ -3363,6 +3364,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "renderer_cursor_geodesy_ack_file": str(CURSOR_GEODESY_ACK_PATH),
             "renderer_cursor_geodesy_state": self.cursor_geodesy_state_payload,
             "renderer_cursor_geodesy_ack": self.cursor_geodesy_ack_payload,
+            "boundary_emphasis_target_mode": boundary_emphasis.get("target_mode"),
+            "boundary_emphasis_target_layer": boundary_emphasis.get("target_layer_key"),
+            "boundary_emphasis_target_alignment": boundary_emphasis.get("target_alignment"),
+            "boundary_emphasis_target_alignment_label": boundary_emphasis.get("target_alignment_label"),
             "renderer_sync": renderer_sync,
         }
 
@@ -6413,6 +6418,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             hit_map = "-"
         boundary_summary = self.boundary_highlight_summary()
         boundary_identity_summary = self.boundary_identity_status_summary()
+        boundary_emphasis = self.collect_boundary_emphasis_control()
+        boundary_target_text = (
+            f"{boundary_emphasis.get('target_mode')}->{boundary_emphasis.get('target_layer_key') or '-'}; "
+            f"{boundary_emphasis.get('target_alignment_label')}"
+        )
         self.canvas_preview_label.setPixmap(QtGui.QPixmap())
         self.canvas_preview_label.setText(
             "RRKAL Scientific Canvas Preview\n\n"
@@ -6422,6 +6432,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"Select hit map: {hit_map}\n"
             f"Boundary highlight: {boundary_summary}\n"
             f"Boundary identity: {boundary_identity_summary}\n"
+            f"Boundary target: {boundary_target_text}\n"
             f"Selected pin: {selected_pin_text}\n"
             f"Pin markers: {pin_markers}\n"
             f"Cursor estimate: {cursor_text}\n\n"
@@ -6433,6 +6444,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"target layer={self.selected_layer_key or '-'}, style={style}, visible_layers={visible}, "
             f"selected_pin={self.selected_pin_id or '-'}, cursor={cursor_text}, "
             f"renderer_cursor_bridge={renderer_cursor_text}, "
+            f"boundary_target={boundary_target_text}, "
             f"boundary_highlight={'on' if self.boundary_highlight_state.get('enabled') else 'off'}."
         )
         self.refresh_research_provenance()
