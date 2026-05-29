@@ -2955,3 +2955,16 @@ Decision:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Boundary emphasis dialog preview
+
+Scope:
+- Qt Boundary emphasis dialog now shows an RGB swatch and live numeric preview for target, RGB, contrast, opacity, gamma and breathing period.
+- Boundary emphasis contracts now declare dialog feedback fields for RGB swatch, live numeric readout and renderer bridge summary across Qt, launch packet and renderer capabilities.
+- Stale queued-mask wording was removed from the Qt dialog; the UI now states that the renderer bridge is wired through the boundary highlight mask while authoritative polygon identity remains pending.
+
+Decision:
+- Researchers need to see the visual emphasis parameters before applying them, especially when tuning EEZ/territorial boundary contrast and semi-transparent overlays.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

@@ -1707,6 +1707,8 @@ def boundary_emphasis_control_packet(
         "renderer_hook_status": "wired_via_boundary_highlight_mask",
         "renderer_bridge_contract": "rrkal_displaytools.boundary_highlight_mask.v1",
         "renderer_controls_mapped": ["target_layers", "color_rgb", "contrast", "alpha", "gamma", "breathing"],
+        "dialog_feedback": ["rgb_swatch", "live_numeric_readout", "renderer_bridge_summary"],
+        "value_preview_fields": ["target_mode", "color_rgb", "contrast", "opacity", "gamma", "breathing_period_s"],
         "pending_renderer_refinements": ["authoritative_polygon_identity", "open_line_area_inference", "full_polygon_fill_mask"],
         "control_count": len(controls),
         "controls": controls,

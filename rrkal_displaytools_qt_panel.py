@@ -1580,6 +1580,8 @@ def boundary_emphasis_control_packet(
         "renderer_hook_status": "wired_via_boundary_highlight_mask",
         "renderer_bridge_contract": BOUNDARY_HIGHLIGHT_SCHEMA,
         "renderer_controls_mapped": ["target_layers", "color_rgb", "contrast", "alpha", "gamma", "breathing"],
+        "dialog_feedback": ["rgb_swatch", "live_numeric_readout", "renderer_bridge_summary"],
+        "value_preview_fields": ["target_mode", "color_rgb", "contrast", "opacity", "gamma", "breathing_period_s"],
         "pending_renderer_refinements": ["authoritative_polygon_identity", "open_line_area_inference", "full_polygon_fill_mask"],
         "control_count": len(controls),
         "controls": controls,
@@ -3442,7 +3444,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         layout = QtWidgets.QVBoxLayout(dialog)
         note = QtWidgets.QLabel(
             "Controls the UI profile for country/territory/territorial sea/EEZ emphasis. "
-            "Renderer mask rasterization is queued for the backend pass."
+            "Renderer mask bridge is wired through the boundary highlight mask; authoritative polygon identity remains pending."
         )
         note.setWordWrap(True)
         layout.addWidget(note)
@@ -3494,6 +3496,46 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         form.addRow("Breathing", breathing_checkbox)
         form.addRow("Breathing period", breathing_period_slider)
         layout.addLayout(form)
+        color_swatch = QtWidgets.QLabel("Boundary emphasis RGB swatch")
+        color_swatch.setObjectName("boundaryEmphasisSwatch")
+        color_swatch.setMinimumHeight(28)
+        color_swatch.setWordWrap(True)
+        layout.addWidget(color_swatch)
+        preview_label = QtWidgets.QLabel()
+        preview_label.setObjectName("boundaryEmphasisPreview")
+        preview_label.setWordWrap(True)
+        layout.addWidget(preview_label)
+
+        def _refresh_preview(*_args: object) -> None:
+            preview_color = [spin.value() for spin in rgb_widgets]
+            contrast = contrast_slider.value() / 100.0
+            opacity = opacity_slider.value() / 100.0
+            gamma = gamma_slider.value() / 100.0
+            breathing_period_s = breathing_period_slider.value() / 10.0
+            breathing_state = "on" if breathing_checkbox.isChecked() else "off"
+            color_swatch.setStyleSheet(
+                "QLabel#boundaryEmphasisSwatch { "
+                f"background: rgb({preview_color[0]}, {preview_color[1]}, {preview_color[2]}); "
+                "border: 1px solid #536270; border-radius: 6px; color: #101820; padding: 6px; "
+                "}"
+            )
+            preview_label.setText(
+                "Boundary emphasis preview: "
+                f"target={target_combo.currentText()}; RGB={preview_color}; "
+                f"contrast={contrast:.2f}; opacity={opacity:.2f}; gamma={gamma:.2f}; "
+                f"breathing={breathing_state}/{breathing_period_s:.1f}s; "
+                f"bridge={packet.get('renderer_bridge_contract')}"
+            )
+
+        for spin in rgb_widgets:
+            spin.valueChanged.connect(_refresh_preview)
+        target_combo.currentTextChanged.connect(_refresh_preview)
+        contrast_slider.valueChanged.connect(_refresh_preview)
+        opacity_slider.valueChanged.connect(_refresh_preview)
+        gamma_slider.valueChanged.connect(_refresh_preview)
+        breathing_checkbox.toggled.connect(_refresh_preview)
+        breathing_period_slider.valueChanged.connect(_refresh_preview)
+        _refresh_preview()
         buttons = QtWidgets.QHBoxLayout()
         apply_button = QtWidgets.QPushButton("Apply UI state")
         close_button = QtWidgets.QPushButton("Close")

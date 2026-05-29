@@ -223,3 +223,8 @@
 
 - Qt Properties and Canvas Preview now show boundary identity applied/pending marker names, making visual/source-property identity and pending authoritative polygon/open-line work visible in the UI.
 - Smoke verifies the visible Boundary identity summary line.
+
+### 2026-05-30 Boundary emphasis dialog preview
+
+- Qt Boundary emphasis controls now include an RGB swatch and live numeric preview for target, RGB, contrast, opacity, gamma and breathing timing.
+- Boundary emphasis launch/capability contracts expose dialog feedback fields so clone-after-setup checks can confirm the UI affordance exists.

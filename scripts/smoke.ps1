@@ -242,6 +242,12 @@ if ($launchPacket.boundary_emphasis_control.renderer_bridge_contract -ne "rrkal_
 if ($launchPacket.boundary_emphasis_control.renderer_controls_mapped -notcontains "gamma") {
     throw "Launch packet boundary_emphasis_control gamma bridge mapping missing"
 }
+if ($launchPacket.boundary_emphasis_control.dialog_feedback -notcontains "rgb_swatch") {
+    throw "Launch packet boundary_emphasis_control RGB swatch feedback missing"
+}
+if ($launchPacket.boundary_emphasis_control.dialog_feedback -notcontains "live_numeric_readout") {
+    throw "Launch packet boundary_emphasis_control live numeric readout missing"
+}
 if ($launchPacket.boundary_emphasis_control.row_double_click_binding -ne "ready") {
     throw "Launch packet boundary_emphasis_control row double-click binding missing"
 }
@@ -846,6 +852,12 @@ if ($capabilities.boundary_emphasis_control.renderer_bridge_contract -ne "rrkal_
 }
 if ($capabilities.boundary_emphasis_control.renderer_controls_mapped -notcontains "breathing") {
     throw "Renderer boundary_emphasis_control breathing bridge mapping missing"
+}
+if ($capabilities.boundary_emphasis_control.dialog_feedback -notcontains "rgb_swatch") {
+    throw "Renderer boundary_emphasis_control RGB swatch feedback missing"
+}
+if ($capabilities.boundary_emphasis_control.dialog_feedback -notcontains "live_numeric_readout") {
+    throw "Renderer boundary_emphasis_control live numeric readout missing"
 }
 if ($capabilities.boundary_emphasis_control.row_double_click_binding -ne "ready") {
     throw "Renderer boundary_emphasis_control row double-click binding missing"
@@ -1466,6 +1478,15 @@ Invoke-CheckedNative py @("-3", "-c", "from cursor_geodesy import viewport_spher
 $qtPanelSource = Get-Content -Raw -Encoding UTF8 rrkal_displaytools_qt_panel.py
 if ($qtPanelSource -like "*Boundary emphasis: UI ready, renderer mask hook queued*") {
     throw "Qt boundary emphasis label still reports queued renderer mask hook"
+}
+if ($qtPanelSource -like "*Renderer mask rasterization is queued for the backend pass*") {
+    throw "Qt boundary emphasis dialog still reports queued renderer mask rasterization"
+}
+if ($qtPanelSource -notlike "*Boundary emphasis preview:*") {
+    throw "Qt boundary emphasis preview readout missing"
+}
+if ($qtPanelSource -notlike "*boundaryEmphasisSwatch*") {
+    throw "Qt boundary emphasis RGB swatch missing"
 }
 if ($qtPanelSource -notlike "*Boundary identity:*") {
     throw "Qt canvas boundary identity summary line missing"
