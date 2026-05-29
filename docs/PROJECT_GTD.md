@@ -35,6 +35,7 @@ Last updated: 2026-05-29
 - Decide which local cache artifacts should later be registered by RRKAL as renderer bridge assets.
 
 ## Done
+- 2026-05-30: Added `rrkal_displaytools.layer_operator_groups.v1` so layer operations are grouped into Selection / Edit state / Isolation / History / Diagnostics across Qt UI, launch packets, renderer capabilities, handoff and smoke.
 
 - 2026-05-30: Added layer operator shortcuts contract and Qt keyboard shortcuts for Photoshop-like layer operations across launch packets, renderer capabilities, handoff inspection and smoke.
 - 2026-05-30: Added renderer diagnostics remediation hints across Qt Properties, launch packets, renderer capabilities, handoff inspection and smoke.

@@ -38,6 +38,7 @@ $summary = [ordered]@{
         active_layer_diagnostics = $launchPacket.active_layer_diagnostics.schema
         layer_capability_matrix = $launchPacket.layer_capability_matrix.schema
         layer_operator_shortcuts = $launchPacket.layer_operator_shortcuts.schema
+        layer_operator_groups = $launchPacket.layer_operator_groups.schema
         layer_undo = $launchPacket.layer_undo.schema
         session_journal = $launchPacket.session_journal.schema
         timeline_state = $launchPacket.timeline_state.schema
@@ -50,6 +51,13 @@ $summary = [ordered]@{
         keyboard_shortcut_count = $launchPacket.layer_operator_shortcuts.keyboard_shortcut_count
         installed_shortcut_ids = $launchPacket.layer_operator_shortcuts.installed_shortcut_ids
         implemented_action_ids = $launchPacket.layer_operator_shortcuts.implemented_action_ids
+    }
+    layer_operator_groups = @{
+        launch_packet_schema = $launchPacket.layer_operator_groups.schema
+        renderer_capabilities_schema = $capabilities.layer_operator_groups.schema
+        group_count = $launchPacket.layer_operator_groups.group_count
+        complete_group_count = $launchPacket.layer_operator_groups.complete_group_count
+        group_ids = @($launchPacket.layer_operator_groups.groups | ForEach-Object { $_.id })
     }
     layer_capability_matrix = @{
         schema = $capabilities.layer_capability_matrix.schema

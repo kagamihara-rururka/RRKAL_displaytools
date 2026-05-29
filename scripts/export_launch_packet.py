@@ -909,11 +909,86 @@ def layer_operator_shortcuts_packet(
         "keyboard_shortcuts": keyboard_shortcuts,
         "installed_shortcut_ids": [action["id"] for action in actions if action.get("keyboard_shortcut")],
         "profile_state_fields": ["selected_layer", "layer_stack_ui"],
-        "launch_packet_fields": ["layer_operator_shortcuts", "layer_stack_ui", "layer_undo"],
+        "launch_packet_fields": ["layer_operator_shortcuts", "layer_operator_groups", "layer_stack_ui", "layer_undo"],
         "summary_text": "select/toggle/lock/opacity/blend/solo/restore/undo/reset/diagnostics",
         "copyable_provenance": True,
         "boundary": "Qt operator shortcut contract only; renderer state and RRKAL data governance are not mutated.",
     }
+
+def layer_operator_groups_packet(
+    shortcuts: dict[str, object] | None,
+    source: str,
+) -> dict[str, object]:
+    shortcuts = shortcuts if isinstance(shortcuts, dict) else {}
+    raw_actions = shortcuts.get("actions") if isinstance(shortcuts.get("actions"), list) else []
+    action_ids = {
+        str(action.get("id"))
+        for action in raw_actions
+        if isinstance(action, dict) and action.get("id")
+    }
+    group_specs = (
+        {
+            "id": "selection",
+            "label": "Selection",
+            "action_ids": ["select_layer"],
+            "purpose": "Choose the active layer before editing, isolation, provenance capture, or diagnostics.",
+        },
+        {
+            "id": "edit_state",
+            "label": "Edit state",
+            "action_ids": ["toggle_visibility", "toggle_lock", "adjust_opacity", "set_blend_mode", "reset_layer_ui_state"],
+            "purpose": "Control visibility, lock, opacity, blend mode, and reversible UI-only state for the selected layer.",
+        },
+        {
+            "id": "isolation",
+            "label": "Isolation",
+            "action_ids": ["solo_selected_layer", "restore_solo_visibility"],
+            "purpose": "Temporarily isolate a research layer and restore the previous visible-layer context.",
+        },
+        {
+            "id": "history",
+            "label": "History",
+            "action_ids": ["undo_layer_state"],
+            "purpose": "Recover the previous layer stack state during exploratory visual analysis.",
+        },
+        {
+            "id": "diagnostics",
+            "label": "Diagnostics",
+            "action_ids": ["show_layer_diagnostics"],
+            "purpose": "Expose renderer capability, runtime ack, and missing-live-control evidence for reproducibility.",
+        },
+    )
+    groups = []
+    for spec in group_specs:
+        expected_ids = [str(action_id) for action_id in spec["action_ids"]]
+        available_ids = [action_id for action_id in expected_ids if action_id in action_ids]
+        missing_ids = [action_id for action_id in expected_ids if action_id not in action_ids]
+        groups.append(
+            {
+                "id": spec["id"],
+                "label": spec["label"],
+                "purpose": spec["purpose"],
+                "action_ids": expected_ids,
+                "available_action_ids": available_ids,
+                "missing_action_ids": missing_ids,
+                "complete": not missing_ids,
+            }
+        )
+    complete_group_count = sum(1 for group in groups if group["complete"])
+    return {
+        "schema": "rrkal_displaytools.layer_operator_groups.v1",
+        "source": source,
+        "shortcut_schema": shortcuts.get("schema"),
+        "group_count": len(groups),
+        "complete_group_count": complete_group_count,
+        "groups": groups,
+        "workflow_order": [group["id"] for group in groups],
+        "summary_text": "Selection / Edit state / Isolation / History / Diagnostics",
+        "copyable_provenance": True,
+        "launch_packet_fields": ["layer_operator_groups", "layer_operator_shortcuts", "layer_stack_ui", "layer_undo"],
+        "boundary": "Qt workflow grouping only; renderer state and RRKAL data governance are not mutated.",
+    }
+
 
 def layer_capability_matrix_packet(
     source: str,
@@ -1743,6 +1818,7 @@ def launch_packet(
         "layer_filter": layer_filter_packet(profile),
         "layer_group_view": layer_group_view_packet(profile),
         "layer_operator_shortcuts": layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None),
+        "layer_operator_groups": layer_operator_groups_packet(layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None), "scripts.export_launch_packet"),
         "layer_capability_matrix": layer_capability_matrix_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None, rrkal_data_manifest_ref),
         "canvas_preview": canvas_preview_packet(profile),
         "boundary_highlight": boundary_highlight_packet(profile),

@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-30 - Layer operator workflow groups
+
+- Added `rrkal_displaytools.layer_operator_groups.v1` to group Qt-first layer operations into Selection, Edit state, Isolation, History and Diagnostics workflows.
+- Surfaced the workflow summary in the Qt Layers dock and exposed the same contract through Qt launch/provenance packets, No-GUI launch packets, renderer capability discovery, handoff inspection and closed-loop evidence.
+- Smoke: PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Layer operator shortcuts contract
 
 - Added `rrkal_displaytools.layer_operator_shortcuts.v1` for Qt-first Photoshop-like layer operations: select, visibility, lock, opacity, blend, solo, restore, undo, reset and diagnostics actions.

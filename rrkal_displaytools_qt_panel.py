@@ -839,11 +839,86 @@ def layer_operator_shortcuts_packet(
         "keyboard_shortcuts": keyboard_shortcuts,
         "installed_shortcut_ids": [action["id"] for action in actions if action.get("keyboard_shortcut")],
         "profile_state_fields": ["selected_layer", "layer_stack_ui"],
-        "launch_packet_fields": ["layer_operator_shortcuts", "layer_stack_ui", "layer_undo"],
+        "launch_packet_fields": ["layer_operator_shortcuts", "layer_operator_groups", "layer_stack_ui", "layer_undo"],
         "summary_text": "select/toggle/lock/opacity/blend/solo/restore/undo/reset/diagnostics",
         "copyable_provenance": True,
         "boundary": "Qt operator shortcut contract only; renderer state and RRKAL data governance are not mutated.",
     }
+
+def layer_operator_groups_packet(
+    shortcuts: dict[str, object] | None,
+    source: str,
+) -> dict[str, object]:
+    shortcuts = shortcuts if isinstance(shortcuts, dict) else {}
+    raw_actions = shortcuts.get("actions") if isinstance(shortcuts.get("actions"), list) else []
+    action_ids = {
+        str(action.get("id"))
+        for action in raw_actions
+        if isinstance(action, dict) and action.get("id")
+    }
+    group_specs = (
+        {
+            "id": "selection",
+            "label": "Selection",
+            "action_ids": ["select_layer"],
+            "purpose": "Choose the active layer before editing, isolation, provenance capture, or diagnostics.",
+        },
+        {
+            "id": "edit_state",
+            "label": "Edit state",
+            "action_ids": ["toggle_visibility", "toggle_lock", "adjust_opacity", "set_blend_mode", "reset_layer_ui_state"],
+            "purpose": "Control visibility, lock, opacity, blend mode, and reversible UI-only state for the selected layer.",
+        },
+        {
+            "id": "isolation",
+            "label": "Isolation",
+            "action_ids": ["solo_selected_layer", "restore_solo_visibility"],
+            "purpose": "Temporarily isolate a research layer and restore the previous visible-layer context.",
+        },
+        {
+            "id": "history",
+            "label": "History",
+            "action_ids": ["undo_layer_state"],
+            "purpose": "Recover the previous layer stack state during exploratory visual analysis.",
+        },
+        {
+            "id": "diagnostics",
+            "label": "Diagnostics",
+            "action_ids": ["show_layer_diagnostics"],
+            "purpose": "Expose renderer capability, runtime ack, and missing-live-control evidence for reproducibility.",
+        },
+    )
+    groups = []
+    for spec in group_specs:
+        expected_ids = [str(action_id) for action_id in spec["action_ids"]]
+        available_ids = [action_id for action_id in expected_ids if action_id in action_ids]
+        missing_ids = [action_id for action_id in expected_ids if action_id not in action_ids]
+        groups.append(
+            {
+                "id": spec["id"],
+                "label": spec["label"],
+                "purpose": spec["purpose"],
+                "action_ids": expected_ids,
+                "available_action_ids": available_ids,
+                "missing_action_ids": missing_ids,
+                "complete": not missing_ids,
+            }
+        )
+    complete_group_count = sum(1 for group in groups if group["complete"])
+    return {
+        "schema": "rrkal_displaytools.layer_operator_groups.v1",
+        "source": source,
+        "shortcut_schema": shortcuts.get("schema"),
+        "group_count": len(groups),
+        "complete_group_count": complete_group_count,
+        "groups": groups,
+        "workflow_order": [group["id"] for group in groups],
+        "summary_text": "Selection / Edit state / Isolation / History / Diagnostics",
+        "copyable_provenance": True,
+        "launch_packet_fields": ["layer_operator_groups", "layer_operator_shortcuts", "layer_stack_ui", "layer_undo"],
+        "boundary": "Qt workflow grouping only; renderer state and RRKAL data governance are not mutated.",
+    }
+
 
 def layer_capability_matrix_packet(
     source: str,
@@ -1515,6 +1590,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_stack_note = QtWidgets.QLabel("Lock / Opacity / Blend 已接 renderer runtime；未支援圖層會在 renderer_sync 標示。")
         self.layer_stack_note.setWordWrap(True)
         layers_layout.addWidget(self.layer_stack_note)
+        self.layer_operator_groups_label = QtWidgets.QLabel(
+            "Layer workflow: Selection / Edit state / Isolation / History / Diagnostics"
+        )
+        self.layer_operator_groups_label.setWordWrap(True)
+        layers_layout.addWidget(self.layer_operator_groups_label)
         self.layer_runtime_legend_label = QtWidgets.QLabel(
             "Runtime badge: no_ack=等待 ack, ok=無近期變更, target=目前 renderer target, changed=renderer 已套用, locked=locked skip, error=ack error"
         )
@@ -2334,6 +2414,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_filter": self.collect_layer_filter_state(),
             "layer_group_view": self.collect_layer_group_view_state(),
             "layer_operator_shortcuts": self.collect_layer_operator_shortcuts(),
+            "layer_operator_groups": self.collect_layer_operator_groups(),
             "layer_capability_matrix": self.collect_layer_capability_matrix(),
             "layer_runtime_evidence_summary": self.collect_layer_capability_matrix().get("runtime_evidence_summary"),
             "active_layer_diagnostics": self.active_layer_diagnostics_packet(),
@@ -2426,6 +2507,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.selected_layer_key,
             self.layer_visibility_snapshot is not None,
             len(self.layer_undo_stack),
+        )
+
+    def collect_layer_operator_groups(self) -> dict[str, object]:
+        return layer_operator_groups_packet(
+            self.collect_layer_operator_shortcuts(),
+            "rrkal_displaytools_qt_panel",
         )
 
     def collect_layer_capability_matrix(self) -> dict[str, object]:
@@ -3202,6 +3289,13 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         )
         capabilities = self.collect_layer_capability_matrix()
         live_counts = capabilities.get("live_counts", {})
+        operator_groups = self.collect_layer_operator_groups()
+        if hasattr(self, "layer_operator_groups_label"):
+            self.layer_operator_groups_label.setText(
+                "Layer workflow: "
+                f"{operator_groups.get('summary_text', 'Selection / Edit state / Isolation / History / Diagnostics')} "
+                f"({operator_groups.get('complete_group_count', 0)}/{operator_groups.get('group_count', 0)} groups complete)"
+            )
         self.layer_stack_note.setText(
             f"可見圖層 {visible}/{len(LAYER_LABELS)}；鎖定 {locked}；"
             f"非預設 opacity/blend {non_default}；"
@@ -5082,6 +5176,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_filter": self.collect_layer_filter_state(),
             "layer_group_view": self.collect_layer_group_view_state(),
             "layer_operator_shortcuts": self.collect_layer_operator_shortcuts(),
+            "layer_operator_groups": self.collect_layer_operator_groups(),
             "layer_capability_matrix": self.collect_layer_capability_matrix(),
             "layer_runtime_evidence_summary": self.collect_layer_capability_matrix().get("runtime_evidence_summary"),
             "layer_runtime_badge_summary": self.collect_layer_capability_matrix().get("runtime_badge_summary"),
