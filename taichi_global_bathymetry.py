@@ -3086,6 +3086,9 @@ class GeoVectorLineOverlay:
         highlight_line_index: int | None = None,
         highlight_phase: float = 0.0,
         point_stride: int = 1,
+        highlight_color: tuple[int, int, int] | None = None,
+        highlight_alpha_scale: float = 1.0,
+        highlight_width_extra: int = 0,
     ) -> np.ndarray:
         if not self.lines:
             return self.empty.copy()
@@ -3161,11 +3164,19 @@ class GeoVectorLineOverlay:
                 continue
             if highlight_line_index is not None and line_index == int(highlight_line_index):
                 pulse = 0.5 + 0.5 * math.sin(float(highlight_phase) * math.tau)
-                glow_alpha = int(95 + 95 * pulse)
-                glow_width = max(4, int(line_width) + int(7 + 5 * pulse))
-                core_width = max(2, int(line_width) + 2)
-                glow_rgba = (255, 255, 180, glow_alpha)
-                core_rgba = (255, 255, 255, 255)
+                color_base = highlight_color or (255, 255, 180)
+                alpha_scale = max(0.0, min(float(highlight_alpha_scale), 2.0))
+                glow_alpha = int(min(255, (95 + 95 * pulse) * alpha_scale))
+                core_alpha = int(min(255, 220 + 35 * alpha_scale))
+                glow_width = max(4, int(line_width) + int(7 + 5 * pulse) + max(0, int(highlight_width_extra)))
+                core_width = max(2, int(line_width) + 2 + max(0, int(highlight_width_extra // 4)))
+                glow_rgba = (int(color_base[0]), int(color_base[1]), int(color_base[2]), glow_alpha)
+                core_rgba = (
+                    min(255, int(color_base[0]) + 32),
+                    min(255, int(color_base[1]) + 32),
+                    min(255, int(color_base[2]) + 32),
+                    core_alpha,
+                )
                 draw_projected_line(line, glow_rgba, glow_width)
                 draw_projected_line(line, core_rgba, core_width)
             else:
@@ -11674,6 +11685,19 @@ class HybridRenderController:
         )
 
     def _current_boundary_view_key(self) -> tuple:
+        boundary_highlight = getattr(self, "boundary_highlight_state", {})
+        breathing = boundary_highlight.get("breathing", {}) if isinstance(boundary_highlight, dict) else {}
+        highlight_key = (
+            bool(boundary_highlight.get("enabled", False)) if isinstance(boundary_highlight, dict) else False,
+            boundary_highlight.get("trigger", "hover") if isinstance(boundary_highlight, dict) else "hover",
+            tuple(boundary_highlight.get("renderer_target_layers", [])) if isinstance(boundary_highlight, dict) else (),
+            tuple(boundary_highlight.get("color_rgb", [])) if isinstance(boundary_highlight, dict) else (),
+            boundary_highlight.get("alpha", 48) if isinstance(boundary_highlight, dict) else 48,
+            boundary_highlight.get("feather", 14) if isinstance(boundary_highlight, dict) else 14,
+            bool(breathing.get("enabled", True)) if isinstance(breathing, dict) else True,
+            breathing.get("speed", 42) if isinstance(breathing, dict) else 42,
+            breathing.get("amplitude", 16) if isinstance(breathing, dict) else 16,
+        )
         layer_state = tuple(
             (
                 layer_id,
@@ -11700,6 +11724,7 @@ class HybridRenderController:
             self.hover_boundary_hit.get("layer_id"),
             self.hover_boundary_hit.get("line_index"),
             self.boundary_hover_phase_bucket,
+            highlight_key,
         )
 
     def _render_hydrology_if_needed(self, force: bool = False) -> None:
@@ -11760,9 +11785,31 @@ class HybridRenderController:
             self.boundary_hover_dirty = False
             return
         composite = np.zeros_like(self.globe_rgba)
-        highlight_layer = self.hover_boundary_hit.get("layer_id")
-        highlight_line_index = self.hover_boundary_hit.get("line_index")
-        highlight_phase = (time.time() * 0.7) % 1.0
+        boundary_highlight = getattr(self, "boundary_highlight_state", {})
+        highlight_enabled = bool(boundary_highlight.get("enabled", False)) if isinstance(boundary_highlight, dict) else False
+        highlight_trigger = str(boundary_highlight.get("trigger", "hover")) if isinstance(boundary_highlight, dict) else "hover"
+        highlight_targets = set(boundary_highlight.get("renderer_target_layers", [])) if isinstance(boundary_highlight, dict) else set()
+        highlight_layer = self.hover_boundary_hit.get("layer_id") if highlight_enabled and highlight_trigger in {"hover", "hover_or_selected"} else None
+        if highlight_layer not in highlight_targets:
+            highlight_layer = None
+        highlight_line_index = self.hover_boundary_hit.get("line_index") if highlight_layer is not None else None
+        color_rgb = boundary_highlight.get("color_rgb", [255, 190, 72]) if isinstance(boundary_highlight, dict) else [255, 190, 72]
+        if not isinstance(color_rgb, list) or len(color_rgb) < 3:
+            color_rgb = [255, 190, 72]
+        highlight_color = tuple(_clamp_int_value(color_rgb[index], 255, 0, 255) for index in range(3))
+        highlight_alpha_scale = (
+            max(0.0, min(_clamp_int_value(boundary_highlight.get("alpha"), 48, 0, 100) / 48.0, 2.0))
+            if isinstance(boundary_highlight, dict)
+            else 1.0
+        )
+        highlight_width_extra = int(_clamp_int_value(boundary_highlight.get("feather"), 14, 0, 100) / 10)
+        breathing = boundary_highlight.get("breathing", {}) if isinstance(boundary_highlight, dict) else {}
+        breath_enabled = bool(breathing.get("enabled", True)) if isinstance(breathing, dict) else True
+        breath_speed = _clamp_int_value(breathing.get("speed"), 42, 0, 100) if isinstance(breathing, dict) else 42
+        if breath_enabled:
+            highlight_phase = (time.time() * max(0.05, breath_speed / 50.0)) % 1.0
+        else:
+            highlight_phase = 0.25
         for layer_id, spec in BOUNDARY_SPECS.items():
             overlay = self.boundary_overlays.get(layer_id)
             if overlay is None or not self.layer_visible.get(layer_id, True):
@@ -11786,6 +11833,9 @@ class HybridRenderController:
                 int(highlight_line_index) if highlight_layer == layer_id and highlight_line_index is not None else None,
                 highlight_phase,
                 point_stride=self._vector_point_stride(),
+                highlight_color=highlight_color,
+                highlight_alpha_scale=highlight_alpha_scale,
+                highlight_width_extra=highlight_width_extra,
             )
             composite = alpha_compose_transparent(composite, rendered)
         self.boundary_overlay_rgba = composite
@@ -12200,13 +12250,11 @@ class HybridRenderController:
             "gamma": state.get("gamma", 100),
             "feather": state.get("feather", 14),
             "breathing": state.get("breathing", {}),
-            "applies": ["input_acknowledgement"],
+            "applies": ["input_acknowledgement", "hover_hit_gate", "outline_glow_preview"],
             "pending": [
-                "hover_geometry_picking",
-                "outline_glow_overlay",
                 "polygon_fill_mask",
                 "shader_contrast_gamma",
-                "breathing_animation",
+                "territory_feature_identity",
             ],
             "error": getattr(self, "boundary_highlight_error", None),
             "source": "taichi_global_bathymetry",
@@ -12298,8 +12346,21 @@ class HybridRenderController:
         self.args.scale_bar_opacity = max(0.0, min(float(value), 1.0))
 
     def set_boundary_hover(self, x: float, y: float) -> None:
+        boundary_highlight = getattr(self, "boundary_highlight_state", {})
+        highlight_enabled = bool(boundary_highlight.get("enabled", False)) if isinstance(boundary_highlight, dict) else False
+        highlight_trigger = str(boundary_highlight.get("trigger", "hover")) if isinstance(boundary_highlight, dict) else "hover"
+        if not highlight_enabled or highlight_trigger not in {"hover", "hover_or_selected"}:
+            empty = build_empty_boundary_hit()
+            if empty != self.hover_boundary_hit:
+                self.hover_boundary_hit = empty
+                self.boundary_hover_dirty = True
+                self.boundary_dirty = True
+            return
+        target_layers = set(boundary_highlight.get("renderer_target_layers", [])) if isinstance(boundary_highlight, dict) else set()
         best = build_empty_boundary_hit()
         for layer_id, overlay in getattr(self, "boundary_overlays", {}).items():
+            if layer_id not in target_layers:
+                continue
             if not self.layer_visible.get(layer_id, True) or overlay is None:
                 continue
             hit = overlay.hit_test(
@@ -14827,6 +14888,8 @@ class QtHybridWindow:
             self.update_scale_bar_visuals()
             return
         if self.last_pos is None:
+            self.controller.set_pin_hover(float(event.pos[0]), float(event.pos[1]))
+            self.controller.set_boundary_hover(float(event.pos[0]), float(event.pos[1]))
             return
         dx = event.pos[0] - self.last_pos[0]
         dy = event.pos[1] - self.last_pos[1]
@@ -15108,13 +15171,11 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "target_layers": list(BOUNDARY_HIGHLIGHT_LAYER_MAP),
             "renderer_target_layers": list(BOUNDARY_HIGHLIGHT_LAYER_MAP.values()),
             "triggers": sorted(BOUNDARY_HIGHLIGHT_TRIGGERS),
-            "applies": ["input_acknowledgement"],
+            "applies": ["input_acknowledgement", "hover_hit_gate", "outline_glow_preview"],
             "pending": [
-                "hover_geometry_picking",
-                "outline_glow_overlay",
                 "polygon_fill_mask",
                 "shader_contrast_gamma",
-                "breathing_animation",
+                "territory_feature_identity",
             ],
         },
         "layer_runtime_state": {

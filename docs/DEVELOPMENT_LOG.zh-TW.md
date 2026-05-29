@@ -1107,3 +1107,18 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Boundary highlight hover outline preview
+
+Scope:
+- Wired `boundary_highlight.enabled`, trigger mode, and renderer target layers into renderer boundary hover hit-testing.
+- Mouse move now updates Pin/boundary hover even when the user is not dragging or rotating the globe.
+- Existing boundary line highlight now uses the boundary highlight RGB color, alpha, feather, and breathing speed settings.
+- Renderer ack/capabilities now mark hover hit gate and outline/glow preview as applied.
+
+Positioning:
+- This turns the boundary highlight contract into a visible renderer preview while staying inside the existing globe mask/vector overlay path.
+- Remaining work is feature identity, polygon fill masks, and fuller contrast/gamma shader behavior.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
