@@ -54,12 +54,14 @@ Before the commit, update:
 - `.npy`, `.npz`, tile/cache dumps, downloaded datasets
 - API keys, OAuth tokens, `.env`, private config
 
-## Validation rule
+## Smoke test rule
 
-Do not run tests or validation unless the user explicitly asks.
+Current user rule: before each commit, run at least a smoke test and record the result in `docs/DEVELOPMENT_LOG.zh-TW.md`.
 
-If validation is requested for the current Python prototype, prefer the smallest relevant check first:
+For Python/UI/script-only changes, prefer the smallest relevant checks first:
 
 ```powershell
-py -3 -m py_compile taichi_global_bathymetry.py
+py -3 -m py_compile rrkal_displaytools_qt_panel.py taichi_global_bathymetry.py
 ```
+
+For PowerShell helper scripts, parse the scripts without executing setup/install work.

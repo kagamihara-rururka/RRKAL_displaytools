@@ -16,6 +16,12 @@ Run on another Windows machine:
 ```powershell
 git clone https://github.com/kagamihara-rururka/RRKAL_displaytools.git
 cd RRKAL_displaytools
+.\scripts\setup_windows.ps1
+.\scripts\run_qt_panel.ps1
+```
+
+Manual equivalent:
+```powershell
 py -3 -m pip install -r requirements.txt
 py -3 rrkal_displaytools_qt_panel.py
 ```
@@ -35,6 +41,8 @@ Primary files:
 - `rrkal_displaytools_qt_panel.py`: Qt operator panel for layer/style/material launch control.
 - `taichi_global_bathymetry.py`: current monolithic renderer prototype.
 - `profiles/*.json`: repo-shared Qt panel profile templates.
+- `scripts/setup_windows.ps1`: Windows dependency setup helper.
+- `scripts/run_qt_panel.ps1`: Windows Qt panel launch helper.
 
 Qt panel capabilities:
 - Toggle renderer layers without memorizing CLI flags.

@@ -25,6 +25,7 @@
 
 ## End-of-round checklist
 
+- Run at least a smoke test before commit.
 - Update `docs/DEVELOPMENT_LOG.zh-TW.md`.
 - Update `docs/PROJECT_GTD.md` or this handoff if scope/status changed.
 - Commit scoped code/docs before starting the next round.
@@ -42,7 +43,7 @@
 
 ## Known constraints
 
-- Avoid tests/validation unless explicitly requested.
+- Current user rule: before each commit, run at least a smoke test and record the result in the development log.
 - Runtime data/cache artifacts are local-only.
 - Keep commits intentional and scoped.
 - Do not add crawler/provider/download logic here; keep those concerns in RRKAL.

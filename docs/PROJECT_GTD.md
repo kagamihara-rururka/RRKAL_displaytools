@@ -8,6 +8,7 @@ Last updated: 2026-05-29
 | --- | --- | --- | --- |
 | Product positioning | MVP | Repo is positioned as RRKAL's visualization/display layer, not a duplicate data launcher. `docs/PRODUCT_POSITIONING.zh-TW.md` records the launcher-vs-renderer boundary. | Keep future code changes aligned with RRKAL-owned data governance and displaytools-owned renderer contracts. |
 | Qt operator UI | MVP | Added `rrkal_displaytools_qt_panel.py`, a PyQt6 control panel for layer toggles, style profiles, topo source, data mode, ocean material values, renderer launch/stop/restart, process status polling, command copy, profile folders, local JSON layer profiles, and repo-shared profile templates. Tk is not the primary UI direction. | Wire deeper in-app layer control after the renderer loop is easier to separate. |
+| Cross-machine onboarding | MVP | Added Windows helper scripts: `scripts/setup_windows.ps1` and `scripts/run_qt_panel.ps1`. | Add richer troubleshooting only after another machine reports concrete setup friction. |
 | Profile templates | MVP | Added baseline scientific, maritime hydrology, parchment review, tactical ops, and fast synthetic templates under `profiles/`. | Tune the preferred visual baseline after user review, then add project-specific templates as needed. |
 | Taichi globe prototype | MVP | `taichi_global_bathymetry.py` is imported as the current monolithic source of truth for the globe/bathymetry prototype. A bounded `--demo-closed-loop` preset exists, but the Qt panel defaults back to scientific/non-tactical baseline control. | Use the Qt panel for near-term visual review, then continue small reversible renderer slices inside the repo copy. |
 | Hydrology and LOD hook | In progress | Hydrology readiness, layer diagnostics, LOD invalidation and layer-count contracts are represented in the prototype. The Qt panel exposes lake/river/border/maritime layer switches. | Converge water/hydrology layers into stable renderer-facing contract names. |
@@ -22,7 +23,7 @@ Last updated: 2026-05-29
 - RRKAL-first data governance: dataset discovery, download, import, install registry, manifest, cache lifecycle, and asset repair belong to `APIkeys_collection`.
 - Do not commit generated caches, screenshots, logs, databases, virtual environments, secrets, or heavy local data.
 - Every development round ends with docs/log update and commit before the next round starts.
-- Do not run tests or validation unless the user explicitly asks.
+- Current user rule: before each commit, run at least a smoke test and record the result in `docs/DEVELOPMENT_LOG.zh-TW.md`.
 
 ## Backlog
 
@@ -44,3 +45,4 @@ Last updated: 2026-05-29
 - 2026-05-29: Added repo-shared profile templates and Qt template loading.
 - 2026-05-29: Added Qt panel command copy and profile directory shortcuts.
 - 2026-05-29: Added Qt panel renderer process status polling.
+- 2026-05-29: Added Windows setup and Qt panel launch scripts for another computer.

@@ -1,5 +1,20 @@
 ﻿# Development Log
 
+## 2026-05-29 - Windows setup and launch helpers
+
+Scope:
+- Added `scripts/setup_windows.ps1` to install Python dependencies from `requirements.txt`.
+- Added `scripts/run_qt_panel.ps1` to launch the Qt operator panel from the repo root.
+- Updated README clone/run instructions for another Windows computer.
+
+Positioning:
+- These scripts support cross-machine displaytools onboarding only.
+- They do not perform validation, dataset download, or RRKAL data governance.
+
+Validation:
+- Smoke passed before commit: `py -3 -m py_compile rrkal_displaytools_qt_panel.py taichi_global_bathymetry.py`.
+- Smoke passed before commit: PowerShell parser check for `scripts/setup_windows.ps1` and `scripts/run_qt_panel.ps1`.
+
 ## 2026-05-29 - Qt panel renderer process status
 
 Scope:
