@@ -1,5 +1,21 @@
 ﻿# Development Log
 
+## 2026-05-29 - Qt operator layer control panel
+
+Scope:
+- Added `rrkal_displaytools_qt_panel.py`, a PyQt6 control panel for launching the renderer with explicit layer flags.
+- Exposed style profile, UI backend, topo source, data mode, resolution, Taichi arch, ocean material values, and key layer toggles.
+- Added quick presets: baseline, maritime/hydrology, parchment, tactical, minimal layers, and fast synthetic.
+- Updated README, GTD, handoff, and workspace docs with Qt-first clone/run instructions.
+- Removed the uncommitted Tk control-panel direction before commit; displaytools UI control should stay Qt-first.
+
+Positioning:
+- This is an operator launch UI, not an RRKAL data-governance UI.
+- It improves control over existing renderer flags without rewriting the monolithic render loop.
+
+Validation:
+- Not run; no test/validation requested.
+
 ## 2026-05-29 - Closed-loop showcase preset
 
 Scope:

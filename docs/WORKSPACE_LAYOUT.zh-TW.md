@@ -10,6 +10,7 @@
 
 ## Root files
 
+- `rrkal_displaytools_qt_panel.py`: Qt-first operator panel for layer/style/material launch control。
 - `taichi_global_bathymetry.py`: 目前的 Taichi globe / bathymetry monolithic prototype。
 - `requirements.txt`: prototype runtime dependency list。
 - `README.md`: repo 簡介、定位與核心文件入口。

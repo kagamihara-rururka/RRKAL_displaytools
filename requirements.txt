@@ -4,3 +4,4 @@ datashader
 vispy
 PyQt5
 Pillow
+PyQt6
