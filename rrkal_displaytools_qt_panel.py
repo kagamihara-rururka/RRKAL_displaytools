@@ -1169,7 +1169,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_runtime_state_label.setText(
             f"Layer runtime bridge: {LAYER_RUNTIME_STATE_PATH.name}; selected={selected_layer}; "
             f"visible={visible_count}/{len(LAYER_LABELS)}; last_write={last_write}; "
-            "visibility live, opacity/blend/lock pending"
+            "visibility/opacity live, blend pending, lock guard live"
         )
 
     def append_layer_runtime_history(self, payload: dict[str, object]) -> None:
@@ -1239,6 +1239,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         event = str(payload.get("event", "-"))
         changed_layers = payload.get("changed_layers", [])
         changed_count = len(changed_layers) if isinstance(changed_layers, list) else "-"
+        changed_opacity_layers = payload.get("changed_opacity_layers", [])
+        changed_opacity_count = len(changed_opacity_layers) if isinstance(changed_opacity_layers, list) else "-"
         skipped_locked_layers = payload.get("skipped_locked_layers", [])
         skipped_count = len(skipped_locked_layers) if isinstance(skipped_locked_layers, list) else "-"
         frame_index = payload.get("frame_index", "-")
@@ -1248,8 +1250,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.layer_runtime_ack_label.setText(f"Renderer ack: event={event}, error={error}, updated={updated_at}")
             return
         self.layer_runtime_ack_label.setText(
-            f"Renderer ack: event={event}, changed={changed_count}, skipped_locked={skipped_count}, "
-            f"frame={frame_index}, updated={updated_at}"
+            f"Renderer ack: event={event}, changed={changed_count}, opacity={changed_opacity_count}, "
+            f"skipped_locked={skipped_count}, frame={frame_index}, updated={updated_at}"
         )
 
     def refresh_pin_input_ack_state(self) -> None:
@@ -1689,7 +1691,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"可見圖層 {visible}/{len(LAYER_LABELS)}；鎖定 {locked}；"
             f"非預設 opacity/blend {non_default}；"
             f"solo snapshot={'active' if self.layer_visibility_snapshot is not None else 'none'}。"
-            "🚧 Lock/Opacity/Blend 下一步接 renderer sync。"
+            "Visibility/Opacity 已接 renderer runtime sync；🚧 Blend 下一步接。"
         )
         self.write_layer_runtime_state()
         self.refresh_layer_properties()

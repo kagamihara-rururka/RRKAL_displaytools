@@ -2464,6 +2464,24 @@ BOUNDARY_HIGHLIGHT_LAYER_MAP = {
     "high_seas_layer": "high_seas",
 }
 BOUNDARY_HIGHLIGHT_TRIGGERS = {"hover", "selected", "hover_or_selected"}
+LAYER_RUNTIME_ID_ALIASES = {
+    "lake_layer": "lakes",
+    "river_layer": "rivers",
+    "border_layer": "borders",
+    "territorial_sea_layer": "territorial_sea",
+    "eez_layer": "eez",
+    "high_seas_layer": "high_seas",
+    "aircraft_layer": "aircraft",
+    "terrain_contours": "contours",
+    "scale_bar": "scale",
+    "vehicle_icons": "vehicle_icons",
+}
+BOUNDARY_OPACITY_ATTRS = {
+    "borders": "border_opacity",
+    "territorial_sea": "territorial_sea_opacity",
+    "eez": "eez_opacity",
+    "high_seas": "high_seas_opacity",
+}
 
 
 def _clamp_int_value(value: object, default: int, minimum: int, maximum: int) -> int:
@@ -10562,6 +10580,49 @@ class HybridRenderController:
             self.overlay_dirty = True
         return changed
 
+    def layer_runtime_id(self, layer_id: object) -> str:
+        raw_id = str(layer_id)
+        return LAYER_RUNTIME_ID_ALIASES.get(raw_id, raw_id)
+
+    def layer_opacity_attr(self, layer_id: str) -> str | None:
+        if layer_id in HYDROLOGY_SPECS:
+            return f"{HYDROLOGY_SPECS[layer_id]['prefix']}_opacity"
+        if layer_id in BOUNDARY_OPACITY_ATTRS:
+            return BOUNDARY_OPACITY_ATTRS[layer_id]
+        if layer_id == "scale":
+            return "scale_bar_opacity"
+        if layer_id == "contours":
+            return "contour_opacity"
+        return None
+
+    def layer_opacity_percent(self, layer_id: str) -> int | None:
+        attr = self.layer_opacity_attr(layer_id)
+        if attr is None or not hasattr(self.args, attr):
+            return None
+        return int(round(max(0.0, min(float(getattr(self.args, attr)), 1.0)) * 100.0))
+
+    def set_layer_opacity(self, layer_id: str, opacity_percent: object) -> bool:
+        opacity_value = _clamp_int_value(opacity_percent, 100, 0, 100) / 100.0
+        current = self.layer_opacity_percent(layer_id)
+        if current is not None and current == int(round(opacity_value * 100.0)):
+            return False
+        if layer_id in HYDROLOGY_SPECS:
+            self.set_hydrology_opacity(layer_id, opacity_value)
+            return True
+        if layer_id in BOUNDARY_OPACITY_ATTRS:
+            self.set_boundary_opacity(layer_id, opacity_value)
+            return True
+        if layer_id == "scale":
+            self.set_scale_bar_opacity(opacity_value)
+            self.overlay_dirty = True
+            return True
+        if layer_id == "contours" and hasattr(self.args, "contour_opacity"):
+            self.args.contour_opacity = opacity_value
+            self.globe_dirty = True
+            self.overlay_dirty = True
+            return True
+        return False
+
     def refresh_layer_runtime_state(self) -> bool:
         if self.layer_runtime_state_file is None:
             return False
@@ -10586,24 +10647,49 @@ class HybridRenderController:
             return False
         changed = False
         changed_layers: list[str] = []
+        changed_opacity_layers: list[str] = []
         skipped_locked_layers: list[str] = []
         layers = payload.get("layers")
         if isinstance(layers, dict):
-            for layer_id, state in layers.items():
+            for runtime_layer_id, state in layers.items():
+                layer_id = self.layer_runtime_id(runtime_layer_id)
                 if layer_id not in self.layer_visible or not isinstance(state, dict):
                     continue
                 visible = state.get("visible")
+                opacity = state.get("opacity")
                 if state.get("locked") is True:
+                    should_skip = False
                     if isinstance(visible, bool) and self.layer_visible.get(layer_id) != visible:
-                        skipped_locked_layers.append(str(layer_id))
+                        should_skip = True
+                    current_opacity = self.layer_opacity_percent(layer_id)
+                    if (
+                        isinstance(opacity, int)
+                        and not isinstance(opacity, bool)
+                        and current_opacity is not None
+                        and current_opacity != max(0, min(int(opacity), 100))
+                    ):
+                        should_skip = True
+                    if should_skip:
+                        skipped_locked_layers.append(str(runtime_layer_id))
                     continue
                 if isinstance(visible, bool) and self.layer_visible.get(layer_id) != visible:
                     self.set_layer_visible(str(layer_id), bool(visible))
                     changed_layers.append(str(layer_id))
                     changed = True
+                if isinstance(opacity, int) and not isinstance(opacity, bool):
+                    if self.set_layer_opacity(str(layer_id), opacity):
+                        changed_opacity_layers.append(str(layer_id))
+                        changed = True
         self.layer_runtime_state_mtime_ns = next_mtime_ns
         self.layer_runtime_state_last_error = None
-        self.write_layer_runtime_ack("applied", payload, changed_layers, skipped_locked_layers, next_mtime_ns)
+        self.write_layer_runtime_ack(
+            "applied",
+            payload,
+            changed_layers,
+            changed_opacity_layers,
+            skipped_locked_layers,
+            next_mtime_ns,
+        )
         return changed
 
     def write_layer_runtime_ack(
@@ -10611,12 +10697,19 @@ class HybridRenderController:
         event_kind: str,
         state_payload: dict[str, object] | None,
         changed_layers: list[str],
+        changed_opacity_layers: list[str],
         skipped_locked_layers: list[str],
         state_mtime_ns: int | None,
     ) -> None:
         if self.layer_runtime_ack_file is None:
             return
         visible_layers = [layer_id for layer_id, visible in self.layer_visible.items() if visible]
+        layer_opacity = {
+            layer_id: opacity
+            for layer_id in self.layer_visible
+            for opacity in [self.layer_opacity_percent(layer_id)]
+            if opacity is not None
+        }
         payload = {
             "schema": "rrkal_displaytools.renderer_layer_runtime_ack.v1",
             "updated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
@@ -10625,12 +10718,15 @@ class HybridRenderController:
             "runtime_state_mtime_ns": state_mtime_ns,
             "runtime_state_updated_at_utc": state_payload.get("updated_at_utc") if isinstance(state_payload, dict) else None,
             "changed_layers": changed_layers,
+            "changed_opacity_layers": changed_opacity_layers,
             "skipped_locked_layers": skipped_locked_layers,
             "visible_layers": visible_layers,
             "layer_visible": {layer_id: bool(visible) for layer_id, visible in self.layer_visible.items()},
+            "layer_opacity": layer_opacity,
+            "runtime_layer_aliases": dict(LAYER_RUNTIME_ID_ALIASES),
             "frame_index": getattr(self, "frame_index", 0),
-            "applies": ["visibility", "lock_guard_visibility"],
-            "pending": ["opacity", "blend_mode"],
+            "applies": ["visibility", "lock_guard_visibility", "opacity"],
+            "pending": ["blend_mode"],
             "error": self.layer_runtime_state_last_error,
             "source": "taichi_global_bathymetry",
         }
@@ -15209,8 +15305,9 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "control": "layer-runtime-state-file",
             "ack_control": "layer-runtime-ack-file",
             "ack_schema": "rrkal_displaytools.renderer_layer_runtime_ack.v1",
-            "applies": ["visibility", "lock_guard_visibility"],
-            "pending": ["opacity", "blend_mode"],
+            "runtime_layer_aliases": dict(LAYER_RUNTIME_ID_ALIASES),
+            "applies": ["visibility", "lock_guard_visibility", "opacity"],
+            "pending": ["blend_mode"],
         },
         "rrkal_boundary": {
             "displaytools_owns": [

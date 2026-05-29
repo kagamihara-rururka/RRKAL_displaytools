@@ -1137,3 +1137,20 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Layer runtime opacity sync
+
+Scope:
+- Added renderer alias mapping from Qt layer keys such as `lake_layer` / `border_layer` to renderer layer IDs such as `lakes` / `borders`.
+- Renderer runtime layer sync now applies supported `opacity` values from `renderer_layer_runtime_state.json`.
+- Supported opacity targets currently include hydrology lines, boundary lines, scale bar, and terrain contours.
+- Locked runtime layers skip both visibility and opacity changes.
+- Renderer layer runtime ack now reports `changed_opacity_layers`, current `layer_opacity`, and the runtime alias map.
+- Qt Layers ack label now displays opacity-change count.
+
+Positioning:
+- This closes the first live opacity loop from the Photoshop-like Qt layer stack into the renderer.
+- Remaining layer stack work is blend mode sync, broader per-layer opacity support for point/icon layers, and renderer-backed picking.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
