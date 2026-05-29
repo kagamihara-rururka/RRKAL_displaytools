@@ -25,7 +25,7 @@
 - 左側 Tools dock 已新增科研導向 tool palette：Move、Select、Pin。Select 用於指定 active layer，並可在 Canvas Preview 以垂直 hit bands 點選目前可見圖層；Pin 用於科研標記，可保存 type、label、note、latitude、longitude，並加入 marker list。Pin list 已支援選取、欄位回填與 selected pin 狀態保存。Brush/Mask 暫不納入本輪 UI。`tool_state`、`pins` 與 `selected_pin_id` 會寫入 profile 與 launch packet。
 - 支援啟動、停止、套用並重啟 renderer。
 - 顯示 renderer PID、執行中狀態與 exit code。
-- 中央 Canvas Preview 已可用 UI-only 方式顯示 style/topography/data mode、active tool、active layer、visible layer count、Select hit map 與 zoom；也可切到最近 `state/showcase/*.png` 的 renderer static thumbnail。Canvas preview mode 與 thumbnail path 會寫入 profile / launch packet / provenance；thumbnail path 只保存參考，不提交 runtime PNG。中央文字區也可顯示 renderer capabilities、layer manifest、launch packet 或 smoke 結果。
+- 中央 Canvas Preview 已可用 UI-only 方式顯示 style/topography/data mode、active tool、active layer、visible layer count、Select hit map 與 zoom；也可切到最近 `state/showcase/*.png` 的 renderer static thumbnail，thumbnail 模式下會自動輪詢並刷新最新 PNG。Canvas preview mode 與 thumbnail path 會寫入 profile / launch packet / provenance；thumbnail path 只保存參考，不提交 runtime PNG。中央文字區也可顯示 renderer capabilities、layer manifest、launch packet 或 smoke 結果。
 - Canvas Preview 已支援滑鼠位置的 UI-only 經緯度估算，使用 equirectangular canvas mapping，可一鍵填入 Pin 的 latitude/longitude，並顯示目前 selected pin 與 marker 摘要。
 - 右側 `Provenance` dock 已提供科研可重現性摘要，可複製 JSON，內容包含 style/topo/data mode、active layer、active tool、visible/locked layers、layer count 與 portable command line。
 - 已新增 `pin_projection.py` 共用 hook：以 latitude/longitude 作為 geodetic surface anchor，依 renderer camera yaw/pitch/zoom 投影到 screen_x/screen_y，並以 horizon clipping 判斷背面遮蔽；renderer capabilities 會暴露此 Pin overlay contract。
@@ -37,7 +37,7 @@
 ## 預計實現功能
 
 - Dockable panels 的更完整 Photoshop-like 版面：Layers / Properties / Navigator / History / Timeline。
-- 中央 Canvas Preview 已具備 Qt state preview 與最近 renderer output static thumbnail；後續要升級為 live renderer frame stream。
+- 中央 Canvas Preview 已具備 Qt state preview、最近 renderer output static thumbnail 與 static thumbnail auto-refresh；後續要升級為 live renderer frame stream。
 - Renderer layer runtime sync 下一步擴充 polygon fill mask 與更完整 renderer diagnostics；目前 visibility、支援圖層 opacity、lake/river/boundary/aircraft/pin/vehicle icon overlay blend、selected layer semantic target、selected-layer-scoped Pin/traffic/boundary/hydrology line picking 已可透過 `state/renderer_layer_runtime_state.json` 與 `state/renderer_layer_pick_state.json` 即時同步，Qt 與 renderer 端已有 bridge diagnostics、history、renderer ack 與 locked layer 防誤改。
 - Point/icon opacity/blend 下一步處理其他新增獨立 overlay，前提是 renderer 有可單獨合成的 frame overlay。
 - Layer stack 下一步是 selected layer 的 authoritative polygon territory identity、開放線段面域推論與更完整 renderer diagnostics。

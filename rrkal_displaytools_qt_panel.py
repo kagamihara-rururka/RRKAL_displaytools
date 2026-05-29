@@ -276,6 +276,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.canvas_meta_label: QtWidgets.QLabel | None = None
         self.canvas_preview_mode = "state"
         self.renderer_thumbnail_path: Path | None = None
+        self.renderer_thumbnail_mtime_ns: int | None = None
         self.canvas_zoom_slider: QtWidgets.QSlider | None = None
         self.cursor_latitude: float | None = None
         self.cursor_longitude: float | None = None
@@ -312,6 +313,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.boundary_highlight_ack_timer.setInterval(1000)
         self.boundary_highlight_ack_timer.timeout.connect(self.refresh_boundary_highlight_ack_state)
         self.boundary_highlight_ack_timer.start()
+        self.renderer_thumbnail_timer = QtCore.QTimer(self)
+        self.renderer_thumbnail_timer.setInterval(1500)
+        self.renderer_thumbnail_timer.timeout.connect(self.refresh_renderer_thumbnail_if_needed)
+        self.renderer_thumbnail_timer.start()
         self.apply_baseline()
         self.refresh_template_list()
         if initial_profile is not None:
@@ -2436,6 +2441,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         pixmap = QtGui.QPixmap(str(path))
         if pixmap.isNull():
             return False
+        try:
+            self.renderer_thumbnail_mtime_ns = path.stat().st_mtime_ns
+        except OSError:
+            self.renderer_thumbnail_mtime_ns = None
         target_size = self.canvas_preview_label.size()
         scaled = pixmap.scaled(
             target_size,
@@ -2450,6 +2459,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def show_canvas_state_preview(self) -> None:
         self.canvas_preview_mode = "state"
         self.renderer_thumbnail_path = None
+        self.renderer_thumbnail_mtime_ns = None
         self.refresh_canvas_preview()
         self.status.setText("已切回 Qt Canvas state preview")
 
@@ -2463,6 +2473,28 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.renderer_thumbnail_path = path
         self.refresh_canvas_preview()
         self.status.setText(f"已顯示 renderer thumbnail：{path.relative_to(ROOT)}")
+
+    def refresh_renderer_thumbnail_if_needed(self) -> None:
+        if self.canvas_preview_mode != "thumbnail":
+            return
+        path = self.renderer_thumbnail_path
+        if path is None or not path.exists():
+            path = self.latest_renderer_thumbnail_path()
+        if path is None:
+            return
+        try:
+            mtime_ns = path.stat().st_mtime_ns
+        except OSError:
+            return
+        if path == self.renderer_thumbnail_path and mtime_ns == self.renderer_thumbnail_mtime_ns:
+            return
+        self.renderer_thumbnail_path = path
+        if self.render_thumbnail_into_canvas(path) and self.canvas_meta_label is not None:
+            self.canvas_meta_label.setText(
+                f"Renderer thumbnail auto-refreshed: {path.relative_to(ROOT)}. "
+                "Static output preview only; live renderer frame stream remains future work."
+            )
+            self.refresh_research_provenance()
 
     def build_research_provenance(self) -> str:
         visible_layers = [key for key, _label in LAYER_LABELS if key in self.checks and self.checks[key].isChecked()]

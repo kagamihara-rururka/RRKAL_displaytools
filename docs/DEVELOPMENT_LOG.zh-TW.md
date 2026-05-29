@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - Canvas thumbnail auto-refresh
+
+Scope:
+- Qt thumbnail mode now polls `state/showcase/*.png` every 1.5 seconds.
+- When the referenced renderer PNG changes or a newer showcase PNG appears, Canvas Preview refreshes without another manual click.
+- Closed-loop status now distinguishes static thumbnail auto-refresh from the still-pending live renderer frame stream.
+
+Positioning:
+- This makes the current static renderer preview usable during iterative headless/showcase renders.
+- It is not a live renderer stream; live frame streaming remains future work.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Canvas preview no-GUI handoff
 
 Scope:

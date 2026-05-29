@@ -54,7 +54,12 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
             },
             {
                 "id": "qt_renderer_preview",
-                "applies": ["Qt canvas state preview", "runtime JSON inspectors", "static renderer output thumbnail"],
+                "applies": [
+                    "Qt canvas state preview",
+                    "runtime JSON inspectors",
+                    "static renderer output thumbnail",
+                    "static thumbnail auto-refresh",
+                ],
                 "pending": ["live renderer frame stream"],
                 "evidence": [
                     "Qt Canvas Preview",
