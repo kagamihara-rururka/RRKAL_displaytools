@@ -409,3 +409,16 @@ Validation:
 
 
 
+
+## 2026-05-29 - Windows setup documentation
+
+Scope:
+- Added `docs/SETUP_WINDOWS.zh-TW.md` for clone, install, smoke, Qt panel launch, template use, quick render, and launch packet export on another Windows computer.
+- Updated docs index, README, and GTD.
+- Added user reporting rule: after every push, summarize current program capabilities in Chinese.
+
+Positioning:
+- This supports cross-machine usage without changing renderer behavior.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

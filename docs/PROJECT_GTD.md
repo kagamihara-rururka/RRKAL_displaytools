@@ -22,7 +22,7 @@ Last updated: 2026-05-29
 - Qt/PyQt6-first for displaytools control UI; do not introduce Tk as the main UI path.
 - RRKAL-first data governance: dataset discovery, download, import, install registry, manifest, cache lifecycle, and asset repair belong to `APIkeys_collection`.
 - Do not commit generated caches, screenshots, logs, databases, virtual environments, secrets, or heavy local data.
-- Every development round ends with docs/log update and commit before the next round starts.
+- Every development round ends with docs/log update, smoke test, commit, push, and a Chinese summary of current program capabilities.
 - Current user rule: before each commit, run at least a smoke test and record the result in `docs/DEVELOPMENT_LOG.zh-TW.md`.
 
 ## Backlog
@@ -60,6 +60,7 @@ Last updated: 2026-05-29
 - 2026-05-29: Extracted shared profile schema validation module.
 - 2026-05-29: Added no-GUI launch packet exporter and smoke coverage.
 - 2026-05-29: Added GitHub Actions Windows smoke workflow.
+- 2026-05-29: Added Windows setup document for another computer.
 - 2026-05-29: Added Qt panel smoke-check action.
 - 2026-05-29: Added Qt launch packet export for handoff/debugging.
 - 2026-05-29: Added Windows quick headless render helper script.
@@ -67,6 +68,7 @@ Last updated: 2026-05-29
 - 2026-05-29: Reworked Qt operator actions into a grid layout.
 - 2026-05-29: Added renderer capabilities JSON CLI output.
 - 2026-05-29: Added Qt panel renderer capabilities display action.
+
 
 
 

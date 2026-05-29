@@ -9,6 +9,7 @@
 - `GIT_HANDOFF.md`: git start/end loop, commit/push rules, and do-not-commit list.
 - `WORKSPACE_LAYOUT.zh-TW.md`: canonical workspace, root files, docs map, and local-only artifact policy.
 - `PROFILE_SCHEMA.zh-TW.md`: Qt panel profile template schema and RRKAL/displaytools handoff rules.
+- `SETUP_WINDOWS.zh-TW.md`: clone/setup/smoke/Qt panel steps for another Windows computer.
 
 ## Positioning
 

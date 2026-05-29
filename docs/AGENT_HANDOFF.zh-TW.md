@@ -29,7 +29,8 @@
 - Update `docs/DEVELOPMENT_LOG.zh-TW.md`.
 - Update `docs/PROJECT_GTD.md` or this handoff if scope/status changed.
 - Commit scoped code/docs before starting the next round.
-- Push `main` when network/GitHub access is available.
+- Push main when network/GitHub access is available.
+- After every push, report in Chinese what capabilities the program currently has.
 
 ## Current source of truth
 
@@ -47,3 +48,4 @@
 - Runtime data/cache artifacts are local-only.
 - Keep commits intentional and scoped.
 - Do not add crawler/provider/download logic here; keep those concerns in RRKAL.
+
