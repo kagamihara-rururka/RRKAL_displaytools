@@ -389,13 +389,19 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "locked": QtWidgets.QLabel("-"),
             "opacity": QtWidgets.QLabel("-"),
             "blend": QtWidgets.QLabel("-"),
+            "renderer_target": QtWidgets.QLabel("-"),
+            "diagnostics": QtWidgets.QLabel("-"),
         }
+        for property_label in self.layer_property_labels.values():
+            property_label.setWordWrap(True)
         material_form.addRow("Layer inspector", layer_inspector_note)
         material_form.addRow("Active layer", self.layer_property_labels["name"])
         material_form.addRow("Visible", self.layer_property_labels["visible"])
         material_form.addRow("Locked", self.layer_property_labels["locked"])
         material_form.addRow("Opacity", self.layer_property_labels["opacity"])
         material_form.addRow("Blend mode", self.layer_property_labels["blend"])
+        material_form.addRow("Renderer target", self.layer_property_labels["renderer_target"])
+        material_form.addRow("Renderer diagnostics", self.layer_property_labels["diagnostics"])
         layer_property_actions = QtWidgets.QHBoxLayout()
         toggle_selected_visibility = QtWidgets.QPushButton("切換選取可見")
         reset_selected_state = QtWidgets.QPushButton("重設選取 UI 狀態")
@@ -1413,6 +1419,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if isinstance(payload, dict):
             self.layer_runtime_ack_payload = payload
             self.refresh_layer_runtime_ack_label(payload)
+            self.refresh_layer_properties()
             self.refresh_research_provenance()
 
     def refresh_layer_runtime_ack_label(self, payload: dict[str, object]) -> None:
@@ -1468,6 +1475,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if isinstance(payload, dict):
             self.layer_pick_state_payload = payload
             self.refresh_layer_pick_state_label(payload)
+            self.refresh_layer_properties()
             self.refresh_research_provenance()
 
     def refresh_layer_pick_state_label(self, payload: dict[str, object]) -> None:
@@ -2072,7 +2080,48 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_property_labels["locked"].setText("Locked" if self.layer_locks[key].isChecked() else "Unlocked")
         self.layer_property_labels["opacity"].setText(f"{self.layer_opacity[key].value()}%")
         self.layer_property_labels["blend"].setText(self.layer_blends[key].currentText())
+        renderer_target = LAYER_RUNTIME_ID_ALIASES.get(key, "-")
+        self.layer_property_labels["renderer_target"].setText(str(renderer_target))
+        self.layer_property_labels["diagnostics"].setText(self.layer_diagnostics_text(str(renderer_target)))
         self.refresh_boundary_highlight_status()
+
+    def layer_diagnostics_text(self, renderer_target: str) -> str:
+        ack = self.layer_runtime_ack_payload if isinstance(self.layer_runtime_ack_payload, dict) else {}
+        ack_event = str(ack.get("event") or "waiting")
+        ack_target = str(ack.get("selected_renderer_layer") or "-")
+        ack_frame = ack.get("frame_index", "-")
+        ack_error = ack.get("error")
+        if ack_error:
+            ack_text = f"ack error={ack_error}"
+        elif ack_target == "-":
+            ack_text = f"ack={ack_event}, target waiting"
+        elif ack_target == renderer_target:
+            ack_text = f"ack={ack_event}, target matched, frame={ack_frame}"
+        else:
+            ack_text = f"ack={ack_event}, target={ack_target}, frame={ack_frame}"
+
+        pick_payload = self.layer_pick_state_payload if isinstance(self.layer_pick_state_payload, dict) else {}
+        pick_result = pick_payload.get("pick_result")
+        pick_result = pick_result if isinstance(pick_result, dict) else {}
+        pick_event = str(pick_result.get("event") or pick_payload.get("event") or "waiting")
+        pick_target = str(pick_payload.get("selected_renderer_layer") or pick_result.get("renderer_layer") or "-")
+        hit_value = pick_result.get("hit")
+        if isinstance(hit_value, bool):
+            hit_text = "hit" if hit_value else "no-hit"
+        else:
+            hit_text = "-"
+        feature_label = pick_result.get("feature_label") or pick_result.get("label") or pick_result.get("name")
+        feature_text = ""
+        if isinstance(feature_label, str) and feature_label.strip():
+            feature = feature_label.strip()
+            if len(feature) > 48:
+                feature = f"{feature[:45]}..."
+            feature_text = f", feature={feature}"
+        if pick_target == "-":
+            pick_text = f"pick={pick_event}, target waiting"
+        else:
+            pick_text = f"pick={pick_event}, target={pick_target}, {hit_text}{feature_text}"
+        return f"{ack_text}; {pick_text}"
 
     def set_active_tool(self, mode: str) -> None:
         if mode not in self.tool_buttons:

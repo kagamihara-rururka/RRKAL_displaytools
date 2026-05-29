@@ -1,5 +1,18 @@
 # Development Log
 
+## 2026-05-29 - Active layer renderer diagnostics
+
+Scope:
+- Properties active layer inspector now shows the selected layer's renderer target alias.
+- The same inspector summarizes the latest renderer runtime ack target/frame and layer pick target/hit/feature.
+- Ack and pick polling now refresh the active layer inspector immediately, not only the Layers dock bridge labels.
+
+Positioning:
+- This makes the Photoshop-like layer workflow more useful for researchers by keeping UI layer state, renderer target, and pick evidence in one place.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Quick render smoke verifies preview frame
 
 Scope:
