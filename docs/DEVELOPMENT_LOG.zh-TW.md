@@ -1,5 +1,18 @@
 # Development Log
 
+## 2026-05-29 - Handoff inspection script
+
+Scope:
+- Added `scripts/inspect_handoff.ps1`.
+- The script prints a read-only JSON summary of renderer UI handoff capabilities, closed-loop ids, partial ids, launch packet contracts, and the RRKAL/displaytools boundary.
+- Smoke now gates the handoff inspection schema and `session_journal` contract.
+
+Positioning:
+- This improves cross-machine clone diagnostics without opening Qt and without adding displaytools-side dataset discovery, download, import, or cache governance.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Renderer UI handoff capability discovery
 
 Scope:

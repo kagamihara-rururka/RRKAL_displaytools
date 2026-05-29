@@ -65,8 +65,9 @@
 - `py -3 rrkal_displaytools_qt_panel.py --list-templates`
 - `py -3 profile_schema.py`
 - `py -3 scripts\export_launch_packet.py --template fast_synthetic`
+- `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_handoff.ps1`
 
-這些入口給腳本查詢 renderer 能力、closed-loop status、圖層 manifest、可用 templates、profile schema，以及產生 launch packet。Renderer capabilities 內含 `closed_loop_status`、`preview_frame_stream`、`active_layer_diagnostics` 與 `ui_handoff_contracts` contract，也可用 `--print-closed-loop-status` 只輸出目前 closed、partial 與 pending 的功能邊界；closed-loop status 會列出 `diagnostics_handoff_contracts`。
+這些入口給腳本查詢 renderer 能力、closed-loop status、圖層 manifest、可用 templates、profile schema、產生 launch packet，以及檢查跨機器 handoff summary。Renderer capabilities 內含 `closed_loop_status`、`preview_frame_stream`、`active_layer_diagnostics` 與 `ui_handoff_contracts` contract，也可用 `--print-closed-loop-status` 只輸出目前 closed、partial 與 pending 的功能邊界；closed-loop status 會列出 `diagnostics_handoff_contracts`。
 
 ### Launch packets and handoff
 
@@ -79,6 +80,7 @@
 
 - `scripts/setup_windows.ps1` 安裝依賴。
 - `scripts/run_qt_panel.ps1` 啟動 Qt panel，支援 `-Profile` 與 `-Template`。
+- `scripts/inspect_handoff.ps1` 輸出 read-only handoff inspection JSON，方便跨機器 clone 後先確認 UI/renderer contract。
 - `scripts/render_quick_smoke.ps1` 要求快速 synthetic/headless render，並驗證 preview frame PNG 寫檔。
 - `scripts/smoke.ps1` 是提交前 smoke helper。
 - `docs/SETUP_WINDOWS.zh-TW.md` 提供另一台 Windows 電腦 clone/setup/smoke/run 步驟。
@@ -102,6 +104,7 @@
   - Closed-loop status `diagnostics_handoff_contracts` gate。
   - Closed-loop status `layer_stack_undo_snapshots` gate。
   - Closed-loop status `session_journal_handoff` gate。
+  - Handoff inspection `session_journal` contract gate。
   - No-GUI template listing。
   - PowerShell script parse。
 

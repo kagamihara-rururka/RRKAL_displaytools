@@ -91,6 +91,17 @@ if ($closedLoopIds -notcontains "layer_stack_undo_snapshots") {
 if ($closedLoopIds -notcontains "session_journal_handoff") {
     throw "Closed-loop session_journal_handoff missing"
 }
+$handoffText = & powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_handoff.ps1
+if ($LASTEXITCODE -ne 0) {
+    throw "Command failed: powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_handoff.ps1"
+}
+$handoff = ($handoffText -join "`n") | ConvertFrom-Json
+if ($handoff.schema -ne "rrkal_displaytools.handoff_inspection.v1") {
+    throw "Handoff inspection schema missing or invalid"
+}
+if ($handoff.launch_packet_contracts.session_journal -ne "rrkal_displaytools.session_journal.v1") {
+    throw "Handoff inspection session_journal contract missing or invalid"
+}
 Invoke-CheckedNative py @("-3", "taichi_global_bathymetry.py", "--print-layer-manifest") | Out-Null
 Invoke-CheckedNative py @("-3", "rrkal_displaytools_qt_panel.py", "--list-templates") | Out-Null
 
