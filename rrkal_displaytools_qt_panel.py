@@ -1166,8 +1166,6 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             live.append("blend")
         if not live:
             return "planned"
-        if key in {"border_layer", "territorial_sea_layer", "eez_layer", "high_seas_layer"}:
-            return f"live: {', '.join(live)}; pending: per-boundary split blend"
         return f"live: {', '.join(live)}"
 
     def collect_layer_runtime_state(self) -> dict[str, object]:
@@ -1225,7 +1223,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_runtime_state_label.setText(
             f"Layer runtime bridge: {LAYER_RUNTIME_STATE_PATH.name}; selected={selected_layer}; "
             f"visible={visible_count}/{len(LAYER_LABELS)}; last_write={last_write}; "
-            "visibility/opacity live, overlay/aggregate blend live, split blend pending, lock guard live"
+            "visibility/opacity live, overlay/split blend live, selected-layer semantic target pending, lock guard live"
         )
 
     def append_layer_runtime_history(self, payload: dict[str, object]) -> None:

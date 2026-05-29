@@ -14,6 +14,20 @@ Positioning:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+## 2026-05-29 - Per-boundary runtime blend split
+
+Scope:
+- Preserved individual rendered boundary layer RGBA buffers in addition to the aggregate boundary overlay.
+- Final frame composition now applies blend mode per boundary layer for borders, territorial sea, EEZ, and high seas.
+- Renderer ack/capabilities now mark per-boundary split blend as applied and keep selected-layer semantic target as the remaining layer runtime pending item.
+
+Positioning:
+- This closes the boundary blend loop without changing provider/data governance.
+- Remaining layer runtime work is selected-layer semantic/object picking rather than basic visibility/opacity/blend sync.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Boundary aggregate runtime blend
 
 Scope:

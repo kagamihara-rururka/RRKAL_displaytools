@@ -10647,6 +10647,7 @@ class HybridRenderController:
         self.lake_overlay_rgba = np.zeros_like(self.globe_rgba)
         self.river_overlay_rgba = np.zeros_like(self.globe_rgba)
         self.boundary_overlay_rgba = np.zeros_like(self.globe_rgba)
+        self.boundary_layer_rgba: dict[str, np.ndarray] = {}
         self.vector_overlay_cache: dict[tuple, object] = {}
         self.vector_overlay_cache_order: list[tuple] = []
         self.vector_overlay_cache_hits = 0
@@ -10894,10 +10895,11 @@ class HybridRenderController:
             "layer_opacity": layer_opacity,
             "layer_blend_mode": layer_blend_mode,
             "boundary_aggregate_blend_mode": self.boundary_aggregate_blend_mode(),
+            "boundary_split_blend_layers": ["borders", "territorial_sea", "eez", "high_seas"],
             "runtime_layer_aliases": dict(LAYER_RUNTIME_ID_ALIASES),
             "frame_index": getattr(self, "frame_index", 0),
-            "applies": ["visibility", "lock_guard_visibility", "opacity", "blend_mode_overlay", "blend_mode_boundary_aggregate"],
-            "pending": ["blend_mode_per_boundary_split"],
+            "applies": ["visibility", "lock_guard_visibility", "opacity", "blend_mode_overlay", "blend_mode_per_boundary_split"],
+            "pending": ["selected_layer_semantic_target"],
             "error": self.layer_runtime_state_last_error,
             "source": "taichi_global_bathymetry",
         }
@@ -12061,12 +12063,17 @@ class HybridRenderController:
         cache_key = ("boundary", view_key)
         cached = None if force else self._lookup_vector_overlay_cache(cache_key)
         if cached is not None:
-            self.boundary_overlay_rgba = cached
+            if isinstance(cached, tuple) and len(cached) == 2:
+                self.boundary_overlay_rgba, self.boundary_layer_rgba = cached
+            else:
+                self.boundary_overlay_rgba = cached
+                self.boundary_layer_rgba = {}
             self.boundary_view_key = view_key
             self.boundary_dirty = False
             self.boundary_hover_dirty = False
             return
         composite = np.zeros_like(self.globe_rgba)
+        layer_rgba: dict[str, np.ndarray] = {}
         boundary_highlight = getattr(self, "boundary_highlight_state", {})
         highlight_enabled = bool(boundary_highlight.get("enabled", False)) if isinstance(boundary_highlight, dict) else False
         highlight_trigger = str(boundary_highlight.get("trigger", "hover")) if isinstance(boundary_highlight, dict) else "hover"
@@ -12120,12 +12127,14 @@ class HybridRenderController:
                 highlight_alpha_scale=highlight_alpha_scale,
                 highlight_width_extra=highlight_width_extra,
             )
+            layer_rgba[layer_id] = rendered
             composite = alpha_compose_transparent(composite, rendered)
         self.boundary_overlay_rgba = composite
+        self.boundary_layer_rgba = layer_rgba
         self.boundary_view_key = view_key
         self.boundary_dirty = False
         self.boundary_hover_dirty = False
-        self._cache_vector_overlay(cache_key, self.boundary_overlay_rgba)
+        self._cache_vector_overlay(cache_key, (self.boundary_overlay_rgba, self.boundary_layer_rgba))
 
     def hydrology_layer_status_text(self, layer_id: str) -> str:
         overlay = self.hydrology_overlays.get(layer_id)
@@ -13770,11 +13779,17 @@ class HybridRenderController:
 
         self.frame_rgba = self.compose_runtime_blend(self.globe_rgba, "lakes", self.lake_overlay_rgba)
         self.frame_rgba = self.compose_runtime_blend(self.frame_rgba, "rivers", self.river_overlay_rgba)
-        self.frame_rgba = alpha_blend_compose(
-            self.frame_rgba,
-            self.boundary_overlay_rgba,
-            self.boundary_aggregate_blend_mode(),
-        )
+        if self.boundary_layer_rgba:
+            for layer_id in ("borders", "territorial_sea", "eez", "high_seas"):
+                rendered_boundary = self.boundary_layer_rgba.get(layer_id)
+                if rendered_boundary is not None:
+                    self.frame_rgba = self.compose_runtime_blend(self.frame_rgba, layer_id, rendered_boundary)
+        else:
+            self.frame_rgba = alpha_blend_compose(
+                self.frame_rgba,
+                self.boundary_overlay_rgba,
+                self.boundary_aggregate_blend_mode(),
+            )
         self.frame_rgba = alpha_compose(self.frame_rgba, self.overlay_rgba)
         self.frame_rgba = self.compose_runtime_overlay(self.frame_rgba, "aircraft", self.aircraft_overlay_rgba)
         self.frame_rgba = self.compose_runtime_overlay(self.frame_rgba, "vehicle_icons", self.vehicle_icon_overlay_rgba)
@@ -15510,7 +15525,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "ack_control": "layer-runtime-ack-file",
             "ack_schema": "rrkal_displaytools.renderer_layer_runtime_ack.v1",
             "runtime_layer_aliases": dict(LAYER_RUNTIME_ID_ALIASES),
-            "applies": ["visibility", "lock_guard_visibility", "opacity", "blend_mode_overlay", "blend_mode_boundary_aggregate"],
+            "applies": ["visibility", "lock_guard_visibility", "opacity", "blend_mode_overlay", "blend_mode_per_boundary_split"],
             "runtime_overlay_opacity_layers": ["aircraft", "pins", "vehicle_icons"],
             "runtime_overlay_blend_layers": [
                 "lakes",
@@ -15519,8 +15534,8 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "pins",
                 "vehicle_icons",
             ],
-            "runtime_aggregate_blend_layers": ["borders", "territorial_sea", "eez", "high_seas"],
-            "pending": ["blend_mode_per_boundary_split"],
+            "runtime_split_blend_layers": ["borders", "territorial_sea", "eez", "high_seas"],
+            "pending": ["selected_layer_semantic_target"],
         },
         "rrkal_boundary": {
             "displaytools_owns": [
