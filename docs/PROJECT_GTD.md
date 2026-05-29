@@ -198,3 +198,4 @@ Last updated: 2026-05-29
 - 2026-05-30: Added Qt `Pin pick` action for inspecting renderer Pin hover/click pick bridge JSON directly in the panel.
 - 2026-05-30: Added Qt `Cursor geo` action for inspecting mouse latitude/longitude readout and renderer cursor geodesy bridge JSON directly in the panel.
 - 2026-05-30: Added Qt `Boundary JSON` action for inspecting Boundary emphasis, identity warning and renderer ack JSON directly in the panel.
+- 2026-05-30: Added `Inspect:` prefixes to Qt JSON inspector action buttons to clarify which buttons inspect state rather than mutate renderer/profile state.

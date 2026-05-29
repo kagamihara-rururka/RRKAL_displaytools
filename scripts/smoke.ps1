@@ -1707,6 +1707,12 @@ if ($qtPanelSource -notlike "*Inspect mouse cursor latitude/longitude geodesy br
 if ($qtPanelSource -notlike "*Boundary JSON*") {
     throw "Qt Boundary JSON action button is missing"
 }
+if ($qtPanelSource -notlike "*Inspect: Profile replay*") {
+    throw "Qt inspector action prefix is missing"
+}
+if ($qtPanelSource -notlike "*Inspect: Boundary JSON*") {
+    throw "Qt Boundary JSON inspector prefix is missing"
+}
 if ($qtPanelSource -notlike "*show_boundary_state*") {
     throw "Qt Boundary JSON action is missing"
 }

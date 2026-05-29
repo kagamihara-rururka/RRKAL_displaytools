@@ -230,6 +230,20 @@ Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
 
+## 2026-05-30 - Qt inspector action naming
+
+Scope:
+- Added an `Inspect:` prefix to the Qt Actions JSON inspector buttons.
+- The prefix now covers Profile replay, Ocean port, Hydro LOD, Style routes, Module seams, Clone ready, Pin pick, Cursor geo and Boundary JSON.
+- Smoke verifies the inspector prefix and Boundary JSON prefix are present.
+
+Decision:
+- The Actions panel needs to distinguish state/contract inspection actions from mutating actions such as launch, restart, save/load and profile export.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+
 ## 2026-05-30 - Qt Boundary JSON action
 
 Scope:

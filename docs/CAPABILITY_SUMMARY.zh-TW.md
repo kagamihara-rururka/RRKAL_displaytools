@@ -414,3 +414,8 @@
 
 - Qt Actions now includes `Boundary JSON`, which displays Boundary highlight, Boundary emphasis controls, identity warning text, renderer ack payload and recent ack history.
 - This gives researchers a direct inspection path for country/territorial sea/EEZ emphasis state and the current non-authoritative identity warning.
+
+### 2026-05-30 Qt inspector action naming
+
+- Qt JSON inspection buttons now use an `Inspect:` prefix, separating state/contract inspection from renderer launch, profile save/load and process control actions.
+- This keeps the Actions panel more readable as more scientific inspection surfaces are added.
