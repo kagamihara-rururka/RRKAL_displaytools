@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - Maritime feature identity keys
+
+Scope:
+- Expanded GeoJSON vector feature identity extraction for Natural Earth and Marine Regions style keys.
+- Pick JSON now records `identity_source`, `identity_keys`, and preview properties such as GEONAME, TERRITORY1/2, SOVEREIGN1/2, ISO codes, MRGID, and policy/type fields when present.
+- Renderer capabilities and closed-loop status now mark maritime property key identity as applied source-property behavior.
+
+Positioning:
+- This improves researcher-facing boundary/EEZ inspection without pretending to resolve official disputes.
+- Authoritative polygon territory identity and open-line area inference remain separate future work.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - RRKAL handoff boundary status
 
 Scope:

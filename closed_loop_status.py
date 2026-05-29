@@ -47,6 +47,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "closed-ring fill contrast/gamma",
                     "closed-ring area hit test",
                     "source-property feature identity",
+                    "maritime property key identity",
                 ],
                 "pending": ["authoritative_polygon_territory_identity", "open_line_area_inference"],
                 "evidence": ["boundary-highlight-json", "boundary-highlight-ack-file"],
