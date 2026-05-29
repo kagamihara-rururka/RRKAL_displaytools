@@ -25,11 +25,12 @@
 ### No-GUI integration endpoints
 
 - `py -3 taichi_global_bathymetry.py --print-renderer-capabilities`
+- `py -3 taichi_global_bathymetry.py --print-layer-manifest`
 - `py -3 rrkal_displaytools_qt_panel.py --list-templates`
 - `py -3 profile_schema.py`
 - `py -3 scripts\export_launch_packet.py --template fast_synthetic`
 
-這些入口給 RRKAL 或腳本查詢 renderer 能力、可用 templates、profile schema，以及產生 launch packet。
+這些入口給腳本查詢 renderer 能力、圖層 manifest、可用 templates、profile schema，以及產生 launch packet。
 
 ### Launch packets and handoff
 

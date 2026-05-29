@@ -22,6 +22,7 @@ Invoke-CheckedNative py @("-3", "profile_schema.py") | Out-Null
 Invoke-CheckedNative py @("-3", "scripts\validate_profiles.py")
 Invoke-CheckedNative py @("-3", "scripts\export_launch_packet.py", "--template", "fast_synthetic") | Out-Null
 Invoke-CheckedNative py @("-3", "taichi_global_bathymetry.py", "--print-renderer-capabilities") | Out-Null
+Invoke-CheckedNative py @("-3", "taichi_global_bathymetry.py", "--print-layer-manifest") | Out-Null
 Invoke-CheckedNative py @("-3", "rrkal_displaytools_qt_panel.py", "--list-templates") | Out-Null
 
 $scripts = Get-ChildItem scripts -Filter *.ps1

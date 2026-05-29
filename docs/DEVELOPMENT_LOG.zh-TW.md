@@ -472,3 +472,16 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Renderer layer manifest output
+
+Scope:
+- Added `--print-layer-manifest` to `taichi_global_bathymetry.py`.
+- The manifest groups existing layer flags into hydrology, boundaries, transport, visual aids, material, and preset groups.
+- Added layer manifest coverage to `scripts/smoke.ps1` and capability summary docs.
+
+Positioning:
+- This starts the renderer-side backend contract for Qt layer control without changing rendering behavior.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

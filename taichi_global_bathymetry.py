@@ -14161,6 +14161,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--demo-closed-loop", action=bool_action, default=parse_bool(os.environ.get("DEMO_CLOSED_LOOP"), False))
     parser.add_argument("--write-demo-packet", default=os.environ.get("WRITE_DEMO_PACKET"))
     parser.add_argument("--print-renderer-capabilities", action=bool_action, default=False)
+    parser.add_argument("--print-layer-manifest", action=bool_action, default=False)
 
     parser.add_argument("--topo-step", type=int, default=int(os.environ.get("TOPO_STEP", "16")))
     parser.add_argument("--topo-source", choices=["gebco", "synthetic"], default=os.environ.get("TOPO_SOURCE", "gebco"))
@@ -14357,6 +14358,77 @@ def renderer_capabilities_packet() -> dict[str, object]:
     }
 
 
+def renderer_layer_manifest_packet() -> dict[str, object]:
+    return {
+        "schema": "rrkal_displaytools.layer_manifest.v1",
+        "renderer": "taichi_global_bathymetry",
+        "groups": [
+            {
+                "id": "hydrology",
+                "label": "Hydrology",
+                "description": "Inland water and river display layers.",
+                "layers": [
+                    {"id": "lake_layer", "flag": "lake-layer", "default": True},
+                    {"id": "river_layer", "flag": "river-layer", "default": True},
+                ],
+            },
+            {
+                "id": "boundaries",
+                "label": "Boundaries",
+                "description": "Political and maritime boundary overlays.",
+                "layers": [
+                    {"id": "border_layer", "flag": "border-layer", "default": True},
+                    {"id": "territorial_sea_layer", "flag": "territorial-sea-layer", "default": False},
+                    {"id": "eez_layer", "flag": "eez-layer", "default": False},
+                    {"id": "high_seas_layer", "flag": "high-seas-layer", "default": False},
+                ],
+            },
+            {
+                "id": "transport",
+                "label": "Transport",
+                "description": "Traffic and vehicle overlays.",
+                "layers": [
+                    {"id": "aircraft_layer", "flag": "aircraft-layer", "default": False},
+                    {"id": "vehicle_icons", "flag": "vehicle-icons", "default": False},
+                ],
+            },
+            {
+                "id": "visual_aids",
+                "label": "Visual aids",
+                "description": "Reference and orientation aids.",
+                "layers": [
+                    {"id": "show_grid", "flag": "show-grid", "default": True},
+                    {"id": "show_stars", "flag": "show-stars", "default": True},
+                    {"id": "terrain_contours", "flag": "terrain-contours", "default": False},
+                    {"id": "scale_bar", "flag": "scale-bar", "default": True},
+                ],
+            },
+            {
+                "id": "material",
+                "label": "Material",
+                "description": "Surface material effects.",
+                "layers": [
+                    {"id": "ocean_material", "flag": "ocean-material", "default": True},
+                ],
+            },
+            {
+                "id": "preset",
+                "label": "Preset",
+                "description": "High-level launch presets.",
+                "layers": [
+                    {"id": "demo_closed_loop", "flag": "demo-closed-loop", "default": False},
+                ],
+            },
+        ],
+        "style_profiles": list(STYLE_PROFILE_REGISTRY.keys()),
+        "material_controls": [
+            {"id": "ocean_wave_strength", "flag": "ocean-wave-strength", "default": 0.22},
+            {"id": "ocean_roughness", "flag": "ocean-roughness", "default": 0.28},
+            {"id": "ocean_foam", "flag": "ocean-foam", "default": 0.12},
+        ],
+    }
+
+
 def apply_closed_loop_demo_defaults(args: argparse.Namespace) -> dict[str, object]:
     """Apply a bounded showcase preset without taking over RRKAL data governance."""
     if args.style_profile not in STYLE_PROFILE_REGISTRY:
@@ -14432,6 +14504,9 @@ def main(argv: list[str] | None = None) -> None:
     args = build_parser().parse_args(argv)
     if args.print_renderer_capabilities:
         print(json.dumps(renderer_capabilities_packet(), ensure_ascii=False, indent=2))
+        return
+    if args.print_layer_manifest:
+        print(json.dumps(renderer_layer_manifest_packet(), ensure_ascii=False, indent=2))
         return
     if args.demo_closed_loop:
         apply_closed_loop_demo_defaults(args)
