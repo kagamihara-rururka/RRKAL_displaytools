@@ -15,6 +15,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from pin_projection import pin_projection_contract_packet
 try:
     import xarray as xr
 except ImportError:
@@ -14343,6 +14344,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "cloud-coverage",
             "cloud-detail",
         ],
+        "pin_overlay": pin_projection_contract_packet(),
         "rrkal_boundary": {
             "displaytools_owns": [
                 "renderer launch flags",

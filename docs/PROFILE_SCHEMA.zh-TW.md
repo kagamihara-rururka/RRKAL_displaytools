@@ -128,6 +128,8 @@ rrkal_displaytools.qt_panel_profile.v1
 
 Renderer overlay 接上後，Pin 不應是螢幕固定標籤，而應是 geodetic surface anchor：每個 frame 由 latitude/longitude 投影到球面，套用地球旋轉與 camera/view transform，再用 horizon/depth occlusion 判斷是否被地球背面或地形/海面遮蔽。
 
+目前共用投影 hook 位於 `pin_projection.py`。它已能計算 `screen_x`、`screen_y`、`view_z`、`visible` 與 `occlusion`，先覆蓋跟隨地球旋轉與背面 horizon clipping；後續 renderer overlay drawing 接上後，再以 globe mask/depth buffer refine 地形或海面遮蔽。
+
 | Field | Type | Description |
 | --- | --- | --- |
 | `id` | string | Pin id，例如 `pin-001`。 |

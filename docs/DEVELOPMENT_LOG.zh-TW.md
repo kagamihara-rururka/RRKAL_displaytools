@@ -725,3 +725,18 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Pin projection and occlusion hook
+
+Scope:
+- Added `pin_projection.py` as a pure Python geodetic Pin projection hook.
+- The hook projects latitude/longitude anchors with camera yaw/pitch/zoom into screen coordinates.
+- It classifies Pin visibility as `visible`, `behind_horizon`, `off_viewport`, or `invalid`.
+- Renderer capabilities and Qt provenance now expose the Pin projection contract.
+
+Positioning:
+- This starts the renderer-facing side of scientific Pins without drawing the overlay yet.
+- Pins now have a concrete math contract for rotating with the globe and hiding behind the horizon; depth/globe-mask refinement remains the next overlay step.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

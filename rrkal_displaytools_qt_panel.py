@@ -16,6 +16,7 @@ import sys
 from pathlib import Path
 
 from profile_schema import profile_payload_errors
+from pin_projection import pin_projection_contract_packet
 
 
 ROOT = Path(__file__).resolve().parent
@@ -1281,6 +1282,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "selected_pin": self.selected_pin_packet(),
             "pins": self.collect_research_pins(),
             "pin_overlay_boundary": "Pins are geodetic annotations; renderer sync must rotate them with the globe and apply horizon/depth occlusion.",
+            "pin_projection_contract": pin_projection_contract_packet(),
             "visible_layers": visible_layers,
             "locked_layers": locked_layers,
             "layer_count": {
