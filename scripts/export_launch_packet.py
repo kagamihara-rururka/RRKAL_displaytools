@@ -205,6 +205,24 @@ def layer_undo_packet() -> dict[str, object]:
     }
 
 
+def session_journal_packet() -> dict[str, object]:
+    return {
+        "schema": "rrkal_displaytools.session_journal.v1",
+        "mode": "no_gui_export_no_runtime_history",
+        "history_limit": 0,
+        "layer_runtime_history": [],
+        "pin_pick_history": [],
+        "layer_undo_depth": 0,
+        "latest_ack_presence": {
+            "layer_runtime_ack": False,
+            "pin_input_ack": False,
+            "pin_pick_ack": False,
+            "boundary_highlight_ack": False,
+        },
+        "boundary": "Recent UI/runtime bridge journal only; not a persisted lab notebook or global document history.",
+    }
+
+
 def launch_packet(profile_path: Path, profile: dict[str, object], rrkal_data_manifest_ref: str = "") -> dict[str, object]:
     portable_command = ["py", "-3", "taichi_global_bathymetry.py", *renderer_args(profile, rrkal_data_manifest_ref)]
     manifest_ref = rrkal_data_manifest_ref or str(profile.get("renderer", {}).get("rrkal_data_manifest_ref", "")).strip()
@@ -232,6 +250,7 @@ def launch_packet(profile_path: Path, profile: dict[str, object], rrkal_data_man
         "boundary_highlight": boundary_highlight_packet(profile),
         "active_layer_diagnostics": active_layer_diagnostics_packet(profile),
         "layer_undo": layer_undo_packet(),
+        "session_journal": session_journal_packet(),
         "closed_loop_status": renderer_closed_loop_status_packet(),
         "portable_command": portable_command,
         "portable_command_line": " ".join(portable_command),

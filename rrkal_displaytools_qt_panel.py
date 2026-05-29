@@ -1210,6 +1210,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "selected_layer": self.selected_layer_key,
             "active_layer_diagnostics": self.active_layer_diagnostics_packet(),
             "layer_undo": self.collect_layer_undo_state(),
+            "session_journal": self.collect_session_journal(),
             "selected_pin_id": self.selected_pin_id,
             "layer_stack_ui": self.collect_layer_stack_ui(),
             "tool_state": self.collect_tool_state(),
@@ -2100,6 +2101,23 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "global_document_undo": "pending",
         }
 
+    def collect_session_journal(self) -> dict[str, object]:
+        return {
+            "schema": "rrkal_displaytools.session_journal.v1",
+            "mode": "qt_runtime_recent_events",
+            "history_limit": 5,
+            "layer_runtime_history": self.layer_runtime_history[:5],
+            "pin_pick_history": self.pin_pick_history[:5],
+            "layer_undo_depth": len(self.layer_undo_stack),
+            "latest_ack_presence": {
+                "layer_runtime_ack": self.layer_runtime_ack_payload is not None,
+                "pin_input_ack": self.pin_input_ack_payload is not None,
+                "pin_pick_ack": self.pin_pick_ack_payload is not None,
+                "boundary_highlight_ack": self.boundary_highlight_ack_payload is not None,
+            },
+            "boundary": "Recent UI/runtime bridge journal only; not a persisted lab notebook or global document history.",
+        }
+
     @QtCore.pyqtSlot()
     def undo_layer_stack_state(self) -> None:
         if not self.layer_undo_stack:
@@ -2810,6 +2828,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "active_layer": self.selected_layer_key,
             "active_layer_diagnostics": self.active_layer_diagnostics_packet(),
             "layer_undo": self.collect_layer_undo_state(),
+            "session_journal": self.collect_session_journal(),
             "active_tool": self.active_tool,
             "cursor_lat_lon_estimate": {
                 "latitude": self.cursor_latitude,

@@ -27,7 +27,7 @@
 - 顯示 renderer PID、執行中狀態與 exit code。
 - 中央 Canvas Preview 已可用 UI-only 方式顯示 style/topography/data mode、active tool、active layer、visible layer count、Select hit map 與 zoom；也可切到最近 `state/showcase/*.png` 的 renderer static thumbnail，thumbnail 模式下會自動輪詢並刷新最新 PNG。Qt 啟動 renderer 時會帶入 `--preview-frame-file state/renderer_preview_frame.png`，Canvas Preview 的 Live preview 模式會輪詢該 PNG，形成 file-based live renderer frame stream。Canvas preview mode、preview frame path 與 interval 會寫入 profile / launch packet / provenance；runtime PNG 只作本機狀態，不提交 Git。中央文字區也可顯示 renderer capabilities、layer manifest、launch packet 或 smoke 結果。
 - Canvas Preview 已支援滑鼠位置的 UI-only 經緯度估算，使用 equirectangular canvas mapping，可一鍵填入 Pin 的 latitude/longitude，並顯示目前 selected pin 與 marker 摘要。
-- 右側 `Provenance` dock 已提供科研可重現性摘要，可複製 JSON，內容包含 style/topo/data mode、active layer、active layer diagnostics、layer undo depth/capacity、active tool、visible/locked layers、layer count 與 portable command line。
+- 右側 `Provenance` dock 已提供科研可重現性摘要，可複製 JSON，內容包含 style/topo/data mode、active layer、active layer diagnostics、layer undo depth/capacity、session journal、active tool、visible/locked layers、layer count 與 portable command line。
 - 已新增 `pin_projection.py` 共用 hook：以 latitude/longitude 作為 geodetic surface anchor，依 renderer camera yaw/pitch/zoom 投影到 screen_x/screen_y，並以 horizon clipping 判斷背面遮蔽；renderer capabilities 會暴露此 Pin overlay contract。
 - Renderer 已支援 `--pin-file`、`--pin-json`、`--pin-layer`、`--pin-size`、`--pin-horizon-eps`、`--pin-label-mode`、`--pin-label-min-priority`、`--pin-pick-radius`、`--pin-pick-state-file`、`--pin-input-ack-file`。Qt 若有 Pins，啟動 renderer 時會以 `--pin-json` 傳入，renderer 會每 frame 投影並只繪製可見 hemisphere 上的 Pin marker；`selected_pin_id` 會以 profile-aware 外圈高亮。Renderer 初始化後可寫回 `state/renderer_pin_input_ack.json`，記錄收到的 pin_count、selected_pin_id 與 selected pin 是否存在。Pin marker 已接 scientific、nautical、tactical、parchment style profiles，並具備基本 label box / leader line / collision avoidance。Qt Pin 已支援 `label_priority` 與 label visibility modes，renderer label placement 會先放 selected Pin，再依 priority 高低排序。Renderer 支援 Pin hover / click pick，點到 Pin 會更新 selected Pin highlight 與資訊面板，並可將 pick state 寫到 JSON bridge；外部 Qt control panel 會輪詢該 bridge，將 selected/cleared 事件同步回 Pin list、欄位與 provenance，並寫出 `state/qt_pin_pick_ack.json` 記錄 Qt 是否已同步該 renderer event。Pin Annotation 面板可直接顯示 renderer Pin input ack、最新 Pin pick JSON 與 Qt ack；History 面板會記錄最近 Pin pick 摘要，provenance 也會保留最新 Pin input ack、Pin pick payload、Qt ack 與最近幾筆 Pin pick history。Malformed `--pin-json` / `--pin-file` 會被 warning 後忽略，不再造成 renderer 閃退。
 - 未完成的 timeline 與全域 document undo stack 會以 🚧 施工中標示；layer stack undo snapshots 已落地，Canvas Preview 的 state / static thumbnail / file-based live preview 已落地，Brush/Mask 暫不納入本輪 UI。
@@ -71,7 +71,7 @@
 ### Launch packets and handoff
 
 - Qt panel 可匯出 launch packet 到 `state/showcase/`，內容包含當下的 `closed_loop_status` snapshot 與 `active_layer_diagnostics` snapshot。
-- No-GUI exporter 可從 profile/template 產生 launch packet，並包含 `closed_loop_status` snapshot、`canvas_preview` contract、`active_layer_diagnostics` contract、`layer_undo` contract、preview frame stream CLI args、`pin-layer` renderer flag 與 optional `--rrkal-data-manifest-ref` reference-only handoff。
+- No-GUI exporter 可從 profile/template 產生 launch packet，並包含 `closed_loop_status` snapshot、`canvas_preview` contract、`active_layer_diagnostics` contract、`layer_undo` contract、`session_journal` contract、preview frame stream CLI args、`pin-layer` renderer flag 與 optional `--rrkal-data-manifest-ref` reference-only handoff。
 - Launch packet 內含 profile、portable command、RRKAL/displaytools 責任邊界。
 - `docs/RRKAL_HANDOFF_CONTRACT.zh-TW.md` 定義未來 RRKAL 對接方式。
 
@@ -94,12 +94,14 @@
   - Launch packet `canvas_preview` schema gate。
   - Launch packet `active_layer_diagnostics` schema gate。
   - Launch packet `layer_undo` schema gate。
+  - Launch packet `session_journal` schema gate。
   - Launch packet `boundary_highlight.identity_status` schema gate。
   - Launch packet `--preview-frame-file` gate。
   - Launch packet `canvas_preview.preview_frame_path` / `preview_frame_interval_s` gate。
   - Renderer capabilities JSON 與 `preview_frame_stream` / `active_layer_diagnostics` schema gate。
   - Closed-loop status `diagnostics_handoff_contracts` gate。
   - Closed-loop status `layer_stack_undo_snapshots` gate。
+  - Closed-loop status `session_journal_handoff` gate。
   - No-GUI template listing。
   - PowerShell script parse。
 

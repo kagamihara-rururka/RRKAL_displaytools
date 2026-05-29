@@ -32,6 +32,15 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                 ],
             },
             {
+                "id": "session_journal_handoff",
+                "scope": ["layer runtime history", "Pin pick history", "renderer ack presence", "session event portability"],
+                "evidence": [
+                    "launch_packet session_journal",
+                    "research provenance session_journal",
+                    "rrkal_displaytools.session_journal.v1",
+                ],
+            },
+            {
                 "id": "renderer_capability_discovery",
                 "scope": ["renderer capabilities", "layer manifest", "profile templates"],
                 "evidence": [
@@ -46,12 +55,14 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "active_layer_diagnostics",
                     "boundary_highlight.identity_status",
                     "layer_undo",
+                    "session_journal",
                     "canvas_preview stream provenance",
                 ],
                 "evidence": [
                     "launch_packet active_layer_diagnostics",
                     "launch_packet boundary_highlight.identity_status",
                     "launch_packet layer_undo",
+                    "launch_packet session_journal",
                     "renderer capabilities active_layer_diagnostics",
                     "profile_schema optional canvas_preview",
                 ],

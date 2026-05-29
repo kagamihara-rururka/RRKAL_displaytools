@@ -1,5 +1,19 @@
 # Development Log
 
+## 2026-05-29 - Session journal handoff contract
+
+Scope:
+- Qt launch packet and research provenance now include `session_journal`.
+- No-GUI launch packet export includes the same schema with a no-runtime-history marker.
+- Closed-loop status now includes `session_journal_handoff`.
+- Smoke now gates launch packet `session_journal` and the closed-loop id.
+
+Positioning:
+- This makes recent layer runtime history, Pin pick history, ack presence, and layer undo depth portable without claiming to be a persisted lab notebook or global document history.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Layer undo handoff contract
 
 Scope:

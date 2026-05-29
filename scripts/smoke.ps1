@@ -34,6 +34,9 @@ if ($launchPacket.active_layer_diagnostics.schema -ne "rrkal_displaytools.active
 if ($launchPacket.layer_undo.schema -ne "rrkal_displaytools.layer_stack_undo.v1") {
     throw "Launch packet layer_undo schema missing or invalid"
 }
+if ($launchPacket.session_journal.schema -ne "rrkal_displaytools.session_journal.v1") {
+    throw "Launch packet session_journal schema missing or invalid"
+}
 if ($launchPacket.boundary_highlight.identity_status.schema -ne "rrkal_displaytools.boundary_identity_status.v1") {
     throw "Launch packet boundary_highlight identity_status schema missing or invalid"
 }
@@ -81,6 +84,9 @@ if ($closedLoopIds -notcontains "diagnostics_handoff_contracts") {
 }
 if ($closedLoopIds -notcontains "layer_stack_undo_snapshots") {
     throw "Closed-loop layer_stack_undo_snapshots missing"
+}
+if ($closedLoopIds -notcontains "session_journal_handoff") {
+    throw "Closed-loop session_journal_handoff missing"
 }
 Invoke-CheckedNative py @("-3", "taichi_global_bathymetry.py", "--print-layer-manifest") | Out-Null
 Invoke-CheckedNative py @("-3", "rrkal_displaytools_qt_panel.py", "--list-templates") | Out-Null
