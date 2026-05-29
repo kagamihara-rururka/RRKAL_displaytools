@@ -267,6 +267,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.timeline_state_label: QtWidgets.QLabel | None = None
         self.timeline_keyframe_list: QtWidgets.QListWidget | None = None
         self.timeline_keyframes: list[dict[str, object]] = []
+        self.timeline_playback_timer: QtCore.QTimer | None = None
+        self.timeline_playback_active = False
+        self.timeline_playback_index = 0
+        self.timeline_playback_interval_ms = 1200
         self.selected_layer_key: str | None = None
         self.boundary_highlight_state: dict[str, object] = default_boundary_highlight_state()
         self.boundary_highlight_label: QtWidgets.QLabel | None = None
@@ -348,6 +352,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.renderer_thumbnail_timer.setInterval(1500)
         self.renderer_thumbnail_timer.timeout.connect(self.refresh_renderer_thumbnail_if_needed)
         self.renderer_thumbnail_timer.start()
+        self.timeline_playback_timer = QtCore.QTimer(self)
+        self.timeline_playback_timer.setInterval(self.timeline_playback_interval_ms)
+        self.timeline_playback_timer.timeout.connect(self.advance_timeline_playback)
         self.apply_baseline()
         self.refresh_template_list()
         if initial_profile is not None:
@@ -967,10 +974,19 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         add_keyframe.clicked.connect(self.add_timeline_keyframe)
         apply_keyframe = QtWidgets.QPushButton("Apply selected")
         apply_keyframe.clicked.connect(self.apply_selected_timeline_keyframe)
+        step_keyframe = QtWidgets.QPushButton("Next")
+        step_keyframe.clicked.connect(self.step_timeline_keyframe)
+        play_keyframes = QtWidgets.QPushButton("Play UI preview")
+        play_keyframes.clicked.connect(self.play_timeline_keyframes)
+        stop_keyframes = QtWidgets.QPushButton("Stop")
+        stop_keyframes.clicked.connect(self.stop_timeline_keyframes)
         clear_keyframes = QtWidgets.QPushButton("Clear")
         clear_keyframes.clicked.connect(self.clear_timeline_keyframes)
         timeline_actions.addWidget(add_keyframe)
         timeline_actions.addWidget(apply_keyframe)
+        timeline_actions.addWidget(step_keyframe)
+        timeline_actions.addWidget(play_keyframes)
+        timeline_actions.addWidget(stop_keyframes)
         timeline_actions.addWidget(clear_keyframes)
         timeline_layout.addLayout(timeline_actions)
         timeline_dock.setWidget(timeline)
@@ -2180,15 +2196,16 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         ]
         return {
             "schema": "rrkal_displaytools.timeline_state.v1",
-            "status": "ui_keyframe_storage",
+            "status": "ui_keyframe_playback" if self.timeline_playback_active else "ui_keyframe_storage",
             "implemented": [
                 "visible_qt_timeline_dock",
                 "ui_keyframe_storage",
                 "ui_keyframe_restore",
+                "ui_keyframe_playback_controls",
                 "launch_packet_status_contract",
             ],
             "pending": [
-                "playback_controls",
+                "renderer_timeline_playback",
                 "animation_export",
                 "ocean_material_keyframes",
                 "camera_keyframes",
@@ -2196,7 +2213,13 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "playhead": 0,
             "keyframe_count": len(self.timeline_keyframes),
             "keyframes": keyframes,
-            "boundary": "UIUX keyframe storage only; no renderer animation playback or export is claimed yet.",
+            "playback": {
+                "mode": "ui_preview_timer",
+                "active": self.timeline_playback_active,
+                "interval_ms": self.timeline_playback_interval_ms,
+                "next_index": self.timeline_playback_index,
+            },
+            "boundary": "UIUX keyframe storage/restore/playback only; no renderer animation playback or export is claimed yet.",
         }
 
     def collect_timeline_keyframe(self) -> dict[str, object]:
@@ -2232,9 +2255,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def refresh_timeline_state_label(self) -> None:
         if self.timeline_state_label is None:
             return
+        playback = "playing" if self.timeline_playback_active else "idle"
         self.timeline_state_label.setText(
             f"Timeline status: {len(self.timeline_keyframes)} UI keyframes stored; "
-            "playback/export pending."
+            f"UI playback={playback}; renderer playback/export pending."
         )
 
     def apply_timeline_keyframes(self, keyframes: list[object]) -> None:
@@ -2316,7 +2340,56 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.status.setText(f"已套用 Timeline keyframe：{keyframe.get('id', '-')}")
 
     @QtCore.pyqtSlot()
+    def step_timeline_keyframe(self) -> None:
+        if not self.timeline_keyframes:
+            self.status.setText("Timeline 沒有 keyframes")
+            return
+        if self.timeline_keyframe_list is None:
+            return
+        row = self.timeline_keyframe_list.currentRow()
+        next_row = 0 if row < 0 else (row + 1) % len(self.timeline_keyframes)
+        self.timeline_keyframe_list.setCurrentRow(next_row)
+        self.apply_selected_timeline_keyframe()
+        self.timeline_playback_index = (next_row + 1) % len(self.timeline_keyframes)
+        self.refresh_timeline_state_label()
+
+    @QtCore.pyqtSlot()
+    def play_timeline_keyframes(self) -> None:
+        if not self.timeline_keyframes:
+            self.status.setText("Timeline 沒有 keyframes 可播放")
+            return
+        self.timeline_playback_active = True
+        if self.timeline_playback_timer is not None:
+            self.timeline_playback_timer.start()
+        self.advance_timeline_playback()
+        self.refresh_timeline_state_label()
+        self.status.setText("Timeline UI preview playback started")
+
+    @QtCore.pyqtSlot()
+    def stop_timeline_keyframes(self) -> None:
+        self.timeline_playback_active = False
+        if self.timeline_playback_timer is not None:
+            self.timeline_playback_timer.stop()
+        self.refresh_timeline_state_label()
+        self.refresh_research_provenance()
+        self.status.setText("Timeline UI preview playback stopped")
+
+    @QtCore.pyqtSlot()
+    def advance_timeline_playback(self) -> None:
+        if not self.timeline_keyframes:
+            self.stop_timeline_keyframes()
+            return
+        if self.timeline_keyframe_list is None:
+            return
+        row = self.timeline_playback_index % len(self.timeline_keyframes)
+        self.timeline_keyframe_list.setCurrentRow(row)
+        self.apply_selected_timeline_keyframe()
+        self.timeline_playback_index = (row + 1) % len(self.timeline_keyframes)
+        self.refresh_timeline_state_label()
+
+    @QtCore.pyqtSlot()
     def clear_timeline_keyframes(self) -> None:
+        self.stop_timeline_keyframes()
         self.timeline_keyframes.clear()
         if self.timeline_keyframe_list is not None:
             self.timeline_keyframe_list.clear()

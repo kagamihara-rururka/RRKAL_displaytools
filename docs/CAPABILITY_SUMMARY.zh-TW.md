@@ -30,13 +30,13 @@
 - 右側 `Provenance` dock 已提供科研可重現性摘要，可複製 JSON，內容包含 style/topo/data mode、active layer、active layer diagnostics、layer undo depth/capacity、session journal、active tool、visible/locked layers、layer count 與 portable command line。
 - 已新增 `pin_projection.py` 共用 hook：以 latitude/longitude 作為 geodetic surface anchor，依 renderer camera yaw/pitch/zoom 投影到 screen_x/screen_y，並以 horizon clipping 判斷背面遮蔽；renderer capabilities 會暴露此 Pin overlay contract。
 - Renderer 已支援 `--pin-file`、`--pin-json`、`--pin-layer`、`--pin-size`、`--pin-horizon-eps`、`--pin-label-mode`、`--pin-label-min-priority`、`--pin-pick-radius`、`--pin-pick-state-file`、`--pin-input-ack-file`。Qt 若有 Pins，啟動 renderer 時會以 `--pin-json` 傳入，renderer 會每 frame 投影並只繪製可見 hemisphere 上的 Pin marker；`selected_pin_id` 會以 profile-aware 外圈高亮。Renderer 初始化後可寫回 `state/renderer_pin_input_ack.json`，記錄收到的 pin_count、selected_pin_id 與 selected pin 是否存在。Pin marker 已接 scientific、nautical、tactical、parchment style profiles，並具備基本 label box / leader line / collision avoidance。Qt Pin 已支援 `label_priority` 與 label visibility modes，renderer label placement 會先放 selected Pin，再依 priority 高低排序。Renderer 支援 Pin hover / click pick，點到 Pin 會更新 selected Pin highlight 與資訊面板，並可將 pick state 寫到 JSON bridge；外部 Qt control panel 會輪詢該 bridge，將 selected/cleared 事件同步回 Pin list、欄位與 provenance，並寫出 `state/qt_pin_pick_ack.json` 記錄 Qt 是否已同步該 renderer event。Pin Annotation 面板可直接顯示 renderer Pin input ack、最新 Pin pick JSON 與 Qt ack；History 面板會記錄最近 Pin pick 摘要，provenance 也會保留最新 Pin input ack、Pin pick payload、Qt ack 與最近幾筆 Pin pick history。Malformed `--pin-json` / `--pin-file` 會被 warning 後忽略，不再造成 renderer 閃退。
-- Timeline dock 已可見，並支援 UI-only keyframe storage / restore，可保存目前 style/material/layer/pin/boundary UI state 成 keyframe 清單，也可把選取 keyframe 回套到目前 UI；keyframes 會隨 Qt profile save/load 保存，`timeline_state` 會進入 launch packet / provenance / no-GUI export。Playback controls、animation export、ocean/material keyframes 與 camera keyframes 仍 pending。全域 document undo stack 仍以 🚧 施工中標示；layer stack undo snapshots 已落地，Canvas Preview 的 state / static thumbnail / file-based live preview 已落地，Brush/Mask 暫不納入本輪 UI。
+- Timeline dock 已可見，並支援 UI-only keyframe storage / restore / playback controls，可保存目前 style/material/layer/pin/boundary UI state 成 keyframe 清單、回套選取 keyframe，也可用 `Play UI preview` / `Next` 在 keyframes 間巡覽；keyframes 會隨 Qt profile save/load 保存，`timeline_state` 會進入 launch packet / provenance / no-GUI export。Renderer timeline playback、animation export、ocean/material keyframes 與 camera keyframes 仍 pending。全域 document undo stack 仍以 🚧 施工中標示；layer stack undo snapshots 已落地，Canvas Preview 的 state / static thumbnail / file-based live preview 已落地，Brush/Mask 暫不納入本輪 UI。
 - 可保存、載入、重置本機 workspace layout，狀態位於 `state/ui_workspace.json`。
 - Window menu 提供 workspace presets：Default、Maritime、Tactical、Parchment、Review，可切換 dock/tab 排版並套用對應顯示 preset。
 
 ## 預計實現功能
 
-- Timeline 下一步是 playback controls、animation export、ocean/material keyframes 與 camera keyframes；目前 Timeline dock、UI-only keyframe storage/restore、profile save/load 與 `timeline_state` status contract 已建立。
+- Timeline 下一步是 renderer timeline playback、animation export、ocean/material keyframes 與 camera keyframes；目前 Timeline dock、UI-only keyframe storage/restore/playback controls、profile save/load 與 `timeline_state` status contract 已建立。
 - 中央 Canvas Preview 已具備 Qt state preview、最近 renderer output static thumbnail、static thumbnail auto-refresh 與 file-based live renderer frame stream；後續要升級為低延遲 IPC/GPU texture stream。
 - Renderer layer runtime sync 下一步擴充 polygon fill mask 與更完整 renderer diagnostics；目前 visibility、支援圖層 opacity、lake/river/boundary/aircraft/pin/vehicle icon overlay blend、selected layer semantic target、selected-layer-scoped Pin/traffic/boundary/hydrology line picking 已可透過 `state/renderer_layer_runtime_state.json` 與 `state/renderer_layer_pick_state.json` 即時同步，Qt 與 renderer 端已有 bridge diagnostics、history、renderer ack 與 locked layer 防誤改。
 - Point/icon opacity/blend 下一步處理其他新增獨立 overlay，前提是 renderer 有可單獨合成的 frame overlay。
@@ -105,6 +105,7 @@
   - Closed-loop status `diagnostics_handoff_contracts` gate。
   - Closed-loop status `layer_stack_undo_snapshots` gate。
   - Closed-loop status `session_journal_handoff` gate。
+  - Closed-loop status `qt_timeline_panel` UI-only playback controls gate。
   - Handoff inspection `session_journal` / `timeline_state` contract gate。
   - No-GUI template listing。
   - PowerShell script parse。

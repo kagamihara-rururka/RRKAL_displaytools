@@ -1,5 +1,19 @@
 # Development Log
 
+## 2026-05-29 - Timeline UI playback controls
+
+Scope:
+- Timeline dock now has `Next`, `Play UI preview`, and `Stop`.
+- UI playback loops through stored keyframes and applies them to the Qt state at a fixed interval.
+- `timeline_state` now reports playback mode, active state, interval, and next keyframe index.
+- Closed-loop smoke now gates `qt_timeline_panel` for UI-only playback controls.
+
+Positioning:
+- This closes Timeline playback as a Qt-side UI preview loop without claiming renderer timeline playback or animation export.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Timeline keyframe restore
 
 Scope:

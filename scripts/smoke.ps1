@@ -94,6 +94,14 @@ if ($closedLoopIds -notcontains "layer_stack_undo_snapshots") {
 if ($closedLoopIds -notcontains "session_journal_handoff") {
     throw "Closed-loop session_journal_handoff missing"
 }
+$timelinePartial = @($closedLoop.partial | Where-Object { $_.id -eq "qt_timeline_panel" }) | Select-Object -First 1
+if ($null -eq $timelinePartial) {
+    throw "Closed-loop qt_timeline_panel partial status missing"
+}
+$timelineApplies = @($timelinePartial.applies)
+if ($timelineApplies -notcontains "UI-only playback controls") {
+    throw "Closed-loop qt_timeline_panel UI-only playback controls missing"
+}
 $handoffText = & powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_handoff.ps1
 if ($LASTEXITCODE -ne 0) {
     throw "Command failed: powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_handoff.ps1"

@@ -231,7 +231,9 @@ def timeline_state_packet() -> dict[str, object]:
         "pending": [
             "visible_qt_timeline_dock",
             "keyframe_storage",
+            "keyframe_restore",
             "playback_controls",
+            "renderer_timeline_playback",
             "animation_export",
             "ocean_material_keyframes",
             "camera_keyframes",
@@ -239,6 +241,12 @@ def timeline_state_packet() -> dict[str, object]:
         "playhead": 0,
         "keyframe_count": 0,
         "keyframes": [],
+        "playback": {
+            "mode": "no_gui_export_no_runtime_playback",
+            "active": False,
+            "interval_ms": 0,
+            "next_index": 0,
+        },
         "boundary": "UIUX placeholder/status contract only; no renderer animation playback is claimed yet.",
     }
 
