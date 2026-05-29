@@ -49,6 +49,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "rrkal_displaytools_qt_panel.py --list-templates",
                     "renderer capabilities layer_capability_matrix",
                     "renderer capabilities layer_runtime_evidence_summary",
+                    "renderer capabilities layer_runtime_badge_summary",
                 ],
             },
             {
@@ -69,6 +70,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "launch_packet layer_capability_matrix",
                     "launch_packet layer_runtime_evidence",
                     "launch_packet layer_runtime_evidence_summary",
+                    "launch_packet layer_runtime_badge_summary",
                     "launch_packet layer_undo",
                     "launch_packet session_journal",
                     "launch_packet document_undo",
@@ -80,6 +82,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "renderer capabilities layer_capability_matrix",
                     "renderer capabilities layer_runtime_evidence",
                     "renderer capabilities layer_runtime_evidence_summary",
+                    "renderer capabilities layer_runtime_badge_summary",
                     "renderer capabilities timeline_handoff",
                     "renderer capabilities ui_handoff_contracts",
                     "profile_schema optional canvas_preview",

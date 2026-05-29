@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-29 - Layer runtime badge provenance
+
+- Added `rrkal_displaytools.layer_runtime_badge_summary.v1` to summarize per-layer Runtime badge counts, selected-layer badge state and noteworthy layers.
+- Qt copyable research provenance now includes the badge summary, so renderer ack evidence can be pasted into lab notes without opening the full matrix JSON.
+- Launch packets, renderer capabilities, handoff inspection, closed-loop status and smoke gates now expose the badge summary contract.
+- Smoke: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1` PASS.
+
 ## 2026-05-29 - Layer runtime evidence summary
 
 - Added `rrkal_displaytools.layer_runtime_evidence_summary.v1` so Qt Properties, launch packets, renderer capabilities and handoff inspection expose a compact skip/error/count summary for layer runtime ack evidence.

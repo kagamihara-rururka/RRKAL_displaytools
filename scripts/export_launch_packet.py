@@ -338,7 +338,9 @@ def active_layer_diagnostics_packet(profile: dict[str, object]) -> dict[str, obj
         "layer_capability_matrix_schema": "rrkal_displaytools.layer_capability_matrix.v1",
         "layer_runtime_evidence_schema": "rrkal_displaytools.layer_runtime_evidence.v1",
         "layer_runtime_evidence_summary_schema": "rrkal_displaytools.layer_runtime_evidence_summary.v1",
+        "layer_runtime_badge_summary_schema": "rrkal_displaytools.layer_runtime_badge_summary.v1",
         "runtime_evidence_summary": layer_runtime_evidence_summary_packet(None),
+        "runtime_badge_summary": layer_capability_matrix_packet("scripts.export_launch_packet", selected_layer).get("runtime_badge_summary"),
         "diagnostics_text": "no runtime ack/pick in no-GUI export",
         "runtime_ack_file": "state/renderer_layer_runtime_ack.json",
         "runtime_ack": None,
@@ -415,6 +417,44 @@ def layer_runtime_evidence_summary_packet(evidence: dict[str, object] | None) ->
     }
 
 
+def layer_runtime_badge_summary_packet(
+    layers: list[dict[str, object]],
+    selected_layer: str | None,
+    source: str,
+) -> dict[str, object]:
+    status_counts = {status_id: 0 for status_id in LAYER_RUNTIME_BADGE_STYLES}
+    noted_layers: list[dict[str, object]] = []
+    selected_status: list[str] = []
+    for layer in layers:
+        statuses = layer.get("runtime_status")
+        statuses = statuses if isinstance(statuses, list) else []
+        layer_statuses = [str(status) for status in statuses if str(status)]
+        for status_id in layer_statuses:
+            status_counts[status_id] = status_counts.get(status_id, 0) + 1
+        if layer.get("key") == selected_layer:
+            selected_status = layer_statuses
+        if any(status in {"changed", "locked", "error", "target"} for status in layer_statuses):
+            noted_layers.append(
+                {
+                    "key": layer.get("key"),
+                    "label": layer.get("label"),
+                    "runtime_status": layer_statuses,
+                    "renderer_target": layer.get("renderer_target"),
+                }
+            )
+    return {
+        "schema": "rrkal_displaytools.layer_runtime_badge_summary.v1",
+        "source": source,
+        "status_counts": status_counts,
+        "selected_layer": selected_layer,
+        "selected_layer_status": selected_status,
+        "noted_layers": noted_layers,
+        "noted_layer_count": len(noted_layers),
+        "copyable_provenance": True,
+        "boundary": "Copyable research provenance summary of layer Runtime badges; No-GUI export marks badges as no_ack until renderer evidence exists.",
+    }
+
+
 def layer_capability_matrix_packet(source: str, selected_layer: str | None = None) -> dict[str, object]:
     layers = [layer_capability_packet(key, label) for key, label in LAYER_LABELS]
     runtime_evidence = {
@@ -455,6 +495,7 @@ def layer_capability_matrix_packet(source: str, selected_layer: str | None = Non
         "live_counts": counts,
         "runtime_evidence": runtime_evidence,
         "runtime_evidence_summary": layer_runtime_evidence_summary_packet(runtime_evidence),
+        "runtime_badge_summary": layer_runtime_badge_summary_packet(layers, selected_layer, source),
         "runtime_status_legend": layer_runtime_status_legend_packet(),
         "selected_layer": selected_layer,
         "selected_layer_capabilities": selected,

@@ -336,6 +336,44 @@ def layer_runtime_evidence_summary_packet(evidence: dict[str, object] | None) ->
     }
 
 
+def layer_runtime_badge_summary_packet(
+    layers: list[dict[str, object]],
+    selected_layer: str | None,
+    source: str,
+) -> dict[str, object]:
+    status_counts = {status_id: 0 for status_id in LAYER_RUNTIME_BADGE_STYLES}
+    layers_with_runtime_notes: list[dict[str, object]] = []
+    selected_status: list[str] = []
+    for layer in layers:
+        statuses = layer.get("runtime_status")
+        statuses = statuses if isinstance(statuses, list) else []
+        layer_statuses = [str(status) for status in statuses if str(status)]
+        for status_id in layer_statuses:
+            status_counts[status_id] = status_counts.get(status_id, 0) + 1
+        if layer.get("key") == selected_layer:
+            selected_status = layer_statuses
+        if any(status in {"changed", "locked", "error", "target"} for status in layer_statuses):
+            layers_with_runtime_notes.append(
+                {
+                    "key": layer.get("key"),
+                    "label": layer.get("label"),
+                    "runtime_status": layer_statuses,
+                    "renderer_target": layer.get("renderer_target"),
+                }
+            )
+    return {
+        "schema": "rrkal_displaytools.layer_runtime_badge_summary.v1",
+        "source": source,
+        "status_counts": status_counts,
+        "selected_layer": selected_layer,
+        "selected_layer_status": selected_status,
+        "noted_layers": layers_with_runtime_notes,
+        "noted_layer_count": len(layers_with_runtime_notes),
+        "copyable_provenance": True,
+        "boundary": "Copyable research provenance summary of Qt layer Runtime badges; badges summarize renderer ack evidence and do not mutate renderer state.",
+    }
+
+
 def layer_capability_matrix_packet(
     source: str,
     selected_layer: str | None = None,
@@ -379,6 +417,7 @@ def layer_capability_matrix_packet(
         "live_counts": counts,
         "runtime_evidence": runtime_evidence,
         "runtime_evidence_summary": layer_runtime_evidence_summary_packet(runtime_evidence),
+        "runtime_badge_summary": layer_runtime_badge_summary_packet(layers, selected_layer, source),
         "runtime_status_legend": layer_runtime_status_legend_packet(),
         "selected_layer": selected_layer,
         "selected_layer_capabilities": selected,
@@ -3909,7 +3948,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_capability_matrix_schema": "rrkal_displaytools.layer_capability_matrix.v1",
             "layer_runtime_evidence_schema": "rrkal_displaytools.layer_runtime_evidence.v1",
             "layer_runtime_evidence_summary_schema": "rrkal_displaytools.layer_runtime_evidence_summary.v1",
+            "layer_runtime_badge_summary_schema": "rrkal_displaytools.layer_runtime_badge_summary.v1",
             "runtime_evidence_summary": self.collect_layer_capability_matrix().get("runtime_evidence_summary"),
+            "runtime_badge_summary": self.collect_layer_capability_matrix().get("runtime_badge_summary"),
             "diagnostics_text": diagnostics_text,
             "runtime_ack_file": str(LAYER_RUNTIME_ACK_PATH),
             "runtime_ack": self.layer_runtime_ack_payload,
@@ -4431,6 +4472,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_group_view": self.collect_layer_group_view_state(),
             "layer_capability_matrix": self.collect_layer_capability_matrix(),
             "layer_runtime_evidence_summary": self.collect_layer_capability_matrix().get("runtime_evidence_summary"),
+            "layer_runtime_badge_summary": self.collect_layer_capability_matrix().get("runtime_badge_summary"),
             "active_layer_diagnostics": self.active_layer_diagnostics_packet(),
             "layer_undo": self.collect_layer_undo_state(),
             "session_journal": self.collect_session_journal(),
