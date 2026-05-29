@@ -72,7 +72,7 @@
 ### Launch packets and handoff
 
 - Qt panel 可匯出 launch packet 到 `state/showcase/`，內容包含當下的 `closed_loop_status` snapshot 與 `active_layer_diagnostics` snapshot。
-- No-GUI exporter 可從 profile/template 產生 launch packet，並包含 `closed_loop_status` snapshot、`canvas_preview` contract、`active_layer_diagnostics` contract、`layer_undo` contract、`session_journal` contract、`timeline_state` contract、可保存為 `state/renderer_timeline_state.json` 的 `timeline_runtime_state` payload、Timeline runtime state/ack file CLI args、preview frame stream CLI args、`pin-layer` renderer flag 與 optional `--rrkal-data-manifest-ref` reference-only handoff。
+- No-GUI exporter 可從 profile/template 產生 launch packet，並包含 `closed_loop_status` snapshot、`canvas_preview` contract、`active_layer_diagnostics` contract、`layer_undo` contract、`session_journal` contract、`timeline_state` contract、可保存為 `state/renderer_timeline_state.json` 的 `timeline_runtime_state` payload、Timeline runtime state/ack file CLI args、preview frame stream CLI args、`pin-layer` renderer flag 與 optional `--rrkal-data-manifest-ref` reference-only handoff。需要產生實體 runtime 檔時可加 `--timeline-state-out <path>`，portable command 會同步指向該檔案。
 - Launch packet 內含 profile、portable command、RRKAL/displaytools 責任邊界。
 - `docs/RRKAL_HANDOFF_CONTRACT.zh-TW.md` 定義未來 RRKAL 對接方式。
 
@@ -102,6 +102,7 @@
   - Launch packet `timeline_runtime_state` schema gate。
   - Launch packet Timeline runtime state/ack file gate。
   - Launch packet `--timeline-state-file` / `--timeline-ack-file` gate。
+  - No-GUI `--timeline-state-out` writes runtime JSON and updates portable command gate。
   - Launch packet `boundary_highlight.identity_status` schema gate。
   - Launch packet `--preview-frame-file` gate。
   - Launch packet `canvas_preview.preview_frame_path` / `preview_frame_interval_s` gate。

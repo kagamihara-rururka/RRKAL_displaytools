@@ -104,7 +104,12 @@ def resolve_profile(profile: Path | None, template: str | None) -> Path:
     return PROFILE_DIR / f"{template_name}.json"
 
 
-def renderer_args(profile: dict[str, object], rrkal_data_manifest_ref: str = "") -> list[str]:
+def renderer_args(
+    profile: dict[str, object],
+    rrkal_data_manifest_ref: str = "",
+    timeline_state_file: str = TIMELINE_STATE_PATH,
+    timeline_ack_file: str = TIMELINE_ACK_PATH,
+) -> list[str]:
     renderer = profile["renderer"]
     material = profile["ocean_material"]
     layers = profile["layers"]
@@ -139,9 +144,9 @@ def renderer_args(profile: dict[str, object], rrkal_data_manifest_ref: str = "")
         "--preview-frame-interval",
         str(PREVIEW_FRAME_INTERVAL_S),
         "--timeline-state-file",
-        TIMELINE_STATE_PATH,
+        timeline_state_file,
         "--timeline-ack-file",
-        TIMELINE_ACK_PATH,
+        timeline_ack_file,
     ]
     for key, flag in BOOL_FLAGS.items():
         args.append(f"--{flag}" if layers[key] else f"--no-{flag}")
@@ -272,7 +277,7 @@ def timeline_state_packet(profile: dict[str, object]) -> dict[str, object]:
     }
 
 
-def timeline_runtime_state_packet(profile: dict[str, object]) -> dict[str, object]:
+def timeline_runtime_state_packet(profile: dict[str, object], target_file: str = TIMELINE_STATE_PATH) -> dict[str, object]:
     profile_keyframes = profile.get("timeline_keyframes")
     keyframes = [dict(keyframe) for keyframe in profile_keyframes if isinstance(keyframe, dict)] if isinstance(profile_keyframes, list) else []
     return {
@@ -281,13 +286,24 @@ def timeline_runtime_state_packet(profile: dict[str, object]) -> dict[str, objec
         "timeline_state": timeline_state_packet(profile),
         "timeline_keyframes": keyframes,
         "source": "scripts/export_launch_packet.py",
-        "target_file": TIMELINE_STATE_PATH,
+        "target_file": target_file,
         "boundary": "Save this payload to the target file before launching the renderer; renderer playback/export remain pending.",
     }
 
 
-def launch_packet(profile_path: Path, profile: dict[str, object], rrkal_data_manifest_ref: str = "") -> dict[str, object]:
-    portable_command = ["py", "-3", "taichi_global_bathymetry.py", *renderer_args(profile, rrkal_data_manifest_ref)]
+def launch_packet(
+    profile_path: Path,
+    profile: dict[str, object],
+    rrkal_data_manifest_ref: str = "",
+    timeline_state_file: str = TIMELINE_STATE_PATH,
+    timeline_ack_file: str = TIMELINE_ACK_PATH,
+) -> dict[str, object]:
+    portable_command = [
+        "py",
+        "-3",
+        "taichi_global_bathymetry.py",
+        *renderer_args(profile, rrkal_data_manifest_ref, timeline_state_file, timeline_ack_file),
+    ]
     manifest_ref = rrkal_data_manifest_ref or str(profile.get("renderer", {}).get("rrkal_data_manifest_ref", "")).strip()
     return {
         "schema": "rrkal_displaytools.launch_packet.v1",
@@ -315,9 +331,9 @@ def launch_packet(profile_path: Path, profile: dict[str, object], rrkal_data_man
         "layer_undo": layer_undo_packet(),
         "session_journal": session_journal_packet(),
         "timeline_state": timeline_state_packet(profile),
-        "timeline_runtime_state": timeline_runtime_state_packet(profile),
-        "timeline_runtime_state_file": TIMELINE_STATE_PATH,
-        "timeline_ack_file": TIMELINE_ACK_PATH,
+        "timeline_runtime_state": timeline_runtime_state_packet(profile, timeline_state_file),
+        "timeline_runtime_state_file": timeline_state_file,
+        "timeline_ack_file": timeline_ack_file,
         "closed_loop_status": renderer_closed_loop_status_packet(),
         "portable_command": portable_command,
         "portable_command_line": " ".join(portable_command),
@@ -330,6 +346,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--template")
     parser.add_argument("--rrkal-data-manifest-ref", default="")
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--timeline-state-out", type=Path)
     return parser
 
 
@@ -346,7 +363,19 @@ def main(argv: list[str] | None = None) -> int:
         for error in errors:
             print(error, file=sys.stderr)
         return 1
-    packet = launch_packet(profile_path, profile, str(args.rrkal_data_manifest_ref or "").strip())
+    timeline_state_file = str(args.timeline_state_out) if args.timeline_state_out else TIMELINE_STATE_PATH
+    packet = launch_packet(
+        profile_path,
+        profile,
+        str(args.rrkal_data_manifest_ref or "").strip(),
+        timeline_state_file,
+    )
+    if args.timeline_state_out:
+        args.timeline_state_out.parent.mkdir(parents=True, exist_ok=True)
+        args.timeline_state_out.write_text(
+            json.dumps(packet["timeline_runtime_state"], ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
     text = json.dumps(packet, ensure_ascii=False, indent=2)
     if args.output:
         args.output.parent.mkdir(parents=True, exist_ok=True)

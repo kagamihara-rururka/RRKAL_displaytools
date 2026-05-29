@@ -1,5 +1,19 @@
 # Development Log
 
+## 2026-05-29 - No-GUI Timeline state file export
+
+Scope:
+- `scripts/export_launch_packet.py` now supports `--timeline-state-out`.
+- When provided, the exporter writes `rrkal_displaytools.timeline_runtime_state.v1` to that path.
+- The generated launch packet and portable command now point `--timeline-state-file` at the written file.
+- Smoke now gates the written runtime JSON and the portable command path.
+
+Positioning:
+- This makes the cross-machine no-GUI Timeline handoff runnable without manually extracting JSON from the launch packet.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - No-GUI Timeline runtime payload
 
 Scope:

@@ -76,6 +76,29 @@ if ($launchPacket.canvas_preview.preview_frame_path -ne "state/renderer_preview_
 if ([double]$launchPacket.canvas_preview.preview_frame_interval_s -le 0) {
     throw "Launch packet canvas_preview preview_frame_interval_s missing or invalid"
 }
+$timelineStateOut = Join-Path $env:TEMP "rrkal_displaytools_smoke_timeline_state.json"
+if (Test-Path $timelineStateOut) {
+    Remove-Item -LiteralPath $timelineStateOut -Force
+}
+$timelinePacketText = & py -3 scripts\export_launch_packet.py --template fast_synthetic --timeline-state-out $timelineStateOut
+if ($LASTEXITCODE -ne 0) {
+    throw "Command failed: py -3 scripts\export_launch_packet.py --template fast_synthetic --timeline-state-out"
+}
+if (!(Test-Path $timelineStateOut)) {
+    throw "No-GUI timeline state output was not written"
+}
+$timelineRuntimeState = Get-Content -Raw -LiteralPath $timelineStateOut | ConvertFrom-Json
+if ($timelineRuntimeState.schema -ne "rrkal_displaytools.timeline_runtime_state.v1") {
+    throw "No-GUI timeline state output schema missing or invalid"
+}
+$timelinePacket = $timelinePacketText | ConvertFrom-Json
+if ($timelinePacket.timeline_runtime_state_file -ne $timelineStateOut) {
+    throw "No-GUI launch packet timeline runtime state file did not follow --timeline-state-out"
+}
+if ($timelinePacket.portable_command -notcontains $timelineStateOut) {
+    throw "No-GUI launch packet portable command did not include --timeline-state-out path"
+}
+Remove-Item -LiteralPath $timelineStateOut -Force
 $capabilitiesText = & py -3 taichi_global_bathymetry.py --print-renderer-capabilities
 if ($LASTEXITCODE -ne 0) {
     throw "Command failed: py -3 taichi_global_bathymetry.py --print-renderer-capabilities"
