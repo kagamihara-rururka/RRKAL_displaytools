@@ -1157,6 +1157,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             return
         visible = sum(1 for key, _label in LAYER_LABELS if self.checks[key].isChecked())
         locked = sum(1 for key, _label in LAYER_LABELS if self.layer_locks[key].isChecked())
+        for key, _label in LAYER_LABELS:
+            if key in self.checks and key in self.layer_locks:
+                self.checks[key].setEnabled(not self.layer_locks[key].isChecked())
         non_default = sum(
             1
             for key, _label in LAYER_LABELS
@@ -1193,6 +1196,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if key not in self.checks:
             self.status.setText("尚未選取可 Solo 的圖層")
             return
+        if self.layer_locks.get(key) is not None and self.layer_locks[key].isChecked():
+            self.status.setText("選取圖層已鎖定，Solo 未變更 visibility")
+            return
         self.layer_visibility_snapshot = {
             layer_key: self.checks[layer_key].isChecked()
             for layer_key, _label in LAYER_LABELS
@@ -1200,6 +1206,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         }
         for layer_key, _label in LAYER_LABELS:
             if layer_key not in self.checks:
+                continue
+            if layer_key != key and self.layer_locks.get(layer_key) is not None and self.layer_locks[layer_key].isChecked():
                 continue
             self.checks[layer_key].blockSignals(True)
             self.checks[layer_key].setChecked(layer_key == key)
@@ -1213,8 +1221,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if not self.layer_visibility_snapshot:
             self.status.setText("沒有可還原的 Solo 前可見性 snapshot")
             return
+        skipped_locked = 0
         for layer_key, enabled in self.layer_visibility_snapshot.items():
             if layer_key not in self.checks:
+                continue
+            if self.layer_locks.get(layer_key) is not None and self.layer_locks[layer_key].isChecked():
+                skipped_locked += 1
                 continue
             self.checks[layer_key].blockSignals(True)
             self.checks[layer_key].setChecked(bool(enabled))
@@ -1222,7 +1234,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_visibility_snapshot = None
         self.refresh_command_preview()
         self.refresh_layer_stack_status()
-        self.status.setText("已還原 Solo 前圖層可見性")
+        if skipped_locked:
+            self.status.setText(f"已還原 Solo 前圖層可見性；跳過 locked layers：{skipped_locked}")
+        else:
+            self.status.setText("已還原 Solo 前圖層可見性")
 
     def canvas_layer_hit_keys(self) -> list[str]:
         visible_keys = [key for key, _label in LAYER_LABELS if key in self.checks and self.checks[key].isChecked()]
@@ -1626,6 +1641,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if key not in self.checks:
             self.status.setText("尚未選取圖層")
             return
+        if self.layer_locks.get(key) is not None and self.layer_locks[key].isChecked():
+            self.status.setText("選取圖層已鎖定，visibility 未變更")
+            return
         self.checks[key].setChecked(not self.checks[key].isChecked())
         self.refresh_command_preview()
         self.refresh_layer_stack_status()
@@ -1880,9 +1898,15 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
 
     def _toggle_group(self, keys: tuple[str, ...]) -> None:
         target = not all(self.checks[key].isChecked() for key in keys)
+        skipped_locked = 0
         for key in keys:
+            if self.layer_locks.get(key) is not None and self.layer_locks[key].isChecked():
+                skipped_locked += 1
+                continue
             self.checks[key].setChecked(target)
         self.refresh_command_preview()
+        if skipped_locked:
+            self.status.setText(f"已切換未鎖定圖層；跳過 locked layers：{skipped_locked}")
 
     @QtCore.pyqtSlot()
     def toggle_hydrology_layers(self) -> None:

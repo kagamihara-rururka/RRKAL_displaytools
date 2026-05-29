@@ -953,3 +953,18 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Layer lock visibility guardrails
+
+Scope:
+- Locked layers now disable their visibility checkbox in the Qt Layers panel.
+- Group toggles skip locked layers.
+- Solo and restore visibility skip locked layers, and Solo refuses to run when the selected layer itself is locked.
+- Selected-layer visibility toggle refuses to change a locked layer.
+
+Positioning:
+- This makes lock meaningful as a UI guardrail for scientific reference layers, not just profile metadata.
+- Renderer-side lock enforcement remains pending; current renderer live sync still applies visibility values from the runtime bridge.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
