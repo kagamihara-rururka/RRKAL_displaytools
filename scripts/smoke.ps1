@@ -43,6 +43,9 @@ if ($launchPacket.active_layer_diagnostics.layer_runtime_evidence_summary_schema
 if ($launchPacket.active_layer_diagnostics.layer_runtime_badge_summary_schema -ne "rrkal_displaytools.layer_runtime_badge_summary.v1") {
     throw "Launch packet active_layer_diagnostics layer runtime badge summary schema link missing"
 }
+if ($launchPacket.active_layer_diagnostics.layer_runtime_warning_list_schema -ne "rrkal_displaytools.layer_runtime_warning_list.v1") {
+    throw "Launch packet active_layer_diagnostics layer runtime warning list schema link missing"
+}
 if ($launchPacket.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
     throw "Launch packet layer_capability_matrix schema missing or invalid"
 }
@@ -60,6 +63,12 @@ if ($launchPacket.layer_capability_matrix.runtime_badge_summary.schema -ne "rrka
 }
 if ($launchPacket.layer_capability_matrix.runtime_badge_summary.copyable_provenance -ne $true) {
     throw "Launch packet layer_capability_matrix runtime badge summary should be copyable provenance"
+}
+if ($launchPacket.layer_capability_matrix.runtime_warning_list.schema -ne "rrkal_displaytools.layer_runtime_warning_list.v1") {
+    throw "Launch packet layer_capability_matrix runtime warning list schema missing or invalid"
+}
+if ($launchPacket.layer_capability_matrix.runtime_warning_list.copyable_provenance -ne $true) {
+    throw "Launch packet layer_capability_matrix runtime warning list should be copyable provenance"
 }
 if ($launchPacket.layer_capability_matrix.runtime_status_legend.schema -ne "rrkal_displaytools.layer_runtime_status_legend.v1") {
     throw "Launch packet layer_capability_matrix runtime status legend missing or invalid"
@@ -423,6 +432,9 @@ if ($capabilities.layer_capability_matrix.runtime_evidence_summary.schema -ne "r
 if ($capabilities.layer_capability_matrix.runtime_badge_summary.schema -ne "rrkal_displaytools.layer_runtime_badge_summary.v1") {
     throw "Renderer layer_capability_matrix runtime badge summary schema missing or invalid"
 }
+if ($capabilities.layer_capability_matrix.runtime_warning_list.schema -ne "rrkal_displaytools.layer_runtime_warning_list.v1") {
+    throw "Renderer layer_capability_matrix runtime warning list schema missing or invalid"
+}
 if ($capabilities.layer_capability_matrix.runtime_status_legend.schema -ne "rrkal_displaytools.layer_runtime_status_legend.v1") {
     throw "Renderer layer_capability_matrix runtime status legend missing or invalid"
 }
@@ -569,6 +581,9 @@ if ($handoff.layer_capability_matrix.runtime_evidence_summary_schema -ne "rrkal_
 }
 if ($handoff.layer_capability_matrix.runtime_badge_summary_schema -ne "rrkal_displaytools.layer_runtime_badge_summary.v1") {
     throw "Handoff inspection layer runtime badge summary schema missing or invalid"
+}
+if ($handoff.layer_capability_matrix.runtime_warning_list_schema -ne "rrkal_displaytools.layer_runtime_warning_list.v1") {
+    throw "Handoff inspection layer runtime warning list schema missing or invalid"
 }
 if ($handoff.layer_capability_matrix.runtime_status_legend_schema -ne "rrkal_displaytools.layer_runtime_status_legend.v1") {
     throw "Handoff inspection layer runtime status legend schema missing or invalid"

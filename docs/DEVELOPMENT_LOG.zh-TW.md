@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-29 - Layer runtime warning list
+
+- Added `rrkal_displaytools.layer_runtime_warning_list.v1` to turn Runtime badge counts into researcher-facing info/warning/error messages.
+- Qt Properties now shows a `Runtime warnings` row, and copyable research provenance includes the warning list.
+- Launch packets, renderer capabilities, handoff inspection, closed-loop status and smoke gates now expose the warning-list contract.
+- Smoke: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1` PASS.
+
 ## 2026-05-29 - Layer runtime badge provenance
 
 - Added `rrkal_displaytools.layer_runtime_badge_summary.v1` to summarize per-layer Runtime badge counts, selected-layer badge state and noteworthy layers.

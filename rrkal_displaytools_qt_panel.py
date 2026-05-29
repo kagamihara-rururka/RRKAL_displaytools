@@ -374,6 +374,53 @@ def layer_runtime_badge_summary_packet(
     }
 
 
+def layer_runtime_warning_list_packet(
+    badge_summary: dict[str, object] | None,
+    evidence_summary: dict[str, object] | None,
+    source: str,
+) -> dict[str, object]:
+    badge_summary = badge_summary if isinstance(badge_summary, dict) else {}
+    evidence_summary = evidence_summary if isinstance(evidence_summary, dict) else {}
+    counts = badge_summary.get("status_counts")
+    counts = counts if isinstance(counts, dict) else {}
+    warnings: list[dict[str, object]] = []
+    error_count = int(counts.get("error", 0) or 0)
+    locked_count = int(counts.get("locked", 0) or 0)
+    changed_count = int(counts.get("changed", 0) or 0)
+    target_count = int(counts.get("target", 0) or 0)
+    no_ack_count = int(counts.get("no_ack", 0) or 0)
+    if error_count:
+        warnings.append({"level": "error", "type": "renderer_ack_error", "text": f"{error_count} layer(s) report renderer ack error badges."})
+    if locked_count:
+        warnings.append({"level": "warning", "type": "locked_layer_skipped", "text": f"{locked_count} locked layer(s) were skipped by renderer runtime sync."})
+    if evidence_summary.get("status") == "unavailable" or no_ack_count:
+        warnings.append({"level": "info", "type": "runtime_ack_pending", "text": f"{no_ack_count} layer(s) have no renderer ack badge evidence yet."})
+    if changed_count:
+        warnings.append({"level": "info", "type": "runtime_change_applied", "text": f"{changed_count} layer(s) changed in the latest renderer runtime ack."})
+    if target_count:
+        warnings.append({"level": "info", "type": "selected_renderer_target", "text": f"{target_count} layer(s) are marked as selected renderer target."})
+    severity = "ok"
+    if error_count:
+        severity = "error"
+    elif locked_count:
+        severity = "warning"
+    elif warnings:
+        severity = "info"
+    summary_text = "No runtime badge warnings." if not warnings else " ".join(str(item["text"]) for item in warnings[:3])
+    if len(warnings) > 3:
+        summary_text += f" +{len(warnings) - 3} more."
+    return {
+        "schema": "rrkal_displaytools.layer_runtime_warning_list.v1",
+        "source": source,
+        "severity": severity,
+        "summary_text": summary_text,
+        "warning_count": len(warnings),
+        "warnings": warnings,
+        "copyable_provenance": True,
+        "boundary": "Researcher-facing warning list derived from layer Runtime badge summaries; it is diagnostic only.",
+    }
+
+
 def layer_capability_matrix_packet(
     source: str,
     selected_layer: str | None = None,
@@ -410,14 +457,17 @@ def layer_capability_matrix_packet(
         "selected_layer_pick": sum(1 for layer in layers if layer["pick_live"]),
     }
     selected = next((layer for layer in layers if layer["key"] == selected_layer), None)
+    runtime_evidence_summary = layer_runtime_evidence_summary_packet(runtime_evidence)
+    runtime_badge_summary = layer_runtime_badge_summary_packet(layers, selected_layer, source)
     return {
         "schema": "rrkal_displaytools.layer_capability_matrix.v1",
         "source": source,
         "layer_count": len(layers),
         "live_counts": counts,
         "runtime_evidence": runtime_evidence,
-        "runtime_evidence_summary": layer_runtime_evidence_summary_packet(runtime_evidence),
-        "runtime_badge_summary": layer_runtime_badge_summary_packet(layers, selected_layer, source),
+        "runtime_evidence_summary": runtime_evidence_summary,
+        "runtime_badge_summary": runtime_badge_summary,
+        "runtime_warning_list": layer_runtime_warning_list_packet(runtime_badge_summary, runtime_evidence_summary, source),
         "runtime_status_legend": layer_runtime_status_legend_packet(),
         "selected_layer": selected_layer,
         "selected_layer_capabilities": selected,
@@ -763,6 +813,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "blend": QtWidgets.QLabel("-"),
             "capabilities": QtWidgets.QLabel("-"),
             "runtime_summary": QtWidgets.QLabel("-"),
+            "runtime_warnings": QtWidgets.QLabel("-"),
             "renderer_target": QtWidgets.QLabel("-"),
             "diagnostics": QtWidgets.QLabel("-"),
         }
@@ -776,6 +827,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         material_form.addRow("Blend mode", self.layer_property_labels["blend"])
         material_form.addRow("Layer capabilities", self.layer_property_labels["capabilities"])
         material_form.addRow("Runtime summary", self.layer_property_labels["runtime_summary"])
+        material_form.addRow("Runtime warnings", self.layer_property_labels["runtime_warnings"])
         material_form.addRow("Renderer target", self.layer_property_labels["renderer_target"])
         material_form.addRow("Renderer diagnostics", self.layer_property_labels["diagnostics"])
         layer_property_actions = QtWidgets.QHBoxLayout()
@@ -3887,6 +3939,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_property_labels["runtime_summary"].setText(
             str(runtime_summary.get("text", "-")) if isinstance(runtime_summary, dict) else "-"
         )
+        runtime_warning_list = matrix.get("runtime_warning_list") if isinstance(matrix, dict) else None
+        self.layer_property_labels["runtime_warnings"].setText(
+            str(runtime_warning_list.get("summary_text", "-")) if isinstance(runtime_warning_list, dict) else "-"
+        )
         renderer_target = LAYER_RUNTIME_ID_ALIASES.get(key, "-")
         self.layer_property_labels["renderer_target"].setText(str(renderer_target))
         self.layer_property_labels["diagnostics"].setText(self.layer_diagnostics_text(str(renderer_target)))
@@ -3949,8 +4005,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_runtime_evidence_schema": "rrkal_displaytools.layer_runtime_evidence.v1",
             "layer_runtime_evidence_summary_schema": "rrkal_displaytools.layer_runtime_evidence_summary.v1",
             "layer_runtime_badge_summary_schema": "rrkal_displaytools.layer_runtime_badge_summary.v1",
+            "layer_runtime_warning_list_schema": "rrkal_displaytools.layer_runtime_warning_list.v1",
             "runtime_evidence_summary": self.collect_layer_capability_matrix().get("runtime_evidence_summary"),
             "runtime_badge_summary": self.collect_layer_capability_matrix().get("runtime_badge_summary"),
+            "runtime_warning_list": self.collect_layer_capability_matrix().get("runtime_warning_list"),
             "diagnostics_text": diagnostics_text,
             "runtime_ack_file": str(LAYER_RUNTIME_ACK_PATH),
             "runtime_ack": self.layer_runtime_ack_payload,
@@ -4473,6 +4531,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_capability_matrix": self.collect_layer_capability_matrix(),
             "layer_runtime_evidence_summary": self.collect_layer_capability_matrix().get("runtime_evidence_summary"),
             "layer_runtime_badge_summary": self.collect_layer_capability_matrix().get("runtime_badge_summary"),
+            "layer_runtime_warning_list": self.collect_layer_capability_matrix().get("runtime_warning_list"),
             "active_layer_diagnostics": self.active_layer_diagnostics_packet(),
             "layer_undo": self.collect_layer_undo_state(),
             "session_journal": self.collect_session_journal(),

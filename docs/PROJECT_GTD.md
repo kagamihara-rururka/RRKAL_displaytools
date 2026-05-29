@@ -36,6 +36,7 @@ Last updated: 2026-05-29
 
 ## Done
 
+- 2026-05-29: Added researcher-facing layer runtime warning list across Qt Properties, provenance, launch packets, renderer capabilities, handoff inspection and smoke.
 - 2026-05-29: Added copyable layer runtime badge summary provenance across Qt, launch packets, renderer capabilities, handoff inspection and smoke.
 - 2026-05-29: Added layer runtime evidence summary contract for Qt Properties, launch packets, renderer capabilities, handoff inspection and smoke.
 - 2026-05-29: Added runtime badge color/legend contract to the layer capability matrix and Qt Layers dock.
