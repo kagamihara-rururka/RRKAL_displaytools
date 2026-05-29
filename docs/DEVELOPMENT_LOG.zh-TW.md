@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-30 - Layer research workflow
+
+- Added `rrkal_displaytools.layer_research_workflow.v1` to connect layer filter/group state, selected layer, runtime warnings and renderer remediation hints into a researcher-facing workflow.
+- Qt Layers dock now shows `Layer research workflow`; launch packets, renderer capabilities, handoff inspection and closed-loop evidence expose the same contract.
+- Smoke: PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Cross-machine readiness Qt surface
 
 - Added a Qt Layers dock `Cross-machine clone readiness` label and exposed its `qt_surface` in `rrkal_displaytools.cross_machine_clone_readiness.v1`.

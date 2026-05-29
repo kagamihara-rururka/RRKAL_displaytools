@@ -35,6 +35,7 @@ Last updated: 2026-05-29
 - Decide which local cache artifacts should later be registered by RRKAL as renderer bridge assets.
 
 ## Done
+- 2026-05-30: Added `rrkal_displaytools.layer_research_workflow.v1` and a Qt Layers dock workflow label linking filter/group/selected-layer/runtime-warning/remediation state.
 - 2026-05-30: Added a Qt Layers dock cross-machine clone readiness label and smoke gates for its launch/renderer Qt surface.
 - 2026-05-30: Added `rrkal_displaytools.cross_machine_clone_readiness.v1` so cross-machine clone/setup/smoke/run readiness is visible through launch packets, renderer capabilities, handoff and smoke.
 - 2026-05-30: Added `rrkal_displaytools.module_boundary_registry.v1` so future decoupling boundaries are visible through launch packets, renderer capabilities, handoff and smoke.

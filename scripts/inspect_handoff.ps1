@@ -39,6 +39,7 @@ $summary = [ordered]@{
         layer_capability_matrix = $launchPacket.layer_capability_matrix.schema
         layer_operator_shortcuts = $launchPacket.layer_operator_shortcuts.schema
         layer_operator_groups = $launchPacket.layer_operator_groups.schema
+        layer_research_workflow = $launchPacket.layer_research_workflow.schema
         style_renderer_entries = $launchPacket.style_renderer_entries.schema
         style_profile_renderer_routes = $launchPacket.style_profile_renderer_routes.schema
         module_boundary_registry = $launchPacket.module_boundary_registry.schema
@@ -69,6 +70,16 @@ $summary = [ordered]@{
         group_count = $launchPacket.layer_operator_groups.group_count
         complete_group_count = $launchPacket.layer_operator_groups.complete_group_count
         group_ids = @($launchPacket.layer_operator_groups.groups | ForEach-Object { $_.id })
+    }
+    layer_research_workflow = @{
+        launch_packet_schema = $launchPacket.layer_research_workflow.schema
+        renderer_capabilities_schema = $capabilities.layer_research_workflow.schema
+        status = $launchPacket.layer_research_workflow.status
+        selected_layer = $launchPacket.layer_research_workflow.selected_layer
+        runtime_warning_severity = $launchPacket.layer_research_workflow.runtime_warning_severity
+        runtime_warning_count = $launchPacket.layer_research_workflow.runtime_warning_count
+        remediation_hint_count = $launchPacket.layer_research_workflow.remediation_hint_count
+        qt_surface = $launchPacket.layer_research_workflow.qt_surface
     }
     style_renderer_entries = @{
         launch_packet_schema = $launchPacket.style_renderer_entries.schema

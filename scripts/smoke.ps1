@@ -188,6 +188,18 @@ if ([int]$launchPacket.layer_operator_groups.group_count -lt 5) {
 if ([int]$launchPacket.layer_operator_groups.complete_group_count -lt 5) {
     throw "Launch packet layer_operator_groups incomplete"
 }
+if ($launchPacket.layer_research_workflow.schema -ne "rrkal_displaytools.layer_research_workflow.v1") {
+    throw "Launch packet layer_research_workflow schema missing or invalid"
+}
+if ($launchPacket.layer_research_workflow.status -ne "ready") {
+    throw "Launch packet layer_research_workflow not ready"
+}
+if ($launchPacket.layer_research_workflow.qt_surface -ne "Layers dock research workflow label") {
+    throw "Launch packet layer_research_workflow Qt surface mismatch"
+}
+if ($launchPacket.layer_research_workflow.researcher_path -notcontains "Select or reveal a layer") {
+    throw "Launch packet layer_research_workflow researcher path incomplete"
+}
 if ($launchPacket.style_renderer_entries.schema -ne "rrkal_displaytools.style_renderer_entries.v1") {
     throw "Launch packet style_renderer_entries schema missing or invalid"
 }
@@ -643,6 +655,12 @@ if ($capabilities.layer_operator_groups.schema -ne "rrkal_displaytools.layer_ope
 if ([int]$capabilities.layer_operator_groups.complete_group_count -lt 5) {
     throw "Renderer layer_operator_groups incomplete"
 }
+if ($capabilities.layer_research_workflow.schema -ne "rrkal_displaytools.layer_research_workflow.v1") {
+    throw "Renderer layer_research_workflow schema missing or invalid"
+}
+if ($capabilities.layer_research_workflow.status -ne "ready") {
+    throw "Renderer layer_research_workflow not ready"
+}
 if ($capabilities.style_renderer_entries.schema -ne "rrkal_displaytools.style_renderer_entries.v1") {
     throw "Renderer style_renderer_entries schema missing or invalid"
 }
@@ -915,6 +933,18 @@ if ($handoff.layer_operator_groups.renderer_capabilities_schema -ne "rrkal_displ
 }
 if ([int]$handoff.layer_operator_groups.complete_group_count -lt 5) {
     throw "Handoff inspection layer_operator_groups incomplete"
+}
+if ($handoff.launch_packet_contracts.layer_research_workflow -ne "rrkal_displaytools.layer_research_workflow.v1") {
+    throw "Handoff inspection layer_research_workflow launch contract missing or invalid"
+}
+if ($handoff.layer_research_workflow.launch_packet_schema -ne "rrkal_displaytools.layer_research_workflow.v1") {
+    throw "Handoff inspection layer_research_workflow launch schema missing or invalid"
+}
+if ($handoff.layer_research_workflow.renderer_capabilities_schema -ne "rrkal_displaytools.layer_research_workflow.v1") {
+    throw "Handoff inspection layer_research_workflow renderer schema missing or invalid"
+}
+if ($handoff.layer_research_workflow.qt_surface -ne "Layers dock research workflow label") {
+    throw "Handoff inspection layer_research_workflow Qt surface mismatch"
 }
 if ($handoff.launch_packet_contracts.style_renderer_entries -ne "rrkal_displaytools.style_renderer_entries.v1") {
     throw "Handoff inspection style_renderer_entries launch contract missing or invalid"

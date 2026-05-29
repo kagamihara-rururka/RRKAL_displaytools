@@ -1427,6 +1427,56 @@ def layer_operator_groups_packet(
     }
 
 
+def layer_research_workflow_packet(
+    layer_filter: dict[str, object] | None,
+    layer_group_view: dict[str, object] | None,
+    operator_groups: dict[str, object] | None,
+    capability_matrix: dict[str, object] | None,
+    source: str,
+) -> dict[str, object]:
+    layer_filter = layer_filter if isinstance(layer_filter, dict) else {}
+    layer_group_view = layer_group_view if isinstance(layer_group_view, dict) else {}
+    operator_groups = operator_groups if isinstance(operator_groups, dict) else {}
+    capability_matrix = capability_matrix if isinstance(capability_matrix, dict) else {}
+    warning_list = capability_matrix.get("runtime_warning_list") if isinstance(capability_matrix.get("runtime_warning_list"), dict) else {}
+    remediation = capability_matrix.get("renderer_diagnostics_remediation") if isinstance(capability_matrix.get("renderer_diagnostics_remediation"), dict) else {}
+    selected_layer = capability_matrix.get("selected_layer") or layer_filter.get("selected_layer")
+    ready = (
+        capability_matrix.get("schema") == "rrkal_displaytools.layer_capability_matrix.v1"
+        and operator_groups.get("schema") == "rrkal_displaytools.layer_operator_groups.v1"
+        and int(operator_groups.get("complete_group_count") or 0) >= 5
+    )
+    return {
+        "schema": "rrkal_displaytools.layer_research_workflow.v1",
+        "source": source,
+        "status": "ready" if ready else "partial",
+        "selected_layer": selected_layer,
+        "filter_schema": layer_filter.get("schema"),
+        "filter_preset": layer_filter.get("preset"),
+        "filter_query": layer_filter.get("query"),
+        "first_matched_layer": layer_filter.get("first_matched_layer"),
+        "selected_layer_visible": layer_filter.get("selected_layer_visible"),
+        "group_view_schema": layer_group_view.get("schema"),
+        "visible_row_count": layer_group_view.get("visible_row_count"),
+        "selected_layer_hidden_by_group": layer_group_view.get("selected_layer_hidden_by_group"),
+        "operator_group_count": operator_groups.get("group_count"),
+        "complete_operator_group_count": operator_groups.get("complete_group_count"),
+        "runtime_warning_severity": warning_list.get("severity", "unknown"),
+        "runtime_warning_count": warning_list.get("warning_count", 0),
+        "remediation_hint_count": remediation.get("hint_count", 0),
+        "researcher_path": [
+            "Filter or group the layer list",
+            "Select or reveal a layer",
+            "Read runtime badge and warning summary",
+            "Open renderer diagnostics/remediation before treating the state as reproducible",
+        ],
+        "qt_surface": "Layers dock research workflow label",
+        "launch_packet_fields": ["layer_research_workflow", "layer_filter", "layer_group_view", "layer_capability_matrix"],
+        "renderer_capability_field": "layer_research_workflow",
+        "boundary": "Research workflow summarizes existing Qt layer controls and renderer diagnostics; it does not mutate renderer state or RRKAL data governance.",
+    }
+
+
 def layer_capability_matrix_packet(
     source: str,
     selected_layer: str | None = None,
@@ -2103,6 +2153,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         )
         self.layer_operator_groups_label.setWordWrap(True)
         layers_layout.addWidget(self.layer_operator_groups_label)
+        self.layer_research_workflow_label = QtWidgets.QLabel("Layer research workflow: pending")
+        self.layer_research_workflow_label.setWordWrap(True)
+        layers_layout.addWidget(self.layer_research_workflow_label)
         self.profile_launch_readiness_label = QtWidgets.QLabel("Profile/launch readiness: pending")
         self.profile_launch_readiness_label.setWordWrap(True)
         layers_layout.addWidget(self.profile_launch_readiness_label)
@@ -2969,6 +3022,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_group_view": self.collect_layer_group_view_state(),
             "layer_operator_shortcuts": self.collect_layer_operator_shortcuts(),
             "layer_operator_groups": self.collect_layer_operator_groups(),
+            "layer_research_workflow": self.collect_layer_research_workflow(),
             "style_renderer_entries": self.collect_style_renderer_entries(),
             "style_profile_renderer_routes": self.collect_style_profile_renderer_routes(),
             "module_boundary_registry": self.collect_module_boundary_registry(),
@@ -3131,6 +3185,15 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def collect_layer_operator_groups(self) -> dict[str, object]:
         return layer_operator_groups_packet(
             self.collect_layer_operator_shortcuts(),
+            "rrkal_displaytools_qt_panel",
+        )
+
+    def collect_layer_research_workflow(self) -> dict[str, object]:
+        return layer_research_workflow_packet(
+            self.collect_layer_filter_state(),
+            self.collect_layer_group_view_state(),
+            self.collect_layer_operator_groups(),
+            self.collect_layer_capability_matrix(),
             "rrkal_displaytools_qt_panel",
         )
 
@@ -3914,6 +3977,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "Layer workflow: "
                 f"{operator_groups.get('summary_text', 'Selection / Edit state / Isolation / History / Diagnostics')} "
                 f"({operator_groups.get('complete_group_count', 0)}/{operator_groups.get('group_count', 0)} groups complete)"
+            )
+        research_workflow = self.collect_layer_research_workflow()
+        if hasattr(self, "layer_research_workflow_label"):
+            self.layer_research_workflow_label.setText(
+                f"Layer research workflow: {research_workflow.get('status', 'unknown')} "
+                f"(selected={research_workflow.get('selected_layer') or '-'}, "
+                f"warnings={research_workflow.get('runtime_warning_count', 0)}, "
+                f"hints={research_workflow.get('remediation_hint_count', 0)})"
             )
         readiness_ui = self.collect_profile_launch_readiness_ui()
         if hasattr(self, "profile_launch_readiness_label"):
@@ -5834,6 +5905,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_group_view": self.collect_layer_group_view_state(),
             "layer_operator_shortcuts": self.collect_layer_operator_shortcuts(),
             "layer_operator_groups": self.collect_layer_operator_groups(),
+            "layer_research_workflow": self.collect_layer_research_workflow(),
             "style_renderer_entries": self.collect_style_renderer_entries(),
             "style_profile_renderer_routes": self.collect_style_profile_renderer_routes(),
             "module_boundary_registry": self.collect_module_boundary_registry(),

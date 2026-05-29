@@ -1497,6 +1497,56 @@ def layer_operator_groups_packet(
     }
 
 
+def layer_research_workflow_packet(
+    layer_filter: dict[str, object] | None,
+    layer_group_view: dict[str, object] | None,
+    operator_groups: dict[str, object] | None,
+    capability_matrix: dict[str, object] | None,
+    source: str,
+) -> dict[str, object]:
+    layer_filter = layer_filter if isinstance(layer_filter, dict) else {}
+    layer_group_view = layer_group_view if isinstance(layer_group_view, dict) else {}
+    operator_groups = operator_groups if isinstance(operator_groups, dict) else {}
+    capability_matrix = capability_matrix if isinstance(capability_matrix, dict) else {}
+    warning_list = capability_matrix.get("runtime_warning_list") if isinstance(capability_matrix.get("runtime_warning_list"), dict) else {}
+    remediation = capability_matrix.get("renderer_diagnostics_remediation") if isinstance(capability_matrix.get("renderer_diagnostics_remediation"), dict) else {}
+    selected_layer = capability_matrix.get("selected_layer") or layer_filter.get("selected_layer")
+    ready = (
+        capability_matrix.get("schema") == "rrkal_displaytools.layer_capability_matrix.v1"
+        and operator_groups.get("schema") == "rrkal_displaytools.layer_operator_groups.v1"
+        and int(operator_groups.get("complete_group_count") or 0) >= 5
+    )
+    return {
+        "schema": "rrkal_displaytools.layer_research_workflow.v1",
+        "source": source,
+        "status": "ready" if ready else "partial",
+        "selected_layer": selected_layer,
+        "filter_schema": layer_filter.get("schema"),
+        "filter_preset": layer_filter.get("preset"),
+        "filter_query": layer_filter.get("query"),
+        "first_matched_layer": layer_filter.get("first_matched_layer"),
+        "selected_layer_visible": layer_filter.get("selected_layer_visible"),
+        "group_view_schema": layer_group_view.get("schema"),
+        "visible_row_count": layer_group_view.get("visible_row_count"),
+        "selected_layer_hidden_by_group": layer_group_view.get("selected_layer_hidden_by_group"),
+        "operator_group_count": operator_groups.get("group_count"),
+        "complete_operator_group_count": operator_groups.get("complete_group_count"),
+        "runtime_warning_severity": warning_list.get("severity", "unknown"),
+        "runtime_warning_count": warning_list.get("warning_count", 0),
+        "remediation_hint_count": remediation.get("hint_count", 0),
+        "researcher_path": [
+            "Filter or group the layer list",
+            "Select or reveal a layer",
+            "Read runtime badge and warning summary",
+            "Open renderer diagnostics/remediation before treating the state as reproducible",
+        ],
+        "qt_surface": "Layers dock research workflow label",
+        "launch_packet_fields": ["layer_research_workflow", "layer_filter", "layer_group_view", "layer_capability_matrix"],
+        "renderer_capability_field": "layer_research_workflow",
+        "boundary": "Research workflow summarizes existing Qt layer controls and renderer diagnostics; it does not mutate renderer state or RRKAL data governance.",
+    }
+
+
 def layer_capability_matrix_packet(
     source: str,
     selected_layer: str | None = None,
@@ -2326,6 +2376,7 @@ def launch_packet(
         "layer_group_view": layer_group_view_packet(profile),
         "layer_operator_shortcuts": layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None),
         "layer_operator_groups": layer_operator_groups_packet(layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None), "scripts.export_launch_packet"),
+        "layer_research_workflow": layer_research_workflow_packet(layer_filter_packet(profile), layer_group_view_packet(profile), layer_operator_groups_packet(layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None), "scripts.export_launch_packet"), layer_capability_matrix_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None, rrkal_data_manifest_ref), "scripts.export_launch_packet"),
         "style_renderer_entries": style_renderer_entries_packet("scripts.export_launch_packet", profile.get("style_profile") if isinstance(profile.get("style_profile"), str) else None),
         "style_profile_renderer_routes": style_profile_renderer_routes_packet(style_renderer_entries_packet("scripts.export_launch_packet", profile.get("style_profile") if isinstance(profile.get("style_profile"), str) else None), "scripts.export_launch_packet"),
         "module_boundary_registry": module_boundary_registry_packet("scripts.export_launch_packet"),
