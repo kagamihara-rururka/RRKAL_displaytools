@@ -40,6 +40,9 @@ if ($launchPacket.layer_filter.available_presets -notcontains "hydrology") {
 if ($launchPacket.layer_filter.available_presets -notcontains "visual_aids") {
     throw "Launch packet layer_filter visual_aids preset missing"
 }
+if ($null -eq $launchPacket.layer_filter.first_matched_layer) {
+    throw "Launch packet layer_filter first_matched_layer missing"
+}
 if ($launchPacket.layer_undo.schema -ne "rrkal_displaytools.layer_stack_undo.v1") {
     throw "Launch packet layer_undo schema missing or invalid"
 }

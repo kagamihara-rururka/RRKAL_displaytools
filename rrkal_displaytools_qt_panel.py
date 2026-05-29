@@ -542,6 +542,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         layer_filter_row.addWidget(clear_layer_filter)
         layers_layout.addLayout(layer_filter_row)
         layer_focus_row = QtWidgets.QHBoxLayout()
+        select_first_match = QtWidgets.QPushButton("Select first")
+        select_first_match.clicked.connect(self.select_first_filtered_layer)
+        layer_focus_row.addWidget(select_first_match)
         for preset_id, label in (
             ("hydrology", "Hydro"),
             ("maritime", "Maritime"),
@@ -2236,6 +2239,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "preset": self.layer_filter_preset,
             "available_presets": ["all", "hydrology", "maritime", "traffic", "visual_aids", "custom"],
             "query": self.layer_filter_text,
+            "first_matched_layer": matched[0] if matched else None,
+            "selected_layer_visible": self.selected_layer_key in matched if self.selected_layer_key is not None else False,
             "matched_layers": matched,
             "matched_count": len(matched),
             "total_layers": len(LAYER_LABELS),
@@ -2270,6 +2275,15 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.refresh_layer_filter()
         self.refresh_research_provenance()
 
+    @QtCore.pyqtSlot()
+    def select_first_filtered_layer(self) -> None:
+        for key, label in LAYER_LABELS:
+            if self.layer_filter_matches(key, label):
+                self.select_layer(key)
+                self.status.setText(f"已選取目前 filter 第一個圖層：{key}")
+                return
+        self.status.setText("目前 layer filter 沒有符合圖層")
+
     def refresh_layer_filter(self) -> None:
         matched_count = 0
         for key, label in LAYER_LABELS:
@@ -2282,9 +2296,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 matched_count += 1
         if self.layer_filter_status_label is not None:
             query = self.layer_filter_text or "all"
+            selected_state = "visible" if self.collect_layer_filter_state().get("selected_layer_visible") else "hidden"
             self.layer_filter_status_label.setText(
                 f"Layer filter: preset={self.layer_filter_preset}, query={query}; "
-                f"matched={matched_count}/{len(LAYER_LABELS)}; renderer state unchanged"
+                f"matched={matched_count}/{len(LAYER_LABELS)}; selected={selected_state}; renderer state unchanged"
             )
 
     def collect_layer_undo_snapshot(self) -> dict[str, object]:
@@ -2814,6 +2829,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             row.style().unpolish(row)
             row.style().polish(row)
             row.update()
+        self.refresh_layer_filter()
         self.refresh_layer_stack_status()
         if hasattr(self, "status"):
             self.status.setText(f"已選取圖層：{label}")

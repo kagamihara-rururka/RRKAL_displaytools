@@ -134,6 +134,8 @@ def profile_payload_errors(profile: dict[str, object]) -> list[str]:
                 "preset",
                 "available_presets",
                 "query",
+                "first_matched_layer",
+                "selected_layer_visible",
                 "matched_layers",
                 "matched_count",
                 "total_layers",
@@ -157,6 +159,12 @@ def profile_payload_errors(profile: dict[str, object]) -> list[str]:
             if matched_layers is not None:
                 if not isinstance(matched_layers, list) or any(not isinstance(item, str) for item in matched_layers):
                     errors.append("layer_filter.matched_layers must be a list of strings")
+            first_matched_layer = layer_filter.get("first_matched_layer")
+            if first_matched_layer is not None and not isinstance(first_matched_layer, str):
+                errors.append("layer_filter.first_matched_layer must be a string or null")
+            selected_layer_visible = layer_filter.get("selected_layer_visible")
+            if selected_layer_visible is not None and not isinstance(selected_layer_visible, bool):
+                errors.append("layer_filter.selected_layer_visible must be boolean")
             for field in ("matched_count", "total_layers"):
                 value = layer_filter.get(field)
                 if value is not None and (not isinstance(value, int) or isinstance(value, bool) or value < 0):
@@ -426,6 +434,8 @@ def profile_schema_packet() -> dict[str, object]:
                 "preset",
                 "available_presets",
                 "query",
+                "first_matched_layer",
+                "selected_layer_visible",
                 "matched_layers",
                 "matched_count",
                 "total_layers",

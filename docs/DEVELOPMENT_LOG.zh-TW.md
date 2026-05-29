@@ -1,5 +1,19 @@
 # Development Log
 
+## 2026-05-29 - Layer filter select-first action
+
+Scope:
+- Layers filter row now includes `Select first`.
+- `layer_filter` state now records `first_matched_layer` and `selected_layer_visible`.
+- The filter status label reports whether the active layer is visible under the current filter.
+- Smoke now gates `layer_filter.first_matched_layer`.
+
+Positioning:
+- This completes a practical filter-to-selection loop for researchers who narrow the layer list and need to immediately target the first matching layer.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Layer filter focus presets
 
 Scope:

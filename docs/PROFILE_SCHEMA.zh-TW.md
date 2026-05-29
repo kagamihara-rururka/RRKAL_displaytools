@@ -104,6 +104,8 @@ rrkal_displaytools.qt_panel_profile.v1
 | `preset` | string | `all`、`hydrology`、`maritime`、`traffic`、`visual_aids` 或 `custom`。 |
 | `available_presets` | array | Qt 目前提供的 focus preset 清單。 |
 | `query` | string | 使用者輸入的搜尋字串。 |
+| `first_matched_layer` | string or null | 目前 filter 結果中的第一個 layer key，可供 Qt `Select first` 使用。 |
+| `selected_layer_visible` | boolean | 目前 active layer 是否仍在 filter 結果中可見。 |
 | `matched_layers` | array | 符合 query 的 layer key 清單。 |
 | `matched_count` | integer | 符合的 row 數。 |
 | `total_layers` | integer | 可過濾的 layer row 總數。 |

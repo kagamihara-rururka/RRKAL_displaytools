@@ -252,6 +252,8 @@ def layer_filter_packet(profile: dict[str, object]) -> dict[str, object]:
         "preset": preset if preset else "all",
         "available_presets": ["all", "hydrology", "maritime", "traffic", "visual_aids", "custom"],
         "query": query,
+        "first_matched_layer": matched_layers[0] if matched_layers else None,
+        "selected_layer_visible": str(profile.get("selected_layer", "")) in matched_layers,
         "matched_layers": matched_layers,
         "matched_count": len(matched_layers),
         "total_layers": len([key for key in BOOL_FLAGS if key != "demo_closed_loop"]),
