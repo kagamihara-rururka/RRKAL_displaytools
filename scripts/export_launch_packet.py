@@ -1189,6 +1189,72 @@ def ocean_material_control_port_packet(
     }
 
 
+def module_boundary_registry_packet(source: str) -> dict[str, object]:
+    boundaries = [
+        {
+            "module": "contracts/launch_packets.py",
+            "owner": "displaytools-contracts",
+            "responsibility": "Launch packets, renderer capabilities, handoff summaries and smoke-visible schemas.",
+            "forbidden": ["Qt widgets", "Taichi kernels", "dataset discovery/download/cache eviction"],
+        },
+        {
+            "module": "qt_ui/main_window.py",
+            "owner": "displaytools-qt",
+            "responsibility": "Qt-first Photoshop-like operator UI, layer controls, profiles, provenance and preview orchestration.",
+            "forbidden": ["Tk primary UI", "provider cache governance", "Taichi kernel logic"],
+        },
+        {
+            "module": "render_core/taichi_globe.py",
+            "owner": "displaytools-render-core",
+            "responsibility": "Taichi globe render loop, scalar uniforms, camera/projection draw calls and frame output.",
+            "forbidden": ["Qt imports", "provider-specific IO", "RRKAL data repair"],
+        },
+        {
+            "module": "render_core/ocean_material.py",
+            "owner": "displaytools-render-core",
+            "responsibility": "Map normalized sea-state scalars and style intent into ocean material uniforms.",
+            "forbidden": ["provider discovery", "downloads", "cache lifecycle"],
+        },
+        {
+            "module": "style_profiles.py",
+            "owner": "displaytools-style",
+            "responsibility": "Scientific, nautical, parchment and tactical visual intent, palettes and renderer routes.",
+            "forbidden": ["Qt widget state", "provider IO", "cache governance"],
+        },
+        {
+            "module": "overlays/vector_layers.py",
+            "owner": "displaytools-overlays",
+            "responsibility": "Layer composition, selected-layer picking, pins, hydrology/boundary drawing and diagnostics.",
+            "forbidden": ["dataset discovery", "RRKAL manifest mutation", "Qt dialogs"],
+        },
+        {
+            "module": "data_sources/*",
+            "owner": "RRKAL-external",
+            "responsibility": "Discovery, download, import, manifest and cache governance for hydrology, maritime and ocean-condition datasets.",
+            "forbidden": ["displaytools-owned cache eviction", "renderer loop dependencies"],
+        },
+        {
+            "module": "diagnostics/handoff.py",
+            "owner": "displaytools-diagnostics",
+            "responsibility": "Closed-loop status, smoke gates, renderer capability discovery and cross-machine handoff inspection.",
+            "forbidden": ["mutating renderer state", "provider downloads"],
+        },
+    ]
+    return {
+        "schema": "rrkal_displaytools.module_boundary_registry.v1",
+        "source": source,
+        "module_count": len(boundaries),
+        "target_modules": [boundary["module"] for boundary in boundaries],
+        "boundaries": boundaries,
+        "qt_first": True,
+        "tk_primary_ui_allowed": False,
+        "rrkal_data_governance_boundary": "RRKAL owns dataset discovery, download, import, manifest, cache lifecycle and repair; displaytools consumes governed references and renderer-ready contracts.",
+        "displaytools_scope": "visualization UI, renderer contracts, launch packets, style/ocean/layer controls, diagnostics and handoff evidence.",
+        "launch_packet_fields": ["module_boundary_registry"],
+        "renderer_capability_field": "module_boundary_registry",
+    }
+
+
 def layer_operator_shortcuts_packet(
     source: str,
     selected_layer: str | None = None,
@@ -2216,6 +2282,7 @@ def launch_packet(
         "layer_operator_groups": layer_operator_groups_packet(layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None), "scripts.export_launch_packet"),
         "style_renderer_entries": style_renderer_entries_packet("scripts.export_launch_packet", profile.get("style_profile") if isinstance(profile.get("style_profile"), str) else None),
         "style_profile_renderer_routes": style_profile_renderer_routes_packet(style_renderer_entries_packet("scripts.export_launch_packet", profile.get("style_profile") if isinstance(profile.get("style_profile"), str) else None), "scripts.export_launch_packet"),
+        "module_boundary_registry": module_boundary_registry_packet("scripts.export_launch_packet"),
         "profile_launch_readiness": profile_launch_readiness_packet("scripts.export_launch_packet", style_renderer_entries_packet("scripts.export_launch_packet", profile.get("style_profile") if isinstance(profile.get("style_profile"), str) else None), layer_operator_groups_packet(layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None), "scripts.export_launch_packet")),
         "profile_launch_readiness_ui": profile_launch_readiness_ui_packet(profile_launch_readiness_packet("scripts.export_launch_packet", style_renderer_entries_packet("scripts.export_launch_packet", profile.get("style_profile") if isinstance(profile.get("style_profile"), str) else None), layer_operator_groups_packet(layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None), "scripts.export_launch_packet")), "scripts.export_launch_packet"),
         "layer_visual_presets": layer_visual_presets_packet("scripts.export_launch_packet"),

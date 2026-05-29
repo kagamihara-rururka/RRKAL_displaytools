@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-30 - Module boundary registry
+
+- Added `rrkal_displaytools.module_boundary_registry.v1` to mark future extraction boundaries for contracts, Qt UI, Taichi render core, ocean material, style profiles, overlays, RRKAL-owned data sources and diagnostics.
+- Launch packets, renderer capabilities, handoff inspection and closed-loop evidence now expose the same module boundary contract, including Qt-first/Tk-not-primary and RRKAL data-governance boundaries.
+- Smoke: PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Style profile renderer routes
 
 - Added `rrkal_displaytools.style_profile_renderer_routes.v1` to make scientific, nautical, parchment and tactical renderer routes explicit, including portable commands for parchment/tactical review on another machine.

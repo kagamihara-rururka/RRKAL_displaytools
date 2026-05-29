@@ -455,6 +455,72 @@ def ocean_material_control_port_packet(
     }
 
 
+def module_boundary_registry_packet(source: str) -> dict[str, object]:
+    boundaries = [
+        {
+            "module": "contracts/launch_packets.py",
+            "owner": "displaytools-contracts",
+            "responsibility": "Launch packets, renderer capabilities, handoff summaries and smoke-visible schemas.",
+            "forbidden": ["Qt widgets", "Taichi kernels", "dataset discovery/download/cache eviction"],
+        },
+        {
+            "module": "qt_ui/main_window.py",
+            "owner": "displaytools-qt",
+            "responsibility": "Qt-first Photoshop-like operator UI, layer controls, profiles, provenance and preview orchestration.",
+            "forbidden": ["Tk primary UI", "provider cache governance", "Taichi kernel logic"],
+        },
+        {
+            "module": "render_core/taichi_globe.py",
+            "owner": "displaytools-render-core",
+            "responsibility": "Taichi globe render loop, scalar uniforms, camera/projection draw calls and frame output.",
+            "forbidden": ["Qt imports", "provider-specific IO", "RRKAL data repair"],
+        },
+        {
+            "module": "render_core/ocean_material.py",
+            "owner": "displaytools-render-core",
+            "responsibility": "Map normalized sea-state scalars and style intent into ocean material uniforms.",
+            "forbidden": ["provider discovery", "downloads", "cache lifecycle"],
+        },
+        {
+            "module": "style_profiles.py",
+            "owner": "displaytools-style",
+            "responsibility": "Scientific, nautical, parchment and tactical visual intent, palettes and renderer routes.",
+            "forbidden": ["Qt widget state", "provider IO", "cache governance"],
+        },
+        {
+            "module": "overlays/vector_layers.py",
+            "owner": "displaytools-overlays",
+            "responsibility": "Layer composition, selected-layer picking, pins, hydrology/boundary drawing and diagnostics.",
+            "forbidden": ["dataset discovery", "RRKAL manifest mutation", "Qt dialogs"],
+        },
+        {
+            "module": "data_sources/*",
+            "owner": "RRKAL-external",
+            "responsibility": "Discovery, download, import, manifest and cache governance for hydrology, maritime and ocean-condition datasets.",
+            "forbidden": ["displaytools-owned cache eviction", "renderer loop dependencies"],
+        },
+        {
+            "module": "diagnostics/handoff.py",
+            "owner": "displaytools-diagnostics",
+            "responsibility": "Closed-loop status, smoke gates, renderer capability discovery and cross-machine handoff inspection.",
+            "forbidden": ["mutating renderer state", "provider downloads"],
+        },
+    ]
+    return {
+        "schema": "rrkal_displaytools.module_boundary_registry.v1",
+        "source": source,
+        "module_count": len(boundaries),
+        "target_modules": [boundary["module"] for boundary in boundaries],
+        "boundaries": boundaries,
+        "qt_first": True,
+        "tk_primary_ui_allowed": False,
+        "rrkal_data_governance_boundary": "RRKAL owns dataset discovery, download, import, manifest, cache lifecycle and repair; displaytools consumes governed references and renderer-ready contracts.",
+        "displaytools_scope": "visualization UI, renderer contracts, launch packets, style/ocean/layer controls, diagnostics and handoff evidence.",
+        "launch_packet_fields": ["module_boundary_registry"],
+        "renderer_capability_field": "module_boundary_registry",
+    }
+
+
 if "--list-templates" in sys.argv[1:]:
     print(json.dumps(profile_template_packet(), ensure_ascii=False, indent=2))
     raise SystemExit(0)
@@ -2819,6 +2885,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "rrkal_displaytools_qt_panel",
         )
 
+    def collect_module_boundary_registry(self) -> dict[str, object]:
+        return module_boundary_registry_packet("rrkal_displaytools_qt_panel")
+
     def collect_launch_packet(self) -> dict[str, object]:
         return {
             "schema": "rrkal_displaytools.launch_packet.v1",
@@ -2846,6 +2915,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_operator_groups": self.collect_layer_operator_groups(),
             "style_renderer_entries": self.collect_style_renderer_entries(),
             "style_profile_renderer_routes": self.collect_style_profile_renderer_routes(),
+            "module_boundary_registry": self.collect_module_boundary_registry(),
             "profile_launch_readiness": self.collect_profile_launch_readiness(),
             "profile_launch_readiness_ui": self.collect_profile_launch_readiness_ui(),
             "layer_visual_presets": self.collect_layer_visual_presets(),
@@ -5703,6 +5773,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_operator_groups": self.collect_layer_operator_groups(),
             "style_renderer_entries": self.collect_style_renderer_entries(),
             "style_profile_renderer_routes": self.collect_style_profile_renderer_routes(),
+            "module_boundary_registry": self.collect_module_boundary_registry(),
             "profile_launch_readiness": self.collect_profile_launch_readiness(),
             "profile_launch_readiness_ui": self.collect_profile_launch_readiness_ui(),
             "layer_visual_presets": self.collect_layer_visual_presets(),

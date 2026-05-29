@@ -41,6 +41,7 @@ $summary = [ordered]@{
         layer_operator_groups = $launchPacket.layer_operator_groups.schema
         style_renderer_entries = $launchPacket.style_renderer_entries.schema
         style_profile_renderer_routes = $launchPacket.style_profile_renderer_routes.schema
+        module_boundary_registry = $launchPacket.module_boundary_registry.schema
         profile_launch_readiness = $launchPacket.profile_launch_readiness.schema
         profile_launch_readiness_ui = $launchPacket.profile_launch_readiness_ui.schema
         layer_visual_presets = $launchPacket.layer_visual_presets.schema
@@ -83,6 +84,15 @@ $summary = [ordered]@{
         route_count = $launchPacket.style_profile_renderer_routes.route_count
         route_ids = $launchPacket.style_profile_renderer_routes.route_ids
         required_routes = $launchPacket.style_profile_renderer_routes.required_routes
+    }
+    module_boundary_registry = @{
+        launch_packet_schema = $launchPacket.module_boundary_registry.schema
+        renderer_capabilities_schema = $capabilities.module_boundary_registry.schema
+        module_count = $launchPacket.module_boundary_registry.module_count
+        target_modules = $launchPacket.module_boundary_registry.target_modules
+        qt_first = $launchPacket.module_boundary_registry.qt_first
+        tk_primary_ui_allowed = $launchPacket.module_boundary_registry.tk_primary_ui_allowed
+        rrkal_data_governance_boundary = $launchPacket.module_boundary_registry.rrkal_data_governance_boundary
     }
     profile_launch_readiness = @{
         launch_packet_schema = $launchPacket.profile_launch_readiness.schema

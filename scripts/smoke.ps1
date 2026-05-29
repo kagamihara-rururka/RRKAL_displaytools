@@ -212,6 +212,18 @@ if ($launchPacket.style_profile_renderer_routes.route_ids -notcontains "parchmen
 if ($launchPacket.style_profile_renderer_routes.route_ids -notcontains "tactical") {
     throw "Launch packet style_profile_renderer_routes missing tactical route"
 }
+if ($launchPacket.module_boundary_registry.schema -ne "rrkal_displaytools.module_boundary_registry.v1") {
+    throw "Launch packet module_boundary_registry schema missing or invalid"
+}
+if ([int]$launchPacket.module_boundary_registry.module_count -lt 8) {
+    throw "Launch packet module_boundary_registry module count missing"
+}
+if ($launchPacket.module_boundary_registry.target_modules -notcontains "render_core/taichi_globe.py") {
+    throw "Launch packet module_boundary_registry missing render_core boundary"
+}
+if ($launchPacket.module_boundary_registry.tk_primary_ui_allowed -ne $false) {
+    throw "Launch packet module_boundary_registry must keep Tk out of primary UI"
+}
 if ($launchPacket.profile_launch_readiness.schema -ne "rrkal_displaytools.profile_launch_readiness.v1") {
     throw "Launch packet profile_launch_readiness schema missing or invalid"
 }
@@ -634,6 +646,12 @@ if ($capabilities.style_profile_renderer_routes.route_ids -notcontains "parchmen
 if ($capabilities.style_profile_renderer_routes.route_ids -notcontains "tactical") {
     throw "Renderer style_profile_renderer_routes missing tactical route"
 }
+if ($capabilities.module_boundary_registry.schema -ne "rrkal_displaytools.module_boundary_registry.v1") {
+    throw "Renderer module_boundary_registry schema missing or invalid"
+}
+if ($capabilities.module_boundary_registry.target_modules -notcontains "data_sources/*") {
+    throw "Renderer module_boundary_registry missing RRKAL data boundary"
+}
 if ($capabilities.profile_launch_readiness.schema -ne "rrkal_displaytools.profile_launch_readiness.v1") {
     throw "Renderer profile_launch_readiness schema missing or invalid"
 }
@@ -900,6 +918,18 @@ if ($handoff.style_profile_renderer_routes.renderer_capabilities_schema -ne "rrk
 }
 if ($handoff.style_profile_renderer_routes.route_ids -notcontains "tactical") {
     throw "Handoff inspection style_profile_renderer_routes missing tactical route"
+}
+if ($handoff.launch_packet_contracts.module_boundary_registry -ne "rrkal_displaytools.module_boundary_registry.v1") {
+    throw "Handoff inspection module_boundary_registry launch contract missing or invalid"
+}
+if ($handoff.module_boundary_registry.launch_packet_schema -ne "rrkal_displaytools.module_boundary_registry.v1") {
+    throw "Handoff inspection module_boundary_registry launch schema missing or invalid"
+}
+if ($handoff.module_boundary_registry.renderer_capabilities_schema -ne "rrkal_displaytools.module_boundary_registry.v1") {
+    throw "Handoff inspection module_boundary_registry renderer schema missing or invalid"
+}
+if ($handoff.module_boundary_registry.tk_primary_ui_allowed -ne $false) {
+    throw "Handoff inspection module_boundary_registry primary UI boundary invalid"
 }
 if ($handoff.launch_packet_contracts.profile_launch_readiness -ne "rrkal_displaytools.profile_launch_readiness.v1") {
     throw "Handoff inspection profile_launch_readiness launch contract missing or invalid"
