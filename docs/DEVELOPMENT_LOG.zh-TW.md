@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-29 - Layer runtime evidence summary
+
+- Added `rrkal_displaytools.layer_runtime_evidence_summary.v1` so Qt Properties, launch packets, renderer capabilities and handoff inspection expose a compact skip/error/count summary for layer runtime ack evidence.
+- The summary reports unavailable/error/skipped_locked/changed/ok status without requiring researchers to open the full runtime JSON.
+- Smoke updated to gate launch packet, renderer capability discovery and handoff inspection summary schemas.
+- Smoke: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1` PASS.
+
 ## 2026-05-29 - Layer runtime badge legend
 
 Scope:

@@ -37,11 +37,20 @@ if ($launchPacket.active_layer_diagnostics.layer_capability_matrix_schema -ne "r
 if ($launchPacket.active_layer_diagnostics.layer_runtime_evidence_schema -ne "rrkal_displaytools.layer_runtime_evidence.v1") {
     throw "Launch packet active_layer_diagnostics layer runtime evidence schema link missing"
 }
+if ($launchPacket.active_layer_diagnostics.layer_runtime_evidence_summary_schema -ne "rrkal_displaytools.layer_runtime_evidence_summary.v1") {
+    throw "Launch packet active_layer_diagnostics layer runtime evidence summary schema link missing"
+}
 if ($launchPacket.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
     throw "Launch packet layer_capability_matrix schema missing or invalid"
 }
 if ($launchPacket.layer_capability_matrix.runtime_evidence.schema -ne "rrkal_displaytools.layer_runtime_evidence.v1") {
     throw "Launch packet layer_capability_matrix runtime evidence schema missing or invalid"
+}
+if ($launchPacket.layer_capability_matrix.runtime_evidence_summary.schema -ne "rrkal_displaytools.layer_runtime_evidence_summary.v1") {
+    throw "Launch packet layer_capability_matrix runtime evidence summary schema missing or invalid"
+}
+if ($launchPacket.layer_capability_matrix.runtime_evidence_summary.status -ne "unavailable") {
+    throw "Launch packet layer_capability_matrix runtime evidence summary should be unavailable in no-GUI export"
 }
 if ($launchPacket.layer_capability_matrix.runtime_status_legend.schema -ne "rrkal_displaytools.layer_runtime_status_legend.v1") {
     throw "Launch packet layer_capability_matrix runtime status legend missing or invalid"
@@ -399,6 +408,9 @@ if ($capabilities.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_c
 if ($capabilities.layer_capability_matrix.runtime_evidence.schema -ne "rrkal_displaytools.layer_runtime_evidence.v1") {
     throw "Renderer layer_capability_matrix runtime evidence schema missing or invalid"
 }
+if ($capabilities.layer_capability_matrix.runtime_evidence_summary.schema -ne "rrkal_displaytools.layer_runtime_evidence_summary.v1") {
+    throw "Renderer layer_capability_matrix runtime evidence summary schema missing or invalid"
+}
 if ($capabilities.layer_capability_matrix.runtime_status_legend.schema -ne "rrkal_displaytools.layer_runtime_status_legend.v1") {
     throw "Renderer layer_capability_matrix runtime status legend missing or invalid"
 }
@@ -539,6 +551,9 @@ if ($handoff.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capabi
 }
 if ($handoff.layer_capability_matrix.runtime_evidence_schema -ne "rrkal_displaytools.layer_runtime_evidence.v1") {
     throw "Handoff inspection layer runtime evidence schema missing or invalid"
+}
+if ($handoff.layer_capability_matrix.runtime_evidence_summary_schema -ne "rrkal_displaytools.layer_runtime_evidence_summary.v1") {
+    throw "Handoff inspection layer runtime evidence summary schema missing or invalid"
 }
 if ($handoff.layer_capability_matrix.runtime_status_legend_schema -ne "rrkal_displaytools.layer_runtime_status_legend.v1") {
     throw "Handoff inspection layer runtime status legend schema missing or invalid"

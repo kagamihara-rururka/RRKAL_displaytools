@@ -36,6 +36,7 @@ Last updated: 2026-05-29
 
 ## Done
 
+- 2026-05-29: Added layer runtime evidence summary contract for Qt Properties, launch packets, renderer capabilities, handoff inspection and smoke.
 - 2026-05-29: Added runtime badge color/legend contract to the layer capability matrix and Qt Layers dock.
 - 2026-05-29: Added Qt Layers runtime evidence badges for per-layer renderer ack status.
 - 2026-05-29: Added layer runtime evidence schema to connect renderer ack results with the layer capability matrix.

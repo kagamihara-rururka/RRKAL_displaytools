@@ -17489,6 +17489,51 @@ def layer_runtime_status_legend_packet() -> dict[str, object]:
     }
 
 
+def layer_runtime_evidence_summary_packet(evidence: dict[str, object] | None = None) -> dict[str, object]:
+    evidence = evidence if isinstance(evidence, dict) else {}
+    counts = evidence.get("counts")
+    counts = counts if isinstance(counts, dict) else {}
+    changed_visibility = int(counts.get("changed_visibility", 0) or 0)
+    changed_opacity = int(counts.get("changed_opacity", 0) or 0)
+    changed_blend = int(counts.get("changed_blend", 0) or 0)
+    skipped_locked = int(counts.get("skipped_locked", 0) or 0)
+    available = bool(evidence.get("available"))
+    error = evidence.get("error")
+    if not available:
+        status = "unavailable"
+        text = "No renderer ack evidence yet."
+    elif error:
+        status = "error"
+        text = f"Renderer ack error: {error}"
+    elif skipped_locked:
+        status = "skipped_locked"
+        text = f"Renderer skipped {skipped_locked} locked layer changes."
+    elif changed_visibility or changed_opacity or changed_blend:
+        status = "changed"
+        text = f"Renderer applied visibility={changed_visibility}, opacity={changed_opacity}, blend={changed_blend} changes."
+    else:
+        status = "ok"
+        text = "Renderer ack observed; no layer mutations in the latest apply."
+    return {
+        "schema": "rrkal_displaytools.layer_runtime_evidence_summary.v1",
+        "available": available,
+        "status": status,
+        "text": text,
+        "counts": {
+            "changed_visibility": changed_visibility,
+            "changed_opacity": changed_opacity,
+            "changed_blend": changed_blend,
+            "skipped_locked": skipped_locked,
+        },
+        "event": evidence.get("event"),
+        "error": error,
+        "selected_renderer_layer": evidence.get("selected_renderer_layer"),
+        "frame_index": evidence.get("frame_index"),
+        "updated_at_utc": evidence.get("updated_at_utc"),
+        "boundary": "Human-readable summary of renderer layer runtime ack evidence; capability discovery is static until renderer runtime ack is loaded.",
+    }
+
+
 def layer_capability_matrix_packet() -> dict[str, object]:
     aliases = {
         "show_grid": "grid",
@@ -17615,6 +17660,7 @@ def layer_capability_matrix_packet() -> dict[str, object]:
             },
             "boundary": "Renderer capability discovery is static; runtime ack evidence appears in Qt layer capability matrix after renderer launch.",
         },
+        "runtime_evidence_summary": layer_runtime_evidence_summary_packet(),
         "runtime_status_legend": layer_runtime_status_legend_packet(),
         "selected_layer": None,
         "selected_layer_capabilities": None,

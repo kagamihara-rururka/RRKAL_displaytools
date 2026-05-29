@@ -337,6 +337,8 @@ def active_layer_diagnostics_packet(profile: dict[str, object]) -> dict[str, obj
         "capabilities": layer_capability_packet(selected_layer, selected_label) if selected_layer else None,
         "layer_capability_matrix_schema": "rrkal_displaytools.layer_capability_matrix.v1",
         "layer_runtime_evidence_schema": "rrkal_displaytools.layer_runtime_evidence.v1",
+        "layer_runtime_evidence_summary_schema": "rrkal_displaytools.layer_runtime_evidence_summary.v1",
+        "runtime_evidence_summary": layer_runtime_evidence_summary_packet(None),
         "diagnostics_text": "no runtime ack/pick in no-GUI export",
         "runtime_ack_file": "state/renderer_layer_runtime_ack.json",
         "runtime_ack": None,
@@ -365,6 +367,51 @@ def layer_capability_packet(key: str, label: str | None = None) -> dict[str, obj
         "pick_live": key in LAYER_PICK_LIVE_KEYS,
         "live_controls": live,
         "renderer_sync": f"live: {', '.join(live)}" if live else "planned",
+}
+
+
+def layer_runtime_evidence_summary_packet(evidence: dict[str, object] | None) -> dict[str, object]:
+    evidence = evidence if isinstance(evidence, dict) else {}
+    counts = evidence.get("counts")
+    counts = counts if isinstance(counts, dict) else {}
+    changed_visibility = int(counts.get("changed_visibility", 0) or 0)
+    changed_opacity = int(counts.get("changed_opacity", 0) or 0)
+    changed_blend = int(counts.get("changed_blend", 0) or 0)
+    skipped_locked = int(counts.get("skipped_locked", 0) or 0)
+    available = bool(evidence.get("available"))
+    error = evidence.get("error")
+    if not available:
+        status = "unavailable"
+        text = "No renderer ack evidence yet."
+    elif error:
+        status = "error"
+        text = f"Renderer ack error: {error}"
+    elif skipped_locked:
+        status = "skipped_locked"
+        text = f"Renderer skipped {skipped_locked} locked layer changes."
+    elif changed_visibility or changed_opacity or changed_blend:
+        status = "changed"
+        text = f"Renderer applied visibility={changed_visibility}, opacity={changed_opacity}, blend={changed_blend} changes."
+    else:
+        status = "ok"
+        text = "Renderer ack observed; no layer mutations in the latest apply."
+    return {
+        "schema": "rrkal_displaytools.layer_runtime_evidence_summary.v1",
+        "available": available,
+        "status": status,
+        "text": text,
+        "counts": {
+            "changed_visibility": changed_visibility,
+            "changed_opacity": changed_opacity,
+            "changed_blend": changed_blend,
+            "skipped_locked": skipped_locked,
+        },
+        "event": evidence.get("event"),
+        "error": error,
+        "selected_renderer_layer": evidence.get("selected_renderer_layer"),
+        "frame_index": evidence.get("frame_index"),
+        "updated_at_utc": evidence.get("updated_at_utc"),
+        "boundary": "Human-readable summary of renderer layer runtime ack evidence; does not change renderer state.",
     }
 
 
@@ -407,6 +454,7 @@ def layer_capability_matrix_packet(source: str, selected_layer: str | None = Non
         "layer_count": len(layers),
         "live_counts": counts,
         "runtime_evidence": runtime_evidence,
+        "runtime_evidence_summary": layer_runtime_evidence_summary_packet(runtime_evidence),
         "runtime_status_legend": layer_runtime_status_legend_packet(),
         "selected_layer": selected_layer,
         "selected_layer_capabilities": selected,

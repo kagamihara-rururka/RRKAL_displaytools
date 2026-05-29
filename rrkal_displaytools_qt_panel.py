@@ -290,6 +290,52 @@ def layer_runtime_evidence_packet(payload: dict[str, object] | None) -> dict[str
     }
 
 
+def layer_runtime_evidence_summary_packet(evidence: dict[str, object] | None) -> dict[str, object]:
+    evidence = evidence if isinstance(evidence, dict) else layer_runtime_evidence_packet(None)
+    counts = evidence.get("counts")
+    counts = counts if isinstance(counts, dict) else {}
+    changed_visibility = int(counts.get("changed_visibility", 0) or 0)
+    changed_opacity = int(counts.get("changed_opacity", 0) or 0)
+    changed_blend = int(counts.get("changed_blend", 0) or 0)
+    skipped_locked = int(counts.get("skipped_locked", 0) or 0)
+    if evidence.get("available") is not True:
+        status = "unavailable"
+        text = "No renderer ack observed yet."
+    elif evidence.get("error"):
+        status = "error"
+        text = f"Renderer ack error: {evidence.get('error')}"
+    elif skipped_locked > 0:
+        status = "skipped_locked"
+        text = f"Renderer skipped {skipped_locked} locked layer updates."
+    elif changed_visibility or changed_opacity or changed_blend:
+        status = "changed"
+        text = (
+            f"Renderer applied changes: visibility={changed_visibility}, "
+            f"opacity={changed_opacity}, blend={changed_blend}."
+        )
+    else:
+        status = "ok"
+        text = "Renderer ack observed; no recent layer mutations."
+    return {
+        "schema": "rrkal_displaytools.layer_runtime_evidence_summary.v1",
+        "available": bool(evidence.get("available")),
+        "status": status,
+        "text": text,
+        "counts": {
+            "changed_visibility": changed_visibility,
+            "changed_opacity": changed_opacity,
+            "changed_blend": changed_blend,
+            "skipped_locked": skipped_locked,
+        },
+        "selected_renderer_layer": evidence.get("selected_renderer_layer"),
+        "event": evidence.get("event"),
+        "error": evidence.get("error"),
+        "frame_index": evidence.get("frame_index"),
+        "updated_at_utc": evidence.get("updated_at_utc"),
+        "boundary": "Human-readable summary of the most recent renderer layer runtime ack evidence.",
+    }
+
+
 def layer_capability_matrix_packet(
     source: str,
     selected_layer: str | None = None,
@@ -332,6 +378,7 @@ def layer_capability_matrix_packet(
         "layer_count": len(layers),
         "live_counts": counts,
         "runtime_evidence": runtime_evidence,
+        "runtime_evidence_summary": layer_runtime_evidence_summary_packet(runtime_evidence),
         "runtime_status_legend": layer_runtime_status_legend_packet(),
         "selected_layer": selected_layer,
         "selected_layer_capabilities": selected,
@@ -676,6 +723,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "opacity": QtWidgets.QLabel("-"),
             "blend": QtWidgets.QLabel("-"),
             "capabilities": QtWidgets.QLabel("-"),
+            "runtime_summary": QtWidgets.QLabel("-"),
             "renderer_target": QtWidgets.QLabel("-"),
             "diagnostics": QtWidgets.QLabel("-"),
         }
@@ -688,6 +736,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         material_form.addRow("Opacity", self.layer_property_labels["opacity"])
         material_form.addRow("Blend mode", self.layer_property_labels["blend"])
         material_form.addRow("Layer capabilities", self.layer_property_labels["capabilities"])
+        material_form.addRow("Runtime summary", self.layer_property_labels["runtime_summary"])
         material_form.addRow("Renderer target", self.layer_property_labels["renderer_target"])
         material_form.addRow("Renderer diagnostics", self.layer_property_labels["diagnostics"])
         layer_property_actions = QtWidgets.QHBoxLayout()
@@ -1696,6 +1745,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_filter": self.collect_layer_filter_state(),
             "layer_group_view": self.collect_layer_group_view_state(),
             "layer_capability_matrix": self.collect_layer_capability_matrix(),
+            "layer_runtime_evidence_summary": self.collect_layer_capability_matrix().get("runtime_evidence_summary"),
             "active_layer_diagnostics": self.active_layer_diagnostics_packet(),
             "layer_undo": self.collect_layer_undo_state(),
             "session_journal": self.collect_session_journal(),
@@ -3794,6 +3844,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         live_text = ", ".join(capabilities.get("live_controls", [])) or "planned"
         runtime_text = ", ".join(capabilities.get("runtime_status", [])) or "no_ack"
         self.layer_property_labels["capabilities"].setText(f"{live_text}; runtime={runtime_text}")
+        runtime_summary = matrix.get("runtime_evidence_summary") if isinstance(matrix, dict) else None
+        self.layer_property_labels["runtime_summary"].setText(
+            str(runtime_summary.get("text", "-")) if isinstance(runtime_summary, dict) else "-"
+        )
         renderer_target = LAYER_RUNTIME_ID_ALIASES.get(key, "-")
         self.layer_property_labels["renderer_target"].setText(str(renderer_target))
         self.layer_property_labels["diagnostics"].setText(self.layer_diagnostics_text(str(renderer_target)))
@@ -3854,6 +3908,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "capabilities": self.collect_layer_capability_matrix().get("selected_layer_capabilities") if key is not None else None,
             "layer_capability_matrix_schema": "rrkal_displaytools.layer_capability_matrix.v1",
             "layer_runtime_evidence_schema": "rrkal_displaytools.layer_runtime_evidence.v1",
+            "layer_runtime_evidence_summary_schema": "rrkal_displaytools.layer_runtime_evidence_summary.v1",
+            "runtime_evidence_summary": self.collect_layer_capability_matrix().get("runtime_evidence_summary"),
             "diagnostics_text": diagnostics_text,
             "runtime_ack_file": str(LAYER_RUNTIME_ACK_PATH),
             "runtime_ack": self.layer_runtime_ack_payload,
@@ -4374,6 +4430,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_filter": self.collect_layer_filter_state(),
             "layer_group_view": self.collect_layer_group_view_state(),
             "layer_capability_matrix": self.collect_layer_capability_matrix(),
+            "layer_runtime_evidence_summary": self.collect_layer_capability_matrix().get("runtime_evidence_summary"),
             "active_layer_diagnostics": self.active_layer_diagnostics_packet(),
             "layer_undo": self.collect_layer_undo_state(),
             "session_journal": self.collect_session_journal(),
