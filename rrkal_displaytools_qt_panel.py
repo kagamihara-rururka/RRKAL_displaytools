@@ -107,6 +107,12 @@ TOOL_MODES = (
     ("pin", "Pin", "科研標記 / observation marker"),
 )
 PIN_TYPES = ("Observation", "Sample Site", "Anomaly", "Reference", "Event")
+PIN_LABEL_MODES = (
+    ("auto", "Auto", "Place visible labels until collision budget is exhausted."),
+    ("selected", "Selected only", "Only label the selected Pin."),
+    ("priority", "Priority", "Only label selected Pin and Pins above the priority threshold."),
+    ("hidden", "Hidden", "Hide all Pin labels; markers remain visible."),
+)
 
 class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def __init__(self, initial_profile: Path | None = None) -> None:
@@ -130,6 +136,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.pin_lat_edit: QtWidgets.QLineEdit | None = None
         self.pin_lon_edit: QtWidgets.QLineEdit | None = None
         self.pin_priority_spin: QtWidgets.QSpinBox | None = None
+        self.pin_label_mode_combo: QtWidgets.QComboBox | None = None
+        self.pin_label_min_priority_spin: QtWidgets.QSpinBox | None = None
         self.pin_list: QtWidgets.QListWidget | None = None
         self.selected_pin_id: str | None = None
         self.research_pins: list[dict[str, object]] = []
@@ -545,17 +553,30 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.pin_priority_spin.setRange(0, 100)
         self.pin_priority_spin.setValue(50)
         self.pin_priority_spin.setToolTip("Renderer label priority: selected Pin wins first, then higher priority labels are placed earlier.")
+        self.pin_label_mode_combo = QtWidgets.QComboBox()
+        for mode, label, hint in PIN_LABEL_MODES:
+            self.pin_label_mode_combo.addItem(label, mode)
+            self.pin_label_mode_combo.setItemData(self.pin_label_mode_combo.count() - 1, hint, QtCore.Qt.ItemDataRole.ToolTipRole)
+        self.pin_label_mode_combo.setToolTip("Renderer Pin label visibility mode.")
+        self.pin_label_min_priority_spin = QtWidgets.QSpinBox()
+        self.pin_label_min_priority_spin.setRange(0, 100)
+        self.pin_label_min_priority_spin.setValue(50)
+        self.pin_label_min_priority_spin.setToolTip("Priority mode only: labels below this threshold are hidden unless selected.")
         self.pin_type_combo.currentTextChanged.connect(lambda _text, self=self: self.refresh_tool_target())
         self.pin_label_edit.textChanged.connect(lambda _text, self=self: self.refresh_tool_target())
         self.pin_note_edit.textChanged.connect(lambda _text, self=self: self.refresh_tool_target())
         self.pin_lat_edit.textChanged.connect(lambda _text, self=self: self.refresh_tool_target())
         self.pin_lon_edit.textChanged.connect(lambda _text, self=self: self.refresh_tool_target())
         self.pin_priority_spin.valueChanged.connect(lambda _value, self=self: self.refresh_tool_target())
+        self.pin_label_mode_combo.currentIndexChanged.connect(lambda _value, self=self: self.refresh_tool_target())
+        self.pin_label_min_priority_spin.valueChanged.connect(lambda _value, self=self: self.refresh_tool_target())
         pin_form.addRow("Type", self.pin_type_combo)
         pin_form.addRow("Label", self.pin_label_edit)
         pin_form.addRow("Latitude", self.pin_lat_edit)
         pin_form.addRow("Longitude", self.pin_lon_edit)
         pin_form.addRow("Label Priority", self.pin_priority_spin)
+        pin_form.addRow("Label Mode", self.pin_label_mode_combo)
+        pin_form.addRow("Min Label Priority", self.pin_label_min_priority_spin)
         pin_form.addRow("Note", self.pin_note_edit)
         pin_actions = QtWidgets.QHBoxLayout()
         add_pin_button = QtWidgets.QPushButton("加入 Pin")
@@ -798,6 +819,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         for key, flag in BOOL_FLAGS.items():
             enabled = self.checks[key].isChecked()
             cmd.append(f"--{flag}" if enabled else f"--no-{flag}")
+        cmd.extend(
+            [
+                "--pin-label-mode",
+                self.current_pin_label_mode(),
+                "--pin-label-min-priority",
+                str(self.pin_label_min_priority_spin.value() if self.pin_label_min_priority_spin is not None else 50),
+            ]
+        )
         pins = self.collect_research_pins()
         if pins:
             cmd.extend(
@@ -885,10 +914,27 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             }
         return stack
 
+    def current_pin_label_mode(self) -> str:
+        if self.pin_label_mode_combo is None:
+            return "auto"
+        data = self.pin_label_mode_combo.currentData()
+        return data if isinstance(data, str) else "auto"
+
+    def set_pin_label_mode(self, mode: str) -> None:
+        if self.pin_label_mode_combo is None:
+            return
+        for index in range(self.pin_label_mode_combo.count()):
+            if self.pin_label_mode_combo.itemData(index) == mode:
+                self.pin_label_mode_combo.setCurrentIndex(index)
+                return
+        self.pin_label_mode_combo.setCurrentIndex(0)
+
     def collect_tool_state(self) -> dict[str, object]:
         return {
             "active_tool": self.active_tool,
             "target_layer": self.selected_layer_key,
+            "pin_label_mode": self.current_pin_label_mode(),
+            "pin_label_min_priority": self.pin_label_min_priority_spin.value() if self.pin_label_min_priority_spin is not None else 50,
             "pin": {
                 "type": self.pin_type_combo.currentText() if self.pin_type_combo is not None else "Observation",
                 "label": self.pin_label_edit.text().strip() if self.pin_label_edit is not None else "",
@@ -1095,6 +1141,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 self.pin_lon_edit.setText(str(pin["longitude"]))
             if self.pin_priority_spin is not None and isinstance(pin.get("label_priority"), int):
                 self.pin_priority_spin.setValue(max(0, min(100, int(pin["label_priority"]))))
+        label_mode = state.get("pin_label_mode")
+        if isinstance(label_mode, str):
+            self.set_pin_label_mode(label_mode)
+        label_min_priority = state.get("pin_label_min_priority")
+        if self.pin_label_min_priority_spin is not None and isinstance(label_min_priority, int):
+            self.pin_label_min_priority_spin.setValue(max(0, min(100, int(label_min_priority))))
         self.refresh_tool_target()
 
     def refresh_tool_target(self) -> None:
@@ -1108,7 +1160,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.tool_target_label.setText(
             f"Active tool: {tool_label}\n"
             f"Target layer: {layer_label}\n"
-            f"Pin: {self.collect_tool_state()['pin']['type']} / {self.collect_tool_state()['pin']['label']}"
+            f"Pin: {self.collect_tool_state()['pin']['type']} / {self.collect_tool_state()['pin']['label']}\n"
+            f"Labels: {self.current_pin_label_mode()} >= {self.pin_label_min_priority_spin.value() if self.pin_label_min_priority_spin is not None else 50}"
         )
         self.refresh_canvas_preview()
 

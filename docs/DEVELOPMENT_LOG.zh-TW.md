@@ -815,3 +815,20 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Pin label visibility modes
+
+Scope:
+- Added Qt Pin label mode controls: auto, selected only, priority, and hidden.
+- Added `pin_label_min_priority` for renderer label thresholding.
+- Qt launch commands now pass `--pin-label-mode` and `--pin-label-min-priority`.
+- Profile schema validates label mode and threshold in `tool_state`.
+- Renderer label layout filters labels before collision placement.
+- Hardened Pin JSON/file loading so malformed shell-escaped Pin payloads are ignored with a warning instead of crashing the renderer.
+
+Positioning:
+- Researchers can now reduce annotation clutter without deleting Pins.
+- Remaining Pin work is renderer pick/hover and deeper globe-mask/depth-buffer occlusion refinement.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

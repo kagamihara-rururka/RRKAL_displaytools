@@ -42,13 +42,14 @@ OPTIONAL_LAYER_STACK_UI_FIELDS = {"selected", "renderer_sync"}
 BLEND_MODES = {"Normal", "Screen", "Multiply", "Overlay", "Soft Light"}
 TOOL_MODES = {"move", "select", "pin"}
 PIN_TYPES = {"Observation", "Sample Site", "Anomaly", "Reference", "Event"}
+PIN_LABEL_MODES = {"auto", "selected", "priority", "hidden"}
 REQUIRED_PIN_FIELDS = {"id", "type", "label", "latitude", "longitude", "placement"}
 OPTIONAL_PIN_FIELDS = {"note", "target_layer", "label_priority"}
 REQUIRED_TOOL_STATE_FIELDS = {
     "active_tool",
     "target_layer",
 }
-OPTIONAL_TOOL_STATE_FIELDS = {"renderer_sync", "pin"}
+OPTIONAL_TOOL_STATE_FIELDS = {"renderer_sync", "pin", "pin_label_mode", "pin_label_min_priority"}
 
 
 def profile_payload_errors(profile: dict[str, object]) -> list[str]:
@@ -138,6 +139,18 @@ def profile_payload_errors(profile: dict[str, object]) -> list[str]:
                     errors.append("tool_state.target_layer must be a string or null")
                 elif target_layer not in REQUIRED_LAYER_STACK_KEYS:
                     errors.append(f"tool_state.target_layer is not a known layer stack key: {target_layer}")
+            pin_label_mode = tool_state.get("pin_label_mode")
+            if pin_label_mode is not None:
+                if not isinstance(pin_label_mode, str) or pin_label_mode not in PIN_LABEL_MODES:
+                    errors.append(f"tool_state.pin_label_mode must be one of {sorted(PIN_LABEL_MODES)}")
+            pin_label_min_priority = tool_state.get("pin_label_min_priority")
+            if pin_label_min_priority is not None:
+                if (
+                    not isinstance(pin_label_min_priority, int)
+                    or isinstance(pin_label_min_priority, bool)
+                    or not 0 <= pin_label_min_priority <= 100
+                ):
+                    errors.append("tool_state.pin_label_min_priority must be an integer from 0 to 100")
             pin = tool_state.get("pin")
             if pin is not None:
                 if not isinstance(pin, dict):
@@ -229,6 +242,7 @@ def profile_schema_packet() -> dict[str, object]:
             "optional_fields": sorted(OPTIONAL_TOOL_STATE_FIELDS),
             "tool_modes": sorted(TOOL_MODES),
             "pin_types": sorted(PIN_TYPES),
+            "pin_label_modes": sorted(PIN_LABEL_MODES),
         },
         "optional_pins": {
             "required_fields": sorted(REQUIRED_PIN_FIELDS),

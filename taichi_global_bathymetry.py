@@ -2426,17 +2426,33 @@ def _extract_selected_pin_id(payload: object) -> str | None:
     return selected_pin_id if isinstance(selected_pin_id, str) else None
 
 
+def _load_pin_json_text(text: str) -> object | None:
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError as first_error:
+        try:
+            return json.loads(text.encode("utf-8").decode("unicode_escape"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            print(f"Invalid --pin-json ignored: {first_error}")
+            return None
+
+
 def load_pin_records(pin_file: str | None, pin_json: str | None) -> tuple[list[dict[str, object]], str | None]:
     records: list[dict[str, object]] = []
     selected_pin_id: str | None = None
     if pin_file:
-        payload = json.loads(Path(pin_file).read_text(encoding="utf-8-sig"))
-        records.extend(_extract_pin_records(payload))
-        selected_pin_id = selected_pin_id or _extract_selected_pin_id(payload)
+        try:
+            payload = json.loads(Path(pin_file).read_text(encoding="utf-8-sig"))
+        except (OSError, json.JSONDecodeError) as exc:
+            print(f"Invalid --pin-file ignored: {exc}")
+        else:
+            records.extend(_extract_pin_records(payload))
+            selected_pin_id = selected_pin_id or _extract_selected_pin_id(payload)
     if pin_json:
-        payload = json.loads(pin_json)
-        records.extend(_extract_pin_records(payload))
-        selected_pin_id = selected_pin_id or _extract_selected_pin_id(payload)
+        payload = _load_pin_json_text(pin_json)
+        if payload is not None:
+            records.extend(_extract_pin_records(payload))
+            selected_pin_id = selected_pin_id or _extract_selected_pin_id(payload)
     return records, selected_pin_id
 
 
@@ -2526,11 +2542,34 @@ def _draw_pin_labels(
     marker_style: dict[str, object],
     width: int,
     height: int,
+    label_mode: str = "auto",
+    label_min_priority: int = 50,
 ) -> None:
     occupied: list[tuple[int, int, int, int]] = []
     planned: list[dict[str, object]] = []
+    mode = str(label_mode or "auto")
+    if mode not in {"auto", "selected", "priority", "hidden"}:
+        mode = "auto"
+    try:
+        min_priority = max(0, min(100, int(label_min_priority)))
+    except (TypeError, ValueError):
+        min_priority = 50
+    filtered: list[dict[str, object]] = []
+    for label in labels:
+        selected = bool(label.get("selected", False))
+        priority = int(label.get("priority", 50))
+        if mode == "hidden":
+            continue
+        if selected:
+            filtered.append(label)
+        elif mode == "selected":
+            continue
+        elif mode == "priority" and priority < min_priority:
+            continue
+        else:
+            filtered.append(label)
     ordered_labels = sorted(
-        labels,
+        filtered,
         key=lambda item: (
             not bool(item.get("selected", False)),
             -int(item.get("priority", 50)),
@@ -2578,6 +2617,8 @@ def render_pin_overlay(
     pin_size: int = 9,
     selected_pin_id: str | None = None,
     style_profile: str = "scientific",
+    label_mode: str = "auto",
+    label_min_priority: int = 50,
 ) -> np.ndarray:
     overlay = np.zeros((height, width, 4), dtype=np.uint8)
     radius = max(2, int(pin_size) // 2)
@@ -2627,7 +2668,7 @@ def render_pin_overlay(
                 "selected": selected,
             }
         )
-    _draw_pin_labels(overlay, labels, marker_style, width, height)
+    _draw_pin_labels(overlay, labels, marker_style, width, height, label_mode, label_min_priority)
     return overlay
 
 
@@ -13000,6 +13041,8 @@ class HybridRenderController:
                         int(getattr(self.args, "pin_size", 9)),
                         self.selected_pin_id,
                         getattr(self.args, "style_profile", "scientific"),
+                        getattr(self.args, "pin_label_mode", "auto"),
+                        int(getattr(self.args, "pin_label_min_priority", 50)),
                     ),
                     self.globe_mask,
                 )
@@ -14563,6 +14606,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--pin-layer", action=bool_action, default=parse_bool(os.environ.get("PIN_LAYER"), True))
     parser.add_argument("--pin-size", type=int, default=int(os.environ.get("PIN_SIZE", "9")))
     parser.add_argument("--pin-horizon-eps", type=float, default=float(os.environ.get("PIN_HORIZON_EPS", "0.006")))
+    parser.add_argument("--pin-label-mode", choices=["auto", "selected", "priority", "hidden"], default=os.environ.get("PIN_LABEL_MODE", "auto"))
+    parser.add_argument("--pin-label-min-priority", type=int, default=int(os.environ.get("PIN_LABEL_MIN_PRIORITY", "50")))
 
     parser.add_argument("--adaptive-sampling", action=bool_action, default=parse_bool(os.environ.get("ADAPTIVE_SAMPLING"), True))
     parser.add_argument("--target-fps", type=float, default=float(os.environ.get("TARGET_FPS", "30.0")))
@@ -14706,6 +14751,8 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "pin-layer",
             "pin-size",
             "pin-horizon-eps",
+            "pin-label-mode",
+            "pin-label-min-priority",
         ],
         "rrkal_boundary": {
             "displaytools_owns": [
