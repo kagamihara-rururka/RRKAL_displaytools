@@ -36,6 +36,11 @@ Optional quick headless render request:
 .\scripts\render_quick_smoke.ps1
 ```
 
+Renderer capabilities JSON:
+`powershell
+py -3 taichi_global_bathymetry.py --print-renderer-capabilities
+` 
+
 Direct renderer launch:
 ```powershell
 py -3 taichi_global_bathymetry.py --style-profile scientific --topo-source gebco --topo-step 48 --data-mode static
@@ -73,5 +78,6 @@ Core docs:
 Notes:
 - Runtime caches, screenshots, logs, databases, and virtual environments are intentionally excluded from Git.
 - This initial import preserves the current monolithic prototype before later module extraction.
+
 
 

@@ -14160,6 +14160,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--fps-log", default=str(CACHE_DIR / "fps_log.jsonl"))
     parser.add_argument("--demo-closed-loop", action=bool_action, default=parse_bool(os.environ.get("DEMO_CLOSED_LOOP"), False))
     parser.add_argument("--write-demo-packet", default=os.environ.get("WRITE_DEMO_PACKET"))
+    parser.add_argument("--print-renderer-capabilities", action=bool_action, default=False)
 
     parser.add_argument("--topo-step", type=int, default=int(os.environ.get("TOPO_STEP", "16")))
     parser.add_argument("--topo-source", choices=["gebco", "synthetic"], default=os.environ.get("TOPO_SOURCE", "gebco"))
@@ -14306,6 +14307,56 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 
+def renderer_capabilities_packet() -> dict[str, object]:
+    return {
+        "schema": "rrkal_displaytools.renderer_capabilities.v1",
+        "renderer": "taichi_global_bathymetry",
+        "style_profiles": list(STYLE_PROFILE_REGISTRY.keys()),
+        "ui_backends": ["qt", "vispy"],
+        "topography_sources": ["gebco", "synthetic"],
+        "data_modes": ["static", "timeseries", "realtime"],
+        "layer_flags": [
+            "show-grid",
+            "show-stars",
+            "lake-layer",
+            "river-layer",
+            "border-layer",
+            "territorial-sea-layer",
+            "eez-layer",
+            "high-seas-layer",
+            "aircraft-layer",
+            "ocean-material",
+            "terrain-contours",
+            "scale-bar",
+            "vehicle-icons",
+        ],
+        "material_controls": [
+            "ocean-wave-strength",
+            "ocean-roughness",
+            "ocean-foam",
+            "ocean-material-scale",
+            "ice-opacity",
+            "ice-specular",
+            "ice-blue",
+            "cloud-opacity",
+            "cloud-coverage",
+            "cloud-detail",
+        ],
+        "rrkal_boundary": {
+            "displaytools_owns": [
+                "renderer launch flags",
+                "style and layer rendering controls",
+                "Taichi visualization frontend",
+            ],
+            "rrkal_owns": [
+                "dataset discovery/download/import",
+                "install registry",
+                "manifest/cache governance",
+            ],
+        },
+    }
+
+
 def apply_closed_loop_demo_defaults(args: argparse.Namespace) -> dict[str, object]:
     """Apply a bounded showcase preset without taking over RRKAL data governance."""
     if args.style_profile not in STYLE_PROFILE_REGISTRY:
@@ -14379,6 +14430,9 @@ def apply_closed_loop_demo_defaults(args: argparse.Namespace) -> dict[str, objec
 def main(argv: list[str] | None = None) -> None:
     configure_stdio()
     args = build_parser().parse_args(argv)
+    if args.print_renderer_capabilities:
+        print(json.dumps(renderer_capabilities_packet(), ensure_ascii=False, indent=2))
+        return
     if args.demo_closed_loop:
         apply_closed_loop_demo_defaults(args)
     if args.scale_bar_y == 686.0 and args.height != 720:

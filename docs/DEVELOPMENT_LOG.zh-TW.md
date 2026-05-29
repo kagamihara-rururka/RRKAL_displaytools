@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - Renderer capabilities JSON output
+
+Scope:
+- Added `--print-renderer-capabilities` to `taichi_global_bathymetry.py`.
+- The output lists style profiles, UI backends, topography sources, data modes, layer flags, material controls, and RRKAL/displaytools responsibility boundaries.
+- Updated README and GTD with the capability output entry.
+
+Positioning:
+- This gives RRKAL and other machines a lightweight renderer-contract discovery path without launching the Taichi runtime.
+
+Validation:
+- Smoke passed before commit: `py -3 -m py_compile rrkal_displaytools_qt_panel.py taichi_global_bathymetry.py`.
+- Smoke passed before commit: `py -3 taichi_global_bathymetry.py --print-renderer-capabilities`.
+- Smoke passed before commit: PowerShell parser check for all scripts under `scripts/`.
 ## 2026-05-29 - Qt operator action layout
 
 Scope:
@@ -224,6 +238,7 @@ Validation:
 Next round rule:
 - Before any new development round, inspect current repo state.
 - After each round, update this log and commit before continuing.
+
 
 
 
