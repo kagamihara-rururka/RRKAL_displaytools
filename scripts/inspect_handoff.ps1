@@ -120,6 +120,9 @@ $summary = [ordered]@{
         occlusion_rule = $launchPacket.pin_overlay.occlusion_rule
         renderer_overlay_status = $launchPacket.pin_overlay.renderer_overlay_status
         horizon_control = $launchPacket.pin_overlay.horizon_control
+        cursor_fill_priority = $launchPacket.pin_overlay.cursor_fill_priority
+        cursor_fill_sources = $launchPacket.pin_overlay.cursor_fill_sources
+        cursor_fill_contract = $launchPacket.pin_overlay.cursor_fill_contract
         current_status = $launchPacket.pin_overlay.current_status
     }
     boundary_emphasis_control = @{

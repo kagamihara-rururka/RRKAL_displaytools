@@ -173,3 +173,8 @@
 
 - Pin "use cursor" now prefers renderer globe raycast geodesy and falls back to the Qt canvas estimate only when renderer state is unavailable.
 - This makes researcher annotations use globe-aware coordinates when the renderer bridge is active.
+
+### 2026-05-30 Pin cursor fill contract discovery
+
+- Shared Pin projection contract now exposes `cursor_fill_priority = renderer_cursor_geodesy_state_then_ui_estimate`.
+- Launch packets, renderer capabilities, Qt provenance, handoff inspection, and smoke all verify renderer-first Pin cursor placement.

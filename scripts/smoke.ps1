@@ -593,6 +593,9 @@ if ($launchPacket.pin_overlay.occlusion_rule -notlike "*view_z <= horizon_eps*")
 if ($launchPacket.pin_overlay.renderer_overlay_status -ne "wired_to_pin_overlay_rgba_and_frame_composition") {
     throw "Launch packet pin_overlay renderer overlay status mismatch"
 }
+if ($launchPacket.pin_overlay.cursor_fill_priority -ne "renderer_cursor_geodesy_state_then_ui_estimate") {
+    throw "Launch packet pin_overlay cursor fill priority mismatch"
+}
 $timelineExportDir = Join-Path $env:TEMP "rrkal_displaytools_smoke_timeline_export"
 $timelineExportGif = Join-Path $timelineExportDir "smoke.gif"
 $timelineExportMp4 = Join-Path $timelineExportDir "smoke.mp4"
@@ -804,6 +807,9 @@ if ($capabilities.pin_overlay.renderer_overlay_status -ne "wired_to_pin_overlay_
 }
 if ($capabilities.pin_overlay.horizon_control -ne "--pin-horizon-eps / PIN_HORIZON_EPS") {
     throw "Renderer pin_overlay horizon control missing"
+}
+if ($capabilities.pin_overlay.cursor_fill_sources -notcontains "renderer_cursor_geodesy_state") {
+    throw "Renderer pin_overlay cursor fill source missing"
 }
 if ($capabilities.boundary_emphasis_control.schema -ne "rrkal_displaytools.boundary_emphasis_control.v1") {
     throw "Renderer boundary_emphasis_control schema missing or invalid"
@@ -1173,6 +1179,12 @@ if ($handoff.pin_overlay.renderer_overlay_status -ne "wired_to_pin_overlay_rgba_
 }
 if ($handoff.pin_overlay.horizon_control -ne "--pin-horizon-eps / PIN_HORIZON_EPS") {
     throw "Handoff inspection pin_overlay horizon control missing"
+}
+if ($handoff.pin_overlay.cursor_fill_priority -ne "renderer_cursor_geodesy_state_then_ui_estimate") {
+    throw "Handoff inspection pin_overlay cursor fill priority mismatch"
+}
+if ($handoff.pin_overlay.cursor_fill_sources -notcontains "qt_canvas_estimate") {
+    throw "Handoff inspection pin_overlay cursor fill fallback missing"
 }
 if ($handoff.launch_packet_contracts.boundary_emphasis_control -ne "rrkal_displaytools.boundary_emphasis_control.v1") {
     throw "Handoff inspection boundary_emphasis_control launch contract missing or invalid"

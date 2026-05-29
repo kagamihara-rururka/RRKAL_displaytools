@@ -2821,3 +2821,16 @@ Decision:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Pin cursor fill contract discovery
+
+Scope:
+- Added Pin cursor fill priority to the shared `pin_projection` contract.
+- Launch packets, renderer capabilities, Qt provenance, and handoff inspection now expose `renderer_cursor_geodesy_state_then_ui_estimate`.
+- Smoke now gates launch packet, renderer capability, and handoff evidence for renderer-first Pin cursor fill.
+
+Decision:
+- Pin placement remains a visualization concern: displaytools owns the renderer-first coordinate handoff, while RRKAL still owns data discovery/import/cache governance.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
