@@ -330,6 +330,51 @@ def hydrology_lod_readiness_packet(
     }
 
 
+def hydrology_lod_runtime_evidence_packet(
+    readiness: dict[str, object] | None,
+    runtime_ack: dict[str, object] | None,
+    pick_state: dict[str, object] | None,
+    source: str,
+) -> dict[str, object]:
+    readiness = readiness if isinstance(readiness, dict) else {}
+    runtime_ack = runtime_ack if isinstance(runtime_ack, dict) else {}
+    pick_state = pick_state if isinstance(pick_state, dict) else {}
+    hydrology_targets = set(readiness.get("stable_renderer_targets") if isinstance(readiness.get("stable_renderer_targets"), list) else ["lakes", "rivers"])
+    changed_layers = runtime_ack.get("changed_layers") if isinstance(runtime_ack.get("changed_layers"), list) else []
+    changed_opacity_layers = runtime_ack.get("changed_opacity_layers") if isinstance(runtime_ack.get("changed_opacity_layers"), list) else []
+    changed_blend_layers = runtime_ack.get("changed_blend_layers") if isinstance(runtime_ack.get("changed_blend_layers"), list) else []
+    hydrology_runtime_hits = [
+        str(layer)
+        for layer in [*changed_layers, *changed_opacity_layers, *changed_blend_layers]
+        if str(layer) in hydrology_targets or str(layer) in {"lake_layer", "river_layer"}
+    ]
+    pick_result = pick_state.get("pick_result") if isinstance(pick_state.get("pick_result"), dict) else {}
+    pick_layer = str(pick_result.get("layer") or pick_state.get("renderer_layer") or "")
+    pick_matches_hydrology = pick_layer in hydrology_targets or pick_layer in {"lake_layer", "river_layer"}
+    runtime_ack_available = bool(runtime_ack)
+    pick_available = bool(pick_state)
+    return {
+        "schema": "rrkal_displaytools.hydrology_lod_runtime_evidence.v1",
+        "source": source,
+        "readiness_schema": readiness.get("schema"),
+        "readiness": readiness.get("readiness", "unknown"),
+        "runtime_ack_available": runtime_ack_available,
+        "runtime_ack_schema": runtime_ack.get("schema") if runtime_ack_available else "rrkal_displaytools.renderer_layer_runtime_ack.v1",
+        "pick_state_available": pick_available,
+        "pick_layer": pick_layer or None,
+        "pick_matches_hydrology": pick_matches_hydrology,
+        "hydrology_runtime_hit_count": len(hydrology_runtime_hits),
+        "hydrology_runtime_hits": hydrology_runtime_hits,
+        "status": "runtime_evidence_available" if (runtime_ack_available or pick_available) else "waiting_for_runtime_evidence",
+        "qt_surface": "Layers dock Hydrology runtime evidence label",
+        "ack_file": "state/renderer_layer_runtime_ack.json",
+        "pick_state_file": "state/renderer_layer_pick_state.json",
+        "launch_packet_fields": ["hydrology_lod_runtime_evidence", "hydrology_lod_readiness", "layer_runtime_evidence"],
+        "renderer_capability_field": "hydrology_lod_runtime_evidence",
+        "boundary": "Runtime evidence summarizes existing renderer ack and selected-layer pick files; RRKAL data discovery/cache governance remain out of scope.",
+    }
+
+
 if "--list-templates" in sys.argv[1:]:
     print(json.dumps(profile_template_packet(), ensure_ascii=False, indent=2))
     raise SystemExit(0)
@@ -1878,6 +1923,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.hydrology_lod_readiness_label = QtWidgets.QLabel("Hydrology/LOD readiness: pending")
         self.hydrology_lod_readiness_label.setWordWrap(True)
         layers_layout.addWidget(self.hydrology_lod_readiness_label)
+        self.hydrology_lod_runtime_evidence_label = QtWidgets.QLabel("Hydrology runtime evidence: waiting")
+        self.hydrology_lod_runtime_evidence_label.setWordWrap(True)
+        layers_layout.addWidget(self.hydrology_lod_runtime_evidence_label)
         preset_buttons = QtWidgets.QHBoxLayout()
         for preset_id, label in (
             ("all_context", "All"),
@@ -2716,6 +2764,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_visual_presets": self.collect_layer_visual_presets(),
             "layer_visual_preset_runtime_feedback": self.collect_layer_visual_preset_runtime_feedback(),
             "hydrology_lod_readiness": self.collect_hydrology_lod_readiness(),
+            "hydrology_lod_runtime_evidence": self.collect_hydrology_lod_runtime_evidence(),
             "layer_capability_matrix": self.collect_layer_capability_matrix(),
             "layer_runtime_evidence_summary": self.collect_layer_capability_matrix().get("runtime_evidence_summary"),
             "active_layer_diagnostics": self.active_layer_diagnostics_packet(),
@@ -2846,6 +2895,16 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         return hydrology_lod_readiness_packet(
             "rrkal_displaytools_qt_panel",
             self.collect_layer_capability_matrix(),
+        )
+
+    def collect_hydrology_lod_runtime_evidence(self) -> dict[str, object]:
+        runtime_ack = self.layer_runtime_ack_payload if isinstance(self.layer_runtime_ack_payload, dict) else None
+        pick_state = self.layer_pick_state_payload if isinstance(self.layer_pick_state_payload, dict) else None
+        return hydrology_lod_runtime_evidence_packet(
+            self.collect_hydrology_lod_readiness(),
+            runtime_ack,
+            pick_state,
+            "rrkal_displaytools_qt_panel",
         )
 
     def collect_layer_operator_groups(self) -> dict[str, object]:
@@ -3660,6 +3719,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 f"Hydrology/LOD readiness: {hydrology_lod.get('readiness', 'unknown')} "
                 f"({hydrology_lod.get('live_hydrology_layer_count', 0)}/{hydrology_lod.get('hydrology_layer_count', 0)} live layers, "
                 f"LOD={hydrology_lod.get('lod_hook_status', 'unknown')})"
+            )
+        hydrology_evidence = self.collect_hydrology_lod_runtime_evidence()
+        if hasattr(self, "hydrology_lod_runtime_evidence_label"):
+            self.hydrology_lod_runtime_evidence_label.setText(
+                f"Hydrology runtime evidence: {hydrology_evidence.get('status', 'waiting_for_runtime_evidence')} "
+                f"(hits={hydrology_evidence.get('hydrology_runtime_hit_count', 0)}, pick={hydrology_evidence.get('pick_matches_hydrology', False)})"
             )
         self.layer_stack_note.setText(
             f"可見圖層 {visible}/{len(LAYER_LABELS)}；鎖定 {locked}；"
@@ -5548,6 +5613,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_visual_presets": self.collect_layer_visual_presets(),
             "layer_visual_preset_runtime_feedback": self.collect_layer_visual_preset_runtime_feedback(),
             "hydrology_lod_readiness": self.collect_hydrology_lod_readiness(),
+            "hydrology_lod_runtime_evidence": self.collect_hydrology_lod_runtime_evidence(),
             "layer_capability_matrix": self.collect_layer_capability_matrix(),
             "layer_runtime_evidence_summary": self.collect_layer_capability_matrix().get("runtime_evidence_summary"),
             "layer_runtime_badge_summary": self.collect_layer_capability_matrix().get("runtime_badge_summary"),

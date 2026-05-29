@@ -35,6 +35,7 @@ Last updated: 2026-05-29
 - Decide which local cache artifacts should later be registered by RRKAL as renderer bridge assets.
 
 ## Done
+- 2026-05-30: Added `rrkal_displaytools.hydrology_lod_runtime_evidence.v1` so Hydrology/LOD readiness is tied to renderer ack and selected-layer pick evidence across Qt, launch packets, renderer capabilities, handoff and smoke.
 - 2026-05-30: Added `rrkal_displaytools.hydrology_lod_readiness.v1` so lake/river hydrology layer targets and LOD hook evidence are visible through Qt, launch packets, renderer capabilities, handoff and smoke.
 - 2026-05-30: Added `rrkal_displaytools.layer_visual_preset_runtime_feedback.v1` so layer presets expose renderer ack feedback in the Qt Layers dock and through launch packets, renderer capabilities, handoff and smoke.
 - 2026-05-30: Added `rrkal_displaytools.layer_visual_presets.v1` and Qt Layers dock preset buttons for All / Hydrology / Boundary / Annotations, preserving locked layers and exposing the contract through launch packets, renderer capabilities, handoff and smoke.

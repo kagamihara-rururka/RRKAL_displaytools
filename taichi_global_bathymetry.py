@@ -18168,6 +18168,51 @@ def hydrology_lod_readiness_packet(
     }
 
 
+def hydrology_lod_runtime_evidence_packet(
+    readiness: dict[str, object] | None,
+    runtime_ack: dict[str, object] | None,
+    pick_state: dict[str, object] | None,
+    source: str,
+) -> dict[str, object]:
+    readiness = readiness if isinstance(readiness, dict) else {}
+    runtime_ack = runtime_ack if isinstance(runtime_ack, dict) else {}
+    pick_state = pick_state if isinstance(pick_state, dict) else {}
+    hydrology_targets = set(readiness.get("stable_renderer_targets") if isinstance(readiness.get("stable_renderer_targets"), list) else ["lakes", "rivers"])
+    changed_layers = runtime_ack.get("changed_layers") if isinstance(runtime_ack.get("changed_layers"), list) else []
+    changed_opacity_layers = runtime_ack.get("changed_opacity_layers") if isinstance(runtime_ack.get("changed_opacity_layers"), list) else []
+    changed_blend_layers = runtime_ack.get("changed_blend_layers") if isinstance(runtime_ack.get("changed_blend_layers"), list) else []
+    hydrology_runtime_hits = [
+        str(layer)
+        for layer in [*changed_layers, *changed_opacity_layers, *changed_blend_layers]
+        if str(layer) in hydrology_targets or str(layer) in {"lake_layer", "river_layer"}
+    ]
+    pick_result = pick_state.get("pick_result") if isinstance(pick_state.get("pick_result"), dict) else {}
+    pick_layer = str(pick_result.get("layer") or pick_state.get("renderer_layer") or "")
+    pick_matches_hydrology = pick_layer in hydrology_targets or pick_layer in {"lake_layer", "river_layer"}
+    runtime_ack_available = bool(runtime_ack)
+    pick_available = bool(pick_state)
+    return {
+        "schema": "rrkal_displaytools.hydrology_lod_runtime_evidence.v1",
+        "source": source,
+        "readiness_schema": readiness.get("schema"),
+        "readiness": readiness.get("readiness", "unknown"),
+        "runtime_ack_available": runtime_ack_available,
+        "runtime_ack_schema": runtime_ack.get("schema") if runtime_ack_available else "rrkal_displaytools.renderer_layer_runtime_ack.v1",
+        "pick_state_available": pick_available,
+        "pick_layer": pick_layer or None,
+        "pick_matches_hydrology": pick_matches_hydrology,
+        "hydrology_runtime_hit_count": len(hydrology_runtime_hits),
+        "hydrology_runtime_hits": hydrology_runtime_hits,
+        "status": "runtime_evidence_available" if (runtime_ack_available or pick_available) else "waiting_for_runtime_evidence",
+        "qt_surface": "Layers dock Hydrology runtime evidence label",
+        "ack_file": "state/renderer_layer_runtime_ack.json",
+        "pick_state_file": "state/renderer_layer_pick_state.json",
+        "launch_packet_fields": ["hydrology_lod_runtime_evidence", "hydrology_lod_readiness", "layer_runtime_evidence"],
+        "renderer_capability_field": "hydrology_lod_runtime_evidence",
+        "boundary": "Runtime evidence summarizes existing renderer ack and selected-layer pick files; RRKAL data discovery/cache governance remain out of scope.",
+    }
+
+
 def layer_operator_shortcuts_packet(
     source: str,
     selected_layer: str | None = None,
@@ -18612,6 +18657,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
         "layer_visual_presets": layer_visual_presets_packet("taichi_global_bathymetry.renderer_capabilities"),
         "layer_visual_preset_runtime_feedback": layer_visual_preset_runtime_feedback_packet(layer_visual_presets_packet("taichi_global_bathymetry.renderer_capabilities"), None, "taichi_global_bathymetry.renderer_capabilities"),
         "hydrology_lod_readiness": hydrology_lod_readiness_packet("taichi_global_bathymetry.renderer_capabilities", layer_capability_matrix_packet()),
+        "hydrology_lod_runtime_evidence": hydrology_lod_runtime_evidence_packet(hydrology_lod_readiness_packet("taichi_global_bathymetry.renderer_capabilities", layer_capability_matrix_packet()), None, None, "taichi_global_bathymetry.renderer_capabilities"),
         "layer_capability_matrix": layer_capability_matrix_packet(),
         "pin_controls": [
             "pin-file",
