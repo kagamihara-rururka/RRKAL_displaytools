@@ -60,6 +60,48 @@ def profile_template_packet() -> dict[str, object]:
     }
 
 
+def style_renderer_entries_packet(
+    source: str,
+    selected_style: str | None = None,
+) -> dict[str, object]:
+    style_ids = ("scientific", "nautical", "parchment", "tactical")
+    labels = {
+        "scientific": "Scientific",
+        "nautical": "Nautical",
+        "parchment": "Parchment",
+        "tactical": "Tactical",
+    }
+    selected = selected_style if selected_style in style_ids else None
+    entries = []
+    for style_id in style_ids:
+        entries.append(
+            {
+                "id": style_id,
+                "label": labels.get(style_id, style_id.title()),
+                "cli_args": ["--style-profile", style_id],
+                "profile_field": "style_profile",
+                "qt_control": "Looks/templates style profile selector",
+                "portable_command_supported": True,
+                "template_supported": True,
+                "renderer_entrypoint": f"taichi_global_bathymetry.py --style-profile {style_id}",
+                "selected": style_id == selected,
+            }
+        )
+    return {
+        "schema": "rrkal_displaytools.style_renderer_entries.v1",
+        "source": source,
+        "selected_style": selected,
+        "entry_count": len(entries),
+        "entry_ids": [entry["id"] for entry in entries],
+        "entries": entries,
+        "parchment_entry_available": "parchment" in style_ids,
+        "tactical_entry_available": "tactical" in style_ids,
+        "launch_packet_fields": ["style_renderer_entries", "profile.style_profile", "portable_command"],
+        "renderer_capability_field": "style_renderer_entries",
+        "boundary": "Style entries are renderer launch/profile contracts; RRKAL data discovery and cache governance stay outside displaytools.",
+    }
+
+
 if "--list-templates" in sys.argv[1:]:
     print(json.dumps(profile_template_packet(), ensure_ascii=False, indent=2))
     raise SystemExit(0)
@@ -2415,6 +2457,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_group_view": self.collect_layer_group_view_state(),
             "layer_operator_shortcuts": self.collect_layer_operator_shortcuts(),
             "layer_operator_groups": self.collect_layer_operator_groups(),
+            "style_renderer_entries": self.collect_style_renderer_entries(),
             "layer_capability_matrix": self.collect_layer_capability_matrix(),
             "layer_runtime_evidence_summary": self.collect_layer_capability_matrix().get("runtime_evidence_summary"),
             "active_layer_diagnostics": self.active_layer_diagnostics_packet(),
@@ -2508,6 +2551,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.layer_visibility_snapshot is not None,
             len(self.layer_undo_stack),
         )
+
+    def collect_style_renderer_entries(self) -> dict[str, object]:
+        style_combo = getattr(self, "style_combo", None)
+        selected_style = style_combo.currentText() if style_combo is not None else None
+        return style_renderer_entries_packet("rrkal_displaytools_qt_panel", selected_style)
 
     def collect_layer_operator_groups(self) -> dict[str, object]:
         return layer_operator_groups_packet(
@@ -5177,6 +5225,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_group_view": self.collect_layer_group_view_state(),
             "layer_operator_shortcuts": self.collect_layer_operator_shortcuts(),
             "layer_operator_groups": self.collect_layer_operator_groups(),
+            "style_renderer_entries": self.collect_style_renderer_entries(),
             "layer_capability_matrix": self.collect_layer_capability_matrix(),
             "layer_runtime_evidence_summary": self.collect_layer_capability_matrix().get("runtime_evidence_summary"),
             "layer_runtime_badge_summary": self.collect_layer_capability_matrix().get("runtime_badge_summary"),

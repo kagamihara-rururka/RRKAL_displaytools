@@ -17898,6 +17898,48 @@ def layer_renderer_diagnostics_remediation_packet(
     }
 
 
+def style_renderer_entries_packet(
+    source: str,
+    selected_style: str | None = None,
+) -> dict[str, object]:
+    style_ids = ("scientific", "nautical", "parchment", "tactical")
+    labels = {
+        "scientific": "Scientific",
+        "nautical": "Nautical",
+        "parchment": "Parchment",
+        "tactical": "Tactical",
+    }
+    selected = selected_style if selected_style in style_ids else None
+    entries = []
+    for style_id in style_ids:
+        entries.append(
+            {
+                "id": style_id,
+                "label": labels.get(style_id, style_id.title()),
+                "cli_args": ["--style-profile", style_id],
+                "profile_field": "style_profile",
+                "qt_control": "Looks/templates style profile selector",
+                "portable_command_supported": True,
+                "template_supported": True,
+                "renderer_entrypoint": f"taichi_global_bathymetry.py --style-profile {style_id}",
+                "selected": style_id == selected,
+            }
+        )
+    return {
+        "schema": "rrkal_displaytools.style_renderer_entries.v1",
+        "source": source,
+        "selected_style": selected,
+        "entry_count": len(entries),
+        "entry_ids": [entry["id"] for entry in entries],
+        "entries": entries,
+        "parchment_entry_available": "parchment" in style_ids,
+        "tactical_entry_available": "tactical" in style_ids,
+        "launch_packet_fields": ["style_renderer_entries", "profile.style_profile", "portable_command"],
+        "renderer_capability_field": "style_renderer_entries",
+        "boundary": "Style entries are renderer launch/profile contracts; RRKAL data discovery and cache governance stay outside displaytools.",
+    }
+
+
 def layer_operator_shortcuts_packet(
     source: str,
     selected_layer: str | None = None,
@@ -18336,6 +18378,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
         },
         "layer_operator_shortcuts": layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"),
         "layer_operator_groups": layer_operator_groups_packet(layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"), "taichi_global_bathymetry.renderer_capabilities"),
+        "style_renderer_entries": style_renderer_entries_packet("taichi_global_bathymetry.renderer_capabilities"),
         "layer_capability_matrix": layer_capability_matrix_packet(),
         "pin_controls": [
             "pin-file",

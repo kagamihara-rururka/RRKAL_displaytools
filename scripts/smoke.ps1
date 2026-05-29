@@ -188,6 +188,18 @@ if ([int]$launchPacket.layer_operator_groups.group_count -lt 5) {
 if ([int]$launchPacket.layer_operator_groups.complete_group_count -lt 5) {
     throw "Launch packet layer_operator_groups incomplete"
 }
+if ($launchPacket.style_renderer_entries.schema -ne "rrkal_displaytools.style_renderer_entries.v1") {
+    throw "Launch packet style_renderer_entries schema missing or invalid"
+}
+if ([int]$launchPacket.style_renderer_entries.entry_count -lt 4) {
+    throw "Launch packet style_renderer_entries entry count missing"
+}
+if ($launchPacket.style_renderer_entries.entry_ids -notcontains "parchment") {
+    throw "Launch packet style_renderer_entries missing parchment entry"
+}
+if ($launchPacket.style_renderer_entries.entry_ids -notcontains "tactical") {
+    throw "Launch packet style_renderer_entries missing tactical entry"
+}
 if ($launchPacket.layer_undo.schema -ne "rrkal_displaytools.layer_stack_undo.v1") {
     throw "Launch packet layer_undo schema missing or invalid"
 }
@@ -517,6 +529,15 @@ if ($capabilities.layer_operator_groups.schema -ne "rrkal_displaytools.layer_ope
 if ([int]$capabilities.layer_operator_groups.complete_group_count -lt 5) {
     throw "Renderer layer_operator_groups incomplete"
 }
+if ($capabilities.style_renderer_entries.schema -ne "rrkal_displaytools.style_renderer_entries.v1") {
+    throw "Renderer style_renderer_entries schema missing or invalid"
+}
+if ($capabilities.style_renderer_entries.entry_ids -notcontains "parchment") {
+    throw "Renderer style_renderer_entries missing parchment entry"
+}
+if ($capabilities.style_renderer_entries.entry_ids -notcontains "tactical") {
+    throw "Renderer style_renderer_entries missing tactical entry"
+}
 if ($capabilities.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
     throw "Renderer layer_capability_matrix capability missing or invalid"
 }
@@ -705,6 +726,21 @@ if ($handoff.layer_operator_groups.renderer_capabilities_schema -ne "rrkal_displ
 }
 if ([int]$handoff.layer_operator_groups.complete_group_count -lt 5) {
     throw "Handoff inspection layer_operator_groups incomplete"
+}
+if ($handoff.launch_packet_contracts.style_renderer_entries -ne "rrkal_displaytools.style_renderer_entries.v1") {
+    throw "Handoff inspection style_renderer_entries launch contract missing or invalid"
+}
+if ($handoff.style_renderer_entries.launch_packet_schema -ne "rrkal_displaytools.style_renderer_entries.v1") {
+    throw "Handoff inspection style_renderer_entries launch schema missing or invalid"
+}
+if ($handoff.style_renderer_entries.renderer_capabilities_schema -ne "rrkal_displaytools.style_renderer_entries.v1") {
+    throw "Handoff inspection style_renderer_entries renderer schema missing or invalid"
+}
+if ($handoff.style_renderer_entries.entry_ids -notcontains "parchment") {
+    throw "Handoff inspection style_renderer_entries missing parchment entry"
+}
+if ($handoff.style_renderer_entries.entry_ids -notcontains "tactical") {
+    throw "Handoff inspection style_renderer_entries missing tactical entry"
 }
 if ($handoff.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
     throw "Handoff inspection layer_capability_matrix summary missing or invalid"

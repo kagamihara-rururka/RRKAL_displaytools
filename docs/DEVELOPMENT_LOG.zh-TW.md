@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-30 - Style renderer entries contract
+
+- Added `rrkal_displaytools.style_renderer_entries.v1` so scientific, nautical, parchment and tactical styles have explicit renderer entry contracts.
+- Exposed style entries through Qt launch/provenance packets, No-GUI launch packets, renderer capability discovery, handoff inspection and closed-loop evidence.
+- Smoke: PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Layer operator workflow groups
 
 - Added `rrkal_displaytools.layer_operator_groups.v1` to group Qt-first layer operations into Selection, Edit state, Isolation, History and Diagnostics workflows.

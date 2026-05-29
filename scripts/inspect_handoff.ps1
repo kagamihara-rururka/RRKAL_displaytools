@@ -39,6 +39,7 @@ $summary = [ordered]@{
         layer_capability_matrix = $launchPacket.layer_capability_matrix.schema
         layer_operator_shortcuts = $launchPacket.layer_operator_shortcuts.schema
         layer_operator_groups = $launchPacket.layer_operator_groups.schema
+        style_renderer_entries = $launchPacket.style_renderer_entries.schema
         layer_undo = $launchPacket.layer_undo.schema
         session_journal = $launchPacket.session_journal.schema
         timeline_state = $launchPacket.timeline_state.schema
@@ -58,6 +59,14 @@ $summary = [ordered]@{
         group_count = $launchPacket.layer_operator_groups.group_count
         complete_group_count = $launchPacket.layer_operator_groups.complete_group_count
         group_ids = @($launchPacket.layer_operator_groups.groups | ForEach-Object { $_.id })
+    }
+    style_renderer_entries = @{
+        launch_packet_schema = $launchPacket.style_renderer_entries.schema
+        renderer_capabilities_schema = $capabilities.style_renderer_entries.schema
+        entry_count = $launchPacket.style_renderer_entries.entry_count
+        entry_ids = $launchPacket.style_renderer_entries.entry_ids
+        parchment_entry_available = $launchPacket.style_renderer_entries.parchment_entry_available
+        tactical_entry_available = $launchPacket.style_renderer_entries.tactical_entry_available
     }
     layer_capability_matrix = @{
         schema = $capabilities.layer_capability_matrix.schema
