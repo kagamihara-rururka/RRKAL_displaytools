@@ -202,7 +202,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         command_layout.addWidget(self.command_text)
         right.addWidget(command_group, stretch=1)
 
-        actions = QtWidgets.QHBoxLayout()
+        actions_group = self._group("操作")
+        actions = QtWidgets.QGridLayout(actions_group)
         refresh_button = QtWidgets.QPushButton("刷新命令")
         copy_button = QtWidgets.QPushButton("複製命令")
         copy_portable_button = QtWidgets.QPushButton("複製可攜命令")
@@ -227,19 +228,23 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         launch_button.clicked.connect(self.launch_renderer)
         restart_button.clicked.connect(self.restart_renderer)
         stop_button.clicked.connect(self.stop_renderer)
-        actions.addWidget(refresh_button)
-        actions.addWidget(copy_button)
-        actions.addWidget(copy_portable_button)
-        actions.addWidget(save_button)
-        actions.addWidget(load_button)
-        actions.addWidget(open_templates_button)
-        actions.addWidget(open_local_profiles_button)
-        actions.addWidget(export_packet_button)
-        actions.addWidget(smoke_button)
-        actions.addWidget(launch_button)
-        actions.addWidget(restart_button)
-        actions.addWidget(stop_button)
-        right.addLayout(actions)
+        action_buttons = (
+            refresh_button,
+            copy_button,
+            copy_portable_button,
+            save_button,
+            load_button,
+            open_templates_button,
+            open_local_profiles_button,
+            export_packet_button,
+            smoke_button,
+            launch_button,
+            restart_button,
+            stop_button,
+        )
+        for index, button in enumerate(action_buttons):
+            actions.addWidget(button, index // 4, index % 4)
+        right.addWidget(actions_group)
 
         self.status = QtWidgets.QLabel("尚未啟動 renderer")
         main.addWidget(self.status)

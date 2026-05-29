@@ -1,5 +1,17 @@
 ﻿# Development Log
 
+## 2026-05-29 - Qt operator action layout
+
+Scope:
+- Reworked the Qt panel operator actions from a single horizontal row into a 4-column grid group.
+- This keeps launch/copy/profile/smoke actions usable on narrower displays.
+
+Positioning:
+- UI layout improvement only; renderer behavior is unchanged.
+
+Validation:
+- Smoke passed before commit: `py -3 -m py_compile rrkal_displaytools_qt_panel.py taichi_global_bathymetry.py`.
+- Smoke passed before commit: PowerShell parser check for all scripts under `scripts/`.
 ## 2026-05-29 - Portable command handoff
 
 Scope:
@@ -212,6 +224,7 @@ Validation:
 Next round rule:
 - Before any new development round, inspect current repo state.
 - After each round, update this log and commit before continuing.
+
 
 
 
