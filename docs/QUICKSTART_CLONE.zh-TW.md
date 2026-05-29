@@ -42,7 +42,7 @@ Smoke passed.
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts\render_quick_smoke.ps1
 ```
 
-這會產生 `state/showcase/quick_smoke.png` 與 `state/showcase/quick_smoke.png.metadata.json`。
+這會產生 `state/showcase/quick_smoke.png`、`state/showcase/quick_smoke.png.metadata.json` 與 `state/showcase/quick_smoke_preview_frame.png`，可用來確認 renderer output 與 live preview frame 寫檔路徑都正常。
 
 ## 4. 開 Qt 控制面板
 

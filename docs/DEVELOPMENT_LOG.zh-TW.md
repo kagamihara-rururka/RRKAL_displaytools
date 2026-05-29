@@ -1,5 +1,20 @@
 # Development Log
 
+## 2026-05-29 - Quick render smoke verifies preview frame
+
+Scope:
+- `scripts/render_quick_smoke.ps1` now passes `--preview-frame-file`.
+- The script now verifies that the preview frame PNG exists and is non-empty.
+- The quick render path disables hydrology, maritime boundary, aircraft, and Pin vector layers so it stays a bounded synthetic renderer smoke.
+- Clone quickstart and capability summary now document the extra quick smoke artifact.
+
+Positioning:
+- This verifies real renderer preview frame output in the optional render smoke without making the lightweight pre-commit smoke heavier.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+- Quick render smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\render_quick_smoke.ps1`.
+
 ## 2026-05-29 - Canvas preview stream provenance
 
 Scope:

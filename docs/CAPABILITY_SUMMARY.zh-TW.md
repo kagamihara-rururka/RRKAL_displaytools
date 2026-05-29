@@ -79,7 +79,7 @@
 
 - `scripts/setup_windows.ps1` 安裝依賴。
 - `scripts/run_qt_panel.ps1` 啟動 Qt panel，支援 `-Profile` 與 `-Template`。
-- `scripts/render_quick_smoke.ps1` 要求快速 synthetic/headless render。
+- `scripts/render_quick_smoke.ps1` 要求快速 synthetic/headless render，並驗證 preview frame PNG 寫檔。
 - `scripts/smoke.ps1` 是提交前 smoke helper。
 - `docs/SETUP_WINDOWS.zh-TW.md` 提供另一台 Windows 電腦 clone/setup/smoke/run 步驟。
 
