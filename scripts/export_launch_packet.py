@@ -11,6 +11,8 @@ ROOT = Path(__file__).resolve().parents[1]
 PROFILE_DIR = ROOT / "profiles"
 PREVIEW_FRAME_PATH = "state/renderer_preview_frame.png"
 PREVIEW_FRAME_INTERVAL_S = 0.75
+TIMELINE_STATE_PATH = "state/renderer_timeline_state.json"
+TIMELINE_ACK_PATH = "state/renderer_timeline_ack.json"
 sys.path.insert(0, str(ROOT))
 
 from closed_loop_status import renderer_closed_loop_status_packet  # noqa: E402
@@ -136,6 +138,10 @@ def renderer_args(profile: dict[str, object], rrkal_data_manifest_ref: str = "")
         PREVIEW_FRAME_PATH,
         "--preview-frame-interval",
         str(PREVIEW_FRAME_INTERVAL_S),
+        "--timeline-state-file",
+        TIMELINE_STATE_PATH,
+        "--timeline-ack-file",
+        TIMELINE_ACK_PATH,
     ]
     for key, flag in BOOL_FLAGS.items():
         args.append(f"--{flag}" if layers[key] else f"--no-{flag}")
@@ -295,6 +301,8 @@ def launch_packet(profile_path: Path, profile: dict[str, object], rrkal_data_man
         "layer_undo": layer_undo_packet(),
         "session_journal": session_journal_packet(),
         "timeline_state": timeline_state_packet(profile),
+        "timeline_runtime_state_file": TIMELINE_STATE_PATH,
+        "timeline_ack_file": TIMELINE_ACK_PATH,
         "closed_loop_status": renderer_closed_loop_status_packet(),
         "portable_command": portable_command,
         "portable_command_line": " ".join(portable_command),

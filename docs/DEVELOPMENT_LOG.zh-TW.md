@@ -1,5 +1,20 @@
 # Development Log
 
+## 2026-05-29 - Timeline renderer acknowledgement handoff
+
+Scope:
+- Qt now writes `state/renderer_timeline_state.json` from the Timeline dock/profile state.
+- Qt launch commands pass `--timeline-state-file` and `--timeline-ack-file`.
+- Renderer reads the Timeline runtime state on startup and writes `state/renderer_timeline_ack.json`.
+- The ack records received state, runtime schema, Timeline schema, keyframe count, playback mode, and pending renderer playback/export work.
+- Launch packets, provenance, closed-loop status, renderer capabilities, and smoke gates now expose the Timeline state/ack contract.
+
+Positioning:
+- This closes Timeline handoff as a renderer receipt loop without claiming renderer-side animation playback, interpolation, or export.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Timeline renderer handoff capability
 
 Scope:

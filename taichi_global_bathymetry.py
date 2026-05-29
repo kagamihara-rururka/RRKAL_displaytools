@@ -2696,6 +2696,21 @@ def load_boundary_highlight_state(boundary_highlight_json: str | None) -> tuple[
     return normalize_boundary_highlight_state(payload, received=True)
 
 
+def load_timeline_runtime_state(timeline_state_file: str | Path | None) -> tuple[dict[str, object] | None, str | None]:
+    if not timeline_state_file:
+        return None, None
+    path = Path(timeline_state_file)
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        return None, f"missing timeline state file: {path}"
+    except (OSError, json.JSONDecodeError) as exc:
+        return None, str(exc)
+    if not isinstance(payload, dict):
+        return None, "timeline runtime state root is not an object"
+    return payload, None
+
+
 def _pin_label_text(pin: dict[str, object]) -> str:
     text = str(pin.get("label") or pin.get("id") or "Pin").strip()
     if len(text) > 28:
@@ -10862,6 +10877,12 @@ class HybridRenderController:
         self.layer_runtime_ack_file = (
             Path(args.layer_runtime_ack_file) if getattr(args, "layer_runtime_ack_file", None) else None
         )
+        self.timeline_state_file = Path(args.timeline_state_file) if getattr(args, "timeline_state_file", None) else None
+        self.timeline_ack_file = Path(args.timeline_ack_file) if getattr(args, "timeline_ack_file", None) else None
+        self.timeline_runtime_state, self.timeline_runtime_state_error = load_timeline_runtime_state(
+            self.timeline_state_file
+        )
+        self.write_timeline_ack()
         self.layer_runtime_state_mtime_ns: int | None = None
         self.layer_runtime_state_last_error: str | None = None
         self.runtime_selected_layer_key: str | None = None
@@ -13125,6 +13146,44 @@ class HybridRenderController:
             self.boundary_highlight_ack_file.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
         except OSError as exc:
             print(f"Unable to write boundary highlight ack: {exc}")
+
+    def write_timeline_ack(self) -> None:
+        if self.timeline_ack_file is None:
+            return
+        state_payload = self.timeline_runtime_state if isinstance(self.timeline_runtime_state, dict) else {}
+        timeline_state = state_payload.get("timeline_state")
+        timeline_state = timeline_state if isinstance(timeline_state, dict) else {}
+        runtime_keyframes = state_payload.get("timeline_keyframes")
+        runtime_keyframes = runtime_keyframes if isinstance(runtime_keyframes, list) else []
+        keyframe_count = timeline_state.get("keyframe_count")
+        if not isinstance(keyframe_count, int):
+            keyframe_count = len(runtime_keyframes)
+        payload = {
+            "schema": "rrkal_displaytools.renderer_timeline_ack.v1",
+            "updated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "received": self.timeline_runtime_state is not None and self.timeline_runtime_state_error is None,
+            "timeline_runtime_state_file": str(self.timeline_state_file) if self.timeline_state_file is not None else None,
+            "timeline_runtime_state_schema": state_payload.get("schema"),
+            "timeline_state_schema": timeline_state.get("schema"),
+            "keyframe_count": keyframe_count,
+            "playback_mode": timeline_state.get("playback", {}).get("mode")
+            if isinstance(timeline_state.get("playback"), dict)
+            else None,
+            "applies": ["input_acknowledgement"],
+            "pending": [
+                "renderer_timeline_playback",
+                "animation_export",
+                "ocean_material_keyframe_interpolation",
+                "camera_keyframe_interpolation",
+            ],
+            "error": self.timeline_runtime_state_error,
+            "source": "taichi_global_bathymetry",
+        }
+        try:
+            self.timeline_ack_file.parent.mkdir(parents=True, exist_ok=True)
+            self.timeline_ack_file.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        except OSError as exc:
+            print(f"Unable to write timeline ack: {exc}")
 
     def nearest_pin_hit(self, x: float, y: float, radius: float | None = None) -> dict[str, object] | None:
         if not self.layer_visible.get("pins", True):
@@ -16123,6 +16182,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--boundary-highlight-ack-file", default=os.environ.get("BOUNDARY_HIGHLIGHT_ACK_FILE"))
     parser.add_argument("--layer-runtime-state-file", default=os.environ.get("LAYER_RUNTIME_STATE_FILE"))
     parser.add_argument("--layer-runtime-ack-file", default=os.environ.get("LAYER_RUNTIME_ACK_FILE"))
+    parser.add_argument("--timeline-state-file", default=os.environ.get("TIMELINE_STATE_FILE"))
+    parser.add_argument("--timeline-ack-file", default=os.environ.get("TIMELINE_ACK_FILE"))
 
     parser.add_argument("--adaptive-sampling", action=bool_action, default=parse_bool(os.environ.get("ADAPTIVE_SAMPLING"), True))
     parser.add_argument("--target-fps", type=float, default=float(os.environ.get("TARGET_FPS", "30.0")))
@@ -16361,9 +16422,13 @@ def renderer_capabilities_packet() -> dict[str, object]:
         },
         "timeline_handoff": {
             "schema": "rrkal_displaytools.timeline_handoff.v1",
+            "state_schema": "rrkal_displaytools.timeline_runtime_state.v1",
+            "ack_schema": "rrkal_displaytools.renderer_timeline_ack.v1",
+            "controls": ["timeline-state-file", "timeline-ack-file"],
             "input_contracts": [
                 "rrkal_displaytools.timeline_state.v1",
                 "rrkal_displaytools.timeline_keyframe.v1",
+                "rrkal_displaytools.timeline_runtime_state.v1",
                 "profile.timeline_keyframes",
             ],
             "applies": [
@@ -16372,6 +16437,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "research provenance summary",
                 "No-GUI launch packet keyframe summary",
                 "UI-only keyframe playback preview",
+                "renderer timeline input acknowledgement",
             ],
             "pending": [
                 "renderer_timeline_playback",

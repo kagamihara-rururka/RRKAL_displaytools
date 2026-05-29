@@ -46,11 +46,23 @@ if ($launchPacket.timeline_state.implemented -notcontains "profile_timeline_keyf
 if ($null -eq $launchPacket.timeline_state.keyframes) {
     throw "Launch packet timeline_state keyframes missing"
 }
+if ($launchPacket.timeline_runtime_state_file -ne "state/renderer_timeline_state.json") {
+    throw "Launch packet timeline runtime state file missing or invalid"
+}
+if ($launchPacket.timeline_ack_file -ne "state/renderer_timeline_ack.json") {
+    throw "Launch packet timeline ack file missing or invalid"
+}
 if ($launchPacket.boundary_highlight.identity_status.schema -ne "rrkal_displaytools.boundary_identity_status.v1") {
     throw "Launch packet boundary_highlight identity_status schema missing or invalid"
 }
 if ($launchPacket.portable_command -notcontains "--preview-frame-file") {
     throw "Launch packet portable command is missing --preview-frame-file"
+}
+if ($launchPacket.portable_command -notcontains "--timeline-state-file") {
+    throw "Launch packet portable command is missing --timeline-state-file"
+}
+if ($launchPacket.portable_command -notcontains "--timeline-ack-file") {
+    throw "Launch packet portable command is missing --timeline-ack-file"
 }
 if ($launchPacket.canvas_preview.preview_frame_path -ne "state/renderer_preview_frame.png") {
     throw "Launch packet canvas_preview preview_frame_path missing or invalid"
@@ -79,6 +91,12 @@ if ($capabilities.ui_handoff_contracts.schema -ne "rrkal_displaytools.ui_handoff
 }
 if ($capabilities.timeline_handoff.schema -ne "rrkal_displaytools.timeline_handoff.v1") {
     throw "Renderer timeline_handoff capability missing or invalid"
+}
+if ($capabilities.timeline_handoff.ack_schema -ne "rrkal_displaytools.renderer_timeline_ack.v1") {
+    throw "Renderer timeline_handoff ack schema missing or invalid"
+}
+if ($capabilities.timeline_handoff.controls -notcontains "timeline-state-file") {
+    throw "Renderer timeline_handoff timeline-state-file control missing"
 }
 if ($capabilities.boundary_highlight.identity_status_schema -ne "rrkal_displaytools.boundary_identity_status.v1") {
     throw "Renderer boundary_highlight identity_status capability missing or invalid"

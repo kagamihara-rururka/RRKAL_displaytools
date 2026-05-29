@@ -29,6 +29,8 @@ BOUNDARY_HIGHLIGHT_ACK_PATH = ROOT / "state" / "renderer_boundary_highlight_ack.
 LAYER_RUNTIME_STATE_PATH = ROOT / "state" / "renderer_layer_runtime_state.json"
 LAYER_RUNTIME_ACK_PATH = ROOT / "state" / "renderer_layer_runtime_ack.json"
 LAYER_PICK_STATE_PATH = ROOT / "state" / "renderer_layer_pick_state.json"
+TIMELINE_STATE_PATH = ROOT / "state" / "renderer_timeline_state.json"
+TIMELINE_ACK_PATH = ROOT / "state" / "renderer_timeline_ack.json"
 
 
 def profile_template_packet() -> dict[str, object]:
@@ -271,6 +273,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.timeline_playback_active = False
         self.timeline_playback_index = 0
         self.timeline_playback_interval_ms = 1200
+        self.timeline_ack_label: QtWidgets.QLabel | None = None
+        self.timeline_ack_mtime_ns: int | None = TIMELINE_ACK_PATH.stat().st_mtime_ns if TIMELINE_ACK_PATH.exists() else None
+        self.timeline_ack_payload: dict[str, object] | None = None
+        self.timeline_state_last_write_utc: str | None = None
+        self.timeline_state_write_error: str | None = None
         self.selected_layer_key: str | None = None
         self.boundary_highlight_state: dict[str, object] = default_boundary_highlight_state()
         self.boundary_highlight_label: QtWidgets.QLabel | None = None
@@ -355,6 +362,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.timeline_playback_timer = QtCore.QTimer(self)
         self.timeline_playback_timer.setInterval(self.timeline_playback_interval_ms)
         self.timeline_playback_timer.timeout.connect(self.advance_timeline_playback)
+        self.timeline_ack_timer = QtCore.QTimer(self)
+        self.timeline_ack_timer.setInterval(1000)
+        self.timeline_ack_timer.timeout.connect(self.refresh_timeline_ack_state)
+        self.timeline_ack_timer.start()
         self.apply_baseline()
         self.refresh_template_list()
         if initial_profile is not None:
@@ -966,6 +977,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         )
         self.timeline_state_label.setWordWrap(True)
         timeline_layout.addWidget(self.timeline_state_label)
+        self.timeline_ack_label = QtWidgets.QLabel(f"Timeline renderer ack: waiting for {TIMELINE_ACK_PATH.name}")
+        self.timeline_ack_label.setWordWrap(True)
+        timeline_layout.addWidget(self.timeline_ack_label)
         self.timeline_keyframe_list = QtWidgets.QListWidget()
         self.timeline_keyframe_list.setMinimumHeight(90)
         timeline_layout.addWidget(self.timeline_keyframe_list)
@@ -1141,6 +1155,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         return super().eventFilter(watched, event)
 
     def build_command(self) -> list[str]:
+        self.write_timeline_runtime_state()
         cmd = [
             sys.executable,
             str(RENDERER),
@@ -1197,6 +1212,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 str(LAYER_RUNTIME_ACK_PATH),
                 "--layer-pick-state-file",
                 str(LAYER_PICK_STATE_PATH),
+                "--timeline-state-file",
+                str(TIMELINE_STATE_PATH),
+                "--timeline-ack-file",
+                str(TIMELINE_ACK_PATH),
             ]
         )
         pins = self.collect_research_pins()
@@ -1274,6 +1293,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_undo": self.collect_layer_undo_state(),
             "session_journal": self.collect_session_journal(),
             "timeline_state": self.collect_timeline_state(),
+            "timeline_runtime_state_file": str(TIMELINE_STATE_PATH),
+            "timeline_ack_file": str(TIMELINE_ACK_PATH),
+            "timeline_ack": self.timeline_ack_payload,
             "selected_pin_id": self.selected_pin_id,
             "layer_stack_ui": self.collect_layer_stack_ui(),
             "tool_state": self.collect_tool_state(),
@@ -2203,6 +2225,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "ui_keyframe_restore",
                 "ui_keyframe_playback_controls",
                 "launch_packet_status_contract",
+                "renderer_timeline_ack_handoff",
             ],
             "pending": [
                 "renderer_timeline_playback",
@@ -2221,6 +2244,69 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             },
             "boundary": "UIUX keyframe storage/restore/playback only; no renderer animation playback or export is claimed yet.",
         }
+
+    def collect_timeline_runtime_state(self) -> dict[str, object]:
+        return {
+            "schema": "rrkal_displaytools.timeline_runtime_state.v1",
+            "updated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "timeline_state": self.collect_timeline_state(),
+            "timeline_keyframes": [dict(keyframe) for keyframe in self.timeline_keyframes],
+            "source": "rrkal_displaytools_qt_panel",
+            "boundary": "Renderer receives Timeline keyframes as state only; renderer playback/interpolation/export remain pending.",
+        }
+
+    def write_timeline_runtime_state(self) -> None:
+        payload = self.collect_timeline_runtime_state()
+        try:
+            TIMELINE_STATE_PATH.parent.mkdir(parents=True, exist_ok=True)
+            TIMELINE_STATE_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        except OSError as exc:
+            self.timeline_state_write_error = str(exc)
+            return
+        self.timeline_state_last_write_utc = str(payload.get("updated_at_utc", ""))
+        self.timeline_state_write_error = None
+
+    def refresh_timeline_ack_state(self) -> None:
+        try:
+            stat = TIMELINE_ACK_PATH.stat()
+        except FileNotFoundError:
+            if self.timeline_ack_mtime_ns is not None:
+                self.timeline_ack_mtime_ns = None
+                if self.timeline_ack_label is not None:
+                    self.timeline_ack_label.setText(f"Timeline renderer ack: waiting for {TIMELINE_ACK_PATH.name}")
+            return
+        except OSError as exc:
+            if self.timeline_ack_label is not None:
+                self.timeline_ack_label.setText(f"Timeline renderer ack read failed: {exc}")
+            return
+        if stat.st_mtime_ns == self.timeline_ack_mtime_ns:
+            return
+        next_mtime_ns = stat.st_mtime_ns
+        try:
+            payload = json.loads(TIMELINE_ACK_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            if self.timeline_ack_label is not None:
+                self.timeline_ack_label.setText(f"Timeline renderer ack parse failed: {exc}")
+            return
+        self.timeline_ack_mtime_ns = next_mtime_ns
+        if isinstance(payload, dict):
+            self.timeline_ack_payload = payload
+            self.refresh_timeline_ack_label(payload)
+            self.refresh_research_provenance()
+
+    def refresh_timeline_ack_label(self, payload: dict[str, object]) -> None:
+        if self.timeline_ack_label is None:
+            return
+        received = payload.get("received", "-")
+        keyframe_count = payload.get("keyframe_count", "-")
+        updated_at = str(payload.get("updated_at_utc", "-"))
+        error = payload.get("error")
+        if error:
+            self.timeline_ack_label.setText(f"Timeline renderer ack: error={error}, updated={updated_at}")
+            return
+        self.timeline_ack_label.setText(
+            f"Timeline renderer ack: received={received}, keyframes={keyframe_count}, updated={updated_at}"
+        )
 
     def collect_timeline_keyframe(self) -> dict[str, object]:
         index = len(self.timeline_keyframes) + 1
@@ -2258,8 +2344,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         playback = "playing" if self.timeline_playback_active else "idle"
         self.timeline_state_label.setText(
             f"Timeline status: {len(self.timeline_keyframes)} UI keyframes stored; "
-            f"UI playback={playback}; renderer playback/export pending."
+            f"UI playback={playback}; renderer ack via {TIMELINE_ACK_PATH.name}; playback/export pending."
         )
+        self.write_timeline_runtime_state()
 
     def apply_timeline_keyframes(self, keyframes: list[object]) -> None:
         self.timeline_keyframes = [dict(keyframe) for keyframe in keyframes if isinstance(keyframe, dict)]
@@ -3109,6 +3196,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_undo": self.collect_layer_undo_state(),
             "session_journal": self.collect_session_journal(),
             "timeline_state": self.collect_timeline_state(),
+            "timeline_runtime_state_file": str(TIMELINE_STATE_PATH),
+            "timeline_state_last_write_utc": self.timeline_state_last_write_utc,
+            "timeline_state_write_error": self.timeline_state_write_error,
+            "timeline_ack_file": str(TIMELINE_ACK_PATH),
+            "timeline_ack": self.timeline_ack_payload,
             "active_tool": self.active_tool,
             "cursor_lat_lon_estimate": {
                 "latitude": self.cursor_latitude,
