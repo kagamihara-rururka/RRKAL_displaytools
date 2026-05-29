@@ -9,6 +9,7 @@
 - `rrkal_displaytools_qt_panel.py` 提供 Qt/PyQt6 圖層控制面板。
 - 產品定位是科研視覺化工作台：UI 借鑑 Photoshop 的面板精神，但優先服務科研者對圖層狀態、資料來源、profile 可重現性、manifest/launch packet 可追蹤性的需求。
 - 模組邊界與後續解耦順序記錄於 `docs/MODULE_BOUNDARIES.zh-TW.md`；displaytools 只負責視覺化/UI/renderer bridge，不接手 RRKAL 的資料 discovery/download/cache governance。
+- 跨機器 clone / smoke / Qt 啟動步驟記錄於 `docs/QUICKSTART_CLONE.zh-TW.md`。
 - 前端方向採 Photoshop-inspired workspace：menu bar、左側 Tools dock、右側 dockable Layers/Properties/Navigator/History panels、工具選項、Looks/模板、圖層、屬性、中央預覽、動作分區。
 - 可控制 style profile、UI backend、topography source、data mode、resolution、Taichi arch。
 - 可控制 lake、river、border、territorial sea、EEZ、high seas、aircraft、Pin marker、ocean material、terrain contours、scale bar、vehicle icons 等圖層。

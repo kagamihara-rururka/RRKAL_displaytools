@@ -1,5 +1,18 @@
 ﻿# Development Log
 
+## 2026-05-29 - Cross-machine clone quickstart
+
+Scope:
+- Added `docs/QUICKSTART_CLONE.zh-TW.md`.
+- Documented clone, venv setup, dependency install, smoke test, Qt panel launch, bridge files, and RRKAL/displaytools responsibility boundary.
+
+Positioning:
+- This improves use from another computer through GitHub.
+- Runtime state files remain local and should not be committed.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Module boundary note
 
 Scope:
