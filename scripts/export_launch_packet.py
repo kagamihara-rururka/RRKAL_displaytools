@@ -1075,6 +1075,11 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         ("cursor_geo", "Inspect: Cursor geo"),
         ("boundary_json", "Inspect: Boundary JSON"),
     ]
+    qt_inspector_groups = [
+        {"id": "replay_contracts", "label": "Replay/contracts", "action_ids": ["profile_replay", "clone_ready", "module_seams"]},
+        {"id": "renderer_ports", "label": "Renderer ports", "action_ids": ["hydro_lod", "ocean_port", "style_routes"]},
+        {"id": "research_interaction", "label": "Research interaction", "action_ids": ["pin_pick", "cursor_geo", "boundary_json"]},
+    ]
     return {
         "schema": "rrkal_displaytools.profile_ui_state_replay.v1",
         "source": source,
@@ -1086,6 +1091,8 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         "qt_inspector_action_ids": [action_id for action_id, _label in qt_inspector_actions],
         "qt_inspector_action_labels": [label for _action_id, label in qt_inspector_actions],
         "qt_inspector_action_count": len(qt_inspector_actions),
+        "qt_inspector_action_groups": qt_inspector_groups,
+        "qt_inspector_group_count": len(qt_inspector_groups),
         "qt_surface": "Layers dock profile UI replay label",
         "launch_packet_fields": ["profile_ui_state_replay", "profile", "timeline_keyframes", "timeline_runtime_state"],
         "renderer_capability_field": "profile_ui_state_replay",

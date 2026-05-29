@@ -329,6 +329,12 @@ if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "
 if ([int]$launchPacket.profile_ui_state_replay.qt_inspector_action_count -lt 9) {
     throw "Launch packet profile_ui_state_replay inspector action count missing"
 }
+if ([int]$launchPacket.profile_ui_state_replay.qt_inspector_group_count -lt 3) {
+    throw "Launch packet profile_ui_state_replay inspector group count missing"
+}
+if ($launchPacket.profile_ui_state_replay.qt_inspector_action_groups.id -notcontains "research_interaction") {
+    throw "Launch packet profile_ui_state_replay research interaction group missing"
+}
 if ($launchPacket.profile_launch_readiness.schema -ne "rrkal_displaytools.profile_launch_readiness.v1") {
     throw "Launch packet profile_launch_readiness schema missing or invalid"
 }
@@ -942,6 +948,9 @@ if ($capabilities.profile_ui_state_replay.qt_inspector_action_ids -notcontains "
 }
 if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontains "Inspect: Clone ready") {
     throw "Renderer profile_ui_state_replay Clone inspector label missing"
+}
+if ($capabilities.profile_ui_state_replay.qt_inspector_action_groups.id -notcontains "renderer_ports") {
+    throw "Renderer profile_ui_state_replay renderer ports group missing"
 }
 if ($capabilities.profile_launch_readiness.schema -ne "rrkal_displaytools.profile_launch_readiness.v1") {
     throw "Renderer profile_launch_readiness schema missing or invalid"
@@ -1743,6 +1752,9 @@ if ($qtPanelSource -notlike "*Qt Inspect actions*") {
 if ($qtPanelSource -notlike "*qt_inspector_action_ids*") {
     throw "Qt profile UI state replay inspector action ids are missing"
 }
+if ($qtPanelSource -notlike "*qt_inspector_action_groups*") {
+    throw "Qt profile UI state replay inspector action groups are missing"
+}
 
 $rendererSource = Get-Content -Raw -Encoding UTF8 taichi_global_bathymetry.py
 if ($rendererSource -notlike "*last_layer_pick_screen*") {
@@ -1768,6 +1780,9 @@ if ($rendererSource -notlike "*Qt Inspect actions*") {
 }
 if ($rendererSource -notlike "*qt_inspector_action_ids*") {
     throw "Renderer capability profile UI state replay inspector ids missing"
+}
+if ($rendererSource -notlike "*research_interaction*") {
+    throw "Renderer capability profile UI state replay inspector group missing"
 }
 
 $scripts = Get-ChildItem scripts -Filter *.ps1
@@ -1863,6 +1878,9 @@ if ($launchPacketSource -notmatch 'Qt Inspect actions') {
 if ($launchPacketSource -notmatch 'qt_inspector_action_ids') {
     throw "Launch packet profile UI state replay inspector ids missing"
 }
+if ($launchPacketSource -notmatch 'qt_inspector_action_groups') {
+    throw "Launch packet profile UI state replay inspector groups missing"
+}
 if ($handoffInspectorSource -notmatch 'profile_ui_state_replay') {
     throw "Handoff inspection profile UI state replay output is missing"
 }
@@ -1905,6 +1923,9 @@ if ($profileSchemaDoc -notmatch 'Qt Inspect actions') {
 }
 if ($profileSchemaDoc -notmatch 'qt_inspector_action_ids') {
     throw "Profile schema docs missing profile UI state replay inspector action ids"
+}
+if ($profileSchemaDoc -notmatch 'qt_inspector_action_groups') {
+    throw "Profile schema docs missing profile UI state replay inspector action groups"
 }
 
 $cloneQuickstartDoc = Get-Content -LiteralPath (Join-Path $BoundaryIdentityRoot "docs\QUICKSTART_CLONE.zh-TW.md") -Raw -Encoding UTF8

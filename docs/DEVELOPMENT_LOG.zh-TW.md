@@ -230,6 +230,20 @@ Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
 
+## 2026-05-30 - Profile replay inspector groups
+
+Scope:
+- Added `qt_inspector_action_groups` and `qt_inspector_group_count` to `profile_ui_state_replay` in Qt, no-GUI launch packet and renderer capability discovery.
+- Groups now classify Inspect actions as `replay_contracts`, `renderer_ports` and `research_interaction`.
+- Smoke verifies group fields through launch packet, renderer capabilities, source contracts and profile schema docs.
+
+Decision:
+- Inspect actions should be grouped as scientific/operator affordances, not only listed as flat button IDs.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+
 ## 2026-05-30 - Profile replay inspector action IDs
 
 Scope:

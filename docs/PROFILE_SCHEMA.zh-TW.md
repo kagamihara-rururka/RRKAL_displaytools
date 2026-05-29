@@ -315,6 +315,8 @@ Timeline playback plan 目前把 style、layer visibility/blend、pins、boundar
 | `qt_inspector_action_ids` | array | Qt `Inspect:` action IDs，例如 `profile_replay`、`clone_ready`、`cursor_geo`、`boundary_json`。 |
 | `qt_inspector_action_labels` | array | Qt `Inspect:` action 顯示文字，例如 `Inspect: Profile replay`、`Inspect: Boundary JSON`。 |
 | `qt_inspector_action_count` | integer | Qt `Inspect:` action 數量。 |
+| `qt_inspector_action_groups` | array | Qt `Inspect:` action 分組，目前包含 `replay_contracts`、`renderer_ports`、`research_interaction`。 |
+| `qt_inspector_group_count` | integer | Qt `Inspect:` action 分組數量。 |
 | `qt_surface` | string | Qt 顯示入口，目前為 Layers dock `profileUiStateReplay` label。 |
 | `launch_packet_fields` | array | No-GUI launch packet 中與 replay 覆蓋相關的欄位。 |
 | `renderer_capability_field` | string | Renderer capability discovery 中的欄位名稱。 |

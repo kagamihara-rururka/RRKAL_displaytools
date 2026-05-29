@@ -434,3 +434,8 @@
 
 - `profile_ui_state_replay` now exposes `qt_inspector_action_ids`, `qt_inspector_action_labels` and `qt_inspector_action_count`.
 - Smoke verifies Boundary, Cursor and Clone inspector entries through launch packets, renderer capabilities and schema docs.
+
+### 2026-05-30 Profile replay inspector groups
+
+- `profile_ui_state_replay` now exposes `qt_inspector_action_groups` and `qt_inspector_group_count`.
+- Inspector groups separate replay/contracts, renderer ports and research interaction checks for Qt-first onboarding and capability discovery.
