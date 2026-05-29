@@ -230,6 +230,20 @@ Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
 
+## 2026-05-30 - Qt Boundary JSON action
+
+Scope:
+- Added a `Boundary JSON` action button to the Qt Actions panel.
+- The action displays Boundary highlight state, Boundary emphasis control state, identity warning text, renderer ack payload and recent ack history.
+- Smoke verifies the button, handler and researcher-facing tooltip.
+
+Decision:
+- Boundary/EEZ emphasis and non-authoritative identity warnings should be inspectable from Qt without opening multiple panels or raw state files.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+
 ## 2026-05-30 - Qt Cursor geodesy JSON action
 
 Scope:

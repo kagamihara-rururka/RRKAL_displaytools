@@ -2585,6 +2585,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         clone_ready_button = QtWidgets.QPushButton("Clone ready")
         pin_pick_button = QtWidgets.QPushButton("Pin pick")
         cursor_geo_button = QtWidgets.QPushButton("Cursor geo")
+        boundary_state_button = QtWidgets.QPushButton("Boundary JSON")
         capabilities_button = QtWidgets.QPushButton("Renderer 能力")
         closed_loop_button = QtWidgets.QPushButton("閉環狀態")
         layer_manifest_button = QtWidgets.QPushButton("圖層 manifest")
@@ -2604,6 +2605,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (clone_ready_button, "Inspect cross-machine clone readiness JSON."),
             (pin_pick_button, "Inspect renderer Pin hover/click pick bridge JSON."),
             (cursor_geo_button, "Inspect mouse cursor latitude/longitude geodesy bridge JSON."),
+            (boundary_state_button, "Inspect Boundary emphasis, identity warning and renderer ack JSON."),
         ):
             button.setToolTip(tooltip)
             button.setAccessibleDescription(tooltip)
@@ -2623,6 +2625,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         clone_ready_button.clicked.connect(self.show_cross_machine_clone_readiness)
         pin_pick_button.clicked.connect(self.show_pin_pick_state)
         cursor_geo_button.clicked.connect(self.show_cursor_geodesy_state)
+        boundary_state_button.clicked.connect(self.show_boundary_state)
         capabilities_button.clicked.connect(self.show_renderer_capabilities)
         closed_loop_button.clicked.connect(self.show_closed_loop_status)
         layer_manifest_button.clicked.connect(self.show_layer_manifest)
@@ -2650,6 +2653,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             clone_ready_button,
             pin_pick_button,
             cursor_geo_button,
+            boundary_state_button,
             capabilities_button,
             closed_loop_button,
             layer_manifest_button,
@@ -7014,6 +7018,23 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             )
         )
         self.status.setText("已顯示 cursor geodesy bridge JSON")
+
+    def show_boundary_state(self) -> None:
+        self.command_text.setPlainText(
+            json.dumps(
+                {
+                    "boundary_highlight": self.collect_boundary_highlight_state(),
+                    "boundary_emphasis_control": self.collect_boundary_emphasis_control(),
+                    "boundary_identity_warning": self.boundary_identity_warning_text(),
+                    "boundary_highlight_ack_file": str(BOUNDARY_HIGHLIGHT_ACK_PATH),
+                    "boundary_highlight_ack": self.boundary_highlight_ack_payload,
+                    "boundary_highlight_ack_history": self.boundary_highlight_ack_history[:5],
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        self.status.setText("已顯示 boundary emphasis / identity JSON")
 
     def show_pin_pick_state(self) -> None:
         try:

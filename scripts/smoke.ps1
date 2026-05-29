@@ -1704,6 +1704,15 @@ if ($qtPanelSource -notlike "*show_cursor_geodesy_state*") {
 if ($qtPanelSource -notlike "*Inspect mouse cursor latitude/longitude geodesy bridge JSON*") {
     throw "Qt Cursor geo action tooltip is missing"
 }
+if ($qtPanelSource -notlike "*Boundary JSON*") {
+    throw "Qt Boundary JSON action button is missing"
+}
+if ($qtPanelSource -notlike "*show_boundary_state*") {
+    throw "Qt Boundary JSON action is missing"
+}
+if ($qtPanelSource -notlike "*Inspect Boundary emphasis, identity warning and renderer ack JSON*") {
+    throw "Qt Boundary JSON action tooltip is missing"
+}
 if ($qtPanelSource -notlike "*saved_state_groups*") {
     throw "Qt profile UI state replay saved groups are missing"
 }

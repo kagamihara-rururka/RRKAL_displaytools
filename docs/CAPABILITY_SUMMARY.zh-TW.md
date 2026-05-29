@@ -409,3 +409,8 @@
 
 - Qt Actions now includes `Cursor geo`, which displays `cursor_geodesy_readout`, renderer cursor state/ack file paths and the latest state/ack payloads.
 - This gives researchers a direct JSON inspection path for mouse-position latitude/longitude inference and renderer raycast feedback.
+
+### 2026-05-30 Qt Boundary JSON action
+
+- Qt Actions now includes `Boundary JSON`, which displays Boundary highlight, Boundary emphasis controls, identity warning text, renderer ack payload and recent ack history.
+- This gives researchers a direct inspection path for country/territorial sea/EEZ emphasis state and the current non-authoritative identity warning.
