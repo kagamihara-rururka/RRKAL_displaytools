@@ -188,6 +188,21 @@ if ([int]$launchPacket.layer_operator_groups.group_count -lt 5) {
 if ([int]$launchPacket.layer_operator_groups.complete_group_count -lt 5) {
     throw "Launch packet layer_operator_groups incomplete"
 }
+if ($launchPacket.layer_selection_tool.schema -ne "rrkal_displaytools.layer_selection_tool.v1") {
+    throw "Launch packet layer_selection_tool schema missing or invalid"
+}
+if ($launchPacket.layer_selection_tool.tool_mode -ne "select_layer") {
+    throw "Launch packet layer_selection_tool mode mismatch"
+}
+if ($launchPacket.layer_selection_tool.renderer_pick_bridge.pick_state_file -ne "state/renderer_layer_pick_state.json") {
+    throw "Launch packet layer_selection_tool pick state file mismatch"
+}
+if ([int]$launchPacket.layer_selection_tool.selectable_layer_count -le 0) {
+    throw "Launch packet layer_selection_tool selectable layer count missing"
+}
+if ($launchPacket.layer_selection_tool.brush_mask_scope -ne "excluded") {
+    throw "Launch packet layer_selection_tool must exclude brush/mask scope"
+}
 if ($launchPacket.layer_research_workflow.schema -ne "rrkal_displaytools.layer_research_workflow.v1") {
     throw "Launch packet layer_research_workflow schema missing or invalid"
 }
@@ -703,6 +718,18 @@ if ($capabilities.layer_operator_groups.schema -ne "rrkal_displaytools.layer_ope
 if ([int]$capabilities.layer_operator_groups.complete_group_count -lt 5) {
     throw "Renderer layer_operator_groups incomplete"
 }
+if ($capabilities.layer_selection_tool.schema -ne "rrkal_displaytools.layer_selection_tool.v1") {
+    throw "Renderer layer_selection_tool schema missing or invalid"
+}
+if ($capabilities.layer_selection_tool.renderer_pick_bridge.live_control -ne "selected_layer_pick") {
+    throw "Renderer layer_selection_tool live control mismatch"
+}
+if ($capabilities.layer_selection_tool.supported_renderer_pick_scopes -notcontains "boundary_line") {
+    throw "Renderer layer_selection_tool boundary pick scope missing"
+}
+if ($capabilities.layer_selection_tool.brush_mask_scope -ne "excluded") {
+    throw "Renderer layer_selection_tool must exclude brush/mask scope"
+}
 if ($capabilities.layer_research_workflow.schema -ne "rrkal_displaytools.layer_research_workflow.v1") {
     throw "Renderer layer_research_workflow schema missing or invalid"
 }
@@ -1018,8 +1045,23 @@ if ($handoff.layer_operator_groups.renderer_capabilities_schema -ne "rrkal_displ
 if ([int]$handoff.layer_operator_groups.complete_group_count -lt 5) {
     throw "Handoff inspection layer_operator_groups incomplete"
 }
+if ($handoff.launch_packet_contracts.layer_selection_tool -ne "rrkal_displaytools.layer_selection_tool.v1") {
+    throw "Handoff inspection layer_selection_tool launch contract missing or invalid"
+}
 if ($handoff.launch_packet_contracts.layer_research_workflow -ne "rrkal_displaytools.layer_research_workflow.v1") {
     throw "Handoff inspection layer_research_workflow launch contract missing or invalid"
+}
+if ($handoff.layer_selection_tool.launch_packet_schema -ne "rrkal_displaytools.layer_selection_tool.v1") {
+    throw "Handoff inspection layer_selection_tool launch schema missing or invalid"
+}
+if ($handoff.layer_selection_tool.renderer_capabilities_schema -ne "rrkal_displaytools.layer_selection_tool.v1") {
+    throw "Handoff inspection layer_selection_tool renderer schema missing or invalid"
+}
+if ($handoff.layer_selection_tool.pick_state_file -ne "state/renderer_layer_pick_state.json") {
+    throw "Handoff inspection layer_selection_tool pick state file mismatch"
+}
+if ($handoff.layer_selection_tool.brush_mask_scope -ne "excluded") {
+    throw "Handoff inspection layer_selection_tool must exclude brush/mask scope"
 }
 if ($handoff.layer_research_workflow.launch_packet_schema -ne "rrkal_displaytools.layer_research_workflow.v1") {
     throw "Handoff inspection layer_research_workflow launch schema missing or invalid"

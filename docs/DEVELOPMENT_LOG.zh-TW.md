@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-30 - Layer selection tool contract
+
+- Added `rrkal_displaytools.layer_selection_tool.v1` so Qt row selection, filtered-layer selection, reveal-selected-row and renderer pick-state inspection have one smoke-gated selection-tool contract.
+- Launch packets, renderer capabilities and handoff inspection now verify the pick-state file, selectable layer count, renderer live-control bridge and explicit brush/mask exclusion.
+- Smoke: PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Boundary emphasis renderer bridge
 
 - Mapped `Boundary emphasis controls...` Apply state into the existing `rrkal_displaytools.boundary_highlight_mask.v1` renderer bridge.

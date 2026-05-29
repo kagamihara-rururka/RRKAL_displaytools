@@ -39,6 +39,7 @@ $summary = [ordered]@{
         layer_capability_matrix = $launchPacket.layer_capability_matrix.schema
         layer_operator_shortcuts = $launchPacket.layer_operator_shortcuts.schema
         layer_operator_groups = $launchPacket.layer_operator_groups.schema
+        layer_selection_tool = $launchPacket.layer_selection_tool.schema
         layer_research_workflow = $launchPacket.layer_research_workflow.schema
         boundary_emphasis_control = $launchPacket.boundary_emphasis_control.schema
         cursor_geodesy_readout = $launchPacket.cursor_geodesy_readout.schema
@@ -73,6 +74,15 @@ $summary = [ordered]@{
         group_count = $launchPacket.layer_operator_groups.group_count
         complete_group_count = $launchPacket.layer_operator_groups.complete_group_count
         group_ids = @($launchPacket.layer_operator_groups.groups | ForEach-Object { $_.id })
+    }
+    layer_selection_tool = @{
+        launch_packet_schema = $launchPacket.layer_selection_tool.schema
+        renderer_capabilities_schema = $capabilities.layer_selection_tool.schema
+        status = $launchPacket.layer_selection_tool.status
+        tool_mode = $launchPacket.layer_selection_tool.tool_mode
+        pick_state_file = $launchPacket.layer_selection_tool.renderer_pick_bridge.pick_state_file
+        selectable_layer_count = $launchPacket.layer_selection_tool.selectable_layer_count
+        brush_mask_scope = $launchPacket.layer_selection_tool.brush_mask_scope
     }
     layer_research_workflow = @{
         launch_packet_schema = $launchPacket.layer_research_workflow.schema

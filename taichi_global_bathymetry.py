@@ -18601,6 +18601,56 @@ def layer_operator_groups_packet(
     }
 
 
+def layer_selection_tool_packet(source: str, selected_layer: str | None = None) -> dict[str, object]:
+    selectable_layer_keys = sorted(
+        globals().get(
+            "LAYER_PICK_LIVE_KEYS",
+            {"lake_layer", "river_layer", "border_layer", "traffic_layer", "pin_layer"},
+        )
+    )
+    return {
+        "schema": "rrkal_displaytools.layer_selection_tool.v1",
+        "source": source,
+        "status": "ready",
+        "ui_direction": "qt_first_scientific_layer_selection",
+        "tool_mode": "select_layer",
+        "selection_model": "single_active_layer_with_renderer_pick_context",
+        "selected_layer": selected_layer,
+        "qt_surfaces": [
+            "Layers dock row selection",
+            "Select first filtered layer",
+            "Reveal selected layer row",
+            "Layer pick JSON inspector",
+        ],
+        "selection_sources": [
+            "layer_row_click",
+            "select_first_filtered_layer",
+            "reveal_selected_layer_row",
+            "renderer_layer_pick_state",
+        ],
+        "renderer_pick_bridge": {
+            "schema": "rrkal_displaytools.renderer_layer_pick_state.v1",
+            "pick_state_file": "state/renderer_layer_pick_state.json",
+            "requires_selected_layer": True,
+            "live_control": "selected_layer_pick",
+        },
+        "selectable_layer_count": len(selectable_layer_keys),
+        "selectable_layer_keys": selectable_layer_keys,
+        "supported_renderer_pick_scopes": ["pin", "traffic_point", "boundary_line", "hydrology_line"],
+        "feature_identity_fields": ["feature_label", "source_properties", "name", "sovereignty", "iso_a3", "mrgid"],
+        "brush_mask_scope": "excluded",
+        "fallback_behavior": "If renderer pick state is unavailable, Qt row selection remains the authoritative active layer.",
+        "launch_packet_fields": [
+            "layer_selection_tool",
+            "layer_capability_matrix",
+            "layer_operator_shortcuts",
+            "layer_research_workflow",
+        ],
+        "renderer_capability_field": "layer_selection_tool",
+        "copyable_provenance": True,
+        "boundary": "Selection tool state bridges Qt active-layer UX and renderer pick context only; brush/mask editing and RRKAL data governance stay out of scope.",
+    }
+
 def layer_research_workflow_packet(
     layer_filter: dict[str, object] | None,
     layer_group_view: dict[str, object] | None,
@@ -18966,6 +19016,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
         },
         "layer_operator_shortcuts": layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"),
         "layer_operator_groups": layer_operator_groups_packet(layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"), "taichi_global_bathymetry.renderer_capabilities"),
+        "layer_selection_tool": layer_selection_tool_packet("taichi_global_bathymetry.renderer_capabilities"),
         "layer_research_workflow": layer_research_workflow_packet(None, None, layer_operator_groups_packet(layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"), "taichi_global_bathymetry.renderer_capabilities"), layer_capability_matrix_packet(), "taichi_global_bathymetry.renderer_capabilities"),
         "boundary_emphasis_control": boundary_emphasis_control_packet(None, None, "taichi_global_bathymetry.renderer_capabilities"),
         "cursor_geodesy_readout": cursor_geodesy_readout_packet("taichi_global_bathymetry.renderer_capabilities"),
