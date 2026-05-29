@@ -155,6 +155,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.pin_pick_state_label: QtWidgets.QLabel | None = None
         self.pin_pick_state_mtime_ns: int | None = PIN_PICK_STATE_PATH.stat().st_mtime_ns if PIN_PICK_STATE_PATH.exists() else None
         self.pin_pick_state_last_event: str | None = None
+        self.pin_pick_history: list[str] = []
+        self.pin_pick_history_signature: str | None = None
         self.selected_pin_id: str | None = None
         self.research_pins: list[dict[str, object]] = []
         self.canvas_preview_label: QtWidgets.QLabel | None = None
@@ -692,6 +694,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         ):
             self.history_list.addItem(item)
         for item in self.layer_runtime_history:
+            self.history_list.insertItem(0, item)
+        for item in self.pin_pick_history:
             self.history_list.insertItem(0, item)
         history_dock.setWidget(self.history_list)
         self.docks["history"] = history_dock
@@ -1593,6 +1597,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 f"visible={visible_count}, frame={frame_index}, updated={updated_at}"
             )
         self.pin_pick_state_last_event = event
+        self.append_pin_pick_history(payload)
+        self.refresh_research_provenance()
         if event == "selected":
             if isinstance(selected_pin_id, str) and self.pin_id_exists(selected_pin_id):
                 self.selected_pin_id = selected_pin_id
@@ -1610,6 +1616,41 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 self.refresh_pin_list()
                 self.refresh_command_preview()
                 self.status.setText("Renderer 已清除 Pin 選取")
+
+    def append_pin_pick_history(self, payload: dict[str, object]) -> None:
+        event = str(payload.get("event", "unknown"))
+        selected_pin_id = str(payload.get("selected_pin_id") or "-")
+        hover_pin = payload.get("hover_pin")
+        event_pin = payload.get("event_pin")
+        hover_pin_id = str(hover_pin.get("id")) if isinstance(hover_pin, dict) and hover_pin.get("id") is not None else "-"
+        event_pin_id = str(event_pin.get("id")) if isinstance(event_pin, dict) and event_pin.get("id") is not None else "-"
+        signature = json.dumps(
+            {
+                "event": event,
+                "selected": selected_pin_id,
+                "hover": hover_pin_id,
+                "event_pin": event_pin_id,
+                "frame": payload.get("frame_index"),
+            },
+            ensure_ascii=False,
+            sort_keys=True,
+        )
+        if signature == self.pin_pick_history_signature:
+            return
+        self.pin_pick_history_signature = signature
+        updated_at = str(payload.get("updated_at_utc", "-"))
+        visible_count = payload.get("pin_visible_count", "-")
+        entry = (
+            f"⌖ Pin pick {updated_at}: event={event}, selected={selected_pin_id}, "
+            f"hover={hover_pin_id}, event_pin={event_pin_id}, visible={visible_count}"
+        )
+        self.pin_pick_history.insert(0, entry)
+        del self.pin_pick_history[10:]
+        if self.history_list is None:
+            return
+        self.history_list.insertItem(0, entry)
+        while self.history_list.count() > 18:
+            self.history_list.takeItem(self.history_list.count() - 1)
 
     def refresh_canvas_preview(self) -> None:
         if self.canvas_preview_label is None or self.canvas_meta_label is None:
@@ -1696,6 +1737,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "pins": self.collect_research_pins(),
             "pin_pick_state_file": str(PIN_PICK_STATE_PATH),
             "pin_pick_state_last_event": self.pin_pick_state_last_event,
+            "pin_pick_history": self.pin_pick_history[:5],
             "layer_runtime_state_file": str(LAYER_RUNTIME_STATE_PATH),
             "layer_runtime_state_last_write_utc": self.layer_runtime_state_last_write_utc,
             "layer_runtime_state_write_error": self.layer_runtime_state_write_error,

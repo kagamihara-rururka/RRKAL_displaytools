@@ -999,3 +999,18 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Pin pick history
+
+Scope:
+- Added short Pin pick history entries to the existing History panel.
+- Entries are recorded from renderer Pin pick bridge events and deduplicated by event, selected Pin, hover Pin, event Pin, and frame.
+- Entries include event type, selected Pin, hover Pin, event Pin, visible Pin count, and update time.
+- Research provenance now includes recent Pin pick history entries.
+
+Positioning:
+- This gives researchers an audit trail for recent renderer-side Pin interactions without opening `state/renderer_pin_pick_state.json` manually.
+- The next Pin work is stronger diagnostics/ack and deeper globe-mask/depth-buffer occlusion refinement.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
