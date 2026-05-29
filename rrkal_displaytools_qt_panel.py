@@ -265,6 +265,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_pick_state_payload: dict[str, object] | None = None
         self.history_list: QtWidgets.QListWidget | None = None
         self.timeline_state_label: QtWidgets.QLabel | None = None
+        self.timeline_keyframe_list: QtWidgets.QListWidget | None = None
+        self.timeline_keyframes: list[dict[str, object]] = []
         self.selected_layer_key: str | None = None
         self.boundary_highlight_state: dict[str, object] = default_boundary_highlight_state()
         self.boundary_highlight_label: QtWidgets.QLabel | None = None
@@ -357,6 +359,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_last_state_signature = self.layer_undo_signature(self.layer_last_state_snapshot)
         self.layer_undo_tracking_enabled = True
         self.refresh_layer_undo_label()
+        self.refresh_timeline_state_label()
 
     def _build_ui(self) -> None:
         central = QtWidgets.QWidget(self)
@@ -956,9 +959,17 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         )
         self.timeline_state_label.setWordWrap(True)
         timeline_layout.addWidget(self.timeline_state_label)
-        add_keyframe = QtWidgets.QPushButton("🚧 Add keyframe")
-        add_keyframe.setEnabled(False)
-        timeline_layout.addWidget(add_keyframe)
+        self.timeline_keyframe_list = QtWidgets.QListWidget()
+        self.timeline_keyframe_list.setMinimumHeight(90)
+        timeline_layout.addWidget(self.timeline_keyframe_list)
+        timeline_actions = QtWidgets.QHBoxLayout()
+        add_keyframe = QtWidgets.QPushButton("Add keyframe")
+        add_keyframe.clicked.connect(self.add_timeline_keyframe)
+        clear_keyframes = QtWidgets.QPushButton("Clear")
+        clear_keyframes.clicked.connect(self.clear_timeline_keyframes)
+        timeline_actions.addWidget(add_keyframe)
+        timeline_actions.addWidget(clear_keyframes)
+        timeline_layout.addLayout(timeline_actions)
         timeline_dock.setWidget(timeline)
         self.docks["timeline"] = timeline_dock
         self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, timeline_dock)
@@ -2151,21 +2162,90 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         }
 
     def collect_timeline_state(self) -> dict[str, object]:
+        keyframes = [
+            {
+                "id": str(keyframe.get("id", "")),
+                "label": str(keyframe.get("label", "")),
+                "style_profile": str(keyframe.get("style_profile", "")),
+                "selected_layer": keyframe.get("selected_layer"),
+            }
+            for keyframe in self.timeline_keyframes[:12]
+        ]
         return {
             "schema": "rrkal_displaytools.timeline_state.v1",
-            "status": "construction",
-            "implemented": ["visible_qt_timeline_dock", "launch_packet_status_contract"],
+            "status": "ui_keyframe_storage",
+            "implemented": ["visible_qt_timeline_dock", "ui_keyframe_storage", "launch_packet_status_contract"],
             "pending": [
-                "keyframe_storage",
                 "playback_controls",
                 "animation_export",
                 "ocean_material_keyframes",
                 "camera_keyframes",
             ],
             "playhead": 0,
-            "keyframe_count": 0,
-            "boundary": "UIUX placeholder/status contract only; no renderer animation playback is claimed yet.",
+            "keyframe_count": len(self.timeline_keyframes),
+            "keyframes": keyframes,
+            "boundary": "UIUX keyframe storage only; no renderer animation playback or export is claimed yet.",
         }
+
+    def collect_timeline_keyframe(self) -> dict[str, object]:
+        index = len(self.timeline_keyframes) + 1
+        timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        return {
+            "schema": "rrkal_displaytools.timeline_keyframe.v1",
+            "id": f"kf_{index:03d}",
+            "label": f"Keyframe {index}",
+            "created_at_utc": timestamp,
+            "style_profile": self.style_combo.currentText(),
+            "renderer": {
+                "style_profile": self.style_combo.currentText(),
+                "ui_backend": self.ui_combo.currentText(),
+                "topo_source": self.topo_combo.currentText(),
+                "data_mode": self.data_combo.currentText(),
+                "width": self.width_edit.text().strip(),
+                "height": self.height_edit.text().strip(),
+                "topo_step": self.topo_step_edit.text().strip(),
+            },
+            "ocean_material": {
+                "wave_strength": self.wave_edit.text().strip(),
+                "roughness": self.roughness_edit.text().strip(),
+                "foam": self.foam_edit.text().strip(),
+            },
+            "selected_layer": self.selected_layer_key,
+            "layer_stack_snapshot": self.collect_layer_undo_snapshot(),
+            "pins": self.collect_research_pins(),
+            "boundary_highlight": self.collect_boundary_highlight_state(),
+        }
+
+    def refresh_timeline_state_label(self) -> None:
+        if self.timeline_state_label is None:
+            return
+        self.timeline_state_label.setText(
+            f"Timeline status: {len(self.timeline_keyframes)} UI keyframes stored; "
+            "playback/export pending."
+        )
+
+    @QtCore.pyqtSlot()
+    def add_timeline_keyframe(self) -> None:
+        keyframe = self.collect_timeline_keyframe()
+        self.timeline_keyframes.append(keyframe)
+        if self.timeline_keyframe_list is not None:
+            self.timeline_keyframe_list.addItem(
+                f"{keyframe['id']} · {keyframe['style_profile']} · layer={keyframe['selected_layer'] or '-'}"
+            )
+        self.refresh_timeline_state_label()
+        self.refresh_research_provenance()
+        if self.history_list is not None:
+            self.history_list.insertItem(0, f"Timeline keyframe stored: {keyframe['id']}")
+        self.status.setText(f"已保存 Timeline keyframe：{keyframe['id']}")
+
+    @QtCore.pyqtSlot()
+    def clear_timeline_keyframes(self) -> None:
+        self.timeline_keyframes.clear()
+        if self.timeline_keyframe_list is not None:
+            self.timeline_keyframe_list.clear()
+        self.refresh_timeline_state_label()
+        self.refresh_research_provenance()
+        self.status.setText("已清除 Timeline UI keyframes")
 
     @QtCore.pyqtSlot()
     def undo_layer_stack_state(self) -> None:

@@ -1,5 +1,19 @@
 # Development Log
 
+## 2026-05-29 - Timeline UI keyframe storage
+
+Scope:
+- Timeline dock now stores UI-only keyframes.
+- Each keyframe captures style/topography/data mode, ocean material controls, selected layer, layer stack snapshot, Pins, and Boundary highlight state.
+- `timeline_state` now reports keyframe count and keyframe summaries.
+- Closed-loop status now marks UI-only keyframe storage as applied while playback/export remain pending.
+
+Positioning:
+- This makes Timeline useful for researcher-facing state capture without claiming renderer animation playback is complete.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Timeline handoff discovery
 
 Scope:

@@ -226,7 +226,7 @@ def session_journal_packet() -> dict[str, object]:
 def timeline_state_packet() -> dict[str, object]:
     return {
         "schema": "rrkal_displaytools.timeline_state.v1",
-        "status": "construction",
+        "status": "no_gui_export_no_runtime_keyframes",
         "implemented": ["launch_packet_status_contract"],
         "pending": [
             "visible_qt_timeline_dock",
@@ -238,6 +238,7 @@ def timeline_state_packet() -> dict[str, object]:
         ],
         "playhead": 0,
         "keyframe_count": 0,
+        "keyframes": [],
         "boundary": "UIUX placeholder/status contract only; no renderer animation playback is claimed yet.",
     }
 
