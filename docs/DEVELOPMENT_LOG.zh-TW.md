@@ -230,6 +230,20 @@ Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
 
+## 2026-05-30 - Qt Module seams JSON action
+
+Scope:
+- Added a `Module seams` action button to the Qt Actions panel.
+- The action renders `module_boundary_registry` in the command/JSON preview pane.
+- Closed-loop evidence now includes the Qt action, and smoke verifies the button plus `show_module_boundary_registry` handler.
+
+Decision:
+- Future module extraction boundaries should be visible from the primary Qt UI before code is split, while RRKAL-owned data discovery/import/cache governance remains outside displaytools.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+
 ## 2026-05-30 - Qt Style routes JSON action
 
 Scope:

@@ -384,3 +384,8 @@
 
 - Qt Actions now includes `Style routes`, which displays `style_renderer_entries` and `style_profile_renderer_routes` together in the JSON preview pane.
 - Parchment and tactical renderer routes are now inspectable from Qt in addition to launch packets, renderer capabilities and handoff inspection.
+
+### 2026-05-30 Qt Module seams JSON action
+
+- Qt Actions now includes `Module seams`, which displays the live `module_boundary_registry` payload in the JSON preview pane.
+- The registry keeps future extraction boundaries explicit: contracts, Qt UI, Taichi render core, ocean material, style profiles, overlays, RRKAL-owned data sources and diagnostics.

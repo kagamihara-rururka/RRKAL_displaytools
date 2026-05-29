@@ -1671,6 +1671,12 @@ if ($qtPanelSource -notlike "*show_style_renderer_routes*") {
 if ($qtPanelSource -notlike "*Style routes*") {
     throw "Qt Style routes action button is missing"
 }
+if ($qtPanelSource -notlike "*show_module_boundary_registry*") {
+    throw "Qt module boundary registry JSON action is missing"
+}
+if ($qtPanelSource -notlike "*Module seams*") {
+    throw "Qt Module seams action button is missing"
+}
 if ($qtPanelSource -notlike "*saved_state_groups*") {
     throw "Qt profile UI state replay saved groups are missing"
 }
