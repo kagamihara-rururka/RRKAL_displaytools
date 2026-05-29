@@ -133,6 +133,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.canvas_preview_label: QtWidgets.QLabel | None = None
         self.canvas_meta_label: QtWidgets.QLabel | None = None
         self.canvas_zoom_slider: QtWidgets.QSlider | None = None
+        self.cursor_latitude: float | None = None
+        self.cursor_longitude: float | None = None
         self.provenance_text: QtWidgets.QPlainTextEdit | None = None
         self.docks: dict[str, QtWidgets.QDockWidget] = {}
         self.template_paths: list[Path] = []
@@ -366,6 +368,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.canvas_preview_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.canvas_preview_label.setMinimumHeight(220)
         self.canvas_preview_label.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
+        self.canvas_preview_label.setMouseTracking(True)
+        self.canvas_preview_label.installEventFilter(self)
         command_layout.addWidget(self.canvas_preview_label)
         self.canvas_meta_label = QtWidgets.QLabel("Canvas state: -")
         self.canvas_meta_label.setObjectName("canvasMeta")
@@ -547,10 +551,13 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         pin_actions = QtWidgets.QHBoxLayout()
         add_pin_button = QtWidgets.QPushButton("加入 Pin")
         remove_pin_button = QtWidgets.QPushButton("移除選取 Pin")
+        use_cursor_button = QtWidgets.QPushButton("用游標填入 Pin")
         add_pin_button.clicked.connect(self.add_pin_marker)
         remove_pin_button.clicked.connect(self.remove_selected_pin_marker)
+        use_cursor_button.clicked.connect(self.fill_pin_from_cursor)
         pin_actions.addWidget(add_pin_button)
         pin_actions.addWidget(remove_pin_button)
+        pin_actions.addWidget(use_cursor_button)
         pin_form.addRow(pin_actions)
         self.pin_list = QtWidgets.QListWidget()
         self.pin_list.setMinimumHeight(110)
@@ -738,6 +745,18 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.foam_edit,
         ):
             edit.textChanged.connect(self.refresh_command_preview)
+
+    def eventFilter(self, watched: QtCore.QObject, event: QtCore.QEvent) -> bool:
+        if watched is self.canvas_preview_label and event.type() == QtCore.QEvent.Type.MouseMove:
+            position = event.position()
+            width = max(1, self.canvas_preview_label.width() if self.canvas_preview_label is not None else 1)
+            height = max(1, self.canvas_preview_label.height() if self.canvas_preview_label is not None else 1)
+            x_ratio = min(max(position.x() / width, 0.0), 1.0)
+            y_ratio = min(max(position.y() / height, 0.0), 1.0)
+            self.cursor_longitude = x_ratio * 360.0 - 180.0
+            self.cursor_latitude = 90.0 - y_ratio * 180.0
+            self.refresh_canvas_preview()
+        return super().eventFilter(watched, event)
 
     def build_command(self) -> list[str]:
         cmd = [
@@ -1088,6 +1107,18 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.refresh_canvas_preview()
         self.status.setText(f"已加入科研 Pin：{pin['label']}")
 
+    def fill_pin_from_cursor(self) -> None:
+        if self.cursor_latitude is None or self.cursor_longitude is None:
+            self.status.setText("尚未偵測到 Canvas 游標經緯度")
+            return
+        if self.pin_lat_edit is not None:
+            self.pin_lat_edit.setText(f"{self.cursor_latitude:.6f}")
+        if self.pin_lon_edit is not None:
+            self.pin_lon_edit.setText(f"{self.cursor_longitude:.6f}")
+        self.status.setText(
+            f"已用游標位置填入 Pin：lat={self.cursor_latitude:.6f}, lon={self.cursor_longitude:.6f}"
+        )
+
     def remove_selected_pin_marker(self) -> None:
         if self.pin_list is None:
             return
@@ -1125,6 +1156,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         visible = sum(1 for key, _label in LAYER_LABELS if key in self.checks and self.checks[key].isChecked())
         pin_count = len(self.research_pins)
         zoom = self.canvas_zoom_slider.value() if self.canvas_zoom_slider is not None else 100
+        cursor_text = (
+            f"lat={self.cursor_latitude:.4f}, lon={self.cursor_longitude:.4f}"
+            if self.cursor_latitude is not None and self.cursor_longitude is not None
+            else "move mouse over canvas"
+        )
         style = self.style_combo.currentText() if hasattr(self, "style_combo") else "-"
         topo = self.topo_combo.currentText() if hasattr(self, "topo_combo") else "-"
         data_mode = self.data_combo.currentText() if hasattr(self, "data_combo") else "-"
@@ -1133,11 +1169,13 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"Style: {style} | Topo: {topo} | Data: {data_mode}\n"
             f"Tool: {tool_label} -> Layer: {selected_label}\n"
             f"Visible layers: {visible}/{len(LAYER_LABELS)} | Pins: {pin_count} | Zoom: {zoom}%\n\n"
+            f"Cursor estimate: {cursor_text}\n\n"
             "🚧 UI preview only: renderer embed/sync pending"
         )
         self.canvas_meta_label.setText(
             f"Canvas state mirrors Qt UI only：active tool={self.active_tool}, "
-            f"target layer={self.selected_layer_key or '-'}, style={style}, visible_layers={visible}."
+            f"target layer={self.selected_layer_key or '-'}, style={style}, visible_layers={visible}, "
+            f"cursor={cursor_text}."
         )
         self.refresh_research_provenance()
 
@@ -1160,6 +1198,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             },
             "active_layer": self.selected_layer_key,
             "active_tool": self.active_tool,
+            "cursor_lat_lon_estimate": {
+                "latitude": self.cursor_latitude,
+                "longitude": self.cursor_longitude,
+                "method": "ui_equirectangular_canvas_estimate",
+            },
             "pins": self.collect_research_pins(),
             "visible_layers": visible_layers,
             "locked_layers": locked_layers,

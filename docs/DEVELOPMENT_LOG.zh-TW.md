@@ -696,3 +696,17 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Qt cursor latitude longitude estimate
+
+Scope:
+- Added mouse tracking to the central Canvas Preview.
+- Added UI-only equirectangular canvas mapping from cursor position to estimated latitude/longitude.
+- Added `用游標填入 Pin` to copy the current cursor estimate into Pin latitude/longitude fields.
+- Added the current cursor estimate to the research provenance summary.
+
+Positioning:
+- This gives researchers an immediate marker workflow while keeping the true renderer/globe hit-test as a later backend closure.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
