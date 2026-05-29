@@ -1,5 +1,16 @@
 ﻿# Development Log
 
+## 2026-05-29 - Qt profile load validation
+
+Scope:
+- Added profile payload validation inside `rrkal_displaytools_qt_panel.py` before applying loaded profiles/templates.
+- The panel now reports missing schema, renderer, material, layer keys, and non-boolean layer values instead of silently applying partial configuration.
+
+Positioning:
+- This protects operator UI state and keeps Qt profile behavior aligned with the smoke validator.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 ## 2026-05-29 - Smoke helper hardening
 
 Scope:
@@ -356,6 +367,7 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 
 
 
