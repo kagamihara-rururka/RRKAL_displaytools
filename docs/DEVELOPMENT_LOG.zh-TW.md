@@ -1,5 +1,20 @@
 ﻿# Development Log
 
+## 2026-05-29 - Closed-loop showcase preset
+
+Scope:
+- Added `--demo-closed-loop` to `taichi_global_bathymetry.py`.
+- The preset keeps the demo bounded: synthetic topography, static data mode, hydrology LOD path enabled, lake/river/border layers on, ocean material controls on, terrain contours/grid/stars/scale bar on.
+- Added an optional `--write-demo-packet` output for a machine-readable renderer showcase packet.
+- Updated GTD and handoff docs for the one-command showcase path.
+
+Positioning:
+- This is a displaytools renderer loop only.
+- It does not perform RRKAL dataset discovery, download, import, install registry, or cache governance.
+
+Validation:
+- Not run; user requested progress and display, but no test/validation run was requested.
+
 ## 2026-05-29 - RRKAL-aligned documentation governance
 
 Scope:

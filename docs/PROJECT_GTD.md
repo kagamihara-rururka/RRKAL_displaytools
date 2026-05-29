@@ -7,10 +7,10 @@ Last updated: 2026-05-29
 | Area | Status | Current progress | Next step |
 | --- | --- | --- | --- |
 | Product positioning | MVP | Repo is positioned as RRKAL's visualization/display layer, not a duplicate data launcher. `docs/PRODUCT_POSITIONING.zh-TW.md` records the launcher-vs-renderer boundary. | Keep future code changes aligned with RRKAL-owned data governance and displaytools-owned renderer contracts. |
-| Taichi globe prototype | MVP | `taichi_global_bathymetry.py` is imported as the current monolithic source of truth for the globe/bathymetry prototype. | Continue small, reversible slices inside the repo copy instead of the old scratch path. |
-| Hydrology and LOD hook | In progress | Hydrology readiness, layer diagnostics, LOD invalidation and layer-count contracts are represented in the prototype. | Converge water/hydrology layers into stable renderer-facing contract names. |
-| Ocean material and sea-state port | Planned | Ocean material controls and sea-condition diagnostics exist as contract-oriented scaffolding. | Add Taichi material control boundary without coupling it to RRKAL download logic. |
-| Style renderer entries | Planned | Scientific/tactical/parchment style concepts are represented by diagnostics. | Create explicit renderer entry points for style profiles. |
+| Taichi globe prototype | MVP | `taichi_global_bathymetry.py` is imported as the current monolithic source of truth for the globe/bathymetry prototype. A bounded `--demo-closed-loop` preset now gives the repo a one-command showcase path. | Use the demo path for near-term visual review, then continue small reversible renderer slices inside the repo copy. |
+| Hydrology and LOD hook | In progress | Hydrology readiness, layer diagnostics, LOD invalidation and layer-count contracts are represented in the prototype. The demo preset forces the current lake/river/border/hydrology LOD path on for review. | Converge water/hydrology layers into stable renderer-facing contract names. |
+| Ocean material and sea-state port | In progress | Ocean material controls and sea-condition diagnostics exist as contract-oriented scaffolding. The demo preset binds manual sea-state material controls without RRKAL download coupling. | Add a clearer Taichi material control boundary after visual review. |
+| Style renderer entries | In progress | Scientific/tactical/parchment style concepts are represented by diagnostics, and `--style-profile` is part of the demo renderer entry. | Create explicit renderer entry points for style profiles. |
 | Module boundaries | Planned | Monolith contains diagnostics for extraction readiness and seam matrices. | Mark modules before extraction: data contracts, renderer core, style profiles, ocean material, diagnostics, cache/LOD. |
 
 ## Working rules
@@ -34,3 +34,4 @@ Last updated: 2026-05-29
 - 2026-05-29: Created and pushed the private GitHub repo `kagamihara-rururka/RRKAL_displaytools`.
 - 2026-05-29: Imported the current Taichi globe prototype and minimal governance docs.
 - 2026-05-29: Added RRKAL-aligned documentation governance skeleton and product positioning.
+- 2026-05-29: Added `--demo-closed-loop` as the first bounded showcase path for the existing renderer stack.

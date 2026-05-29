@@ -34,6 +34,8 @@
 - `taichi_global_bathymetry.py` is still a monolithic prototype.
 - Module extraction is planned but not physically started in this repo.
 - Future development should happen in the repo copy, not the old `C:\Users\lyn59\scratch` copy, unless the user explicitly asks for a scratch sync.
+- Current showcase entry: `py -3 taichi_global_bathymetry.py --demo-closed-loop --style-profile tactical`.
+- Optional packet output: add `--write-demo-packet state\showcase\closed_loop_demo.json`; generated `state/` artifacts remain local-only.
 
 ## Known constraints
 

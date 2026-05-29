@@ -1,4 +1,4 @@
-import argparse
+﻿import argparse
 import datetime
 import gzip
 import io
@@ -14158,6 +14158,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--once", action=bool_action, default=False)
     parser.add_argument("--output", default=None)
     parser.add_argument("--fps-log", default=str(CACHE_DIR / "fps_log.jsonl"))
+    parser.add_argument("--demo-closed-loop", action=bool_action, default=parse_bool(os.environ.get("DEMO_CLOSED_LOOP"), False))
+    parser.add_argument("--write-demo-packet", default=os.environ.get("WRITE_DEMO_PACKET"))
 
     parser.add_argument("--topo-step", type=int, default=int(os.environ.get("TOPO_STEP", "16")))
     parser.add_argument("--topo-source", choices=["gebco", "synthetic"], default=os.environ.get("TOPO_SOURCE", "gebco"))
@@ -14303,9 +14305,82 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+
+def apply_closed_loop_demo_defaults(args: argparse.Namespace) -> dict[str, object]:
+    """Apply a bounded showcase preset without taking over RRKAL data governance."""
+    if args.style_profile not in STYLE_PROFILE_REGISTRY:
+        args.style_profile = "scientific"
+    args.topo_source = "synthetic"
+    args.topo_step = max(int(args.topo_step), 48)
+    args.data_mode = "static"
+    args.hydrology_source_mode = "lod"
+    args.lake_layer = True
+    args.river_layer = True
+    args.border_layer = True
+    args.ocean_material = True
+    args.ocean_condition_source = "manual"
+    args.ocean_wave_strength = max(float(args.ocean_wave_strength), 0.28)
+    args.ocean_roughness = max(float(args.ocean_roughness), 0.32)
+    args.ocean_foam = max(float(args.ocean_foam), 0.16)
+    args.ocean_responsive = True
+    args.terrain_contours = True
+    args.scale_bar = True
+    args.show_grid = True
+    args.show_stars = True
+    packet = {
+        "schema": "rrkal_displaytools.closed_loop_demo.v1",
+        "mode": "demo_closed_loop",
+        "rrkal_boundary": {
+            "launcher_owns": [
+                "dataset discovery",
+                "download/import/install registry",
+                "manifest and cache asset governance",
+            ],
+            "displaytools_owns": [
+                "renderer consumption contract",
+                "Taichi globe visualization",
+                "style/material/LOD display controls",
+            ],
+        },
+        "renderer_entry": {
+            "ui": args.ui,
+            "projection": args.map_projection,
+            "style_profile": args.style_profile,
+            "topography_source": args.topo_source,
+            "topography_step": args.topo_step,
+        },
+        "closed_loop_layers": {
+            "hydrology_source_mode": args.hydrology_source_mode,
+            "lake_layer": bool(args.lake_layer),
+            "river_layer": bool(args.river_layer),
+            "border_layer": bool(args.border_layer),
+            "ocean_material": bool(args.ocean_material),
+            "terrain_contours": bool(args.terrain_contours),
+            "scale_bar": bool(args.scale_bar),
+            "grid": bool(args.show_grid),
+            "stars": bool(args.show_stars),
+        },
+        "ocean_material": {
+            "condition_source": args.ocean_condition_source,
+            "wave_strength": float(args.ocean_wave_strength),
+            "roughness": float(args.ocean_roughness),
+            "foam": float(args.ocean_foam),
+            "responsive": bool(args.ocean_responsive),
+        },
+        "launch_note": "One-command bounded showcase; uses synthetic topography and does not perform RRKAL downloads.",
+    }
+    if args.write_demo_packet:
+        packet_path = Path(args.write_demo_packet)
+        packet_path.parent.mkdir(parents=True, exist_ok=True)
+        packet_path.write_text(json.dumps(packet, ensure_ascii=False, indent=2), encoding="utf-8")
+        print(f"Wrote closed-loop demo packet: {packet_path}")
+    print(json.dumps(packet, ensure_ascii=False, indent=2))
+    return packet
 def main(argv: list[str] | None = None) -> None:
     configure_stdio()
     args = build_parser().parse_args(argv)
+    if args.demo_closed_loop:
+        apply_closed_loop_demo_defaults(args)
     if args.scale_bar_y == 686.0 and args.height != 720:
         args.scale_bar_y = max(34.0, float(args.height) - 34.0)
     ensure_dependencies(bool(args.headless))
@@ -14322,3 +14397,4 @@ def main(argv: list[str] | None = None) -> None:
 
 if __name__ == "__main__":
     main()
+
