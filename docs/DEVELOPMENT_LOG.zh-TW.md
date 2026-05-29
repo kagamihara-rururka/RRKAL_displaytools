@@ -230,6 +230,20 @@ Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
 
+## 2026-05-30 - Qt Hydrology LOD JSON action
+
+Scope:
+- Added a `Hydro LOD` action button to the Qt Actions panel.
+- The action renders `hydrology_lod_readiness` and `hydrology_lod_runtime_evidence` together in the command/JSON preview pane.
+- Closed-loop evidence now includes the Qt action, and smoke verifies the button plus `show_hydrology_lod_status` handler.
+
+Decision:
+- Hydrology layer contracts and LOD hook evidence should be inspectable from Qt while still keeping dataset discovery/download/import/cache governance outside displaytools.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+
 ## 2026-05-30 - Qt Ocean material port JSON action
 
 Scope:

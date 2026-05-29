@@ -1659,6 +1659,12 @@ if ($qtPanelSource -notlike "*show_ocean_material_control_port*") {
 if ($qtPanelSource -notlike "*Ocean port*") {
     throw "Qt Ocean port action button is missing"
 }
+if ($qtPanelSource -notlike "*show_hydrology_lod_status*") {
+    throw "Qt hydrology LOD JSON action is missing"
+}
+if ($qtPanelSource -notlike "*Hydro LOD*") {
+    throw "Qt Hydro LOD action button is missing"
+}
 if ($qtPanelSource -notlike "*saved_state_groups*") {
     throw "Qt profile UI state replay saved groups are missing"
 }

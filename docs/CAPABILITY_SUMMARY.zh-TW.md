@@ -374,3 +374,8 @@
 
 - Qt Actions now includes `Ocean port`, which displays the live `ocean_material_control_port` payload in the JSON preview pane.
 - This keeps wave strength, roughness, foam, Taichi uniforms and scalar sea-state handoff inspectable without adding provider discovery/download/import/cache governance to displaytools.
+
+### 2026-05-30 Qt Hydrology LOD JSON action
+
+- Qt Actions now includes `Hydro LOD`, which displays `hydrology_lod_readiness` and `hydrology_lod_runtime_evidence` together in the JSON preview pane.
+- This makes lake/river layer contracts, renderer targets, runtime ack files, pick-state files and LOD hook readiness inspectable from the primary Qt UI.

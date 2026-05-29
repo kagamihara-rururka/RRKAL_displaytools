@@ -2579,6 +2579,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         export_packet_button = QtWidgets.QPushButton("匯出啟動包")
         profile_replay_button = QtWidgets.QPushButton("Profile replay")
         ocean_port_button = QtWidgets.QPushButton("Ocean port")
+        hydro_lod_button = QtWidgets.QPushButton("Hydro LOD")
         capabilities_button = QtWidgets.QPushButton("Renderer 能力")
         closed_loop_button = QtWidgets.QPushButton("閉環狀態")
         layer_manifest_button = QtWidgets.QPushButton("圖層 manifest")
@@ -2599,6 +2600,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         export_packet_button.clicked.connect(self.export_launch_packet_dialog)
         profile_replay_button.clicked.connect(self.show_profile_ui_state_replay)
         ocean_port_button.clicked.connect(self.show_ocean_material_control_port)
+        hydro_lod_button.clicked.connect(self.show_hydrology_lod_status)
         capabilities_button.clicked.connect(self.show_renderer_capabilities)
         closed_loop_button.clicked.connect(self.show_closed_loop_status)
         layer_manifest_button.clicked.connect(self.show_layer_manifest)
@@ -2620,6 +2622,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             export_packet_button,
             profile_replay_button,
             ocean_port_button,
+            hydro_lod_button,
             capabilities_button,
             closed_loop_button,
             layer_manifest_button,
@@ -6930,6 +6933,19 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             json.dumps(self.collect_ocean_material_control_port(), ensure_ascii=False, indent=2)
         )
         self.status.setText("已顯示 ocean material / sea-state port JSON")
+
+    def show_hydrology_lod_status(self) -> None:
+        self.command_text.setPlainText(
+            json.dumps(
+                {
+                    "hydrology_lod_readiness": self.collect_hydrology_lod_readiness(),
+                    "hydrology_lod_runtime_evidence": self.collect_hydrology_lod_runtime_evidence(),
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        self.status.setText("已顯示 hydrology / LOD hook JSON")
 
     def show_pin_pick_state(self) -> None:
         try:
