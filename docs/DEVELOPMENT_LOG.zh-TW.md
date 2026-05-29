@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-30 - Layer operator shortcuts contract
+
+- Added `rrkal_displaytools.layer_operator_shortcuts.v1` for Qt-first Photoshop-like layer operations: select, visibility, lock, opacity, blend, solo, restore, undo, reset and diagnostics actions.
+- Exposed the contract in Qt launch/provenance packets, No-GUI launch packets, renderer capability discovery, handoff inspection, closed-loop evidence and smoke gates.
+- Smoke: `scripts/smoke.ps1` PASS (2026-05-30).
+
 ## 2026-05-30 - Layer renderer diagnostics remediation hints
 
 - Added `rrkal_displaytools.layer_renderer_diagnostics_remediation.v1` with read-only next-step hints for renderer ack, layer pick state, RRKAL identity source, warning list and live-control coverage bridges.

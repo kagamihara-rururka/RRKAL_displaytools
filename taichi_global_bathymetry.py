@@ -17897,6 +17897,112 @@ def layer_renderer_diagnostics_remediation_packet(
         "boundary": "Read-only remediation hints; renderer state and RRKAL data governance are not mutated.",
     }
 
+
+def layer_operator_shortcuts_packet(
+    source: str,
+    selected_layer: str | None = None,
+    solo_snapshot_active: bool = False,
+    undo_depth: int | None = None,
+) -> dict[str, object]:
+    actions = [
+        {
+            "id": "select_layer",
+            "label": "Select layer",
+            "surface": "Layers row",
+            "state_scope": "selected_layer",
+            "qt_available": True,
+            "profile_effect": "selected_layer",
+        },
+        {
+            "id": "toggle_visibility",
+            "label": "Toggle visibility",
+            "surface": "Layers row checkbox / Properties button",
+            "state_scope": "layer_stack_ui.visible",
+            "qt_available": True,
+            "profile_effect": "layer_stack_ui",
+        },
+        {
+            "id": "toggle_lock",
+            "label": "Toggle lock",
+            "surface": "Layers row lock",
+            "state_scope": "layer_stack_ui.locked",
+            "qt_available": True,
+            "profile_effect": "layer_stack_ui",
+        },
+        {
+            "id": "adjust_opacity",
+            "label": "Adjust opacity",
+            "surface": "Layers row slider",
+            "state_scope": "layer_stack_ui.opacity",
+            "qt_available": True,
+            "profile_effect": "layer_stack_ui",
+        },
+        {
+            "id": "set_blend_mode",
+            "label": "Set blend mode",
+            "surface": "Layers row blend combo",
+            "state_scope": "layer_stack_ui.blend_mode",
+            "qt_available": True,
+            "profile_effect": "layer_stack_ui",
+        },
+        {
+            "id": "solo_selected_layer",
+            "label": "Solo selected layer",
+            "surface": "Layers actions",
+            "state_scope": "layer_visibility_snapshot",
+            "qt_available": True,
+            "profile_effect": "runtime_state_only",
+        },
+        {
+            "id": "restore_solo_visibility",
+            "label": "Restore pre-solo visibility",
+            "surface": "Layers actions",
+            "state_scope": "layer_visibility_snapshot",
+            "qt_available": True,
+            "profile_effect": "runtime_state_only",
+        },
+        {
+            "id": "undo_layer_state",
+            "label": "Undo layer state",
+            "surface": "Layers actions",
+            "state_scope": "layer_undo",
+            "qt_available": True,
+            "profile_effect": "runtime_state_only",
+        },
+        {
+            "id": "reset_layer_ui_state",
+            "label": "Reset layer UI state",
+            "surface": "Layers actions / Properties button",
+            "state_scope": "layer_stack_ui",
+            "qt_available": True,
+            "profile_effect": "layer_stack_ui",
+        },
+        {
+            "id": "show_layer_diagnostics",
+            "label": "Show layer diagnostics",
+            "surface": "Layers actions",
+            "state_scope": "diagnostics_view",
+            "qt_available": True,
+            "profile_effect": "none",
+        },
+    ]
+    return {
+        "schema": "rrkal_displaytools.layer_operator_shortcuts.v1",
+        "source": source,
+        "ui_direction": "qt_first_photoshop_like_layer_operations",
+        "selected_layer": selected_layer,
+        "solo_snapshot_active": bool(solo_snapshot_active),
+        "undo_depth": int(undo_depth or 0),
+        "action_count": len(actions),
+        "actions": actions,
+        "implemented_action_ids": [action["id"] for action in actions if action.get("qt_available")],
+        "profile_state_fields": ["selected_layer", "layer_stack_ui"],
+        "launch_packet_fields": ["layer_operator_shortcuts", "layer_stack_ui", "layer_undo"],
+        "summary_text": "select/toggle/lock/opacity/blend/solo/restore/undo/reset/diagnostics",
+        "copyable_provenance": True,
+        "boundary": "Qt operator shortcut contract only; renderer state and RRKAL data governance are not mutated.",
+    }
+
 def layer_capability_matrix_packet() -> dict[str, object]:
     aliases = {
         "show_grid": "grid",
@@ -18137,6 +18243,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "pending": ["low_latency_ipc_or_gpu_texture_stream"],
             "output": "RGBA PNG replaced atomically at the requested interval",
         },
+        "layer_operator_shortcuts": layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"),
         "layer_capability_matrix": layer_capability_matrix_packet(),
         "pin_controls": [
             "pin-file",

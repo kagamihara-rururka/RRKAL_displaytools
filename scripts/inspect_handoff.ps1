@@ -37,10 +37,17 @@ $summary = [ordered]@{
         canvas_preview = $launchPacket.canvas_preview.schema
         active_layer_diagnostics = $launchPacket.active_layer_diagnostics.schema
         layer_capability_matrix = $launchPacket.layer_capability_matrix.schema
+        layer_operator_shortcuts = $launchPacket.layer_operator_shortcuts.schema
         layer_undo = $launchPacket.layer_undo.schema
         session_journal = $launchPacket.session_journal.schema
         timeline_state = $launchPacket.timeline_state.schema
         boundary_identity_status = $launchPacket.boundary_highlight.identity_status.schema
+    }
+    layer_operator_shortcuts = @{
+        launch_packet_schema = $launchPacket.layer_operator_shortcuts.schema
+        renderer_capabilities_schema = $capabilities.layer_operator_shortcuts.schema
+        action_count = $launchPacket.layer_operator_shortcuts.action_count
+        implemented_action_ids = $launchPacket.layer_operator_shortcuts.implemented_action_ids
     }
     layer_capability_matrix = @{
         schema = $capabilities.layer_capability_matrix.schema

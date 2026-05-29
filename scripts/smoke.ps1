@@ -160,6 +160,19 @@ if ($null -eq $launchPacket.layer_group_view.visible_counts_by_group.hydrology) 
 if ($null -eq $launchPacket.layer_group_view.selected_layer_hidden_by_group) {
     throw "Launch packet layer_group_view selected-layer hidden diagnostic missing"
 }
+if ($launchPacket.layer_operator_shortcuts.schema -ne "rrkal_displaytools.layer_operator_shortcuts.v1") {
+    throw "Launch packet layer_operator_shortcuts schema missing or invalid"
+}
+$launchLayerOperatorActions = @($launchPacket.layer_operator_shortcuts.implemented_action_ids)
+if ($launchLayerOperatorActions -notcontains "solo_selected_layer") {
+    throw "Launch packet layer_operator_shortcuts missing solo action"
+}
+if ($launchLayerOperatorActions -notcontains "restore_solo_visibility") {
+    throw "Launch packet layer_operator_shortcuts missing restore solo action"
+}
+if ($launchLayerOperatorActions -notcontains "undo_layer_state") {
+    throw "Launch packet layer_operator_shortcuts missing layer undo action"
+}
 if ($launchPacket.layer_undo.schema -ne "rrkal_displaytools.layer_stack_undo.v1") {
     throw "Launch packet layer_undo schema missing or invalid"
 }
@@ -474,6 +487,12 @@ if ($capabilities.preview_frame_stream.schema -ne "rrkal_displaytools.preview_fr
 if ($capabilities.active_layer_diagnostics.schema -ne "rrkal_displaytools.active_layer_diagnostics.v1") {
     throw "Renderer active_layer_diagnostics capability missing or invalid"
 }
+if ($capabilities.layer_operator_shortcuts.schema -ne "rrkal_displaytools.layer_operator_shortcuts.v1") {
+    throw "Renderer layer_operator_shortcuts schema missing or invalid"
+}
+if ($capabilities.layer_operator_shortcuts.implemented_action_ids -notcontains "solo_selected_layer") {
+    throw "Renderer layer_operator_shortcuts missing solo action"
+}
 if ($capabilities.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
     throw "Renderer layer_capability_matrix capability missing or invalid"
 }
@@ -641,6 +660,12 @@ if ($handoff.launch_packet_contracts.timeline_state -ne "rrkal_displaytools.time
 }
 if ($handoff.launch_packet_contracts.layer_capability_matrix -ne "rrkal_displaytools.layer_capability_matrix.v1") {
     throw "Handoff inspection layer_capability_matrix contract missing or invalid"
+}
+if ($handoff.layer_operator_shortcuts.launch_packet_schema -ne "rrkal_displaytools.layer_operator_shortcuts.v1") {
+    throw "Handoff inspection layer_operator_shortcuts launch schema missing or invalid"
+}
+if ($handoff.layer_operator_shortcuts.renderer_capabilities_schema -ne "rrkal_displaytools.layer_operator_shortcuts.v1") {
+    throw "Handoff inspection layer_operator_shortcuts renderer schema missing or invalid"
 }
 if ($handoff.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
     throw "Handoff inspection layer_capability_matrix summary missing or invalid"
