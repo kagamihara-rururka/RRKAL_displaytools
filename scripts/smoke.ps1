@@ -1708,4 +1708,12 @@ if ($handoffInspectorSource -notmatch 'boundary_identity_warning_surface') {
     throw "Handoff inspection boundary identity warning surface output is missing"
 }
 
+$closedLoopSource = Get-Content -LiteralPath (Join-Path $BoundaryIdentityRoot "closed_loop_status.py") -Raw -Encoding UTF8
+if ($closedLoopSource -notmatch 'boundary_identity_warning_handoff') {
+    throw "Closed-loop boundary identity warning handoff evidence is missing"
+}
+if ($closedLoopSource -notmatch 'Closed warning/provenance loop only') {
+    throw "Closed-loop boundary identity warning boundary note is missing"
+}
+
 Write-Host "Smoke passed."

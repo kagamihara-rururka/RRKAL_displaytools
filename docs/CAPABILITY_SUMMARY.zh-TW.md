@@ -324,3 +324,8 @@
 
 - `scripts\inspect_handoff.ps1` now reports `canvas_preview.boundary_identity_warning` and its surface description.
 - Cross-machine inspection can show Boundary/EEZ identity warnings without launching Qt.
+
+### 2026-05-30 Closed-loop Boundary identity warning handoff evidence
+
+- Closed-loop status now lists `boundary_identity_warning_handoff` for the warning/provenance loop across Qt, Canvas Preview, launch packet, handoff inspection and smoke.
+- The closed-loop note keeps authoritative polygon/EEZ identity and open-line area inference explicitly pending.

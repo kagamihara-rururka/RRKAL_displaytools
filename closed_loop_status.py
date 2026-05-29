@@ -181,6 +181,26 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "renderer capabilities ui_handoff_contracts",
                 ],
             },
+            {
+                "id": "boundary_identity_warning_handoff",
+                "scope": [
+                    "Qt Properties identity warning badge",
+                    "Canvas Preview visible Boundary warning",
+                    "Canvas preview provenance warning",
+                    "No-GUI launch packet warning",
+                    "Handoff inspection warning output",
+                    "Smoke-gated warning contract",
+                ],
+                "evidence": [
+                    "boundaryIdentityWarningBadge",
+                    "Boundary warning:",
+                    "canvas_preview.boundary_identity_warning",
+                    "scripts.export_launch_packet canvas_preview boundary_identity_warning",
+                    "scripts/inspect_handoff.ps1 canvas_preview boundary_identity_warning",
+                    "scripts/smoke.ps1 boundary warning gates",
+                ],
+                "boundary": "Closed warning/provenance loop only; authoritative polygon territory identity and open-line area inference remain pending backend work.",
+            },
         ],
         "partial": [
             {

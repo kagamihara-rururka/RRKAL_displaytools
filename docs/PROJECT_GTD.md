@@ -180,3 +180,4 @@ Last updated: 2026-05-29
 - 2026-05-30: Added Boundary identity warning text to Canvas Preview, canvas meta and `canvas_preview.boundary_identity_warning` provenance.
 - 2026-05-30: Added no-GUI launch packet `canvas_preview.boundary_identity_warning` and smoke coverage for cross-machine warning inspection.
 - 2026-05-30: Added Boundary identity warning fields to handoff inspection output and smoke coverage.
+- 2026-05-30: Added `boundary_identity_warning_handoff` closed-loop evidence while keeping authoritative polygon/EEZ and open-line backend work pending.

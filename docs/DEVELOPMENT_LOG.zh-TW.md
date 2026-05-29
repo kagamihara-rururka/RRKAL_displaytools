@@ -3224,3 +3224,17 @@ Decision:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+
+## 2026-05-30 - Closed-loop Boundary identity warning handoff evidence
+
+Scope:
+- Closed-loop status now includes `boundary_identity_warning_handoff` as a closed evidence group.
+- The group covers Qt Properties badge, Canvas Preview warning, canvas provenance, no-GUI launch packet, handoff inspection and smoke gates.
+- The closed-loop boundary note explicitly keeps authoritative polygon identity and open-line area inference pending.
+
+Decision:
+- Warning/provenance delivery is now its own closed loop, while backend geospatial identity closure remains separate and should not be hidden inside UI completion.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
