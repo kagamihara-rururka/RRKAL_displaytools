@@ -35,6 +35,7 @@ Last updated: 2026-05-29
 - Decide which local cache artifacts should later be registered by RRKAL as renderer bridge assets.
 
 ## Done
+- 2026-05-30: Added `rrkal_displaytools.style_profile_renderer_routes.v1` so parchment/tactical style renderer routes are explicit and portable through launch packets, renderer capabilities, handoff and smoke.
 - 2026-05-30: Added `rrkal_displaytools.ocean_material_control_port.v1` so Qt ocean material controls and scalar sea-state handoff fields are visible through launch packets, renderer capabilities, handoff and smoke.
 - 2026-05-30: Added `rrkal_displaytools.hydrology_lod_runtime_evidence.v1` so Hydrology/LOD readiness is tied to renderer ack and selected-layer pick evidence across Qt, launch packets, renderer capabilities, handoff and smoke.
 - 2026-05-30: Added `rrkal_displaytools.hydrology_lod_readiness.v1` so lake/river hydrology layer targets and LOD hook evidence are visible through Qt, launch packets, renderer capabilities, handoff and smoke.

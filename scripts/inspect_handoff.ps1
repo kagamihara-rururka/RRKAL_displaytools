@@ -40,6 +40,7 @@ $summary = [ordered]@{
         layer_operator_shortcuts = $launchPacket.layer_operator_shortcuts.schema
         layer_operator_groups = $launchPacket.layer_operator_groups.schema
         style_renderer_entries = $launchPacket.style_renderer_entries.schema
+        style_profile_renderer_routes = $launchPacket.style_profile_renderer_routes.schema
         profile_launch_readiness = $launchPacket.profile_launch_readiness.schema
         profile_launch_readiness_ui = $launchPacket.profile_launch_readiness_ui.schema
         layer_visual_presets = $launchPacket.layer_visual_presets.schema
@@ -74,6 +75,14 @@ $summary = [ordered]@{
         entry_ids = $launchPacket.style_renderer_entries.entry_ids
         parchment_entry_available = $launchPacket.style_renderer_entries.parchment_entry_available
         tactical_entry_available = $launchPacket.style_renderer_entries.tactical_entry_available
+    }
+    style_profile_renderer_routes = @{
+        launch_packet_schema = $launchPacket.style_profile_renderer_routes.schema
+        renderer_capabilities_schema = $capabilities.style_profile_renderer_routes.schema
+        status = $launchPacket.style_profile_renderer_routes.status
+        route_count = $launchPacket.style_profile_renderer_routes.route_count
+        route_ids = $launchPacket.style_profile_renderer_routes.route_ids
+        required_routes = $launchPacket.style_profile_renderer_routes.required_routes
     }
     profile_launch_readiness = @{
         launch_packet_schema = $launchPacket.profile_launch_readiness.schema

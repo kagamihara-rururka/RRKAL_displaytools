@@ -102,6 +102,48 @@ def style_renderer_entries_packet(
     }
 
 
+def style_profile_renderer_routes_packet(
+    style_entries: dict[str, object] | None,
+    source: str,
+) -> dict[str, object]:
+    style_entries = style_entries if isinstance(style_entries, dict) else style_renderer_entries_packet(source)
+    raw_entries = style_entries.get("entries") if isinstance(style_entries.get("entries"), list) else []
+    routes = []
+    for entry in raw_entries:
+        if not isinstance(entry, dict):
+            continue
+        style_id = str(entry.get("id", ""))
+        if style_id not in {"scientific", "nautical", "parchment", "tactical"}:
+            continue
+        routes.append(
+            {
+                "id": style_id,
+                "renderer_entrypoint": entry.get("renderer_entrypoint", f"taichi_global_bathymetry.py --style-profile {style_id}"),
+                "portable_command": ["py", "-3", "taichi_global_bathymetry.py", "--style-profile", style_id],
+                "cli_args": entry.get("cli_args", ["--style-profile", style_id]),
+                "profile_field": "renderer.style_profile",
+                "template_supported": bool(entry.get("template_supported", True)),
+            }
+        )
+    route_ids = [str(route["id"]) for route in routes]
+    required_routes = ["parchment", "tactical"]
+    missing_routes = [route_id for route_id in required_routes if route_id not in route_ids]
+    return {
+        "schema": "rrkal_displaytools.style_profile_renderer_routes.v1",
+        "source": source,
+        "route_count": len(routes),
+        "route_ids": route_ids,
+        "routes": routes,
+        "required_routes": required_routes,
+        "missing_routes": missing_routes,
+        "status": "ready" if not missing_routes else "partial",
+        "qt_surface": "Looks/templates style profile selector",
+        "launch_packet_fields": ["style_profile_renderer_routes", "style_renderer_entries", "portable_command"],
+        "renderer_capability_field": "style_profile_renderer_routes",
+        "boundary": "Style profile routes are renderer launch affordances only; data discovery/cache governance stays RRKAL-owned.",
+    }
+
+
 def profile_launch_readiness_packet(
     source: str,
     style_entries: dict[str, object] | None = None,
@@ -2803,6 +2845,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_operator_shortcuts": self.collect_layer_operator_shortcuts(),
             "layer_operator_groups": self.collect_layer_operator_groups(),
             "style_renderer_entries": self.collect_style_renderer_entries(),
+            "style_profile_renderer_routes": self.collect_style_profile_renderer_routes(),
             "profile_launch_readiness": self.collect_profile_launch_readiness(),
             "profile_launch_readiness_ui": self.collect_profile_launch_readiness_ui(),
             "layer_visual_presets": self.collect_layer_visual_presets(),
@@ -2908,6 +2951,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         style_combo = getattr(self, "style_combo", None)
         selected_style = style_combo.currentText() if style_combo is not None else None
         return style_renderer_entries_packet("rrkal_displaytools_qt_panel", selected_style)
+
+    def collect_style_profile_renderer_routes(self) -> dict[str, object]:
+        return style_profile_renderer_routes_packet(
+            self.collect_style_renderer_entries(),
+            "rrkal_displaytools_qt_panel",
+        )
 
     def collect_profile_launch_readiness(self) -> dict[str, object]:
         return profile_launch_readiness_packet(
@@ -5653,6 +5702,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_operator_shortcuts": self.collect_layer_operator_shortcuts(),
             "layer_operator_groups": self.collect_layer_operator_groups(),
             "style_renderer_entries": self.collect_style_renderer_entries(),
+            "style_profile_renderer_routes": self.collect_style_profile_renderer_routes(),
             "profile_launch_readiness": self.collect_profile_launch_readiness(),
             "profile_launch_readiness_ui": self.collect_profile_launch_readiness_ui(),
             "layer_visual_presets": self.collect_layer_visual_presets(),

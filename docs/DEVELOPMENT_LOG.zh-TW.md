@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-30 - Style profile renderer routes
+
+- Added `rrkal_displaytools.style_profile_renderer_routes.v1` to make scientific, nautical, parchment and tactical renderer routes explicit, including portable commands for parchment/tactical review on another machine.
+- Qt launch/provenance packets, No-GUI launch packets, renderer capabilities, handoff inspection and closed-loop evidence now expose the same style route contract.
+- Smoke: PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Ocean material control port
 
 - Added `rrkal_displaytools.ocean_material_control_port.v1` to expose Qt wave/roughness/foam controls, renderer CLI flags, Taichi uniforms and the scalar sea-state handoff boundary.

@@ -200,6 +200,18 @@ if ($launchPacket.style_renderer_entries.entry_ids -notcontains "parchment") {
 if ($launchPacket.style_renderer_entries.entry_ids -notcontains "tactical") {
     throw "Launch packet style_renderer_entries missing tactical entry"
 }
+if ($launchPacket.style_profile_renderer_routes.schema -ne "rrkal_displaytools.style_profile_renderer_routes.v1") {
+    throw "Launch packet style_profile_renderer_routes schema missing or invalid"
+}
+if ($launchPacket.style_profile_renderer_routes.status -ne "ready") {
+    throw "Launch packet style_profile_renderer_routes not ready"
+}
+if ($launchPacket.style_profile_renderer_routes.route_ids -notcontains "parchment") {
+    throw "Launch packet style_profile_renderer_routes missing parchment route"
+}
+if ($launchPacket.style_profile_renderer_routes.route_ids -notcontains "tactical") {
+    throw "Launch packet style_profile_renderer_routes missing tactical route"
+}
 if ($launchPacket.profile_launch_readiness.schema -ne "rrkal_displaytools.profile_launch_readiness.v1") {
     throw "Launch packet profile_launch_readiness schema missing or invalid"
 }
@@ -613,6 +625,15 @@ if ($capabilities.style_renderer_entries.entry_ids -notcontains "parchment") {
 if ($capabilities.style_renderer_entries.entry_ids -notcontains "tactical") {
     throw "Renderer style_renderer_entries missing tactical entry"
 }
+if ($capabilities.style_profile_renderer_routes.schema -ne "rrkal_displaytools.style_profile_renderer_routes.v1") {
+    throw "Renderer style_profile_renderer_routes schema missing or invalid"
+}
+if ($capabilities.style_profile_renderer_routes.route_ids -notcontains "parchment") {
+    throw "Renderer style_profile_renderer_routes missing parchment route"
+}
+if ($capabilities.style_profile_renderer_routes.route_ids -notcontains "tactical") {
+    throw "Renderer style_profile_renderer_routes missing tactical route"
+}
 if ($capabilities.profile_launch_readiness.schema -ne "rrkal_displaytools.profile_launch_readiness.v1") {
     throw "Renderer profile_launch_readiness schema missing or invalid"
 }
@@ -867,6 +888,18 @@ if ($handoff.style_renderer_entries.entry_ids -notcontains "parchment") {
 }
 if ($handoff.style_renderer_entries.entry_ids -notcontains "tactical") {
     throw "Handoff inspection style_renderer_entries missing tactical entry"
+}
+if ($handoff.launch_packet_contracts.style_profile_renderer_routes -ne "rrkal_displaytools.style_profile_renderer_routes.v1") {
+    throw "Handoff inspection style_profile_renderer_routes launch contract missing or invalid"
+}
+if ($handoff.style_profile_renderer_routes.launch_packet_schema -ne "rrkal_displaytools.style_profile_renderer_routes.v1") {
+    throw "Handoff inspection style_profile_renderer_routes launch schema missing or invalid"
+}
+if ($handoff.style_profile_renderer_routes.renderer_capabilities_schema -ne "rrkal_displaytools.style_profile_renderer_routes.v1") {
+    throw "Handoff inspection style_profile_renderer_routes renderer schema missing or invalid"
+}
+if ($handoff.style_profile_renderer_routes.route_ids -notcontains "tactical") {
+    throw "Handoff inspection style_profile_renderer_routes missing tactical route"
 }
 if ($handoff.launch_packet_contracts.profile_launch_readiness -ne "rrkal_displaytools.profile_launch_readiness.v1") {
     throw "Handoff inspection profile_launch_readiness launch contract missing or invalid"
