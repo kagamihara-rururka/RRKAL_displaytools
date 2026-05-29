@@ -26,6 +26,11 @@ py -3 -m pip install -r requirements.txt
 py -3 rrkal_displaytools_qt_panel.py
 ```
 
+List shared templates without opening the panel:
+`powershell
+py -3 rrkal_displaytools_qt_panel.py --list-templates
+` 
+
 Open the panel with a shared template already loaded:
 ```powershell
 .\scripts\run_qt_panel.ps1 -Profile .\profiles\maritime_hydrology.json
@@ -86,6 +91,7 @@ Core docs:
 Notes:
 - Runtime caches, screenshots, logs, databases, and virtual environments are intentionally excluded from Git.
 - This initial import preserves the current monolithic prototype before later module extraction.
+
 
 
 

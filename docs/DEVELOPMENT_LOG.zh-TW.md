@@ -1,5 +1,17 @@
 ﻿# Development Log
 
+## 2026-05-29 - No-GUI profile template listing
+
+Scope:
+- Added `--list-templates` to `rrkal_displaytools_qt_panel.py`.
+- Added template listing to `scripts/smoke.ps1`.
+- Updated README and GTD with the no-GUI template discovery path.
+
+Positioning:
+- This gives RRKAL and scripts a lightweight way to discover available displaytools profiles without opening the Qt panel.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 ## 2026-05-29 - Qt startup template loading
 
 Scope:
@@ -321,4 +333,5 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 

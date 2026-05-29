@@ -733,7 +733,30 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="RRKAL_displaytools Qt operator panel")
     parser.add_argument("--profile", type=Path, help="Load a panel profile JSON on startup")
     parser.add_argument("--template", help="Load a built-in profile template by file stem, for example maritime_hydrology")
+    parser.add_argument("--list-templates", action="store_true", help="Print built-in profile templates as JSON and exit")
     return parser
+
+
+def profile_template_packet() -> dict[str, object]:
+    templates = []
+    for path in sorted(PROFILE_TEMPLATE_DIR.glob("*.json")):
+        item: dict[str, object] = {
+            "id": path.stem,
+            "path": str(path.relative_to(ROOT)),
+        }
+        try:
+            profile = json.loads(path.read_text(encoding="utf-8"))
+            if isinstance(profile, dict):
+                item["name"] = profile.get("name", path.stem)
+                item["description"] = profile.get("description", "")
+                item["schema"] = profile.get("schema", "")
+        except Exception as exc:
+            item["error"] = str(exc)
+        templates.append(item)
+    return {
+        "schema": "rrkal_displaytools.profile_templates.v1",
+        "templates": templates,
+    }
 
 
 def resolve_startup_profile(profile: Path | None, template: str | None) -> Path | None:
@@ -747,6 +770,9 @@ def resolve_startup_profile(profile: Path | None, template: str | None) -> Path 
 
 def main(argv: list[str] | None = None) -> None:
     args = build_arg_parser().parse_args(argv)
+    if args.list_templates:
+        print(json.dumps(profile_template_packet(), ensure_ascii=False, indent=2))
+        return
     app = QtWidgets.QApplication([sys.argv[0]])
     panel = DisplayToolsQtPanel(initial_profile=resolve_startup_profile(args.profile, args.template))
     panel.show()

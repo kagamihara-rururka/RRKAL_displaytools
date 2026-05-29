@@ -7,6 +7,7 @@ Write-Host "Repo: $RepoRoot"
 
 py -3 -m py_compile rrkal_displaytools_qt_panel.py taichi_global_bathymetry.py
 py -3 taichi_global_bathymetry.py --print-renderer-capabilities | Out-Null
+py -3 rrkal_displaytools_qt_panel.py --list-templates | Out-Null
 
 $scripts = Get-ChildItem scripts -Filter *.ps1
 foreach ($script in $scripts) {
