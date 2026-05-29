@@ -1611,7 +1611,11 @@ def cursor_geodesy_readout_packet(
         "renderer_raycast_inputs": ["screen_x", "screen_y", "viewport_width", "viewport_height", "camera_yaw_deg", "camera_pitch_deg"],
         "renderer_raycast_outputs": ["hit", "latitude", "longitude", "front_hemisphere"],
         "raycast_smoke_cases": ["center_hit", "outside_globe_miss"],
-        "researcher_note": "Canvas preview gives immediate lon/lat feedback; renderer-facing globe raycast math is smoke-gated and ready for Taichi mouse-state wiring.",
+        "runtime_bridge_status": "state_ack_contract_ready",
+        "renderer_raycast_state_file": "state/renderer_cursor_geodesy_state.json",
+        "renderer_raycast_ack_file": "state/renderer_cursor_geodesy_ack.json",
+        "runtime_bridge_fields": ["screen_x", "screen_y", "latitude", "longitude", "hit", "camera_yaw_deg", "camera_pitch_deg"],
+        "researcher_note": "Canvas preview gives immediate lon/lat feedback; renderer-facing globe raycast math and state/ack file contract are smoke-gated for Taichi mouse-state wiring.",
     }
 
 

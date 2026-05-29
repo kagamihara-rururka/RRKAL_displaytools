@@ -105,6 +105,10 @@ $summary = [ordered]@{
         renderer_raycast_helper = $launchPacket.cursor_geodesy_readout.renderer_raycast_helper
         renderer_raycast_method = $launchPacket.cursor_geodesy_readout.renderer_raycast_method
         raycast_smoke_cases = $launchPacket.cursor_geodesy_readout.raycast_smoke_cases
+        runtime_bridge_status = $launchPacket.cursor_geodesy_readout.runtime_bridge_status
+        renderer_raycast_state_file = $launchPacket.cursor_geodesy_readout.renderer_raycast_state_file
+        renderer_raycast_ack_file = $launchPacket.cursor_geodesy_readout.renderer_raycast_ack_file
+        runtime_bridge_fields = $launchPacket.cursor_geodesy_readout.runtime_bridge_fields
         qt_surface = $launchPacket.cursor_geodesy_readout.qt_surface
     }
     pin_overlay = @{

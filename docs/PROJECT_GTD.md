@@ -35,6 +35,7 @@ Last updated: 2026-05-29
 - Decide which local cache artifacts should later be registered by RRKAL as renderer bridge assets.
 
 ## Done
+- 2026-05-30: Added smoke-gated cursor geodesy state/ack bridge contract for renderer cursor raycast runtime wiring.
 - 2026-05-30: Repaired the Capability Summary Canvas Preview mojibake introduced during cursor raycast contract work.
 - 2026-05-30: Added `cursor_geodesy.py` renderer-facing cursor raycast helper and smoke-gated `rrkal_displaytools.cursor_geodesy_raycast.v1` evidence.
 - 2026-05-30: Aligned the Qt Boundary emphasis status label with the wired renderer bridge and added a smoke guard against stale queued wording.

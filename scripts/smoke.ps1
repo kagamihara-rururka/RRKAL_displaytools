@@ -560,6 +560,15 @@ if ($launchPacket.cursor_geodesy_readout.renderer_raycast_helper -ne "cursor_geo
 if ($launchPacket.cursor_geodesy_readout.raycast_smoke_cases -notcontains "center_hit") {
     throw "Launch packet cursor_geodesy_readout center raycast smoke case missing"
 }
+if ($launchPacket.cursor_geodesy_readout.runtime_bridge_status -ne "state_ack_contract_ready") {
+    throw "Launch packet cursor_geodesy_readout runtime bridge status mismatch"
+}
+if ($launchPacket.cursor_geodesy_readout.renderer_raycast_state_file -ne "state/renderer_cursor_geodesy_state.json") {
+    throw "Launch packet cursor_geodesy_readout state file mismatch"
+}
+if ($launchPacket.cursor_geodesy_readout.runtime_bridge_fields -notcontains "latitude") {
+    throw "Launch packet cursor_geodesy_readout latitude bridge field missing"
+}
 if ($launchPacket.pin_overlay.schema -ne "rrkal_displaytools.pin_projection.v1") {
     throw "Launch packet pin_overlay schema missing or invalid"
 }
@@ -762,6 +771,15 @@ if ($capabilities.cursor_geodesy_readout.renderer_raycast_schema -ne "rrkal_disp
 }
 if ($capabilities.cursor_geodesy_readout.raycast_smoke_cases -notcontains "outside_globe_miss") {
     throw "Renderer cursor_geodesy_readout outside-globe raycast smoke case missing"
+}
+if ($capabilities.cursor_geodesy_readout.runtime_bridge_status -ne "state_ack_contract_ready") {
+    throw "Renderer cursor_geodesy_readout runtime bridge status mismatch"
+}
+if ($capabilities.cursor_geodesy_readout.renderer_raycast_ack_file -ne "state/renderer_cursor_geodesy_ack.json") {
+    throw "Renderer cursor_geodesy_readout ack file mismatch"
+}
+if ($capabilities.cursor_geodesy_readout.runtime_bridge_fields -notcontains "hit") {
+    throw "Renderer cursor_geodesy_readout hit bridge field missing"
 }
 if ($capabilities.pin_overlay.schema -ne "rrkal_displaytools.pin_projection.v1") {
     throw "Renderer pin_overlay schema missing or invalid"
@@ -1113,6 +1131,15 @@ if ($handoff.cursor_geodesy_readout.backend_raycast_status -ne "renderer_globe_i
 }
 if ($handoff.cursor_geodesy_readout.renderer_raycast_helper -ne "cursor_geodesy.viewport_sphere_raycast") {
     throw "Handoff inspection cursor_geodesy_readout raycast helper missing"
+}
+if ($handoff.cursor_geodesy_readout.runtime_bridge_status -ne "state_ack_contract_ready") {
+    throw "Handoff inspection cursor_geodesy_readout runtime bridge status mismatch"
+}
+if ($handoff.cursor_geodesy_readout.renderer_raycast_state_file -ne "state/renderer_cursor_geodesy_state.json") {
+    throw "Handoff inspection cursor_geodesy_readout state file mismatch"
+}
+if ($handoff.cursor_geodesy_readout.renderer_raycast_ack_file -ne "state/renderer_cursor_geodesy_ack.json") {
+    throw "Handoff inspection cursor_geodesy_readout ack file mismatch"
 }
 if ($handoff.launch_packet_contracts.pin_overlay -ne "rrkal_displaytools.pin_projection.v1") {
     throw "Handoff inspection pin_overlay launch contract missing or invalid"

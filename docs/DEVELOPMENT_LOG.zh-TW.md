@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-30 - Cursor geodesy state ack bridge contract
+
+- Added smoke-gated cursor raycast state/ack file fields: `state/renderer_cursor_geodesy_state.json` and `state/renderer_cursor_geodesy_ack.json`.
+- Launch packets, renderer capabilities and handoff inspection now expose the cursor raycast runtime bridge status and required state fields.
+- Smoke: PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Capability summary mojibake repair
 
 - Repaired the `Canvas Preview` capability summary line that was garbled during the cursor geodesy raycast contract update.
