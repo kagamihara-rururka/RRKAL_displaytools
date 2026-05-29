@@ -61,7 +61,7 @@ Current user rule: before each commit, run at least a smoke test and record the 
 For Python/UI/script-only changes, prefer the smallest relevant checks first:
 
 ```powershell
-py -3 -m py_compile rrkal_displaytools_qt_panel.py taichi_global_bathymetry.py
+.\scripts\smoke.ps1
 ```
 
-For PowerShell helper scripts, parse the scripts without executing setup/install work.
+The smoke helper compiles Python entrypoints, checks renderer capabilities output, and parses PowerShell helper scripts without executing setup/install work.

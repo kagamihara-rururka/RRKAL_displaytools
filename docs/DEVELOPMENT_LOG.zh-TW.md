@@ -1,5 +1,17 @@
 ﻿# Development Log
 
+## 2026-05-29 - Centralized smoke helper
+
+Scope:
+- Added `scripts/smoke.ps1` as the pre-commit smoke helper.
+- The helper compiles Python entrypoints, checks renderer capabilities output, and parses all PowerShell scripts.
+- Updated README and Git handoff to point future commits at the helper.
+
+Positioning:
+- This implements the user's new rule that commits need at least smoke testing.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 ## 2026-05-29 - Qt renderer capabilities display
 
 Scope:
@@ -251,6 +263,7 @@ Validation:
 Next round rule:
 - Before any new development round, inspect current repo state.
 - After each round, update this log and commit before continuing.
+
 
 
 

@@ -36,6 +36,11 @@ Optional quick headless render request:
 .\scripts\render_quick_smoke.ps1
 ```
 
+Pre-commit smoke:
+```powershell
+.\scripts\smoke.ps1
+```
+
 Renderer capabilities JSON:
 `powershell
 py -3 taichi_global_bathymetry.py --print-renderer-capabilities
@@ -59,6 +64,7 @@ Primary files:
 - `scripts/setup_windows.ps1`: Windows dependency setup helper.
 - `scripts/run_qt_panel.ps1`: Windows Qt panel launch helper.
 - `scripts/render_quick_smoke.ps1`: Windows headless quick render helper.
+- `scripts/smoke.ps1`: pre-commit smoke test helper.
 
 Qt panel capabilities:
 - Toggle renderer layers without memorizing CLI flags.
