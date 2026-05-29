@@ -3196,3 +3196,17 @@ Decision:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+
+## 2026-05-30 - No-GUI launch packet Boundary identity warning
+
+Scope:
+- No-GUI launch packet `canvas_preview` now includes `boundary_identity_warning` and `boundary_identity_warning_surface` by default.
+- The warning mirrors the Qt Canvas Preview / Properties provenance language for authoritative polygon and open-line inference pending status.
+- Smoke now verifies the no-GUI launch packet source contains the warning field and surface description.
+
+Decision:
+- Cross-machine users should see the Boundary identity warning from launch packet inspection even before opening Qt.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+

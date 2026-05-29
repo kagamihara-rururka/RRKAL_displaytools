@@ -314,3 +314,8 @@
 
 - Canvas Preview now shows a `Boundary warning:` line and mirrors the warning in canvas meta text.
 - Research provenance now records `canvas_preview.boundary_identity_warning` so exported UI state preserves the non-authoritative identity warning.
+
+### 2026-05-30 No-GUI launch packet Boundary identity warning
+
+- No-GUI launch packets now expose `canvas_preview.boundary_identity_warning` by default.
+- Clone/handoff users can see pending authoritative polygon/EEZ identity and open-line closure warnings without starting Qt.

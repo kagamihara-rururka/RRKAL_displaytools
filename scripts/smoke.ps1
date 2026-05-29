@@ -1692,4 +1692,12 @@ if ($qtBoundaryIdentitySource -notmatch 'Boundary warning:') {
     throw "Qt Canvas Preview visible boundary warning line is missing"
 }
 
+$launchPacketSource = Get-Content -LiteralPath (Join-Path $BoundaryIdentityRoot "scripts\export_launch_packet.py") -Raw -Encoding UTF8
+if ($launchPacketSource -notmatch 'boundary_identity_warning') {
+    throw "No-GUI launch packet canvas preview boundary identity warning is missing"
+}
+if ($launchPacketSource -notmatch 'No-GUI launch packet / Qt Canvas Preview / research provenance') {
+    throw "No-GUI launch packet boundary warning surface is missing"
+}
+
 Write-Host "Smoke passed."

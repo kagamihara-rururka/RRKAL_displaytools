@@ -178,3 +178,4 @@ Last updated: 2026-05-29
 - 2026-05-30: Surfaced Boundary identity `source_hint=` in Qt Properties and Canvas Preview, with smoke coverage for visible provenance text.
 - 2026-05-30: Added a Qt Properties Boundary identity warning badge for pending authoritative polygon/EEZ identity and open-line geometry closure.
 - 2026-05-30: Added Boundary identity warning text to Canvas Preview, canvas meta and `canvas_preview.boundary_identity_warning` provenance.
+- 2026-05-30: Added no-GUI launch packet `canvas_preview.boundary_identity_warning` and smoke coverage for cross-machine warning inspection.
