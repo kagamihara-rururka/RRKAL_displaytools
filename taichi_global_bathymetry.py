@@ -2323,13 +2323,75 @@ def alpha_compose(background: np.ndarray, overlay: np.ndarray) -> np.ndarray:
     return out
 
 
-PIN_MARKER_COLORS = {
-    "Observation": (255, 226, 112, 232),
-    "Sample Site": (88, 214, 141, 232),
-    "Anomaly": (255, 105, 97, 238),
-    "Reference": (126, 188, 255, 232),
-    "Event": (255, 168, 76, 238),
+PIN_MARKER_STYLE_PROFILES = {
+    "scientific": {
+        "colors": {
+            "Observation": (255, 226, 112, 232),
+            "Sample Site": (88, 214, 141, 232),
+            "Anomaly": (255, 105, 97, 238),
+            "Reference": (126, 188, 255, 232),
+            "Event": (255, 168, 76, 238),
+        },
+        "selected_ring": (255, 255, 255, 220),
+        "center": (12, 18, 24, 255),
+    },
+    "nautical": {
+        "colors": {
+            "Observation": (255, 238, 132, 234),
+            "Sample Site": (91, 216, 205, 234),
+            "Anomaly": (238, 80, 90, 240),
+            "Reference": (82, 165, 232, 234),
+            "Event": (255, 178, 82, 238),
+        },
+        "selected_ring": (237, 248, 255, 226),
+        "center": (8, 32, 44, 255),
+    },
+    "tactical": {
+        "colors": {
+            "Observation": (160, 255, 140, 238),
+            "Sample Site": (72, 255, 216, 238),
+            "Anomaly": (255, 54, 66, 245),
+            "Reference": (96, 176, 255, 238),
+            "Event": (255, 198, 66, 242),
+        },
+        "selected_ring": (214, 255, 220, 235),
+        "center": (0, 20, 12, 255),
+    },
+    "parchment": {
+        "colors": {
+            "Observation": (124, 79, 38, 230),
+            "Sample Site": (77, 111, 76, 230),
+            "Anomaly": (143, 49, 38, 238),
+            "Reference": (80, 94, 120, 230),
+            "Event": (151, 92, 34, 236),
+        },
+        "selected_ring": (255, 244, 202, 228),
+        "center": (61, 39, 24, 255),
+    },
 }
+
+
+def resolve_pin_marker_style(style_profile: str) -> dict[str, object]:
+    key = str(style_profile or "scientific").strip().lower()
+    if key not in PIN_MARKER_STYLE_PROFILES:
+        key = "scientific"
+    return PIN_MARKER_STYLE_PROFILES[key]
+
+
+def pin_marker_style_packet() -> dict[str, object]:
+    profiles: dict[str, object] = {}
+    for profile_id, style in PIN_MARKER_STYLE_PROFILES.items():
+        colors = style["colors"]
+        profiles[profile_id] = {
+            "pin_types": sorted(colors),
+            "selected_ring": style["selected_ring"],
+            "center": style["center"],
+        }
+    return {
+        "schema": "rrkal_displaytools.pin_marker_style_profiles.v1",
+        "profiles": profiles,
+        "fallback": "scientific",
+    }
 
 
 def _extract_pin_records(payload: object) -> list[dict[str, object]]:
@@ -2369,9 +2431,14 @@ def render_pin_overlay(
     projected_pins: list[dict[str, object]],
     pin_size: int = 9,
     selected_pin_id: str | None = None,
+    style_profile: str = "scientific",
 ) -> np.ndarray:
     overlay = np.zeros((height, width, 4), dtype=np.uint8)
     radius = max(2, int(pin_size) // 2)
+    marker_style = resolve_pin_marker_style(style_profile)
+    marker_colors = marker_style["colors"]
+    selected_ring = marker_style["selected_ring"]
+    center_color = marker_style["center"]
     for pin in projected_pins:
         if not bool(pin.get("visible", False)):
             continue
@@ -2381,7 +2448,7 @@ def render_pin_overlay(
         except (KeyError, TypeError, ValueError):
             continue
         selected = selected_pin_id is not None and pin.get("id") == selected_pin_id
-        color = PIN_MARKER_COLORS.get(str(pin.get("type", "Observation")), PIN_MARKER_COLORS["Observation"])
+        color = marker_colors.get(str(pin.get("type", "Observation")), marker_colors["Observation"])
         marker_radius = radius + (2 if selected else 0)
         ring_radius = marker_radius + (3 if selected else 0)
         for dy in range(-ring_radius, ring_radius + 1):
@@ -2394,15 +2461,15 @@ def render_pin_overlay(
                     continue
                 dist2 = dx * dx + dy * dy
                 if selected and marker_radius * marker_radius < dist2 <= ring_radius * ring_radius:
-                    overlay[py, px, :3] = (255, 255, 255)
-                    overlay[py, px, 3] = max(int(overlay[py, px, 3]), 220)
+                    overlay[py, px, :3] = selected_ring[:3]
+                    overlay[py, px, 3] = max(int(overlay[py, px, 3]), int(selected_ring[3]))
                 elif dist2 <= marker_radius * marker_radius or dx == 0 or dy == 0:
                     alpha = color[3] if dist2 <= marker_radius * marker_radius else 190
                     overlay[py, px, :3] = color[:3]
                     overlay[py, px, 3] = max(int(overlay[py, px, 3]), alpha)
         if 0 <= x < width and 0 <= y < height:
-            overlay[y, x, :3] = (12, 18, 24)
-            overlay[y, x, 3] = 255
+            overlay[y, x, :3] = center_color[:3]
+            overlay[y, x, 3] = center_color[3]
     return overlay
 
 
@@ -12774,6 +12841,7 @@ class HybridRenderController:
                         self.current_pin_projections,
                         int(getattr(self.args, "pin_size", 9)),
                         self.selected_pin_id,
+                        getattr(self.args, "style_profile", "scientific"),
                     ),
                     self.globe_mask,
                 )
@@ -14473,6 +14541,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
         ],
         "pin_overlay": pin_projection_contract_packet(),
         "pin_selected_state": "selected_pin_id from --pin-file/--pin-json is rendered with a highlighted marker ring",
+        "pin_marker_styles": pin_marker_style_packet(),
         "pin_controls": [
             "pin-file",
             "pin-json",

@@ -770,3 +770,17 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Style-aware Pin marker palettes
+
+Scope:
+- Added profile-aware Pin marker palettes for scientific, nautical, tactical, and parchment styles.
+- Selected Pin highlight rings now follow the active style profile instead of using one fixed white ring.
+- Renderer capabilities now expose the Pin marker style profile contract.
+
+Positioning:
+- This moves Pin overlay styling into the same style-profile contract as the rest of the renderer.
+- Remaining Pin work is label layout, pick/hover, and deeper globe-mask/depth-buffer occlusion refinement.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
