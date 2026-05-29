@@ -447,3 +447,16 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - RRKAL handoff contract documentation
+
+Scope:
+- Added `docs/RRKAL_HANDOFF_CONTRACT.zh-TW.md`.
+- Documented no-GUI endpoints for renderer capabilities, profile templates, profile schema, and launch packet export.
+- Updated README and docs index.
+
+Positioning:
+- This turns the current displaytools work into an explicit future RRKAL integration surface.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

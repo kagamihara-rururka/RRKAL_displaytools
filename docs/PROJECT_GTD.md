@@ -91,3 +91,4 @@ Last updated: 2026-05-29
 
 
 - 2026-05-29: Added no-GUI profile schema contract JSON output and repaired README command fences.
+- 2026-05-29: Added RRKAL handoff contract documentation for no-GUI integration endpoints.
