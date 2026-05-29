@@ -1171,7 +1171,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_runtime_state_label.setText(
             f"Layer runtime bridge: {LAYER_RUNTIME_STATE_PATH.name}; selected={selected_layer}; "
             f"visible={visible_count}/{len(LAYER_LABELS)}; last_write={last_write}; "
-            "visibility/opacity live, blend pending, lock guard live"
+            "visibility/opacity live, overlay blend live, vector blend pending, lock guard live"
         )
 
     def append_layer_runtime_history(self, payload: dict[str, object]) -> None:
@@ -1243,6 +1243,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         changed_count = len(changed_layers) if isinstance(changed_layers, list) else "-"
         changed_opacity_layers = payload.get("changed_opacity_layers", [])
         changed_opacity_count = len(changed_opacity_layers) if isinstance(changed_opacity_layers, list) else "-"
+        changed_blend_layers = payload.get("changed_blend_layers", [])
+        changed_blend_count = len(changed_blend_layers) if isinstance(changed_blend_layers, list) else "-"
         skipped_locked_layers = payload.get("skipped_locked_layers", [])
         skipped_count = len(skipped_locked_layers) if isinstance(skipped_locked_layers, list) else "-"
         frame_index = payload.get("frame_index", "-")
@@ -1253,6 +1255,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             return
         self.layer_runtime_ack_label.setText(
             f"Renderer ack: event={event}, changed={changed_count}, opacity={changed_opacity_count}, "
+            f"blend={changed_blend_count}, "
             f"skipped_locked={skipped_count}, frame={frame_index}, updated={updated_at}"
         )
 

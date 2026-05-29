@@ -2323,6 +2323,36 @@ def alpha_compose(background: np.ndarray, overlay: np.ndarray) -> np.ndarray:
     return out
 
 
+def alpha_blend_compose(background: np.ndarray, overlay: np.ndarray, blend_mode: str) -> np.ndarray:
+    if blend_mode == "Normal":
+        return alpha_compose(background, overlay)
+    if overlay.shape != background.shape:
+        raise ValueError(f"Overlay shape {overlay.shape} does not match background {background.shape}")
+
+    base_rgb = background[..., :3].astype(np.float32) / 255.0
+    overlay_rgb = overlay[..., :3].astype(np.float32) / 255.0
+    alpha = overlay[..., 3:4].astype(np.float32) / 255.0
+    if blend_mode == "Screen":
+        blended = 1.0 - (1.0 - base_rgb) * (1.0 - overlay_rgb)
+    elif blend_mode == "Multiply":
+        blended = base_rgb * overlay_rgb
+    elif blend_mode == "Overlay":
+        blended = np.where(
+            base_rgb <= 0.5,
+            2.0 * base_rgb * overlay_rgb,
+            1.0 - 2.0 * (1.0 - base_rgb) * (1.0 - overlay_rgb),
+        )
+    elif blend_mode == "Soft Light":
+        blended = (1.0 - 2.0 * overlay_rgb) * base_rgb * base_rgb + 2.0 * overlay_rgb * base_rgb
+    else:
+        return alpha_compose(background, overlay)
+
+    out = background.copy()
+    out[..., :3] = np.clip((blended * alpha + base_rgb * (1.0 - alpha)) * 255.0, 0.0, 255.0).astype(np.uint8)
+    out[..., 3] = 255
+    return out
+
+
 PIN_MARKER_STYLE_PROFILES = {
     "scientific": {
         "colors": {
@@ -2477,6 +2507,7 @@ LAYER_RUNTIME_ID_ALIASES = {
     "scale_bar": "scale",
     "vehicle_icons": "vehicle_icons",
 }
+RUNTIME_BLEND_MODES = {"Normal", "Screen", "Multiply", "Overlay", "Soft Light"}
 BOUNDARY_OPACITY_ATTRS = {
     "borders": "border_opacity",
     "territorial_sea": "territorial_sea_opacity",
@@ -10548,6 +10579,10 @@ class HybridRenderController:
             "aircraft": 100,
             "pins": 100,
         }
+        self.runtime_overlay_blend_modes: dict[str, str] = {
+            "aircraft": "Normal",
+            "pins": "Normal",
+        }
         self.hydrology_overlays = self._load_hydrology_overlays()
         self.boundary_overlays = self._load_boundary_overlays()
         self.lake_overlay_rgba = np.zeros_like(self.globe_rgba)
@@ -10634,6 +10669,23 @@ class HybridRenderController:
             return True
         return False
 
+    def layer_blend_mode(self, layer_id: str) -> str | None:
+        if hasattr(self, "runtime_overlay_blend_modes") and layer_id in self.runtime_overlay_blend_modes:
+            return str(self.runtime_overlay_blend_modes[layer_id])
+        return None
+
+    def set_layer_blend_mode(self, layer_id: str, blend_mode: object) -> bool:
+        mode = str(blend_mode)
+        if mode not in RUNTIME_BLEND_MODES:
+            return False
+        if not hasattr(self, "runtime_overlay_blend_modes") or layer_id not in self.runtime_overlay_blend_modes:
+            return False
+        if self.runtime_overlay_blend_modes[layer_id] == mode:
+            return False
+        self.runtime_overlay_blend_modes[layer_id] = mode
+        self.overlay_dirty = True
+        return True
+
     def apply_runtime_overlay_opacity(self, layer_id: str, overlay: np.ndarray) -> np.ndarray:
         opacity = self.layer_opacity_percent(layer_id)
         if opacity is None or opacity >= 100:
@@ -10645,6 +10697,13 @@ class HybridRenderController:
         alpha = out[..., 3].astype(np.float32) * (float(opacity) / 100.0)
         out[..., 3] = np.clip(alpha, 0.0, 255.0).astype(np.uint8)
         return out
+
+    def compose_runtime_overlay(self, background: np.ndarray, layer_id: str, overlay: np.ndarray) -> np.ndarray:
+        return alpha_blend_compose(
+            background,
+            self.apply_runtime_overlay_opacity(layer_id, overlay),
+            self.layer_blend_mode(layer_id) or "Normal",
+        )
 
     def refresh_layer_runtime_state(self) -> bool:
         if self.layer_runtime_state_file is None:
@@ -10671,6 +10730,7 @@ class HybridRenderController:
         changed = False
         changed_layers: list[str] = []
         changed_opacity_layers: list[str] = []
+        changed_blend_layers: list[str] = []
         skipped_locked_layers: list[str] = []
         layers = payload.get("layers")
         if isinstance(layers, dict):
@@ -10680,6 +10740,7 @@ class HybridRenderController:
                     continue
                 visible = state.get("visible")
                 opacity = state.get("opacity")
+                blend_mode = state.get("blend_mode")
                 if state.get("locked") is True:
                     should_skip = False
                     if isinstance(visible, bool) and self.layer_visible.get(layer_id) != visible:
@@ -10692,6 +10753,9 @@ class HybridRenderController:
                         and current_opacity != max(0, min(int(opacity), 100))
                     ):
                         should_skip = True
+                    current_blend = self.layer_blend_mode(layer_id)
+                    if isinstance(blend_mode, str) and current_blend is not None and current_blend != blend_mode:
+                        should_skip = True
                     if should_skip:
                         skipped_locked_layers.append(str(runtime_layer_id))
                     continue
@@ -10703,6 +10767,10 @@ class HybridRenderController:
                     if self.set_layer_opacity(str(layer_id), opacity):
                         changed_opacity_layers.append(str(layer_id))
                         changed = True
+                if isinstance(blend_mode, str):
+                    if self.set_layer_blend_mode(str(layer_id), blend_mode):
+                        changed_blend_layers.append(str(layer_id))
+                        changed = True
         self.layer_runtime_state_mtime_ns = next_mtime_ns
         self.layer_runtime_state_last_error = None
         self.write_layer_runtime_ack(
@@ -10710,6 +10778,7 @@ class HybridRenderController:
             payload,
             changed_layers,
             changed_opacity_layers,
+            changed_blend_layers,
             skipped_locked_layers,
             next_mtime_ns,
         )
@@ -10721,6 +10790,7 @@ class HybridRenderController:
         state_payload: dict[str, object] | None,
         changed_layers: list[str],
         changed_opacity_layers: list[str],
+        changed_blend_layers: list[str],
         skipped_locked_layers: list[str],
         state_mtime_ns: int | None,
     ) -> None:
@@ -10733,6 +10803,12 @@ class HybridRenderController:
             for opacity in [self.layer_opacity_percent(layer_id)]
             if opacity is not None
         }
+        layer_blend_mode = {
+            layer_id: blend_mode
+            for layer_id in self.layer_visible
+            for blend_mode in [self.layer_blend_mode(layer_id)]
+            if blend_mode is not None
+        }
         payload = {
             "schema": "rrkal_displaytools.renderer_layer_runtime_ack.v1",
             "updated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
@@ -10742,14 +10818,16 @@ class HybridRenderController:
             "runtime_state_updated_at_utc": state_payload.get("updated_at_utc") if isinstance(state_payload, dict) else None,
             "changed_layers": changed_layers,
             "changed_opacity_layers": changed_opacity_layers,
+            "changed_blend_layers": changed_blend_layers,
             "skipped_locked_layers": skipped_locked_layers,
             "visible_layers": visible_layers,
             "layer_visible": {layer_id: bool(visible) for layer_id, visible in self.layer_visible.items()},
             "layer_opacity": layer_opacity,
+            "layer_blend_mode": layer_blend_mode,
             "runtime_layer_aliases": dict(LAYER_RUNTIME_ID_ALIASES),
             "frame_index": getattr(self, "frame_index", 0),
-            "applies": ["visibility", "lock_guard_visibility", "opacity"],
-            "pending": ["blend_mode"],
+            "applies": ["visibility", "lock_guard_visibility", "opacity", "blend_mode_overlay"],
+            "pending": ["blend_mode_vector_layers"],
             "error": self.layer_runtime_state_last_error,
             "source": "taichi_global_bathymetry",
         }
@@ -13596,14 +13674,8 @@ class HybridRenderController:
         self.frame_rgba = alpha_compose(self.frame_rgba, self.river_overlay_rgba)
         self.frame_rgba = alpha_compose(self.frame_rgba, self.boundary_overlay_rgba)
         self.frame_rgba = alpha_compose(self.frame_rgba, self.overlay_rgba)
-        self.frame_rgba = alpha_compose(
-            self.frame_rgba,
-            self.apply_runtime_overlay_opacity("aircraft", self.aircraft_overlay_rgba),
-        )
-        self.frame_rgba = alpha_compose(
-            self.frame_rgba,
-            self.apply_runtime_overlay_opacity("pins", self.pin_overlay_rgba),
-        )
+        self.frame_rgba = self.compose_runtime_overlay(self.frame_rgba, "aircraft", self.aircraft_overlay_rgba)
+        self.frame_rgba = self.compose_runtime_overlay(self.frame_rgba, "pins", self.pin_overlay_rgba)
         self.frame_rgba = apply_style_profile(self.frame_rgba, getattr(self.args, "style_profile", "scientific"))
         self.last_render_ms = (time.time() - start) * 1000.0
         if self.output_path and (getattr(self.args, "once", False) or getattr(self.args, "headless", False)):
@@ -15335,9 +15407,10 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "ack_control": "layer-runtime-ack-file",
             "ack_schema": "rrkal_displaytools.renderer_layer_runtime_ack.v1",
             "runtime_layer_aliases": dict(LAYER_RUNTIME_ID_ALIASES),
-            "applies": ["visibility", "lock_guard_visibility", "opacity"],
+            "applies": ["visibility", "lock_guard_visibility", "opacity", "blend_mode_overlay"],
             "runtime_overlay_opacity_layers": ["aircraft", "pins"],
-            "pending": ["blend_mode"],
+            "runtime_overlay_blend_layers": ["aircraft", "pins"],
+            "pending": ["blend_mode_vector_layers"],
         },
         "rrkal_boundary": {
             "displaytools_owns": [

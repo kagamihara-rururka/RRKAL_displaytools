@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - Overlay runtime blend mode
+
+Scope:
+- Added renderer blend compositing modes for runtime overlay layers: Normal, Screen, Multiply, Overlay, and Soft Light.
+- Qt `blend_mode` runtime state now applies to the ADS-B aircraft and Pin marker overlays.
+- Renderer ack now reports `changed_blend_layers` and current `layer_blend_mode`; capabilities expose overlay blend support separately from vector layer pending work.
+
+Positioning:
+- This closes the first visible blend-mode loop for independent overlays without pretending aggregate vector layers are solved.
+- Remaining blend work is lake/river/boundary/vector overlay composition and vehicle icon support once it has an independent renderer overlay.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Pin layer runtime visibility opacity
 
 Scope:
