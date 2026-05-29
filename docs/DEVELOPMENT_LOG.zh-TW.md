@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - Layer pick state bridge
+
+Scope:
+- Renderer selected-layer pick results now write `state/renderer_layer_pick_state.json`.
+- Qt launch commands pass `--layer-pick-state-file`, and the Layers panel reads the file to show event, target, picker, hit state, frame, and timestamp.
+- Research provenance now includes the layer pick state path and latest payload.
+
+Positioning:
+- This closes the selected-layer picking feedback loop between renderer and Qt panel.
+- Remaining picking work is polygon fill masks and hydrology feature picking.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Selected-layer scoped renderer picking
 
 Scope:

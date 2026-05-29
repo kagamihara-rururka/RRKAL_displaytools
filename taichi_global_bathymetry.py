@@ -10526,6 +10526,7 @@ class HybridRenderController:
         )
         self.pin_input_ack_file = Path(args.pin_input_ack_file) if getattr(args, "pin_input_ack_file", None) else None
         self.pin_pick_state_file = Path(args.pin_pick_state_file) if getattr(args, "pin_pick_state_file", None) else None
+        self.layer_pick_state_file = Path(args.layer_pick_state_file) if getattr(args, "layer_pick_state_file", None) else None
         self.write_pin_input_ack()
         self.boundary_highlight_state, self.boundary_highlight_error = load_boundary_highlight_state(
             getattr(args, "boundary_highlight_json", None)
@@ -12611,6 +12612,39 @@ class HybridRenderController:
         except OSError as exc:
             print(f"Unable to write pin pick state: {exc}")
 
+    def selected_vehicle_summary(self) -> dict[str, object] | None:
+        row = self.selected_vehicle
+        if not isinstance(row, pd.Series):
+            return None
+        summary: dict[str, object] = {}
+        for key in ("source", "mmsi", "icao24", "name", "shipname", "callsign", "lat", "lon", "sog", "speed_kt", "altitude_m", "cog", "heading", "timestamp"):
+            if key in row and pd.notna(row.get(key)):
+                summary[key] = str(row.get(key))
+        return summary
+
+    def write_layer_pick_state(self) -> None:
+        if self.layer_pick_state_file is None:
+            return
+        payload = {
+            "schema": "rrkal_displaytools.renderer_layer_pick_state.v1",
+            "updated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "event": self.last_layer_pick_result.get("event"),
+            "selected_renderer_layer": self.selected_renderer_layer_id,
+            "selected_layer_semantic_target": self.selected_layer_semantic_target,
+            "pick_result": self.last_layer_pick_result,
+            "selected_pin_id": self.selected_pin_id,
+            "selected_pin": self.selected_pin_hit,
+            "selected_vehicle": self.selected_vehicle_summary(),
+            "selected_boundary": self.selected_boundary_hit if self.selected_boundary_hit.get("layer_id") else None,
+            "frame_index": self.frame_index,
+            "source": "taichi_global_bathymetry",
+        }
+        try:
+            self.layer_pick_state_file.parent.mkdir(parents=True, exist_ok=True)
+            self.layer_pick_state_file.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        except OSError as exc:
+            print(f"Unable to write layer pick state: {exc}")
+
     def write_pin_input_ack(self) -> None:
         if self.pin_input_ack_file is None:
             return
@@ -12797,6 +12831,7 @@ class HybridRenderController:
             self.overlay_dirty = True
             if had_pin_state:
                 self.write_pin_pick_state("cleared", None)
+        self.write_layer_pick_state()
         return picked
 
     def pick_selected_layer_target(self, x: float, y: float) -> bool:
@@ -12811,6 +12846,7 @@ class HybridRenderController:
                 "hit": picked,
                 "frame_index": self.frame_index,
             }
+            self.write_layer_pick_state()
             return picked
         if layer_id in {"aircraft", "vehicle_icons"}:
             source_filter = {"ADS-B"} if layer_id == "aircraft" else None
@@ -12824,6 +12860,7 @@ class HybridRenderController:
                 "hit": picked,
                 "frame_index": self.frame_index,
             }
+            self.write_layer_pick_state()
             return picked
         if layer_id in BOUNDARY_SPECS:
             return self.pick_boundary_layer(layer_id, x, y)
@@ -12836,6 +12873,7 @@ class HybridRenderController:
                 "hit": False,
                 "frame_index": self.frame_index,
             }
+            self.write_layer_pick_state()
             return False
         picked_pin = self.pick_pin(x, y)
         if picked_pin:
@@ -12847,6 +12885,7 @@ class HybridRenderController:
                 "hit": True,
                 "frame_index": self.frame_index,
             }
+            self.write_layer_pick_state()
             return True
         self.pick_vehicle(x, y)
         picked_vehicle = self.selected_vehicle is not None
@@ -12858,6 +12897,7 @@ class HybridRenderController:
             "hit": picked_vehicle,
             "frame_index": self.frame_index,
         }
+        self.write_layer_pick_state()
         return picked_vehicle
 
     def hit_test_scale_bar(self, x: float, y: float) -> bool:
@@ -15538,6 +15578,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--pin-pick-radius", type=float, default=float(os.environ.get("PIN_PICK_RADIUS", "18.0")))
     parser.add_argument("--pin-pick-state-file", default=os.environ.get("PIN_PICK_STATE_FILE"))
     parser.add_argument("--pin-input-ack-file", default=os.environ.get("PIN_INPUT_ACK_FILE"))
+    parser.add_argument("--layer-pick-state-file", default=os.environ.get("LAYER_PICK_STATE_FILE"))
     parser.add_argument("--boundary-highlight-json", default=os.environ.get("BOUNDARY_HIGHLIGHT_JSON"))
     parser.add_argument("--boundary-highlight-ack-file", default=os.environ.get("BOUNDARY_HIGHLIGHT_ACK_FILE"))
     parser.add_argument("--layer-runtime-state-file", default=os.environ.get("LAYER_RUNTIME_STATE_FILE"))
@@ -15690,6 +15731,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "pin-pick-radius",
             "pin-pick-state-file",
             "pin-input-ack-file",
+            "layer-pick-state-file",
         ],
         "boundary_highlight": {
             "schema": BOUNDARY_HIGHLIGHT_SCHEMA,
@@ -15717,7 +15759,9 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "schema": "rrkal_displaytools.layer_runtime_state.v1",
             "control": "layer-runtime-state-file",
             "ack_control": "layer-runtime-ack-file",
+            "pick_state_control": "layer-pick-state-file",
             "ack_schema": "rrkal_displaytools.renderer_layer_runtime_ack.v1",
+            "pick_state_schema": "rrkal_displaytools.renderer_layer_pick_state.v1",
             "runtime_layer_aliases": dict(LAYER_RUNTIME_ID_ALIASES),
             "applies": [
                 "visibility",

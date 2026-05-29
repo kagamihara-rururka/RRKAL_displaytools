@@ -27,6 +27,7 @@ PIN_PICK_ACK_PATH = ROOT / "state" / "qt_pin_pick_ack.json"
 BOUNDARY_HIGHLIGHT_ACK_PATH = ROOT / "state" / "renderer_boundary_highlight_ack.json"
 LAYER_RUNTIME_STATE_PATH = ROOT / "state" / "renderer_layer_runtime_state.json"
 LAYER_RUNTIME_ACK_PATH = ROOT / "state" / "renderer_layer_runtime_ack.json"
+LAYER_PICK_STATE_PATH = ROOT / "state" / "renderer_layer_pick_state.json"
 
 
 def profile_template_packet() -> dict[str, object]:
@@ -231,6 +232,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_runtime_ack_label: QtWidgets.QLabel | None = None
         self.layer_runtime_ack_mtime_ns: int | None = LAYER_RUNTIME_ACK_PATH.stat().st_mtime_ns if LAYER_RUNTIME_ACK_PATH.exists() else None
         self.layer_runtime_ack_payload: dict[str, object] | None = None
+        self.layer_pick_state_label: QtWidgets.QLabel | None = None
+        self.layer_pick_state_mtime_ns: int | None = LAYER_PICK_STATE_PATH.stat().st_mtime_ns if LAYER_PICK_STATE_PATH.exists() else None
+        self.layer_pick_state_payload: dict[str, object] | None = None
         self.history_list: QtWidgets.QListWidget | None = None
         self.selected_layer_key: str | None = None
         self.boundary_highlight_state: dict[str, object] = default_boundary_highlight_state()
@@ -297,6 +301,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_runtime_ack_timer.setInterval(1000)
         self.layer_runtime_ack_timer.timeout.connect(self.refresh_layer_runtime_ack_state)
         self.layer_runtime_ack_timer.start()
+        self.layer_pick_state_timer = QtCore.QTimer(self)
+        self.layer_pick_state_timer.setInterval(800)
+        self.layer_pick_state_timer.timeout.connect(self.refresh_layer_pick_state)
+        self.layer_pick_state_timer.start()
         self.boundary_highlight_ack_timer = QtCore.QTimer(self)
         self.boundary_highlight_ack_timer.setInterval(1000)
         self.boundary_highlight_ack_timer.timeout.connect(self.refresh_boundary_highlight_ack_state)
@@ -511,6 +519,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_runtime_ack_label = QtWidgets.QLabel(f"Renderer ack: waiting for {LAYER_RUNTIME_ACK_PATH.name}")
         self.layer_runtime_ack_label.setWordWrap(True)
         layers_layout.addWidget(self.layer_runtime_ack_label)
+        self.layer_pick_state_label = QtWidgets.QLabel(f"Layer pick: waiting for {LAYER_PICK_STATE_PATH.name}")
+        self.layer_pick_state_label.setWordWrap(True)
+        layers_layout.addWidget(self.layer_pick_state_label)
         demo = QtWidgets.QCheckBox("閉環展示 preset（會覆蓋部分設定）")
         demo.stateChanged.connect(self.refresh_command_preview)
         self.checks["demo_closed_loop"] = demo
@@ -1036,6 +1047,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 str(LAYER_RUNTIME_STATE_PATH),
                 "--layer-runtime-ack-file",
                 str(LAYER_RUNTIME_ACK_PATH),
+                "--layer-pick-state-file",
+                str(LAYER_PICK_STATE_PATH),
             ]
         )
         pins = self.collect_research_pins()
@@ -1115,6 +1128,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "pin_pick_ack_file": str(PIN_PICK_ACK_PATH),
             "layer_runtime_state_file": str(LAYER_RUNTIME_STATE_PATH),
             "layer_runtime_ack_file": str(LAYER_RUNTIME_ACK_PATH),
+            "layer_pick_state_file": str(LAYER_PICK_STATE_PATH),
             "command": self.build_command(),
             "command_line": subprocess.list2cmdline(self.build_command()),
             "portable_command": self.build_portable_command(),
@@ -1350,6 +1364,50 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"blend={changed_blend_count}, "
             f"target={selected_renderer_layer}, boundary_blend={boundary_blend}, "
             f"skipped_locked={skipped_count}, frame={frame_index}, updated={updated_at}"
+        )
+
+    def refresh_layer_pick_state(self) -> None:
+        try:
+            stat = LAYER_PICK_STATE_PATH.stat()
+        except FileNotFoundError:
+            if self.layer_pick_state_mtime_ns is not None:
+                self.layer_pick_state_mtime_ns = None
+                if self.layer_pick_state_label is not None:
+                    self.layer_pick_state_label.setText(f"Layer pick: waiting for {LAYER_PICK_STATE_PATH.name}")
+            return
+        except OSError as exc:
+            if self.layer_pick_state_label is not None:
+                self.layer_pick_state_label.setText(f"Layer pick read failed: {exc}")
+            return
+        if stat.st_mtime_ns == self.layer_pick_state_mtime_ns:
+            return
+        next_mtime_ns = stat.st_mtime_ns
+        try:
+            payload = json.loads(LAYER_PICK_STATE_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            if self.layer_pick_state_label is not None:
+                self.layer_pick_state_label.setText(f"Layer pick parse failed: {exc}")
+            return
+        self.layer_pick_state_mtime_ns = next_mtime_ns
+        if isinstance(payload, dict):
+            self.layer_pick_state_payload = payload
+            self.refresh_layer_pick_state_label(payload)
+            self.refresh_research_provenance()
+
+    def refresh_layer_pick_state_label(self, payload: dict[str, object]) -> None:
+        if self.layer_pick_state_label is None:
+            return
+        result = payload.get("pick_result")
+        result = result if isinstance(result, dict) else {}
+        event = str(result.get("event") or payload.get("event") or "-")
+        target = str(payload.get("selected_renderer_layer") or result.get("renderer_layer") or "-")
+        picker = str(result.get("picker") or "-")
+        hit = result.get("hit")
+        frame_index = payload.get("frame_index", "-")
+        updated_at = str(payload.get("updated_at_utc", "-"))
+        self.layer_pick_state_label.setText(
+            f"Layer pick: event={event}, target={target}, picker={picker}, hit={hit}, "
+            f"frame={frame_index}, updated={updated_at}"
         )
 
     def refresh_pin_input_ack_state(self) -> None:
@@ -2310,6 +2368,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_runtime_ack_file": str(LAYER_RUNTIME_ACK_PATH),
             "layer_runtime_ack": self.layer_runtime_ack_payload,
             "layer_runtime_history": self.layer_runtime_history[:5],
+            "layer_pick_state_file": str(LAYER_PICK_STATE_PATH),
+            "layer_pick_state": self.layer_pick_state_payload,
             "canvas_select_hit_targets": self.canvas_layer_hit_keys(),
             "pin_overlay_boundary": "Pins are geodetic annotations; renderer sync must rotate them with the globe and apply horizon/depth occlusion.",
             "pin_projection_contract": pin_projection_contract_packet(),
