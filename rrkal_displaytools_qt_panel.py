@@ -68,6 +68,7 @@ except ImportError as exc:
 RENDERER = ROOT / "taichi_global_bathymetry.py"
 PROFILE_DIR = ROOT / "state" / "ui_profiles"
 SHOWCASE_DIR = ROOT / "state" / "showcase"
+RENDERER_PREVIEW_FRAME_PATH = ROOT / "state" / "renderer_preview_frame.png"
 WORKSPACE_STATE_PATH = ROOT / "state" / "ui_workspace.json"
 
 STYLE_PROFILES = ("scientific", "nautical", "parchment", "tactical")
@@ -608,6 +609,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         layer_manifest_button = QtWidgets.QPushButton("圖層 manifest")
         canvas_state_button = QtWidgets.QPushButton("Canvas state")
         thumbnail_button = QtWidgets.QPushButton("Renderer thumbnail")
+        live_preview_button = QtWidgets.QPushButton("Live preview")
         smoke_button = QtWidgets.QPushButton("Smoke check")
         launch_button = QtWidgets.QPushButton("啟動地球儀")
         restart_button = QtWidgets.QPushButton("套用並重啟")
@@ -625,6 +627,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         layer_manifest_button.clicked.connect(self.show_layer_manifest)
         canvas_state_button.clicked.connect(self.show_canvas_state_preview)
         thumbnail_button.clicked.connect(self.show_latest_renderer_thumbnail)
+        live_preview_button.clicked.connect(self.show_live_renderer_preview)
         smoke_button.clicked.connect(self.run_smoke_check)
         launch_button.clicked.connect(self.launch_renderer)
         restart_button.clicked.connect(self.restart_renderer)
@@ -643,6 +646,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             layer_manifest_button,
             canvas_state_button,
             thumbnail_button,
+            live_preview_button,
             smoke_button,
             launch_button,
             restart_button,
@@ -700,6 +704,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         renderer_menu.addAction("Closed-loop Status JSON", self.show_closed_loop_status)
         renderer_menu.addAction("Layer Manifest JSON", self.show_layer_manifest)
         renderer_menu.addAction("Latest Output Thumbnail", self.show_latest_renderer_thumbnail)
+        renderer_menu.addAction("Live Preview Stream", self.show_live_renderer_preview)
 
         window_menu = self.menuBar().addMenu("Window")
         window_menu.addAction("Open Template Folder", self.open_template_dir)
@@ -1050,6 +1055,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.roughness_edit.text().strip() or "0.28",
             "--ocean-foam",
             self.foam_edit.text().strip() or "0.12",
+            "--preview-frame-file",
+            str(RENDERER_PREVIEW_FRAME_PATH),
+            "--preview-frame-interval",
+            "0.75",
         ]
         rrkal_manifest_ref = self.rrkal_manifest_ref_edit.text().strip()
         if rrkal_manifest_ref:
@@ -1177,12 +1186,23 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         except ValueError:
             return str(self.renderer_thumbnail_path)
 
+    def display_renderer_preview_path(self, path: Path) -> str:
+        try:
+            return str(path.relative_to(ROOT))
+        except ValueError:
+            return str(path)
+
     def collect_canvas_preview_state(self) -> dict[str, object]:
+        renderer_sync = {
+            "state": "ui_state_preview",
+            "thumbnail": "static_renderer_output_thumbnail",
+            "live_file_stream": "file_based_live_renderer_frame_stream",
+        }.get(self.canvas_preview_mode, "ui_state_preview")
         return {
             "schema": "rrkal_displaytools.canvas_preview.v1",
             "mode": self.canvas_preview_mode,
             "renderer_thumbnail_path": self.renderer_thumbnail_profile_path(),
-            "renderer_sync": "static_renderer_output_thumbnail",
+            "renderer_sync": renderer_sync,
         }
 
     def collect_layer_stack_ui(self) -> dict[str, dict[str, object]]:
@@ -1846,6 +1866,18 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
 
     def apply_canvas_preview_state(self, state: dict[str, object]) -> None:
         mode = str(state.get("mode", "state"))
+        if mode == "live_file_stream":
+            preview_path = RENDERER_PREVIEW_FRAME_PATH
+            raw_path = state.get("renderer_thumbnail_path")
+            if isinstance(raw_path, str) and raw_path.strip():
+                candidate = Path(raw_path.strip())
+                if not candidate.is_absolute():
+                    candidate = ROOT / candidate
+                preview_path = candidate
+            self.canvas_preview_mode = "live_file_stream"
+            self.renderer_thumbnail_path = preview_path
+            self.renderer_thumbnail_mtime_ns = None
+            return
         if mode == "thumbnail":
             thumbnail_path: Path | None = None
             raw_path = state.get("renderer_thumbnail_path")
@@ -2356,11 +2388,27 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def refresh_canvas_preview(self) -> None:
         if self.canvas_preview_label is None or self.canvas_meta_label is None:
             return
-        if self.canvas_preview_mode == "thumbnail" and self.renderer_thumbnail_path is not None:
+        if self.canvas_preview_mode in {"thumbnail", "live_file_stream"} and self.renderer_thumbnail_path is not None:
             if self.render_thumbnail_into_canvas(self.renderer_thumbnail_path):
+                sync_note = (
+                    "File-based live renderer frame stream."
+                    if self.canvas_preview_mode == "live_file_stream"
+                    else "Static output preview with auto-refresh."
+                )
                 self.canvas_meta_label.setText(
-                    f"Renderer thumbnail: {self.renderer_thumbnail_path.relative_to(ROOT)}. "
-                    "Static output preview only; live renderer frame stream remains future work."
+                    f"Renderer preview: {self.display_renderer_preview_path(self.renderer_thumbnail_path)}. {sync_note}"
+                )
+                self.refresh_research_provenance()
+                return
+            if self.canvas_preview_mode == "live_file_stream":
+                self.canvas_preview_label.setPixmap(QtGui.QPixmap())
+                self.canvas_preview_label.setText(
+                    "Renderer Live Preview\n\n"
+                    f"Waiting for {self.display_renderer_preview_path(self.renderer_thumbnail_path)}\n"
+                    "Launch or restart renderer to start the file stream."
+                )
+                self.canvas_meta_label.setText(
+                    f"Renderer live preview waiting for {self.display_renderer_preview_path(self.renderer_thumbnail_path)}."
                 )
                 self.refresh_research_provenance()
                 return
@@ -2413,7 +2461,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"Selected pin: {selected_pin_text}\n"
             f"Pin markers: {pin_markers}\n"
             f"Cursor estimate: {cursor_text}\n\n"
-            "Qt state preview; renderer state sync and pick bridges are live. Use Renderer thumbnail for latest output PNG."
+            "Qt state preview; renderer state sync and pick bridges are live. Use Renderer thumbnail or Live preview for renderer pixels."
         )
         self.canvas_meta_label.setText(
             f"Canvas state mirrors Qt UI only：active tool={self.active_tool}, "
@@ -2471,14 +2519,25 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             return
         self.canvas_preview_mode = "thumbnail"
         self.renderer_thumbnail_path = path
+        self.renderer_thumbnail_mtime_ns = None
         self.refresh_canvas_preview()
         self.status.setText(f"已顯示 renderer thumbnail：{path.relative_to(ROOT)}")
 
+    @QtCore.pyqtSlot()
+    def show_live_renderer_preview(self) -> None:
+        self.canvas_preview_mode = "live_file_stream"
+        self.renderer_thumbnail_path = RENDERER_PREVIEW_FRAME_PATH
+        self.renderer_thumbnail_mtime_ns = None
+        self.refresh_canvas_preview()
+        self.status.setText(f"已切到 renderer live preview stream：{RENDERER_PREVIEW_FRAME_PATH.relative_to(ROOT)}")
+
     def refresh_renderer_thumbnail_if_needed(self) -> None:
-        if self.canvas_preview_mode != "thumbnail":
+        if self.canvas_preview_mode not in {"thumbnail", "live_file_stream"}:
             return
         path = self.renderer_thumbnail_path
-        if path is None or not path.exists():
+        if self.canvas_preview_mode == "live_file_stream":
+            path = RENDERER_PREVIEW_FRAME_PATH
+        elif path is None or not path.exists():
             path = self.latest_renderer_thumbnail_path()
         if path is None:
             return
@@ -2490,9 +2549,13 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             return
         self.renderer_thumbnail_path = path
         if self.render_thumbnail_into_canvas(path) and self.canvas_meta_label is not None:
+            sync_note = (
+                "File-based live renderer frame stream."
+                if self.canvas_preview_mode == "live_file_stream"
+                else "Static output preview with auto-refresh."
+            )
             self.canvas_meta_label.setText(
-                f"Renderer thumbnail auto-refreshed: {path.relative_to(ROOT)}. "
-                "Static output preview only; live renderer frame stream remains future work."
+                f"Renderer preview auto-refreshed: {self.display_renderer_preview_path(path)}. {sync_note}"
             )
             self.refresh_research_provenance()
 

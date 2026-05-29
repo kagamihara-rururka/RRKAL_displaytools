@@ -30,7 +30,7 @@ rrkal_displaytools.qt_panel_profile.v1
 | `tool_state` | object | optional | Qt tool palette 的 UI-only state。 |
 | `pins` | array | optional | 科研標記清單。 |
 | `boundary_highlight` | object | optional | 疆域/領海/EEZ hover 強調遮罩控制。 |
-| `canvas_preview` | object | optional | 中央 Canvas Preview 模式與 static renderer thumbnail 參考。 |
+| `canvas_preview` | object | optional | 中央 Canvas Preview 模式、static renderer thumbnail 或 live renderer frame stream 參考。 |
 
 ## `renderer`
 
@@ -170,14 +170,14 @@ Renderer overlay 接上後，Pin 不應是螢幕固定標籤，而應是 geodeti
 
 ## `canvas_preview`
 
-可選。此欄位保存中央 Canvas Preview 的 UI 狀態，讓 profile / launch packet 可重現操作者當時是在看 Qt state preview，或是在看最近一次 renderer output static thumbnail。
+可選。此欄位保存中央 Canvas Preview 的 UI 狀態，讓 profile / launch packet 可重現操作者當時是在看 Qt state preview、最近一次 renderer output static thumbnail，或 renderer 寫出的 file-based live preview frame。
 
 | Field | Type | Description |
 | --- | --- | --- |
 | `schema` | string | 固定為 `rrkal_displaytools.canvas_preview.v1`。 |
-| `mode` | string | `state` 或 `thumbnail`。 |
-| `renderer_thumbnail_path` | string or null | 可選的 renderer PNG 相對路徑，例如 `state/showcase/quick_smoke.png`。若載入時不存在，Qt 會 fallback 到最近的 `state/showcase/*.png`；仍找不到時回到 `state`。 |
-| `renderer_sync` | string | 目前為 static thumbnail contract；live renderer frame stream 仍是後續工作。 |
+| `mode` | string | `state`、`thumbnail` 或 `live_file_stream`。 |
+| `renderer_thumbnail_path` | string or null | 可選的 renderer PNG 相對路徑，例如 `state/showcase/quick_smoke.png` 或 `state/renderer_preview_frame.png`。`thumbnail` 載入時若不存在，Qt 會 fallback 到最近的 `state/showcase/*.png`；`live_file_stream` 會等待 renderer 寫出 live preview frame。 |
+| `renderer_sync` | string | `state` 為 UI-only preview；`thumbnail` 為 static renderer output contract；`live_file_stream` 為 file-based live renderer frame stream。 |
 
 ## Handoff rules
 

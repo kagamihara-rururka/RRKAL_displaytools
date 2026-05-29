@@ -59,11 +59,13 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "runtime JSON inspectors",
                     "static renderer output thumbnail",
                     "static thumbnail auto-refresh",
+                    "file-based live renderer frame stream",
                 ],
-                "pending": ["live renderer frame stream"],
+                "pending": ["low-latency IPC/GPU frame stream"],
                 "evidence": [
                     "Qt Canvas Preview",
                     "state/showcase/*.png",
+                    "state/renderer_preview_frame.png",
                     "renderer_layer_runtime_state.json",
                     "renderer_layer_pick_state.json",
                 ],
@@ -79,7 +81,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
         "pending": [
             "authoritative polygon territory/EEZ identity",
             "open-line area inference",
-            "live renderer frame stream",
+            "low-latency IPC/GPU frame stream",
         ],
         "external_dependencies": ["RRKAL data manifest validation/ingest/governance"],
     }

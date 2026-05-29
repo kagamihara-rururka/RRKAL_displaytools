@@ -1,4 +1,19 @@
-﻿# Development Log
+# Development Log
+
+## 2026-05-29 - File-based renderer live preview stream
+
+Scope:
+- Renderer now accepts `--preview-frame-file` and `--preview-frame-interval`.
+- During render loops, renderer writes the current `frame_rgba` into an atomically replaced PNG for Qt preview.
+- Qt launch commands pass `state/renderer_preview_frame.png`, and Canvas Preview can switch to `live_file_stream` mode with automatic polling.
+- Smoke now checks that renderer capabilities expose `preview_frame_stream.schema == rrkal_displaytools.preview_frame_stream.v1`.
+
+Positioning:
+- This closes a minimal live renderer preview loop without adding another UI backend or mixing Tk.
+- The future renderer preview upgrade is low-latency IPC/GPU texture streaming, not displaytools data governance.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
 ## 2026-05-29 - Smoke gate for canvas preview handoff
 

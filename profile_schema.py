@@ -55,7 +55,7 @@ BLEND_MODES = {"Normal", "Screen", "Multiply", "Overlay", "Soft Light"}
 TOOL_MODES = {"move", "select", "pin"}
 PIN_TYPES = {"Observation", "Sample Site", "Anomaly", "Reference", "Event"}
 PIN_LABEL_MODES = {"auto", "selected", "priority", "hidden"}
-CANVAS_PREVIEW_MODES = {"state", "thumbnail"}
+CANVAS_PREVIEW_MODES = {"state", "thumbnail", "live_file_stream"}
 BOUNDARY_HIGHLIGHT_LAYER_KEYS = {"border_layer", "territorial_sea_layer", "eez_layer", "high_seas_layer"}
 BOUNDARY_HIGHLIGHT_TRIGGERS = {"hover", "selected", "hover_or_selected"}
 REQUIRED_BOUNDARY_HIGHLIGHT_FIELDS = {
@@ -340,6 +340,12 @@ def profile_schema_packet() -> dict[str, object]:
             "tool_modes": sorted(TOOL_MODES),
             "pin_types": sorted(PIN_TYPES),
             "pin_label_modes": sorted(PIN_LABEL_MODES),
+        },
+        "optional_canvas_preview": {
+            "schema": CANVAS_PREVIEW_SCHEMA_ID,
+            "modes": sorted(CANVAS_PREVIEW_MODES),
+            "fields": ["schema", "mode", "renderer_thumbnail_path", "renderer_sync"],
+            "live_file_stream_path": "state/renderer_preview_frame.png",
         },
         "optional_boundary_highlight": {
             "schema": BOUNDARY_HIGHLIGHT_SCHEMA_ID,

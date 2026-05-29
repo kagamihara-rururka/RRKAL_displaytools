@@ -10847,6 +10847,13 @@ class HybridRenderController:
         self.output_path = Path(args.output) if args.output else None
         if self.output_path:
             self.output_path.parent.mkdir(parents=True, exist_ok=True)
+        self.preview_frame_path = (
+            Path(args.preview_frame_file) if getattr(args, "preview_frame_file", None) else None
+        )
+        if self.preview_frame_path:
+            self.preview_frame_path.parent.mkdir(parents=True, exist_ok=True)
+        self.preview_frame_interval = max(0.05, float(getattr(args, "preview_frame_interval", 0.75)))
+        self.preview_frame_last_write = 0.0
         self.lod_manager = BasemapLODManager()
         self.basemap_lod = self.lod_manager.choose(self.current_km_per_pixel())
         self.hydrology_render_profile = HydrologyRenderLODProfile(args)
@@ -13016,6 +13023,22 @@ class HybridRenderController:
         except OSError as exc:
             print(f"Unable to write output metadata: {exc}")
 
+    def write_preview_frame_if_due(self, force: bool = False) -> None:
+        if self.preview_frame_path is None:
+            return
+        now = time.time()
+        if not force and now - self.preview_frame_last_write < self.preview_frame_interval:
+            return
+        try:
+            from PIL import Image
+
+            tmp_path = self.preview_frame_path.with_name(self.preview_frame_path.name + ".tmp.png")
+            Image.fromarray(self.frame_rgba, mode="RGBA").save(tmp_path)
+            tmp_path.replace(self.preview_frame_path)
+            self.preview_frame_last_write = now
+        except Exception as exc:
+            print(f"Unable to write preview frame: {exc}")
+
     def write_pin_input_ack(self) -> None:
         if self.pin_input_ack_file is None:
             return
@@ -14520,6 +14543,9 @@ class HybridRenderController:
 
             Image.fromarray(self.frame_rgba, mode="RGBA").save(self.output_path)
             self.write_output_metadata()
+        self.write_preview_frame_if_due(
+            force=force or bool(getattr(self.args, "once", False) or getattr(self.args, "headless", False))
+        )
         self.frame_index += 1
         return self.frame_rgba
 
@@ -15999,6 +16025,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--headless", action=bool_action, default=False)
     parser.add_argument("--once", action=bool_action, default=False)
     parser.add_argument("--output", default=None)
+    parser.add_argument("--preview-frame-file", default=os.environ.get("PREVIEW_FRAME_FILE"))
+    parser.add_argument("--preview-frame-interval", type=float, default=float(os.environ.get("PREVIEW_FRAME_INTERVAL", "0.75")))
     parser.add_argument("--rrkal-data-manifest-ref", default=os.environ.get("RRKAL_DATA_MANIFEST_REF", ""))
     parser.add_argument("--fps-log", default=str(CACHE_DIR / "fps_log.jsonl"))
     parser.add_argument("--demo-closed-loop", action=bool_action, default=parse_bool(os.environ.get("DEMO_CLOSED_LOOP"), False))
@@ -16212,6 +16240,14 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "env": "RRKAL_DATA_MANIFEST_REF",
             "applies": ["launch_packet", "renderer_output_metadata_sidecar"],
             "boundary": "reference-only; displaytools records the value and RRKAL owns manifest/cache governance",
+        },
+        "preview_frame_stream": {
+            "schema": "rrkal_displaytools.preview_frame_stream.v1",
+            "controls": ["preview-frame-file", "preview-frame-interval"],
+            "env": ["PREVIEW_FRAME_FILE", "PREVIEW_FRAME_INTERVAL"],
+            "applies": ["file-based preview PNG stream", "Qt Canvas Preview live_file_stream mode"],
+            "pending": ["low_latency_ipc_or_gpu_texture_stream"],
+            "output": "RGBA PNG replaced atomically at the requested interval",
         },
         "pin_controls": [
             "pin-file",

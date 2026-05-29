@@ -28,7 +28,19 @@ $launchPacket = $launchPacketText | ConvertFrom-Json
 if ($launchPacket.canvas_preview.schema -ne "rrkal_displaytools.canvas_preview.v1") {
     throw "Launch packet canvas_preview schema missing or invalid"
 }
-Invoke-CheckedNative py @("-3", "taichi_global_bathymetry.py", "--print-renderer-capabilities") | Out-Null
+$capabilitiesText = & py -3 taichi_global_bathymetry.py --print-renderer-capabilities
+if ($LASTEXITCODE -ne 0) {
+    throw "Command failed: py -3 taichi_global_bathymetry.py --print-renderer-capabilities"
+}
+$capabilitiesRaw = $capabilitiesText -join "`n"
+$capabilitiesJsonStart = $capabilitiesRaw.IndexOf("{")
+if ($capabilitiesJsonStart -lt 0) {
+    throw "Renderer capabilities JSON payload not found"
+}
+$capabilities = $capabilitiesRaw.Substring($capabilitiesJsonStart) | ConvertFrom-Json
+if ($capabilities.preview_frame_stream.schema -ne "rrkal_displaytools.preview_frame_stream.v1") {
+    throw "Renderer preview_frame_stream capability missing or invalid"
+}
 Invoke-CheckedNative py @("-3", "taichi_global_bathymetry.py", "--print-closed-loop-status") | Out-Null
 Invoke-CheckedNative py @("-3", "taichi_global_bathymetry.py", "--print-layer-manifest") | Out-Null
 Invoke-CheckedNative py @("-3", "rrkal_displaytools_qt_panel.py", "--list-templates") | Out-Null
