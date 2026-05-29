@@ -46,6 +46,26 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\render_quick_smoke.p
 
 ## 4. 開 Qt 控制面板
 
+建議用 repo 內 launcher；它會優先使用 `.venv\Scripts\python.exe`，找不到 `.venv` 時才 fallback 到 `py -3`：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\run_qt_panel.ps1
+```
+
+需要先跑 smoke 再開 UI：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\run_qt_panel.ps1 -SmokeFirst
+```
+
+也可以直接載入 repo profile template：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\run_qt_panel.ps1 -Template maritime_hydrology
+```
+
+手動等價命令：
+
 ```powershell
 python rrkal_displaytools_qt_panel.py
 ```

@@ -1,5 +1,18 @@
 ﻿# Development Log
 
+## 2026-05-29 - Qt launcher smoke gate
+
+Scope:
+- `scripts/run_qt_panel.ps1` now prefers the repo `.venv` Python when available, then falls back to `py -3`.
+- Added optional `-SmokeFirst` to run the project smoke check before opening the Qt panel.
+- Quickstart, README, capability summary, and closed-loop evidence now point to the launcher as the cross-machine Qt entry.
+
+Positioning:
+- This improves clone-to-UI startup without adding dataset discovery, download, import, or cache governance.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Boundary closed-ring area hit
 
 Scope:

@@ -40,6 +40,7 @@ Open the panel with a shared template already loaded:
 ```powershell
 .\scripts\run_qt_panel.ps1 -Profile .\profiles\maritime_hydrology.json
 .\scripts\run_qt_panel.ps1 -Template maritime_hydrology
+.\scripts\run_qt_panel.ps1 -SmokeFirst
 ```
 
 Optional quick headless render request:

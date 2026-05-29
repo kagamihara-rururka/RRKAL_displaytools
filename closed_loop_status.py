@@ -34,7 +34,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
             {
                 "id": "cross_machine_bootstrap_docs",
                 "scope": ["clone", "venv setup", "smoke", "Qt panel launch"],
-                "evidence": ["docs/QUICKSTART_CLONE.zh-TW.md", "README.md"],
+                "evidence": ["scripts/run_qt_panel.ps1", "docs/QUICKSTART_CLONE.zh-TW.md", "README.md"],
             },
         ],
         "partial": [

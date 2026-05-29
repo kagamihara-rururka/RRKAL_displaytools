@@ -1,17 +1,48 @@
 param(
     [string]$Profile,
-    [string]$Template
+    [string]$Template,
+    [switch]$SmokeFirst
 )
 
 $ErrorActionPreference = "Stop"
 $RepoRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 Set-Location $RepoRoot
 
-$args = @("-3", "rrkal_displaytools_qt_panel.py")
+function Invoke-CheckedNative {
+    param(
+        [string]$FilePath,
+        [string[]]$ArgumentList
+    )
+
+    & $FilePath @ArgumentList
+    if ($LASTEXITCODE -ne 0) {
+        throw "Command failed: $FilePath $($ArgumentList -join ' ')"
+    }
+}
+
+if ($SmokeFirst) {
+    Invoke-CheckedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\smoke.ps1")
+}
+
+$VenvPython = Join-Path $RepoRoot ".venv\Scripts\python.exe"
+if (Test-Path $VenvPython) {
+    $python = $VenvPython
+    $pythonArgs = @()
+} else {
+    $python = "py"
+    $pythonArgs = @("-3")
+}
+
+$qtArgs = @("rrkal_displaytools_qt_panel.py")
 if ($Profile) {
-    $args += @("--profile", $Profile)
+    $qtArgs += @("--profile", $Profile)
 }
 if ($Template) {
-    $args += @("--template", $Template)
+    $qtArgs += @("--template", $Template)
 }
-py @args
+
+Write-Host "RRKAL_displaytools Qt launcher"
+Write-Host "Repo: $RepoRoot"
+Write-Host "Python: $python $($pythonArgs -join ' ')"
+
+Invoke-CheckedNative $python ($pythonArgs + $qtArgs)
