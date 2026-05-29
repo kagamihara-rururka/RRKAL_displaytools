@@ -74,6 +74,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.checks: dict[str, QtWidgets.QCheckBox] = {}
         self.template_paths: list[Path] = []
         self._build_ui()
+        self.process_timer = QtCore.QTimer(self)
+        self.process_timer.setInterval(1500)
+        self.process_timer.timeout.connect(self.update_process_status)
+        self.process_timer.start()
         self.apply_baseline()
         self.refresh_template_list()
         self.refresh_command_preview()
@@ -439,6 +443,18 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.process.terminate()
         self.process = None
         self.launch_renderer()
+
+    @QtCore.pyqtSlot()
+    def update_process_status(self) -> None:
+        if self.process is None:
+            return
+        pid = self.process.pid
+        exit_code = self.process.poll()
+        if exit_code is None:
+            self.status.setText(f"renderer 執行中，PID={pid}")
+            return
+        self.status.setText(f"renderer 已結束，PID={pid}，exit={exit_code}")
+        self.process = None
 
     def _set_combo(self, combo: QtWidgets.QComboBox, value: str) -> None:
         index = combo.findText(value)

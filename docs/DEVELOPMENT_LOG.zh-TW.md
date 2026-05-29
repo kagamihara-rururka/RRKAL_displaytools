@@ -1,5 +1,17 @@
 ﻿# Development Log
 
+## 2026-05-29 - Qt panel renderer process status
+
+Scope:
+- Added a Qt timer that polls the renderer process started by `rrkal_displaytools_qt_panel.py`.
+- The panel now reports running PID and exit code when the renderer closes.
+
+Positioning:
+- This improves operator feedback without changing renderer behavior or RRKAL data governance.
+
+Validation:
+- Not run; no test/validation requested.
+
 ## 2026-05-29 - Qt panel operator shortcuts
 
 Scope:
