@@ -44,6 +44,7 @@ $summary = [ordered]@{
         profile_launch_readiness_ui = $launchPacket.profile_launch_readiness_ui.schema
         layer_visual_presets = $launchPacket.layer_visual_presets.schema
         layer_visual_preset_runtime_feedback = $launchPacket.layer_visual_preset_runtime_feedback.schema
+        hydrology_lod_readiness = $launchPacket.hydrology_lod_readiness.schema
         layer_undo = $launchPacket.layer_undo.schema
         session_journal = $launchPacket.session_journal.schema
         timeline_state = $launchPacket.timeline_state.schema
@@ -103,6 +104,15 @@ $summary = [ordered]@{
         qt_surface = $launchPacket.layer_visual_preset_runtime_feedback.qt_surface
         ack_file = $launchPacket.layer_visual_preset_runtime_feedback.ack_file
         requires_renderer_ack_for_reproducibility = $launchPacket.layer_visual_preset_runtime_feedback.requires_renderer_ack_for_reproducibility
+    }
+    hydrology_lod_readiness = @{
+        launch_packet_schema = $launchPacket.hydrology_lod_readiness.schema
+        renderer_capabilities_schema = $capabilities.hydrology_lod_readiness.schema
+        readiness = $launchPacket.hydrology_lod_readiness.readiness
+        live_hydrology_layer_count = $launchPacket.hydrology_lod_readiness.live_hydrology_layer_count
+        hydrology_layer_count = $launchPacket.hydrology_lod_readiness.hydrology_layer_count
+        stable_renderer_targets = $launchPacket.hydrology_lod_readiness.stable_renderer_targets
+        lod_hook_status = $launchPacket.hydrology_lod_readiness.lod_hook_status
     }
     layer_capability_matrix = @{
         schema = $capabilities.layer_capability_matrix.schema

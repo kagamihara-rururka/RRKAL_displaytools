@@ -242,6 +242,21 @@ if ($launchPacket.layer_visual_preset_runtime_feedback.qt_surface -ne "Layers do
 if ($launchPacket.layer_visual_preset_runtime_feedback.requires_renderer_ack_for_reproducibility -ne $true) {
     throw "Launch packet layer_visual_preset_runtime_feedback must require renderer ack"
 }
+if ($launchPacket.hydrology_lod_readiness.schema -ne "rrkal_displaytools.hydrology_lod_readiness.v1") {
+    throw "Launch packet hydrology_lod_readiness schema missing or invalid"
+}
+if ($launchPacket.hydrology_lod_readiness.readiness -ne "ready") {
+    throw "Launch packet hydrology_lod_readiness should be ready for lake/river layers"
+}
+if ([int]$launchPacket.hydrology_lod_readiness.live_hydrology_layer_count -lt 2) {
+    throw "Launch packet hydrology_lod_readiness live hydrology layer count missing"
+}
+if ($launchPacket.hydrology_lod_readiness.stable_renderer_targets -notcontains "lakes") {
+    throw "Launch packet hydrology_lod_readiness missing lakes renderer target"
+}
+if ($launchPacket.hydrology_lod_readiness.lod_hook_status -ne "contract_ready") {
+    throw "Launch packet hydrology_lod_readiness LOD hook not contract-ready"
+}
 if ($launchPacket.layer_undo.schema -ne "rrkal_displaytools.layer_stack_undo.v1") {
     throw "Launch packet layer_undo schema missing or invalid"
 }
@@ -610,6 +625,15 @@ if ($capabilities.layer_visual_preset_runtime_feedback.schema -ne "rrkal_display
 if ($capabilities.layer_visual_preset_runtime_feedback.ack_file -ne "state/renderer_layer_runtime_ack.json") {
     throw "Renderer layer_visual_preset_runtime_feedback ack file mismatch"
 }
+if ($capabilities.hydrology_lod_readiness.schema -ne "rrkal_displaytools.hydrology_lod_readiness.v1") {
+    throw "Renderer hydrology_lod_readiness schema missing or invalid"
+}
+if ($capabilities.hydrology_lod_readiness.stable_renderer_targets -notcontains "rivers") {
+    throw "Renderer hydrology_lod_readiness missing rivers renderer target"
+}
+if ($capabilities.hydrology_lod_readiness.lod_hook_status -ne "contract_ready") {
+    throw "Renderer hydrology_lod_readiness LOD hook not contract-ready"
+}
 if ($capabilities.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
     throw "Renderer layer_capability_matrix capability missing or invalid"
 }
@@ -867,6 +891,21 @@ if ($handoff.layer_visual_preset_runtime_feedback.renderer_capabilities_schema -
 }
 if ($handoff.layer_visual_preset_runtime_feedback.requires_renderer_ack_for_reproducibility -ne $true) {
     throw "Handoff inspection layer_visual_preset_runtime_feedback must require renderer ack"
+}
+if ($handoff.launch_packet_contracts.hydrology_lod_readiness -ne "rrkal_displaytools.hydrology_lod_readiness.v1") {
+    throw "Handoff inspection hydrology_lod_readiness launch contract missing or invalid"
+}
+if ($handoff.hydrology_lod_readiness.launch_packet_schema -ne "rrkal_displaytools.hydrology_lod_readiness.v1") {
+    throw "Handoff inspection hydrology_lod_readiness launch schema missing or invalid"
+}
+if ($handoff.hydrology_lod_readiness.renderer_capabilities_schema -ne "rrkal_displaytools.hydrology_lod_readiness.v1") {
+    throw "Handoff inspection hydrology_lod_readiness renderer schema missing or invalid"
+}
+if ([int]$handoff.hydrology_lod_readiness.live_hydrology_layer_count -lt 2) {
+    throw "Handoff inspection hydrology_lod_readiness live hydrology layer count missing"
+}
+if ($handoff.hydrology_lod_readiness.lod_hook_status -ne "contract_ready") {
+    throw "Handoff inspection hydrology_lod_readiness LOD hook not contract-ready"
 }
 if ($handoff.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
     throw "Handoff inspection layer_capability_matrix summary missing or invalid"

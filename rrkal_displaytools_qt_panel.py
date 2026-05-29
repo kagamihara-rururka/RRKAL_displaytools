@@ -276,6 +276,60 @@ def layer_visual_preset_runtime_feedback_packet(
     }
 
 
+def hydrology_lod_readiness_packet(
+    source: str,
+    capability_matrix: dict[str, object] | None = None,
+) -> dict[str, object]:
+    capability_matrix = capability_matrix if isinstance(capability_matrix, dict) else {}
+    layers = capability_matrix.get("layers") if isinstance(capability_matrix.get("layers"), list) else []
+    layers_by_key = {
+        str(layer.get("key")): layer
+        for layer in layers
+        if isinstance(layer, dict) and layer.get("key")
+    }
+    hydrology_keys = ("lake_layer", "river_layer")
+    fallback_targets = {"lake_layer": "lakes", "river_layer": "rivers"}
+    hydrology_layers = []
+    for key in hydrology_keys:
+        layer = layers_by_key.get(
+            key,
+            {
+                "key": key,
+                "renderer_target": fallback_targets.get(key, key),
+                "live_controls": ["visibility", "opacity", "blend", "selected_layer_pick"],
+            },
+        )
+        live_controls = layer.get("live_controls") if isinstance(layer.get("live_controls"), list) else []
+        hydrology_layers.append(
+            {
+                "key": key,
+                "renderer_target": layer.get("renderer_target"),
+                "visibility_live": "visibility" in live_controls,
+                "opacity_live": "opacity" in live_controls,
+                "blend_live": "blend" in live_controls,
+                "selected_layer_pick_live": "selected_layer_pick" in live_controls,
+            }
+        )
+    live_layer_count = sum(1 for layer in hydrology_layers if layer["visibility_live"])
+    return {
+        "schema": "rrkal_displaytools.hydrology_lod_readiness.v1",
+        "source": source,
+        "readiness": "ready" if live_layer_count == len(hydrology_layers) else "partial",
+        "hydrology_layer_count": len(hydrology_layers),
+        "live_hydrology_layer_count": live_layer_count,
+        "hydrology_layers": hydrology_layers,
+        "stable_qt_layer_keys": list(hydrology_keys),
+        "stable_renderer_targets": ["lakes", "rivers"],
+        "lod_hook_status": "contract_ready",
+        "lod_hook_fields": ["renderer_target", "visible", "opacity", "blend_mode", "selected_layer_pick"],
+        "deferred_context_layers": ["bathymetry_layer", "coastline_layer"],
+        "qt_surface": "Layers dock Hydrology/LOD readiness label",
+        "launch_packet_fields": ["hydrology_lod_readiness", "layer_capability_matrix", "layer_runtime_evidence"],
+        "renderer_capability_field": "hydrology_lod_readiness",
+        "boundary": "Displaytools owns hydrology renderer-facing layer contracts and LOD hook evidence; dataset discovery, download, import, and cache governance remain RRKAL-owned.",
+    }
+
+
 if "--list-templates" in sys.argv[1:]:
     print(json.dumps(profile_template_packet(), ensure_ascii=False, indent=2))
     raise SystemExit(0)
@@ -1821,6 +1875,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_visual_preset_runtime_feedback_label = QtWidgets.QLabel("Preset renderer ack: waiting")
         self.layer_visual_preset_runtime_feedback_label.setWordWrap(True)
         layers_layout.addWidget(self.layer_visual_preset_runtime_feedback_label)
+        self.hydrology_lod_readiness_label = QtWidgets.QLabel("Hydrology/LOD readiness: pending")
+        self.hydrology_lod_readiness_label.setWordWrap(True)
+        layers_layout.addWidget(self.hydrology_lod_readiness_label)
         preset_buttons = QtWidgets.QHBoxLayout()
         for preset_id, label in (
             ("all_context", "All"),
@@ -2658,6 +2715,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "profile_launch_readiness_ui": self.collect_profile_launch_readiness_ui(),
             "layer_visual_presets": self.collect_layer_visual_presets(),
             "layer_visual_preset_runtime_feedback": self.collect_layer_visual_preset_runtime_feedback(),
+            "hydrology_lod_readiness": self.collect_hydrology_lod_readiness(),
             "layer_capability_matrix": self.collect_layer_capability_matrix(),
             "layer_runtime_evidence_summary": self.collect_layer_capability_matrix().get("runtime_evidence_summary"),
             "active_layer_diagnostics": self.active_layer_diagnostics_packet(),
@@ -2782,6 +2840,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.collect_layer_visual_presets(),
             runtime_ack,
             "rrkal_displaytools_qt_panel",
+        )
+
+    def collect_hydrology_lod_readiness(self) -> dict[str, object]:
+        return hydrology_lod_readiness_packet(
+            "rrkal_displaytools_qt_panel",
+            self.collect_layer_capability_matrix(),
         )
 
     def collect_layer_operator_groups(self) -> dict[str, object]:
@@ -3589,6 +3653,13 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.layer_visual_preset_runtime_feedback_label.setText(
                 f"Preset renderer ack: {preset_feedback.get('status', 'waiting_for_renderer_ack')} "
                 f"(changed={preset_feedback.get('changed_layer_count', 0)}, locked={preset_feedback.get('skipped_locked_count', 0)})"
+            )
+        hydrology_lod = self.collect_hydrology_lod_readiness()
+        if hasattr(self, "hydrology_lod_readiness_label"):
+            self.hydrology_lod_readiness_label.setText(
+                f"Hydrology/LOD readiness: {hydrology_lod.get('readiness', 'unknown')} "
+                f"({hydrology_lod.get('live_hydrology_layer_count', 0)}/{hydrology_lod.get('hydrology_layer_count', 0)} live layers, "
+                f"LOD={hydrology_lod.get('lod_hook_status', 'unknown')})"
             )
         self.layer_stack_note.setText(
             f"可見圖層 {visible}/{len(LAYER_LABELS)}；鎖定 {locked}；"
@@ -5476,6 +5547,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "profile_launch_readiness_ui": self.collect_profile_launch_readiness_ui(),
             "layer_visual_presets": self.collect_layer_visual_presets(),
             "layer_visual_preset_runtime_feedback": self.collect_layer_visual_preset_runtime_feedback(),
+            "hydrology_lod_readiness": self.collect_hydrology_lod_readiness(),
             "layer_capability_matrix": self.collect_layer_capability_matrix(),
             "layer_runtime_evidence_summary": self.collect_layer_capability_matrix().get("runtime_evidence_summary"),
             "layer_runtime_badge_summary": self.collect_layer_capability_matrix().get("runtime_badge_summary"),

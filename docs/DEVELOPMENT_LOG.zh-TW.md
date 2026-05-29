@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-30 - Hydrology LOD readiness contract
+
+- Added `rrkal_displaytools.hydrology_lod_readiness.v1` to lock lake/river Qt layer keys to renderer targets, live controls and LOD hook evidence.
+- Qt Layers dock now shows Hydrology/LOD readiness, and launch packets, renderer capabilities, handoff inspection and closed-loop evidence expose the same contract.
+- Smoke: PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Layer visual preset runtime feedback
 
 - Added `rrkal_displaytools.layer_visual_preset_runtime_feedback.v1` to connect layer visual presets with the existing renderer layer runtime ack bridge.

@@ -1010,6 +1010,60 @@ def layer_visual_preset_runtime_feedback_packet(
     }
 
 
+def hydrology_lod_readiness_packet(
+    source: str,
+    capability_matrix: dict[str, object] | None = None,
+) -> dict[str, object]:
+    capability_matrix = capability_matrix if isinstance(capability_matrix, dict) else {}
+    layers = capability_matrix.get("layers") if isinstance(capability_matrix.get("layers"), list) else []
+    layers_by_key = {
+        str(layer.get("key")): layer
+        for layer in layers
+        if isinstance(layer, dict) and layer.get("key")
+    }
+    hydrology_keys = ("lake_layer", "river_layer")
+    fallback_targets = {"lake_layer": "lakes", "river_layer": "rivers"}
+    hydrology_layers = []
+    for key in hydrology_keys:
+        layer = layers_by_key.get(
+            key,
+            {
+                "key": key,
+                "renderer_target": fallback_targets.get(key, key),
+                "live_controls": ["visibility", "opacity", "blend", "selected_layer_pick"],
+            },
+        )
+        live_controls = layer.get("live_controls") if isinstance(layer.get("live_controls"), list) else []
+        hydrology_layers.append(
+            {
+                "key": key,
+                "renderer_target": layer.get("renderer_target"),
+                "visibility_live": "visibility" in live_controls,
+                "opacity_live": "opacity" in live_controls,
+                "blend_live": "blend" in live_controls,
+                "selected_layer_pick_live": "selected_layer_pick" in live_controls,
+            }
+        )
+    live_layer_count = sum(1 for layer in hydrology_layers if layer["visibility_live"])
+    return {
+        "schema": "rrkal_displaytools.hydrology_lod_readiness.v1",
+        "source": source,
+        "readiness": "ready" if live_layer_count == len(hydrology_layers) else "partial",
+        "hydrology_layer_count": len(hydrology_layers),
+        "live_hydrology_layer_count": live_layer_count,
+        "hydrology_layers": hydrology_layers,
+        "stable_qt_layer_keys": list(hydrology_keys),
+        "stable_renderer_targets": ["lakes", "rivers"],
+        "lod_hook_status": "contract_ready",
+        "lod_hook_fields": ["renderer_target", "visible", "opacity", "blend_mode", "selected_layer_pick"],
+        "deferred_context_layers": ["bathymetry_layer", "coastline_layer"],
+        "qt_surface": "Layers dock Hydrology/LOD readiness label",
+        "launch_packet_fields": ["hydrology_lod_readiness", "layer_capability_matrix", "layer_runtime_evidence"],
+        "renderer_capability_field": "hydrology_lod_readiness",
+        "boundary": "Displaytools owns hydrology renderer-facing layer contracts and LOD hook evidence; dataset discovery, download, import, and cache governance remain RRKAL-owned.",
+    }
+
+
 def layer_operator_shortcuts_packet(
     source: str,
     selected_layer: str | None = None,
@@ -2040,6 +2094,7 @@ def launch_packet(
         "profile_launch_readiness_ui": profile_launch_readiness_ui_packet(profile_launch_readiness_packet("scripts.export_launch_packet", style_renderer_entries_packet("scripts.export_launch_packet", profile.get("style_profile") if isinstance(profile.get("style_profile"), str) else None), layer_operator_groups_packet(layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None), "scripts.export_launch_packet")), "scripts.export_launch_packet"),
         "layer_visual_presets": layer_visual_presets_packet("scripts.export_launch_packet"),
         "layer_visual_preset_runtime_feedback": layer_visual_preset_runtime_feedback_packet(layer_visual_presets_packet("scripts.export_launch_packet"), None, "scripts.export_launch_packet"),
+        "hydrology_lod_readiness": hydrology_lod_readiness_packet("scripts.export_launch_packet", layer_capability_matrix_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None, rrkal_data_manifest_ref)),
         "layer_capability_matrix": layer_capability_matrix_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None, rrkal_data_manifest_ref),
         "canvas_preview": canvas_preview_packet(profile),
         "boundary_highlight": boundary_highlight_packet(profile),
