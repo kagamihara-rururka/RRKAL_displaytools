@@ -1,5 +1,18 @@
 # Development Log
 
+## 2026-05-29 - Handoff inspection layer capabilities
+
+Scope:
+- `scripts\inspect_handoff.ps1` now reports `layer_capability_matrix` schema, launch-packet schema, live capability counts, and selected layer capabilities.
+- Smoke now gates handoff inspection `layer_capability_matrix`.
+- Clone quickstart now points at the current GitHub URL and tells users to expect the layer capability matrix in the read-only inspection output.
+
+Positioning:
+- This improves cross-machine confidence before opening Qt: another workstation can verify layer live capability contracts without running renderer output or touching RRKAL data governance.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Layer capability matrix UI contract
 
 Scope:

@@ -36,10 +36,19 @@ $summary = [ordered]@{
     launch_packet_contracts = @{
         canvas_preview = $launchPacket.canvas_preview.schema
         active_layer_diagnostics = $launchPacket.active_layer_diagnostics.schema
+        layer_capability_matrix = $launchPacket.layer_capability_matrix.schema
         layer_undo = $launchPacket.layer_undo.schema
         session_journal = $launchPacket.session_journal.schema
         timeline_state = $launchPacket.timeline_state.schema
         boundary_identity_status = $launchPacket.boundary_highlight.identity_status.schema
+    }
+    layer_capability_matrix = @{
+        schema = $capabilities.layer_capability_matrix.schema
+        launch_packet_schema = $launchPacket.layer_capability_matrix.schema
+        layer_count = $capabilities.layer_capability_matrix.layer_count
+        live_counts = $capabilities.layer_capability_matrix.live_counts
+        selected_layer = $launchPacket.layer_capability_matrix.selected_layer
+        selected_layer_capabilities = $launchPacket.layer_capability_matrix.selected_layer_capabilities
     }
     rrkal_boundary = $launchPacket.rrkal_boundary
     note = "Read-only inspection; does not discover, download, import, or govern datasets."

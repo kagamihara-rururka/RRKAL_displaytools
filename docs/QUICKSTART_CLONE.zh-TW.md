@@ -5,13 +5,13 @@
 Repo:
 
 ```text
-https://github.com/kagamihara-rururka/RRKAL_displaytools
+https://github.com/Kagamihara-Ruruka/RRKAL_displaytools
 ```
 
 ## 1. Clone
 
 ```powershell
-git clone https://github.com/kagamihara-rururka/RRKAL_displaytools.git
+git clone https://github.com/Kagamihara-Ruruka/RRKAL_displaytools.git
 cd RRKAL_displaytools
 ```
 
@@ -37,6 +37,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_handoff.ps1
 ```text
 "schema": "rrkal_displaytools.handoff_inspection.v1"
 "session_journal": "rrkal_displaytools.session_journal.v1"
+"layer_capability_matrix": "rrkal_displaytools.layer_capability_matrix.v1"
 ```
 
 ## 4. 跑提交級 smoke

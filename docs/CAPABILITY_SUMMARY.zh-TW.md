@@ -20,7 +20,7 @@
 - Timeline playback/export 已新增 `rrkal_displaytools.timeline_layer_opacity_interpolation.v1`、`rrkal_displaytools.timeline_layer_discrete_hold.v1` 與 `rrkal_displaytools.timeline_export_options.v1`；前者在 active/next keyframe 間插值 layer opacity，後者明確持有 active-keyframe layer visibility / blend mode。Timeline export 可在 Qt Timeline dock 設定 export-on-launch、output directory、frame count、FPS、GIF fallback 與 optional MP4 video；MP4 依賴 `imageio[ffmpeg]`。True blend crossfade 與 visibility fade 仍 pending。
 - Renderer layer runtime blend mode 目前已對 lake、river、borders、territorial sea、EEZ、high seas、ADS-B aircraft、Pin marker 與 vehicle icon overlay 支援 Normal、Screen、Multiply、Overlay、Soft Light。
 - Renderer layer runtime visibility 目前已同步 hydrology/boundary/aircraft/pin/vehicle icons/scale/contours/grid/stars/ocean material 的對應 renderer flags；這些基礎視覺圖層可透過 runtime bridge 改變而不必重啟。
-- Layer capability matrix 已建立為 `rrkal_displaytools.layer_capability_matrix.v1`，會列出每個 Qt layer 的 renderer target、visibility/opacity/blend/selected-layer pick 是否 live、live control counts 與 selected layer capabilities。Qt Properties 會直接顯示選取圖層能力，Layers dock 可顯示完整 JSON；launch packet、No-GUI export、renderer capabilities 與 smoke gate 也會驗證此 contract。
+- Layer capability matrix 已建立為 `rrkal_displaytools.layer_capability_matrix.v1`，會列出每個 Qt layer 的 renderer target、visibility/opacity/blend/selected-layer pick 是否 live、live control counts 與 selected layer capabilities。Qt Properties 會直接顯示選取圖層能力，Layers dock 可顯示完整 JSON；launch packet、No-GUI export、renderer capabilities、handoff inspection 與 smoke gate 也會驗證此 contract。
 - Qt layer stack metadata 會在 profile / launch packet / runtime bridge 中寫入每個 layer 的 `renderer_sync` 摘要，區分 visibility / opacity / blend live 狀態；runtime bridge 另會寫出 selected renderer target 供 renderer ack/provenance 追蹤。
 - Properties 面板已接 active layer inspector，可查看目前選取圖層的 visibility、lock、opacity、blend mode、renderer target，以及最近 renderer runtime ack / layer pick 摘要，並可切換選取圖層 visibility 或重設選取圖層 UI state。
 - Properties 面板已新增 `Boundary highlight` 疆域強調遮罩控制入口與 `Boundary identity` 摘要；國界、領海、EEZ、公海圖層列可雙擊打開控制對話框，設定 hover/selected 觸發、target layers、RGB 色彩、對比、半透明、gamma、feather 與呼吸特效。對話框、Properties 摘要與 `boundary_highlight.identity_status` 會明確標示 source-property feature identity 已 live，但 authoritative 疆域/EEZ identity 與 open-line area inference 仍 pending。此狀態已寫入 profile、launch packet、Canvas Preview 與 provenance；Qt 啟動 renderer 時會以 `--boundary-highlight-json` 傳入，renderer 會用 `--boundary-highlight-ack-file` 寫回 `state/renderer_boundary_highlight_ack.json`。Renderer 目前已用該 payload 控制 hover hit target layers、啟用狀態、outline/glow 顏色、contrast、gamma、alpha、feather 與 breathing speed；滑鼠移到國界/領海/EEZ/公海線段附近，或落在完整可見的閉合 ring 內，可看到線段/面域強調；閉合 ring 幾何會加上半透明 polygon fill preview，fill preview 會套用獨立的 gamma/contrast tone 控制，且 source GeoJSON properties 會進入 pick feature identity。Authoritative polygon territory identity 與開放線段面域推論仍是下一步。
@@ -84,7 +84,7 @@
 
 - `scripts/setup_windows.ps1` 安裝依賴。
 - `scripts/run_qt_panel.ps1` 啟動 Qt panel，支援 `-Profile` 與 `-Template`。
-- `scripts/inspect_handoff.ps1` 輸出 read-only handoff inspection JSON，方便跨機器 clone 後先確認 UI/renderer contract。
+- `scripts/inspect_handoff.ps1` 輸出 read-only handoff inspection JSON，方便跨機器 clone 後先確認 UI/renderer contract，包含 layer capability matrix 摘要。
 - `scripts/render_quick_smoke.ps1` 要求快速 synthetic/headless render，並驗證 preview frame PNG 寫檔。
 - `scripts/smoke.ps1` 是提交前 smoke helper。
 - `docs/SETUP_WINDOWS.zh-TW.md` 提供另一台 Windows 電腦 clone/setup/smoke/run 步驟。
@@ -126,6 +126,7 @@
   - Closed-loop status `session_journal_handoff` gate。
   - Closed-loop status `qt_timeline_panel` UI-only playback controls gate。
   - Handoff inspection `session_journal` / `timeline_state` contract gate。
+  - Handoff inspection `layer_capability_matrix` contract gate。
   - No-GUI template listing。
   - PowerShell script parse。
 

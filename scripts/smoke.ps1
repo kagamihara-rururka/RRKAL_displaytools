@@ -513,6 +513,15 @@ if ($handoff.launch_packet_contracts.session_journal -ne "rrkal_displaytools.ses
 if ($handoff.launch_packet_contracts.timeline_state -ne "rrkal_displaytools.timeline_state.v1") {
     throw "Handoff inspection timeline_state contract missing or invalid"
 }
+if ($handoff.launch_packet_contracts.layer_capability_matrix -ne "rrkal_displaytools.layer_capability_matrix.v1") {
+    throw "Handoff inspection layer_capability_matrix contract missing or invalid"
+}
+if ($handoff.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
+    throw "Handoff inspection layer_capability_matrix summary missing or invalid"
+}
+if ([int]$handoff.layer_capability_matrix.live_counts.blend -le 0) {
+    throw "Handoff inspection layer_capability_matrix blend live count missing"
+}
 Invoke-CheckedNative py @("-3", "taichi_global_bathymetry.py", "--print-layer-manifest") | Out-Null
 Invoke-CheckedNative py @("-3", "rrkal_displaytools_qt_panel.py", "--list-templates") | Out-Null
 
