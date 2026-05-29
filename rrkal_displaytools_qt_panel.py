@@ -1124,6 +1124,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         event = str(payload.get("event", "-"))
         changed_layers = payload.get("changed_layers", [])
         changed_count = len(changed_layers) if isinstance(changed_layers, list) else "-"
+        skipped_locked_layers = payload.get("skipped_locked_layers", [])
+        skipped_count = len(skipped_locked_layers) if isinstance(skipped_locked_layers, list) else "-"
         frame_index = payload.get("frame_index", "-")
         updated_at = str(payload.get("updated_at_utc", "-"))
         error = payload.get("error")
@@ -1131,7 +1133,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.layer_runtime_ack_label.setText(f"Renderer ack: event={event}, error={error}, updated={updated_at}")
             return
         self.layer_runtime_ack_label.setText(
-            f"Renderer ack: event={event}, changed_layers={changed_count}, frame={frame_index}, updated={updated_at}"
+            f"Renderer ack: event={event}, changed={changed_count}, skipped_locked={skipped_count}, "
+            f"frame={frame_index}, updated={updated_at}"
         )
 
     def refresh_pin_input_ack_state(self) -> None:

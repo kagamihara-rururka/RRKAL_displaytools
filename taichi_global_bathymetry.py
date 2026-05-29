@@ -10465,19 +10465,24 @@ class HybridRenderController:
             return False
         changed = False
         changed_layers: list[str] = []
+        skipped_locked_layers: list[str] = []
         layers = payload.get("layers")
         if isinstance(layers, dict):
             for layer_id, state in layers.items():
                 if layer_id not in self.layer_visible or not isinstance(state, dict):
                     continue
                 visible = state.get("visible")
+                if state.get("locked") is True:
+                    if isinstance(visible, bool) and self.layer_visible.get(layer_id) != visible:
+                        skipped_locked_layers.append(str(layer_id))
+                    continue
                 if isinstance(visible, bool) and self.layer_visible.get(layer_id) != visible:
                     self.set_layer_visible(str(layer_id), bool(visible))
                     changed_layers.append(str(layer_id))
                     changed = True
         self.layer_runtime_state_mtime_ns = next_mtime_ns
         self.layer_runtime_state_last_error = None
-        self.write_layer_runtime_ack("applied", payload, changed_layers, next_mtime_ns)
+        self.write_layer_runtime_ack("applied", payload, changed_layers, skipped_locked_layers, next_mtime_ns)
         return changed
 
     def write_layer_runtime_ack(
@@ -10485,6 +10490,7 @@ class HybridRenderController:
         event_kind: str,
         state_payload: dict[str, object] | None,
         changed_layers: list[str],
+        skipped_locked_layers: list[str],
         state_mtime_ns: int | None,
     ) -> None:
         if self.layer_runtime_ack_file is None:
@@ -10498,11 +10504,12 @@ class HybridRenderController:
             "runtime_state_mtime_ns": state_mtime_ns,
             "runtime_state_updated_at_utc": state_payload.get("updated_at_utc") if isinstance(state_payload, dict) else None,
             "changed_layers": changed_layers,
+            "skipped_locked_layers": skipped_locked_layers,
             "visible_layers": visible_layers,
             "layer_visible": {layer_id: bool(visible) for layer_id, visible in self.layer_visible.items()},
             "frame_index": getattr(self, "frame_index", 0),
-            "applies": ["visibility"],
-            "pending": ["opacity", "blend_mode", "lock"],
+            "applies": ["visibility", "lock_guard_visibility"],
+            "pending": ["opacity", "blend_mode"],
             "error": self.layer_runtime_state_last_error,
             "source": "taichi_global_bathymetry",
         }
@@ -14962,8 +14969,8 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "control": "layer-runtime-state-file",
             "ack_control": "layer-runtime-ack-file",
             "ack_schema": "rrkal_displaytools.renderer_layer_runtime_ack.v1",
-            "applies": ["visibility"],
-            "pending": ["opacity", "blend_mode", "lock"],
+            "applies": ["visibility", "lock_guard_visibility"],
+            "pending": ["opacity", "blend_mode"],
         },
         "rrkal_boundary": {
             "displaytools_owns": [

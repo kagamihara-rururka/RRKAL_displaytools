@@ -1060,3 +1060,18 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Renderer layer lock enforcement
+
+Scope:
+- Renderer runtime layer sync now skips visibility changes for layers marked `locked=true` in `renderer_layer_runtime_state.json`.
+- Renderer `renderer_layer_runtime_ack.json` now records `skipped_locked_layers`.
+- Qt Layers panel ack status now displays the skipped locked-layer count.
+- Renderer capabilities now mark `lock_guard_visibility` as applied, with opacity/blend mode still pending.
+
+Positioning:
+- This closes the lock guardrail loop across Qt layer controls, runtime bridge payload, renderer visibility application, and renderer acknowledgement.
+- Remaining layer sync work is opacity, blend mode, richer diagnostics, and renderer-backed picking.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
