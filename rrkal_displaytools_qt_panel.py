@@ -1227,6 +1227,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "pins": self.collect_research_pins(),
             "boundary_highlight": self.collect_boundary_highlight_state(),
             "canvas_preview": self.collect_canvas_preview_state(),
+            "timeline_keyframes": self.timeline_keyframes,
         }
 
     def collect_launch_packet(self) -> dict[str, object]:
@@ -1928,6 +1929,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         pins = profile.get("pins")
         boundary_highlight = profile.get("boundary_highlight")
         canvas_preview = profile.get("canvas_preview")
+        timeline_keyframes = profile.get("timeline_keyframes")
         if isinstance(renderer, dict):
             self._set_combo(self.style_combo, str(renderer.get("style_profile", self.style_combo.currentText())))
             self._set_combo(self.ui_combo, str(renderer.get("ui_backend", self.ui_combo.currentText())))
@@ -1971,6 +1973,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.refresh_boundary_highlight_status()
         if isinstance(canvas_preview, dict):
             self.apply_canvas_preview_state(canvas_preview)
+        if isinstance(timeline_keyframes, list):
+            self.apply_timeline_keyframes(timeline_keyframes)
         self.selected_pin_id = selected_pin_id if isinstance(selected_pin_id, str) else None
         if self.selected_pin_id is not None and self.selected_pin_packet() is None:
             self.selected_pin_id = None
@@ -2223,6 +2227,17 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"Timeline status: {len(self.timeline_keyframes)} UI keyframes stored; "
             "playback/export pending."
         )
+
+    def apply_timeline_keyframes(self, keyframes: list[object]) -> None:
+        self.timeline_keyframes = [dict(keyframe) for keyframe in keyframes if isinstance(keyframe, dict)]
+        if self.timeline_keyframe_list is not None:
+            self.timeline_keyframe_list.clear()
+            for keyframe in self.timeline_keyframes:
+                self.timeline_keyframe_list.addItem(
+                    f"{keyframe.get('id', '-')} · {keyframe.get('style_profile', '-')} · "
+                    f"layer={keyframe.get('selected_layer') or '-'}"
+                )
+        self.refresh_timeline_state_label()
 
     @QtCore.pyqtSlot()
     def add_timeline_keyframe(self) -> None:

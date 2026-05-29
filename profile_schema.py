@@ -9,6 +9,7 @@ PROFILE_SCHEMA_ID = "rrkal_displaytools.qt_panel_profile.v1"
 BOUNDARY_HIGHLIGHT_SCHEMA_ID = "rrkal_displaytools.boundary_highlight_mask.v1"
 BOUNDARY_IDENTITY_STATUS_SCHEMA_ID = "rrkal_displaytools.boundary_identity_status.v1"
 CANVAS_PREVIEW_SCHEMA_ID = "rrkal_displaytools.canvas_preview.v1"
+TIMELINE_KEYFRAME_SCHEMA_ID = "rrkal_displaytools.timeline_keyframe.v1"
 
 REQUIRED_PROFILE_TOP_LEVEL = {"schema", "renderer", "ocean_material", "layers"}
 OPTIONAL_PROFILE_TOP_LEVEL = {
@@ -19,6 +20,7 @@ OPTIONAL_PROFILE_TOP_LEVEL = {
     "pins",
     "boundary_highlight",
     "canvas_preview",
+    "timeline_keyframes",
 }
 REQUIRED_PROFILE_RENDERER = {
     "style_profile",
@@ -280,6 +282,28 @@ def profile_payload_errors(profile: dict[str, object]) -> list[str]:
             renderer_sync = canvas_preview.get("renderer_sync")
             if renderer_sync is not None and not isinstance(renderer_sync, str):
                 errors.append("canvas_preview.renderer_sync must be a string")
+    timeline_keyframes = profile.get("timeline_keyframes")
+    if timeline_keyframes is not None:
+        if not isinstance(timeline_keyframes, list):
+            errors.append("timeline_keyframes must be a list")
+        else:
+            for index, keyframe in enumerate(timeline_keyframes):
+                if not isinstance(keyframe, dict):
+                    errors.append(f"timeline_keyframes[{index}] must be an object")
+                    continue
+                schema = keyframe.get("schema")
+                if schema is not None and schema != TIMELINE_KEYFRAME_SCHEMA_ID:
+                    errors.append(f"timeline_keyframes[{index}].schema must be {TIMELINE_KEYFRAME_SCHEMA_ID}")
+                for field in ("id", "label", "style_profile"):
+                    value = keyframe.get(field)
+                    if value is not None and not isinstance(value, str):
+                        errors.append(f"timeline_keyframes[{index}].{field} must be a string")
+                selected_layer = keyframe.get("selected_layer")
+                if selected_layer is not None:
+                    if not isinstance(selected_layer, str):
+                        errors.append(f"timeline_keyframes[{index}].selected_layer must be a string or null")
+                    elif selected_layer not in REQUIRED_LAYER_STACK_KEYS:
+                        errors.append(f"timeline_keyframes[{index}].selected_layer is not a known layer stack key")
     boundary_highlight = profile.get("boundary_highlight")
     if boundary_highlight is not None:
         if not isinstance(boundary_highlight, dict):

@@ -1,5 +1,18 @@
 # Development Log
 
+## 2026-05-29 - Timeline profile persistence
+
+Scope:
+- Qt profiles now save `timeline_keyframes`.
+- Profile loading restores the Timeline keyframe list and status label.
+- `profile_schema.py` now accepts optional `timeline_keyframes`.
+
+Positioning:
+- This makes UI-only Timeline state survive profile save/load while playback/export remain future renderer work.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Timeline UI keyframe storage
 
 Scope:
