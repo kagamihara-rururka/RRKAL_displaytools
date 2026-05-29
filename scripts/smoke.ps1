@@ -1566,6 +1566,12 @@ if ($qtPanelSource -notlike "*Pin cursor fill:*") {
 if ($qtPanelSource -notlike "*pin_cursor_fill_source_text*") {
     throw "Qt panel Pin cursor fill source helper missing"
 }
+if ($qtPanelSource -notlike "*pin_cursor_fill_label*") {
+    throw "Qt panel Pin cursor fill fixed label missing"
+}
+if ($qtPanelSource -notlike "*Cursor Fill*") {
+    throw "Qt panel Pin cursor fill form row missing"
+}
 if ($qtPanelSource -notlike "*screen_position*") {
     throw "Qt panel layer pick screen position diagnostics missing"
 }

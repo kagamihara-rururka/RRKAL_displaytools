@@ -1967,6 +1967,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.pin_label_mode_combo: QtWidgets.QComboBox | None = None
         self.pin_label_min_priority_spin: QtWidgets.QSpinBox | None = None
         self.pin_list: QtWidgets.QListWidget | None = None
+        self.pin_cursor_fill_label: QtWidgets.QLabel | None = None
         self.pin_input_ack_label: QtWidgets.QLabel | None = None
         self.pin_input_ack_mtime_ns: int | None = PIN_INPUT_ACK_PATH.stat().st_mtime_ns if PIN_INPUT_ACK_PATH.exists() else None
         self.pin_input_ack_payload: dict[str, object] | None = None
@@ -2684,6 +2685,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         pin_form.addRow("Label Mode", self.pin_label_mode_combo)
         pin_form.addRow("Min Label Priority", self.pin_label_min_priority_spin)
         pin_form.addRow("Note", self.pin_note_edit)
+        self.pin_cursor_fill_label = QtWidgets.QLabel(f"Pin cursor fill: {self.pin_cursor_fill_source_text()}")
+        self.pin_cursor_fill_label.setWordWrap(True)
+        pin_form.addRow("Cursor Fill", self.pin_cursor_fill_label)
         pin_actions = QtWidgets.QHBoxLayout()
         add_pin_button = QtWidgets.QPushButton("加入 Pin")
         remove_pin_button = QtWidgets.QPushButton("移除選取 Pin")
@@ -6083,13 +6087,16 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.selected_layer_key or "-",
         )
         tool_label = next((text for mode, text, _hint in TOOL_MODES if mode == self.active_tool), self.active_tool)
+        cursor_fill_text = self.pin_cursor_fill_source_text()
         self.tool_target_label.setText(
             f"Active tool: {tool_label}\n"
             f"Target layer: {layer_label}\n"
             f"Pin: {self.collect_tool_state()['pin']['type']} / {self.collect_tool_state()['pin']['label']}\n"
             f"Labels: {self.current_pin_label_mode()} >= {self.pin_label_min_priority_spin.value() if self.pin_label_min_priority_spin is not None else 50}\n"
-            f"Pin cursor fill: {self.pin_cursor_fill_source_text()}"
+            f"Pin cursor fill: {cursor_fill_text}"
         )
+        if self.pin_cursor_fill_label is not None:
+            self.pin_cursor_fill_label.setText(f"Pin cursor fill: {cursor_fill_text}")
         self.refresh_canvas_preview()
 
     def add_pin_marker(self) -> None:
@@ -6162,6 +6169,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.pin_lat_edit.setText(f"{latitude:.6f}")
         if self.pin_lon_edit is not None:
             self.pin_lon_edit.setText(f"{longitude:.6f}")
+        self.refresh_tool_target()
         self.status.setText(
             f"已用游標位置填入 Pin：lat={latitude:.6f}, lon={longitude:.6f} ({source})"
         )

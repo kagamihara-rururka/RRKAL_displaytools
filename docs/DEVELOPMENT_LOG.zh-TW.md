@@ -3033,3 +3033,16 @@ Decision:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Pin cursor fill status row
+
+Scope:
+- Qt Pin Annotation panel now has a fixed Cursor Fill status row showing whether Pin coordinates will use renderer globe raycast, Qt canvas fallback, or are still waiting.
+- The Cursor Fill status refreshes through the same helper as the tool palette and after filling Pin coordinates from the cursor.
+- Smoke verifies the fixed Pin cursor fill label and form row.
+
+Decision:
+- Researchers need to know which coordinate source is being used before placing geodetic Pins, especially when renderer raycast and Qt canvas estimates can disagree.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

@@ -253,3 +253,8 @@
 
 - Timeline keyframe rows now include Boundary emphasis target and alignment summaries.
 - Loaded profile keyframes and newly captured keyframes share the same display formatter.
+
+### 2026-05-30 Pin cursor fill status row
+
+- Pin Annotation now exposes a fixed Cursor Fill status row with renderer-raycast vs Qt-estimate source text.
+- Cursor fill status refreshes after coordinate fill and remains mirrored in the tool palette summary.
