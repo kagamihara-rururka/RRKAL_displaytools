@@ -1647,6 +1647,12 @@ if ($qtPanelSource -notlike "*profileUiStateReplay*") {
 if ($qtPanelSource -notlike "*profile_ui_state_replay_packet*") {
     throw "Qt profile UI state replay contract is missing"
 }
+if ($qtPanelSource -notlike "*saved_state_groups*") {
+    throw "Qt profile UI state replay saved groups are missing"
+}
+if ($qtPanelSource -notlike "*replay_surfaces*") {
+    throw "Qt profile UI state replay surfaces are missing"
+}
 
 $rendererSource = Get-Content -Raw -Encoding UTF8 taichi_global_bathymetry.py
 if ($rendererSource -notlike "*last_layer_pick_screen*") {
@@ -1660,6 +1666,12 @@ if ($rendererSource -notlike "*double-click Boundary/territorial sea/EEZ/high-se
 }
 if ($rendererSource -notlike "*profile_ui_state_replay_packet*") {
     throw "Renderer capability profile UI state replay contract missing"
+}
+if ($rendererSource -notlike "*saved_state_groups*") {
+    throw "Renderer capability profile UI state replay saved groups missing"
+}
+if ($rendererSource -notlike "*replay_surfaces*") {
+    throw "Renderer capability profile UI state replay surfaces missing"
 }
 
 $scripts = Get-ChildItem scripts -Filter *.ps1
@@ -1743,8 +1755,20 @@ if ($launchPacketSource -notmatch 'double-click Boundary/territorial sea/EEZ/hig
 if ($launchPacketSource -notmatch 'profile_ui_state_replay') {
     throw "Launch packet profile UI state replay contract is missing"
 }
+if ($launchPacketSource -notmatch 'saved_state_groups') {
+    throw "Launch packet profile UI state replay saved groups missing"
+}
+if ($launchPacketSource -notmatch 'replay_surfaces') {
+    throw "Launch packet profile UI state replay surfaces missing"
+}
 if ($handoffInspectorSource -notmatch 'profile_ui_state_replay') {
     throw "Handoff inspection profile UI state replay output is missing"
+}
+if ($handoffInspectorSource -notmatch 'saved_state_groups') {
+    throw "Handoff inspection profile UI state replay saved groups output is missing"
+}
+if ($handoffInspectorSource -notmatch 'replay_surfaces') {
+    throw "Handoff inspection profile UI state replay surfaces output is missing"
 }
 
 $closedLoopSource = Get-Content -LiteralPath (Join-Path $BoundaryIdentityRoot "closed_loop_status.py") -Raw -Encoding UTF8

@@ -187,3 +187,4 @@ Last updated: 2026-05-29
 - 2026-05-30: Added `layer_workflow_hint_handoff` closed-loop evidence for layer workflow guidance across Qt, launch packet, handoff, capabilities and smoke.
 - 2026-05-30: Added `profile_ui_state_replay_handoff` for portable profile/UI replay coverage across Qt, launch packet, capabilities, handoff and smoke.
 - 2026-05-30: Documented `profile_ui_state_replay` in the profile schema and smoke-gated the docs.
+- 2026-05-30: Strengthened smoke gates for `profile_ui_state_replay` saved groups and replay surfaces across Qt, capabilities, launch packet and handoff.

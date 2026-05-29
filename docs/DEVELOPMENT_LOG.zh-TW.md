@@ -3324,3 +3324,16 @@ Decision:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+
+## 2026-05-30 - Profile UI replay smoke source gates
+
+Scope:
+- Smoke now verifies `saved_state_groups` and `replay_surfaces` in Qt, renderer capability, no-GUI launch packet and handoff inspection sources.
+- This strengthens `profile_ui_state_replay` from a name-only gate into a coverage-content gate.
+
+Decision:
+- Profile replay handoff should remain verifiable as a concrete coverage summary, not only as a schema id.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+

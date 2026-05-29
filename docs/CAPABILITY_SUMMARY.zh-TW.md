@@ -359,3 +359,8 @@
 
 - Profile schema docs now describe `profile_ui_state_replay` and its saved state groups / replay surfaces.
 - Smoke verifies the docs stay aligned with the new profile replay handoff contract.
+
+### 2026-05-30 Profile UI replay smoke source gates
+
+- Smoke now checks `saved_state_groups` and `replay_surfaces` across Qt, renderer capabilities, launch packet and handoff inspection.
+- This keeps profile replay coverage machine-verifiable across clone-after-setup workflows.
