@@ -3822,10 +3822,19 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             if feature_label != "-":
                 feature_text = f", feature={feature_label}"
         frame_index = payload.get("frame_index", "-")
+        screen_position = payload.get("screen_position")
+        screen_position = screen_position if isinstance(screen_position, dict) else {}
+        screen_x = screen_position.get("screen_x")
+        screen_y = screen_position.get("screen_y")
+        screen_text = (
+            f", pos=({float(screen_x):.1f},{float(screen_y):.1f})"
+            if isinstance(screen_x, (int, float)) and isinstance(screen_y, (int, float))
+            else ""
+        )
         updated_at = str(payload.get("updated_at_utc", "-"))
         self.layer_pick_state_label.setText(
             f"Layer pick: event={event}, target={target}, picker={picker}, hit={hit}{feature_text}, "
-            f"frame={frame_index}, updated={updated_at}"
+            f"frame={frame_index}{screen_text}, updated={updated_at}"
         )
 
     def refresh_pin_input_ack_state(self) -> None:
@@ -5757,6 +5766,15 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         pick_result = pick_result if isinstance(pick_result, dict) else {}
         pick_event = str(pick_result.get("event") or pick_payload.get("event") or "waiting")
         pick_target = str(pick_payload.get("selected_renderer_layer") or pick_result.get("renderer_layer") or "-")
+        screen_position = pick_payload.get("screen_position")
+        screen_position = screen_position if isinstance(screen_position, dict) else {}
+        screen_x = screen_position.get("screen_x")
+        screen_y = screen_position.get("screen_y")
+        screen_text = (
+            f", pos=({float(screen_x):.1f},{float(screen_y):.1f})"
+            if isinstance(screen_x, (int, float)) and isinstance(screen_y, (int, float))
+            else ""
+        )
         hit_value = pick_result.get("hit")
         if isinstance(hit_value, bool):
             hit_text = "hit" if hit_value else "no-hit"
@@ -5772,7 +5790,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if pick_target == "-":
             pick_text = f"pick={pick_event}, target waiting"
         else:
-            pick_text = f"pick={pick_event}, target={pick_target}, {hit_text}{feature_text}"
+            pick_text = f"pick={pick_event}, target={pick_target}, {hit_text}{feature_text}{screen_text}"
         return f"{ack_text}; {pick_text}"
 
     def active_layer_diagnostics_packet(self) -> dict[str, object]:

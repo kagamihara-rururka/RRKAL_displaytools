@@ -11514,6 +11514,7 @@ class HybridRenderController:
         self.runtime_selected_layer_key: str | None = None
         self.selected_renderer_layer_id: str | None = None
         self.selected_layer_semantic_target: dict[str, object] | None = None
+        self.last_layer_pick_screen: dict[str, float] | None = None
         self.current_pin_projections: list[dict[str, object]] = []
         self.pin_visible_count = 0
         self.output_path = Path(args.output) if args.output else None
@@ -13988,6 +13989,7 @@ class HybridRenderController:
             "event": self.last_layer_pick_result.get("event"),
             "selected_renderer_layer": self.selected_renderer_layer_id,
             "selected_layer_semantic_target": self.selected_layer_semantic_target,
+            "screen_position": self.last_layer_pick_screen,
             "pick_result": self.last_layer_pick_result,
             "selected_pin_id": self.selected_pin_id,
             "selected_pin": self.selected_pin_hit,
@@ -14633,6 +14635,7 @@ class HybridRenderController:
         return picked
 
     def pick_selected_layer_target(self, x: float, y: float) -> bool:
+        self.last_layer_pick_screen = {"screen_x": float(x), "screen_y": float(y)}
         layer_id = self.selected_renderer_layer_id
         if layer_id == "pins":
             had_pin_state = self.selected_pin_hit is not None or self.hover_pin_hit is not None or self.selected_pin_id is not None

@@ -183,3 +183,8 @@
 
 - Tools dock now shows whether Pin cursor fill is using renderer globe raycast, outside-globe fallback, Qt canvas estimate fallback, or waiting for cursor state.
 - This makes annotation coordinate provenance visible before researchers place Pins.
+
+### 2026-05-30 Layer pick screen position diagnostics
+
+- Renderer layer pick state now records click `screen_position`.
+- Qt layer diagnostics show click position with hit/no-hit results so researchers can trace selected-layer picking behavior.

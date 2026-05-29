@@ -1434,6 +1434,14 @@ if ($qtPanelSource -notlike "*Pin cursor fill:*") {
 if ($qtPanelSource -notlike "*pin_cursor_fill_source_text*") {
     throw "Qt panel Pin cursor fill source helper missing"
 }
+if ($qtPanelSource -notlike "*screen_position*") {
+    throw "Qt panel layer pick screen position diagnostics missing"
+}
+
+$rendererSource = Get-Content -Raw -Encoding UTF8 taichi_global_bathymetry.py
+if ($rendererSource -notlike "*last_layer_pick_screen*") {
+    throw "Renderer layer pick screen position state missing"
+}
 
 $scripts = Get-ChildItem scripts -Filter *.ps1
 foreach ($script in $scripts) {

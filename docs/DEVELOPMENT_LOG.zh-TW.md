@@ -2848,3 +2848,16 @@ Decision:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Layer pick screen position diagnostics
+
+Scope:
+- Renderer layer pick state now records the clicked screen position as `screen_position`.
+- Qt layer pick diagnostics and active layer diagnostics now display click position beside hit/no-hit context.
+- Smoke now gates renderer `last_layer_pick_screen` state and Qt screen-position diagnostics strings.
+
+Decision:
+- Layer selection needs operator-visible pick provenance so researchers can diagnose whether a miss is due to target layer, position, or renderer picker coverage.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
