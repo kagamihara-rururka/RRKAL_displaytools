@@ -159,6 +159,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "timeline playback readiness contract",
                     "timeline playback plan contract",
                     "renderer startup first-keyframe apply contract",
+                    "renderer startup first-keyframe pins/boundary apply",
                 ],
                 "pending": ["renderer_timeline_playback", "animation_export"],
                 "evidence": [

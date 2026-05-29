@@ -187,6 +187,12 @@ if ($timelineAck.playback_plan.schema -ne "rrkal_displaytools.timeline_playback_
 if ($timelineAck.first_keyframe_apply.schema -ne "rrkal_displaytools.timeline_first_keyframe_apply.v1") {
     throw "Renderer timeline ack endpoint first keyframe apply packet missing or invalid"
 }
+if ($null -eq $timelineAck.first_keyframe_apply.changed.pins) {
+    throw "Renderer timeline first keyframe apply pins changed field missing"
+}
+if ($null -eq $timelineAck.first_keyframe_apply.changed.boundary_highlight) {
+    throw "Renderer timeline first keyframe apply boundary changed field missing"
+}
 Remove-Item -LiteralPath $timelineAckOut -Force
 Remove-Item -LiteralPath $timelineStateOut -Force
 $capabilitiesText = & py -3 taichi_global_bathymetry.py --print-renderer-capabilities

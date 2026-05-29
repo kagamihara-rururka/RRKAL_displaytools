@@ -1,5 +1,18 @@
 # Development Log
 
+## 2026-05-29 - Timeline first keyframe Pins and Boundary apply
+
+Scope:
+- Renderer startup first-keyframe apply now also applies Timeline keyframe Pins and Boundary highlight state.
+- Pin input ack and Boundary highlight ack are rewritten after Timeline first-keyframe apply when those states change.
+- `timeline_first_keyframe_apply.changed` now reports pins, selected pin, and boundary highlight changes.
+
+Positioning:
+- This closes the remaining first-keyframe renderer apply gap before inter-keyframe animation/export work.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Renderer startup first Timeline keyframe apply
 
 Scope:

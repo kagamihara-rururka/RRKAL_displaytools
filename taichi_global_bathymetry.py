@@ -2843,8 +2843,11 @@ def timeline_first_keyframe_apply_preview_packet(
             "layer_opacity": [],
             "layer_blend": [],
             "selected_layer": False,
+            "pins": False,
+            "selected_pin_id": False,
+            "boundary_highlight": False,
         },
-        "unsupported_scope": ["pins", "boundary_highlight"],
+        "unsupported_scope": [],
         "boundary": "Preview/apply packet for startup first-keyframe handling; this is not renderer animation playback.",
     }
 
@@ -11259,6 +11262,9 @@ class HybridRenderController:
         changed_layers: list[str] = []
         changed_opacity_layers: list[str] = []
         changed_blend_layers: list[str] = []
+        changed_pins = False
+        changed_selected_pin = False
+        changed_boundary_highlight = False
         renderer = first.get("renderer")
         style_profile = None
         if isinstance(renderer, dict):
@@ -11315,6 +11321,44 @@ class HybridRenderController:
             selected_layer_key = first.get("selected_layer")
         selected_layer_state = layers.get(selected_layer_key) if isinstance(layers, dict) else None
         selected_layer_changed = self.set_selected_layer_semantic_target(selected_layer_key, selected_layer_state)
+        pins = first.get("pins")
+        if isinstance(pins, list):
+            previous_pin_signature = json.dumps(self.pin_records, ensure_ascii=False, sort_keys=True)
+            next_pins = [dict(pin) for pin in pins if isinstance(pin, dict)]
+            self.pin_records = next_pins
+            next_pin_ids = {str(pin.get("id", "")) for pin in next_pins}
+            selected_pin_id = first.get("selected_pin_id")
+            if isinstance(selected_pin_id, str) and selected_pin_id in next_pin_ids:
+                next_selected_pin_id = selected_pin_id
+            elif self.selected_pin_id in next_pin_ids:
+                next_selected_pin_id = self.selected_pin_id
+            else:
+                next_selected_pin_id = None
+            changed_selected_pin = self.selected_pin_id != next_selected_pin_id
+            self.selected_pin_id = next_selected_pin_id
+            changed_pins = previous_pin_signature != json.dumps(self.pin_records, ensure_ascii=False, sort_keys=True)
+            if changed_pins or changed_selected_pin:
+                self.write_pin_input_ack()
+                self.overlay_dirty = True
+        boundary_highlight = first.get("boundary_highlight")
+        if isinstance(boundary_highlight, dict):
+            previous_boundary_signature = json.dumps(
+                self.boundary_highlight_state,
+                ensure_ascii=False,
+                sort_keys=True,
+            )
+            next_boundary_state, boundary_error = normalize_boundary_highlight_state(boundary_highlight, received=True)
+            self.boundary_highlight_state = next_boundary_state
+            self.boundary_highlight_error = boundary_error
+            changed_boundary_highlight = previous_boundary_signature != json.dumps(
+                self.boundary_highlight_state,
+                ensure_ascii=False,
+                sort_keys=True,
+            )
+            if changed_boundary_highlight:
+                self.write_boundary_highlight_ack()
+                self.boundary_dirty = True
+                self.boundary_hover_dirty = True
         result.update(
             {
                 "applied": True,
@@ -11326,16 +11370,12 @@ class HybridRenderController:
                     "layer_opacity": changed_opacity_layers,
                     "layer_blend": changed_blend_layers,
                     "selected_layer": selected_layer_changed,
+                    "pins": changed_pins,
+                    "selected_pin_id": changed_selected_pin,
+                    "boundary_highlight": changed_boundary_highlight,
                 },
-                "unsupported_scope": [
-                    scope
-                    for scope, present in (
-                        ("pins", isinstance(first.get("pins"), list)),
-                        ("boundary_highlight", isinstance(first.get("boundary_highlight"), dict)),
-                    )
-                    if present
-                ],
-                "boundary": "Startup applies only the first keyframe's style/material/layer state; no inter-keyframe animation or export is performed.",
+                "unsupported_scope": [],
+                "boundary": "Startup applies only the first keyframe's style/material/layer/pin/boundary state; no inter-keyframe animation or export is performed.",
             }
         )
         return result
