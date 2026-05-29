@@ -29,6 +29,7 @@ rrkal_displaytools.qt_panel_profile.v1
 | `layer_stack_ui` | object | optional | Qt layer stack 的 UI-only state。 |
 | `tool_state` | object | optional | Qt tool palette 的 UI-only state。 |
 | `pins` | array | optional | 科研標記清單。 |
+| `boundary_highlight` | object | optional | 疆域/領海/EEZ hover 強調遮罩控制。 |
 
 ## `renderer`
 
@@ -94,7 +95,7 @@ rrkal_displaytools.qt_panel_profile.v1
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `locked` | boolean | UI-only lock state，renderer sync 尚未接。 |
+| `locked` | boolean | Qt 與 renderer visibility sync 的防誤改 guardrail；opacity/blend renderer sync 尚未接。 |
 | `opacity` | integer 0-100 | UI-only opacity，renderer sync 尚未接。 |
 | `blend_mode` | string | `Normal`、`Screen`、`Multiply`、`Overlay` 或 `Soft Light`。 |
 | `selected` | boolean | 可選，記錄該 layer 是否為 active layer。 |
@@ -143,6 +144,26 @@ Renderer overlay 接上後，Pin 不應是螢幕固定標籤，而應是 geodeti
 | `label_priority` | integer 0-100 | 可選，renderer label layout 優先度；selected Pin 仍會優先於一般 Pin。 |
 | `target_layer` | string or null | 可選，建立 pin 時的 active layer。 |
 | `placement` | string | 目前為 `manual_lat_lon`；後續會加入滑鼠位置反推經緯度的 `cursor_lat_lon` 流程。 |
+
+## `boundary_highlight`
+
+可選。此欄位保存國界、領海、EEZ、公海等疆域圖層的 hover/selected 強調遮罩設定，讓科研者可以把疆域、領海或經濟海域作為可重現的視覺分析狀態保存到 profile 與 launch packet。
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `schema` | string | 固定為 `rrkal_displaytools.boundary_highlight_mask.v1`。 |
+| `enabled` | boolean | 是否啟用疆域強調遮罩。 |
+| `trigger` | string | `hover`、`selected` 或 `hover_or_selected`。 |
+| `target_layers` | array | 只允許 `border_layer`、`territorial_sea_layer`、`eez_layer`、`high_seas_layer`。 |
+| `color_rgb` | array | 三個 0-255 integer，對應遮罩 RGB。 |
+| `contrast` | integer 0-100 | 疆域強調對比度。 |
+| `alpha` | integer 0-100 | 遮罩半透明程度。 |
+| `gamma` | integer 25-300 | gamma bar，100 表示 1.00x。 |
+| `feather` | integer 0-100 | 邊界柔化程度。 |
+| `breathing` | object | 呼吸特效設定，包含 `enabled`、`speed`、`amplitude`。 |
+| `renderer_sync` | string | 目前為 `ui_profile_launch_packet_only`，表示 renderer polygon mask 尚未接。 |
+
+目前 Qt 已提供 Properties 入口與圖層列雙擊對話框，並會把設定寫入 profile、launch packet、Canvas Preview 與 provenance。下一步 renderer 應先實作 hover outline + translucent glow，再接 polygon fill、contrast/gamma shader 與呼吸動畫。
 
 ## Handoff rules
 

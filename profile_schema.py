@@ -6,9 +6,17 @@ from pathlib import Path
 
 
 PROFILE_SCHEMA_ID = "rrkal_displaytools.qt_panel_profile.v1"
+BOUNDARY_HIGHLIGHT_SCHEMA_ID = "rrkal_displaytools.boundary_highlight_mask.v1"
 
 REQUIRED_PROFILE_TOP_LEVEL = {"schema", "renderer", "ocean_material", "layers"}
-OPTIONAL_PROFILE_TOP_LEVEL = {"selected_layer", "selected_pin_id", "layer_stack_ui", "tool_state", "pins"}
+OPTIONAL_PROFILE_TOP_LEVEL = {
+    "selected_layer",
+    "selected_pin_id",
+    "layer_stack_ui",
+    "tool_state",
+    "pins",
+    "boundary_highlight",
+}
 REQUIRED_PROFILE_RENDERER = {
     "style_profile",
     "ui_backend",
@@ -43,6 +51,22 @@ BLEND_MODES = {"Normal", "Screen", "Multiply", "Overlay", "Soft Light"}
 TOOL_MODES = {"move", "select", "pin"}
 PIN_TYPES = {"Observation", "Sample Site", "Anomaly", "Reference", "Event"}
 PIN_LABEL_MODES = {"auto", "selected", "priority", "hidden"}
+BOUNDARY_HIGHLIGHT_LAYER_KEYS = {"border_layer", "territorial_sea_layer", "eez_layer", "high_seas_layer"}
+BOUNDARY_HIGHLIGHT_TRIGGERS = {"hover", "selected", "hover_or_selected"}
+REQUIRED_BOUNDARY_HIGHLIGHT_FIELDS = {
+    "schema",
+    "enabled",
+    "trigger",
+    "target_layers",
+    "color_rgb",
+    "contrast",
+    "alpha",
+    "gamma",
+    "feather",
+    "breathing",
+    "renderer_sync",
+}
+REQUIRED_BOUNDARY_BREATHING_FIELDS = {"enabled", "speed", "amplitude"}
 REQUIRED_PIN_FIELDS = {"id", "type", "label", "latitude", "longitude", "placement"}
 OPTIONAL_PIN_FIELDS = {"note", "target_layer", "label_priority"}
 REQUIRED_TOOL_STATE_FIELDS = {
@@ -212,6 +236,54 @@ def profile_payload_errors(profile: dict[str, object]) -> list[str]:
                 pin_ids = {pin.get("id") for pin in pins if isinstance(pin, dict)}
                 if selected_pin_id not in pin_ids:
                     errors.append("selected_pin_id must match an id in pins")
+    boundary_highlight = profile.get("boundary_highlight")
+    if boundary_highlight is not None:
+        if not isinstance(boundary_highlight, dict):
+            errors.append("boundary_highlight must be an object")
+        else:
+            for field in sorted(REQUIRED_BOUNDARY_HIGHLIGHT_FIELDS - set(boundary_highlight)):
+                errors.append(f"missing boundary_highlight field: {field}")
+            schema = boundary_highlight.get("schema")
+            if schema != BOUNDARY_HIGHLIGHT_SCHEMA_ID:
+                errors.append(f"boundary_highlight.schema must be {BOUNDARY_HIGHLIGHT_SCHEMA_ID!r}")
+            if not isinstance(boundary_highlight.get("enabled"), bool):
+                errors.append("boundary_highlight.enabled must be boolean")
+            trigger = boundary_highlight.get("trigger")
+            if not isinstance(trigger, str) or trigger not in BOUNDARY_HIGHLIGHT_TRIGGERS:
+                errors.append(f"boundary_highlight.trigger must be one of {sorted(BOUNDARY_HIGHLIGHT_TRIGGERS)}")
+            target_layers = boundary_highlight.get("target_layers")
+            if not isinstance(target_layers, list) or not target_layers:
+                errors.append("boundary_highlight.target_layers must be a non-empty list")
+            elif any(not isinstance(layer, str) or layer not in BOUNDARY_HIGHLIGHT_LAYER_KEYS for layer in target_layers):
+                errors.append("boundary_highlight.target_layers must contain only boundary layer keys")
+            color_rgb = boundary_highlight.get("color_rgb")
+            if (
+                not isinstance(color_rgb, list)
+                or len(color_rgb) != 3
+                or any(not isinstance(value, int) or isinstance(value, bool) or not 0 <= value <= 255 for value in color_rgb)
+            ):
+                errors.append("boundary_highlight.color_rgb must be three integers from 0 to 255")
+            for field in ("contrast", "alpha", "feather"):
+                value = boundary_highlight.get(field)
+                if not isinstance(value, int) or isinstance(value, bool) or not 0 <= value <= 100:
+                    errors.append(f"boundary_highlight.{field} must be an integer from 0 to 100")
+            gamma = boundary_highlight.get("gamma")
+            if not isinstance(gamma, int) or isinstance(gamma, bool) or not 25 <= gamma <= 300:
+                errors.append("boundary_highlight.gamma must be an integer from 25 to 300")
+            breathing = boundary_highlight.get("breathing")
+            if not isinstance(breathing, dict):
+                errors.append("boundary_highlight.breathing must be an object")
+            else:
+                for field in sorted(REQUIRED_BOUNDARY_BREATHING_FIELDS - set(breathing)):
+                    errors.append(f"missing boundary_highlight.breathing field: {field}")
+                if not isinstance(breathing.get("enabled"), bool):
+                    errors.append("boundary_highlight.breathing.enabled must be boolean")
+                for field in ("speed", "amplitude"):
+                    value = breathing.get(field)
+                    if not isinstance(value, int) or isinstance(value, bool) or not 0 <= value <= 100:
+                        errors.append(f"boundary_highlight.breathing.{field} must be an integer from 0 to 100")
+            if not isinstance(boundary_highlight.get("renderer_sync"), str):
+                errors.append("boundary_highlight.renderer_sync must be a string")
     return errors
 
 
@@ -243,6 +315,14 @@ def profile_schema_packet() -> dict[str, object]:
             "tool_modes": sorted(TOOL_MODES),
             "pin_types": sorted(PIN_TYPES),
             "pin_label_modes": sorted(PIN_LABEL_MODES),
+        },
+        "optional_boundary_highlight": {
+            "schema": BOUNDARY_HIGHLIGHT_SCHEMA_ID,
+            "target_layers": sorted(BOUNDARY_HIGHLIGHT_LAYER_KEYS),
+            "triggers": sorted(BOUNDARY_HIGHLIGHT_TRIGGERS),
+            "required_fields": sorted(REQUIRED_BOUNDARY_HIGHLIGHT_FIELDS),
+            "breathing_required_fields": sorted(REQUIRED_BOUNDARY_BREATHING_FIELDS),
+            "status": "Qt UI/profile/launch packet state; renderer hover polygon mask pending",
         },
         "optional_pins": {
             "required_fields": sorted(REQUIRED_PIN_FIELDS),

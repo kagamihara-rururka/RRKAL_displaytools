@@ -1075,3 +1075,19 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Boundary highlight mask UI contract
+
+Scope:
+- Added `boundary_highlight` state to Qt profiles, launch packets, Canvas Preview, and provenance.
+- Added a Properties panel entry for boundary highlight controls.
+- Boundary-capable rows (`border_layer`, `territorial_sea_layer`, `eez_layer`, `high_seas_layer`) can be double-clicked to open the control dialog.
+- The dialog exposes enabled/trigger, target boundary layers, RGB color picker, contrast, alpha, gamma, feather, and breathing speed/amplitude controls.
+- Updated profile schema validation and docs for `rrkal_displaytools.boundary_highlight_mask.v1`.
+
+Positioning:
+- This captures the user's territory/sea-zone emphasis behavior as a reproducible UI/profile contract before renderer polygon picking is implemented.
+- Remaining work is renderer-backed hover geometry picking, outline/glow visualization, polygon fill, and shader-side contrast/gamma/breathing application.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

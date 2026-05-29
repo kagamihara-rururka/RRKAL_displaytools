@@ -105,6 +105,13 @@ LAYER_LABELS = (
     ("vehicle_icons", "交通工具圖示"),
 )
 
+BOUNDARY_HIGHLIGHT_SCHEMA = "rrkal_displaytools.boundary_highlight_mask.v1"
+BOUNDARY_HIGHLIGHT_LAYER_KEYS = (
+    "border_layer",
+    "territorial_sea_layer",
+    "eez_layer",
+    "high_seas_layer",
+)
 BLEND_MODES = ("Normal", "Screen", "Multiply", "Overlay", "Soft Light")
 TOOL_MODES = (
     ("move", "Move", "檢視 / 平移"),
@@ -118,6 +125,70 @@ PIN_LABEL_MODES = (
     ("priority", "Priority", "Only label selected Pin and Pins above the priority threshold."),
     ("hidden", "Hidden", "Hide all Pin labels; markers remain visible."),
 )
+
+
+def _coerce_int(value: object, default: int, minimum: int, maximum: int) -> int:
+    if isinstance(value, bool):
+        return default
+    try:
+        number = int(value)
+    except (TypeError, ValueError):
+        return default
+    return max(minimum, min(maximum, number))
+
+
+def default_boundary_highlight_state() -> dict[str, object]:
+    return {
+        "schema": BOUNDARY_HIGHLIGHT_SCHEMA,
+        "enabled": True,
+        "trigger": "hover",
+        "target_layers": list(BOUNDARY_HIGHLIGHT_LAYER_KEYS),
+        "color_rgb": [255, 190, 72],
+        "contrast": 45,
+        "alpha": 48,
+        "gamma": 100,
+        "feather": 14,
+        "breathing": {
+            "enabled": True,
+            "speed": 42,
+            "amplitude": 16,
+        },
+        "renderer_sync": "ui_profile_launch_packet_only",
+    }
+
+
+def normalized_boundary_highlight_state(payload: object) -> dict[str, object]:
+    state = default_boundary_highlight_state()
+    if not isinstance(payload, dict):
+        return state
+    state["enabled"] = bool(payload.get("enabled", state["enabled"]))
+    trigger = payload.get("trigger")
+    if isinstance(trigger, str) and trigger in {"hover", "selected", "hover_or_selected"}:
+        state["trigger"] = trigger
+    targets = payload.get("target_layers")
+    if isinstance(targets, list):
+        target_layers = [str(layer) for layer in targets if str(layer) in BOUNDARY_HIGHLIGHT_LAYER_KEYS]
+        if target_layers:
+            state["target_layers"] = target_layers
+    color_rgb = payload.get("color_rgb")
+    if isinstance(color_rgb, list) and len(color_rgb) >= 3:
+        state["color_rgb"] = [_coerce_int(color_rgb[index], 255, 0, 255) for index in range(3)]
+    state["contrast"] = _coerce_int(payload.get("contrast"), int(state["contrast"]), 0, 100)
+    state["alpha"] = _coerce_int(payload.get("alpha"), int(state["alpha"]), 0, 100)
+    state["gamma"] = _coerce_int(payload.get("gamma"), int(state["gamma"]), 25, 300)
+    state["feather"] = _coerce_int(payload.get("feather"), int(state["feather"]), 0, 100)
+    breathing = payload.get("breathing")
+    if isinstance(breathing, dict):
+        state["breathing"] = {
+            "enabled": bool(breathing.get("enabled", True)),
+            "speed": _coerce_int(breathing.get("speed"), 42, 0, 100),
+            "amplitude": _coerce_int(breathing.get("amplitude"), 16, 0, 100),
+        }
+    renderer_sync = payload.get("renderer_sync")
+    if isinstance(renderer_sync, str):
+        state["renderer_sync"] = renderer_sync
+    return state
+
 
 class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def __init__(self, initial_profile: Path | None = None) -> None:
@@ -142,6 +213,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_runtime_ack_payload: dict[str, object] | None = None
         self.history_list: QtWidgets.QListWidget | None = None
         self.selected_layer_key: str | None = None
+        self.boundary_highlight_state: dict[str, object] = default_boundary_highlight_state()
+        self.boundary_highlight_label: QtWidgets.QLabel | None = None
+        self.boundary_layer_event_targets: dict[int, str] = {}
         self.active_tool = "move"
         self.tool_buttons: dict[str, QtWidgets.QToolButton] = {}
         self.tool_target_label: QtWidgets.QLabel | None = None
@@ -280,6 +354,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         layer_property_actions.addWidget(toggle_selected_visibility)
         layer_property_actions.addWidget(reset_selected_state)
         material_form.addRow(layer_property_actions)
+        self.boundary_highlight_label = QtWidgets.QLabel(self.boundary_highlight_summary())
+        self.boundary_highlight_label.setWordWrap(True)
+        boundary_highlight_button = QtWidgets.QPushButton("疆域強調遮罩設定")
+        boundary_highlight_button.clicked.connect(lambda _checked=False: self.open_boundary_highlight_dialog())
+        material_form.addRow("Boundary highlight", self.boundary_highlight_label)
+        material_form.addRow(boundary_highlight_button)
         properties_dock = QtWidgets.QDockWidget("Properties", self)
         properties_dock.setObjectName("propertiesDock")
         properties_dock.setAllowedAreas(
@@ -369,6 +449,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             blend.setToolTip("🚧 UI-only blend mode; renderer compositing sync pending")
             blend.currentTextChanged.connect(lambda _text, self=self: self.refresh_layer_stack_status())
             self.layer_blends[key] = blend
+            if key in BOUNDARY_HIGHLIGHT_LAYER_KEYS:
+                boundary_tooltip = "雙擊開啟疆域/領海/EEZ/公海強調遮罩控制。"
+                row.setToolTip(boundary_tooltip)
+                layer_label.setToolTip(boundary_tooltip)
+                row.installEventFilter(self)
+                layer_label.installEventFilter(self)
+                self.boundary_layer_event_targets[id(row)] = key
+                self.boundary_layer_event_targets[id(layer_label)] = key
 
             row_layout.addWidget(select_button, 0, 0)
             row_layout.addWidget(check, 0, 1)
@@ -561,6 +649,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
 
         help_menu = self.menuBar().addMenu("Help")
         help_menu.addAction("Smoke Check", self.run_smoke_check)
+
+    def eventFilter(self, watched: QtCore.QObject, event: QtCore.QEvent) -> bool:
+        if event.type() == QtCore.QEvent.Type.MouseButtonDblClick:
+            layer_key = self.boundary_layer_event_targets.get(id(watched))
+            if layer_key is not None:
+                self.open_boundary_highlight_dialog(layer_key)
+                return True
+        return super().eventFilter(watched, event)
 
     def _build_tool_dock(self) -> None:
         dock = QtWidgets.QDockWidget("Tools", self)
@@ -951,6 +1047,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_stack_ui": self.collect_layer_stack_ui(),
             "tool_state": self.collect_tool_state(),
             "pins": self.collect_research_pins(),
+            "boundary_highlight": self.collect_boundary_highlight_state(),
         }
 
     def collect_launch_packet(self) -> dict[str, object]:
@@ -976,6 +1073,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_stack_ui": self.collect_layer_stack_ui(),
             "tool_state": self.collect_tool_state(),
             "pins": self.collect_research_pins(),
+            "boundary_highlight": self.collect_boundary_highlight_state(),
             "pin_input_ack_file": str(PIN_INPUT_ACK_PATH),
             "pin_pick_state_file": str(PIN_PICK_STATE_PATH),
             "pin_pick_ack_file": str(PIN_PICK_ACK_PATH),
@@ -1213,6 +1311,187 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def collect_research_pins(self) -> list[dict[str, object]]:
         return [dict(pin) for pin in self.research_pins]
 
+    def collect_boundary_highlight_state(self) -> dict[str, object]:
+        return normalized_boundary_highlight_state(self.boundary_highlight_state)
+
+    def boundary_highlight_summary(self) -> str:
+        state = self.collect_boundary_highlight_state()
+        color_rgb = state.get("color_rgb", [255, 190, 72])
+        color_text = (
+            f"{color_rgb[0]},{color_rgb[1]},{color_rgb[2]}"
+            if isinstance(color_rgb, list) and len(color_rgb) >= 3
+            else "255,190,72"
+        )
+        breathing = state.get("breathing", {})
+        breathing_enabled = isinstance(breathing, dict) and breathing.get("enabled") is True
+        target_layers = state.get("target_layers", [])
+        target_count = len(target_layers) if isinstance(target_layers, list) else 0
+        gamma = _coerce_int(state.get("gamma"), 100, 25, 300) / 100.0
+        return (
+            f"{'On' if state.get('enabled') else 'Off'}; trigger={state.get('trigger', 'hover')}; "
+            f"RGB={color_text}; contrast={state.get('contrast')}%; alpha={state.get('alpha')}%; "
+            f"gamma={gamma:.2f}; feather={state.get('feather')}%; "
+            f"breath={'on' if breathing_enabled else 'off'}; targets={target_count}; 🚧 renderer overlay pending"
+        )
+
+    def refresh_boundary_highlight_status(self) -> None:
+        if self.boundary_highlight_label is not None:
+            self.boundary_highlight_label.setText(self.boundary_highlight_summary())
+
+    def open_boundary_highlight_dialog(self, layer_key: str | None = None) -> None:
+        if not isinstance(layer_key, str) or layer_key not in BOUNDARY_HIGHLIGHT_LAYER_KEYS:
+            if self.selected_layer_key in BOUNDARY_HIGHLIGHT_LAYER_KEYS:
+                layer_key = self.selected_layer_key
+            else:
+                layer_key = "border_layer"
+        self.select_layer(layer_key)
+        state = self.collect_boundary_highlight_state()
+        dialog = QtWidgets.QDialog(self)
+        layer_label = next((label for key, label in LAYER_LABELS if key == layer_key), layer_key)
+        dialog.setWindowTitle(f"疆域強調遮罩：{layer_label}")
+        layout = QtWidgets.QVBoxLayout(dialog)
+        note = QtWidgets.QLabel(
+            "控制國界/領海/EEZ/公海 hover 強調遮罩。這是科研定位用的圖層強調狀態，"
+            "本輪寫入 profile / launch packet / provenance；renderer 實際 polygon mask 仍為下一步。"
+        )
+        note.setWordWrap(True)
+        layout.addWidget(note)
+        form = QtWidgets.QFormLayout()
+        enabled = QtWidgets.QCheckBox("啟用 hover 疆域強調")
+        enabled.setChecked(bool(state.get("enabled", True)))
+        form.addRow("Enabled", enabled)
+        trigger_combo = QtWidgets.QComboBox()
+        trigger_items = (
+            ("hover", "Hover"),
+            ("selected", "Selected"),
+            ("hover_or_selected", "Hover or selected"),
+        )
+        for value, label in trigger_items:
+            trigger_combo.addItem(label, value)
+        for index in range(trigger_combo.count()):
+            if trigger_combo.itemData(index) == state.get("trigger"):
+                trigger_combo.setCurrentIndex(index)
+                break
+        form.addRow("Trigger", trigger_combo)
+        color_rgb = state.get("color_rgb", [255, 190, 72])
+        if not isinstance(color_rgb, list) or len(color_rgb) < 3:
+            color_rgb = [255, 190, 72]
+        selected_color = [QtGui.QColor(int(color_rgb[0]), int(color_rgb[1]), int(color_rgb[2]))]
+        color_button = QtWidgets.QPushButton()
+
+        def update_color_button() -> None:
+            color = selected_color[0]
+            color_button.setText(f"RGB {color.red()}, {color.green()}, {color.blue()}")
+            color_button.setStyleSheet(
+                f"background-color: rgb({color.red()}, {color.green()}, {color.blue()}); color: #111; font-weight: 700;"
+            )
+
+        def choose_color() -> None:
+            color = QtWidgets.QColorDialog.getColor(selected_color[0], dialog, "Boundary highlight RGB")
+            if color.isValid():
+                selected_color[0] = color
+                update_color_button()
+
+        color_button.clicked.connect(choose_color)
+        update_color_button()
+        form.addRow("RGB 色環", color_button)
+
+        def slider_row(value: int, minimum: int, maximum: int, suffix: str = "%") -> tuple[QtWidgets.QWidget, QtWidgets.QSlider, QtWidgets.QLabel]:
+            container = QtWidgets.QWidget()
+            row = QtWidgets.QHBoxLayout(container)
+            row.setContentsMargins(0, 0, 0, 0)
+            slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+            slider.setRange(minimum, maximum)
+            slider.setValue(value)
+            label = QtWidgets.QLabel()
+
+            def update_label(next_value: int) -> None:
+                if suffix == "x":
+                    label.setText(f"{next_value / 100.0:.2f}x")
+                else:
+                    label.setText(f"{next_value}{suffix}")
+
+            slider.valueChanged.connect(update_label)
+            update_label(value)
+            row.addWidget(slider, stretch=1)
+            row.addWidget(label)
+            return container, slider, label
+
+        contrast_row, contrast_slider, _contrast_label = slider_row(_coerce_int(state.get("contrast"), 45, 0, 100), 0, 100)
+        alpha_row, alpha_slider, _alpha_label = slider_row(_coerce_int(state.get("alpha"), 48, 0, 100), 0, 100)
+        gamma_row, gamma_slider, _gamma_label = slider_row(_coerce_int(state.get("gamma"), 100, 25, 300), 25, 300, "x")
+        feather_row, feather_slider, _feather_label = slider_row(_coerce_int(state.get("feather"), 14, 0, 100), 0, 100)
+        form.addRow("對比 Contrast", contrast_row)
+        form.addRow("半透明 Alpha", alpha_row)
+        form.addRow("Gamma", gamma_row)
+        form.addRow("邊緣 Feather", feather_row)
+        breathing = state.get("breathing", {})
+        if not isinstance(breathing, dict):
+            breathing = {}
+        breath_enabled = QtWidgets.QCheckBox("呼吸特效")
+        breath_enabled.setChecked(bool(breathing.get("enabled", True)))
+        breath_speed_row, breath_speed_slider, _speed_label = slider_row(
+            _coerce_int(breathing.get("speed"), 42, 0, 100), 0, 100
+        )
+        breath_amp_row, breath_amp_slider, _amp_label = slider_row(
+            _coerce_int(breathing.get("amplitude"), 16, 0, 100), 0, 100
+        )
+        form.addRow("Breathing", breath_enabled)
+        form.addRow("Breath speed", breath_speed_row)
+        form.addRow("Breath amplitude", breath_amp_row)
+        layout.addLayout(form)
+        target_group = QtWidgets.QGroupBox("Target boundary layers")
+        target_layout = QtWidgets.QGridLayout(target_group)
+        current_targets = state.get("target_layers", [])
+        target_checks: dict[str, QtWidgets.QCheckBox] = {}
+        for index, target_key in enumerate(BOUNDARY_HIGHLIGHT_LAYER_KEYS):
+            target_label = next((label for key, label in LAYER_LABELS if key == target_key), target_key)
+            target_check = QtWidgets.QCheckBox(target_label)
+            target_check.setChecked(isinstance(current_targets, list) and target_key in current_targets)
+            target_checks[target_key] = target_check
+            target_layout.addWidget(target_check, index // 2, index % 2)
+        layout.addWidget(target_group)
+        buttons = QtWidgets.QDialogButtonBox(
+            QtWidgets.QDialogButtonBox.StandardButton.Ok | QtWidgets.QDialogButtonBox.StandardButton.Cancel
+        )
+
+        def apply_dialog() -> None:
+            color = selected_color[0]
+            targets = [key for key, checkbox in target_checks.items() if checkbox.isChecked()]
+            if not targets:
+                targets = [layer_key]
+            self.boundary_highlight_state = normalized_boundary_highlight_state(
+                {
+                    "schema": BOUNDARY_HIGHLIGHT_SCHEMA,
+                    "enabled": enabled.isChecked(),
+                    "trigger": trigger_combo.currentData(),
+                    "target_layers": targets,
+                    "color_rgb": [color.red(), color.green(), color.blue()],
+                    "contrast": contrast_slider.value(),
+                    "alpha": alpha_slider.value(),
+                    "gamma": gamma_slider.value(),
+                    "feather": feather_slider.value(),
+                    "breathing": {
+                        "enabled": breath_enabled.isChecked(),
+                        "speed": breath_speed_slider.value(),
+                        "amplitude": breath_amp_slider.value(),
+                    },
+                    "renderer_sync": "ui_profile_launch_packet_only",
+                }
+            )
+            self.refresh_boundary_highlight_status()
+            self.refresh_command_preview()
+            self.refresh_canvas_preview()
+            if self.history_list is not None:
+                self.history_list.insertItem(0, f"🚧 Boundary highlight UI updated: {layer_key}")
+            self.status.setText(f"已更新疆域強調遮罩設定：{layer_label}")
+            dialog.accept()
+
+        buttons.accepted.connect(apply_dialog)
+        buttons.rejected.connect(dialog.reject)
+        layout.addWidget(buttons)
+        dialog.exec()
+
     def apply_profile(self, profile: dict[str, object]) -> None:
         errors = profile_payload_errors(profile)
         if errors:
@@ -1227,6 +1506,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         layer_stack = profile.get("layer_stack_ui")
         tool_state = profile.get("tool_state")
         pins = profile.get("pins")
+        boundary_highlight = profile.get("boundary_highlight")
         if isinstance(renderer, dict):
             self._set_combo(self.style_combo, str(renderer.get("style_profile", self.style_combo.currentText())))
             self._set_combo(self.ui_combo, str(renderer.get("ui_backend", self.ui_combo.currentText())))
@@ -1262,6 +1542,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.apply_tool_state(tool_state)
         if isinstance(pins, list):
             self.apply_research_pins(pins)
+        if isinstance(boundary_highlight, dict):
+            self.boundary_highlight_state = normalized_boundary_highlight_state(boundary_highlight)
+            self.refresh_boundary_highlight_status()
         self.selected_pin_id = selected_pin_id if isinstance(selected_pin_id, str) else None
         if self.selected_pin_id is not None and self.selected_pin_packet() is None:
             self.selected_pin_id = None
@@ -1440,6 +1723,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_property_labels["locked"].setText("Locked" if self.layer_locks[key].isChecked() else "Unlocked")
         self.layer_property_labels["opacity"].setText(f"{self.layer_opacity[key].value()}%")
         self.layer_property_labels["blend"].setText(self.layer_blends[key].currentText())
+        self.refresh_boundary_highlight_status()
 
     def set_active_tool(self, mode: str) -> None:
         if mode not in self.tool_buttons:
@@ -1796,12 +2080,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             hit_map = f"{hit_map}, +{len(hit_keys) - 5} more"
         if not hit_map:
             hit_map = "-"
+        boundary_summary = self.boundary_highlight_summary()
         self.canvas_preview_label.setText(
             "RRKAL Scientific Canvas Preview\n\n"
             f"Style: {style} | Topo: {topo} | Data: {data_mode}\n"
             f"Tool: {tool_label} -> Layer: {selected_label}\n"
             f"Visible layers: {visible}/{len(LAYER_LABELS)} | Pins: {pin_count} | Zoom: {zoom}%\n\n"
             f"Select hit map: {hit_map}\n"
+            f"Boundary highlight: {boundary_summary}\n"
             f"Selected pin: {selected_pin_text}\n"
             f"Pin markers: {pin_markers}\n"
             f"Cursor estimate: {cursor_text}\n\n"
@@ -1810,7 +2096,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.canvas_meta_label.setText(
             f"Canvas state mirrors Qt UI only：active tool={self.active_tool}, "
             f"target layer={self.selected_layer_key or '-'}, style={style}, visible_layers={visible}, "
-            f"selected_pin={self.selected_pin_id or '-'}, cursor={cursor_text}."
+            f"selected_pin={self.selected_pin_id or '-'}, cursor={cursor_text}, "
+            f"boundary_highlight={'on' if self.boundary_highlight_state.get('enabled') else 'off'}."
         )
         self.refresh_research_provenance()
 
@@ -1859,6 +2146,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "canvas_select_hit_targets": self.canvas_layer_hit_keys(),
             "pin_overlay_boundary": "Pins are geodetic annotations; renderer sync must rotate them with the globe and apply horizon/depth occlusion.",
             "pin_projection_contract": pin_projection_contract_packet(),
+            "boundary_highlight": self.collect_boundary_highlight_state(),
+            "boundary_highlight_boundary": "UI/profile/launch state only; renderer hover polygon mask and EEZ/territorial geometry picking are pending.",
             "visible_layers": visible_layers,
             "locked_layers": locked_layers,
             "layer_visibility_snapshot_active": self.layer_visibility_snapshot is not None,
