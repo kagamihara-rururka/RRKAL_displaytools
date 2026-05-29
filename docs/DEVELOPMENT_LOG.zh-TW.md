@@ -1029,3 +1029,18 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Qt Pin pick acknowledgement
+
+Scope:
+- Added `state/qt_pin_pick_ack.json` as a Qt-authored acknowledgement for renderer Pin pick events.
+- The ack records renderer event, renderer timestamp, renderer frame, renderer selected Pin, Qt selected Pin, and whether the Qt UI synced the event.
+- The Pin Annotation panel now shows Qt ack status.
+- Launch packets and research provenance include the Pin pick ack file and latest ack payload.
+
+Positioning:
+- This separates "renderer wrote Pin pick state" from "Qt consumed and synced Pin pick state", improving traceability for scientific annotations.
+- Remaining Pin work is renderer-side acknowledgement and deeper globe-mask/depth-buffer occlusion refinement.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

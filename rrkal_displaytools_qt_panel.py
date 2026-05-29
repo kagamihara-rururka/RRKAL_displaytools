@@ -22,6 +22,7 @@ from pin_projection import pin_projection_contract_packet
 ROOT = Path(__file__).resolve().parent
 PROFILE_TEMPLATE_DIR = ROOT / "profiles"
 PIN_PICK_STATE_PATH = ROOT / "state" / "renderer_pin_pick_state.json"
+PIN_PICK_ACK_PATH = ROOT / "state" / "qt_pin_pick_ack.json"
 LAYER_RUNTIME_STATE_PATH = ROOT / "state" / "renderer_layer_runtime_state.json"
 LAYER_RUNTIME_ACK_PATH = ROOT / "state" / "renderer_layer_runtime_ack.json"
 
@@ -153,9 +154,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.pin_label_min_priority_spin: QtWidgets.QSpinBox | None = None
         self.pin_list: QtWidgets.QListWidget | None = None
         self.pin_pick_state_label: QtWidgets.QLabel | None = None
+        self.pin_pick_ack_label: QtWidgets.QLabel | None = None
         self.pin_pick_state_mtime_ns: int | None = PIN_PICK_STATE_PATH.stat().st_mtime_ns if PIN_PICK_STATE_PATH.exists() else None
         self.pin_pick_state_last_event: str | None = None
         self.pin_pick_state_payload: dict[str, object] | None = None
+        self.pin_pick_ack_payload: dict[str, object] | None = None
+        self.pin_pick_ack_write_error: str | None = None
         self.pin_pick_history: list[str] = []
         self.pin_pick_history_signature: str | None = None
         self.selected_pin_id: str | None = None
@@ -635,6 +639,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.pin_pick_state_label = QtWidgets.QLabel(f"Renderer bridge: waiting for {PIN_PICK_STATE_PATH.name}")
         self.pin_pick_state_label.setWordWrap(True)
         pin_form.addRow("Renderer Pick", self.pin_pick_state_label)
+        self.pin_pick_ack_label = QtWidgets.QLabel(f"Qt ack: waiting for {PIN_PICK_ACK_PATH.name}")
+        self.pin_pick_ack_label.setWordWrap(True)
+        pin_form.addRow("Qt Ack", self.pin_pick_ack_label)
         pin_form.addRow("Status", QtWidgets.QLabel("Manual lat/lon Pins; renderer click/hover sync uses JSON bridge."))
         layout.addWidget(pin_group)
 
@@ -957,6 +964,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "tool_state": self.collect_tool_state(),
             "pins": self.collect_research_pins(),
             "pin_pick_state_file": str(PIN_PICK_STATE_PATH),
+            "pin_pick_ack_file": str(PIN_PICK_ACK_PATH),
             "layer_runtime_state_file": str(LAYER_RUNTIME_STATE_PATH),
             "layer_runtime_ack_file": str(LAYER_RUNTIME_ACK_PATH),
             "command": self.build_command(),
@@ -1603,7 +1611,6 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             )
         self.pin_pick_state_last_event = event
         self.append_pin_pick_history(payload)
-        self.refresh_research_provenance()
         if event == "selected":
             if isinstance(selected_pin_id, str) and self.pin_id_exists(selected_pin_id):
                 self.selected_pin_id = selected_pin_id
@@ -1621,6 +1628,43 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 self.refresh_pin_list()
                 self.refresh_command_preview()
                 self.status.setText("Renderer 已清除 Pin 選取")
+        self.write_pin_pick_ack(payload)
+        self.refresh_research_provenance()
+
+    def write_pin_pick_ack(self, payload: dict[str, object]) -> None:
+        event = str(payload.get("event", "unknown"))
+        selected_pin_id = payload.get("selected_pin_id")
+        ui_synced = True
+        if event == "selected":
+            ui_synced = isinstance(selected_pin_id, str) and self.selected_pin_id == selected_pin_id
+        elif event == "cleared":
+            ui_synced = self.selected_pin_id is None
+        ack = {
+            "schema": "rrkal_displaytools.qt_pin_pick_ack.v1",
+            "updated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "event": event,
+            "renderer_updated_at_utc": payload.get("updated_at_utc"),
+            "renderer_frame_index": payload.get("frame_index"),
+            "renderer_selected_pin_id": selected_pin_id,
+            "qt_selected_pin_id": self.selected_pin_id,
+            "ui_synced": ui_synced,
+            "pin_count": len(self.research_pins),
+            "source": "rrkal_displaytools_qt_panel",
+        }
+        try:
+            PIN_PICK_ACK_PATH.parent.mkdir(parents=True, exist_ok=True)
+            PIN_PICK_ACK_PATH.write_text(json.dumps(ack, ensure_ascii=False, indent=2), encoding="utf-8")
+            self.pin_pick_ack_payload = ack
+            self.pin_pick_ack_write_error = None
+            if self.pin_pick_ack_label is not None:
+                self.pin_pick_ack_label.setText(
+                    f"Qt ack: event={event}, ui_synced={ui_synced}, selected={self.selected_pin_id or '-'}, "
+                    f"updated={ack['updated_at_utc']}"
+                )
+        except OSError as exc:
+            self.pin_pick_ack_write_error = str(exc)
+            if self.pin_pick_ack_label is not None:
+                self.pin_pick_ack_label.setText(f"Qt ack write failed: {exc}")
 
     def append_pin_pick_history(self, payload: dict[str, object]) -> None:
         event = str(payload.get("event", "unknown"))
@@ -1743,6 +1787,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "pin_pick_state_file": str(PIN_PICK_STATE_PATH),
             "pin_pick_state_last_event": self.pin_pick_state_last_event,
             "pin_pick_state": self.pin_pick_state_payload,
+            "pin_pick_ack_file": str(PIN_PICK_ACK_PATH),
+            "pin_pick_ack": self.pin_pick_ack_payload,
+            "pin_pick_ack_write_error": self.pin_pick_ack_write_error,
             "pin_pick_history": self.pin_pick_history[:5],
             "layer_runtime_state_file": str(LAYER_RUNTIME_STATE_PATH),
             "layer_runtime_state_last_write_utc": self.layer_runtime_state_last_write_utc,
