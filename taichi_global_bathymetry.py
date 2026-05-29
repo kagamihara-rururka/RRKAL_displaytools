@@ -2456,6 +2456,96 @@ def load_pin_records(pin_file: str | None, pin_json: str | None) -> tuple[list[d
     return records, selected_pin_id
 
 
+BOUNDARY_HIGHLIGHT_SCHEMA = "rrkal_displaytools.boundary_highlight_mask.v1"
+BOUNDARY_HIGHLIGHT_LAYER_MAP = {
+    "border_layer": "borders",
+    "territorial_sea_layer": "territorial_sea",
+    "eez_layer": "eez",
+    "high_seas_layer": "high_seas",
+}
+BOUNDARY_HIGHLIGHT_TRIGGERS = {"hover", "selected", "hover_or_selected"}
+
+
+def _clamp_int_value(value: object, default: int, minimum: int, maximum: int) -> int:
+    if isinstance(value, bool):
+        return default
+    try:
+        number = int(value)
+    except (TypeError, ValueError):
+        return default
+    return max(minimum, min(maximum, number))
+
+
+def default_boundary_highlight_state(received: bool = False) -> dict[str, object]:
+    return {
+        "schema": BOUNDARY_HIGHLIGHT_SCHEMA,
+        "received": received,
+        "enabled": False,
+        "trigger": "hover",
+        "target_layers": list(BOUNDARY_HIGHLIGHT_LAYER_MAP),
+        "renderer_target_layers": list(BOUNDARY_HIGHLIGHT_LAYER_MAP.values()),
+        "color_rgb": [255, 190, 72],
+        "contrast": 45,
+        "alpha": 48,
+        "gamma": 100,
+        "feather": 14,
+        "breathing": {
+            "enabled": True,
+            "speed": 42,
+            "amplitude": 16,
+        },
+        "renderer_sync": "input_acknowledged_overlay_pending",
+    }
+
+
+def normalize_boundary_highlight_state(payload: object, received: bool = True) -> tuple[dict[str, object], str | None]:
+    state = default_boundary_highlight_state(received=received)
+    if not isinstance(payload, dict):
+        return state, "boundary_highlight root is not an object"
+    state["enabled"] = bool(payload.get("enabled", state["enabled"]))
+    trigger = payload.get("trigger")
+    if isinstance(trigger, str) and trigger in BOUNDARY_HIGHLIGHT_TRIGGERS:
+        state["trigger"] = trigger
+    else:
+        state["trigger"] = "hover"
+    targets = payload.get("target_layers")
+    if isinstance(targets, list):
+        target_layers = [str(layer) for layer in targets if str(layer) in BOUNDARY_HIGHLIGHT_LAYER_MAP]
+        if target_layers:
+            state["target_layers"] = target_layers
+    color_rgb = payload.get("color_rgb")
+    if isinstance(color_rgb, list) and len(color_rgb) >= 3:
+        state["color_rgb"] = [_clamp_int_value(color_rgb[index], 255, 0, 255) for index in range(3)]
+    state["contrast"] = _clamp_int_value(payload.get("contrast"), int(state["contrast"]), 0, 100)
+    state["alpha"] = _clamp_int_value(payload.get("alpha"), int(state["alpha"]), 0, 100)
+    state["gamma"] = _clamp_int_value(payload.get("gamma"), int(state["gamma"]), 25, 300)
+    state["feather"] = _clamp_int_value(payload.get("feather"), int(state["feather"]), 0, 100)
+    breathing = payload.get("breathing")
+    if isinstance(breathing, dict):
+        state["breathing"] = {
+            "enabled": bool(breathing.get("enabled", True)),
+            "speed": _clamp_int_value(breathing.get("speed"), 42, 0, 100),
+            "amplitude": _clamp_int_value(breathing.get("amplitude"), 16, 0, 100),
+        }
+    state["renderer_target_layers"] = [
+        BOUNDARY_HIGHLIGHT_LAYER_MAP[layer] for layer in state["target_layers"] if layer in BOUNDARY_HIGHLIGHT_LAYER_MAP
+    ]
+    return state, None
+
+
+def load_boundary_highlight_state(boundary_highlight_json: str | None) -> tuple[dict[str, object], str | None]:
+    if not boundary_highlight_json:
+        return default_boundary_highlight_state(received=False), None
+    try:
+        payload = json.loads(boundary_highlight_json)
+    except json.JSONDecodeError as first_error:
+        try:
+            payload = json.loads(boundary_highlight_json.encode("utf-8").decode("unicode_escape"))
+        except (UnicodeDecodeError, json.JSONDecodeError):
+            return default_boundary_highlight_state(received=False), str(first_error)
+    return normalize_boundary_highlight_state(payload, received=True)
+
+
 def _pin_label_text(pin: dict[str, object]) -> str:
     text = str(pin.get("label") or pin.get("id") or "Pin").strip()
     if len(text) > 28:
@@ -10315,6 +10405,13 @@ class HybridRenderController:
         self.pin_input_ack_file = Path(args.pin_input_ack_file) if getattr(args, "pin_input_ack_file", None) else None
         self.pin_pick_state_file = Path(args.pin_pick_state_file) if getattr(args, "pin_pick_state_file", None) else None
         self.write_pin_input_ack()
+        self.boundary_highlight_state, self.boundary_highlight_error = load_boundary_highlight_state(
+            getattr(args, "boundary_highlight_json", None)
+        )
+        self.boundary_highlight_ack_file = (
+            Path(args.boundary_highlight_ack_file) if getattr(args, "boundary_highlight_ack_file", None) else None
+        )
+        self.write_boundary_highlight_ack()
         self.layer_runtime_state_file = (
             Path(args.layer_runtime_state_file) if getattr(args, "layer_runtime_state_file", None) else None
         )
@@ -12084,6 +12181,41 @@ class HybridRenderController:
             self.pin_input_ack_file.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
         except OSError as exc:
             print(f"Unable to write pin input ack: {exc}")
+
+    def write_boundary_highlight_ack(self) -> None:
+        if self.boundary_highlight_ack_file is None:
+            return
+        state = dict(getattr(self, "boundary_highlight_state", default_boundary_highlight_state()))
+        payload = {
+            "schema": "rrkal_displaytools.renderer_boundary_highlight_ack.v1",
+            "updated_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "received": bool(state.get("received", False)),
+            "enabled": bool(state.get("enabled", False)),
+            "trigger": state.get("trigger", "hover"),
+            "target_layers": state.get("target_layers", []),
+            "renderer_target_layers": state.get("renderer_target_layers", []),
+            "color_rgb": state.get("color_rgb", [255, 190, 72]),
+            "contrast": state.get("contrast", 45),
+            "alpha": state.get("alpha", 48),
+            "gamma": state.get("gamma", 100),
+            "feather": state.get("feather", 14),
+            "breathing": state.get("breathing", {}),
+            "applies": ["input_acknowledgement"],
+            "pending": [
+                "hover_geometry_picking",
+                "outline_glow_overlay",
+                "polygon_fill_mask",
+                "shader_contrast_gamma",
+                "breathing_animation",
+            ],
+            "error": getattr(self, "boundary_highlight_error", None),
+            "source": "taichi_global_bathymetry",
+        }
+        try:
+            self.boundary_highlight_ack_file.parent.mkdir(parents=True, exist_ok=True)
+            self.boundary_highlight_ack_file.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        except OSError as exc:
+            print(f"Unable to write boundary highlight ack: {exc}")
 
     def nearest_pin_hit(self, x: float, y: float, radius: float | None = None) -> dict[str, object] | None:
         if not self.layer_visible.get("pins", True):
@@ -14813,6 +14945,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--pin-pick-radius", type=float, default=float(os.environ.get("PIN_PICK_RADIUS", "18.0")))
     parser.add_argument("--pin-pick-state-file", default=os.environ.get("PIN_PICK_STATE_FILE"))
     parser.add_argument("--pin-input-ack-file", default=os.environ.get("PIN_INPUT_ACK_FILE"))
+    parser.add_argument("--boundary-highlight-json", default=os.environ.get("BOUNDARY_HIGHLIGHT_JSON"))
+    parser.add_argument("--boundary-highlight-ack-file", default=os.environ.get("BOUNDARY_HIGHLIGHT_ACK_FILE"))
     parser.add_argument("--layer-runtime-state-file", default=os.environ.get("LAYER_RUNTIME_STATE_FILE"))
     parser.add_argument("--layer-runtime-ack-file", default=os.environ.get("LAYER_RUNTIME_ACK_FILE"))
 
@@ -14964,6 +15098,25 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "pin-pick-state-file",
             "pin-input-ack-file",
         ],
+        "boundary_highlight": {
+            "schema": BOUNDARY_HIGHLIGHT_SCHEMA,
+            "ack_schema": "rrkal_displaytools.renderer_boundary_highlight_ack.v1",
+            "controls": [
+                "boundary-highlight-json",
+                "boundary-highlight-ack-file",
+            ],
+            "target_layers": list(BOUNDARY_HIGHLIGHT_LAYER_MAP),
+            "renderer_target_layers": list(BOUNDARY_HIGHLIGHT_LAYER_MAP.values()),
+            "triggers": sorted(BOUNDARY_HIGHLIGHT_TRIGGERS),
+            "applies": ["input_acknowledgement"],
+            "pending": [
+                "hover_geometry_picking",
+                "outline_glow_overlay",
+                "polygon_fill_mask",
+                "shader_contrast_gamma",
+                "breathing_animation",
+            ],
+        },
         "layer_runtime_state": {
             "schema": "rrkal_displaytools.layer_runtime_state.v1",
             "control": "layer-runtime-state-file",

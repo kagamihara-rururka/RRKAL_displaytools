@@ -1091,3 +1091,19 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Boundary highlight renderer acknowledgement
+
+Scope:
+- Qt launch commands now pass `--boundary-highlight-json` and `--boundary-highlight-ack-file`.
+- Renderer now parses the boundary highlight payload and writes `renderer_boundary_highlight_ack.json`.
+- The ack records enabled state, trigger mode, profile target layers, renderer target layers, color/contrast/alpha/gamma/feather, breathing settings, and pending overlay steps.
+- The Properties panel now polls and displays the renderer boundary highlight ack.
+- Merged the boundary-layer double-click handler into the active `eventFilter`, restoring the intended dialog entry path.
+
+Positioning:
+- This closes the first front-end to renderer receipt loop for territory/sea-zone emphasis.
+- Remaining work is renderer-backed hover geometry picking, outline/glow visualization, polygon fill, and shader-side contrast/gamma/breathing application.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

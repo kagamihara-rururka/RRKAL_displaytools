@@ -24,6 +24,7 @@ PROFILE_TEMPLATE_DIR = ROOT / "profiles"
 PIN_PICK_STATE_PATH = ROOT / "state" / "renderer_pin_pick_state.json"
 PIN_INPUT_ACK_PATH = ROOT / "state" / "renderer_pin_input_ack.json"
 PIN_PICK_ACK_PATH = ROOT / "state" / "qt_pin_pick_ack.json"
+BOUNDARY_HIGHLIGHT_ACK_PATH = ROOT / "state" / "renderer_boundary_highlight_ack.json"
 LAYER_RUNTIME_STATE_PATH = ROOT / "state" / "renderer_layer_runtime_state.json"
 LAYER_RUNTIME_ACK_PATH = ROOT / "state" / "renderer_layer_runtime_ack.json"
 
@@ -215,6 +216,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.selected_layer_key: str | None = None
         self.boundary_highlight_state: dict[str, object] = default_boundary_highlight_state()
         self.boundary_highlight_label: QtWidgets.QLabel | None = None
+        self.boundary_highlight_ack_label: QtWidgets.QLabel | None = None
+        self.boundary_highlight_ack_mtime_ns: int | None = (
+            BOUNDARY_HIGHLIGHT_ACK_PATH.stat().st_mtime_ns if BOUNDARY_HIGHLIGHT_ACK_PATH.exists() else None
+        )
+        self.boundary_highlight_ack_payload: dict[str, object] | None = None
         self.boundary_layer_event_targets: dict[int, str] = {}
         self.active_tool = "move"
         self.tool_buttons: dict[str, QtWidgets.QToolButton] = {}
@@ -272,6 +278,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_runtime_ack_timer.setInterval(1000)
         self.layer_runtime_ack_timer.timeout.connect(self.refresh_layer_runtime_ack_state)
         self.layer_runtime_ack_timer.start()
+        self.boundary_highlight_ack_timer = QtCore.QTimer(self)
+        self.boundary_highlight_ack_timer.setInterval(1000)
+        self.boundary_highlight_ack_timer.timeout.connect(self.refresh_boundary_highlight_ack_state)
+        self.boundary_highlight_ack_timer.start()
         self.apply_baseline()
         self.refresh_template_list()
         if initial_profile is not None:
@@ -360,6 +370,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         boundary_highlight_button.clicked.connect(lambda _checked=False: self.open_boundary_highlight_dialog())
         material_form.addRow("Boundary highlight", self.boundary_highlight_label)
         material_form.addRow(boundary_highlight_button)
+        self.boundary_highlight_ack_label = QtWidgets.QLabel(
+            f"Boundary ack: waiting for {BOUNDARY_HIGHLIGHT_ACK_PATH.name}"
+        )
+        self.boundary_highlight_ack_label.setWordWrap(True)
+        material_form.addRow("Boundary renderer", self.boundary_highlight_ack_label)
         properties_dock = QtWidgets.QDockWidget("Properties", self)
         properties_dock.setObjectName("propertiesDock")
         properties_dock.setAllowedAreas(
@@ -650,14 +665,6 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         help_menu = self.menuBar().addMenu("Help")
         help_menu.addAction("Smoke Check", self.run_smoke_check)
 
-    def eventFilter(self, watched: QtCore.QObject, event: QtCore.QEvent) -> bool:
-        if event.type() == QtCore.QEvent.Type.MouseButtonDblClick:
-            layer_key = self.boundary_layer_event_targets.get(id(watched))
-            if layer_key is not None:
-                self.open_boundary_highlight_dialog(layer_key)
-                return True
-        return super().eventFilter(watched, event)
-
     def _build_tool_dock(self) -> None:
         dock = QtWidgets.QDockWidget("Tools", self)
         dock.setObjectName("toolsDock")
@@ -938,6 +945,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             edit.textChanged.connect(self.refresh_command_preview)
 
     def eventFilter(self, watched: QtCore.QObject, event: QtCore.QEvent) -> bool:
+        if event.type() == QtCore.QEvent.Type.MouseButtonDblClick:
+            layer_key = self.boundary_layer_event_targets.get(id(watched))
+            if layer_key is not None:
+                self.open_boundary_highlight_dialog(layer_key)
+                return True
         if watched is self.canvas_preview_label and event.type() == QtCore.QEvent.Type.MouseMove:
             position = event.position()
             width = max(1, self.canvas_preview_label.width() if self.canvas_preview_label is not None else 1)
@@ -997,6 +1009,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 str(PIN_PICK_STATE_PATH),
                 "--pin-input-ack-file",
                 str(PIN_INPUT_ACK_PATH),
+                "--boundary-highlight-json",
+                json.dumps(self.collect_boundary_highlight_state(), ensure_ascii=False),
+                "--boundary-highlight-ack-file",
+                str(BOUNDARY_HIGHLIGHT_ACK_PATH),
                 "--layer-runtime-state-file",
                 str(LAYER_RUNTIME_STATE_PATH),
                 "--layer-runtime-ack-file",
@@ -1074,6 +1090,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "tool_state": self.collect_tool_state(),
             "pins": self.collect_research_pins(),
             "boundary_highlight": self.collect_boundary_highlight_state(),
+            "boundary_highlight_ack_file": str(BOUNDARY_HIGHLIGHT_ACK_PATH),
             "pin_input_ack_file": str(PIN_INPUT_ACK_PATH),
             "pin_pick_state_file": str(PIN_PICK_STATE_PATH),
             "pin_pick_ack_file": str(PIN_PICK_ACK_PATH),
@@ -1337,6 +1354,56 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def refresh_boundary_highlight_status(self) -> None:
         if self.boundary_highlight_label is not None:
             self.boundary_highlight_label.setText(self.boundary_highlight_summary())
+
+    def refresh_boundary_highlight_ack_state(self) -> None:
+        try:
+            stat = BOUNDARY_HIGHLIGHT_ACK_PATH.stat()
+        except FileNotFoundError:
+            if self.boundary_highlight_ack_mtime_ns is not None:
+                self.boundary_highlight_ack_mtime_ns = None
+                if self.boundary_highlight_ack_label is not None:
+                    self.boundary_highlight_ack_label.setText(
+                        f"Boundary ack: waiting for {BOUNDARY_HIGHLIGHT_ACK_PATH.name}"
+                    )
+            return
+        except OSError as exc:
+            if self.boundary_highlight_ack_label is not None:
+                self.boundary_highlight_ack_label.setText(f"Boundary ack read failed: {exc}")
+            return
+        if stat.st_mtime_ns == self.boundary_highlight_ack_mtime_ns:
+            return
+        next_mtime_ns = stat.st_mtime_ns
+        try:
+            payload = json.loads(BOUNDARY_HIGHLIGHT_ACK_PATH.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            if self.boundary_highlight_ack_label is not None:
+                self.boundary_highlight_ack_label.setText(f"Boundary ack parse failed: {exc}")
+            return
+        self.boundary_highlight_ack_mtime_ns = next_mtime_ns
+        if isinstance(payload, dict):
+            self.boundary_highlight_ack_payload = payload
+            self.refresh_boundary_highlight_ack_label(payload)
+            self.refresh_research_provenance()
+
+    def refresh_boundary_highlight_ack_label(self, payload: dict[str, object]) -> None:
+        if self.boundary_highlight_ack_label is None:
+            return
+        enabled = payload.get("enabled", "-")
+        target_layers = payload.get("target_layers", [])
+        target_count = len(target_layers) if isinstance(target_layers, list) else "-"
+        renderer_layers = payload.get("renderer_target_layers", [])
+        renderer_count = len(renderer_layers) if isinstance(renderer_layers, list) else "-"
+        updated_at = str(payload.get("updated_at_utc", "-"))
+        error = payload.get("error")
+        if error:
+            self.boundary_highlight_ack_label.setText(
+                f"Boundary ack: error={error}, updated={updated_at}"
+            )
+            return
+        self.boundary_highlight_ack_label.setText(
+            f"Boundary ack: enabled={enabled}, targets={target_count}, renderer_targets={renderer_count}, "
+            f"updated={updated_at}"
+        )
 
     def open_boundary_highlight_dialog(self, layer_key: str | None = None) -> None:
         if not isinstance(layer_key, str) or layer_key not in BOUNDARY_HIGHLIGHT_LAYER_KEYS:
@@ -2147,6 +2214,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "pin_overlay_boundary": "Pins are geodetic annotations; renderer sync must rotate them with the globe and apply horizon/depth occlusion.",
             "pin_projection_contract": pin_projection_contract_packet(),
             "boundary_highlight": self.collect_boundary_highlight_state(),
+            "boundary_highlight_ack_file": str(BOUNDARY_HIGHLIGHT_ACK_PATH),
+            "boundary_highlight_ack": self.boundary_highlight_ack_payload,
             "boundary_highlight_boundary": "UI/profile/launch state only; renderer hover polygon mask and EEZ/territorial geometry picking are pending.",
             "visible_layers": visible_layers,
             "locked_layers": locked_layers,

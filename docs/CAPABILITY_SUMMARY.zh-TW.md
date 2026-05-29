@@ -14,7 +14,7 @@
 - 支援水文、海域、交通、視覺輔助四組一鍵切換，並可對目前選取圖層執行 Solo / restore visibility。
 - Layers 面板已具備 Photoshop-like layer stack 雛形：active layer selection、visibility、lock、opacity、blend mode、UI-only state reset。Visibility 已接 renderer flags，並支援 Solo selected layer / restore previous visibility snapshot，方便科研者快速隔離水文、海域、交通或輔助圖層；Qt lock 會停用 locked layer 的 visibility checkbox，並讓 group toggle、Solo、restore 與 selected-layer visibility toggle 跳過 locked layers。Qt 會寫出 `state/renderer_layer_runtime_state.json`，renderer 可用 `--layer-runtime-state-file` 讀取並即時套用 visibility 變更，也可用 `--layer-runtime-ack-file` 寫回 `state/renderer_layer_runtime_ack.json` 作為接收回執；renderer 端會跳過 runtime state 中 `locked=true` 圖層的 visibility 變更，ack 會回報 `skipped_locked_layers`。Layers 面板會顯示 layer runtime bridge 的 selected layer、visible count、last write、renderer ack、skipped locked count 與 pending 狀態，也可把目前 runtime JSON 顯示到中央文字區；History 面板會記錄最近 layer runtime 摘要變更，provenance 也會保留最近幾筆 layer runtime history 與 renderer ack。selected layer/opacity/blend 目前是 🚧 UI state，會寫入 launch packet 供後續 renderer sync。
 - Properties 面板已接 active layer inspector，可查看目前選取圖層的 visibility、lock、opacity、blend mode，並可切換選取圖層 visibility 或重設選取圖層 UI state。
-- Properties 面板已新增 `Boundary highlight` 疆域強調遮罩控制入口；國界、領海、EEZ、公海圖層列可雙擊打開控制對話框，設定 hover/selected 觸發、target layers、RGB 色彩、對比、半透明、gamma、feather 與呼吸特效。此狀態已寫入 profile、launch packet、Canvas Preview 與 provenance；renderer 實際疆域/領海/EEZ polygon hover mask 仍是下一步。
+- Properties 面板已新增 `Boundary highlight` 疆域強調遮罩控制入口；國界、領海、EEZ、公海圖層列可雙擊打開控制對話框，設定 hover/selected 觸發、target layers、RGB 色彩、對比、半透明、gamma、feather 與呼吸特效。此狀態已寫入 profile、launch packet、Canvas Preview 與 provenance；Qt 啟動 renderer 時會以 `--boundary-highlight-json` 傳入，renderer 會用 `--boundary-highlight-ack-file` 寫回 `state/renderer_boundary_highlight_ack.json`，確認接收的 target layers 與尚未接上的 overlay pipeline。renderer 實際疆域/領海/EEZ polygon hover mask 仍是下一步。
 - Qt profile save/load 已支援 selected layer 與 layer stack UI state，因此 active layer、lock、opacity、blend mode 可以隨本機 profile 保存與載入；既有 repo templates 仍相容。
 - 左側 Tools dock 已新增科研導向 tool palette：Move、Select、Pin。Select 用於指定 active layer，並可在 Canvas Preview 以垂直 hit bands 點選目前可見圖層；Pin 用於科研標記，可保存 type、label、note、latitude、longitude，並加入 marker list。Pin list 已支援選取、欄位回填與 selected pin 狀態保存。Brush/Mask 暫不納入本輪 UI。`tool_state`、`pins` 與 `selected_pin_id` 會寫入 profile 與 launch packet。
 - 支援啟動、停止、套用並重啟 renderer。
@@ -36,7 +36,7 @@
 - Layer stack 的 selected layer、lock、opacity、blend mode 接 renderer 即時同步。
 - Style / Looks panel 的縮圖化模板選擇。
 - Select 工具下一步是從 UI-only Canvas Preview hit bands 升級到 renderer 實際圖層/物件 picking；Pin 下一步是補更細的 renderer interaction ack 與 globe mask / depth buffer refinement；Brush/Mask 暫不納入本輪 UI。
-- Boundary highlight 下一步是接 renderer 邊界/領海/EEZ geometry picking，先用 outline + translucent glow 建立 hover 強調，再逐步接 polygon fill、gamma/contrast shader 與呼吸動畫。
+- Boundary highlight 下一步是接 renderer 邊界/領海/EEZ geometry picking；目前 input ack 已閉環，下一步先用 outline + translucent glow 建立 hover 強調，再逐步接 polygon fill、gamma/contrast shader 與呼吸動畫。
 - Provenance 下一步要對接 renderer output artifact 與 RRKAL data manifest，但在 UIUX 閉環完成前只保留 UI provenance summary。
 - Timeline / keyframe / animation controls for ocean/cloud/material parameters。
 - Workspace presets 後續要補成可視化 preset manager，並支援保存多組命名工作區。
