@@ -127,6 +127,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_blends: dict[str, QtWidgets.QComboBox] = {}
         self.layer_rows: dict[str, QtWidgets.QWidget] = {}
         self.layer_property_labels: dict[str, QtWidgets.QLabel] = {}
+        self.layer_visibility_snapshot: dict[str, bool] | None = None
         self.selected_layer_key: str | None = None
         self.active_tool = "move"
         self.tool_buttons: dict[str, QtWidgets.QToolButton] = {}
@@ -361,6 +362,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ("海域開/關", self.toggle_maritime_layers),
             ("交通開/關", self.toggle_transport_layers),
             ("輔助開/關", self.toggle_visual_aids),
+            ("Solo 選取圖層", self.solo_selected_layer_visibility),
+            ("還原 Solo 前可見性", self.restore_layer_visibility_snapshot),
             ("重設 UI 圖層狀態", self.reset_layer_stack_controls),
         )
         layer_actions_layout = QtWidgets.QGridLayout()
@@ -1093,7 +1096,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         )
         self.layer_stack_note.setText(
             f"可見圖層 {visible}/{len(LAYER_LABELS)}；鎖定 {locked}；"
-            f"非預設 opacity/blend {non_default}。🚧 Lock/Opacity/Blend 下一步接 renderer sync。"
+            f"非預設 opacity/blend {non_default}；"
+            f"solo snapshot={'active' if self.layer_visibility_snapshot is not None else 'none'}。"
+            "🚧 Lock/Opacity/Blend 下一步接 renderer sync。"
         )
         self.refresh_layer_properties()
         self.refresh_canvas_preview()
@@ -1113,6 +1118,42 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if hasattr(self, "status"):
             self.status.setText(f"已選取圖層：{label}")
         self.refresh_tool_target()
+
+    def solo_selected_layer_visibility(self) -> None:
+        key = self.selected_layer_key
+        if key not in self.checks:
+            self.status.setText("尚未選取可 Solo 的圖層")
+            return
+        self.layer_visibility_snapshot = {
+            layer_key: self.checks[layer_key].isChecked()
+            for layer_key, _label in LAYER_LABELS
+            if layer_key in self.checks
+        }
+        for layer_key, _label in LAYER_LABELS:
+            if layer_key not in self.checks:
+                continue
+            self.checks[layer_key].blockSignals(True)
+            self.checks[layer_key].setChecked(layer_key == key)
+            self.checks[layer_key].blockSignals(False)
+        self.refresh_command_preview()
+        self.refresh_layer_stack_status()
+        label = next((text for layer_key, text in LAYER_LABELS if layer_key == key), key)
+        self.status.setText(f"已 Solo 選取圖層：{label}")
+
+    def restore_layer_visibility_snapshot(self) -> None:
+        if not self.layer_visibility_snapshot:
+            self.status.setText("沒有可還原的 Solo 前可見性 snapshot")
+            return
+        for layer_key, enabled in self.layer_visibility_snapshot.items():
+            if layer_key not in self.checks:
+                continue
+            self.checks[layer_key].blockSignals(True)
+            self.checks[layer_key].setChecked(bool(enabled))
+            self.checks[layer_key].blockSignals(False)
+        self.layer_visibility_snapshot = None
+        self.refresh_command_preview()
+        self.refresh_layer_stack_status()
+        self.status.setText("已還原 Solo 前圖層可見性")
 
     def canvas_layer_hit_keys(self) -> list[str]:
         visible_keys = [key for key, _label in LAYER_LABELS if key in self.checks and self.checks[key].isChecked()]
@@ -1479,6 +1520,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "pin_projection_contract": pin_projection_contract_packet(),
             "visible_layers": visible_layers,
             "locked_layers": locked_layers,
+            "layer_visibility_snapshot_active": self.layer_visibility_snapshot is not None,
             "layer_count": {
                 "visible": len(visible_layers),
                 "total": len(LAYER_LABELS),

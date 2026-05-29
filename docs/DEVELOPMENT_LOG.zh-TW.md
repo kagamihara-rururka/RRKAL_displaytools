@@ -893,3 +893,18 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Layer solo visibility workflow
+
+Scope:
+- Added `Solo 選取圖層` in the Layers panel.
+- Added `還原 Solo 前可見性` with an in-memory visibility snapshot.
+- Solo updates renderer visibility flags for the selected layer while preserving the previous visible-layer state for restore.
+- Research provenance now records whether a layer visibility snapshot is active.
+
+Positioning:
+- This gives researchers a fast way to isolate one hydrology, maritime, transport, or visual-aid layer without manually toggling every checkbox.
+- The next step is renderer-backed live layer sync so visibility changes do not require restart.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
