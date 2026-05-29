@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - Qt renderer thumbnail preview
+
+Scope:
+- Added a Canvas Preview mode for the latest `state/showcase/*.png` renderer output.
+- Added UI actions to switch between Qt Canvas state preview and Renderer thumbnail preview.
+- Provenance and closed-loop status now distinguish static renderer output thumbnails from the still-pending live renderer frame stream.
+
+Positioning:
+- This gives researchers an embedded renderer visual check without adding a live streaming architecture yet.
+- Live frame streaming remains future work.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Qt launcher smoke gate
 
 Scope:

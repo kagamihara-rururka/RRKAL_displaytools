@@ -25,7 +25,7 @@
 - 左側 Tools dock 已新增科研導向 tool palette：Move、Select、Pin。Select 用於指定 active layer，並可在 Canvas Preview 以垂直 hit bands 點選目前可見圖層；Pin 用於科研標記，可保存 type、label、note、latitude、longitude，並加入 marker list。Pin list 已支援選取、欄位回填與 selected pin 狀態保存。Brush/Mask 暫不納入本輪 UI。`tool_state`、`pins` 與 `selected_pin_id` 會寫入 profile 與 launch packet。
 - 支援啟動、停止、套用並重啟 renderer。
 - 顯示 renderer PID、執行中狀態與 exit code。
-- 中央 Canvas Preview 已可用 UI-only 方式顯示 style/topography/data mode、active tool、active layer、visible layer count、Select hit map 與 zoom；也可顯示 renderer capabilities、layer manifest、launch packet 或 smoke 結果。
+- 中央 Canvas Preview 已可用 UI-only 方式顯示 style/topography/data mode、active tool、active layer、visible layer count、Select hit map 與 zoom；也可切到最近 `state/showcase/*.png` 的 renderer static thumbnail，並可顯示 renderer capabilities、layer manifest、launch packet 或 smoke 結果。
 - Canvas Preview 已支援滑鼠位置的 UI-only 經緯度估算，使用 equirectangular canvas mapping，可一鍵填入 Pin 的 latitude/longitude，並顯示目前 selected pin 與 marker 摘要。
 - 右側 `Provenance` dock 已提供科研可重現性摘要，可複製 JSON，內容包含 style/topo/data mode、active layer、active tool、visible/locked layers、layer count 與 portable command line。
 - 已新增 `pin_projection.py` 共用 hook：以 latitude/longitude 作為 geodetic surface anchor，依 renderer camera yaw/pitch/zoom 投影到 screen_x/screen_y，並以 horizon clipping 判斷背面遮蔽；renderer capabilities 會暴露此 Pin overlay contract。
@@ -37,12 +37,12 @@
 ## 預計實現功能
 
 - Dockable panels 的更完整 Photoshop-like 版面：Layers / Properties / Navigator / History / Timeline。
-- 中央 Canvas Preview 後續要從 UI-only 摘要升級為可嵌入或可同步的 renderer 畫面預覽。
+- 中央 Canvas Preview 已具備 Qt state preview 與最近 renderer output static thumbnail；後續要升級為 live renderer frame stream。
 - Renderer layer runtime sync 下一步擴充 polygon fill mask 與更完整 renderer diagnostics；目前 visibility、支援圖層 opacity、lake/river/boundary/aircraft/pin/vehicle icon overlay blend、selected layer semantic target、selected-layer-scoped Pin/traffic/boundary/hydrology line picking 已可透過 `state/renderer_layer_runtime_state.json` 與 `state/renderer_layer_pick_state.json` 即時同步，Qt 與 renderer 端已有 bridge diagnostics、history、renderer ack 與 locked layer 防誤改。
 - Point/icon opacity/blend 下一步處理其他新增獨立 overlay，前提是 renderer 有可單獨合成的 frame overlay。
 - Layer stack 下一步是 selected layer 的 authoritative polygon territory identity、開放線段面域推論與更完整 renderer diagnostics。
 - Style / Looks panel 的縮圖化模板選擇。
-- Select 工具已接 renderer selected-layer object picking bridge；Canvas Preview 本身仍是 Qt-side hit bands，下一步是 embedded renderer thumbnail。Pin 下一步是補更細的 renderer interaction ack 與 globe mask / depth buffer refinement；Brush/Mask 暫不納入本輪 UI。
+- Select 工具已接 renderer selected-layer object picking bridge；Canvas Preview 本身仍是 Qt-side hit bands，且可嵌入最近 renderer PNG thumbnail，下一步是 live renderer frame stream。Pin 下一步是補更細的 renderer interaction ack 與 globe mask / depth buffer refinement；Brush/Mask 暫不納入本輪 UI。
 - Boundary highlight 下一步是從目前 line hover outline/glow、source-property feature identity、閉合 ring area hit、閉合 ring polygon preview 與 fill gamma/contrast tone 控制，升級到 authoritative 疆域/領海/EEZ identity 與開放線段面域推論。
 - Renderer headless/once output 會在 image output 旁寫出 `.metadata.json` sidecar，記錄 renderer state、layer state、selected-layer pick、boundary highlight、closed-loop status、RRKAL data manifest reference 與 RRKAL/displaytools 邊界。`--rrkal-data-manifest-ref` / Qt `RRKAL manifest ref` 只做 reference passthrough；manifest validation/ingest/governance 仍屬 RRKAL。
 - Timeline / keyframe / animation controls for ocean/cloud/material parameters。

@@ -274,6 +274,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.research_pins: list[dict[str, object]] = []
         self.canvas_preview_label: QtWidgets.QLabel | None = None
         self.canvas_meta_label: QtWidgets.QLabel | None = None
+        self.canvas_preview_mode = "state"
+        self.renderer_thumbnail_path: Path | None = None
         self.canvas_zoom_slider: QtWidgets.QSlider | None = None
         self.cursor_latitude: float | None = None
         self.cursor_longitude: float | None = None
@@ -599,6 +601,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         capabilities_button = QtWidgets.QPushButton("Renderer 能力")
         closed_loop_button = QtWidgets.QPushButton("閉環狀態")
         layer_manifest_button = QtWidgets.QPushButton("圖層 manifest")
+        canvas_state_button = QtWidgets.QPushButton("Canvas state")
+        thumbnail_button = QtWidgets.QPushButton("Renderer thumbnail")
         smoke_button = QtWidgets.QPushButton("Smoke check")
         launch_button = QtWidgets.QPushButton("啟動地球儀")
         restart_button = QtWidgets.QPushButton("套用並重啟")
@@ -614,6 +618,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         capabilities_button.clicked.connect(self.show_renderer_capabilities)
         closed_loop_button.clicked.connect(self.show_closed_loop_status)
         layer_manifest_button.clicked.connect(self.show_layer_manifest)
+        canvas_state_button.clicked.connect(self.show_canvas_state_preview)
+        thumbnail_button.clicked.connect(self.show_latest_renderer_thumbnail)
         smoke_button.clicked.connect(self.run_smoke_check)
         launch_button.clicked.connect(self.launch_renderer)
         restart_button.clicked.connect(self.restart_renderer)
@@ -630,6 +636,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             capabilities_button,
             closed_loop_button,
             layer_manifest_button,
+            canvas_state_button,
+            thumbnail_button,
             smoke_button,
             launch_button,
             restart_button,
@@ -686,6 +694,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         renderer_menu.addAction("Capabilities JSON", self.show_renderer_capabilities)
         renderer_menu.addAction("Closed-loop Status JSON", self.show_closed_loop_status)
         renderer_menu.addAction("Layer Manifest JSON", self.show_layer_manifest)
+        renderer_menu.addAction("Latest Output Thumbnail", self.show_latest_renderer_thumbnail)
 
         window_menu = self.menuBar().addMenu("Window")
         window_menu.addAction("Open Template Folder", self.open_template_dir)
@@ -2301,6 +2310,16 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def refresh_canvas_preview(self) -> None:
         if self.canvas_preview_label is None or self.canvas_meta_label is None:
             return
+        if self.canvas_preview_mode == "thumbnail" and self.renderer_thumbnail_path is not None:
+            if self.render_thumbnail_into_canvas(self.renderer_thumbnail_path):
+                self.canvas_meta_label.setText(
+                    f"Renderer thumbnail: {self.renderer_thumbnail_path.relative_to(ROOT)}. "
+                    "Static output preview only; live renderer frame stream remains future work."
+                )
+                self.refresh_research_provenance()
+                return
+            self.canvas_preview_mode = "state"
+            self.renderer_thumbnail_path = None
         selected_label = next(
             (text for key, text in LAYER_LABELS if key == self.selected_layer_key),
             self.selected_layer_key or "-",
@@ -2337,6 +2356,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if not hit_map:
             hit_map = "-"
         boundary_summary = self.boundary_highlight_summary()
+        self.canvas_preview_label.setPixmap(QtGui.QPixmap())
         self.canvas_preview_label.setText(
             "RRKAL Scientific Canvas Preview\n\n"
             f"Style: {style} | Topo: {topo} | Data: {data_mode}\n"
@@ -2347,7 +2367,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"Selected pin: {selected_pin_text}\n"
             f"Pin markers: {pin_markers}\n"
             f"Cursor estimate: {cursor_text}\n\n"
-            "Qt preview only; renderer state sync and pick bridges are live, embedded thumbnail pending"
+            "Qt state preview; renderer state sync and pick bridges are live. Use Renderer thumbnail for latest output PNG."
         )
         self.canvas_meta_label.setText(
             f"Canvas state mirrors Qt UI only：active tool={self.active_tool}, "
@@ -2356,6 +2376,52 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"boundary_highlight={'on' if self.boundary_highlight_state.get('enabled') else 'off'}."
         )
         self.refresh_research_provenance()
+
+    def latest_renderer_thumbnail_path(self) -> Path | None:
+        try:
+            candidates = [path for path in SHOWCASE_DIR.glob("*.png") if path.is_file()]
+        except OSError:
+            return None
+        if not candidates:
+            return None
+        try:
+            return max(candidates, key=lambda path: path.stat().st_mtime_ns)
+        except OSError:
+            return None
+
+    def render_thumbnail_into_canvas(self, path: Path) -> bool:
+        if self.canvas_preview_label is None:
+            return False
+        pixmap = QtGui.QPixmap(str(path))
+        if pixmap.isNull():
+            return False
+        target_size = self.canvas_preview_label.size()
+        scaled = pixmap.scaled(
+            target_size,
+            QtCore.Qt.AspectRatioMode.KeepAspectRatio,
+            QtCore.Qt.TransformationMode.SmoothTransformation,
+        )
+        self.canvas_preview_label.setPixmap(scaled)
+        self.canvas_preview_label.setText("")
+        return True
+
+    @QtCore.pyqtSlot()
+    def show_canvas_state_preview(self) -> None:
+        self.canvas_preview_mode = "state"
+        self.renderer_thumbnail_path = None
+        self.refresh_canvas_preview()
+        self.status.setText("已切回 Qt Canvas state preview")
+
+    @QtCore.pyqtSlot()
+    def show_latest_renderer_thumbnail(self) -> None:
+        path = self.latest_renderer_thumbnail_path()
+        if path is None:
+            self.status.setText("找不到 renderer PNG；可先跑 scripts\\render_quick_smoke.ps1 或 renderer --output")
+            return
+        self.canvas_preview_mode = "thumbnail"
+        self.renderer_thumbnail_path = path
+        self.refresh_canvas_preview()
+        self.status.setText(f"已顯示 renderer thumbnail：{path.relative_to(ROOT)}")
 
     def build_research_provenance(self) -> str:
         visible_layers = [key for key, _label in LAYER_LABELS if key in self.checks and self.checks[key].isChecked()]
@@ -2403,6 +2469,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_pick_state_file": str(LAYER_PICK_STATE_PATH),
             "layer_pick_state": self.layer_pick_state_payload,
             "canvas_select_hit_targets": self.canvas_layer_hit_keys(),
+            "canvas_preview_mode": self.canvas_preview_mode,
+            "renderer_thumbnail_path": str(self.renderer_thumbnail_path) if self.renderer_thumbnail_path else None,
             "pin_overlay_boundary": "Pins are geodetic annotations; renderer sync must rotate them with the globe and apply horizon/depth occlusion.",
             "pin_projection_contract": pin_projection_contract_packet(),
             "boundary_highlight": self.collect_boundary_highlight_state(),
