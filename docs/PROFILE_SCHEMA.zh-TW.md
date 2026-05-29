@@ -138,6 +138,7 @@ Renderer overlay 接上後，Pin 不應是螢幕固定標籤，而應是 geodeti
 | `note` | string | 可選，標記備註。 |
 | `latitude` | number -90..90 | 緯度。 |
 | `longitude` | number -180..180 | 經度。 |
+| `label_priority` | integer 0-100 | 可選，renderer label layout 優先度；selected Pin 仍會優先於一般 Pin。 |
 | `target_layer` | string or null | 可選，建立 pin 時的 active layer。 |
 | `placement` | string | 目前為 `manual_lat_lon`；後續會加入滑鼠位置反推經緯度的 `cursor_lat_lon` 流程。 |
 

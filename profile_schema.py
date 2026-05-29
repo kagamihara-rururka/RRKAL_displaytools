@@ -43,7 +43,7 @@ BLEND_MODES = {"Normal", "Screen", "Multiply", "Overlay", "Soft Light"}
 TOOL_MODES = {"move", "select", "pin"}
 PIN_TYPES = {"Observation", "Sample Site", "Anomaly", "Reference", "Event"}
 REQUIRED_PIN_FIELDS = {"id", "type", "label", "latitude", "longitude", "placement"}
-OPTIONAL_PIN_FIELDS = {"note", "target_layer"}
+OPTIONAL_PIN_FIELDS = {"note", "target_layer", "label_priority"}
 REQUIRED_TOOL_STATE_FIELDS = {
     "active_tool",
     "target_layer",
@@ -152,6 +152,10 @@ def profile_payload_errors(profile: dict[str, object]) -> list[str]:
                     for field in ("latitude", "longitude"):
                         if field in pin and not isinstance(pin[field], str):
                             errors.append(f"tool_state.pin.{field} must be a string")
+                    if "label_priority" in pin:
+                        priority = pin["label_priority"]
+                        if not isinstance(priority, int) or isinstance(priority, bool) or not 0 <= priority <= 100:
+                            errors.append("tool_state.pin.label_priority must be an integer from 0 to 100")
             if "renderer_sync" in tool_state and not isinstance(tool_state["renderer_sync"], str):
                 errors.append("tool_state.renderer_sync must be a string")
     pins = profile.get("pins")
@@ -178,6 +182,10 @@ def profile_payload_errors(profile: dict[str, object]) -> list[str]:
                         errors.append(f"pins[{index}].target_layer must be a string or null")
                     elif pin["target_layer"] not in REQUIRED_LAYER_STACK_KEYS:
                         errors.append(f"pins[{index}].target_layer is not a known layer stack key")
+                if "label_priority" in pin:
+                    priority = pin["label_priority"]
+                    if not isinstance(priority, int) or isinstance(priority, bool) or not 0 <= priority <= 100:
+                        errors.append(f"pins[{index}].label_priority must be an integer from 0 to 100")
                 pin_type = pin.get("type")
                 if not isinstance(pin_type, str) or pin_type not in PIN_TYPES:
                     errors.append(f"pins[{index}].type must be one of {sorted(PIN_TYPES)}")

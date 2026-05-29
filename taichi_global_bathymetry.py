@@ -2447,6 +2447,16 @@ def _pin_label_text(pin: dict[str, object]) -> str:
     return text or "Pin"
 
 
+def _pin_label_priority(pin: dict[str, object]) -> int:
+    value = pin.get("label_priority", 50)
+    if isinstance(value, bool):
+        return 50
+    try:
+        return max(0, min(100, int(value)))
+    except (TypeError, ValueError):
+        return 50
+
+
 def _boxes_intersect(a: tuple[int, int, int, int], b: tuple[int, int, int, int], pad: int = 4) -> bool:
     return not (
         a[2] + pad <= b[0]
@@ -2519,7 +2529,15 @@ def _draw_pin_labels(
 ) -> None:
     occupied: list[tuple[int, int, int, int]] = []
     planned: list[dict[str, object]] = []
-    for label in labels[:24]:
+    ordered_labels = sorted(
+        labels,
+        key=lambda item: (
+            not bool(item.get("selected", False)),
+            -int(item.get("priority", 50)),
+            str(item.get("text", "")),
+        ),
+    )
+    for label in ordered_labels[:24]:
         x = int(label["x"])
         y = int(label["y"])
         text = str(label["text"])
@@ -2605,6 +2623,8 @@ def render_pin_overlay(
                 "y": y,
                 "text": _pin_label_text(pin),
                 "marker_radius": marker_radius,
+                "priority": _pin_label_priority(pin),
+                "selected": selected,
             }
         )
     _draw_pin_labels(overlay, labels, marker_style, width, height)

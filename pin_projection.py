@@ -20,6 +20,16 @@ def _float_field(pin: dict[str, Any], field: str) -> float:
     return float(value)
 
 
+def _pin_label_priority(pin: dict[str, Any]) -> int:
+    value = pin.get("label_priority", 50)
+    if isinstance(value, bool):
+        return 50
+    try:
+        return max(0, min(100, int(value)))
+    except (TypeError, ValueError):
+        return 50
+
+
 def lat_lon_to_world(
     latitude: float,
     longitude: float,
@@ -108,6 +118,7 @@ def project_pin_to_screen(
         "id": pin.get("id"),
         "type": pin.get("type"),
         "label": pin.get("label"),
+        "label_priority": _pin_label_priority(pin),
         "latitude": latitude,
         "longitude": longitude,
         "anchor": "geodetic_surface",
@@ -173,6 +184,7 @@ def pin_projection_contract_packet() -> dict[str, Any]:
             "pin.label",
             "pin.latitude",
             "pin.longitude",
+            "pin.label_priority",
             "camera.yaw",
             "camera.pitch",
             "camera.zoom",
@@ -188,6 +200,7 @@ def pin_projection_contract_packet() -> dict[str, Any]:
             "view_z",
             "visible",
             "occlusion",
+            "label_priority",
         ],
         "rotation_rule": "recompute screen position every frame from geodetic anchor and current globe camera",
         "occlusion_rule": "hide behind-horizon anchors when view_z <= horizon_eps; clip off-viewport anchors; refine with renderer depth/globe mask when overlay drawing is wired",

@@ -129,6 +129,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.pin_note_edit: QtWidgets.QLineEdit | None = None
         self.pin_lat_edit: QtWidgets.QLineEdit | None = None
         self.pin_lon_edit: QtWidgets.QLineEdit | None = None
+        self.pin_priority_spin: QtWidgets.QSpinBox | None = None
         self.pin_list: QtWidgets.QListWidget | None = None
         self.selected_pin_id: str | None = None
         self.research_pins: list[dict[str, object]] = []
@@ -540,15 +541,21 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.pin_note_edit = QtWidgets.QLineEdit("UI-only marker; geospatial placement pending")
         self.pin_lat_edit = QtWidgets.QLineEdit("0.0")
         self.pin_lon_edit = QtWidgets.QLineEdit("0.0")
+        self.pin_priority_spin = QtWidgets.QSpinBox()
+        self.pin_priority_spin.setRange(0, 100)
+        self.pin_priority_spin.setValue(50)
+        self.pin_priority_spin.setToolTip("Renderer label priority: selected Pin wins first, then higher priority labels are placed earlier.")
         self.pin_type_combo.currentTextChanged.connect(lambda _text, self=self: self.refresh_tool_target())
         self.pin_label_edit.textChanged.connect(lambda _text, self=self: self.refresh_tool_target())
         self.pin_note_edit.textChanged.connect(lambda _text, self=self: self.refresh_tool_target())
         self.pin_lat_edit.textChanged.connect(lambda _text, self=self: self.refresh_tool_target())
         self.pin_lon_edit.textChanged.connect(lambda _text, self=self: self.refresh_tool_target())
+        self.pin_priority_spin.valueChanged.connect(lambda _value, self=self: self.refresh_tool_target())
         pin_form.addRow("Type", self.pin_type_combo)
         pin_form.addRow("Label", self.pin_label_edit)
         pin_form.addRow("Latitude", self.pin_lat_edit)
         pin_form.addRow("Longitude", self.pin_lon_edit)
+        pin_form.addRow("Label Priority", self.pin_priority_spin)
         pin_form.addRow("Note", self.pin_note_edit)
         pin_actions = QtWidgets.QHBoxLayout()
         add_pin_button = QtWidgets.QPushButton("加入 Pin")
@@ -888,6 +895,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "note": self.pin_note_edit.text().strip() if self.pin_note_edit is not None else "",
                 "latitude": self.pin_lat_edit.text().strip() if self.pin_lat_edit is not None else "",
                 "longitude": self.pin_lon_edit.text().strip() if self.pin_lon_edit is not None else "",
+                "label_priority": self.pin_priority_spin.value() if self.pin_priority_spin is not None else 50,
                 "placement": "manual_lat_lon",
             },
             "renderer_sync": "planned",
@@ -1085,6 +1093,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 self.pin_lat_edit.setText(str(pin["latitude"]))
             if self.pin_lon_edit is not None and isinstance(pin.get("longitude"), str):
                 self.pin_lon_edit.setText(str(pin["longitude"]))
+            if self.pin_priority_spin is not None and isinstance(pin.get("label_priority"), int):
+                self.pin_priority_spin.setValue(max(0, min(100, int(pin["label_priority"]))))
         self.refresh_tool_target()
 
     def refresh_tool_target(self) -> None:
@@ -1125,6 +1135,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "note": self.pin_note_edit.text().strip() if self.pin_note_edit is not None else "",
             "latitude": latitude,
             "longitude": longitude,
+            "label_priority": self.pin_priority_spin.value() if self.pin_priority_spin is not None else 50,
             "target_layer": self.selected_layer_key,
             "placement": "manual_lat_lon",
         }
@@ -1196,6 +1207,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.pin_lat_edit.setText(str(pin["latitude"]))
         if self.pin_lon_edit is not None and isinstance(pin.get("longitude"), (int, float)):
             self.pin_lon_edit.setText(str(pin["longitude"]))
+        if self.pin_priority_spin is not None and isinstance(pin.get("label_priority"), int):
+            self.pin_priority_spin.setValue(max(0, min(100, int(pin["label_priority"]))))
 
     def refresh_pin_list(self) -> None:
         if self.pin_list is None:
@@ -1207,7 +1220,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             selected = pin.get("id") == self.selected_pin_id
             prefix = "* " if selected else "  "
             self.pin_list.addItem(
-                f"{prefix}{pin.get('id')} | {pin.get('type')} | {pin.get('label')} "
+                f"{prefix}{pin.get('id')} | P{pin.get('label_priority', 50)} | {pin.get('type')} | {pin.get('label')} "
                 f"({pin.get('latitude')}, {pin.get('longitude')})"
             )
             if selected:

@@ -799,3 +799,19 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Pin label priority controls
+
+Scope:
+- Added Qt `Label Priority` control for Pin annotations.
+- Saved Pins and launch packets now carry `label_priority` from 0 to 100.
+- Profile schema validation accepts optional `label_priority`.
+- Pin projection packets preserve `label_priority`.
+- Renderer label placement now sorts selected Pin first, then higher priority labels.
+
+Positioning:
+- This lets researchers protect important stations/anomalies from being dropped by collision avoidance.
+- Remaining Pin work is label visibility modes, pick/hover, and deeper globe-mask/depth-buffer occlusion refinement.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
