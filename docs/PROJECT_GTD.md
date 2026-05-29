@@ -35,6 +35,7 @@ Last updated: 2026-05-29
 - Decide which local cache artifacts should later be registered by RRKAL as renderer bridge assets.
 
 ## Done
+- 2026-05-30: Aligned the Qt Boundary emphasis status label with the wired renderer bridge and added a smoke guard against stale queued wording.
 - 2026-05-30: Added `-HandoffFirst` to `scripts/run_qt_panel.ps1` and smoke-gated the cross-machine handoff-first Qt launch command.
 - 2026-05-30: Added smoke-gated `rrkal_displaytools.layer_selection_tool.v1` for Qt-first layer selection, filtered/revealed row selection and renderer pick-state inspection while keeping brush/mask scope excluded.
 - 2026-05-30: Mapped Qt boundary emphasis Apply state into the existing boundary highlight renderer bridge and smoke-gated RGB/contrast/alpha/gamma/breathing mapping evidence.

@@ -2298,7 +2298,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.boundary_emphasis_button = QtWidgets.QPushButton("Boundary emphasis controls...")
         self.boundary_emphasis_button.clicked.connect(self.open_boundary_emphasis_dialog)
         layers_layout.addWidget(self.boundary_emphasis_button)
-        self.boundary_emphasis_label = QtWidgets.QLabel("Boundary emphasis: UI ready, renderer mask hook queued")
+        self.boundary_emphasis_label = QtWidgets.QLabel("Boundary emphasis: UI ready, renderer bridge wired")
         self.boundary_emphasis_label.setWordWrap(True)
         layers_layout.addWidget(self.boundary_emphasis_label)
         self.profile_launch_readiness_label = QtWidgets.QLabel("Profile/launch readiness: pending")

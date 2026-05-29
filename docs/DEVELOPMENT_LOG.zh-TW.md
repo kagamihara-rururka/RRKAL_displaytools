@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-30 - Boundary emphasis status label alignment
+
+- Updated the Qt Layers dock initial Boundary emphasis label from queued renderer mask hook to renderer bridge wired.
+- Smoke now guards against the stale queued label returning while `boundary_emphasis_control` is wired through `rrkal_displaytools.boundary_highlight_mask.v1`.
+- Smoke: PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Handoff-first Qt launcher
 
 - Added `-HandoffFirst` to `scripts/run_qt_panel.ps1`, allowing clone-after-setup users to run `scripts/inspect_handoff.ps1` before the Qt panel opens.

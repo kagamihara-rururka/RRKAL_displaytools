@@ -1333,6 +1333,14 @@ if ([int]$handoff.layer_capability_matrix.live_counts.blend -le 0) {
 Invoke-CheckedNative py @("-3", "taichi_global_bathymetry.py", "--print-layer-manifest") | Out-Null
 Invoke-CheckedNative py @("-3", "rrkal_displaytools_qt_panel.py", "--list-templates") | Out-Null
 
+$qtPanelSource = Get-Content -Raw -Encoding UTF8 rrkal_displaytools_qt_panel.py
+if ($qtPanelSource -like "*Boundary emphasis: UI ready, renderer mask hook queued*") {
+    throw "Qt boundary emphasis label still reports queued renderer mask hook"
+}
+if ($qtPanelSource -notlike "*Boundary emphasis: UI ready, renderer bridge wired*") {
+    throw "Qt boundary emphasis label missing renderer bridge wired status"
+}
+
 $scripts = Get-ChildItem scripts -Filter *.ps1
 foreach ($script in $scripts) {
     $tokens = $null
