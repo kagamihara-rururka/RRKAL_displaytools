@@ -104,6 +104,13 @@ Qt 面板目前可做：
 - 查看 Pin、boundary、layer bridge 狀態。
 - 在 Canvas Preview 中切換 Qt state、renderer thumbnail 與 Live preview。
 
+跨機器 clone 後建議先按 Actions 裡的 `Inspect:` 檢查入口：
+
+- `Inspect: Clone ready`：確認 portable command、profile launch readiness 與 module boundary readiness。
+- `Inspect: Profile replay`：確認 renderer config、layer stack、pins、Boundary emphasis/warnings 與 Timeline keyframes 是否屬於可攜 profile/UI state。
+- `Inspect: Hydro LOD`、`Inspect: Ocean port`、`Inspect: Style routes`：確認 hydrology/LOD、sea-state scalar port、parchment/tactical renderer routes。
+- `Inspect: Pin pick`、`Inspect: Cursor geo`、`Inspect: Boundary JSON`：確認科研互動狀態，包括 Pin pick、滑鼠經緯度、Boundary/EEZ 強調與 identity warning。
+
 ## 6. Canvas Preview / Live preview
 
 Qt 面板中央有 Canvas Preview。

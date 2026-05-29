@@ -1871,4 +1871,12 @@ if ($profileSchemaDoc -notmatch 'replay_surfaces') {
     throw "Profile schema docs missing profile UI state replay surfaces"
 }
 
+$cloneQuickstartDoc = Get-Content -LiteralPath (Join-Path $BoundaryIdentityRoot "docs\QUICKSTART_CLONE.zh-TW.md") -Raw -Encoding UTF8
+if ($cloneQuickstartDoc -notmatch 'Inspect: Clone ready') {
+    throw "Clone quickstart missing Qt Inspect Clone ready guidance"
+}
+if ($cloneQuickstartDoc -notmatch 'Inspect: Boundary JSON') {
+    throw "Clone quickstart missing Qt Inspect Boundary JSON guidance"
+}
+
 Write-Host "Smoke passed."

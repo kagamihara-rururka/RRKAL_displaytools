@@ -419,3 +419,8 @@
 
 - Qt JSON inspection buttons now use an `Inspect:` prefix, separating state/contract inspection from renderer launch, profile save/load and process control actions.
 - This keeps the Actions panel more readable as more scientific inspection surfaces are added.
+
+### 2026-05-30 Clone quickstart Inspect guidance
+
+- The clone quickstart now tells cross-machine users which `Inspect:` buttons to open first after launching Qt.
+- Smoke verifies the quickstart mentions `Inspect: Clone ready` and `Inspect: Boundary JSON` so onboarding docs stay aligned with the Qt Actions panel.

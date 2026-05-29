@@ -230,6 +230,20 @@ Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
 
+## 2026-05-30 - Clone quickstart Inspect guidance
+
+Scope:
+- Added a cross-machine Qt inspection checklist to `docs\QUICKSTART_CLONE.zh-TW.md`.
+- The checklist points new clone users to `Inspect: Clone ready`, `Inspect: Profile replay`, `Inspect: Hydro LOD`, `Inspect: Ocean port`, `Inspect: Style routes`, `Inspect: Pin pick`, `Inspect: Cursor geo` and `Inspect: Boundary JSON`.
+- Smoke verifies the quickstart keeps the `Inspect: Clone ready` and `Inspect: Boundary JSON` references.
+
+Decision:
+- Cross-machine users need a concrete first-run checklist after launching Qt, not only raw handoff/launch packet commands.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+
 ## 2026-05-30 - Qt inspector action naming
 
 Scope:
