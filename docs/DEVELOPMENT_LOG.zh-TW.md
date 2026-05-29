@@ -422,3 +422,15 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - No-GUI template listing before Qt import
+
+Scope:
+- Updated `rrkal_displaytools_qt_panel.py --list-templates` to return before importing PyQt6.
+- Template listing now reads UTF-8 BOM profile files using `utf-8-sig`.
+
+Positioning:
+- This lets RRKAL/scripts discover displaytools templates without requiring the Qt runtime to initialize.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

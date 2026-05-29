@@ -17,6 +17,37 @@ from pathlib import Path
 
 from profile_schema import profile_payload_errors
 
+
+ROOT = Path(__file__).resolve().parent
+PROFILE_TEMPLATE_DIR = ROOT / "profiles"
+
+
+def profile_template_packet() -> dict[str, object]:
+    templates = []
+    for path in sorted(PROFILE_TEMPLATE_DIR.glob("*.json")):
+        item: dict[str, object] = {
+            "id": path.stem,
+            "path": str(path.relative_to(ROOT)),
+        }
+        try:
+            profile = json.loads(path.read_text(encoding="utf-8-sig"))
+            if isinstance(profile, dict):
+                item["name"] = profile.get("name", path.stem)
+                item["description"] = profile.get("description", "")
+                item["schema"] = profile.get("schema", "")
+        except Exception as exc:
+            item["error"] = str(exc)
+        templates.append(item)
+    return {
+        "schema": "rrkal_displaytools.profile_templates.v1",
+        "templates": templates,
+    }
+
+
+if "--list-templates" in sys.argv[1:]:
+    print(json.dumps(profile_template_packet(), ensure_ascii=False, indent=2))
+    raise SystemExit(0)
+
 try:
     from PyQt6 import QtCore, QtGui, QtWidgets
 except ImportError as exc:
@@ -25,10 +56,8 @@ except ImportError as exc:
         "py -3 -m pip install -r requirements.txt"
     ) from exc
 
-ROOT = Path(__file__).resolve().parent
 RENDERER = ROOT / "taichi_global_bathymetry.py"
 PROFILE_DIR = ROOT / "state" / "ui_profiles"
-PROFILE_TEMPLATE_DIR = ROOT / "profiles"
 SHOWCASE_DIR = ROOT / "state" / "showcase"
 
 STYLE_PROFILES = ("scientific", "nautical", "parchment", "tactical")
@@ -741,28 +770,6 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--template", help="Load a built-in profile template by file stem, for example maritime_hydrology")
     parser.add_argument("--list-templates", action="store_true", help="Print built-in profile templates as JSON and exit")
     return parser
-
-
-def profile_template_packet() -> dict[str, object]:
-    templates = []
-    for path in sorted(PROFILE_TEMPLATE_DIR.glob("*.json")):
-        item: dict[str, object] = {
-            "id": path.stem,
-            "path": str(path.relative_to(ROOT)),
-        }
-        try:
-            profile = json.loads(path.read_text(encoding="utf-8"))
-            if isinstance(profile, dict):
-                item["name"] = profile.get("name", path.stem)
-                item["description"] = profile.get("description", "")
-                item["schema"] = profile.get("schema", "")
-        except Exception as exc:
-            item["error"] = str(exc)
-        templates.append(item)
-    return {
-        "schema": "rrkal_displaytools.profile_templates.v1",
-        "templates": templates,
-    }
 
 
 def resolve_startup_profile(profile: Path | None, template: str | None) -> Path | None:

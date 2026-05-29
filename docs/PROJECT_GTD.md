@@ -54,6 +54,7 @@ Last updated: 2026-05-29
 - 2026-05-29: Added startup profile loading for the Qt panel and run script.
 - 2026-05-29: Added startup template-name loading for built-in profiles.
 - 2026-05-29: Added no-GUI template listing for built-in profiles.
+- 2026-05-29: Made no-GUI template listing return before PyQt6 import.
 - 2026-05-29: Added profile template validation to smoke.
 - 2026-05-29: Hardened smoke helper to fail on native command errors and tolerate UTF-8 BOM profile files.
 - 2026-05-29: Added Qt panel profile load validation.
