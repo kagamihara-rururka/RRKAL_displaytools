@@ -111,6 +111,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_locks: dict[str, QtWidgets.QCheckBox] = {}
         self.layer_opacity: dict[str, QtWidgets.QSlider] = {}
         self.layer_blends: dict[str, QtWidgets.QComboBox] = {}
+        self.layer_rows: dict[str, QtWidgets.QWidget] = {}
+        self.selected_layer_key: str | None = None
         self.docks: dict[str, QtWidgets.QDockWidget] = {}
         self.template_paths: list[Path] = []
         self._build_ui()
@@ -226,7 +228,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         layer_header = QtWidgets.QWidget()
         layer_header_layout = QtWidgets.QGridLayout(layer_header)
         layer_header_layout.setContentsMargins(0, 0, 0, 0)
-        headers = ("Vis", "Layer", "Lock", "Opacity", "Blend")
+        headers = ("Select", "Vis", "Layer", "Lock", "Opacity", "Blend")
         for column, text in enumerate(headers):
             header_label = QtWidgets.QLabel(text)
             header_label.setObjectName("layerHeader")
@@ -235,9 +237,16 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         for key, label in LAYER_LABELS:
             row = QtWidgets.QWidget()
             row.setObjectName("layerRow")
+            row.setProperty("selected", False)
             row_layout = QtWidgets.QGridLayout(row)
             row_layout.setContentsMargins(4, 2, 4, 2)
             row_layout.setHorizontalSpacing(8)
+            self.layer_rows[key] = row
+
+            select_button = QtWidgets.QToolButton()
+            select_button.setText("選取")
+            select_button.setToolButtonStyle(QtCore.Qt.ToolButtonStyle.ToolButtonTextOnly)
+            select_button.clicked.connect(lambda _checked=False, layer_key=key: self.select_layer(layer_key))
 
             check = QtWidgets.QCheckBox()
             check.setToolTip(f"Renderer visibility flag: {BOOL_FLAGS[key]}")
@@ -265,12 +274,16 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             blend.currentTextChanged.connect(lambda _text, self=self: self.refresh_layer_stack_status())
             self.layer_blends[key] = blend
 
-            row_layout.addWidget(check, 0, 0)
-            row_layout.addWidget(layer_label, 0, 1)
-            row_layout.addWidget(lock, 0, 2)
-            row_layout.addWidget(opacity, 0, 3)
-            row_layout.addWidget(blend, 0, 4)
+            row_layout.addWidget(select_button, 0, 0)
+            row_layout.addWidget(check, 0, 1)
+            row_layout.addWidget(layer_label, 0, 2)
+            row_layout.addWidget(lock, 0, 3)
+            row_layout.addWidget(opacity, 0, 4)
+            row_layout.addWidget(blend, 0, 5)
             layers_layout.addWidget(row)
+        self.selected_layer_label = QtWidgets.QLabel("目前選取圖層：尚未選取")
+        self.selected_layer_label.setObjectName("selectedLayer")
+        layers_layout.addWidget(self.selected_layer_label)
         self.layer_stack_note = QtWidgets.QLabel("🚧 Lock / Opacity / Blend 目前是 UI state，下一步接 renderer 即時同步。")
         self.layer_stack_note.setWordWrap(True)
         layers_layout.addWidget(self.layer_stack_note)
@@ -283,6 +296,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ("海域開/關", self.toggle_maritime_layers),
             ("交通開/關", self.toggle_transport_layers),
             ("輔助開/關", self.toggle_visual_aids),
+            ("重設 UI 圖層狀態", self.reset_layer_stack_controls),
         )
         layer_actions_layout = QtWidgets.QGridLayout()
         for index, (label, callback) in enumerate(layer_actions):
@@ -290,6 +304,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             button.clicked.connect(callback)
             layer_actions_layout.addWidget(button, index // 2, index % 2)
         layers_layout.addLayout(layer_actions_layout)
+        self.select_layer("show_grid")
         layers_dock = QtWidgets.QDockWidget("Layers", self)
         layers_dock.setObjectName("layersDock")
         layers_dock.setAllowedAreas(
@@ -373,6 +388,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             QLabel#navigatorPreview { background: #202832; color: #d8e6f3; border: 1px dashed #8aa0b6; }
             QLabel#layerHeader { color: #587087; font-size: 8.5pt; font-weight: 700; }
             QWidget#layerRow { border-bottom: 1px solid #d6e0ea; }
+            QWidget#layerRow[selected="true"] { background: #dceeff; border: 1px solid #5b8db8; }
+            QLabel#selectedLayer { color: #23435f; font-weight: 700; padding-top: 6px; }
             """
         )
 
@@ -646,6 +663,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 ],
             },
             "profile": self.collect_profile(),
+            "selected_layer": self.selected_layer_key,
             "layer_stack_ui": self.collect_layer_stack_ui(),
             "command": self.build_command(),
             "command_line": subprocess.list2cmdline(self.build_command()),
@@ -660,6 +678,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "locked": self.layer_locks[key].isChecked(),
                 "opacity": self.layer_opacity[key].value(),
                 "blend_mode": self.layer_blends[key].currentText(),
+                "selected": key == self.selected_layer_key,
                 "renderer_sync": "planned",
             }
         return stack
@@ -756,6 +775,35 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"可見圖層 {visible}/{len(LAYER_LABELS)}；鎖定 {locked}；"
             f"非預設 opacity/blend {non_default}。🚧 Lock/Opacity/Blend 下一步接 renderer sync。"
         )
+
+    def select_layer(self, key: str) -> None:
+        if key not in self.layer_rows:
+            return
+        self.selected_layer_key = key
+        label = next((label for layer_key, label in LAYER_LABELS if layer_key == key), key)
+        self.selected_layer_label.setText(f"目前選取圖層：{label} / {key}")
+        for layer_key, row in self.layer_rows.items():
+            row.setProperty("selected", layer_key == key)
+            row.style().unpolish(row)
+            row.style().polish(row)
+            row.update()
+        self.refresh_layer_stack_status()
+        if hasattr(self, "status"):
+            self.status.setText(f"已選取圖層：{label}")
+
+    def reset_layer_stack_controls(self) -> None:
+        for key, _label in LAYER_LABELS:
+            self.layer_locks[key].blockSignals(True)
+            self.layer_opacity[key].blockSignals(True)
+            self.layer_blends[key].blockSignals(True)
+            self.layer_locks[key].setChecked(False)
+            self.layer_opacity[key].setValue(100)
+            self.layer_blends[key].setCurrentText("Normal")
+            self.layer_locks[key].blockSignals(False)
+            self.layer_opacity[key].blockSignals(False)
+            self.layer_blends[key].blockSignals(False)
+        self.refresh_layer_stack_status()
+        self.status.setText("已重設 UI-only layer lock/opacity/blend 狀態")
 
     @QtCore.pyqtSlot()
     def copy_command_to_clipboard(self) -> None:

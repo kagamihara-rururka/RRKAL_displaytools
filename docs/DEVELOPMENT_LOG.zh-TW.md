@@ -586,3 +586,17 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Qt active layer selection
+
+Scope:
+- Added active-layer selection controls to the Qt `Layers` stack.
+- Selected rows are highlighted and the active layer is shown in the panel.
+- Added a reset action for UI-only lock, opacity, and blend-mode state.
+- Launch packets now include `selected_layer` and per-layer `selected` metadata for the next renderer-sync step.
+
+Positioning:
+- This gives brush, mask, selection, and Properties-panel work a concrete layer target without changing renderer behavior yet.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
