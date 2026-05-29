@@ -101,6 +101,10 @@ $summary = [ordered]@{
         projection_method = $launchPacket.cursor_geodesy_readout.projection_method
         event_position_guard = $launchPacket.cursor_geodesy_readout.event_position_guard
         backend_raycast_status = $launchPacket.cursor_geodesy_readout.backend_raycast_status
+        renderer_raycast_schema = $launchPacket.cursor_geodesy_readout.renderer_raycast_schema
+        renderer_raycast_helper = $launchPacket.cursor_geodesy_readout.renderer_raycast_helper
+        renderer_raycast_method = $launchPacket.cursor_geodesy_readout.renderer_raycast_method
+        raycast_smoke_cases = $launchPacket.cursor_geodesy_readout.raycast_smoke_cases
         qt_surface = $launchPacket.cursor_geodesy_readout.qt_surface
     }
     pin_overlay = @{

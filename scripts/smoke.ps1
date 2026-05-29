@@ -551,8 +551,14 @@ if ($launchPacket.cursor_geodesy_readout.schema -ne "rrkal_displaytools.cursor_g
 if ($launchPacket.cursor_geodesy_readout.event_position_guard -ne "QMouseEvent.position with QMouseEvent.pos fallback") {
     throw "Launch packet cursor_geodesy_readout event guard missing"
 }
-if ($launchPacket.cursor_geodesy_readout.backend_raycast_status -ne "queued_renderer_globe_intersection") {
+if ($launchPacket.cursor_geodesy_readout.backend_raycast_status -ne "renderer_globe_intersection_contract_ready") {
     throw "Launch packet cursor_geodesy_readout backend raycast status mismatch"
+}
+if ($launchPacket.cursor_geodesy_readout.renderer_raycast_helper -ne "cursor_geodesy.viewport_sphere_raycast") {
+    throw "Launch packet cursor_geodesy_readout raycast helper missing"
+}
+if ($launchPacket.cursor_geodesy_readout.raycast_smoke_cases -notcontains "center_hit") {
+    throw "Launch packet cursor_geodesy_readout center raycast smoke case missing"
 }
 if ($launchPacket.pin_overlay.schema -ne "rrkal_displaytools.pin_projection.v1") {
     throw "Launch packet pin_overlay schema missing or invalid"
@@ -748,8 +754,14 @@ if ($capabilities.cursor_geodesy_readout.schema -ne "rrkal_displaytools.cursor_g
 if ($capabilities.cursor_geodesy_readout.projection_method -ne "viewport_equirectangular_preview_estimate") {
     throw "Renderer cursor_geodesy_readout projection method mismatch"
 }
-if ($capabilities.cursor_geodesy_readout.backend_raycast_status -ne "queued_renderer_globe_intersection") {
+if ($capabilities.cursor_geodesy_readout.backend_raycast_status -ne "renderer_globe_intersection_contract_ready") {
     throw "Renderer cursor_geodesy_readout backend raycast status mismatch"
+}
+if ($capabilities.cursor_geodesy_readout.renderer_raycast_schema -ne "rrkal_displaytools.cursor_geodesy_raycast.v1") {
+    throw "Renderer cursor_geodesy_readout raycast schema missing"
+}
+if ($capabilities.cursor_geodesy_readout.raycast_smoke_cases -notcontains "outside_globe_miss") {
+    throw "Renderer cursor_geodesy_readout outside-globe raycast smoke case missing"
 }
 if ($capabilities.pin_overlay.schema -ne "rrkal_displaytools.pin_projection.v1") {
     throw "Renderer pin_overlay schema missing or invalid"
@@ -1096,6 +1108,12 @@ if ($handoff.cursor_geodesy_readout.renderer_capabilities_schema -ne "rrkal_disp
 if ($handoff.cursor_geodesy_readout.event_position_guard -ne "QMouseEvent.position with QMouseEvent.pos fallback") {
     throw "Handoff inspection cursor_geodesy_readout event guard missing"
 }
+if ($handoff.cursor_geodesy_readout.backend_raycast_status -ne "renderer_globe_intersection_contract_ready") {
+    throw "Handoff inspection cursor_geodesy_readout backend raycast status mismatch"
+}
+if ($handoff.cursor_geodesy_readout.renderer_raycast_helper -ne "cursor_geodesy.viewport_sphere_raycast") {
+    throw "Handoff inspection cursor_geodesy_readout raycast helper missing"
+}
 if ($handoff.launch_packet_contracts.pin_overlay -ne "rrkal_displaytools.pin_projection.v1") {
     throw "Handoff inspection pin_overlay launch contract missing or invalid"
 }
@@ -1332,6 +1350,7 @@ if ([int]$handoff.layer_capability_matrix.live_counts.blend -le 0) {
 }
 Invoke-CheckedNative py @("-3", "taichi_global_bathymetry.py", "--print-layer-manifest") | Out-Null
 Invoke-CheckedNative py @("-3", "rrkal_displaytools_qt_panel.py", "--list-templates") | Out-Null
+Invoke-CheckedNative py @("-3", "-c", "from cursor_geodesy import viewport_sphere_raycast; c=viewport_sphere_raycast(50,50,100,100); m=viewport_sphere_raycast(120,120,100,100); assert c['hit'] and abs(c['latitude']) < 1e-9 and abs(c['longitude']) < 1e-9 and not m['hit']") | Out-Null
 
 $qtPanelSource = Get-Content -Raw -Encoding UTF8 rrkal_displaytools_qt_panel.py
 if ($qtPanelSource -like "*Boundary emphasis: UI ready, renderer mask hook queued*") {

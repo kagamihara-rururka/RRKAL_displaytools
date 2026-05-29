@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-30 - Cursor geodesy renderer raycast contract
+
+- Added `cursor_geodesy.py` with a dependency-free `viewport_sphere_raycast` helper for renderer-facing cursor-to-lat/lon math.
+- `cursor_geodesy_readout` now exposes `rrkal_displaytools.cursor_geodesy_raycast.v1`, raycast helper/method/inputs/outputs and smoke cases through launch packets, renderer capabilities and handoff inspection.
+- Smoke: PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Boundary emphasis status label alignment
 
 - Updated the Qt Layers dock initial Boundary emphasis label from queued renderer mask hook to renderer bridge wired.

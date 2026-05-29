@@ -18719,8 +18719,14 @@ def cursor_geodesy_readout_packet(source: str) -> dict[str, object]:
         "projection_method": "viewport_equirectangular_preview_estimate",
         "event_position_guard": "QMouseEvent.position with QMouseEvent.pos fallback",
         "qt_surface": "Canvas meta label and launch packet",
-        "backend_raycast_status": "queued_renderer_globe_intersection",
-        "researcher_note": "Canvas preview gives immediate lon/lat feedback; final globe raycast should be handled by renderer backend when closed.",
+        "backend_raycast_status": "renderer_globe_intersection_contract_ready",
+        "renderer_raycast_schema": "rrkal_displaytools.cursor_geodesy_raycast.v1",
+        "renderer_raycast_helper": "cursor_geodesy.viewport_sphere_raycast",
+        "renderer_raycast_method": "orthographic_globe_disc_intersection",
+        "renderer_raycast_inputs": ["screen_x", "screen_y", "viewport_width", "viewport_height", "camera_yaw_deg", "camera_pitch_deg"],
+        "renderer_raycast_outputs": ["hit", "latitude", "longitude", "front_hemisphere"],
+        "raycast_smoke_cases": ["center_hit", "outside_globe_miss"],
+        "researcher_note": "Canvas preview gives immediate lon/lat feedback; renderer-facing globe raycast math is smoke-gated and ready for Taichi mouse-state wiring.",
     }
 
 

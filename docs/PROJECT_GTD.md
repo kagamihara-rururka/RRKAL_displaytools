@@ -35,12 +35,13 @@ Last updated: 2026-05-29
 - Decide which local cache artifacts should later be registered by RRKAL as renderer bridge assets.
 
 ## Done
+- 2026-05-30: Added `cursor_geodesy.py` renderer-facing cursor raycast helper and smoke-gated `rrkal_displaytools.cursor_geodesy_raycast.v1` evidence.
 - 2026-05-30: Aligned the Qt Boundary emphasis status label with the wired renderer bridge and added a smoke guard against stale queued wording.
 - 2026-05-30: Added `-HandoffFirst` to `scripts/run_qt_panel.ps1` and smoke-gated the cross-machine handoff-first Qt launch command.
 - 2026-05-30: Added smoke-gated `rrkal_displaytools.layer_selection_tool.v1` for Qt-first layer selection, filtered/revealed row selection and renderer pick-state inspection while keeping brush/mask scope excluded.
 - 2026-05-30: Mapped Qt boundary emphasis Apply state into the existing boundary highlight renderer bridge and smoke-gated RGB/contrast/alpha/gamma/breathing mapping evidence.
 - 2026-05-30: Added smoke-gated Pin projection evidence for globe-rotation tracking and horizon occlusion through `rrkal_displaytools.pin_projection.v1`.
-- 2026-05-30: Added smoke-gated `rrkal_displaytools.cursor_geodesy_readout.v1` for guarded canvas mouse lon/lat readout; renderer globe raycast remains queued.
+- 2026-05-30: Added smoke-gated `rrkal_displaytools.cursor_geodesy_readout.v1` for guarded canvas mouse lon/lat readout; renderer globe raycast contract is now smoke-gated through `cursor_geodesy.viewport_sphere_raycast`, with Taichi mouse-state wiring still pending.
 - 2026-05-30: Routed boundary-capable layer row double-clicks to the Qt boundary emphasis dialog and added smoke-gated contract evidence for the binding.
 - 2026-05-30: Added `rrkal_displaytools.boundary_emphasis_control.v1` and a Qt Layers dock dialog for RGB/contrast/opacity/gamma/breathing territory emphasis controls; renderer mask hook remains queued for backend implementation.
 - 2026-05-30: Added `rrkal_displaytools.layer_research_workflow.v1` and a Qt Layers dock workflow label linking filter/group/selected-layer/runtime-warning/remediation state.
