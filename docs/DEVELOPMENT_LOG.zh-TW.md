@@ -640,3 +640,18 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Qt canvas preview and simplified select tool
+
+Scope:
+- Added a central UI-only Canvas Preview that mirrors style, topo source, data mode, active tool, active layer, visible layer count, and zoom.
+- Simplified the tool palette to Move and Select only.
+- Removed Brush, Mask, Erase, and their UI-only option controls from the active UI path.
+- Simplified `tool_state` schema to active tool and target layer.
+
+Positioning:
+- This keeps UIUX development focused on layer selection and canvas feedback before backend renderer sync.
+- The UI framing was tightened toward research workflows: panel structure borrows from Photoshop, but the primary user need is reproducible scientific visualization state.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

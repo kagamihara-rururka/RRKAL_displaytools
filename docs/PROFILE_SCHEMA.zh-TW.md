@@ -104,16 +104,11 @@ rrkal_displaytools.qt_panel_profile.v1
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `active_tool` | string | `move`、`select`、`brush`、`mask` 或 `erase`。 |
+| `active_tool` | string | `move` 或 `select`。 |
 | `target_layer` | string or null | 工具目前綁定的 active layer key。 |
-| `brush_size` | integer 1-200 | UI-only brush size。 |
-| `brush_hardness` | integer 0-100 | UI-only brush hardness。 |
-| `tool_opacity` | integer 0-100 | UI-only tool opacity。 |
-| `mask_mode` | string | `Reveal`、`Hide` 或 `Refine`。 |
-| `selection_mode` | string | `Replace`、`Add`、`Subtract` 或 `Intersect`。 |
 | `renderer_sync` | string | 可選，通常為 `planned`。 |
 
-目前 `tool_state` 不會直接改 renderer。Brush / Mask / Selection 會先完成 Qt UIUX 閉環，後端 renderer sync 之後再接。
+目前 `tool_state` 不會直接改 renderer。Brush / Mask 暫不納入本輪 UI；Select 用於指定 active layer，供後續圖層操作閉環使用。
 
 ## Handoff rules
 

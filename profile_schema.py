@@ -40,17 +40,10 @@ REQUIRED_LAYER_STACK_KEYS = REQUIRED_PROFILE_LAYERS - {"demo_closed_loop"}
 REQUIRED_LAYER_STACK_UI_FIELDS = {"locked", "opacity", "blend_mode"}
 OPTIONAL_LAYER_STACK_UI_FIELDS = {"selected", "renderer_sync"}
 BLEND_MODES = {"Normal", "Screen", "Multiply", "Overlay", "Soft Light"}
-TOOL_MODES = {"move", "select", "brush", "mask", "erase"}
-MASK_MODES = {"Reveal", "Hide", "Refine"}
-SELECTION_MODES = {"Replace", "Add", "Subtract", "Intersect"}
+TOOL_MODES = {"move", "select"}
 REQUIRED_TOOL_STATE_FIELDS = {
     "active_tool",
     "target_layer",
-    "brush_size",
-    "brush_hardness",
-    "tool_opacity",
-    "mask_mode",
-    "selection_mode",
 }
 OPTIONAL_TOOL_STATE_FIELDS = {"renderer_sync"}
 
@@ -139,23 +132,6 @@ def profile_payload_errors(profile: dict[str, object]) -> list[str]:
                     errors.append("tool_state.target_layer must be a string or null")
                 elif target_layer not in REQUIRED_LAYER_STACK_KEYS:
                     errors.append(f"tool_state.target_layer is not a known layer stack key: {target_layer}")
-            for field in ("brush_size", "brush_hardness", "tool_opacity"):
-                value = tool_state.get(field)
-                if not isinstance(value, int) or isinstance(value, bool):
-                    errors.append(f"tool_state.{field} must be an integer")
-            brush_size = tool_state.get("brush_size")
-            if isinstance(brush_size, int) and not isinstance(brush_size, bool) and not 1 <= brush_size <= 200:
-                errors.append("tool_state.brush_size must be from 1 to 200")
-            for field in ("brush_hardness", "tool_opacity"):
-                value = tool_state.get(field)
-                if isinstance(value, int) and not isinstance(value, bool) and not 0 <= value <= 100:
-                    errors.append(f"tool_state.{field} must be from 0 to 100")
-            mask_mode = tool_state.get("mask_mode")
-            if not isinstance(mask_mode, str) or mask_mode not in MASK_MODES:
-                errors.append(f"tool_state.mask_mode must be one of {sorted(MASK_MODES)}")
-            selection_mode = tool_state.get("selection_mode")
-            if not isinstance(selection_mode, str) or selection_mode not in SELECTION_MODES:
-                errors.append(f"tool_state.selection_mode must be one of {sorted(SELECTION_MODES)}")
             if "renderer_sync" in tool_state and not isinstance(tool_state["renderer_sync"], str):
                 errors.append("tool_state.renderer_sync must be a string")
     return errors
@@ -187,8 +163,6 @@ def profile_schema_packet() -> dict[str, object]:
             "required_fields": sorted(REQUIRED_TOOL_STATE_FIELDS),
             "optional_fields": sorted(OPTIONAL_TOOL_STATE_FIELDS),
             "tool_modes": sorted(TOOL_MODES),
-            "mask_modes": sorted(MASK_MODES),
-            "selection_modes": sorted(SELECTION_MODES),
         },
         "local_only_paths": [
             "state/ui_profiles/",

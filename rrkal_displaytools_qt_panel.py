@@ -102,13 +102,8 @@ LAYER_LABELS = (
 BLEND_MODES = ("Normal", "Screen", "Multiply", "Overlay", "Soft Light")
 TOOL_MODES = (
     ("move", "Move", "檢視 / 平移"),
-    ("select", "Select", "🚧 選取範圍"),
-    ("brush", "Brush", "🚧 筆刷"),
-    ("mask", "Mask", "🚧 遮罩"),
-    ("erase", "Erase", "🚧 擦除"),
+    ("select", "Select", "選取圖層 / active layer target"),
 )
-MASK_MODES = ("Reveal", "Hide", "Refine")
-SELECTION_MODES = ("Replace", "Add", "Subtract", "Intersect")
 
 class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def __init__(self, initial_profile: Path | None = None) -> None:
@@ -126,11 +121,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.active_tool = "move"
         self.tool_buttons: dict[str, QtWidgets.QToolButton] = {}
         self.tool_target_label: QtWidgets.QLabel | None = None
-        self.brush_size_slider: QtWidgets.QSlider | None = None
-        self.brush_hardness_slider: QtWidgets.QSlider | None = None
-        self.tool_opacity_slider: QtWidgets.QSlider | None = None
-        self.mask_mode_combo: QtWidgets.QComboBox | None = None
-        self.selection_mode_combo: QtWidgets.QComboBox | None = None
+        self.canvas_preview_label: QtWidgets.QLabel | None = None
+        self.canvas_meta_label: QtWidgets.QLabel | None = None
+        self.canvas_zoom_slider: QtWidgets.QSlider | None = None
         self.docks: dict[str, QtWidgets.QDockWidget] = {}
         self.template_paths: list[Path] = []
         self._build_ui()
@@ -159,7 +152,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         title = QtWidgets.QLabel("RRKAL_displaytools Studio")
         title.setObjectName("title")
         subtitle = QtWidgets.QLabel(
-            "Photoshop-inspired Qt workspace：左側工具/預設，中間命令與資料預覽，右側圖層與屬性控制。"
+            "Research-oriented Qt workspace：借鑑 Photoshop 的面板精神，但優先服務科研者的可追蹤圖層、可重現 profile 與資料狀態檢查。"
         )
         subtitle.setWordWrap(True)
         main.addWidget(title)
@@ -356,8 +349,26 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.docks["layers"] = layers_dock
         self.addDockWidget(QtCore.Qt.DockWidgetArea.RightDockWidgetArea, layers_dock)
 
-        command_group = self._group("中央預覽 / Command and JSON preview")
+        command_group = self._group("中央預覽 / Canvas, Command and JSON preview")
         command_layout = QtWidgets.QVBoxLayout(command_group)
+        self.canvas_preview_label = QtWidgets.QLabel("Canvas Preview")
+        self.canvas_preview_label.setObjectName("canvasPreview")
+        self.canvas_preview_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.canvas_preview_label.setMinimumHeight(220)
+        self.canvas_preview_label.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
+        command_layout.addWidget(self.canvas_preview_label)
+        self.canvas_meta_label = QtWidgets.QLabel("Canvas state: -")
+        self.canvas_meta_label.setObjectName("canvasMeta")
+        self.canvas_meta_label.setWordWrap(True)
+        command_layout.addWidget(self.canvas_meta_label)
+        zoom_row = QtWidgets.QHBoxLayout()
+        zoom_row.addWidget(QtWidgets.QLabel("Canvas zoom"))
+        self.canvas_zoom_slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+        self.canvas_zoom_slider.setRange(25, 200)
+        self.canvas_zoom_slider.setValue(100)
+        self.canvas_zoom_slider.valueChanged.connect(lambda _value, self=self: self.refresh_canvas_preview())
+        zoom_row.addWidget(self.canvas_zoom_slider)
+        command_layout.addLayout(zoom_row)
         self.command_text = QtWidgets.QPlainTextEdit()
         self.command_text.setReadOnly(True)
         self.command_text.setMinimumHeight(150)
@@ -432,6 +443,16 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             QWidget#layerRow[selected="true"] { background: #dceeff; border: 1px solid #5b8db8; }
             QLabel#selectedLayer { color: #23435f; font-weight: 700; padding-top: 6px; }
             QLabel#toolPaletteTitle { color: #23435f; font-weight: 700; padding-top: 6px; }
+            QLabel#canvasPreview {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #142331, stop:0.52 #1f4d5e, stop:1 #d7c29b);
+                color: #f3f7f9;
+                border: 2px solid #5b8db8;
+                border-radius: 10px;
+                font-size: 13pt;
+                font-weight: 700;
+                padding: 16px;
+            }
+            QLabel#canvasMeta { color: #31475a; font-weight: 600; }
             """
         )
 
@@ -492,35 +513,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.tool_target_label = QtWidgets.QLabel("Target layer: -")
         self.tool_target_label.setWordWrap(True)
         layout.addWidget(self.tool_target_label)
-
-        options_group = QtWidgets.QGroupBox("Tool Options")
-        options_form = QtWidgets.QFormLayout(options_group)
-        self.brush_size_slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
-        self.brush_size_slider.setRange(1, 200)
-        self.brush_size_slider.setValue(32)
-        self.brush_hardness_slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
-        self.brush_hardness_slider.setRange(0, 100)
-        self.brush_hardness_slider.setValue(75)
-        self.tool_opacity_slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
-        self.tool_opacity_slider.setRange(0, 100)
-        self.tool_opacity_slider.setValue(100)
-        self.mask_mode_combo = QtWidgets.QComboBox()
-        self.mask_mode_combo.addItems(MASK_MODES)
-        self.selection_mode_combo = QtWidgets.QComboBox()
-        self.selection_mode_combo.addItems(SELECTION_MODES)
-        for slider in (self.brush_size_slider, self.brush_hardness_slider, self.tool_opacity_slider):
-            slider.valueChanged.connect(lambda _value, self=self: self.refresh_tool_target())
-        self.mask_mode_combo.currentTextChanged.connect(lambda _text, self=self: self.refresh_tool_target())
-        self.selection_mode_combo.currentTextChanged.connect(lambda _text, self=self: self.refresh_tool_target())
-        options_form.addRow("Brush size", self.brush_size_slider)
-        options_form.addRow("Hardness", self.brush_hardness_slider)
-        options_form.addRow("Tool opacity", self.tool_opacity_slider)
-        options_form.addRow("Mask mode", self.mask_mode_combo)
-        options_form.addRow("Selection mode", self.selection_mode_combo)
-        tool_note = QtWidgets.QLabel("🚧 Brush / Mask / Selection 目前只綁定 active layer UI state，renderer sync 後端之後再接。")
+        tool_note = QtWidgets.QLabel("Select 只負責選取/指定 active layer；Brush/Mask 暫不納入本輪 UI。")
         tool_note.setWordWrap(True)
-        options_form.addRow("Status", tool_note)
-        layout.addWidget(options_group)
+        layout.addWidget(tool_note)
 
         quick_title = QtWidgets.QLabel("快捷 / Presets")
         quick_title.setObjectName("toolPaletteTitle")
@@ -784,13 +779,6 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         return {
             "active_tool": self.active_tool,
             "target_layer": self.selected_layer_key,
-            "brush_size": self.brush_size_slider.value() if self.brush_size_slider is not None else 32,
-            "brush_hardness": self.brush_hardness_slider.value() if self.brush_hardness_slider is not None else 75,
-            "tool_opacity": self.tool_opacity_slider.value() if self.tool_opacity_slider is not None else 100,
-            "mask_mode": self.mask_mode_combo.currentText() if self.mask_mode_combo is not None else "Reveal",
-            "selection_mode": (
-                self.selection_mode_combo.currentText() if self.selection_mode_combo is not None else "Replace"
-            ),
             "renderer_sync": "planned",
         }
 
@@ -891,6 +879,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     @QtCore.pyqtSlot()
     def refresh_command_preview(self) -> None:
         self.command_text.setPlainText(subprocess.list2cmdline(self.build_command()))
+        self.refresh_canvas_preview()
 
     def refresh_layer_stack_status(self) -> None:
         if not hasattr(self, "layer_stack_note"):
@@ -907,6 +896,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"非預設 opacity/blend {non_default}。🚧 Lock/Opacity/Blend 下一步接 renderer sync。"
         )
         self.refresh_layer_properties()
+        self.refresh_canvas_preview()
 
     def select_layer(self, key: str) -> None:
         if key not in self.layer_rows:
@@ -950,6 +940,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         label = next((text for tool_mode, text, _hint in TOOL_MODES if tool_mode == mode), mode)
         if hasattr(self, "status"):
             self.status.setText(f"已選取工具：{label}")
+        self.refresh_canvas_preview()
 
     def apply_tool_state(self, state: dict[str, object]) -> None:
         active_tool = state.get("active_tool")
@@ -958,16 +949,6 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         target_layer = state.get("target_layer")
         if isinstance(target_layer, str) and target_layer in self.layer_rows:
             self.select_layer(target_layer)
-        if self.brush_size_slider is not None and isinstance(state.get("brush_size"), int):
-            self.brush_size_slider.setValue(int(state["brush_size"]))
-        if self.brush_hardness_slider is not None and isinstance(state.get("brush_hardness"), int):
-            self.brush_hardness_slider.setValue(int(state["brush_hardness"]))
-        if self.tool_opacity_slider is not None and isinstance(state.get("tool_opacity"), int):
-            self.tool_opacity_slider.setValue(int(state["tool_opacity"]))
-        if self.mask_mode_combo is not None and isinstance(state.get("mask_mode"), str):
-            self.mask_mode_combo.setCurrentText(str(state["mask_mode"]))
-        if self.selection_mode_combo is not None and isinstance(state.get("selection_mode"), str):
-            self.selection_mode_combo.setCurrentText(str(state["selection_mode"]))
         self.refresh_tool_target()
 
     def refresh_tool_target(self) -> None:
@@ -981,8 +962,33 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.tool_target_label.setText(
             f"Active tool: {tool_label}\n"
             f"Target layer: {layer_label}\n"
-            f"Brush {self.collect_tool_state()['brush_size']}px / "
-            f"{self.collect_tool_state()['tool_opacity']}% opacity"
+            "Select tool updates the active layer target."
+        )
+        self.refresh_canvas_preview()
+
+    def refresh_canvas_preview(self) -> None:
+        if self.canvas_preview_label is None or self.canvas_meta_label is None:
+            return
+        selected_label = next(
+            (text for key, text in LAYER_LABELS if key == self.selected_layer_key),
+            self.selected_layer_key or "-",
+        )
+        tool_label = next((text for mode, text, _hint in TOOL_MODES if mode == self.active_tool), self.active_tool)
+        visible = sum(1 for key, _label in LAYER_LABELS if key in self.checks and self.checks[key].isChecked())
+        zoom = self.canvas_zoom_slider.value() if self.canvas_zoom_slider is not None else 100
+        style = self.style_combo.currentText() if hasattr(self, "style_combo") else "-"
+        topo = self.topo_combo.currentText() if hasattr(self, "topo_combo") else "-"
+        data_mode = self.data_combo.currentText() if hasattr(self, "data_combo") else "-"
+        self.canvas_preview_label.setText(
+            "RRKAL Scientific Canvas Preview\n\n"
+            f"Style: {style} | Topo: {topo} | Data: {data_mode}\n"
+            f"Tool: {tool_label} -> Layer: {selected_label}\n"
+            f"Visible layers: {visible}/{len(LAYER_LABELS)} | Zoom: {zoom}%\n\n"
+            "🚧 UI preview only: renderer embed/sync pending"
+        )
+        self.canvas_meta_label.setText(
+            f"Canvas state mirrors Qt UI only：active tool={self.active_tool}, "
+            f"target layer={self.selected_layer_key or '-'}, style={style}, visible_layers={visible}."
         )
 
     def toggle_selected_layer_visibility(self) -> None:
