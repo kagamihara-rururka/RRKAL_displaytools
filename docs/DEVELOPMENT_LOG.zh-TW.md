@@ -3153,3 +3153,17 @@ Decision:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+
+## 2026-05-30 - Qt Boundary identity source visible summary
+
+Scope:
+- Qt `Boundary identity` summary now appends `source_hint=...` from `identity_source_hint_summary`.
+- The same helper feeds both the Properties dock and Canvas Preview, so researchers can see preview identity provenance without opening JSON.
+- Smoke now verifies the summary field across renderer, Qt, launch packet and closed-loop status, and checks that Qt visible text includes `source_hint=`.
+
+Decision:
+- Boundary/EEZ emphasis must surface its non-authoritative provenance directly in the scientific UI, not only in handoff packets.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+

@@ -1670,7 +1670,14 @@ foreach ($boundaryIdentityFile in $boundaryIdentityFiles) {
     if ($boundaryIdentityText -notmatch 'pending_backend_geometry_closure') {
         throw "Missing open-line inference pending marker in $boundaryIdentityFile"
     }
+    if ($boundaryIdentityText -notmatch 'identity_source_hint_summary') {
+        throw "Missing boundary identity source summary in $boundaryIdentityFile"
+    }
+}
+
+$qtBoundaryIdentitySource = Get-Content -LiteralPath (Join-Path $BoundaryIdentityRoot "rrkal_displaytools_qt_panel.py") -Raw -Encoding UTF8
+if ($qtBoundaryIdentitySource -notmatch 'source_hint=') {
+    throw "Qt Boundary identity summary is not visible in Properties/Canvas Preview text"
 }
 
 Write-Host "Smoke passed."
-

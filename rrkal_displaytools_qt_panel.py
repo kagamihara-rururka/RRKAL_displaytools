@@ -1831,7 +1831,7 @@ def default_boundary_identity_status() -> dict[str, object]:
             "displaytools_scope": "consume identity fields and expose visual emphasis/provenance only",
         },
         "ui_summary_fields": ["applied", "pending", "boundary", "identity_source_hint", "identity_source_hint_summary"],
-"identity_source_hint_summary": "preview_sources=source_properties,maritime_property_keys,closed_ring_geometry; authoritative_source=RRKAL-governed polygon/EEZ dataset manifest; open_line_area_inference=pending_backend_geometry_closure",
+        "identity_source_hint_summary": "preview_sources=source_properties,maritime_property_keys,closed_ring_geometry; authoritative_source=RRKAL-governed polygon/EEZ dataset manifest; open_line_area_inference=pending_backend_geometry_closure",
     }
 
 
@@ -4149,6 +4149,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if len(pending_items) > 3:
             pending_text = f"{pending_text}, +{len(pending_items) - 3}"
         boundary = str(identity_status.get("boundary", "visual/source-property preview only"))
+        source_summary = str(identity_status.get("identity_source_hint_summary", "")).strip()
+        if source_summary:
+            return (
+                f"applied={applied_count} [{applied_text}]; pending={pending_count} [{pending_text}]; "
+                f"{boundary}; source_hint={source_summary}"
+            )
         return f"applied={applied_count} [{applied_text}]; pending={pending_count} [{pending_text}]; {boundary}"
 
     def refresh_boundary_highlight_status(self) -> None:

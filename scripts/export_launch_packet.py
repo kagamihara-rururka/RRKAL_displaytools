@@ -181,7 +181,7 @@ DEFAULT_BOUNDARY_IDENTITY_STATUS = {
         "displaytools_scope": "consume identity fields and expose visual emphasis/provenance only",
     },
     "ui_summary_fields": ["applied", "pending", "boundary", "identity_source_hint", "identity_source_hint_summary"],
-"identity_source_hint_summary": "preview_sources=source_properties,maritime_property_keys,closed_ring_geometry; authoritative_source=RRKAL-governed polygon/EEZ dataset manifest; open_line_area_inference=pending_backend_geometry_closure",
+        "identity_source_hint_summary": "preview_sources=source_properties,maritime_property_keys,closed_ring_geometry; authoritative_source=RRKAL-governed polygon/EEZ dataset manifest; open_line_area_inference=pending_backend_geometry_closure",
 }
 DEFAULT_BOUNDARY_HIGHLIGHT = {
     "schema": "rrkal_displaytools.boundary_highlight_mask.v1",
@@ -2718,5 +2718,6 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
 
 

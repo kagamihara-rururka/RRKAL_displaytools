@@ -299,3 +299,8 @@
 
 - Boundary identity contracts now include `identity_source_hint_summary` for compact handoff display.
 - The summary keeps the UI honest that current identity is preview/source-property based and `pending_backend_geometry_closure` still blocks authoritative open-line inference.
+
+### 2026-05-30 Qt Boundary identity source visible summary
+
+- Properties and Canvas Preview now expose Boundary identity `source_hint=` text directly through the shared Qt identity summary helper.
+- Smoke verifies that compact identity provenance is visible in Qt, not only available in JSON contracts.
