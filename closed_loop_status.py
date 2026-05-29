@@ -40,8 +40,14 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
         "partial": [
             {
                 "id": "boundary_highlight_mask",
-                "applies": ["line hover mask", "outline glow", "closed-ring polygon fill preview", "source-property feature identity"],
-                "pending": ["authoritative_polygon_territory_identity", "open_line_area_inference", "fill_shader_contrast_gamma"],
+                "applies": [
+                    "line hover mask",
+                    "outline glow",
+                    "closed-ring polygon fill preview",
+                    "closed-ring fill contrast/gamma",
+                    "source-property feature identity",
+                ],
+                "pending": ["authoritative_polygon_territory_identity", "open_line_area_inference"],
                 "evidence": ["boundary-highlight-json", "boundary-highlight-ack-file"],
             },
             {

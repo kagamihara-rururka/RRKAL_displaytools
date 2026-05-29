@@ -1,5 +1,19 @@
 ﻿# Development Log
 
+## 2026-05-29 - Boundary highlight fill tone controls
+
+Scope:
+- Added a dedicated closed-ring polygon fill tone path for Boundary highlight.
+- Fill preview now applies the same RGB, contrast, and gamma controls as the outline path, with a more restrained tone so the mask does not overpower vector lines.
+- Renderer boundary highlight ack/capabilities and closed-loop status now mark `closed_ring_fill_contrast_gamma` as applied.
+
+Positioning:
+- This closes fill shader contrast/gamma for the current closed-ring fill preview.
+- Authoritative polygon territory identity and open-line area inference remain separate future work.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-29 - Qt layer pick feature label
 
 Scope:

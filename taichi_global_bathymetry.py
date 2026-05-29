@@ -2587,6 +2587,20 @@ def apply_boundary_highlight_color_controls(color_rgb: object, contrast: object,
     return tuple(int(round(float(value) * 255.0)) for value in rgb)
 
 
+def apply_boundary_highlight_fill_controls(color_rgb: object, contrast: object, gamma: object) -> tuple[int, int, int]:
+    if isinstance(color_rgb, list) and len(color_rgb) >= 3:
+        base = [_clamp_int_value(color_rgb[index], 255, 0, 255) for index in range(3)]
+    else:
+        base = [255, 190, 72]
+    rgb = np.asarray(base, dtype=np.float32) / 255.0
+    gamma_value = _clamp_int_value(gamma, 100, 25, 300) / 100.0
+    rgb = np.power(np.clip(rgb, 0.0, 1.0), 1.0 / max(0.25, gamma_value))
+    contrast_factor = 1.0 + (_clamp_int_value(contrast, 45, 0, 100) / 100.0) * 0.9
+    rgb = np.clip((rgb - 0.5) * contrast_factor + 0.5, 0.0, 1.0)
+    rgb = np.clip(rgb * 0.82 + 0.06, 0.0, 1.0)
+    return tuple(int(round(float(value) * 255.0)) for value in rgb)
+
+
 def default_boundary_highlight_state(received: bool = False) -> dict[str, object]:
     return {
         "schema": BOUNDARY_HIGHLIGHT_SCHEMA,
@@ -3296,6 +3310,7 @@ class GeoVectorLineOverlay:
         highlight_phase: float = 0.0,
         point_stride: int = 1,
         highlight_color: tuple[int, int, int] | None = None,
+        highlight_fill_color: tuple[int, int, int] | None = None,
         highlight_alpha_scale: float = 1.0,
         highlight_width_extra: int = 0,
     ) -> np.ndarray:
@@ -3389,8 +3404,9 @@ class GeoVectorLineOverlay:
                 except Exception:
                     line_closed = False
                 if line_closed:
+                    fill_base = highlight_fill_color or color_base
                     fill_alpha = int(min(180, (32 + 42 * pulse) * alpha_scale))
-                    fill_rgba = (int(color_base[0]), int(color_base[1]), int(color_base[2]), fill_alpha)
+                    fill_rgba = (int(fill_base[0]), int(fill_base[1]), int(fill_base[2]), fill_alpha)
                     fill_segments = draw_projected_line(line, (0, 0, 0, 0), 1)
                     for segment in fill_segments:
                         if len(segment) >= 3 and screen_polygon_area(segment) >= 6.0:
@@ -12284,6 +12300,11 @@ class HybridRenderController:
             boundary_highlight.get("contrast", 45) if isinstance(boundary_highlight, dict) else 45,
             boundary_highlight.get("gamma", 100) if isinstance(boundary_highlight, dict) else 100,
         )
+        highlight_fill_color = apply_boundary_highlight_fill_controls(
+            boundary_highlight.get("color_rgb", [255, 190, 72]) if isinstance(boundary_highlight, dict) else [255, 190, 72],
+            boundary_highlight.get("contrast", 45) if isinstance(boundary_highlight, dict) else 45,
+            boundary_highlight.get("gamma", 100) if isinstance(boundary_highlight, dict) else 100,
+        )
         highlight_alpha_scale = (
             max(0.0, min(_clamp_int_value(boundary_highlight.get("alpha"), 48, 0, 100) / 48.0, 2.0))
             if isinstance(boundary_highlight, dict)
@@ -12321,6 +12342,7 @@ class HybridRenderController:
                 highlight_phase,
                 point_stride=self._vector_point_stride(),
                 highlight_color=highlight_color,
+                highlight_fill_color=highlight_fill_color,
                 highlight_alpha_scale=highlight_alpha_scale,
                 highlight_width_extra=highlight_width_extra,
             )
@@ -12881,9 +12903,9 @@ class HybridRenderController:
                 "outline_glow_preview",
                 "hover_contrast_gamma_color",
                 "closed_ring_polygon_fill_preview",
+                "closed_ring_fill_contrast_gamma",
             ],
             "pending": [
-                "fill_shader_contrast_gamma",
                 "authoritative_polygon_territory_identity",
                 "open_line_area_inference",
             ],
@@ -16031,10 +16053,10 @@ def renderer_capabilities_packet() -> dict[str, object]:
                 "outline_glow_preview",
                 "hover_contrast_gamma_color",
                 "closed_ring_polygon_fill_preview",
+                "closed_ring_fill_contrast_gamma",
                 "source_property_feature_identity",
             ],
             "pending": [
-                "fill_shader_contrast_gamma",
                 "authoritative_polygon_territory_identity",
                 "open_line_area_inference",
             ],
