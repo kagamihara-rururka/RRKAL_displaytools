@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-30 - Cross-machine clone readiness
+
+- Added `rrkal_displaytools.cross_machine_clone_readiness.v1` to make clone/setup/smoke/run/inspect steps explicit for another Windows machine.
+- Qt launch/provenance packets, No-GUI launch packets, renderer capabilities, handoff inspection and closed-loop evidence now expose the same cross-machine readiness contract while preserving the RRKAL data-governance boundary.
+- Smoke: PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Module boundary registry
 
 - Added `rrkal_displaytools.module_boundary_registry.v1` to mark future extraction boundaries for contracts, Qt UI, Taichi render core, ocean material, style profiles, overlays, RRKAL-owned data sources and diagnostics.

@@ -224,6 +224,18 @@ if ($launchPacket.module_boundary_registry.target_modules -notcontains "render_c
 if ($launchPacket.module_boundary_registry.tk_primary_ui_allowed -ne $false) {
     throw "Launch packet module_boundary_registry must keep Tk out of primary UI"
 }
+if ($launchPacket.cross_machine_clone_readiness.schema -ne "rrkal_displaytools.cross_machine_clone_readiness.v1") {
+    throw "Launch packet cross_machine_clone_readiness schema missing or invalid"
+}
+if ($launchPacket.cross_machine_clone_readiness.status -ne "ready") {
+    throw "Launch packet cross_machine_clone_readiness not ready"
+}
+if ($launchPacket.cross_machine_clone_readiness.required_commands -notcontains "scripts/setup_windows.ps1") {
+    throw "Launch packet cross_machine_clone_readiness missing setup command"
+}
+if ($launchPacket.cross_machine_clone_readiness.setup_doc -ne "docs/SETUP_WINDOWS.zh-TW.md") {
+    throw "Launch packet cross_machine_clone_readiness setup doc mismatch"
+}
 if ($launchPacket.profile_launch_readiness.schema -ne "rrkal_displaytools.profile_launch_readiness.v1") {
     throw "Launch packet profile_launch_readiness schema missing or invalid"
 }
@@ -652,6 +664,12 @@ if ($capabilities.module_boundary_registry.schema -ne "rrkal_displaytools.module
 if ($capabilities.module_boundary_registry.target_modules -notcontains "data_sources/*") {
     throw "Renderer module_boundary_registry missing RRKAL data boundary"
 }
+if ($capabilities.cross_machine_clone_readiness.schema -ne "rrkal_displaytools.cross_machine_clone_readiness.v1") {
+    throw "Renderer cross_machine_clone_readiness schema missing or invalid"
+}
+if ($capabilities.cross_machine_clone_readiness.required_commands -notcontains "scripts/run_qt_panel.ps1") {
+    throw "Renderer cross_machine_clone_readiness missing run command"
+}
 if ($capabilities.profile_launch_readiness.schema -ne "rrkal_displaytools.profile_launch_readiness.v1") {
     throw "Renderer profile_launch_readiness schema missing or invalid"
 }
@@ -930,6 +948,18 @@ if ($handoff.module_boundary_registry.renderer_capabilities_schema -ne "rrkal_di
 }
 if ($handoff.module_boundary_registry.tk_primary_ui_allowed -ne $false) {
     throw "Handoff inspection module_boundary_registry primary UI boundary invalid"
+}
+if ($handoff.launch_packet_contracts.cross_machine_clone_readiness -ne "rrkal_displaytools.cross_machine_clone_readiness.v1") {
+    throw "Handoff inspection cross_machine_clone_readiness launch contract missing or invalid"
+}
+if ($handoff.cross_machine_clone_readiness.launch_packet_schema -ne "rrkal_displaytools.cross_machine_clone_readiness.v1") {
+    throw "Handoff inspection cross_machine_clone_readiness launch schema missing or invalid"
+}
+if ($handoff.cross_machine_clone_readiness.renderer_capabilities_schema -ne "rrkal_displaytools.cross_machine_clone_readiness.v1") {
+    throw "Handoff inspection cross_machine_clone_readiness renderer schema missing or invalid"
+}
+if ($handoff.cross_machine_clone_readiness.required_commands -notcontains "scripts/inspect_handoff.ps1") {
+    throw "Handoff inspection cross_machine_clone_readiness missing handoff command"
 }
 if ($handoff.launch_packet_contracts.profile_launch_readiness -ne "rrkal_displaytools.profile_launch_readiness.v1") {
     throw "Handoff inspection profile_launch_readiness launch contract missing or invalid"

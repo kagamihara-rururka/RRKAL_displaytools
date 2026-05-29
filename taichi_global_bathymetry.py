@@ -18359,6 +18359,51 @@ def module_boundary_registry_packet(source: str) -> dict[str, object]:
     }
 
 
+def cross_machine_clone_readiness_packet(
+    profile_readiness: dict[str, object] | None,
+    module_boundaries: dict[str, object] | None,
+    source: str,
+) -> dict[str, object]:
+    profile_readiness = profile_readiness if isinstance(profile_readiness, dict) else {}
+    module_boundaries = module_boundaries if isinstance(module_boundaries, dict) else {}
+    required_commands = [
+        "scripts/setup_windows.ps1",
+        "scripts/smoke.ps1",
+        "scripts/run_qt_panel.ps1",
+        "scripts/inspect_handoff.ps1",
+    ]
+    first_run_order = [
+        "git clone https://github.com/Kagamihara-Ruruka/RRKAL_displaytools.git",
+        "cd RRKAL_displaytools",
+        "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup_windows.ps1",
+        "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/smoke.ps1",
+        "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run_qt_panel.ps1",
+    ]
+    profile_ready = profile_readiness.get("readiness") == "ready"
+    boundaries_ready = module_boundaries.get("schema") == "rrkal_displaytools.module_boundary_registry.v1"
+    qt_first = module_boundaries.get("qt_first") is True
+    tk_not_primary = module_boundaries.get("tk_primary_ui_allowed") is False
+    return {
+        "schema": "rrkal_displaytools.cross_machine_clone_readiness.v1",
+        "source": source,
+        "status": "ready" if profile_ready and boundaries_ready and qt_first and tk_not_primary else "partial",
+        "repo_url": "https://github.com/Kagamihara-Ruruka/RRKAL_displaytools.git",
+        "setup_doc": "docs/SETUP_WINDOWS.zh-TW.md",
+        "required_commands": required_commands,
+        "first_run_order": first_run_order,
+        "qt_first": qt_first,
+        "tk_primary_ui_allowed": not tk_not_primary,
+        "profile_launch_readiness_schema": profile_readiness.get("schema"),
+        "profile_launch_readiness": profile_readiness.get("readiness", "unknown"),
+        "module_boundary_registry_schema": module_boundaries.get("schema"),
+        "smoke_required_before_push": True,
+        "clone_after_setup_verification": ["smoke", "handoff inspection", "renderer capability discovery", "Qt panel launch"],
+        "launch_packet_fields": ["cross_machine_clone_readiness", "profile_launch_readiness", "module_boundary_registry", "portable_command"],
+        "renderer_capability_field": "cross_machine_clone_readiness",
+        "boundary": "Cross-machine readiness covers clone/setup/smoke/run handoff only; data discovery, download, import and cache governance remain RRKAL-owned.",
+    }
+
+
 def layer_operator_shortcuts_packet(
     source: str,
     selected_layer: str | None = None,
@@ -18800,6 +18845,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
         "style_renderer_entries": style_renderer_entries_packet("taichi_global_bathymetry.renderer_capabilities"),
         "style_profile_renderer_routes": style_profile_renderer_routes_packet(style_renderer_entries_packet("taichi_global_bathymetry.renderer_capabilities"), "taichi_global_bathymetry.renderer_capabilities"),
         "module_boundary_registry": module_boundary_registry_packet("taichi_global_bathymetry.renderer_capabilities"),
+        "cross_machine_clone_readiness": cross_machine_clone_readiness_packet(profile_launch_readiness_packet("taichi_global_bathymetry.renderer_capabilities", style_renderer_entries_packet("taichi_global_bathymetry.renderer_capabilities"), layer_operator_groups_packet(layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"), "taichi_global_bathymetry.renderer_capabilities")), module_boundary_registry_packet("taichi_global_bathymetry.renderer_capabilities"), "taichi_global_bathymetry.renderer_capabilities"),
         "profile_launch_readiness": profile_launch_readiness_packet("taichi_global_bathymetry.renderer_capabilities", style_renderer_entries_packet("taichi_global_bathymetry.renderer_capabilities"), layer_operator_groups_packet(layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"), "taichi_global_bathymetry.renderer_capabilities")),
         "profile_launch_readiness_ui": profile_launch_readiness_ui_packet(profile_launch_readiness_packet("taichi_global_bathymetry.renderer_capabilities", style_renderer_entries_packet("taichi_global_bathymetry.renderer_capabilities"), layer_operator_groups_packet(layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"), "taichi_global_bathymetry.renderer_capabilities")), "taichi_global_bathymetry.renderer_capabilities"),
         "layer_visual_presets": layer_visual_presets_packet("taichi_global_bathymetry.renderer_capabilities"),
