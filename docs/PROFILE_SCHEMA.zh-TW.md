@@ -27,6 +27,7 @@ rrkal_displaytools.qt_panel_profile.v1
 | `selected_layer` | string | optional | Qt layer stack 目前選取圖層。 |
 | `layer_stack_ui` | object | optional | Qt layer stack 的 UI-only state。 |
 | `tool_state` | object | optional | Qt tool palette 的 UI-only state。 |
+| `pins` | array | optional | 科研標記清單。 |
 
 ## `renderer`
 
@@ -116,9 +117,24 @@ rrkal_displaytools.qt_panel_profile.v1
 | `type` | string | `Observation`、`Sample Site`、`Anomaly`、`Reference` 或 `Event`。 |
 | `label` | string | 標記名稱。 |
 | `note` | string | 標記備註。 |
-| `placement` | string | 目前通常是 `pending_canvas_hit_test`，代表地球點擊定位後端尚未接。 |
+| `placement` | string | 目前通常是 `manual_lat_lon`，代表以手動經緯度建立；地球點擊定位後端尚未接。 |
 
 目前 `tool_state` 不會直接改 renderer。Brush / Mask 暫不納入本輪 UI；Select 用於指定 active layer，Pin 用於先保存科研標記意圖，後續再接 canvas/globe hit-test。
+
+## `pins`
+
+可選。此欄位保存科研標記清單，適合記錄觀測點、採樣站、異常點、參考點與事件。
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `id` | string | Pin id，例如 `pin-001`。 |
+| `type` | string | `Observation`、`Sample Site`、`Anomaly`、`Reference` 或 `Event`。 |
+| `label` | string | 標記名稱。 |
+| `note` | string | 可選，標記備註。 |
+| `latitude` | number -90..90 | 緯度。 |
+| `longitude` | number -180..180 | 經度。 |
+| `target_layer` | string or null | 可選，建立 pin 時的 active layer。 |
+| `placement` | string | 目前為 `manual_lat_lon`；後續會加入滑鼠位置反推經緯度的 `cursor_lat_lon` 流程。 |
 
 ## Handoff rules
 

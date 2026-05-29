@@ -682,3 +682,17 @@ Positioning:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-29 - Qt pin marker list
+
+Scope:
+- Extended the Pin tool with manual latitude/longitude fields.
+- Added add/remove marker list controls for research pins.
+- Added optional top-level `pins` schema validation and profile/launch packet persistence.
+- Documented mouse-position-to-lat/lon as the next backend boundary for globe/canvas hit-testing.
+
+Positioning:
+- This completes the UIUX-side scientific marker loop first: researchers can record observation/sample/anomaly/reference/event pins manually before renderer hit-testing is connected.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

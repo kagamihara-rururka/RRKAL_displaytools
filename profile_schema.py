@@ -8,7 +8,7 @@ from pathlib import Path
 PROFILE_SCHEMA_ID = "rrkal_displaytools.qt_panel_profile.v1"
 
 REQUIRED_PROFILE_TOP_LEVEL = {"schema", "renderer", "ocean_material", "layers"}
-OPTIONAL_PROFILE_TOP_LEVEL = {"selected_layer", "layer_stack_ui", "tool_state"}
+OPTIONAL_PROFILE_TOP_LEVEL = {"selected_layer", "layer_stack_ui", "tool_state", "pins"}
 REQUIRED_PROFILE_RENDERER = {
     "style_profile",
     "ui_backend",
@@ -42,6 +42,8 @@ OPTIONAL_LAYER_STACK_UI_FIELDS = {"selected", "renderer_sync"}
 BLEND_MODES = {"Normal", "Screen", "Multiply", "Overlay", "Soft Light"}
 TOOL_MODES = {"move", "select", "pin"}
 PIN_TYPES = {"Observation", "Sample Site", "Anomaly", "Reference", "Event"}
+REQUIRED_PIN_FIELDS = {"id", "type", "label", "latitude", "longitude", "placement"}
+OPTIONAL_PIN_FIELDS = {"note", "target_layer"}
 REQUIRED_TOOL_STATE_FIELDS = {
     "active_tool",
     "target_layer",
@@ -144,8 +146,44 @@ def profile_payload_errors(profile: dict[str, object]) -> list[str]:
                     for field in ("label", "note", "placement"):
                         if field in pin and not isinstance(pin[field], str):
                             errors.append(f"tool_state.pin.{field} must be a string")
+                    for field in ("latitude", "longitude"):
+                        if field in pin and not isinstance(pin[field], str):
+                            errors.append(f"tool_state.pin.{field} must be a string")
             if "renderer_sync" in tool_state and not isinstance(tool_state["renderer_sync"], str):
                 errors.append("tool_state.renderer_sync must be a string")
+    pins = profile.get("pins")
+    if pins is not None:
+        if not isinstance(pins, list):
+            errors.append("pins must be a list")
+        else:
+            allowed_fields = REQUIRED_PIN_FIELDS | OPTIONAL_PIN_FIELDS
+            for index, pin in enumerate(pins):
+                if not isinstance(pin, dict):
+                    errors.append(f"pins[{index}] must be an object")
+                    continue
+                for field in sorted(REQUIRED_PIN_FIELDS - set(pin)):
+                    errors.append(f"missing pins[{index}] field: {field}")
+                for field in sorted(set(pin) - allowed_fields):
+                    errors.append(f"unknown pins[{index}] field: {field}")
+                for field in ("id", "label", "placement"):
+                    if not isinstance(pin.get(field), str):
+                        errors.append(f"pins[{index}].{field} must be a string")
+                if "note" in pin and not isinstance(pin["note"], str):
+                    errors.append(f"pins[{index}].note must be a string")
+                if "target_layer" in pin and pin["target_layer"] is not None:
+                    if not isinstance(pin["target_layer"], str):
+                        errors.append(f"pins[{index}].target_layer must be a string or null")
+                    elif pin["target_layer"] not in REQUIRED_LAYER_STACK_KEYS:
+                        errors.append(f"pins[{index}].target_layer is not a known layer stack key")
+                pin_type = pin.get("type")
+                if not isinstance(pin_type, str) or pin_type not in PIN_TYPES:
+                    errors.append(f"pins[{index}].type must be one of {sorted(PIN_TYPES)}")
+                latitude = pin.get("latitude")
+                if not isinstance(latitude, (int, float)) or isinstance(latitude, bool) or not -90 <= latitude <= 90:
+                    errors.append(f"pins[{index}].latitude must be a number from -90 to 90")
+                longitude = pin.get("longitude")
+                if not isinstance(longitude, (int, float)) or isinstance(longitude, bool) or not -180 <= longitude <= 180:
+                    errors.append(f"pins[{index}].longitude must be a number from -180 to 180")
     return errors
 
 
@@ -176,6 +214,12 @@ def profile_schema_packet() -> dict[str, object]:
             "optional_fields": sorted(OPTIONAL_TOOL_STATE_FIELDS),
             "tool_modes": sorted(TOOL_MODES),
             "pin_types": sorted(PIN_TYPES),
+        },
+        "optional_pins": {
+            "required_fields": sorted(REQUIRED_PIN_FIELDS),
+            "optional_fields": sorted(OPTIONAL_PIN_FIELDS),
+            "pin_types": sorted(PIN_TYPES),
+            "coordinate_source": "manual_lat_lon now; cursor lat/lon resolver planned",
         },
         "local_only_paths": [
             "state/ui_profiles/",

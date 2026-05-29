@@ -126,6 +126,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.pin_type_combo: QtWidgets.QComboBox | None = None
         self.pin_label_edit: QtWidgets.QLineEdit | None = None
         self.pin_note_edit: QtWidgets.QLineEdit | None = None
+        self.pin_lat_edit: QtWidgets.QLineEdit | None = None
+        self.pin_lon_edit: QtWidgets.QLineEdit | None = None
+        self.pin_list: QtWidgets.QListWidget | None = None
+        self.research_pins: list[dict[str, object]] = []
         self.canvas_preview_label: QtWidgets.QLabel | None = None
         self.canvas_meta_label: QtWidgets.QLabel | None = None
         self.canvas_zoom_slider: QtWidgets.QSlider | None = None
@@ -528,13 +532,30 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.pin_type_combo.addItems(PIN_TYPES)
         self.pin_label_edit = QtWidgets.QLineEdit("Station A")
         self.pin_note_edit = QtWidgets.QLineEdit("UI-only marker; geospatial placement pending")
+        self.pin_lat_edit = QtWidgets.QLineEdit("0.0")
+        self.pin_lon_edit = QtWidgets.QLineEdit("0.0")
         self.pin_type_combo.currentTextChanged.connect(lambda _text, self=self: self.refresh_tool_target())
         self.pin_label_edit.textChanged.connect(lambda _text, self=self: self.refresh_tool_target())
         self.pin_note_edit.textChanged.connect(lambda _text, self=self: self.refresh_tool_target())
+        self.pin_lat_edit.textChanged.connect(lambda _text, self=self: self.refresh_tool_target())
+        self.pin_lon_edit.textChanged.connect(lambda _text, self=self: self.refresh_tool_target())
         pin_form.addRow("Type", self.pin_type_combo)
         pin_form.addRow("Label", self.pin_label_edit)
+        pin_form.addRow("Latitude", self.pin_lat_edit)
+        pin_form.addRow("Longitude", self.pin_lon_edit)
         pin_form.addRow("Note", self.pin_note_edit)
-        pin_form.addRow("Status", QtWidgets.QLabel("🚧 Pin placement on globe pending renderer/canvas hit-test."))
+        pin_actions = QtWidgets.QHBoxLayout()
+        add_pin_button = QtWidgets.QPushButton("加入 Pin")
+        remove_pin_button = QtWidgets.QPushButton("移除選取 Pin")
+        add_pin_button.clicked.connect(self.add_pin_marker)
+        remove_pin_button.clicked.connect(self.remove_selected_pin_marker)
+        pin_actions.addWidget(add_pin_button)
+        pin_actions.addWidget(remove_pin_button)
+        pin_form.addRow(pin_actions)
+        self.pin_list = QtWidgets.QListWidget()
+        self.pin_list.setMinimumHeight(110)
+        pin_form.addRow("Pins", self.pin_list)
+        pin_form.addRow("Status", QtWidgets.QLabel("Manual lat/lon pins now; globe hit-test pending."))
         layout.addWidget(pin_group)
 
         quick_title = QtWidgets.QLabel("快捷 / Presets")
@@ -775,6 +796,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "selected_layer": self.selected_layer_key,
             "layer_stack_ui": self.collect_layer_stack_ui(),
             "tool_state": self.collect_tool_state(),
+            "pins": self.collect_research_pins(),
         }
 
     def collect_launch_packet(self) -> dict[str, object]:
@@ -798,6 +820,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "selected_layer": self.selected_layer_key,
             "layer_stack_ui": self.collect_layer_stack_ui(),
             "tool_state": self.collect_tool_state(),
+            "pins": self.collect_research_pins(),
             "command": self.build_command(),
             "command_line": subprocess.list2cmdline(self.build_command()),
             "portable_command": self.build_portable_command(),
@@ -824,10 +847,15 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "type": self.pin_type_combo.currentText() if self.pin_type_combo is not None else "Observation",
                 "label": self.pin_label_edit.text().strip() if self.pin_label_edit is not None else "",
                 "note": self.pin_note_edit.text().strip() if self.pin_note_edit is not None else "",
-                "placement": "pending_canvas_hit_test",
+                "latitude": self.pin_lat_edit.text().strip() if self.pin_lat_edit is not None else "",
+                "longitude": self.pin_lon_edit.text().strip() if self.pin_lon_edit is not None else "",
+                "placement": "manual_lat_lon",
             },
             "renderer_sync": "planned",
         }
+
+    def collect_research_pins(self) -> list[dict[str, object]]:
+        return [dict(pin) for pin in self.research_pins]
 
     def apply_profile(self, profile: dict[str, object]) -> None:
         errors = profile_payload_errors(profile)
@@ -841,6 +869,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         selected_layer = profile.get("selected_layer")
         layer_stack = profile.get("layer_stack_ui")
         tool_state = profile.get("tool_state")
+        pins = profile.get("pins")
         if isinstance(renderer, dict):
             self._set_combo(self.style_combo, str(renderer.get("style_profile", self.style_combo.currentText())))
             self._set_combo(self.ui_combo, str(renderer.get("ui_backend", self.ui_combo.currentText())))
@@ -874,6 +903,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                     break
         if isinstance(tool_state, dict):
             self.apply_tool_state(tool_state)
+        if isinstance(pins, list):
+            self.apply_research_pins(pins)
         self.refresh_command_preview()
         self.refresh_layer_stack_status()
 
@@ -1005,6 +1036,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 self.pin_label_edit.setText(str(pin["label"]))
             if self.pin_note_edit is not None and isinstance(pin.get("note"), str):
                 self.pin_note_edit.setText(str(pin["note"]))
+            if self.pin_lat_edit is not None and isinstance(pin.get("latitude"), str):
+                self.pin_lat_edit.setText(str(pin["latitude"]))
+            if self.pin_lon_edit is not None and isinstance(pin.get("longitude"), str):
+                self.pin_lon_edit.setText(str(pin["longitude"]))
         self.refresh_tool_target()
 
     def refresh_tool_target(self) -> None:
@@ -1022,6 +1057,63 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         )
         self.refresh_canvas_preview()
 
+    def add_pin_marker(self) -> None:
+        if self.pin_lat_edit is None or self.pin_lon_edit is None:
+            return
+        try:
+            latitude = float(self.pin_lat_edit.text().strip())
+            longitude = float(self.pin_lon_edit.text().strip())
+        except ValueError:
+            self.status.setText("Pin 經緯度必須是數字")
+            return
+        if not -90 <= latitude <= 90:
+            self.status.setText("Pin latitude 必須介於 -90 到 90")
+            return
+        if not -180 <= longitude <= 180:
+            self.status.setText("Pin longitude 必須介於 -180 到 180")
+            return
+        label = self.pin_label_edit.text().strip() if self.pin_label_edit is not None else ""
+        pin = {
+            "id": f"pin-{len(self.research_pins) + 1:03d}",
+            "type": self.pin_type_combo.currentText() if self.pin_type_combo is not None else "Observation",
+            "label": label or f"Pin {len(self.research_pins) + 1}",
+            "note": self.pin_note_edit.text().strip() if self.pin_note_edit is not None else "",
+            "latitude": latitude,
+            "longitude": longitude,
+            "target_layer": self.selected_layer_key,
+            "placement": "manual_lat_lon",
+        }
+        self.research_pins.append(pin)
+        self.refresh_pin_list()
+        self.refresh_canvas_preview()
+        self.status.setText(f"已加入科研 Pin：{pin['label']}")
+
+    def remove_selected_pin_marker(self) -> None:
+        if self.pin_list is None:
+            return
+        row = self.pin_list.currentRow()
+        if row < 0 or row >= len(self.research_pins):
+            self.status.setText("尚未選取要移除的 Pin")
+            return
+        removed = self.research_pins.pop(row)
+        self.refresh_pin_list()
+        self.refresh_canvas_preview()
+        self.status.setText(f"已移除科研 Pin：{removed.get('label', removed.get('id', 'pin'))}")
+
+    def refresh_pin_list(self) -> None:
+        if self.pin_list is None:
+            return
+        self.pin_list.clear()
+        for pin in self.research_pins:
+            self.pin_list.addItem(
+                f"{pin.get('id')} | {pin.get('type')} | {pin.get('label')} "
+                f"({pin.get('latitude')}, {pin.get('longitude')})"
+            )
+
+    def apply_research_pins(self, pins: list[object]) -> None:
+        self.research_pins = [dict(pin) for pin in pins if isinstance(pin, dict)]
+        self.refresh_pin_list()
+
     def refresh_canvas_preview(self) -> None:
         if self.canvas_preview_label is None or self.canvas_meta_label is None:
             return
@@ -1031,6 +1123,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         )
         tool_label = next((text for mode, text, _hint in TOOL_MODES if mode == self.active_tool), self.active_tool)
         visible = sum(1 for key, _label in LAYER_LABELS if key in self.checks and self.checks[key].isChecked())
+        pin_count = len(self.research_pins)
         zoom = self.canvas_zoom_slider.value() if self.canvas_zoom_slider is not None else 100
         style = self.style_combo.currentText() if hasattr(self, "style_combo") else "-"
         topo = self.topo_combo.currentText() if hasattr(self, "topo_combo") else "-"
@@ -1039,7 +1132,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "RRKAL Scientific Canvas Preview\n\n"
             f"Style: {style} | Topo: {topo} | Data: {data_mode}\n"
             f"Tool: {tool_label} -> Layer: {selected_label}\n"
-            f"Visible layers: {visible}/{len(LAYER_LABELS)} | Zoom: {zoom}%\n\n"
+            f"Visible layers: {visible}/{len(LAYER_LABELS)} | Pins: {pin_count} | Zoom: {zoom}%\n\n"
             "🚧 UI preview only: renderer embed/sync pending"
         )
         self.canvas_meta_label.setText(
@@ -1067,6 +1160,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             },
             "active_layer": self.selected_layer_key,
             "active_tool": self.active_tool,
+            "pins": self.collect_research_pins(),
             "visible_layers": visible_layers,
             "locked_layers": locked_layers,
             "layer_count": {
