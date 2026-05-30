@@ -1930,6 +1930,25 @@ if (-not ($capabilitySummary.current_capabilities | Where-Object { $_.id -eq "pr
 if (-not (($capabilitySummary.boundaries -join "`n") -match "RRKAL owns dataset discovery")) {
     throw "Capability summary RRKAL boundary missing"
 }
+
+$post0700RunbookPath = Join-Path $RepoRoot "docs\POST_0700_DECOUPLING_RUNBOOK.zh-TW.md"
+if (-not (Test-Path -LiteralPath $post0700RunbookPath)) {
+    throw "Post-07 decoupling runbook is missing"
+}
+$post0700Runbook = Get-Content -LiteralPath $post0700RunbookPath -Raw -Encoding UTF8
+if ($post0700Runbook -notlike "*render_plan_compose*") {
+    throw "Post-07 decoupling runbook missing render_plan_compose target"
+}
+if ($post0700Runbook -notlike "*scripts\pre_decoupling_gate.ps1*") {
+    throw "Post-07 decoupling runbook missing formal gate command"
+}
+if ($post0700Runbook -notlike "*runtime_merge=false*") {
+    throw "Post-07 decoupling runbook missing runtime merge non-goal"
+}
+if ($post0700Runbook -notlike "*L:\AGENT_EXCHANGE*") {
+    throw "Post-07 decoupling runbook missing exchange boundary"
+}
+
 $layerVisualPresetsInspectorPath = Join-Path $RepoRoot "scripts\inspect_layer_visual_presets.ps1"
 if (-not (Test-Path -LiteralPath $layerVisualPresetsInspectorPath)) {
     throw "Layer visual presets inspector script is missing"

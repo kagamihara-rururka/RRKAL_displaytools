@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Post-07 decoupling runbook
+
+- Added `docs/POST_0700_DECOUPLING_RUNBOOK.zh-TW.md` for the first post-7 `render_plan_compose` code-move slice.
+- The runbook records entry gates, allowed scope, non-goals, stop conditions and cross-agent exchange boundary.
+- Smoke now gates the runbook for `render_plan_compose`, formal gate command, `runtime_merge=false` and `L:\AGENT_EXCHANGE` boundaries.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Qt copy pre-7 closure summary
 
 - Added `Copy pre-7 closure` to Qt Replay/contracts for checkpoint handoff.
