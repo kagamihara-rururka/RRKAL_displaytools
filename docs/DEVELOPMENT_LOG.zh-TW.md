@@ -1,5 +1,16 @@
 # Development Log
 
+## 2026-05-30 - Render-plan batch decisions
+
+Changes:
+- Added `HybridRenderController.layer_render_plan_batch_decisions()` to classify batch and layer composition actions before the future single-pass renderer refactor.
+- Compiled render-plan metadata and Qt diagnostics now expose `rrkal_displaytools.layer_render_plan_batch_decisions.v1`, `batch_decisions` and `batch_decision_count`.
+- Batch/layer decisions include `rebuild_batch`, `reuse_batch`, `compose_dirty_overlay`, `compose_cached_overlay` and `postprocess_each_frame`.
+- Smoke gates now verify batch decision schema/helper/field, Qt control-board summary text and renderer decision markers.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Render-plan invalidation scope
 
 Changes:

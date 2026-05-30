@@ -539,6 +539,15 @@ if ($launchPacket.layer_render_plan_performance.compiled_plan_invalidation_scope
 if ($launchPacket.layer_render_plan_performance.compiled_plan_invalidation_scope_field -ne "cache_invalidation_scope") {
     throw "Launch packet layer_render_plan_performance invalidation scope field missing"
 }
+if ($launchPacket.layer_render_plan_performance.compiled_plan_batch_decision_schema -ne "rrkal_displaytools.layer_render_plan_batch_decisions.v1") {
+    throw "Launch packet layer_render_plan_performance batch decision schema missing"
+}
+if ($launchPacket.layer_render_plan_performance.compiled_plan_batch_decision_helper -ne "HybridRenderController.layer_render_plan_batch_decisions") {
+    throw "Launch packet layer_render_plan_performance batch decision helper missing"
+}
+if ($launchPacket.layer_render_plan_performance.compiled_plan_batch_decision_field -ne "batch_decisions") {
+    throw "Launch packet layer_render_plan_performance batch decision field missing"
+}
 if ($launchPacket.layer_render_plan_performance.compiled_plan_reuse_decision_field -ne "cache_reuse_decision") {
     throw "Launch packet layer_render_plan_performance reuse decision field missing"
 }
@@ -1684,6 +1693,15 @@ if ($capabilities.layer_render_plan_performance.compiled_plan_invalidation_scope
 if ($capabilities.layer_render_plan_performance.compiled_plan_invalidation_scope_field -ne "cache_invalidation_scope") {
     throw "Renderer layer_render_plan_performance invalidation scope field missing"
 }
+if ($capabilities.layer_render_plan_performance.compiled_plan_batch_decision_schema -ne "rrkal_displaytools.layer_render_plan_batch_decisions.v1") {
+    throw "Renderer layer_render_plan_performance batch decision schema missing"
+}
+if ($capabilities.layer_render_plan_performance.compiled_plan_batch_decision_helper -ne "HybridRenderController.layer_render_plan_batch_decisions") {
+    throw "Renderer layer_render_plan_performance batch decision helper missing"
+}
+if ($capabilities.layer_render_plan_performance.compiled_plan_batch_decision_field -ne "batch_decisions") {
+    throw "Renderer layer_render_plan_performance batch decision field missing"
+}
 if ($capabilities.layer_render_plan_performance.compiled_plan_reuse_policy -ne "reuse_when_cache_key_matches_previous_compiled_plan") {
     throw "Renderer layer_render_plan_performance compiled plan reuse policy missing"
 }
@@ -2377,6 +2395,15 @@ if ($handoff.layer_render_plan_performance.compiled_plan_invalidation_scope_help
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_invalidation_scope_field -ne "cache_invalidation_scope") {
     throw "Handoff inspection layer render plan performance invalidation scope field missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_batch_decision_schema -ne "rrkal_displaytools.layer_render_plan_batch_decisions.v1") {
+    throw "Handoff inspection layer render plan performance batch decision schema missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_batch_decision_helper -ne "HybridRenderController.layer_render_plan_batch_decisions") {
+    throw "Handoff inspection layer render plan performance batch decision helper missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_batch_decision_field -ne "batch_decisions") {
+    throw "Handoff inspection layer render plan performance batch decision field missing"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_reuse_decision_field -ne "cache_reuse_decision") {
     throw "Handoff inspection layer render plan performance reuse decision field missing"
@@ -3598,6 +3625,15 @@ if ($qtPanelSource -notlike "*cache_invalidation_scope*") {
 if ($qtPanelSource -notlike "*scope={scope_text}*") {
     throw "Qt render plan invalidation scope summary text is missing"
 }
+if ($qtPanelSource -notlike "*layer_render_plan_batch_decisions.v1*") {
+    throw "Qt render plan batch decision schema is missing"
+}
+if ($qtPanelSource -notlike "*batch_decisions*") {
+    throw "Qt render plan batch decisions diagnostics field is missing"
+}
+if ($qtPanelSource -notlike "*batches={batch_decision_count}:{batch_text}*") {
+    throw "Qt render plan batch decision summary text is missing"
+}
 if ($qtPanelSource -notlike "*collect_layer_render_plan_cache_diagnostics*") {
     throw "Qt render plan cache diagnostics collector is missing"
 }
@@ -3893,6 +3929,21 @@ if ($rendererSource -notlike '*"scope": "plan"*') {
 }
 if ($rendererSource -notlike '*"scope": "reuse"*') {
     throw "Renderer render plan reuse scope marker is missing"
+}
+if ($rendererSource -notlike "*def layer_render_plan_batch_decisions*") {
+    throw "Renderer render plan batch decisions helper is missing"
+}
+if ($rendererSource -notlike '*"decision": "rebuild_batch"*') {
+    throw "Renderer render plan rebuild batch decision marker is missing"
+}
+if ($rendererSource -notlike '*reuse_batch*') {
+    throw "Renderer render plan reuse batch decision marker is missing"
+}
+if ($rendererSource -notlike '*"compose_dirty_overlay"*') {
+    throw "Renderer render plan dirty overlay compose decision marker is missing"
+}
+if ($rendererSource -notlike '*"compose_cached_overlay"*') {
+    throw "Renderer render plan cached overlay compose decision marker is missing"
 }
 if ($rendererSource -notlike '*"layer_render_plan": getattr(self, "layer_render_plan_snapshot"*') {
     if ($rendererSource -notlike '*"layer_render_plan": getattr(self, "compiled_layer_render_plan"*') {
