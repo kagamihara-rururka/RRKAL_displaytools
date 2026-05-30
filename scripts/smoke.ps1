@@ -1214,6 +1214,9 @@ if ($visualInspectorIndex.entry_ids -notcontains "render_plan_compose_work_order
 if ($visualInspectorIndex.entry_ids -notcontains "pre_decoupling_readiness_bundle") {
     throw "Visual contract inspector index missing pre-decoupling readiness bundle"
 }
+if ($visualInspectorIndex.entry_ids -notcontains "pre_decoupling_readiness_check") {
+    throw "Visual contract inspector index missing pre-decoupling readiness check"
+}
 if ($visualInspectorIndex.recommended_cross_machine_sequence[0] -ne "renderer_config_gateway") {
     throw "Visual contract inspector index cross-machine sequence should start with config gateway"
 }
@@ -1275,6 +1278,9 @@ if ($visualReviewPacket.pre_decoupling_commands -notcontains "powershell -NoProf
 }
 if ($visualReviewPacket.pre_decoupling_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\export_pre_decoupling_readiness_bundle.ps1") {
     throw "Visual contract review packet missing pre-decoupling readiness bundle command"
+}
+if ($visualReviewPacket.pre_decoupling_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_pre_decoupling_readiness.ps1") {
+    throw "Visual contract review packet missing pre-decoupling readiness check command"
 }
 if ($visualReviewPacket.boundary -notlike "*RRKAL owns discovery/download/import/cache governance*") {
     throw "Visual contract review packet data-governance boundary missing"
@@ -1429,6 +1435,35 @@ if ($preDecouplingReadinessBundle.render_plan_compose_work_order.target_module -
 }
 if ($preDecouplingReadinessBundle.ready_for_07_gate_review -ne $true) {
     throw "Pre-decoupling readiness bundle not ready for 07 gate review"
+}
+$preDecouplingReadinessCheckPath = Join-Path $RepoRoot "scripts\check_pre_decoupling_readiness.ps1"
+if (-not (Test-Path -LiteralPath $preDecouplingReadinessCheckPath)) {
+    throw "Pre-decoupling readiness check script is missing"
+}
+$preDecouplingReadinessCheckContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $preDecouplingReadinessCheckPath, "-ContractOnly")
+$preDecouplingReadinessCheckContract = ($preDecouplingReadinessCheckContractText -join "`n") | ConvertFrom-Json
+if ($preDecouplingReadinessCheckContract.schema -ne "rrkal_displaytools.pre_decoupling_readiness_check.v1") {
+    throw "Pre-decoupling readiness check contract schema missing"
+}
+if ($preDecouplingReadinessCheckContract.output_schema -ne "rrkal_displaytools.pre_decoupling_readiness_check_result.v1") {
+    throw "Pre-decoupling readiness check output schema missing"
+}
+if ($preDecouplingReadinessCheckContract.checks -notcontains "required_before_move_complete") {
+    throw "Pre-decoupling readiness check required-before-move check missing"
+}
+$preDecouplingReadinessCheckText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $preDecouplingReadinessCheckPath)
+$preDecouplingReadinessCheck = ($preDecouplingReadinessCheckText -join "`n") | ConvertFrom-Json
+if ($preDecouplingReadinessCheck.schema -ne "rrkal_displaytools.pre_decoupling_readiness_check_result.v1") {
+    throw "Pre-decoupling readiness check result schema missing"
+}
+if ($preDecouplingReadinessCheck.status -ne "pass") {
+    throw "Pre-decoupling readiness check did not pass"
+}
+if ($preDecouplingReadinessCheck.ready_for_07_gate_review -ne $true) {
+    throw "Pre-decoupling readiness check not ready for 07 gate review"
+}
+if ($preDecouplingReadinessCheck.first_extraction_target -ne "render_core/render_plan.py") {
+    throw "Pre-decoupling readiness check target mismatch"
 }
 $layerWorkflowInspectorPath = Join-Path $RepoRoot "scripts\inspect_layer_workflow.ps1"
 if (-not (Test-Path -LiteralPath $layerWorkflowInspectorPath)) {

@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Pre-decoupling readiness check
+
+- Added `scripts/check_pre_decoupling_readiness.ps1` as a compact no-GUI pass/fail check over the readiness bundle.
+- The check verifies bundle readiness, first extraction target, boundary readiness, work-order readiness, required-before-move completeness and snapshot work-order inclusion.
+- Registered the check in the visual inspector index, review packet, runbook and smoke gates.
+- Smoke: PASS via `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; cloud-drive transient file-access retry occurred and recovered.
+
 ## 2026-05-31 - Pre-decoupling readiness bundle
 
 - Added `scripts/export_pre_decoupling_readiness_bundle.ps1` as a single no-GUI handoff packet for the pre-7 decoupling state.

@@ -51,6 +51,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\export_pre_decouplin
 
 This bundles the inspector index, review packet, gate contract, boundary inspection, render-plan work order and snapshot export contract without writing state.
 
+For a compact pass/fail check before the formal gate, run:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_pre_decoupling_readiness.ps1
+```
+
+This must report `status=pass`, `ready_for_07_gate_review=true`, and `first_extraction_target=render_core/render_plan.py`.
+
 ## First extraction order
 
 1. `render_plan_compose` -> `render_core/render_plan.py`
