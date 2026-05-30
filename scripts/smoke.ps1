@@ -1127,6 +1127,12 @@ if ($launchPacket.ocean_material_control_port.qt_control_panel.performance_guard
 if ($launchPacket.ocean_material_control_port.qt_control_panel.performance_guard_action -ne "apply_ocean_3d_safe_preview") {
     throw "Launch packet Taichi ocean 3D safe preview action missing"
 }
+if ($launchPacket.ocean_material_control_port.qt_control_panel.performance_guard_summary_contract.schema -ne "rrkal_displaytools.taichi_ocean_3d_performance_guard_summary_contract.v1") {
+    throw "Launch packet Ocean 3D performance guard summary contract missing"
+}
+if ($launchPacket.ocean_material_control_port.qt_control_panel.performance_guard_summary_contract.qt_copy_action -ne "copy_ocean_3d_performance_guard_summary") {
+    throw "Launch packet Ocean 3D performance guard copy action missing"
+}
 if ($launchPacket.ocean_material_control_port.qt_control_panel.control_board_default_visible -ne $true) {
     throw "Launch packet Taichi ocean 3D control board visibility flag missing"
 }
@@ -2346,6 +2352,12 @@ if ($capabilities.ocean_material_control_port.qt_control_panel.performance_guard
 }
 if ($capabilities.ocean_material_control_port.qt_control_panel.performance_guard_action -ne "apply_ocean_3d_safe_preview") {
     throw "Renderer Taichi ocean 3D safe preview action missing"
+}
+if ($capabilities.ocean_material_control_port.qt_control_panel.performance_guard_summary_contract.schema -ne "rrkal_displaytools.taichi_ocean_3d_performance_guard_summary_contract.v1") {
+    throw "Renderer Ocean 3D performance guard summary contract missing"
+}
+if ($capabilities.ocean_material_control_port.qt_control_panel.performance_guard_summary_contract.qt_copy_action -ne "copy_ocean_3d_performance_guard_summary") {
+    throw "Renderer Ocean 3D performance guard copy action missing"
 }
 if ($capabilities.ocean_material_control_port.qt_control_panel.control_board_status -ne "wired_default_visible") {
     throw "Renderer Taichi ocean 3D control board status missing"
@@ -3990,6 +4002,15 @@ if ($qtPanelSource -notlike "*show_ocean_material_control_port*") {
 }
 if ($qtPanelSource -notlike "*copy_ocean_material_summary*") {
     throw "Qt ocean material copy summary action is missing"
+}
+if ($qtPanelSource -notlike "*Copy Ocean guard*") {
+    throw "Qt Ocean 3D performance guard copy button is missing"
+}
+if ($qtPanelSource -notlike "*copy_ocean_3d_performance_guard_summary*") {
+    throw "Qt Ocean 3D performance guard copy action is missing"
+}
+if ($qtPanelSource -notlike "*Ocean 3D performance guard: *true_optimization=post_decoupling_render_plan_merge*") {
+    throw "Qt Ocean 3D performance guard portable summary text missing"
 }
 if ($qtPanelSource -notlike "*Ocean material: *governance=RRKAL-owned provider/cache*") {
     throw "Qt ocean material portable summary text missing"

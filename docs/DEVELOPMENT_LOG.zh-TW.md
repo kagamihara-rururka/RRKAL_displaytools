@@ -1,5 +1,14 @@
 # Development Log
 
+## 2026-05-30 - Ocean 3D guard copy summary
+
+Changes:
+- Added `Copy Ocean guard` to the Qt Renderer ports action section for copying the Ocean 3D safe-preview preset, current scalar values, action ID and render-plan optimization boundary.
+- Added `rrkal_displaytools.taichi_ocean_3d_performance_guard_summary_contract.v1` to the ocean material control port across Qt, no-GUI launch packets and renderer capability discovery.
+- Smoke now gates the copy action, portable summary text and launch/renderer capability summary contract.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
 ## 2026-05-30 - Ocean 3D safe preview guard
 
 Changes:

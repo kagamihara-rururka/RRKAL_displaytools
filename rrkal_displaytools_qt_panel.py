@@ -899,6 +899,15 @@ def ocean_material_control_port_packet(
             "performance_guard_action": "apply_ocean_3d_safe_preview",
             "performance_guard_preset": {"wave_strength": 0.08, "roughness": 0.12, "foam": 0.02},
             "performance_guard_boundary": "Safe preview lowers scalar ocean-material intensity only; true renderer pass reduction remains the layer render-plan merge follow-up.",
+            "performance_guard_summary_contract_schema": "rrkal_displaytools.taichi_ocean_3d_performance_guard_summary_contract.v1",
+            "performance_guard_summary_contract": {
+                "schema": "rrkal_displaytools.taichi_ocean_3d_performance_guard_summary_contract.v1",
+                "summary_format": "Ocean 3D performance guard: safe_preview={performance_guard_preset}; action={performance_guard_action}; button={performance_guard_button_object}; true_optimization=post_decoupling_render_plan_merge",
+                "qt_copy_action": "copy_ocean_3d_performance_guard_summary",
+                "launch_packet_field": "ocean_material_control_port.qt_control_panel.performance_guard_summary_contract",
+                "renderer_capability_field": "ocean_material_control_port.qt_control_panel.performance_guard_summary_contract",
+                "portable": True,
+            },
             "control_board_default_visible": True,
             "control_board_status": "wired_default_visible",
             "control_board_audit_schema": "rrkal_displaytools.taichi_ocean_3d_control_board_audit.v1",
@@ -3976,6 +3985,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         ocean_port_button = QtWidgets.QPushButton("Inspect: Ocean port")
         ocean_3d_controls_action_button = QtWidgets.QPushButton("Open: Ocean 3D controls")
         copy_ocean_summary_button = QtWidgets.QPushButton("Copy Ocean summary")
+        copy_ocean_guard_summary_button = QtWidgets.QPushButton("Copy Ocean guard")
         hydro_lod_button = QtWidgets.QPushButton("Inspect: Hydro LOD")
         copy_hydro_lod_summary_button = QtWidgets.QPushButton("Copy Hydro LOD summary")
         style_routes_button = QtWidgets.QPushButton("Inspect: Style routes")
@@ -4022,6 +4032,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (ocean_port_button, "Renderer ports: inspect scalar ocean material and sea-state handoff JSON."),
             (ocean_3d_controls_action_button, "Renderer ports: open Taichi 3D Ocean Water scalar controls from the Qt control board."),
             (copy_ocean_summary_button, "Renderer ports: copy Ocean material controls, apply status, sea-state scalar sample and RRKAL governance summary."),
+            (copy_ocean_guard_summary_button, "Renderer ports: copy Ocean 3D safe-preview guard, action and render-plan optimization boundary."),
             (hydro_lod_button, "Renderer ports: inspect hydrology layer and LOD hook readiness JSON."),
             (copy_hydro_lod_summary_button, "Renderer ports: copy Hydrology/LOD readiness, runtime evidence and state/ack/pick file summary."),
             (style_routes_button, "Renderer ports: inspect parchment and tactical style renderer route JSON."),
@@ -4073,6 +4084,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         ocean_port_button.clicked.connect(self.show_ocean_material_control_port)
         ocean_3d_controls_action_button.clicked.connect(self.open_taichi_ocean_3d_controls)
         copy_ocean_summary_button.clicked.connect(self.copy_ocean_material_summary)
+        copy_ocean_guard_summary_button.clicked.connect(self.copy_ocean_3d_performance_guard_summary)
         hydro_lod_button.clicked.connect(self.show_hydrology_lod_status)
         copy_hydro_lod_summary_button.clicked.connect(self.copy_hydrology_lod_summary)
         style_routes_button.clicked.connect(self.show_style_renderer_routes)
@@ -4115,7 +4127,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         action_sections = (
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button, export_reviewer_packet_button)),
             ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, timeline_button, module_seams_button, copy_module_summary_button, clone_ready_button, copy_clone_summary_button)),
-            ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, ocean_3d_controls_action_button, copy_ocean_summary_button, style_routes_button, copy_style_routes_summary_button, layer_matrix_button, layer_runtime_button)),
+            ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, ocean_3d_controls_action_button, copy_ocean_summary_button, copy_ocean_guard_summary_button, style_routes_button, copy_style_routes_summary_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
             ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, copy_style_thumb_status_button, thumbnail_button, live_preview_button)),
             ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, render_plan_perf_button, copy_compose_budget_button, copy_compose_parity_button, smoke_button)),
@@ -9599,6 +9611,28 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         summary = self.ocean_material_summary_text()
         QtWidgets.QApplication.clipboard().setText(summary)
         self.status.setText("已複製 ocean material / sea-state 摘要")
+
+    def ocean_3d_performance_guard_summary_text(self) -> str:
+        packet = self.collect_ocean_material_control_port()
+        panel = packet.get("qt_control_panel", {})
+        panel = panel if isinstance(panel, dict) else {}
+        preset = panel.get("performance_guard_preset")
+        preset = preset if isinstance(preset, dict) else {"wave_strength": 0.08, "roughness": 0.12, "foam": 0.02}
+        return (
+            "Ocean 3D performance guard: "
+            f"safe_preview={preset}; "
+            f"current=wave:{self.wave_edit.text().strip() or '0.22'}/"
+            f"roughness:{self.roughness_edit.text().strip() or '0.28'}/"
+            f"foam:{self.foam_edit.text().strip() or '0.12'}; "
+            f"action={panel.get('performance_guard_action', 'apply_ocean_3d_safe_preview')}; "
+            f"button={panel.get('performance_guard_button_object', 'ocean3DPerformanceSafePreviewButton')}; "
+            "true_optimization=post_decoupling_render_plan_merge"
+        )
+
+    def copy_ocean_3d_performance_guard_summary(self) -> None:
+        summary = self.ocean_3d_performance_guard_summary_text()
+        QtWidgets.QApplication.clipboard().setText(summary)
+        self.status.setText("Copied Ocean 3D performance guard summary to clipboard.")
 
     def show_hydrology_lod_status(self) -> None:
         self.command_text.setPlainText(
