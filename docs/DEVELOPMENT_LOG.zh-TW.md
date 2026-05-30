@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Qt Layer lock disabled controls
+
+Changes:
+- Extended `rrkal_displaytools.layer_lock_affordance.v1` with `disabled_controls_when_locked`.
+- Locked Qt layer rows now disable visibility, opacity and blend controls together.
+- Smoke now verifies the disabled controls contract and Qt source behavior for opacity/blend.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Qt Layer lock affordance
 
 Changes:

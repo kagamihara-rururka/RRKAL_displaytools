@@ -167,6 +167,7 @@ $summary = [ordered]@{
         locked_row_property = $launchPacket.layer_lock_affordance.locked_row_property
         locked_row_stylesheet_selector = $launchPacket.layer_lock_affordance.locked_row_stylesheet_selector
         visibility_control_disabled_when_locked = $launchPacket.layer_lock_affordance.visibility_control_disabled_when_locked
+        disabled_controls_when_locked = $launchPacket.layer_lock_affordance.disabled_controls_when_locked
         summary_text = $launchPacket.layer_lock_affordance.summary_text
     }
     layer_research_workflow = @{

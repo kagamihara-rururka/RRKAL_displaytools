@@ -260,6 +260,12 @@ if ($launchPacket.layer_lock_affordance.locked_row_stylesheet_selector -ne 'QWid
 if ($launchPacket.layer_lock_affordance.visibility_control_disabled_when_locked -ne $true) {
     throw "Launch packet layer_lock_affordance disabled visibility control flag missing"
 }
+if ($launchPacket.layer_lock_affordance.disabled_controls_when_locked -notcontains "opacity_slider") {
+    throw "Launch packet layer_lock_affordance disabled opacity slider missing"
+}
+if ($launchPacket.layer_lock_affordance.disabled_controls_when_locked -notcontains "blend_combo") {
+    throw "Launch packet layer_lock_affordance disabled blend combo missing"
+}
 if ($launchPacket.layer_research_workflow.schema -ne "rrkal_displaytools.layer_research_workflow.v1") {
     throw "Launch packet layer_research_workflow schema missing or invalid"
 }
@@ -1183,6 +1189,9 @@ if ($capabilities.layer_lock_affordance.qt_surface -ne "Layers dock locked row t
 if ($capabilities.layer_lock_affordance.visibility_control_disabled_when_locked -ne $true) {
     throw "Renderer layer_lock_affordance disabled visibility control flag missing"
 }
+if ($capabilities.layer_lock_affordance.disabled_controls_when_locked -notcontains "opacity_slider") {
+    throw "Renderer layer_lock_affordance disabled opacity slider missing"
+}
 if ($capabilities.layer_research_workflow.schema -ne "rrkal_displaytools.layer_research_workflow.v1") {
     throw "Renderer layer_research_workflow schema missing or invalid"
 }
@@ -1958,6 +1967,9 @@ if ($handoff.layer_lock_affordance.renderer_capabilities_schema -ne "rrkal_displ
 if ($handoff.layer_lock_affordance.locked_row_property -ne "locked") {
     throw "Handoff inspection layer_lock_affordance row property mismatch"
 }
+if ($handoff.layer_lock_affordance.disabled_controls_when_locked -notcontains "blend_combo") {
+    throw "Handoff inspection layer_lock_affordance disabled blend combo missing"
+}
 if ($handoff.layer_research_workflow.launch_packet_schema -ne "rrkal_displaytools.layer_research_workflow.v1") {
     throw "Handoff inspection layer_research_workflow launch schema missing or invalid"
 }
@@ -2634,6 +2646,15 @@ if ($qtPanelSource -notlike '*locked="true"*') {
 }
 if ($qtPanelSource -notlike '*setProperty("locked"*') {
     throw "Qt layer locked row property update is missing"
+}
+if ($qtPanelSource -notlike "*disabled_controls_when_locked*") {
+    throw "Qt layer lock disabled controls contract is missing"
+}
+if ($qtPanelSource -notlike "*layer_opacity*setEnabled(not is_locked)*") {
+    throw "Qt layer locked opacity disable behavior is missing"
+}
+if ($qtPanelSource -notlike "*layer_blends*setEnabled(not is_locked)*") {
+    throw "Qt layer locked blend disable behavior is missing"
 }
 if ($qtPanelSource -notlike "*click a row to select the active research layer*") {
     throw "Qt Layers workflow row-selection hint is missing"

@@ -27,7 +27,7 @@
 - `rrkal_displaytools.layer_control_feedback_strip.v1` adds a compact Qt Layers dock `layerControlFeedbackStrip` label for active layer visibility, lock, opacity, blend mode and renderer sync. It is exposed through launch packets, renderer capabilities, handoff inspection and smoke, giving researchers one visible status strip for layer control without mutating renderer state or RRKAL data governance.
 - `rrkal_displaytools.layer_selection_affordance.v1` makes active-layer targeting explicit through the selected row `selected` property, `QWidget#layerRow[selected="true"]` styling and a visible `layerSelectionAffordance` label. Launch packets, renderer capabilities, handoff inspection and smoke verify the focus aids so researchers can confirm which layer subsequent operations target.
 - `rrkal_displaytools.layer_hover_affordance.v1` adds a Qt Layers dock `layerHoverAffordance` label driven by row hover enter/leave events and tracked by `layer_hover_layer_key`. It reports the hovered layer, renderer target, visibility, lock state and renderer sync without changing selection, making dense scientific layer stacks easier to scan.
-- `rrkal_displaytools.layer_lock_affordance.v1` makes locked layers visually explicit through the row `locked` property, `QWidget#layerRow[locked="true"]` styling and disabled visibility checkbox behavior. Launch packets, renderer capabilities, handoff inspection and smoke verify the locked-row cue without changing renderer semantics.
+- `rrkal_displaytools.layer_lock_affordance.v1` makes locked layers visually explicit through the row `locked` property, `QWidget#layerRow[locked="true"]` styling and disabled visibility/opacity/blend controls. Launch packets, renderer capabilities, handoff inspection and smoke verify the locked-row cue without changing renderer semantics.
 - `rrkal_displaytools.layer_selection_tool.v1` unifies Qt row selection, first-filtered selection, reveal-selected-row and renderer `state/renderer_layer_pick_state.json` inspection into a smoke-gated scientific selection tool contract; brush/mask scope is explicitly excluded.
 - `rrkal_displaytools.layer_research_workflow.v1` turns filter/group/selected-layer/runtime-warning/remediation state into a researcher-facing workflow contract and a Qt Layers dock status label, so dense layer stacks have a verifiable path from filtering to reproducible diagnostics.
 - `rrkal_displaytools.boundary_emphasis_control.v1` adds the Qt-first territory/boundary emphasis control surface requested for country boundaries, territorial seas, EEZs and maritime boundaries. The dialog exposes RGB, contrast, opacity, gamma and breathing controls; launch packets, renderer capabilities, handoff and smoke track the UI contract, including boundary-layer row double-click entry and renderer bridge mapping through `rrkal_displaytools.boundary_highlight_mask.v1`; full polygon fill mask remains a backend refinement.
@@ -420,7 +420,12 @@
 ### 2026-05-30 Qt Layer lock affordance
 
 - Qt Layers rows now expose the `locked` property and `QWidget#layerRow[locked="true"]` styling.
-- Visibility checkboxes are disabled when a layer is locked, and launch packets / renderer capabilities / handoff / smoke verify `rrkal_displaytools.layer_lock_affordance.v1`.
+- Visibility, opacity and blend controls are disabled when a layer is locked, and launch packets / renderer capabilities / handoff / smoke verify `rrkal_displaytools.layer_lock_affordance.v1`.
+
+### 2026-05-30 Qt Layer lock disabled controls
+
+- `rrkal_displaytools.layer_lock_affordance.v1` now records `disabled_controls_when_locked` for `visibility_checkbox`, `opacity_slider` and `blend_combo`.
+- Qt Layers keeps those three controls disabled while a layer row is locked, reducing accidental edits in dense scientific layer stacks.
 
 ### 2026-05-30 Qt Pin occlusion legend
 

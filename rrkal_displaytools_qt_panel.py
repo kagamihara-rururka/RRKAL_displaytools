@@ -2224,6 +2224,7 @@ def layer_lock_affordance_packet(
         "locked_row_property": "locked",
         "locked_row_stylesheet_selector": 'QWidget#layerRow[locked="true"]',
         "visibility_control_disabled_when_locked": True,
+        "disabled_controls_when_locked": ["visibility_checkbox", "opacity_slider", "blend_combo"],
         "qt_checkbox_tooltip": "Lock is honored by renderer runtime sync for visibility, opacity, and blend updates.",
         "launch_packet_fields": ["layer_lock_affordance", "layer_stack_ui", "layer_control_feedback_strip"],
         "renderer_capability_field": "layer_lock_affordance",
@@ -5993,6 +5994,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             if key in self.checks and key in self.layer_locks:
                 is_locked = self.layer_locks[key].isChecked()
                 self.checks[key].setEnabled(not is_locked)
+                self.layer_opacity[key].setEnabled(not is_locked)
+                self.layer_blends[key].setEnabled(not is_locked)
                 row = self.layer_rows.get(key)
                 if row is not None:
                     row.setProperty("locked", is_locked)
