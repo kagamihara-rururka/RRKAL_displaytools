@@ -1,5 +1,17 @@
 # Development Log
 
+## 2026-05-30 - Compose parity artifact producer
+
+Changes:
+- Added renderer CLI `--compose-parity-artifact-dir` as an opt-in artifact producer for compose-run parity review.
+- Added `HybridRenderController.apply_layer_render_plan_merged_candidate_composition()` to generate a merged alpha-compose candidate frame without enabling runtime merge.
+- Added `HybridRenderController.write_compose_parity_artifacts()` to write baseline sequential PNG, merged-candidate PNG and `rrkal_displaytools.compose_run_parity_artifacts.v1` metadata under `state/compose_parity`.
+- Updated `rrkal_displaytools.compose_run_parity_artifact_workflow.v1` to expose producer command, renderer arg, candidate schema and artifact schema across Qt, launch packets, renderer capabilities and handoff.
+- Runtime compose merging remains disabled until the manual parity smoke proves zero-diff output.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Compose parity artifact workflow contract
 
 Changes:

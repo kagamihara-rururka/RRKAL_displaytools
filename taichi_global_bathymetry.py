@@ -14322,6 +14322,145 @@ class HybridRenderController:
         }
         return frame
 
+    def merge_alpha_compose_overlay_run(self, overlays: list[np.ndarray]) -> np.ndarray | None:
+        valid_overlays = [overlay for overlay in overlays if isinstance(overlay, np.ndarray)]
+        if not valid_overlays:
+            return None
+        merged = np.zeros_like(valid_overlays[0], dtype=np.uint8)
+        for overlay in valid_overlays:
+            if overlay.shape != merged.shape:
+                raise ValueError(f"Overlay shape {overlay.shape} does not match merged overlay {merged.shape}")
+            bottom_alpha = merged[..., 3:4].astype(np.float32) / 255.0
+            top_alpha = overlay[..., 3:4].astype(np.float32) / 255.0
+            out_alpha = top_alpha + bottom_alpha * (1.0 - top_alpha)
+            bottom_premul = merged[..., :3].astype(np.float32) / 255.0 * bottom_alpha
+            top_premul = overlay[..., :3].astype(np.float32) / 255.0 * top_alpha
+            out_premul = top_premul + bottom_premul * (1.0 - top_alpha)
+            out_rgb = np.zeros_like(out_premul)
+            np.divide(out_premul, out_alpha, out=out_rgb, where=out_alpha > 0.0)
+            merged[..., :3] = np.clip(out_rgb * 255.0, 0.0, 255.0).astype(np.uint8)
+            merged[..., 3] = np.clip(out_alpha[..., 0] * 255.0, 0.0, 255.0).astype(np.uint8)
+        return merged
+
+    def apply_layer_render_plan_merged_candidate_composition(
+        self,
+        steps: list[dict[str, object]] | None = None,
+    ) -> tuple[np.ndarray, dict[str, object]]:
+        frame = self.globe_rgba
+        plan_steps = steps if isinstance(steps, list) else self.layer_render_plan_composition_steps()
+        candidate_runs: list[dict[str, object]] = []
+        index = 0
+        while index < len(plan_steps):
+            step = plan_steps[index]
+            if not isinstance(step, dict):
+                index += 1
+                continue
+            kind = str(step.get("kind"))
+            layer_id = str(step.get("layer_id") or step.get("id") or "")
+            overlay = self.layer_render_plan_step_overlay(step)
+            if kind == "alpha_compose" and overlay is not None:
+                run_steps = [step]
+                overlays = [overlay]
+                next_index = index + 1
+                while next_index < len(plan_steps):
+                    next_step = plan_steps[next_index]
+                    if not isinstance(next_step, dict) or str(next_step.get("kind")) != "alpha_compose":
+                        break
+                    next_overlay = self.layer_render_plan_step_overlay(next_step)
+                    if next_overlay is None:
+                        break
+                    run_steps.append(next_step)
+                    overlays.append(next_overlay)
+                    next_index += 1
+                merged_overlay = self.merge_alpha_compose_overlay_run(overlays)
+                if merged_overlay is not None:
+                    frame = alpha_compose(frame, merged_overlay)
+                candidate_runs.append(
+                    {
+                        "kind": "alpha_compose_overlays",
+                        "start_queue_order": step.get("queue_order", index),
+                        "end_queue_order": run_steps[-1].get("queue_order", next_index - 1),
+                        "step_count": len(run_steps),
+                        "step_ids": [
+                            str(run_step.get("id") or run_step.get("layer_id") or "unknown_step")
+                            for run_step in run_steps
+                        ],
+                        "merged": len(run_steps) > 1,
+                        "candidate_path": "merged_overlay_then_alpha_compose",
+                    }
+                )
+                index = next_index
+                continue
+            if kind == "runtime_blend" and overlay is not None:
+                frame = self.compose_runtime_blend(frame, layer_id, overlay)
+            elif kind == "alpha_blend" and overlay is not None:
+                frame = alpha_blend_compose(frame, overlay, str(step.get("blend_mode") or "Normal"))
+            elif kind == "runtime_overlay" and overlay is not None:
+                frame = self.compose_runtime_overlay(frame, layer_id, overlay)
+            elif kind == "style_profile_postprocess":
+                frame = apply_style_profile(frame, getattr(self.args, "style_profile", "scientific"))
+            index += 1
+        packet = {
+            "schema": "rrkal_displaytools.compose_run_parity_candidate.v1",
+            "source": "HybridRenderController.apply_layer_render_plan_merged_candidate_composition",
+            "status": "candidate_frame_generated",
+            "runtime_merge_enabled": False,
+            "candidate_run_count": len(candidate_runs),
+            "merged_candidate_run_count": sum(1 for run in candidate_runs if run.get("merged") is True),
+            "candidate_runs": candidate_runs,
+            "boundary": "Candidate frame is opt-in parity evidence only; runtime compose merging remains disabled.",
+        }
+        return frame, packet
+
+    def write_compose_parity_artifacts(self) -> None:
+        artifact_dir_value = getattr(self.args, "compose_parity_artifact_dir", None)
+        if not artifact_dir_value:
+            return
+        artifact_dir = Path(artifact_dir_value)
+        baseline_path = artifact_dir / "baseline_sequential_frame_rgba.png"
+        candidate_path = artifact_dir / "merged_candidate_frame_rgba.png"
+        metadata_path = artifact_dir / "renderer_output_metadata.json"
+        compose_queue = []
+        if isinstance(getattr(self, "compiled_layer_render_plan", None), dict):
+            plan_queue = self.compiled_layer_render_plan.get("compose_queue")
+            if isinstance(plan_queue, list):
+                compose_queue = plan_queue
+        try:
+            from PIL import Image
+
+            artifact_dir.mkdir(parents=True, exist_ok=True)
+            candidate_frame, candidate_packet = self.apply_layer_render_plan_merged_candidate_composition(compose_queue)
+            Image.fromarray(self.frame_rgba, mode="RGBA").save(baseline_path)
+            Image.fromarray(candidate_frame, mode="RGBA").save(candidate_path)
+            metadata = {
+                "schema": "rrkal_displaytools.compose_run_parity_artifacts.v1",
+                "created_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                "status": "artifacts_written",
+                "runtime_merge_enabled": False,
+                "artifact_dir": str(artifact_dir),
+                "baseline_artifact": str(baseline_path),
+                "candidate_artifact": str(candidate_path),
+                "metadata_artifact": str(metadata_path),
+                "diff_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\render_compose_parity_smoke.ps1",
+                "compose_queue_count": len(compose_queue),
+                "candidate": candidate_packet,
+                "compiled_plan_schema": (
+                    self.compiled_layer_render_plan.get("schema")
+                    if isinstance(getattr(self, "compiled_layer_render_plan", None), dict)
+                    else None
+                ),
+            }
+            metadata_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+            self.compose_parity_artifact_result = metadata
+        except Exception as exc:
+            self.compose_parity_artifact_result = {
+                "schema": "rrkal_displaytools.compose_run_parity_artifacts.v1",
+                "status": "write_failed",
+                "error": str(exc),
+                "artifact_dir": str(artifact_dir),
+            }
+            print(f"Unable to write compose parity artifacts: {exc}")
+
     def layer_render_plan_cache_key(
         self,
         runtime_snapshot: dict[str, object],
@@ -16735,6 +16874,7 @@ class HybridRenderController:
         if isinstance(self.compiled_layer_render_plan, dict):
             self.compiled_layer_render_plan["phase_timing_runtime"] = self.layer_render_plan_phase_timing_runtime
             self.compiled_layer_render_plan["phase_timing_runtime_schema"] = "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1"
+        self.write_compose_parity_artifacts()
         if self.output_path and (getattr(self.args, "once", False) or getattr(self.args, "headless", False)):
             from PIL import Image
 
@@ -18226,6 +18366,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--headless", action=bool_action, default=False)
     parser.add_argument("--once", action=bool_action, default=False)
     parser.add_argument("--output", default=None)
+    parser.add_argument("--compose-parity-artifact-dir", default=os.environ.get("COMPOSE_PARITY_ARTIFACT_DIR"))
     parser.add_argument("--preview-frame-file", default=os.environ.get("PREVIEW_FRAME_FILE"))
     parser.add_argument("--preview-frame-interval", type=float, default=float(os.environ.get("PREVIEW_FRAME_INTERVAL", "0.75")))
     parser.add_argument("--rrkal-data-manifest-ref", default=os.environ.get("RRKAL_DATA_MANIFEST_REF", ""))
@@ -19956,7 +20097,8 @@ def layer_render_plan_performance_packet(
             "compose_run_parity_artifact_workflow_schema": "rrkal_displaytools.compose_run_parity_artifact_workflow.v1",
             "compose_run_parity_artifact_workflow": {
                 "schema": "rrkal_displaytools.compose_run_parity_artifact_workflow.v1",
-                "status": "artifact_workflow_ready_candidate_generation_pending",
+                "status": "producer_ready_runtime_merge_disabled",
+                "renderer_arg": "--compose-parity-artifact-dir",
                 "artifact_dir": "state/compose_parity",
                 "baseline_artifact": "state/compose_parity/baseline_sequential_frame_rgba.png",
                 "candidate_artifact": "state/compose_parity/merged_candidate_frame_rgba.png",
@@ -19964,8 +20106,11 @@ def layer_render_plan_performance_packet(
                 "diff_script": "scripts\\render_compose_parity_smoke.ps1",
                 "precommit_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\render_compose_parity_smoke.ps1 -ContractOnly",
                 "manual_diff_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\render_compose_parity_smoke.ps1",
-                "producer_status": "baseline_renderer_output_available_candidate_merge_path_pending",
-                "next_step": "Add an opt-in merged compose candidate renderer path and write the candidate artifact before enabling runtime merge.",
+                "producer_command": "py -3 taichi_global_bathymetry.py --once --output state/compose_parity/renderer_frame.png --compose-parity-artifact-dir state/compose_parity",
+                "producer_status": "baseline_and_candidate_artifact_producer_available_runtime_merge_disabled",
+                "candidate_schema": "rrkal_displaytools.compose_run_parity_candidate.v1",
+                "artifacts_schema": "rrkal_displaytools.compose_run_parity_artifacts.v1",
+                "next_step": "Run the manual diff command on generated artifacts and require zero-diff evidence before enabling runtime merge.",
                 "boundary": "Workflow metadata only; runtime artifacts stay under state/ and are not committed.",
             },
             "phase_timing_unit": "milliseconds",
