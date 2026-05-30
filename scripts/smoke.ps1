@@ -641,6 +641,9 @@ if ($launchPacket.layer_render_plan_performance.compose_pass_budget.qt_label_obj
 if ($launchPacket.layer_render_plan_performance.compose_pass_budget.runtime_diagnostic_fields -notcontains "cache_diagnostics.phase_timing_ms.compose_overlays") {
     throw "Launch packet layer_render_plan_performance compose pass budget runtime timing field missing"
 }
+if ($launchPacket.layer_render_plan_performance.compose_pass_budget.bottleneck_advice_rules.compose_overlays -ne "run_parity_then_collapse_runs") {
+    throw "Launch packet layer_render_plan_performance compose pass budget advice rule missing"
+}
 if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_schema -ne "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1") {
     throw "Launch packet layer_render_plan_performance compose run parity contract schema missing"
 }
@@ -1972,6 +1975,9 @@ if ($capabilities.layer_render_plan_performance.compose_pass_budget.runtime_merg
 if ($capabilities.layer_render_plan_performance.compose_pass_budget.runtime_diagnostic_fields -notcontains "cache_diagnostics.slowest_phase_id") {
     throw "Renderer layer_render_plan_performance compose pass budget runtime slowest phase field missing"
 }
+if ($capabilities.layer_render_plan_performance.compose_pass_budget.advice_field -ne "compose_bottleneck_advice") {
+    throw "Renderer layer_render_plan_performance compose pass budget advice field missing"
+}
 if ($capabilities.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_schema -ne "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1") {
     throw "Renderer layer_render_plan_performance compose run parity contract schema missing"
 }
@@ -2830,6 +2836,9 @@ if ($handoff.layer_render_plan_performance.compose_pass_budget.required_evidence
 }
 if ($handoff.layer_render_plan_performance.compose_pass_budget.runtime_diagnostic_fields -notcontains "cache_diagnostics.phase_timing_ms.compose_overlays") {
     throw "Handoff inspection layer render plan performance compose pass budget runtime timing field missing"
+}
+if ($handoff.layer_render_plan_performance.compose_pass_budget.bottleneck_advice_rules.unknown -ne "await_runtime_metadata") {
+    throw "Handoff inspection layer render plan performance compose pass budget default advice missing"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_schema -ne "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1") {
     throw "Handoff inspection layer render plan performance compose run parity contract schema missing"
@@ -4297,6 +4306,9 @@ if ($qtPanelSource -notlike "*compose_ms={compose_ms}*") {
 if ($qtPanelSource -notlike "*slowest={slowest_phase}*") {
     throw "Qt compose pass budget slowest phase summary text is missing"
 }
+if ($qtPanelSource -notlike "*advice={advice}*") {
+    throw "Qt compose pass budget advice summary text is missing"
+}
 if ($qtPanelSource -notlike "*composeParityRunnerReadinessStrip*") {
     throw "Qt compose parity runner readiness strip is missing"
 }
@@ -4682,6 +4694,9 @@ if ($rendererSource -notlike "*collapsed_overlay_runs_then_single_taichi_composi
 }
 if ($rendererSource -notlike "*cache_diagnostics.phase_timing_ms.compose_overlays*") {
     throw "Renderer compose pass budget runtime timing marker is missing"
+}
+if ($rendererSource -notlike "*run_parity_then_collapse_runs*") {
+    throw "Renderer compose pass budget advice marker is missing"
 }
 if ($rendererSource -notlike "*rrkal_displaytools.compose_run_parity_artifact_runner.v1*") {
     throw "Renderer compose parity artifact runner schema marker is missing"

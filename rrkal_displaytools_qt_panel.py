@@ -1202,6 +1202,13 @@ def layer_render_plan_performance_packet(
                     "cache_diagnostics.slowest_phase_id",
                     "cache_diagnostics.slow_frame_threshold_ms",
                 ],
+                "bottleneck_advice_rules": {
+                    "compose_overlays": "run_parity_then_collapse_runs",
+                    "prepare_batches": "inspect_static_batch_cache_reuse",
+                    "postprocess": "inspect_style_fold_or_defer",
+                    "unknown": "await_runtime_metadata",
+                },
+                "advice_field": "compose_bottleneck_advice",
                 "runtime_merge_enabled": False,
                 "boundary": "Budget metadata only; renderer keeps the existing sequential compose path until parity evidence proves the collapsed path.",
             },
@@ -9317,6 +9324,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         phase_timing = diagnostics.get("phase_timing_ms") if isinstance(diagnostics.get("phase_timing_ms"), dict) else {}
         compose_ms = phase_timing.get("compose_overlays", "-")
         slowest_phase = diagnostics.get("slowest_phase_id", "-")
+        advice_rules = budget.get("bottleneck_advice_rules") if isinstance(budget.get("bottleneck_advice_rules"), dict) else {}
+        advice = advice_rules.get(slowest_phase) or advice_rules.get("unknown", "await_runtime_metadata")
         target = budget.get("target_pass_model", "-")
         status = budget.get("status", "unknown")
         return (
@@ -9326,6 +9335,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"merge={merge_candidates}; "
             f"compose_ms={compose_ms}; "
             f"slowest={slowest_phase}; "
+            f"advice={advice}; "
             f"target={target}; "
             "evidence=compose_parity_runner; "
             "runtime_merge=false"

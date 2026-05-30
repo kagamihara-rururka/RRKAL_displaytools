@@ -2018,6 +2018,13 @@ def layer_render_plan_performance_packet(
                     "cache_diagnostics.slowest_phase_id",
                     "cache_diagnostics.slow_frame_threshold_ms",
                 ],
+                "bottleneck_advice_rules": {
+                    "compose_overlays": "run_parity_then_collapse_runs",
+                    "prepare_batches": "inspect_static_batch_cache_reuse",
+                    "postprocess": "inspect_style_fold_or_defer",
+                    "unknown": "await_runtime_metadata",
+                },
+                "advice_field": "compose_bottleneck_advice",
                 "runtime_merge_enabled": False,
                 "boundary": "Budget metadata only; renderer keeps the existing sequential compose path until parity evidence proves the collapsed path.",
             },

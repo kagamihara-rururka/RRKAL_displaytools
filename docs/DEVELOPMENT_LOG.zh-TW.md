@@ -1,5 +1,14 @@
 # Development Log
 
+## 2026-05-30 - Compose budget bottleneck advice
+
+Changes:
+- Added compose pass budget `bottleneck_advice_rules`, mapping `compose_overlays` to `run_parity_then_collapse_runs` while preserving safe fallback advice before runtime metadata exists.
+- Qt `composePassBudgetStrip` now shows `advice=` beside compose timing and slowest-phase fields.
+- Smoke gates launch packet, renderer capability, handoff, Qt and renderer source markers for the advice field/rules.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
 ## 2026-05-30 - Compose budget runtime timing fields
 
 Changes:
