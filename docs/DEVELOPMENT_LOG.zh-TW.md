@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Renderer layer render-plan runtime snapshot
+
+Changes:
+- Added `HybridRenderController.layer_render_plan_runtime_snapshot()` to centralize visible layers, dirty flags, batch targets and current compose order as runtime evidence.
+- Wired the snapshot into renderer output metadata under `layer_render_plan` without changing current visual composition behavior.
+- Extended `rrkal_displaytools.layer_render_plan_performance.v1` with the runtime snapshot schema/helper and metadata sidecar field while keeping `runtime_optimization_applied=false`.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Layer render-plan performance queue
 
 Changes:

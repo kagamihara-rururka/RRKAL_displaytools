@@ -488,6 +488,9 @@ if ($launchPacket.renderer_output_artifact_contract.metadata_sidecar_schema -ne 
 if ($launchPacket.renderer_output_artifact_contract.quick_render_smoke_validates -notcontains "preview_frame_png_nonempty") {
     throw "Launch packet renderer output artifact quick smoke preview check missing"
 }
+if ($launchPacket.renderer_output_artifact_contract.metadata_fields -notcontains "layer_render_plan") {
+    throw "Launch packet renderer output artifact metadata fields missing layer render plan"
+}
 if ($launchPacket.layer_render_plan_performance.schema -ne "rrkal_displaytools.layer_render_plan_performance.v1") {
     throw "Launch packet layer_render_plan_performance schema missing or invalid"
 }
@@ -502,6 +505,12 @@ if ($launchPacket.layer_render_plan_performance.stage_order -notcontains "submit
 }
 if ($launchPacket.layer_render_plan_performance.runtime_optimization_applied -ne $false) {
     throw "Launch packet layer_render_plan_performance must not claim applied runtime optimization"
+}
+if ($launchPacket.layer_render_plan_performance.runtime_snapshot_schema -ne "rrkal_displaytools.layer_render_plan_runtime_snapshot.v1") {
+    throw "Launch packet layer_render_plan_performance runtime snapshot schema missing"
+}
+if ($launchPacket.layer_render_plan_performance.metadata_sidecar_field -ne "layer_render_plan") {
+    throw "Launch packet layer_render_plan_performance metadata sidecar field missing"
 }
 if ($launchPacket.module_boundary_registry.schema -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Launch packet module_boundary_registry schema missing or invalid"
@@ -1558,6 +1567,9 @@ if ($capabilities.renderer_output_artifact_contract.schema -ne "rrkal_displaytoo
 if ($capabilities.renderer_output_artifact_contract.image_output_control -ne "--output") {
     throw "Renderer output artifact contract output control mismatch"
 }
+if ($capabilities.renderer_output_artifact_contract.metadata_fields -notcontains "layer_render_plan") {
+    throw "Renderer output artifact metadata fields missing layer render plan"
+}
 if ($capabilities.layer_render_plan_performance.schema -ne "rrkal_displaytools.layer_render_plan_performance.v1") {
     throw "Renderer layer_render_plan_performance schema missing or invalid"
 }
@@ -1569,6 +1581,12 @@ if ($capabilities.layer_render_plan_performance.stage_order -notcontains "submit
 }
 if ($capabilities.layer_render_plan_performance.runtime_optimization_applied -ne $false) {
     throw "Renderer layer_render_plan_performance must not claim applied runtime optimization"
+}
+if ($capabilities.layer_render_plan_performance.runtime_snapshot_schema -ne "rrkal_displaytools.layer_render_plan_runtime_snapshot.v1") {
+    throw "Renderer layer_render_plan_performance runtime snapshot schema missing"
+}
+if ($capabilities.layer_render_plan_performance.runtime_snapshot_helper -ne "HybridRenderController.layer_render_plan_runtime_snapshot") {
+    throw "Renderer layer_render_plan_performance runtime snapshot helper missing"
 }
 if ($capabilities.module_boundary_registry.schema -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Renderer module_boundary_registry schema missing or invalid"
@@ -2186,6 +2204,9 @@ if ($handoff.renderer_output_artifact_contract.renderer_capabilities_schema -ne 
 if ($handoff.renderer_output_artifact_contract.quick_render_smoke_validates -notcontains "metadata_sidecar_schema") {
     throw "Handoff inspection renderer output artifact metadata quick smoke check missing"
 }
+if ($handoff.renderer_output_artifact_contract.metadata_fields -notcontains "layer_render_plan") {
+    throw "Handoff inspection renderer output artifact metadata fields missing layer render plan"
+}
 if ($handoff.launch_packet_contracts.layer_render_plan_performance -ne "rrkal_displaytools.layer_render_plan_performance.v1") {
     throw "Handoff inspection layer render plan performance launch contract missing or invalid"
 }
@@ -2203,6 +2224,12 @@ if ($handoff.layer_render_plan_performance.stage_order -notcontains "submit_sing
 }
 if ($handoff.layer_render_plan_performance.runtime_optimization_applied -ne $false) {
     throw "Handoff inspection layer render plan performance must not claim applied runtime optimization"
+}
+if ($handoff.layer_render_plan_performance.runtime_snapshot_schema -ne "rrkal_displaytools.layer_render_plan_runtime_snapshot.v1") {
+    throw "Handoff inspection layer render plan performance runtime snapshot schema missing"
+}
+if ($handoff.layer_render_plan_performance.runtime_snapshot_helper -ne "HybridRenderController.layer_render_plan_runtime_snapshot") {
+    throw "Handoff inspection layer render plan performance runtime snapshot helper missing"
 }
 if ($handoff.launch_packet_contracts.layer_selection_tool -ne "rrkal_displaytools.layer_selection_tool.v1") {
     throw "Handoff inspection layer_selection_tool launch contract missing or invalid"
@@ -3340,6 +3367,12 @@ if ($qtPanelSource -notlike "*collect_layer_render_plan_performance*") {
 if ($qtPanelSource -notlike "*submit_single_taichi_render_pass*") {
     throw "Qt render plan performance single-pass marker is missing"
 }
+if ($qtPanelSource -notlike "*layer_render_plan_runtime_snapshot*") {
+    throw "Qt/render source layer render plan runtime snapshot helper is missing"
+}
+if ($qtPanelSource -notlike "*metadata_sidecar_field*: *layer_render_plan*") {
+    throw "Qt render plan performance metadata sidecar contract is missing"
+}
 if ($qtPanelSource -notlike "*Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON*") {
     throw "Qt Research interaction inspector tooltip is missing"
 }
@@ -3549,6 +3582,15 @@ if ($qtPanelSource -notlike "*qt_inspector_action_groups*") {
 }
 
 $rendererSource = Get-Content -Raw -Encoding UTF8 taichi_global_bathymetry.py
+if ($rendererSource -notlike "*def layer_render_plan_runtime_snapshot*") {
+    throw "Renderer layer render plan runtime snapshot helper is missing"
+}
+if ($rendererSource -notlike '*"layer_render_plan": getattr(self, "layer_render_plan_snapshot"*') {
+    throw "Renderer metadata layer render plan sidecar field is missing"
+}
+if ($rendererSource -notlike "*self.layer_render_plan_snapshot = self.layer_render_plan_runtime_snapshot*") {
+    throw "Renderer render_if_needed does not update the layer render plan snapshot"
+}
 if ($rendererSource -notlike "*last_layer_pick_screen*") {
     throw "Renderer layer pick screen position state missing"
 }

@@ -14031,6 +14031,60 @@ class HybridRenderController:
         except OSError as exc:
             print(f"Unable to write layer pick state: {exc}")
 
+    def layer_render_plan_runtime_snapshot(
+        self,
+        changed: bool | None = None,
+        force: bool = False,
+        defer_vector_overlays: bool | None = None,
+    ) -> dict[str, object]:
+        visible_layers = [layer_id for layer_id, visible in self.layer_visible.items() if visible]
+        dirty_flags = {
+            "force": bool(force),
+            "changed": bool(changed) if changed is not None else None,
+            "globe_dirty": bool(getattr(self, "globe_dirty", False)),
+            "overlay_dirty": bool(getattr(self, "overlay_dirty", False)),
+            "hydrology_dirty": bool(getattr(self, "hydrology_dirty", False)),
+            "boundary_dirty": bool(getattr(self, "boundary_dirty", False)),
+            "boundary_hover_dirty": bool(getattr(self, "boundary_hover_dirty", False)),
+        }
+        return {
+            "schema": "rrkal_displaytools.layer_render_plan_runtime_snapshot.v1",
+            "source": "HybridRenderController.layer_render_plan_runtime_snapshot",
+            "frame_index": int(getattr(self, "frame_index", 0)),
+            "status": "snapshot_only",
+            "runtime_optimization_applied": False,
+            "optimization_target": "precompute_layer_state_then_single_render_pass",
+            "visible_layers": visible_layers,
+            "visible_layer_count": len(visible_layers),
+            "selected_layer_semantic_target": getattr(self, "selected_layer_semantic_target", None),
+            "dirty_flags": dirty_flags,
+            "defer_vector_overlays": defer_vector_overlays,
+            "batch_targets": [
+                {"id": "globe_material", "source": "TaichiGlobe.render", "dirty_flag": "globe_dirty"},
+                {"id": "hydrology_polylines", "source": "lake_overlay_rgba/river_overlay_rgba", "dirty_flag": "hydrology_dirty"},
+                {"id": "boundary_and_maritime_lines", "source": "boundary_layer_rgba/boundary_overlay_rgba", "dirty_flag": "boundary_dirty"},
+                {"id": "traffic_points", "source": "overlay_rgba/aircraft_overlay_rgba", "dirty_flag": "overlay_dirty"},
+                {"id": "research_pins", "source": "pin_overlay_rgba", "dirty_flag": "overlay_dirty"},
+                {"id": "vehicle_icons", "source": "vehicle_icon_overlay_rgba", "dirty_flag": "overlay_dirty"},
+            ],
+            "compose_order": [
+                "globe_rgba",
+                "lakes",
+                "rivers",
+                "borders",
+                "territorial_sea",
+                "eez",
+                "high_seas",
+                "ais_overlay",
+                "aircraft",
+                "vehicle_icons",
+                "pins",
+                "style_profile_postprocess",
+            ],
+            "single_pass_target": "future_unified_taichi_render_plan",
+            "current_path": "existing_sequential_overlay_composition",
+        }
+
     def output_metadata_path(self) -> Path | None:
         if self.output_path is None:
             return None
@@ -14074,6 +14128,7 @@ class HybridRenderController:
             "selected_layer_semantic_target": self.selected_layer_semantic_target,
             "last_layer_pick_result": self.last_layer_pick_result,
             "boundary_highlight": getattr(self, "boundary_highlight_state", {}),
+            "layer_render_plan": getattr(self, "layer_render_plan_snapshot", self.layer_render_plan_runtime_snapshot()),
             "closed_loop_status": renderer_closed_loop_status_packet(),
             "rrkal_data_manifest_ref": getattr(self.args, "rrkal_data_manifest_ref", ""),
             "rrkal_data_manifest_ref_boundary": "Reference-only; displaytools records the RRKAL manifest reference but does not discover, download, validate, import, or govern it.",
@@ -15726,6 +15781,7 @@ class HybridRenderController:
                 changed = True
                 self.boundary_hover_dirty = True
                 self.boundary_dirty = True
+        self.layer_render_plan_snapshot = self.layer_render_plan_runtime_snapshot(changed=changed, force=force)
         if not changed:
             return None
 
@@ -15768,6 +15824,11 @@ class HybridRenderController:
         if force or self.overlay_dirty or self.hydrology_dirty or self.boundary_dirty or self.boundary_hover_dirty:
             budget_decision = self.render_budget_decision()
             defer_vector_overlays = bool(budget_decision.get("defer_vector_overlays", False)) and not force
+            self.layer_render_plan_snapshot = self.layer_render_plan_runtime_snapshot(
+                changed=changed,
+                force=force,
+                defer_vector_overlays=defer_vector_overlays,
+            )
             style_profile = getattr(self.args, "style_profile", "scientific")
             self.overlay_renderer.set_style_profile(style_profile)
             self.aircraft_overlay_renderer.set_style_profile(style_profile)
@@ -18928,6 +18989,7 @@ def renderer_output_artifact_contract_packet(source: str) -> dict[str, object]:
             "layer_visible",
             "layer_opacity",
             "layer_blend_mode",
+            "layer_render_plan",
             "selected_layer_semantic_target",
             "last_layer_pick_result",
             "boundary_highlight",
@@ -18970,6 +19032,10 @@ def layer_render_plan_performance_packet(
         "optimization_target": "precompute_layer_state_then_single_render_pass",
         "current_runtime_claim": "contract_and_schedule_only",
         "runtime_optimization_applied": False,
+        "runtime_snapshot_schema": "rrkal_displaytools.layer_render_plan_runtime_snapshot.v1",
+        "runtime_snapshot_helper": "HybridRenderController.layer_render_plan_runtime_snapshot",
+        "metadata_sidecar_field": "layer_render_plan",
+        "runtime_snapshot_wired": True,
         "deferred_until": "module_decoupling_boundary_contract_is_stable",
         "module_boundary_schema": modules.get("schema"),
         "stage_order": stage_order,
