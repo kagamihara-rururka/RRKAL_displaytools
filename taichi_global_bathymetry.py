@@ -18490,6 +18490,37 @@ def hydrology_lod_readiness_packet(
         "stable_renderer_targets": ["lakes", "rivers"],
         "lod_hook_status": "contract_ready",
         "lod_hook_fields": ["renderer_target", "visible", "opacity", "blend_mode", "selected_layer_pick"],
+        "renderer_apply_contract_schema": "rrkal_displaytools.hydrology_lod_renderer_apply_contract.v1",
+        "renderer_apply_contract": {
+            "schema": "rrkal_displaytools.hydrology_lod_renderer_apply_contract.v1",
+            "status": "runtime_bridge_ready" if live_layer_count == len(hydrology_layers) else "partial",
+            "runtime_state_schema": "rrkal_displaytools.layer_runtime_state.v1",
+            "runtime_ack_schema": "rrkal_displaytools.renderer_layer_runtime_ack.v1",
+            "runtime_state_file": "state/renderer_layer_runtime_state.json",
+            "runtime_ack_file": "state/renderer_layer_runtime_ack.json",
+            "qt_layer_keys": list(hydrology_keys),
+            "renderer_targets": ["lakes", "rivers"],
+            "apply_targets": hydrology_layers,
+            "required_state_fields": [
+                "layers.<key>.visible",
+                "layers.<key>.opacity",
+                "layers.<key>.blend_mode",
+                "selected_layer",
+            ],
+            "required_ack_fields": [
+                "changed_layers",
+                "changed_opacity_layers",
+                "changed_blend_layers",
+                "selected_renderer_layer",
+                "skipped_locked_layers",
+            ],
+            "lod_source_modes": ["lod", "static"],
+            "renderer_entry_points": ["load_layer_runtime_state", "apply_layer_runtime_state"],
+            "qt_surface": "Inspect: Hydro LOD",
+            "smoke_gate": "hydrology_lod_renderer_apply_contract",
+            "portable": True,
+            "boundary": "Renderer apply consumes existing hydrology layer runtime state and ack files only; authoritative hydrology datasets and cache governance remain RRKAL-owned.",
+        },
         "deferred_context_layers": ["bathymetry_layer", "coastline_layer"],
         "qt_surface": "Layers dock Hydrology/LOD readiness label",
         "launch_packet_fields": ["hydrology_lod_readiness", "layer_capability_matrix", "layer_runtime_evidence"],
@@ -18521,11 +18552,15 @@ def hydrology_lod_runtime_evidence_packet(
     pick_matches_hydrology = pick_layer in hydrology_targets or pick_layer in {"lake_layer", "river_layer"}
     runtime_ack_available = bool(runtime_ack)
     pick_available = bool(pick_state)
+    apply_contract = readiness.get("renderer_apply_contract") if isinstance(readiness.get("renderer_apply_contract"), dict) else {}
     return {
         "schema": "rrkal_displaytools.hydrology_lod_runtime_evidence.v1",
         "source": source,
         "readiness_schema": readiness.get("schema"),
         "readiness": readiness.get("readiness", "unknown"),
+        "renderer_apply_contract_schema": apply_contract.get("schema", "rrkal_displaytools.hydrology_lod_renderer_apply_contract.v1"),
+        "renderer_apply_contract_status": apply_contract.get("status", "unknown"),
+        "runtime_state_file": apply_contract.get("runtime_state_file", "state/renderer_layer_runtime_state.json"),
         "runtime_ack_available": runtime_ack_available,
         "runtime_ack_schema": runtime_ack.get("schema") if runtime_ack_available else "rrkal_displaytools.renderer_layer_runtime_ack.v1",
         "pick_state_available": pick_available,

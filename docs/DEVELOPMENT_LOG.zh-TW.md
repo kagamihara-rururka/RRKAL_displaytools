@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Hydrology LOD renderer apply contract
+
+Changes:
+- Added `rrkal_displaytools.hydrology_lod_renderer_apply_contract.v1` inside `hydrology_lod_readiness` for Qt, no-GUI launch packets and renderer capability discovery.
+- The contract pins hydrology renderer apply to `state/renderer_layer_runtime_state.json`, `state/renderer_layer_runtime_ack.json`, required state/ack fields, lake/river apply targets and portable handoff semantics.
+- Handoff inspection and smoke now verify the nested renderer apply contract and hydrology runtime evidence links.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Reviewer packet export
 
 Changes:
