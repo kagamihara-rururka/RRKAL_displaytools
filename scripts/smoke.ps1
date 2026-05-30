@@ -7245,4 +7245,28 @@ if (-not (Test-Path -LiteralPath (Join-Path $RepoRoot "state\decoupling\pre_deco
     throw "Pre-decoupling snapshot output file missing"
 }
 
+$pre7ClosurePath = Join-Path $RepoRoot "scripts\check_pre7_closure_readiness.ps1"
+if (-not (Test-Path -LiteralPath $pre7ClosurePath)) {
+    throw "Pre-7 closure readiness checker is missing"
+}
+$pre7ClosureContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $pre7ClosurePath, "-ContractOnly")
+$pre7ClosureContract = ($pre7ClosureContractText -join "`n") | ConvertFrom-Json
+if ($pre7ClosureContract.schema -ne "rrkal_displaytools.pre7_closure_readiness_check.contract.v1") {
+    throw "Pre-7 closure readiness contract schema missing"
+}
+$pre7ClosureText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $pre7ClosurePath)
+$pre7Closure = ($pre7ClosureText -join "`n") | ConvertFrom-Json
+if ($pre7Closure.schema -ne "rrkal_displaytools.pre7_closure_readiness_check.v1") {
+    throw "Pre-7 closure readiness output schema missing"
+}
+if ($pre7Closure.status -ne "pass") {
+    throw "Pre-7 closure readiness did not pass"
+}
+if (-not $pre7Closure.ready_for_post7_gate) {
+    throw "Pre-7 closure readiness did not report post-7 gate readiness"
+}
+if ($pre7Closure.failed_checks.Count -ne 0) {
+    throw "Pre-7 closure readiness reported failed checks"
+}
+
 Write-Host "Smoke passed."

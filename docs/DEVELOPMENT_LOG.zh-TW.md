@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Pre-7 closure readiness check
+
+- Added `scripts/check_pre7_closure_readiness.ps1` as a no-code-move closure gate for reviewer route, capability summary, UIUX closure, workspace map, extraction dry-run, quickstart alignment and formal pre-decoupling gate presence.
+- Smoke now gates the checker contract and pass/fail output before post-7 decoupling starts.
+- This gives the 7:00 handoff a single compact command before `scripts/pre_decoupling_gate.ps1`.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Clone quickstart extraction dry-run path
 
 - Updated `docs/QUICKSTART_CLONE.zh-TW.md` so cloned-machine reviewers see `Inspect: Extraction dry-run` in the Replay/contracts path.
