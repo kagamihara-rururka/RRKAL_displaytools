@@ -1853,6 +1853,9 @@ def cross_machine_clone_readiness_packet(
 ) -> dict[str, object]:
     profile_readiness = profile_readiness if isinstance(profile_readiness, dict) else {}
     module_boundaries = module_boundaries if isinstance(module_boundaries, dict) else {}
+    clone_command = "git clone https://github.com/Kagamihara-Ruruka/RRKAL_displaytools.git"
+    default_branch = "main"
+    repo_visibility = "public"
     required_commands = [
         "scripts/setup_windows.ps1",
         "scripts/smoke.ps1",
@@ -1864,7 +1867,7 @@ def cross_machine_clone_readiness_packet(
     first_run_smoke_command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/smoke.ps1"
     first_run_handoff_command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/inspect_handoff.ps1"
     first_run_order = [
-        "git clone https://github.com/Kagamihara-Ruruka/RRKAL_displaytools.git",
+        clone_command,
         "cd RRKAL_displaytools",
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup_windows.ps1",
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/smoke.ps1",
@@ -1880,9 +1883,12 @@ def cross_machine_clone_readiness_packet(
         "source": source,
         "status": "ready" if profile_ready and boundaries_ready and qt_first and tk_not_primary else "partial",
         "repo_url": "https://github.com/Kagamihara-Ruruka/RRKAL_displaytools.git",
+        "clone_command": clone_command,
+        "default_branch": default_branch,
+        "repo_visibility": repo_visibility,
         "setup_doc": "docs/SETUP_WINDOWS.zh-TW.md",
         "qt_surface": "Layers dock cross-machine readiness label",
-        "qt_visible_fields": ["status", "required_command_count", "setup_doc", "first_run_smoke_command", "first_run_handoff_command"],
+        "qt_visible_fields": ["status", "required_command_count", "setup_doc", "default_branch", "repo_visibility", "first_run_smoke_command", "first_run_handoff_command"],
         "required_commands": required_commands,
         "launcher_options": launcher_options,
         "handoff_first_command": handoff_first_command,
@@ -1901,7 +1907,7 @@ def cross_machine_clone_readiness_packet(
         "clone_reviewer_summary_contract_schema": "rrkal_displaytools.clone_reviewer_summary_contract.v1",
         "clone_reviewer_summary_contract": {
             "label": "Clone reviewer",
-            "summary_format": "Clone reviewer: status={status}; repo={repo_url}; setup={setup_doc}; profile={profile_launch_readiness}; qt_first={qt_first}; smoke_required={smoke_required_before_push}; first_smoke={first_run_smoke_command}; first_handoff={first_run_handoff_command}; handoff_first={handoff_first_command}",
+            "summary_format": "Clone reviewer: status={status}; repo={repo_url}; clone={clone_command}; branch={default_branch}; visibility={repo_visibility}; setup={setup_doc}; profile={profile_launch_readiness}; qt_first={qt_first}; smoke_required={smoke_required_before_push}; first_smoke={first_run_smoke_command}; first_handoff={first_run_handoff_command}; handoff_first={handoff_first_command}",
             "qt_inspector_group": "replay_contracts",
             "qt_copy_action": "copy_clone_reviewer_summary",
             "component_contract_fields": [

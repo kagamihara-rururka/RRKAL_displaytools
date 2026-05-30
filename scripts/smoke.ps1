@@ -479,6 +479,15 @@ if ($launchPacket.cross_machine_clone_readiness.status -ne "ready") {
 if ($launchPacket.cross_machine_clone_readiness.required_commands -notcontains "scripts/setup_windows.ps1") {
     throw "Launch packet cross_machine_clone_readiness missing setup command"
 }
+if ($launchPacket.cross_machine_clone_readiness.clone_command -notlike "git clone *RRKAL_displaytools.git") {
+    throw "Launch packet cross_machine_clone_readiness clone command missing"
+}
+if ($launchPacket.cross_machine_clone_readiness.default_branch -ne "main") {
+    throw "Launch packet cross_machine_clone_readiness default branch mismatch"
+}
+if ($launchPacket.cross_machine_clone_readiness.repo_visibility -ne "public") {
+    throw "Launch packet cross_machine_clone_readiness repo visibility mismatch"
+}
 if ($launchPacket.cross_machine_clone_readiness.setup_doc -ne "docs/SETUP_WINDOWS.zh-TW.md") {
     throw "Launch packet cross_machine_clone_readiness setup doc mismatch"
 }
@@ -487,6 +496,9 @@ if ($launchPacket.cross_machine_clone_readiness.qt_surface -ne "Layers dock cros
 }
 if ($launchPacket.cross_machine_clone_readiness.qt_visible_fields -notcontains "first_run_smoke_command") {
     throw "Launch packet cross_machine_clone_readiness Qt visible first-run smoke field missing"
+}
+if ($launchPacket.cross_machine_clone_readiness.qt_visible_fields -notcontains "repo_visibility") {
+    throw "Launch packet cross_machine_clone_readiness Qt visible repo visibility field missing"
 }
 if ($launchPacket.cross_machine_clone_readiness.first_run_order -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/inspect_handoff.ps1") {
     throw "Launch packet cross_machine_clone_readiness first-run handoff order missing"
@@ -514,6 +526,9 @@ if ($launchPacket.cross_machine_clone_readiness.clone_reviewer_summary_contract.
 }
 if ($launchPacket.cross_machine_clone_readiness.clone_reviewer_summary_contract.summary_format -notlike "*first_smoke*") {
     throw "Launch packet clone reviewer summary format missing first-run smoke"
+}
+if ($launchPacket.cross_machine_clone_readiness.clone_reviewer_summary_contract.summary_format -notlike "*clone={clone_command}*") {
+    throw "Launch packet clone reviewer summary format missing clone command"
 }
 if (-not $launchPacket.cross_machine_clone_readiness.clone_reviewer_summary_contract.portable) {
     throw "Launch packet clone reviewer summary portability flag missing"
@@ -1399,11 +1414,20 @@ if ($capabilities.cross_machine_clone_readiness.schema -ne "rrkal_displaytools.c
 if ($capabilities.cross_machine_clone_readiness.required_commands -notcontains "scripts/run_qt_panel.ps1") {
     throw "Renderer cross_machine_clone_readiness missing run command"
 }
+if ($capabilities.cross_machine_clone_readiness.clone_command -notlike "git clone *RRKAL_displaytools.git") {
+    throw "Renderer cross_machine_clone_readiness clone command missing"
+}
+if ($capabilities.cross_machine_clone_readiness.default_branch -ne "main") {
+    throw "Renderer cross_machine_clone_readiness default branch mismatch"
+}
 if ($capabilities.cross_machine_clone_readiness.qt_surface -ne "Layers dock cross-machine readiness label") {
     throw "Renderer cross_machine_clone_readiness Qt surface mismatch"
 }
 if ($capabilities.cross_machine_clone_readiness.qt_visible_fields -notcontains "first_run_handoff_command") {
     throw "Renderer cross_machine_clone_readiness Qt visible first-run handoff field missing"
+}
+if ($capabilities.cross_machine_clone_readiness.qt_visible_fields -notcontains "default_branch") {
+    throw "Renderer cross_machine_clone_readiness Qt visible default branch field missing"
 }
 if ($capabilities.cross_machine_clone_readiness.launcher_options -notcontains "-HandoffFirst") {
     throw "Renderer cross_machine_clone_readiness missing HandoffFirst launcher option"
@@ -2279,6 +2303,12 @@ if ($handoff.cross_machine_clone_readiness.renderer_capabilities_schema -ne "rrk
 if ($handoff.cross_machine_clone_readiness.required_commands -notcontains "scripts/inspect_handoff.ps1") {
     throw "Handoff inspection cross_machine_clone_readiness missing handoff command"
 }
+if ($handoff.cross_machine_clone_readiness.clone_command -notlike "git clone *RRKAL_displaytools.git") {
+    throw "Handoff inspection cross_machine_clone_readiness clone command missing"
+}
+if ($handoff.cross_machine_clone_readiness.repo_visibility -ne "public") {
+    throw "Handoff inspection cross_machine_clone_readiness repo visibility mismatch"
+}
 if ($handoff.cross_machine_clone_readiness.qt_visible_fields -notcontains "first_run_smoke_command") {
     throw "Handoff inspection cross_machine_clone_readiness Qt visible first-run smoke field missing"
 }
@@ -2805,6 +2835,12 @@ if ($qtPanelSource -notlike "*clone_reviewer_summary_text*") {
 }
 if ($qtPanelSource -notlike "*first_run_smoke_command*") {
     throw "Qt clone readiness first-run smoke command is missing"
+}
+if ($qtPanelSource -notlike "*clone_command*") {
+    throw "Qt clone readiness clone command field is missing"
+}
+if ($qtPanelSource -notlike "*visibility=*") {
+    throw "Qt clone readiness visible repo visibility text is missing"
 }
 if ($qtPanelSource -notlike "*first smoke=*") {
     throw "Qt clone readiness label first smoke text is missing"

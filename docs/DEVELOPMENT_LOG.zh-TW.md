@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Cross-machine clone command contract
+
+Changes:
+- Added `clone_command`, `default_branch` and `repo_visibility` to `rrkal_displaytools.cross_machine_clone_readiness.v1`.
+- Extended the clone reviewer summary and Qt readiness label with branch / visibility handoff details.
+- Smoke now verifies clone command, public visibility and default branch across launch packet, renderer capability and handoff outputs.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Cross-machine readiness visible commands
 
 Changes:
