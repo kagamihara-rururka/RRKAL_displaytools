@@ -6402,6 +6402,9 @@ if ($preDecouplingSnapshotContract.output_schema -ne "rrkal_displaytools.pre_dec
 if ($preDecouplingSnapshotContract.included_fields -notcontains "performance_smoke_telemetry") {
     throw "Pre-decoupling snapshot performance field missing"
 }
+if ($preDecouplingSnapshotContract.included_fields -notcontains "decoupling_boundary_inspection") {
+    throw "Pre-decoupling snapshot boundary inspection field missing"
+}
 $preDecouplingSnapshotText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $preDecouplingSnapshotPath)
 $preDecouplingSnapshot = ($preDecouplingSnapshotText -join "`n") | ConvertFrom-Json
 if ($preDecouplingSnapshot.schema -ne "rrkal_displaytools.pre_decoupling_snapshot.v1") {
@@ -6412,6 +6415,12 @@ if ($preDecouplingSnapshot.decoupling_readiness.schema -ne "rrkal_displaytools.d
 }
 if ($preDecouplingSnapshot.pre_decoupling_gate.schema -ne "rrkal_displaytools.pre_decoupling_gate.v1") {
     throw "Pre-decoupling snapshot gate schema missing"
+}
+if ($preDecouplingSnapshot.decoupling_boundary_inspection.schema -ne "rrkal_displaytools.decoupling_boundary_inspection.v1") {
+    throw "Pre-decoupling snapshot boundary inspection schema missing"
+}
+if ($preDecouplingSnapshot.decoupling_boundary_inspection.first_extraction_id -ne "render_plan_compose") {
+    throw "Pre-decoupling snapshot boundary inspection first extraction mismatch"
 }
 if ($preDecouplingSnapshot.performance_smoke_telemetry.schema -ne "rrkal_displaytools.performance_smoke.v1") {
     throw "Pre-decoupling snapshot performance telemetry schema missing"

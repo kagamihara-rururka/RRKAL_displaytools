@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Boundary inspection in pre-decoupling snapshot
+
+- Added `decoupling_boundary_inspection` to `scripts/export_pre_decoupling_snapshot.ps1` output so the handoff snapshot includes the post-7 first extraction target and RRKAL data/cache boundary.
+- Smoke now gates both the snapshot export contract field and the emitted boundary inspection schema/first extraction ID.
+- Kept this read-only; it does not move renderer code or launch Qt/Taichi.
+- Smoke: PASS via `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; cloud-drive transient file-access retries occurred and recovered.
+
 ## 2026-05-31 - No-GUI decoupling boundary inspector
 
 - Added `scripts/inspect_decoupling_boundaries.ps1` for read-only inspection of the post-7 decoupling boundary before code movement.
