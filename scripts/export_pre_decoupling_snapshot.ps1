@@ -22,9 +22,21 @@ function Resolve-SnapshotPath {
 function Invoke-JsonPython {
     param([string[]]$ArgumentList)
 
-    $text = & py -3 @ArgumentList
+    $text = $null
+    $lastOutput = $null
+    for ($attempt = 1; $attempt -le 4; $attempt++) {
+        $text = & py -3 @ArgumentList 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            $lastOutput = $text
+            break
+        }
+        $lastOutput = $text
+        if ($attempt -lt 4) {
+            Start-Sleep -Milliseconds ([int](250 * $attempt))
+        }
+    }
     if ($LASTEXITCODE -ne 0) {
-        throw "Command failed: py -3 $($ArgumentList -join ' ')"
+        throw "Command failed: py -3 $($ArgumentList -join ' ')`n$($lastOutput -join "`n")"
     }
     $raw = $text -join "`n"
     $jsonStart = $raw.IndexOf("{")
@@ -37,9 +49,21 @@ function Invoke-JsonPython {
 function Invoke-JsonPowerShell {
     param([string[]]$ArgumentList)
 
-    $text = & powershell @ArgumentList
+    $text = $null
+    $lastOutput = $null
+    for ($attempt = 1; $attempt -le 4; $attempt++) {
+        $text = & powershell @ArgumentList 2>&1
+        if ($LASTEXITCODE -eq 0) {
+            $lastOutput = $text
+            break
+        }
+        $lastOutput = $text
+        if ($attempt -lt 4) {
+            Start-Sleep -Milliseconds ([int](250 * $attempt))
+        }
+    }
     if ($LASTEXITCODE -ne 0) {
-        throw "Command failed: powershell $($ArgumentList -join ' ')"
+        throw "Command failed: powershell $($ArgumentList -join ' ')`n$($lastOutput -join "`n")"
     }
     $raw = $text -join "`n"
     $jsonStart = $raw.IndexOf("{")

@@ -1196,6 +1196,47 @@ if ($visualInspectorIndex.boundary -notlike "*does not launch Qt, Taichi*") {
 if ($visualInspectorIndex.boundary -notlike "*dataset discovery, import or cache governance*") {
     throw "Visual contract inspector index data-governance boundary missing"
 }
+$visualReviewPacketPath = Join-Path $RepoRoot "scripts\export_visual_contract_review_packet.ps1"
+if (-not (Test-Path -LiteralPath $visualReviewPacketPath)) {
+    throw "Visual contract review packet exporter is missing"
+}
+$visualReviewPacketContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $visualReviewPacketPath, "-ContractOnly")
+$visualReviewPacketContract = ($visualReviewPacketContractText -join "`n") | ConvertFrom-Json
+if ($visualReviewPacketContract.schema -ne "rrkal_displaytools.visual_contract_review_packet_export.v1") {
+    throw "Visual contract review packet export schema missing"
+}
+if ($visualReviewPacketContract.output_schema -ne "rrkal_displaytools.visual_contract_review_packet.v1") {
+    throw "Visual contract review packet output schema missing"
+}
+if ($visualReviewPacketContract.boundary -notlike "*does not launch Qt, Taichi*") {
+    throw "Visual contract review packet launch boundary missing"
+}
+$visualReviewPacketText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $visualReviewPacketPath)
+$visualReviewPacket = ($visualReviewPacketText -join "`n") | ConvertFrom-Json
+if ($visualReviewPacket.schema -ne "rrkal_displaytools.visual_contract_review_packet.v1") {
+    throw "Visual contract review packet schema missing"
+}
+if ($visualReviewPacket.inspector_index_schema -ne "rrkal_displaytools.visual_contract_inspector_index.v1") {
+    throw "Visual contract review packet index schema mismatch"
+}
+if ($visualReviewPacket.inspector_entry_ids -notcontains "hydrology_lod") {
+    throw "Visual contract review packet missing Hydrology/LOD inspector"
+}
+if ($visualReviewPacket.inspector_entry_ids -notcontains "ocean_material") {
+    throw "Visual contract review packet missing Ocean material inspector"
+}
+if ($visualReviewPacket.inspector_entry_ids -notcontains "style_routes") {
+    throw "Visual contract review packet missing style routes inspector"
+}
+if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_ocean_material.ps1") {
+    throw "Visual contract review packet missing Ocean material first command"
+}
+if ($visualReviewPacket.pre_decoupling_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\pre_decoupling_gate.ps1 -ContractOnly") {
+    throw "Visual contract review packet missing pre-decoupling gate command"
+}
+if ($visualReviewPacket.boundary -notlike "*RRKAL owns discovery/download/import/cache governance*") {
+    throw "Visual contract review packet data-governance boundary missing"
+}
 $configGatewayInspectorPath = Join-Path $RepoRoot "scripts\inspect_renderer_config_gateway.ps1"
 if (-not (Test-Path -LiteralPath $configGatewayInspectorPath)) {
     throw "Renderer config gateway inspector script is missing"

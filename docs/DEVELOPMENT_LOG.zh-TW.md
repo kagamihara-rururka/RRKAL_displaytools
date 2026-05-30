@@ -1,5 +1,13 @@
 # Development Log
 
+## 2026-05-31 - Visual contract review packet exporter
+
+- Added `scripts/export_visual_contract_review_packet.ps1` to emit one no-GUI JSON review packet for cloned-machine visual contract checks.
+- The packet embeds the inspector index, first reviewer commands, pre-decoupling commands and the displaytools/RRKAL governance boundary.
+- Smoke now verifies contract-only export, normal packet schema, key inspector IDs and required handoff commands.
+- Hardened `scripts/export_pre_decoupling_snapshot.ps1` with short internal retries for transient cloud-drive file locks during Python/PowerShell JSON collection.
+- Smoke: PASS (`scripts\smoke.ps1`).
+
 ## 2026-05-31 - Visual contract inspector index
 
 - Added `scripts/list_visual_contract_inspectors.ps1` to list no-GUI reviewer commands for config gateway, style routes, Hydrology/LOD, Ocean material, performance smoke and pre-decoupling gates.
