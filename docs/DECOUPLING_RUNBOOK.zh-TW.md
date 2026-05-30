@@ -18,6 +18,8 @@ The gate must report:
 
 - `schema=rrkal_displaytools.pre_decoupling_gate.v1`
 - `ready=true`
+- `decoupling_not_before=2026-05-31T07:00:00+08:00`
+- `time_gate_enforced=true`
 - `first_extraction_id=render_plan_compose`
 - `requires_clean_worktree=true`
 - `observability_baseline_schema=rrkal_displaytools.decoupling_observability_baseline.v1`
@@ -58,6 +60,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_pre_decoupling
 ```
 
 This must report `status=pass`, `ready_for_07_gate_review=true`, and `first_extraction_target=render_core/render_plan.py`.
+
+The formal gate refuses code movement before `2026-05-31T07:00:00+08:00`; before that time, use the no-GUI readiness commands only.
 
 ## First extraction order
 

@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Pre-decoupling gate time enforcement
+
+- Added a formal `decoupling_not_before=2026-05-31T07:00:00+08:00` time gate to `scripts/pre_decoupling_gate.ps1`.
+- `-ContractOnly` still reports gate metadata, but non-contract gate execution now refuses renderer code movement before the not-before timestamp.
+- Smoke now gates the not-before timestamp and `time_gate_enforced=true` metadata.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; transient cloud-drive file-access backoff warnings observed, final retry passed).
+
 ## 2026-05-31 - Pre-decoupling readiness check
 
 - Added `scripts/check_pre_decoupling_readiness.ps1` as a compact no-GUI pass/fail check over the readiness bundle.

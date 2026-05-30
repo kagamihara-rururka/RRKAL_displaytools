@@ -44,12 +44,18 @@ $readiness = Invoke-JsonPython @("decoupling_readiness.py", "--phase", "post_07_
 $performanceContract = Invoke-JsonPython @("performance_telemetry.py", "--contract-only")
 $workOrderContract = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_render_plan_compose_work_order.ps1", "-ContractOnly")
 $firstExtraction = @($readiness.first_extraction_order | Select-Object -First 1)[0]
+$decouplingNotBefore = [DateTimeOffset]::Parse($readiness.operation_schedule.decoupling_not_before)
+$currentTime = [DateTimeOffset]::Now
 $gate = [ordered]@{
     schema = "rrkal_displaytools.pre_decoupling_gate.v1"
     source = "scripts/pre_decoupling_gate.ps1"
     contract_only = [bool]$ContractOnly
     phase = $readiness.phase
     ready = $false
+    decoupling_not_before = $readiness.operation_schedule.decoupling_not_before
+    current_time_utc = $currentTime.ToUniversalTime().ToString("o")
+    time_gate_enforced = $true
+    time_gate_open = ($currentTime -ge $decouplingNotBefore)
     first_extraction_id = $firstExtraction.id
     first_extraction_target = $firstExtraction.target_module
     observability_baseline_schema = $readiness.observability_baseline.schema
@@ -111,6 +117,9 @@ if ($gate.render_plan_compose_work_order_schema -ne "rrkal_displaytools.render_p
 }
 
 if (-not $ContractOnly) {
+    if (-not $gate.time_gate_open) {
+        throw "Pre-decoupling gate is not open before $($gate.decoupling_not_before); continue UI/contract handoff closure only"
+    }
     $gitStatus = git status --porcelain
     if ($LASTEXITCODE -ne 0) {
         throw "Pre-decoupling git status failed"

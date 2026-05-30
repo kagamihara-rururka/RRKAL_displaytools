@@ -6473,6 +6473,12 @@ if ($preDecouplingGate.schema -ne "rrkal_displaytools.pre_decoupling_gate.v1") {
 if ($preDecouplingGate.first_extraction_id -ne "render_plan_compose") {
     throw "Pre-decoupling gate first extraction mismatch"
 }
+if ($preDecouplingGate.decoupling_not_before -ne "2026-05-31T07:00:00+08:00") {
+    throw "Pre-decoupling gate not-before timestamp mismatch"
+}
+if ($preDecouplingGate.time_gate_enforced -ne $true) {
+    throw "Pre-decoupling gate time enforcement missing"
+}
 if ($preDecouplingGate.observability_baseline_schema -ne "rrkal_displaytools.decoupling_observability_baseline.v1") {
     throw "Pre-decoupling gate observability baseline missing"
 }
