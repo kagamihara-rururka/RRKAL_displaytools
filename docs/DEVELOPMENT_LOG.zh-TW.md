@@ -1,5 +1,17 @@
 # Development Log
 
+## 2026-05-30 - Render-plan compose run parity contract
+
+Changes:
+- Added `HybridRenderController.layer_render_plan_compose_run_parity_contract()` to require visual parity evidence before enabling any merged compose run.
+- Compiled render-plan metadata and Qt diagnostics now expose `rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1`.
+- The contract records candidate run ids, strict RGBA diff tolerance, required artifacts and the recommended quick render smoke command.
+- The Layers control-board render-plan strip now shows `parity=` beside compose run and merge-candidate counts.
+- Smoke gates now verify parity contract schema/helper/field, Qt summary text and renderer contract markers.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Render-plan compose run grouping
 
 Changes:

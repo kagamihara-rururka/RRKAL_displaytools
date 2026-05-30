@@ -14159,6 +14159,11 @@ class HybridRenderController:
             queued["compose_queue_reason"] = "executable_overlay"
             queue.append(queued)
         compose_runs_packet = self.layer_render_plan_compose_runs(queue)
+        compose_run_parity_contract = self.layer_render_plan_compose_run_parity_contract(
+            compose_runs_packet.get("runs", [])
+            if isinstance(compose_runs_packet.get("runs"), list)
+            else []
+        )
         return {
             "schema": "rrkal_displaytools.layer_render_plan_compose_queue.v1",
             "source": "HybridRenderController.layer_render_plan_compose_queue",
@@ -14174,6 +14179,8 @@ class HybridRenderController:
             "compose_runs": compose_runs_packet.get("runs", []),
             "compose_run_count": compose_runs_packet.get("run_count", 0),
             "compose_merge_candidate_run_count": compose_runs_packet.get("merge_candidate_run_count", 0),
+            "compose_run_parity_contract_schema": "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1",
+            "compose_run_parity_contract": compose_run_parity_contract,
             "next_optimization_target": "collapse executable queue into fewer overlay composition passes",
         }
 
@@ -14242,6 +14249,39 @@ class HybridRenderController:
             "merge_candidate_run_count": sum(1 for run in runs if run.get("merge_safe") is True),
             "runs": runs,
             "next_optimization_target": "merge safe adjacent alpha_compose overlays after visual parity smoke is available",
+        }
+
+    def layer_render_plan_compose_run_parity_contract(
+        self,
+        compose_runs: list[dict[str, object]],
+    ) -> dict[str, object]:
+        merge_candidates = [
+            run
+            for run in compose_runs
+            if isinstance(run, dict) and run.get("merge_safe") is True
+        ]
+        return {
+            "schema": "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1",
+            "source": "HybridRenderController.layer_render_plan_compose_run_parity_contract",
+            "status": "required_before_runtime_merge" if merge_candidates else "no_merge_candidates",
+            "runtime_merge_enabled": False,
+            "merge_candidate_run_count": len(merge_candidates),
+            "candidate_run_ids": [str(run.get("id")) for run in merge_candidates],
+            "compare_method": "sequential_compose_queue_vs_merged_candidate_rgba_diff",
+            "required_artifacts": [
+                "baseline_sequential_frame_rgba",
+                "merged_candidate_frame_rgba",
+                "max_abs_diff",
+                "changed_pixel_count",
+                "renderer_output_metadata",
+            ],
+            "tolerance": {
+                "max_abs_diff": 0,
+                "changed_pixel_count": 0,
+            },
+            "gate": "block_compose_run_merge_until_visual_parity_passes",
+            "recommended_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\render_quick_smoke.ps1",
+            "next_runtime_step": "add an opt-in merged alpha compose path and compare it against the sequential compose queue before enabling it by default",
         }
 
     def apply_layer_render_plan_composition(self, steps: list[dict[str, object]] | None = None) -> np.ndarray:
@@ -14756,6 +14796,8 @@ class HybridRenderController:
             plan["compose_runs_schema"] = "rrkal_displaytools.layer_render_plan_compose_runs.v1"
             plan["compose_run_count"] = compose_queue_packet.get("compose_run_count", 0)
             plan["compose_merge_candidate_run_count"] = compose_queue_packet.get("compose_merge_candidate_run_count", 0)
+            plan["compose_run_parity_contract"] = compose_queue_packet.get("compose_run_parity_contract", {})
+            plan["compose_run_parity_contract_schema"] = "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1"
             return plan
         self.compiled_layer_render_plan_cache_key = cache_key
         return {
@@ -14805,6 +14847,8 @@ class HybridRenderController:
             "compose_runs_schema": "rrkal_displaytools.layer_render_plan_compose_runs.v1",
             "compose_run_count": compose_queue_packet.get("compose_run_count", 0),
             "compose_merge_candidate_run_count": compose_queue_packet.get("compose_merge_candidate_run_count", 0),
+            "compose_run_parity_contract": compose_queue_packet.get("compose_run_parity_contract", {}),
+            "compose_run_parity_contract_schema": "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1",
             "compose_order": runtime_snapshot.get("compose_order", []),
             "apply_helper": "HybridRenderController.apply_layer_render_plan_composition",
             "single_pass_ready": False,
@@ -19794,6 +19838,8 @@ def layer_render_plan_cache_diagnostics_packet(
         "compose_runs": plan.get("compose_runs") if isinstance(plan.get("compose_runs"), list) else [],
         "compose_run_count": plan.get("compose_run_count", 0),
         "compose_merge_candidate_run_count": plan.get("compose_merge_candidate_run_count", 0),
+        "compose_run_parity_contract_schema": plan.get("compose_run_parity_contract_schema", "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1"),
+        "compose_run_parity_contract": plan.get("compose_run_parity_contract") if isinstance(plan.get("compose_run_parity_contract"), dict) else {},
         "cache_key_available": bool(plan.get("cache_key")),
         "reuse_policy": plan.get("reuse_policy", "reuse_when_cache_key_matches_previous_compiled_plan") if available else "unavailable",
         "reuse_boundary": plan.get("reuse_boundary", "valid_until_dirty_flags_or_camera_change") if available else "unavailable",
@@ -19874,6 +19920,9 @@ def layer_render_plan_performance_packet(
         "compiled_plan_compose_runs_schema": "rrkal_displaytools.layer_render_plan_compose_runs.v1",
         "compiled_plan_compose_runs_helper": "HybridRenderController.layer_render_plan_compose_runs",
         "compiled_plan_compose_runs_field": "compose_runs",
+        "compiled_plan_compose_run_parity_contract_schema": "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1",
+        "compiled_plan_compose_run_parity_contract_helper": "HybridRenderController.layer_render_plan_compose_run_parity_contract",
+        "compiled_plan_compose_run_parity_contract_field": "compose_run_parity_contract",
         "phase_timing_unit": "milliseconds",
         "compiled_plan_reuse_decision_field": "cache_reuse_decision",
         "compiled_plan_reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",

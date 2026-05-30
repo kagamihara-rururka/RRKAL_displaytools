@@ -629,6 +629,15 @@ if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_runs_helpe
 if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_runs_field -ne "compose_runs") {
     throw "Launch packet layer_render_plan_performance compose runs field missing"
 }
+if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_schema -ne "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1") {
+    throw "Launch packet layer_render_plan_performance compose run parity contract schema missing"
+}
+if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_helper -ne "HybridRenderController.layer_render_plan_compose_run_parity_contract") {
+    throw "Launch packet layer_render_plan_performance compose run parity contract helper missing"
+}
+if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_field -ne "compose_run_parity_contract") {
+    throw "Launch packet layer_render_plan_performance compose run parity contract field missing"
+}
 if ($launchPacket.layer_render_plan_performance.compiled_plan_reuse_decision_field -ne "cache_reuse_decision") {
     throw "Launch packet layer_render_plan_performance reuse decision field missing"
 }
@@ -1864,6 +1873,15 @@ if ($capabilities.layer_render_plan_performance.compiled_plan_compose_runs_helpe
 if ($capabilities.layer_render_plan_performance.compiled_plan_compose_runs_field -ne "compose_runs") {
     throw "Renderer layer_render_plan_performance compose runs field missing"
 }
+if ($capabilities.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_schema -ne "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1") {
+    throw "Renderer layer_render_plan_performance compose run parity contract schema missing"
+}
+if ($capabilities.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_helper -ne "HybridRenderController.layer_render_plan_compose_run_parity_contract") {
+    throw "Renderer layer_render_plan_performance compose run parity contract helper missing"
+}
+if ($capabilities.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_field -ne "compose_run_parity_contract") {
+    throw "Renderer layer_render_plan_performance compose run parity contract field missing"
+}
 if ($capabilities.layer_render_plan_performance.compiled_plan_reuse_policy -ne "reuse_when_cache_key_matches_previous_compiled_plan") {
     throw "Renderer layer_render_plan_performance compiled plan reuse policy missing"
 }
@@ -2647,6 +2665,15 @@ if ($handoff.layer_render_plan_performance.compiled_plan_compose_runs_helper -ne
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_compose_runs_field -ne "compose_runs") {
     throw "Handoff inspection layer render plan performance compose runs field missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_schema -ne "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1") {
+    throw "Handoff inspection layer render plan performance compose run parity contract schema missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_helper -ne "HybridRenderController.layer_render_plan_compose_run_parity_contract") {
+    throw "Handoff inspection layer render plan performance compose run parity contract helper missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_field -ne "compose_run_parity_contract") {
+    throw "Handoff inspection layer render plan performance compose run parity contract field missing"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_reuse_decision_field -ne "cache_reuse_decision") {
     throw "Handoff inspection layer render plan performance reuse decision field missing"
@@ -3982,6 +4009,15 @@ if ($qtPanelSource -notlike "*runs={compose_run_count}*") {
 if ($qtPanelSource -notlike "*merge={compose_merge_candidate_run_count}*") {
     throw "Qt render plan compose merge summary text is missing"
 }
+if ($qtPanelSource -notlike "*layer_render_plan_compose_run_parity_contract.v1*") {
+    throw "Qt render plan compose run parity contract schema is missing"
+}
+if ($qtPanelSource -notlike "*compose_run_parity_contract*") {
+    throw "Qt render plan compose run parity contract is missing"
+}
+if ($qtPanelSource -notlike "*parity={parity_status}*") {
+    throw "Qt render plan compose run parity summary text is missing"
+}
 if ($qtPanelSource -notlike "*refresh_layer_render_plan_cache_diagnostics_strip*") {
     throw "Qt render plan cache diagnostics strip refresh is missing"
 }
@@ -4307,6 +4343,18 @@ if ($rendererSource -notlike "*def layer_render_plan_compose_queue*") {
 }
 if ($rendererSource -notlike "*def layer_render_plan_compose_runs*") {
     throw "Renderer render plan compose runs helper is missing"
+}
+if ($rendererSource -notlike "*def layer_render_plan_compose_run_parity_contract*") {
+    throw "Renderer render plan compose run parity helper is missing"
+}
+if ($rendererSource -notlike "*block_compose_run_merge_until_visual_parity_passes*") {
+    throw "Renderer render plan compose run parity gate marker is missing"
+}
+if ($rendererSource -notlike "*sequential_compose_queue_vs_merged_candidate_rgba_diff*") {
+    throw "Renderer render plan compose run parity compare marker is missing"
+}
+if ($rendererSource -notlike "*baseline_sequential_frame_rgba*") {
+    throw "Renderer render plan compose run parity baseline artifact marker is missing"
 }
 if ($rendererSource -notlike "*adjacent_alpha_compose_overlays_can_be_collapsed_after_visual_parity_check*") {
     throw "Renderer render plan compose runs merge-safe marker is missing"
