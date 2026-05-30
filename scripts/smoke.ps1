@@ -1199,6 +1199,9 @@ if ($visualInspectorIndex.entry_ids -notcontains "uiux_closure_status") {
 if ($visualInspectorIndex.entry_ids -notcontains "layer_visual_presets") {
     throw "Visual contract inspector index missing Layer visual presets inspector"
 }
+if ($visualInspectorIndex.entry_ids -notcontains "layer_operator_shortcuts") {
+    throw "Visual contract inspector index missing Layer operator shortcuts inspector"
+}
 if ($visualInspectorIndex.entry_ids -notcontains "research_interaction") {
     throw "Visual contract inspector index missing Research interaction inspector"
 }
@@ -1279,6 +1282,9 @@ if ($visualReviewPacket.inspector_entry_ids -notcontains "uiux_closure_status") 
 if ($visualReviewPacket.inspector_entry_ids -notcontains "layer_visual_presets") {
     throw "Visual contract review packet missing Layer visual presets inspector"
 }
+if ($visualReviewPacket.inspector_entry_ids -notcontains "layer_operator_shortcuts") {
+    throw "Visual contract review packet missing Layer operator shortcuts inspector"
+}
 if ($visualReviewPacket.inspector_entry_ids -notcontains "research_interaction") {
     throw "Visual contract review packet missing Research interaction inspector"
 }
@@ -1302,6 +1308,9 @@ if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -Exec
 }
 if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_layer_visual_presets.ps1") {
     throw "Visual contract review packet missing Layer visual presets first command"
+}
+if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_layer_operator_shortcuts.ps1") {
+    throw "Visual contract review packet missing Layer operator shortcuts first command"
 }
 if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_research_interaction.ps1") {
     throw "Visual contract review packet missing Research interaction first command"
@@ -1661,6 +1670,50 @@ if ($layerVisualPresetsInspectorPacket.selection_tool_mode -ne "select_layer") {
 }
 if ($layerVisualPresetsInspectorPacket.selection_affordance_quick_actions -notcontains "diagnostics") {
     throw "Layer visual presets selection diagnostics action missing"
+}
+$layerOperatorShortcutsInspectorPath = Join-Path $RepoRoot "scripts\inspect_layer_operator_shortcuts.ps1"
+if (-not (Test-Path -LiteralPath $layerOperatorShortcutsInspectorPath)) {
+    throw "Layer operator shortcuts inspector script is missing"
+}
+$layerOperatorShortcutsInspectorContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $layerOperatorShortcutsInspectorPath, "-ContractOnly")
+$layerOperatorShortcutsInspectorContract = ($layerOperatorShortcutsInspectorContractText -join "`n") | ConvertFrom-Json
+if ($layerOperatorShortcutsInspectorContract.schema -ne "rrkal_displaytools.layer_operator_shortcuts_inspector.v1") {
+    throw "Layer operator shortcuts inspector contract schema missing"
+}
+if ($layerOperatorShortcutsInspectorContract.required_contracts -notcontains "rrkal_displaytools.layer_operator_shortcuts.v1") {
+    throw "Layer operator shortcuts inspector shortcut contract missing"
+}
+if ($layerOperatorShortcutsInspectorContract.required_contracts -notcontains "rrkal_displaytools.layer_selection_affordance.v1") {
+    throw "Layer operator shortcuts inspector selection affordance contract missing"
+}
+$layerOperatorShortcutsInspectorText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $layerOperatorShortcutsInspectorPath)
+$layerOperatorShortcutsInspectorPacket = ($layerOperatorShortcutsInspectorText -join "`n") | ConvertFrom-Json
+if ($layerOperatorShortcutsInspectorPacket.schema -ne "rrkal_displaytools.layer_operator_shortcuts_inspection.v1") {
+    throw "Layer operator shortcuts inspection schema missing"
+}
+if ($layerOperatorShortcutsInspectorPacket.ui_direction -ne "qt_first_photoshop_like_layer_operations") {
+    throw "Layer operator shortcuts UI direction mismatch"
+}
+if ($layerOperatorShortcutsInspectorPacket.implemented_action_ids -notcontains "select_layer") {
+    throw "Layer operator shortcuts select action missing"
+}
+if ($layerOperatorShortcutsInspectorPacket.implemented_action_ids -notcontains "open_boundary_emphasis") {
+    throw "Layer operator shortcuts boundary emphasis action missing"
+}
+if ($layerOperatorShortcutsInspectorPacket.installed_shortcut_ids -notcontains "toggle_visibility") {
+    throw "Layer operator shortcuts visibility shortcut missing"
+}
+if ($layerOperatorShortcutsInspectorPacket.installed_shortcut_ids -notcontains "undo_layer_state") {
+    throw "Layer operator shortcuts undo shortcut missing"
+}
+if ($layerOperatorShortcutsInspectorPacket.complete_group_count -lt 5) {
+    throw "Layer operator shortcuts group closure incomplete"
+}
+if ($layerOperatorShortcutsInspectorPacket.active_quick_actions -notcontains "solo") {
+    throw "Layer operator shortcuts active solo quick action missing"
+}
+if ($layerOperatorShortcutsInspectorPacket.copyable_provenance -ne $true) {
+    throw "Layer operator shortcuts copyable provenance missing"
 }
 $researchInteractionInspectorPath = Join-Path $RepoRoot "scripts\inspect_research_interaction.ps1"
 if (-not (Test-Path -LiteralPath $researchInteractionInspectorPath)) {

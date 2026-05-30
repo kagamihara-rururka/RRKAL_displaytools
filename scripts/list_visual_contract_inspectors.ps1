@@ -61,6 +61,14 @@ $entries = @(
         no_launch_side_effect = $true
     },
     [ordered]@{
+        id = "layer_operator_shortcuts"
+        category = "layer_control"
+        schema = "rrkal_displaytools.layer_operator_shortcuts_inspector.v1"
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_layer_operator_shortcuts.ps1"
+        proves = @("keyboard shortcuts", "active quick actions", "operation groups", "copyable provenance")
+        no_launch_side_effect = $true
+    },
+    [ordered]@{
         id = "research_interaction"
         category = "research_interaction"
         schema = "rrkal_displaytools.research_interaction_inspector.v1"
@@ -164,6 +172,7 @@ $entries = @(
         "qt_uiux_surface",
         "uiux_closure_status",
         "layer_visual_presets",
+        "layer_operator_shortcuts",
         "research_interaction",
         "hydrology_lod",
         "ocean_material",

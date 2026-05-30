@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Layer operator shortcuts inspector
+
+- Added `scripts/inspect_layer_operator_shortcuts.ps1` as a no-GUI reviewer packet for layer keyboard shortcuts, active quick actions, operation groups and copyable provenance.
+- Registered the inspector in the visual contract inspector index, cross-machine review packet and smoke gates.
+- Smoke now verifies `select_layer`, Boundary emphasis, visibility/undo shortcuts, quick solo action and complete operator groups.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; transient cloud-drive file-access backoff warnings observed, final retry passed).
+
 ## 2026-05-31 - UIUX closure status inspector
 
 - Added `scripts/inspect_uiux_closure_status.ps1` as a no-GUI closure board for visual feature readiness, goal scorecard, closed-loop status and visual review readiness.
