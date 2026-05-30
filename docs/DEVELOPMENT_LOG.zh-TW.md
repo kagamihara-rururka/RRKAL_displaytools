@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Style thumbnail readiness label
+
+Changes:
+- Added `styleThumbnailReadiness` to the Qt Looks/templates section.
+- The label reports ready/missing local thumbnail slots for `state/style_previews/<style>.png`.
+- Added `rrkal_displaytools.style_thumbnail_readiness.v1` metadata to style preview packets, handoff inspection and smoke.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Cross-machine clone command contract
 
 Changes:

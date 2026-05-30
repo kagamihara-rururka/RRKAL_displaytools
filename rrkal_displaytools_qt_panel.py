@@ -245,6 +245,10 @@ def style_template_visual_preview_packet(
         "qt_icon_loader": "refresh_style_template_preview_cards",
         "thumbnail_icon_size": [96, 54],
         "thumbnail_missing_card_text": "thumb: missing",
+        "thumbnail_readiness_schema": "rrkal_displaytools.style_thumbnail_readiness.v1",
+        "thumbnail_readiness_label_object": "styleThumbnailReadiness",
+        "thumbnail_readiness_fields": ["ready_count", "missing_count", "missing_ids", "thumbnail_batch_command"],
+        "thumbnail_readiness_summary_format": "Style thumbnails: ready={ready_count}/{required_count}; missing={missing_ids}; action={thumbnail_batch_script}",
         "qt_interaction": "clickable_preview_cards_select_style_profile",
         "card_click_action": "apply_style_template_preview_card",
         "qt_card_object_prefix": "styleTemplateCard_",
@@ -2932,6 +2936,13 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         renderer_form.addRow("Template preview", self.style_template_preview_label)
         self.style_template_preview_cards = self._create_style_template_preview_cards()
         renderer_form.addRow("Template cards", self.style_template_preview_cards)
+        self.style_thumbnail_readiness_label = QtWidgets.QLabel("Style thumbnails: ready=unknown; missing=unknown")
+        self.style_thumbnail_readiness_label.setObjectName("styleThumbnailReadiness")
+        self.style_thumbnail_readiness_label.setWordWrap(True)
+        self.style_thumbnail_readiness_label.setStyleSheet(
+            "QLabel#styleThumbnailReadiness { background:#fff7e6; color:#5a3b12; border:1px solid #d6a94f; border-radius:6px; padding:6px; font-weight:600; }"
+        )
+        renderer_form.addRow("Thumb readiness", self.style_thumbnail_readiness_label)
         self.style_combo.currentTextChanged.connect(lambda _text: self.refresh_style_template_preview_cards())
         self.refresh_style_template_preview_cards()
         renderer_form.addRow("UI backend", self.ui_combo)
@@ -4531,6 +4542,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         current_style = self.style_combo.currentText() if hasattr(self, "style_combo") else ""
         cards = packet.get("preview_cards", [])
         card_by_id = {str(card.get("id")): card for card in cards if isinstance(card, dict)} if isinstance(cards, list) else {}
+        ready_count = 0
+        missing_ids: list[str] = []
         for style_id, button in getattr(self, "style_template_preview_buttons", {}).items():
             card = card_by_id.get(style_id, {})
             label = str(card.get("label", style_id.title())) if isinstance(card, dict) else style_id.title()
@@ -4538,6 +4551,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             thumbnail_path = str(card.get("thumbnail_path", f"state/style_previews/{style_id}.png")) if isinstance(card, dict) else f"state/style_previews/{style_id}.png"
             thumbnail_file = self.local_style_thumbnail_path(thumbnail_path)
             thumbnail_exists = thumbnail_file.exists()
+            if thumbnail_exists:
+                ready_count += 1
+            else:
+                missing_ids.append(style_id)
             button.setText(
                 f"{label}\n{'  '.join(str(color) for color in swatches)}\nthumb: {'ready' if thumbnail_exists else 'missing'} {thumbnail_path}"
             )
@@ -4549,6 +4566,13 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             selected = style_id == current_style
             button.setChecked(selected)
             button.setStyleSheet(self._style_template_preview_card_stylesheet(swatches, selected))
+        readiness_label = getattr(self, "style_thumbnail_readiness_label", None)
+        if readiness_label is not None:
+            missing_text = ", ".join(missing_ids) if missing_ids else "none"
+            readiness_label.setText(
+                f"Style thumbnails: ready={ready_count}/{len(card_by_id)}; "
+                f"missing={missing_text}; action=Copy style thumbs command"
+            )
         if hasattr(self, "style_template_preview_label"):
             self.style_template_preview_label.setText(
                 f"Style previews: {packet.get('preview_count')} cards; thumbnails={packet.get('thumbnail_artifact_dir')}; selected={current_style}; click a card to update Style profile."
