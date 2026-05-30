@@ -335,6 +335,15 @@ if ($launchPacket.boundary_emphasis_control.boundary_summary_contract_schema -ne
 if ($launchPacket.boundary_emphasis_control.boundary_summary_contract.qt_copy_action -ne "copy_boundary_emphasis_summary") {
     throw "Launch packet boundary_emphasis_control summary copy action missing or invalid"
 }
+if ($launchPacket.boundary_emphasis_control.boundary_summary_contract.summary_format -notlike "*contrast={contrast}*gamma={gamma}*breathing={breathing_enabled}@{breathing_period_s}s*") {
+    throw "Launch packet boundary_emphasis_control summary tuning format missing"
+}
+if ($launchPacket.boundary_emphasis_control.boundary_summary_contract.summary_parameter_fields -notcontains "breathing_period_s") {
+    throw "Launch packet boundary_emphasis_control summary tuning fields missing"
+}
+if ($launchPacket.boundary_emphasis_control.summary_parameter_fields -notcontains "gamma") {
+    throw "Launch packet boundary_emphasis_control portable summary parameter fields missing"
+}
 if (-not $launchPacket.boundary_emphasis_control.boundary_summary_contract.portable) {
     throw "Launch packet boundary_emphasis_control summary portability flag missing"
 }
@@ -1348,6 +1357,12 @@ if ($capabilities.boundary_emphasis_control.boundary_summary_contract_schema -ne
 if ($capabilities.boundary_emphasis_control.boundary_summary_contract.qt_copy_action -ne "copy_boundary_emphasis_summary") {
     throw "Renderer boundary_emphasis_control summary copy action missing or invalid"
 }
+if ($capabilities.boundary_emphasis_control.boundary_summary_contract.summary_format -notlike "*contrast={contrast}*gamma={gamma}*breathing={breathing_enabled}@{breathing_period_s}s*") {
+    throw "Renderer boundary_emphasis_control summary tuning format missing"
+}
+if ($capabilities.boundary_emphasis_control.summary_parameter_fields -notcontains "contrast") {
+    throw "Renderer boundary_emphasis_control portable summary parameter fields missing"
+}
 if ($capabilities.style_renderer_entries.schema -ne "rrkal_displaytools.style_renderer_entries.v1") {
     throw "Renderer style_renderer_entries schema missing or invalid"
 }
@@ -2201,6 +2216,9 @@ if ($handoff.boundary_emphasis_control.dialog_feedback -notcontains "rgb_swatch"
 if ($handoff.boundary_emphasis_control.value_preview_fields -notcontains "target_alignment") {
     throw "Handoff inspection boundary_emphasis_control target alignment preview missing"
 }
+if ($handoff.boundary_emphasis_control.summary_parameter_fields -notcontains "breathing_enabled") {
+    throw "Handoff inspection boundary_emphasis_control summary parameter fields missing"
+}
 if (-not $handoff.boundary_emphasis_control.target_alignment) {
     throw "Handoff inspection boundary_emphasis_control target alignment field missing"
 }
@@ -2215,6 +2233,9 @@ if ($handoff.boundary_emphasis_control.boundary_summary_contract.qt_label_object
 }
 if ($handoff.boundary_emphasis_control.boundary_summary_contract.qt_copy_action -ne "copy_boundary_emphasis_summary") {
     throw "Handoff inspection boundary_emphasis_control summary copy action missing or invalid"
+}
+if ($handoff.boundary_emphasis_control.boundary_summary_contract.summary_format -notlike "*contrast={contrast}*gamma={gamma}*breathing={breathing_enabled}@{breathing_period_s}s*") {
+    throw "Handoff inspection boundary_emphasis_control summary tuning format missing"
 }
 if (-not $handoff.boundary_emphasis_control.boundary_summary_contract.portable) {
     throw "Handoff inspection boundary_emphasis_control summary portability flag missing"
@@ -3123,6 +3144,9 @@ if ($qtPanelSource -notlike "*boundary_emphasis_summary_text*") {
 }
 if ($qtPanelSource -notlike "*copy_boundary_emphasis_summary*") {
     throw "Qt Boundary summary copy action missing"
+}
+if ($qtPanelSource -notlike "*contrast={packet.get('contrast')}*gamma={packet.get('gamma')}*breathing={packet.get('breathing_enabled')}@{packet.get('breathing_period_s')}s*") {
+    throw "Qt Boundary summary tuning fields missing"
 }
 if ($qtPanelSource -notlike "*Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON*") {
     throw "Qt Boundary JSON action tooltip is missing"

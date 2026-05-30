@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Boundary emphasis tuning summary
+
+Changes:
+- Expanded the boundary emphasis portable summary to include RGB, contrast, opacity, gamma and breathing period values.
+- Added summary parameter fields to Qt, launch packet, renderer capability and handoff contracts for the boundary emphasis control surface.
+- Smoke now gates the richer boundary emphasis summary format across launch packet, renderer capabilities, handoff inspection and Qt copy text.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Local style thumbnail readiness JSON
 
 Changes:

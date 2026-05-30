@@ -19682,6 +19682,7 @@ def boundary_emphasis_control_packet(
         {"id": "breathing_enabled", "label": "Breathing effect", "kind": "checkbox"},
         {"id": "breathing_period_s", "label": "Breathing period", "kind": "slider"},
     ]
+    summary_parameter_fields = ["color_rgb", "contrast", "opacity", "gamma", "breathing_enabled", "breathing_period_s"]
     return {
         "schema": "rrkal_displaytools.boundary_emphasis_control.v1",
         "source": source,
@@ -19709,13 +19710,15 @@ def boundary_emphasis_control_packet(
         "boundary_summary_contract_schema": "rrkal_displaytools.boundary_emphasis_summary_contract.v1",
         "boundary_summary_contract": {
             "label": "Boundary emphasis",
-            "summary_format": "Boundary emphasis: target={target_mode}->{target_layer_key}; align={target_alignment_label}; color={color_rgb}; opacity={opacity}; bridge={renderer_bridge_contract}",
+            "summary_format": "Boundary emphasis: target={target_mode}->{target_layer_key}; align={target_alignment_label}; color={color_rgb}; contrast={contrast}; opacity={opacity}; gamma={gamma}; breathing={breathing_enabled}@{breathing_period_s}s; bridge={renderer_bridge_contract}",
+            "summary_parameter_fields": summary_parameter_fields,
             "qt_label_object": "boundary_emphasis_label",
             "qt_copy_action": "copy_boundary_emphasis_summary",
             "launch_packet_field": "boundary_emphasis_control.boundary_summary_contract",
             "handoff_field": "boundary_emphasis_control.boundary_summary_contract",
             "portable": True,
         },
+        "summary_parameter_fields": summary_parameter_fields,
         "renderer_controls_mapped": ["target_layers", "color_rgb", "contrast", "alpha", "gamma", "breathing"],
         "dialog_feedback": ["rgb_swatch", "live_numeric_readout", "renderer_bridge_summary"],
         "value_preview_fields": ["target_mode", "target_alignment", "color_rgb", "contrast", "opacity", "gamma", "breathing_period_s"],

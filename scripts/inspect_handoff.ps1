@@ -307,6 +307,7 @@ $summary = [ordered]@{
         renderer_controls_mapped = $launchPacket.boundary_emphasis_control.renderer_controls_mapped
         dialog_feedback = $launchPacket.boundary_emphasis_control.dialog_feedback
         value_preview_fields = $launchPacket.boundary_emphasis_control.value_preview_fields
+        summary_parameter_fields = $launchPacket.boundary_emphasis_control.summary_parameter_fields
         target_layer_key = $launchPacket.boundary_emphasis_control.target_layer_key
         target_alignment = $launchPacket.boundary_emphasis_control.target_alignment
         target_alignment_label = $launchPacket.boundary_emphasis_control.target_alignment_label

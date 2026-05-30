@@ -2379,6 +2379,7 @@ def boundary_emphasis_control_packet(
         {"id": "breathing_enabled", "label": "Breathing effect", "kind": "checkbox"},
         {"id": "breathing_period_s", "label": "Breathing period", "kind": "slider"},
     ]
+    summary_parameter_fields = ["color_rgb", "contrast", "opacity", "gamma", "breathing_enabled", "breathing_period_s"]
     return {
         "schema": "rrkal_displaytools.boundary_emphasis_control.v1",
         "source": source,
@@ -2406,13 +2407,15 @@ def boundary_emphasis_control_packet(
         "boundary_summary_contract_schema": "rrkal_displaytools.boundary_emphasis_summary_contract.v1",
         "boundary_summary_contract": {
             "label": "Boundary emphasis",
-            "summary_format": "Boundary emphasis: target={target_mode}->{target_layer_key}; align={target_alignment_label}; color={color_rgb}; opacity={opacity}; bridge={renderer_bridge_contract}",
+            "summary_format": "Boundary emphasis: target={target_mode}->{target_layer_key}; align={target_alignment_label}; color={color_rgb}; contrast={contrast}; opacity={opacity}; gamma={gamma}; breathing={breathing_enabled}@{breathing_period_s}s; bridge={renderer_bridge_contract}",
+            "summary_parameter_fields": summary_parameter_fields,
             "qt_label_object": "boundary_emphasis_label",
             "qt_copy_action": "copy_boundary_emphasis_summary",
             "launch_packet_field": "boundary_emphasis_control.boundary_summary_contract",
             "handoff_field": "boundary_emphasis_control.boundary_summary_contract",
             "portable": True,
         },
+        "summary_parameter_fields": summary_parameter_fields,
         "renderer_controls_mapped": ["target_layers", "color_rgb", "contrast", "alpha", "gamma", "breathing"],
         "dialog_feedback": ["rgb_swatch", "live_numeric_readout", "renderer_bridge_summary"],
         "value_preview_fields": ["target_mode", "target_alignment", "color_rgb", "contrast", "opacity", "gamma", "breathing_period_s"],
@@ -3464,7 +3467,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (cursor_geo_button, "Research interaction: inspect mouse cursor latitude/longitude geodesy bridge JSON."),
             (copy_cursor_summary_button, "Cursor geodesy: copy source, hit state, latitude/longitude and renderer state/ack bridge summary."),
             (boundary_state_button, "Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON."),
-            (copy_boundary_summary_button, "Boundary emphasis: copy target, alignment, color, opacity and renderer bridge summary."),
+            (copy_boundary_summary_button, "Boundary emphasis: copy target, alignment, RGB/contrast/opacity/gamma/breathing and renderer bridge summary."),
             (copy_research_summary_button, "Research interaction: copy selection, pin, cursor and boundary summaries as one portable handoff note."),
             (visual_readiness_button, "Visual review: inspect thumbnail/live preview readiness, frame status and missing-frame hints JSON."),
             (copy_visual_summary_button, "Visual review: copy compact thumbnail/live preview readiness summary to clipboard."),
@@ -4927,7 +4930,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"target={packet.get('target_mode')}->{packet.get('target_layer_key') or '-'}; "
             f"align={packet.get('target_alignment_label')}; "
             f"color={packet.get('color_rgb')}; "
+            f"contrast={packet.get('contrast')}; "
             f"opacity={packet.get('opacity')}; "
+            f"gamma={packet.get('gamma')}; "
+            f"breathing={packet.get('breathing_enabled')}@{packet.get('breathing_period_s')}s; "
             f"bridge={packet.get('renderer_bridge_contract')}"
         )
 
