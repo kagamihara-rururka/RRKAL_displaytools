@@ -1082,6 +1082,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         ("pin_pick", "Inspect: Pin pick"),
         ("cursor_geo", "Inspect: Cursor geo"),
         ("boundary_json", "Inspect: Boundary JSON"),
+        ("visual_readiness", "Inspect: Visual readiness"),
         ("renderer_thumbnail", "Inspect: Renderer thumbnail"),
         ("live_preview", "Inspect: Live preview"),
     ]
@@ -1089,7 +1090,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         {"id": "replay_contracts", "label": "Replay/contracts", "action_ids": ["profile_replay", "timeline", "clone_ready", "module_seams"]},
         {"id": "renderer_ports", "label": "Renderer ports", "action_ids": ["hydro_lod", "ocean_port", "style_routes", "layer_matrix", "layer_runtime"]},
         {"id": "research_interaction", "label": "Research interaction", "action_ids": ["layer_pick", "selection_state", "layer_ops", "canvas_state", "pin_pick", "cursor_geo", "boundary_json"]},
-        {"id": "visual_review", "label": "Visual review", "action_ids": ["renderer_thumbnail", "live_preview"]},
+        {"id": "visual_review", "label": "Visual review", "action_ids": ["visual_readiness", "renderer_thumbnail", "live_preview"]},
     ]
     return {
         "schema": "rrkal_displaytools.profile_ui_state_replay.v1",
@@ -1110,6 +1111,28 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         "handoff_field": "profile_ui_state_replay",
         "summary_text": "Profiles preserve renderer settings, layer stack, pins, Boundary emphasis/warnings and Timeline keyframes for cross-machine UI replay.",
         "boundary": "Replay coverage describes portable UI/profile state; it does not imply RRKAL data discovery/cache governance or authoritative geospatial identity resolution.",
+    }
+
+
+def visual_review_readiness_packet(source: str) -> dict[str, object]:
+    visual_actions = ["visual_readiness", "renderer_thumbnail", "live_preview"]
+    return {
+        "schema": "rrkal_displaytools.visual_review_readiness.v1",
+        "source": source,
+        "status": "ready",
+        "visual_review_actions": visual_actions,
+        "qt_inspector_action_id": "visual_readiness",
+        "qt_inspector_action_label": "Inspect: Visual readiness",
+        "renderer_thumbnail_ready": True,
+        "live_preview_ready": True,
+        "recommended_sequence": ["Inspect: Visual readiness", "Inspect: Renderer thumbnail", "Inspect: Live preview"],
+        "missing_frame_guidance": [
+            "Run Inspect: Renderer thumbnail to confirm cached preview-frame availability.",
+            "Run Inspect: Live preview to confirm renderer frame-capture routing.",
+            "If both views are unavailable, launch Qt with a known style profile before filing a renderer issue.",
+        ],
+        "summary_text": "Visual review readiness confirms the Qt Inspect path for renderer thumbnail and live preview before deeper renderer debugging.",
+        "boundary": "Readiness metadata only; it does not render a new frame, download data, or mutate renderer/cache state.",
     }
 
 
@@ -2735,6 +2758,7 @@ def launch_packet(
         "profile_launch_readiness": profile_launch_readiness_packet("scripts.export_launch_packet", style_renderer_entries_packet("scripts.export_launch_packet", profile.get("style_profile") if isinstance(profile.get("style_profile"), str) else None), layer_operator_groups_packet(layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None), "scripts.export_launch_packet")),
         "profile_launch_readiness_ui": profile_launch_readiness_ui_packet(profile_launch_readiness_packet("scripts.export_launch_packet", style_renderer_entries_packet("scripts.export_launch_packet", profile.get("style_profile") if isinstance(profile.get("style_profile"), str) else None), layer_operator_groups_packet(layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None), "scripts.export_launch_packet")), "scripts.export_launch_packet"),
         "profile_ui_state_replay": profile_ui_state_replay_packet("scripts.export_launch_packet"),
+        "visual_review_readiness": visual_review_readiness_packet("scripts.export_launch_packet"),
         "layer_visual_presets": layer_visual_presets_packet("scripts.export_launch_packet"),
         "layer_visual_preset_runtime_feedback": layer_visual_preset_runtime_feedback_packet(layer_visual_presets_packet("scripts.export_launch_packet"), None, "scripts.export_launch_packet"),
         "hydrology_lod_readiness": hydrology_lod_readiness_packet("scripts.export_launch_packet", layer_capability_matrix_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None, rrkal_data_manifest_ref)),
@@ -2833,6 +2857,5 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
 
 

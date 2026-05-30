@@ -329,3 +329,14 @@ Done:
 
 Next:
 - Continue moving the same review clarity into Qt-side user-facing Inspect output where useful.
+
+
+## 2026-05-30 - Qt visual readiness capability
+
+Done:
+- Added `visual_review_readiness` to launch packets and renderer capability discovery.
+- Added `Inspect: Visual readiness` to the profile replay Visual review group.
+- Handoff and smoke now gate the launch packet schema, renderer capability schema and Qt action id.
+
+Next:
+- Continue closing Qt visual review by surfacing thumbnail/live preview frame status in the user-facing payload.

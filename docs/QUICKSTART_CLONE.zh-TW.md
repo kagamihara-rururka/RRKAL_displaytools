@@ -200,3 +200,9 @@ Displaytools 不負責：
 - `scripts\inspect_handoff.ps1` now reports `visual_review_readiness`.
 - Use it before launching Qt on another machine to confirm `renderer_thumbnail` and `live_preview` Inspect actions are available.
 - If preview frames are missing, follow the reported guidance: inspect renderer thumbnail, inspect live preview, then retry with a known style profile before filing a renderer issue.
+
+## Qt visual readiness Inspect
+
+- Visual review now includes `Inspect: Visual readiness` before `Inspect: Renderer thumbnail` and `Inspect: Live preview`.
+- The same `visual_review_readiness` packet is exported by no-GUI launch packets and renderer capability discovery.
+- Use this first when a cloned machine opens Qt but the preview frame path is unclear.

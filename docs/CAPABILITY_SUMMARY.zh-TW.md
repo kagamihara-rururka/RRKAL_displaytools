@@ -519,3 +519,9 @@
 - Handoff inspection now exposes `rrkal_displaytools.visual_review_readiness.v1`.
 - The packet reports Visual review action ids, renderer thumbnail readiness, live preview readiness and missing-frame guidance.
 - Smoke gates both readiness flags and the renderer thumbnail/live preview guidance text.
+
+## Qt visual readiness Inspect
+
+- `rrkal_displaytools.visual_review_readiness.v1` is now emitted by no-GUI launch packets and renderer capability discovery.
+- Profile UI replay advertises `Inspect: Visual readiness` in the Visual review group.
+- Smoke gates the launch packet schema, renderer capability schema and Qt action id through handoff output.

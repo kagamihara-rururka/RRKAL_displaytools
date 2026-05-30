@@ -229,6 +229,18 @@ Positioning:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+## 2026-05-30 - Qt visual readiness capability
+
+Changes:
+- Added `visual_review_readiness` packets to `taichi_global_bathymetry.py` renderer capabilities and `scripts\export_launch_packet.py` no-GUI launch packets.
+- Added `Inspect: Visual readiness` to the profile replay Visual review action group.
+- Updated handoff inspection to read visual readiness from launch/capability packets instead of deriving it only from profile action ids.
+- Smoke gates launch packet schema, renderer capability schema and Qt action id.
+- Updated clone quickstart, capability summary and GTD for Qt visual readiness Inspect.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-30 - Visual review readiness handoff
 
 Changes:

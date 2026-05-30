@@ -26,6 +26,8 @@ $launchPacket = Invoke-JsonPythonCommand @("scripts\export_launch_packet.py", "-
 $profileUiGroups = @($launchPacket.profile_ui_state_replay.qt_inspector_action_groups)
 $researchInteractionActions = @(($profileUiGroups | Where-Object { $_.id -eq "research_interaction" } | Select-Object -First 1).action_ids)
 $visualReviewActions = @(($profileUiGroups | Where-Object { $_.id -eq "visual_review" } | Select-Object -First 1).action_ids)
+$visualReviewReadiness = $launchPacket.visual_review_readiness
+$visualReviewReadinessCapabilities = $capabilities.visual_review_readiness
 
 $summary = [ordered]@{
     schema = "rrkal_displaytools.handoff_inspection.v1"
@@ -144,16 +146,15 @@ $summary = [ordered]@{
     }
     visual_review_readiness = @{
         schema = "rrkal_displaytools.visual_review_readiness.v1"
-        source_schema = $launchPacket.profile_ui_state_replay.schema
-        visual_review_actions = $visualReviewActions
-        renderer_thumbnail_ready = ($visualReviewActions -contains "renderer_thumbnail")
-        live_preview_ready = ($visualReviewActions -contains "live_preview")
-        recommended_sequence = @("Inspect: Renderer thumbnail", "Inspect: Live preview")
-        missing_frame_guidance = @(
-            "Run Inspect: Renderer thumbnail to confirm cached preview-frame availability.",
-            "Run Inspect: Live preview to confirm renderer frame-capture routing.",
-            "If both views are unavailable, launch Qt with a known style profile before filing a renderer issue."
-        )
+        launch_packet_schema = $visualReviewReadiness.schema
+        renderer_capabilities_schema = $visualReviewReadinessCapabilities.schema
+        profile_ui_source_schema = $launchPacket.profile_ui_state_replay.schema
+        visual_review_actions = $visualReviewReadiness.visual_review_actions
+        qt_inspector_action_id = $visualReviewReadiness.qt_inspector_action_id
+        renderer_thumbnail_ready = $visualReviewReadiness.renderer_thumbnail_ready
+        live_preview_ready = $visualReviewReadiness.live_preview_ready
+        recommended_sequence = $visualReviewReadiness.recommended_sequence
+        missing_frame_guidance = $visualReviewReadiness.missing_frame_guidance
     }
     cursor_geodesy_readout = @{
         launch_packet_schema = $launchPacket.cursor_geodesy_readout.schema

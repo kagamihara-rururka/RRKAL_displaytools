@@ -1300,6 +1300,9 @@ if ($handoff.profile_visual_quick_review.qt_inspector_group_ids -notcontains "vi
 if ($handoff.profile_visual_quick_review.research_interaction_actions -notcontains "layer_ops") {
     throw "Handoff inspection profile visual quick review missing Layer ops action"
 }
+if ($handoff.profile_visual_quick_review.visual_review_actions -notcontains "visual_readiness") {
+    throw "Handoff inspection profile visual quick review missing visual readiness action"
+}
 if ($handoff.profile_visual_quick_review.visual_review_actions -notcontains "renderer_thumbnail") {
     throw "Handoff inspection profile visual quick review missing renderer thumbnail action"
 }
@@ -1308,6 +1311,18 @@ if ($handoff.profile_visual_quick_review.visual_review_actions -notcontains "liv
 }
 if ($handoff.visual_review_readiness.schema -ne "rrkal_displaytools.visual_review_readiness.v1") {
     throw "Handoff inspection visual review readiness schema missing or invalid"
+}
+if ($handoff.visual_review_readiness.launch_packet_schema -ne "rrkal_displaytools.visual_review_readiness.v1") {
+    throw "Handoff inspection visual review readiness launch packet schema missing or invalid"
+}
+if ($handoff.visual_review_readiness.renderer_capabilities_schema -ne "rrkal_displaytools.visual_review_readiness.v1") {
+    throw "Handoff inspection visual review readiness renderer capability schema missing or invalid"
+}
+if ($handoff.visual_review_readiness.qt_inspector_action_id -ne "visual_readiness") {
+    throw "Handoff inspection visual review readiness Qt action id missing or invalid"
+}
+if ($handoff.visual_review_readiness.visual_review_actions -notcontains "visual_readiness") {
+    throw "Handoff inspection visual review readiness missing visual readiness action"
 }
 if (-not $handoff.visual_review_readiness.renderer_thumbnail_ready) {
     throw "Handoff inspection visual review readiness missing renderer thumbnail readiness"
