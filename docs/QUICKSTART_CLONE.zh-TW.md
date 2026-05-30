@@ -175,3 +175,8 @@ Displaytools 不負責：
 - In the Layers dock, read `Layer operation summary` before treating a renderer view as reproducible.
 - It summarizes the active layer's visibility, lock, opacity, blend mode, renderer target, runtime ack and pick context.
 - The same text is copied into Qt launch/provenance packets as `active_layer_operation_summary`.
+
+## Last layer operation feedback
+
+- Read `Last layer operation` in the Layers dock after visibility, lock or reset actions.
+- The same compact status is exported in Qt launch/provenance packets as `last_layer_operation`.

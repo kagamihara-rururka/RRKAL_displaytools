@@ -3690,3 +3690,14 @@ Changes:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Last layer operation feedback
+
+Changes:
+- Added a visible `Last layer operation` label to the Qt Layers dock.
+- Added `set_layer_operation_status()` and routed selected-layer visibility, lock, selected reset and stack reset messages through it.
+- Added `last_layer_operation` to Qt launch/provenance packets.
+- Added smoke/docs coverage for the operation event label and packet field.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

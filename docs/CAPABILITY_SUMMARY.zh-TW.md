@@ -493,3 +493,8 @@
 - Layers dock now shows a visible `Layer operation summary` for the active research layer.
 - The summary includes active layer key/label, visibility, lock, opacity, blend mode, renderer target, runtime ack and pick context.
 - Qt launch/provenance packets include `active_layer_operation_summary`, so clone/review workflows can inspect the same operation state without opening multiple JSON panes first.
+
+## Qt last layer operation feedback
+
+- Layers dock now keeps a visible `Last layer operation` label for selected-layer visibility, lock, selected-layer reset and stack reset actions.
+- Qt launch/provenance packets include `last_layer_operation`, giving clone/review workflows a compact record of the last layer operation message.

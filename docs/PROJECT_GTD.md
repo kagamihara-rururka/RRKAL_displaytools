@@ -253,3 +253,14 @@ Done:
 
 Next:
 - Continue UIUX closure around layer operation feedback, especially clearer status after layer isolation/restore/undo.
+
+
+## 2026-05-30 - Last layer operation feedback
+
+Done:
+- Added a visible `Last layer operation` label to the Layers dock.
+- Routed selected-layer visibility, lock, selected reset and stack reset messages through the same operation status helper.
+- Added `last_layer_operation` to Qt launch/provenance packets and smoke gates.
+
+Next:
+- Extend the same feedback path to solo/restore/undo/isolation actions.

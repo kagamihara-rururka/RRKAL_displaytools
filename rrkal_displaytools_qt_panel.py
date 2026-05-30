@@ -2485,6 +2485,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_operation_summary_label.setObjectName("layerOperationSummary")
         self.layer_operation_summary_label.setWordWrap(True)
         layers_layout.addWidget(self.layer_operation_summary_label)
+        self.layer_operation_event_label = QtWidgets.QLabel("Last layer operation: none yet")
+        self.layer_operation_event_label.setObjectName("layerOperationEvent")
+        self.layer_operation_event_label.setWordWrap(True)
+        layers_layout.addWidget(self.layer_operation_event_label)
         self.cross_machine_readiness_label = QtWidgets.QLabel("Cross-machine clone readiness: pending")
         self.cross_machine_readiness_label.setWordWrap(True)
         layers_layout.addWidget(self.cross_machine_readiness_label)
@@ -6152,6 +6156,18 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             summary_label.setText(self.active_layer_operation_summary_text())
         self.refresh_boundary_highlight_status()
 
+    def layer_operation_event_text(self) -> str:
+        event_label = getattr(self, "layer_operation_event_label", None)
+        if event_label is None:
+            return "Last layer operation: none yet"
+        return event_label.text()
+
+    def set_layer_operation_status(self, message: str) -> None:
+        self.status.setText(message)
+        event_label = getattr(self, "layer_operation_event_label", None)
+        if event_label is not None:
+            event_label.setText(f"Last layer operation: {message}")
+
     def active_layer_operation_summary_text(self) -> str:
         key = self.selected_layer_key
         if not key:
@@ -6860,6 +6876,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             },
             "active_layer": self.selected_layer_key,
             "active_layer_operation_summary": self.active_layer_operation_summary_text(),
+            "last_layer_operation": self.layer_operation_event_text(),
             "layer_filter": self.collect_layer_filter_state(),
             "layer_group_view": self.collect_layer_group_view_state(),
             "layer_operator_shortcuts": self.collect_layer_operator_shortcuts(),
@@ -7140,30 +7157,33 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def toggle_selected_layer_visibility(self) -> None:
         key = self.selected_layer_key
         if key not in self.checks:
-            self.status.setText("尚未選取圖層")
+            self.set_layer_operation_status("尚未選取圖層")
             return
         if self.layer_locks.get(key) is not None and self.layer_locks[key].isChecked():
-            self.status.setText("選取圖層已鎖定，visibility 未變更")
+            self.set_layer_operation_status("選取圖層已鎖定，visibility 未變更")
             return
         self.checks[key].setChecked(not self.checks[key].isChecked())
         self.refresh_command_preview()
         self.refresh_layer_stack_status()
+        label = next((text for layer_key, text in LAYER_LABELS if layer_key == key), key)
+        state = "visible" if self.checks[key].isChecked() else "hidden"
+        self.set_layer_operation_status(f"Selected layer visibility: {label} -> {state}")
 
     def toggle_selected_layer_lock(self) -> None:
         key = self.selected_layer_key
         if key not in self.layer_locks:
-            self.status.setText("No selected layer")
+            self.set_layer_operation_status("No selected layer")
             return
         self.layer_locks[key].setChecked(not self.layer_locks[key].isChecked())
         label = next((text for layer_key, text in LAYER_LABELS if layer_key == key), key)
         state = "locked" if self.layer_locks[key].isChecked() else "unlocked"
-        self.status.setText(f"Selected layer lock: {label} -> {state}")
+        self.set_layer_operation_status(f"Selected layer lock: {label} -> {state}")
         self.refresh_layer_stack_status()
 
     def reset_selected_layer_controls(self) -> None:
         key = self.selected_layer_key
         if key not in self.layer_locks:
-            self.status.setText("尚未選取圖層")
+            self.set_layer_operation_status("尚未選取圖層")
             return
         self.auto_capture_document_snapshot("Before selected layer reset")
         self.layer_locks[key].setChecked(False)
@@ -7171,7 +7191,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_blends[key].setCurrentText("Normal")
         self.refresh_layer_stack_status()
         label = next((text for layer_key, text in LAYER_LABELS if layer_key == key), key)
-        self.status.setText(f"已重設選取圖層 UI 狀態：{label}")
+        self.set_layer_operation_status(f"已重設選取圖層 UI 狀態：{label}")
 
     def reset_layer_stack_controls(self) -> None:
         self.auto_capture_document_snapshot("Before layer stack reset")
@@ -7186,7 +7206,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.layer_opacity[key].blockSignals(False)
             self.layer_blends[key].blockSignals(False)
         self.refresh_layer_stack_status()
-        self.status.setText("已重設 UI-only layer lock/opacity/blend 狀態")
+        self.set_layer_operation_status("已重設 UI-only layer lock/opacity/blend 狀態")
 
     @QtCore.pyqtSlot()
     def copy_command_to_clipboard(self) -> None:
@@ -7555,4 +7575,3 @@ def main(argv: list[str] | None = None) -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -1716,6 +1716,18 @@ if ($qtPanelSource -notlike "*active_layer_operation_summary_text*") {
 if ($qtPanelSource -notlike "*active_layer_operation_summary*") {
     throw "Qt launch packet active layer operation summary field is missing"
 }
+if ($qtPanelSource -notlike "*layerOperationEvent*") {
+    throw "Qt Layers operation event label is missing"
+}
+if ($qtPanelSource -notlike "*Last layer operation:*") {
+    throw "Qt Layers operation event text is missing"
+}
+if ($qtPanelSource -notlike "*set_layer_operation_status*") {
+    throw "Qt layer operation status helper is missing"
+}
+if ($qtPanelSource -notlike "*last_layer_operation*") {
+    throw "Qt launch packet last layer operation field is missing"
+}
 if ($qtPanelSource -notlike "*click a row to select the active research layer*") {
     throw "Qt Layers workflow row-selection hint is missing"
 }
