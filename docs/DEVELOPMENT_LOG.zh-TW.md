@@ -1,5 +1,16 @@
 # Development Log
 
+## 2026-05-31 - Decoupling observability baseline gate
+
+Changes:
+- Added `observability_baseline` to `decoupling_readiness.py`, linking post-7 extraction readiness to `performance_smoke_telemetry`, stage timing JSONL and render telemetry schema.
+- Updated `scripts/pre_decoupling_gate.ps1` so the gate validates performance smoke contract fields before renderer files are moved.
+- Updated the decoupling runbook to list observability baseline expectations for the post-7 gate.
+- Boundary: this is still pre-7 contract/gate work; no renderer modules were physically extracted.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-31 - Performance telemetry reviewer visibility
 
 Changes:

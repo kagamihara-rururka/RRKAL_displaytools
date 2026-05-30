@@ -20,6 +20,8 @@ The gate must report:
 - `ready=true`
 - `first_extraction_id=render_plan_compose`
 - `requires_clean_worktree=true`
+- `observability_baseline_schema=rrkal_displaytools.decoupling_observability_baseline.v1`
+- `performance_smoke_schema=rrkal_displaytools.performance_smoke.v1`
 
 ## First extraction order
 
@@ -43,6 +45,8 @@ Start with pure render-plan helpers only. Preserve these fields while moving cod
 - `layer_render_plan_performance`
 - `compose_performance_summary`
 - `render_compose_parity`
+- `performance_smoke_telemetry`
+- `state/performance/stage_timing.jsonl`
 - `decoupling_readiness`
 - `reviewer_packet_export`
 

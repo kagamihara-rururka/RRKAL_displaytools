@@ -11,6 +11,7 @@ import json
 from datetime import UTC, datetime
 
 from controlled_interception import controlled_interception_policy_packet
+from performance_telemetry import contract_packet as performance_smoke_contract_packet
 
 
 SCHEMA = "rrkal_displaytools.decoupling_readiness.v1"
@@ -20,6 +21,7 @@ def decoupling_readiness_packet(phase: str = "pre_07_ui_closure") -> dict[str, o
     """Return the renderer decoupling queue and boundary guardrails."""
 
     phase = phase if phase in {"pre_07_ui_closure", "post_07_decoupling"} else "pre_07_ui_closure"
+    performance_contract = performance_smoke_contract_packet()
     return {
         "schema": SCHEMA,
         "generated_at_utc": datetime.now(UTC).isoformat(timespec="seconds"),
@@ -33,6 +35,18 @@ def decoupling_readiness_packet(phase: str = "pre_07_ui_closure") -> dict[str, o
             "note": "Before the gate, continue UI/contract/handoff closure only; after the gate, start with render_plan_compose extraction.",
         },
         "controlled_interception_policy": controlled_interception_policy_packet("decoupling_readiness"),
+        "observability_baseline": {
+            "schema": "rrkal_displaytools.decoupling_observability_baseline.v1",
+            "status": "contract_ready",
+            "performance_smoke_schema": performance_contract["schema"],
+            "stage_timing_schema": performance_contract["stage_timing_schema"],
+            "render_telemetry_schema": performance_contract["render_telemetry_schema"],
+            "output_paths": performance_contract["output_paths"],
+            "pre_move_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/performance_smoke.ps1",
+            "contract_only_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/performance_smoke.ps1 -ContractOnly",
+            "gate_reason": "Before render_plan_compose extraction, record a lightweight displaytools timing baseline so regressions can be localized by stage.",
+            "boundary": "Displaytools observability only; RRKAL crawler/download/import/cache telemetry stays in RRKAL.",
+        },
         "phase_policy": {
             "pre_07_ui_closure": {
                 "allowed": [
@@ -70,7 +84,10 @@ def decoupling_readiness_packet(phase: str = "pre_07_ui_closure") -> dict[str, o
                     "layer_render_plan_performance",
                     "compose_performance_summary",
                     "render_compose_parity",
+                    "performance_smoke_telemetry",
+                    "stage_timing_jsonl",
                 ],
+                "requires_observability_baseline": True,
                 "risk": "medium",
             },
             {
@@ -135,6 +152,7 @@ def decoupling_readiness_packet(phase: str = "pre_07_ui_closure") -> dict[str, o
         },
         "smoke_gate_before_each_move": [
             "scripts/smoke.ps1",
+            "scripts/performance_smoke.ps1",
             "git diff --check",
             "docs/DEVELOPMENT_LOG.zh-TW.md smoke result",
         ],

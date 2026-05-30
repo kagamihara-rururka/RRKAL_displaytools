@@ -26,6 +26,7 @@ function Invoke-JsonPython {
 }
 
 $readiness = Invoke-JsonPython @("decoupling_readiness.py", "--phase", "post_07_decoupling")
+$performanceContract = Invoke-JsonPython @("performance_telemetry.py", "--contract-only")
 $firstExtraction = @($readiness.first_extraction_order | Select-Object -First 1)[0]
 $gate = [ordered]@{
     schema = "rrkal_displaytools.pre_decoupling_gate.v1"
@@ -35,9 +36,15 @@ $gate = [ordered]@{
     ready = $false
     first_extraction_id = $firstExtraction.id
     first_extraction_target = $firstExtraction.target_module
+    observability_baseline_schema = $readiness.observability_baseline.schema
+    performance_smoke_schema = $readiness.observability_baseline.performance_smoke_schema
+    stage_timing_schema = $readiness.observability_baseline.stage_timing_schema
+    render_telemetry_schema = $readiness.observability_baseline.render_telemetry_schema
+    performance_smoke_command = $readiness.observability_baseline.pre_move_command
     required_before_move = @(
         "clean git worktree",
         "scripts/smoke.ps1",
+        "scripts/performance_smoke.ps1",
         "git diff --check",
         "docs/DEVELOPMENT_LOG.zh-TW.md smoke result"
     )
@@ -45,6 +52,7 @@ $gate = [ordered]@{
     blocked_scope = @($readiness.phase_policy.post_07_decoupling.blocked)
     rrkal_boundary_rule = $readiness.rrkal_boundary.rule
     smoke_executed = $false
+    performance_smoke_output_required = "state/performance/stage_timing.jsonl"
 }
 
 if ($gate.phase -ne "post_07_decoupling") {
@@ -55,6 +63,21 @@ if ($gate.first_extraction_id -ne "render_plan_compose") {
 }
 if ($gate.rrkal_boundary_rule -notmatch "Do not move discovery/download/import/cache lifecycle") {
     throw "Pre-decoupling RRKAL boundary rule missing"
+}
+if ($gate.observability_baseline_schema -ne "rrkal_displaytools.decoupling_observability_baseline.v1") {
+    throw "Pre-decoupling observability baseline schema missing"
+}
+if ($gate.performance_smoke_schema -ne "rrkal_displaytools.performance_smoke.v1") {
+    throw "Pre-decoupling performance smoke schema missing"
+}
+if ($gate.stage_timing_schema -ne "rrkal_displaytools.stage_timing.v1") {
+    throw "Pre-decoupling stage timing schema missing"
+}
+if ($gate.render_telemetry_schema -ne "rrkal_displaytools.render_telemetry.v1") {
+    throw "Pre-decoupling render telemetry schema missing"
+}
+if ($performanceContract.schema -ne $gate.performance_smoke_schema) {
+    throw "Pre-decoupling performance smoke contract-only command mismatch"
 }
 
 if (-not $ContractOnly) {
@@ -68,6 +91,9 @@ if (-not $ContractOnly) {
     powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1
     if ($LASTEXITCODE -ne 0) {
         throw "Pre-decoupling smoke failed"
+    }
+    if (-not (Test-Path -LiteralPath $gate.performance_smoke_output_required)) {
+        throw "Pre-decoupling performance smoke output missing after smoke"
     }
     $gate.smoke_executed = $true
 }

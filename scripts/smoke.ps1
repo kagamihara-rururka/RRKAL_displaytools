@@ -5771,11 +5771,26 @@ if ($decouplingReadiness.controlled_interception_policy.schema -ne "rrkal_displa
 if ($decouplingReadiness.controlled_interception_policy.blocked_patterns -notcontains "permanent_builtins_print_patch") {
     throw "Controlled interception permanent print patch guard missing"
 }
+if ($decouplingReadiness.observability_baseline.schema -ne "rrkal_displaytools.decoupling_observability_baseline.v1") {
+    throw "Decoupling readiness observability baseline schema missing"
+}
+if ($decouplingReadiness.observability_baseline.performance_smoke_schema -ne "rrkal_displaytools.performance_smoke.v1") {
+    throw "Decoupling readiness performance smoke schema missing"
+}
+if ($decouplingReadiness.observability_baseline.stage_timing_schema -ne "rrkal_displaytools.stage_timing.v1") {
+    throw "Decoupling readiness stage timing schema missing"
+}
+if ($decouplingReadiness.smoke_gate_before_each_move -notcontains "scripts/performance_smoke.ps1") {
+    throw "Decoupling readiness performance smoke gate missing"
+}
 if ($decouplingReadiness.first_extraction_order.Count -lt 5) {
     throw "Decoupling readiness first extraction order is incomplete"
 }
 if (($decouplingReadiness.first_extraction_order | Select-Object -First 1).id -ne "render_plan_compose") {
     throw "Decoupling readiness first extraction must start with render_plan_compose"
+}
+if ((($decouplingReadiness.first_extraction_order | Select-Object -First 1).keep_contracts) -notcontains "performance_smoke_telemetry") {
+    throw "Decoupling readiness first extraction observability contract missing"
 }
 if ($decouplingReadiness.rrkal_boundary.rule -notmatch "Do not move discovery/download/import/cache lifecycle") {
     throw "Decoupling readiness RRKAL boundary guard is missing"
@@ -5908,6 +5923,15 @@ if ($preDecouplingGate.schema -ne "rrkal_displaytools.pre_decoupling_gate.v1") {
 }
 if ($preDecouplingGate.first_extraction_id -ne "render_plan_compose") {
     throw "Pre-decoupling gate first extraction mismatch"
+}
+if ($preDecouplingGate.observability_baseline_schema -ne "rrkal_displaytools.decoupling_observability_baseline.v1") {
+    throw "Pre-decoupling gate observability baseline missing"
+}
+if ($preDecouplingGate.performance_smoke_schema -ne "rrkal_displaytools.performance_smoke.v1") {
+    throw "Pre-decoupling gate performance smoke schema missing"
+}
+if ($preDecouplingGate.required_before_move -notcontains "scripts/performance_smoke.ps1") {
+    throw "Pre-decoupling gate performance smoke required step missing"
 }
 if (-not $preDecouplingGate.ready) {
     throw "Pre-decoupling gate did not report ready"
