@@ -4221,6 +4221,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         copy_renderer_config_summary_button = QtWidgets.QPushButton("Copy config summary")
         performance_telemetry_button = QtWidgets.QPushButton("Inspect: Perf telemetry")
         copy_performance_smoke_summary_button = QtWidgets.QPushButton("Copy perf smoke summary")
+        pre_decoupling_snapshot_button = QtWidgets.QPushButton("Inspect: Decoupling snapshot")
+        copy_pre_decoupling_snapshot_command_button = QtWidgets.QPushButton("Copy snapshot command")
         copy_module_summary_button = QtWidgets.QPushButton("Copy module summary")
         clone_ready_button = QtWidgets.QPushButton("Inspect: Clone ready")
         copy_clone_summary_button = QtWidgets.QPushButton("Copy clone summary")
@@ -4283,6 +4285,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (copy_renderer_config_summary_button, "Replay/contracts: copy normalized renderer config, changed defaults and config-only boundary."),
             (performance_telemetry_button, "Replay/contracts: inspect performance smoke telemetry schema and output paths without running a heavy benchmark."),
             (copy_performance_smoke_summary_button, "Replay/contracts: copy performance smoke entrypoint, JSON/JSONL outputs and RRKAL boundary."),
+            (pre_decoupling_snapshot_button, "Replay/contracts: inspect the pre-decoupling snapshot command and exported contract fields."),
+            (copy_pre_decoupling_snapshot_command_button, "Replay/contracts: copy the pre-decoupling snapshot command, output path and next extraction gate."),
             (copy_module_summary_button, "Replay/contracts: copy module extraction order, stable contracts, Tk boundary and RRKAL governance summary."),
             (clone_ready_button, "Replay/contracts: inspect cross-machine clone readiness JSON."),
             (copy_clone_summary_button, "Replay/contracts: copy clone/setup/profile launch reviewer summary for cross-machine handoff."),
@@ -4344,6 +4348,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         copy_renderer_config_summary_button.clicked.connect(self.copy_renderer_config_gateway_summary)
         performance_telemetry_button.clicked.connect(self.show_performance_smoke_telemetry)
         copy_performance_smoke_summary_button.clicked.connect(self.copy_performance_smoke_summary)
+        pre_decoupling_snapshot_button.clicked.connect(self.show_pre_decoupling_snapshot_contract)
+        copy_pre_decoupling_snapshot_command_button.clicked.connect(self.copy_pre_decoupling_snapshot_command)
         copy_module_summary_button.clicked.connect(self.copy_module_boundary_summary)
         clone_ready_button.clicked.connect(self.show_cross_machine_clone_readiness)
         copy_clone_summary_button.clicked.connect(self.copy_clone_reviewer_summary)
@@ -4381,7 +4387,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         stop_button.clicked.connect(self.stop_renderer)
         action_sections = (
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button, export_reviewer_packet_button)),
-            ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, copy_reviewer_fields_button, copy_goal_scorecard_button, timeline_button, module_seams_button, decoupling_readiness_button, copy_decoupling_summary_button, controlled_interception_button, copy_interception_summary_button, renderer_config_gateway_button, copy_renderer_config_summary_button, performance_telemetry_button, copy_performance_smoke_summary_button, copy_module_summary_button, clone_ready_button, copy_clone_summary_button)),
+            ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, copy_reviewer_fields_button, copy_goal_scorecard_button, timeline_button, module_seams_button, decoupling_readiness_button, copy_decoupling_summary_button, controlled_interception_button, copy_interception_summary_button, renderer_config_gateway_button, copy_renderer_config_summary_button, performance_telemetry_button, copy_performance_smoke_summary_button, pre_decoupling_snapshot_button, copy_pre_decoupling_snapshot_command_button, copy_module_summary_button, clone_ready_button, copy_clone_summary_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, ocean_3d_controls_action_button, copy_ocean_summary_button, copy_ocean_guard_summary_button, style_routes_button, copy_style_routes_summary_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, copy_layer_controls_guide_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
             ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, copy_visual_closure_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, copy_style_thumb_status_button, thumbnail_button, live_preview_button)),
@@ -5372,6 +5378,32 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
 
         return contract_packet()
 
+    def collect_pre_decoupling_snapshot_contract(self) -> dict[str, object]:
+        readiness = self.collect_decoupling_readiness()
+        schedule = readiness.get("operation_schedule") if isinstance(readiness.get("operation_schedule"), dict) else {}
+        return {
+            "schema": "rrkal_displaytools.pre_decoupling_snapshot_qt_entry.v1",
+            "status": "ready",
+            "command": schedule.get(
+                "pre_decoupling_snapshot_command",
+                "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/export_pre_decoupling_snapshot.ps1",
+            ),
+            "output": schedule.get("pre_decoupling_snapshot_output", "state/decoupling/pre_decoupling_snapshot.json"),
+            "exporter_contract_schema": "rrkal_displaytools.pre_decoupling_snapshot_export.v1",
+            "snapshot_schema": "rrkal_displaytools.pre_decoupling_snapshot.v1",
+            "included_fields": [
+                "decoupling_readiness",
+                "pre_decoupling_gate",
+                "performance_smoke_telemetry",
+                "renderer_config_gateway",
+                "controlled_interception_policy",
+                "git_state",
+            ],
+            "next_action": "Run after local smoke and before post-7 render_plan_compose extraction.",
+            "boundary": "Qt entry exposes command/output only; it does not move renderer code, launch Qt recursively, run live network or touch RRKAL data/cache governance.",
+            "portable": True,
+        }
+
     def module_boundary_summary_text(self, registry: dict[str, object] | None = None) -> str:
         registry = registry if isinstance(registry, dict) else self.collect_module_boundary_registry()
         contract = registry.get("decoupling_boundary_contract") if isinstance(registry.get("decoupling_boundary_contract"), dict) else {}
@@ -5450,6 +5482,18 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"render_fields={len(render_fields)}; "
             "command=powershell -NoProfile -ExecutionPolicy Bypass -File scripts/performance_smoke.ps1; "
             "boundary=displaytools-only-no-rrkal-crawler-cache"
+        )
+
+    def pre_decoupling_snapshot_command_text(self, packet: dict[str, object] | None = None) -> str:
+        packet = packet if isinstance(packet, dict) else self.collect_pre_decoupling_snapshot_contract()
+        fields = packet.get("included_fields") if isinstance(packet.get("included_fields"), list) else []
+        return (
+            "Pre-decoupling snapshot: "
+            f"schema={packet.get('schema', '-')}; "
+            f"command={packet.get('command', '-')}; "
+            f"output={packet.get('output', '-')}; "
+            f"fields={len(fields)}; "
+            "next=post_07_render_plan_compose"
         )
 
     def collect_visual_feature_closure_matrix(self) -> dict[str, object]:
@@ -10260,6 +10304,15 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         summary = self.decoupling_readiness_summary_text()
         QtWidgets.QApplication.clipboard().setText(summary)
         self.status.setText("Copied decoupling readiness summary to clipboard.")
+
+    def show_pre_decoupling_snapshot_contract(self) -> None:
+        self.command_text.setPlainText(json.dumps(self.collect_pre_decoupling_snapshot_contract(), ensure_ascii=False, indent=2))
+        self.status.setText("Displayed pre-decoupling snapshot contract JSON")
+
+    def copy_pre_decoupling_snapshot_command(self) -> None:
+        summary = self.pre_decoupling_snapshot_command_text()
+        QtWidgets.QApplication.clipboard().setText(summary)
+        self.status.setText("Copied pre-decoupling snapshot command to clipboard.")
 
     def show_controlled_interception_policy(self) -> None:
         self.command_text.setPlainText(

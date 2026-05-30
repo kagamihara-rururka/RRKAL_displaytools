@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Qt pre-decoupling snapshot entry
+
+- Added a Qt Replay/contracts entry for the pre-decoupling snapshot command and generated output path.
+- Added copy-summary support so reviewers can capture the snapshot command without hunting through scripts.
+- Extended smoke coverage for the Qt snapshot buttons, handlers and schema reference.
+- Smoke: PASS (`scripts\smoke.ps1`).
+
 ## 2026-05-31 - Pre-decoupling snapshot exporter
 
 Changes:

@@ -5887,6 +5887,12 @@ if ($decouplingQtPanelSource -notmatch "Inspect: Perf telemetry") {
 if ($decouplingQtPanelSource -notmatch "Copy perf smoke summary") {
     throw "Qt panel performance telemetry copy summary action is missing"
 }
+if ($decouplingQtPanelSource -notmatch "Inspect: Decoupling snapshot") {
+    throw "Qt panel missing pre-decoupling snapshot inspect action"
+}
+if ($decouplingQtPanelSource -notmatch "Copy snapshot command") {
+    throw "Qt panel missing copy pre-decoupling snapshot command action"
+}
 if ($decouplingQtPanelSource -notmatch "show_decoupling_readiness") {
     throw "Qt panel decoupling readiness handler is missing"
 }
@@ -5910,6 +5916,15 @@ if ($decouplingQtPanelSource -notmatch "show_performance_smoke_telemetry") {
 }
 if ($decouplingQtPanelSource -notmatch "copy_performance_smoke_summary") {
     throw "Qt panel performance telemetry copy summary handler is missing"
+}
+if ($decouplingQtPanelSource -notmatch "show_pre_decoupling_snapshot_contract") {
+    throw "Qt panel missing pre-decoupling snapshot inspect handler"
+}
+if ($decouplingQtPanelSource -notmatch "copy_pre_decoupling_snapshot_command") {
+    throw "Qt panel missing pre-decoupling snapshot copy handler"
+}
+if ($decouplingQtPanelSource -notmatch "pre_decoupling_snapshot_qt_entry.v1") {
+    throw "Qt panel missing pre-decoupling snapshot schema reference"
 }
 if ($decouplingQtPanelSource -notmatch "collect_decoupling_readiness") {
     throw "Qt panel decoupling readiness collector is missing"
