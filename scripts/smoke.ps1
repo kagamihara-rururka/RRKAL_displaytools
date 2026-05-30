@@ -1180,6 +1180,41 @@ if ($configGatewayInspectorPacket.schema -ne "rrkal_displaytools.renderer_config
 if ($configGatewayInspectorPacket.boundary -notlike "*does not launch Qt, Taichi*") {
     throw "Renderer config gateway inspector boundary mismatch"
 }
+$styleRoutesInspectorPath = Join-Path $RepoRoot "scripts\inspect_style_renderer_routes.ps1"
+if (-not (Test-Path -LiteralPath $styleRoutesInspectorPath)) {
+    throw "Style routes inspector script is missing"
+}
+$styleRoutesInspectorContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $styleRoutesInspectorPath, "-ContractOnly")
+$styleRoutesInspectorContract = ($styleRoutesInspectorContractText -join "`n") | ConvertFrom-Json
+if ($styleRoutesInspectorContract.schema -ne "rrkal_displaytools.style_routes_inspector.v1") {
+    throw "Style routes inspector contract schema missing"
+}
+if ($styleRoutesInspectorContract.launch_packet_field -ne "style_profile_renderer_routes") {
+    throw "Style routes inspector launch packet field mismatch"
+}
+if ($styleRoutesInspectorContract.required_route_ids -notcontains "parchment") {
+    throw "Style routes inspector contract missing parchment route"
+}
+if ($styleRoutesInspectorContract.required_route_ids -notcontains "tactical") {
+    throw "Style routes inspector contract missing tactical route"
+}
+$styleRoutesInspectorText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $styleRoutesInspectorPath)
+$styleRoutesInspectorPacket = ($styleRoutesInspectorText -join "`n") | ConvertFrom-Json
+if ($styleRoutesInspectorPacket.schema -ne "rrkal_displaytools.style_profile_renderer_routes.v1") {
+    throw "Style routes inspector output schema missing"
+}
+if ($styleRoutesInspectorPacket.route_ids -notcontains "parchment") {
+    throw "Style routes inspector output missing parchment route"
+}
+if ($styleRoutesInspectorPacket.route_ids -notcontains "tactical") {
+    throw "Style routes inspector output missing tactical route"
+}
+if ($styleRoutesInspectorPacket.portable_route_commands.parchment -notlike "*--style-profile parchment*") {
+    throw "Style routes inspector parchment command missing"
+}
+if ($styleRoutesInspectorPacket.portable_route_commands.tactical -notlike "*--style-profile tactical*") {
+    throw "Style routes inspector tactical command missing"
+}
 $performanceSmokePath = Join-Path $RepoRoot "scripts\performance_smoke.ps1"
 if (-not (Test-Path -LiteralPath $performanceSmokePath)) {
     throw "Performance smoke script is missing"

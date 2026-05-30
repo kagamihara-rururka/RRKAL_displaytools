@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - No-GUI style renderer routes inspector
+
+- Added `scripts/inspect_style_renderer_routes.ps1` for no-GUI inspection of scientific, nautical, parchment and tactical renderer route contracts.
+- Smoke now verifies the inspector contract, launch-packet field, parchment/tactical route IDs and portable style commands.
+- Updated GTD to reflect that explicit style renderer entries are already smoke-gated; the remaining work is visual tuning and post-decoupling entrypoint extraction, not first exposure.
+- Smoke: PASS (`scripts\smoke.ps1`).
+
 ## 2026-05-31 - Spatial compression roadmap contract
 
 - Added `spatial_compression_roadmap.py` as a contract-only handoff for 3D bathymetry compression strategy.
