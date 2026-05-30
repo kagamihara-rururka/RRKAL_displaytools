@@ -169,3 +169,9 @@ Displaytools 不負責：
 
 - Use `Inspect: Selection state` when checking which layer is currently active for research operations.
 - It reuses the layer pick state output, so clone users can review active layer selection, pick history, and renderer target metadata before treating a view as reproducible.
+
+## Active layer operation summary
+
+- In the Layers dock, read `Layer operation summary` before treating a renderer view as reproducible.
+- It summarizes the active layer's visibility, lock, opacity, blend mode, renderer target, runtime ack and pick context.
+- The same text is copied into Qt launch/provenance packets as `active_layer_operation_summary`.

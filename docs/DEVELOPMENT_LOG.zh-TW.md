@@ -3680,3 +3680,13 @@ Changes:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+## 2026-05-30 - Active layer operation summary
+
+Changes:
+- Added a visible `Layer operation summary` label to the Qt Layers dock.
+- The summary reports active layer identity, visibility, lock, opacity, blend mode, renderer target, runtime ack and pick context.
+- Added `active_layer_operation_summary` to Qt launch/provenance packets.
+- Added smoke and docs coverage for the new layer operation summary.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

@@ -1704,6 +1704,18 @@ if ($qtPanelSource -notlike "*boundary_highlight_ack_history*") {
 if ($qtPanelSource -notlike "*layerWorkflowHint*") {
     throw "Qt Layers workflow hint is missing"
 }
+if ($qtPanelSource -notlike "*layerOperationSummary*") {
+    throw "Qt Layers operation summary label is missing"
+}
+if ($qtPanelSource -notlike "*Layer operation summary:*") {
+    throw "Qt Layers operation summary text is missing"
+}
+if ($qtPanelSource -notlike "*active_layer_operation_summary_text*") {
+    throw "Qt active layer operation summary helper is missing"
+}
+if ($qtPanelSource -notlike "*active_layer_operation_summary*") {
+    throw "Qt launch packet active layer operation summary field is missing"
+}
 if ($qtPanelSource -notlike "*click a row to select the active research layer*") {
     throw "Qt Layers workflow row-selection hint is missing"
 }

@@ -487,3 +487,9 @@
 - Qt Actions now exposes `Inspect: Selection state` inside Research interaction.
 - The action calls the existing layer pick state JSON path, but labels it around the researcher task: confirming active layer selection and renderer target before analysis/export.
 - Launch packets and renderer capabilities advertise `selection_state` through `profile_ui_state_replay`.
+
+## Qt active layer operation summary
+
+- Layers dock now shows a visible `Layer operation summary` for the active research layer.
+- The summary includes active layer key/label, visibility, lock, opacity, blend mode, renderer target, runtime ack and pick context.
+- Qt launch/provenance packets include `active_layer_operation_summary`, so clone/review workflows can inspect the same operation state without opening multiple JSON panes first.

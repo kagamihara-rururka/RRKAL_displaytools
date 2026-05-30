@@ -242,3 +242,14 @@ Done:
 
 Next:
 - Continue improving layer operation feedback and research annotation review before backend closure.
+
+
+## 2026-05-30 - Active layer operation summary
+
+Done:
+- Added a visible `Layer operation summary` label to the Layers dock.
+- The summary reports active layer identity, visibility, lock, opacity, blend, renderer target, runtime ack and pick context.
+- Added `active_layer_operation_summary` to Qt launch/provenance packets and smoke gates.
+
+Next:
+- Continue UIUX closure around layer operation feedback, especially clearer status after layer isolation/restore/undo.

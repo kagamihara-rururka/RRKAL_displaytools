@@ -2479,6 +2479,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.profile_ui_state_replay_label.setObjectName("profileUiStateReplay")
         self.profile_ui_state_replay_label.setWordWrap(True)
         layers_layout.addWidget(self.profile_ui_state_replay_label)
+        self.layer_operation_summary_label = QtWidgets.QLabel(
+            "Layer operation summary: no active layer selected; use Select or click a layer row."
+        )
+        self.layer_operation_summary_label.setObjectName("layerOperationSummary")
+        self.layer_operation_summary_label.setWordWrap(True)
+        layers_layout.addWidget(self.layer_operation_summary_label)
         self.cross_machine_readiness_label = QtWidgets.QLabel("Cross-machine clone readiness: pending")
         self.cross_machine_readiness_label.setWordWrap(True)
         layers_layout.addWidget(self.cross_machine_readiness_label)
@@ -6141,7 +6147,41 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         renderer_target = LAYER_RUNTIME_ID_ALIASES.get(key, "-")
         self.layer_property_labels["renderer_target"].setText(str(renderer_target))
         self.layer_property_labels["diagnostics"].setText(self.layer_diagnostics_text(str(renderer_target)))
+        summary_label = getattr(self, "layer_operation_summary_label", None)
+        if summary_label is not None:
+            summary_label.setText(self.active_layer_operation_summary_text())
         self.refresh_boundary_highlight_status()
+
+    def active_layer_operation_summary_text(self) -> str:
+        key = self.selected_layer_key
+        if not key:
+            return "Layer operation summary: no active layer selected; use Select or click a layer row."
+        label = next((text for layer_key, text in LAYER_LABELS if layer_key == key), key)
+        checks = getattr(self, "checks", {})
+        layer_locks = getattr(self, "layer_locks", {})
+        layer_opacity = getattr(self, "layer_opacity", {})
+        layer_blends = getattr(self, "layer_blends", {})
+        visible_widget = checks.get(key)
+        lock_widget = layer_locks.get(key)
+        opacity_widget = layer_opacity.get(key)
+        blend_widget = layer_blends.get(key)
+        visible_text = "on" if visible_widget is not None and visible_widget.isChecked() else "off"
+        lock_text = "locked" if lock_widget is not None and lock_widget.isChecked() else "unlocked"
+        opacity_text = f"{opacity_widget.value()}%" if opacity_widget is not None else "-"
+        blend_text = blend_widget.currentText() if blend_widget is not None else "-"
+        renderer_target = LAYER_RUNTIME_ID_ALIASES.get(key)
+        target_text = renderer_target or "not live"
+        diagnostics_text = (
+            self.layer_diagnostics_text(str(renderer_target))
+            if renderer_target is not None
+            else "no renderer target bridge"
+        )
+        return (
+            "Layer operation summary: "
+            f"{label} ({key}); visible={visible_text}; lock={lock_text}; "
+            f"opacity={opacity_text}; blend={blend_text}; renderer target={target_text}; "
+            f"{diagnostics_text}"
+        )
 
     def layer_diagnostics_text(self, renderer_target: str) -> str:
         ack = self.layer_runtime_ack_payload if isinstance(self.layer_runtime_ack_payload, dict) else {}
@@ -6819,6 +6859,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "rrkal_data_manifest_ref": self.rrkal_manifest_ref_edit.text().strip(),
             },
             "active_layer": self.selected_layer_key,
+            "active_layer_operation_summary": self.active_layer_operation_summary_text(),
             "layer_filter": self.collect_layer_filter_state(),
             "layer_group_view": self.collect_layer_group_view_state(),
             "layer_operator_shortcuts": self.collect_layer_operator_shortcuts(),
@@ -7514,5 +7555,4 @@ def main(argv: list[str] | None = None) -> None:
 
 if __name__ == "__main__":
     main()
-
 
