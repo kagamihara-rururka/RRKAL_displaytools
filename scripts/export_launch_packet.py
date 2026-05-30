@@ -1222,6 +1222,10 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
         "qt_action": "export_reviewer_packet_dialog",
         "qt_action_label": "Export reviewer packet",
         "default_output": "state/showcase/reviewer_packet.json",
+        "no_gui_export_script": "scripts\\export_reviewer_packet.ps1",
+        "no_gui_export_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\export_reviewer_packet.ps1",
+        "no_gui_contract_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\export_reviewer_packet.ps1 -ContractOnly",
+        "no_gui_export_schema": "rrkal_displaytools.no_gui_reviewer_packet_export.v1",
         "included_summary_fields": [
             "clone_reviewer_summary",
             "launch_reviewer_summary",

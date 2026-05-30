@@ -956,6 +956,12 @@ if ($launchPacket.reviewer_packet_export.schema -ne "rrkal_displaytools.reviewer
 if ($launchPacket.reviewer_packet_export.reviewer_packet_schema -ne "rrkal_displaytools.reviewer_packet.v1") {
     throw "Launch packet reviewer packet schema missing or invalid"
 }
+if ($launchPacket.reviewer_packet_export.no_gui_export_script -ne "scripts\export_reviewer_packet.ps1") {
+    throw "Launch packet reviewer no-GUI export script missing"
+}
+if ($launchPacket.reviewer_packet_export.no_gui_export_schema -ne "rrkal_displaytools.no_gui_reviewer_packet_export.v1") {
+    throw "Launch packet reviewer no-GUI export schema missing"
+}
 if ($launchPacket.reviewer_packet_export.qt_action -ne "export_reviewer_packet_dialog") {
     throw "Launch packet reviewer packet Qt action missing or invalid"
 }
@@ -2203,6 +2209,9 @@ if ($capabilities.reviewer_packet_export.schema -ne "rrkal_displaytools.reviewer
 if ($capabilities.reviewer_packet_export.qt_action -ne "export_reviewer_packet_dialog") {
     throw "Renderer reviewer packet Qt action missing or invalid"
 }
+if ($capabilities.reviewer_packet_export.no_gui_contract_command -notlike "*-ContractOnly*") {
+    throw "Renderer reviewer no-GUI contract command missing"
+}
 if ($capabilities.reviewer_packet_export.included_summary_fields -notcontains "clone_reviewer_summary") {
     throw "Renderer reviewer packet clone summary field missing"
 }
@@ -3413,6 +3422,9 @@ if ($handoff.reviewer_packet_export.renderer_capabilities_schema -ne "rrkal_disp
 if ($handoff.reviewer_packet_export.qt_action -ne "export_reviewer_packet_dialog") {
     throw "Handoff inspection reviewer packet Qt action missing or invalid"
 }
+if ($handoff.reviewer_packet_export.no_gui_export_script -ne "scripts\export_reviewer_packet.ps1") {
+    throw "Handoff inspection reviewer no-GUI export script missing"
+}
 if ($handoff.reviewer_packet_export.included_summary_fields -notcontains "research_interaction_summary") {
     throw "Handoff inspection reviewer packet research summary field missing"
 }
@@ -3873,6 +3885,9 @@ if ($qtPanelSource -notlike "*Export reviewer packet*") {
 }
 if ($qtPanelSource -notlike "*export_reviewer_packet_dialog*") {
     throw "Qt reviewer packet export action is missing"
+}
+if ($qtPanelSource -notlike "*export_reviewer_packet.ps1*") {
+    throw "Qt reviewer packet no-GUI export contract is missing"
 }
 if ($qtPanelSource -notlike "*collect_reviewer_packet*") {
     throw "Qt reviewer packet collector is missing"
@@ -4940,6 +4955,31 @@ if ($composeParityArtifactRunnerSource -notlike "*state/compose_parity*") {
 }
 if ($composeParityArtifactRunnerSource -notlike "*compose_parity_artifact_runner.json*") {
     throw "Compose parity artifact runner manifest path is missing"
+}
+$reviewerPacketExporterPath = Join-Path $RepoRoot "scripts\export_reviewer_packet.ps1"
+if (-not (Test-Path -LiteralPath $reviewerPacketExporterPath)) {
+    throw "No-GUI reviewer packet exporter script is missing"
+}
+$reviewerPacketExporterSource = Get-Content -LiteralPath $reviewerPacketExporterPath -Raw -Encoding UTF8
+if ($reviewerPacketExporterSource -notlike "*rrkal_displaytools.no_gui_reviewer_packet_export.v1*") {
+    throw "No-GUI reviewer packet exporter schema marker missing"
+}
+if ($reviewerPacketExporterSource -notlike "*compose_performance_summary*") {
+    throw "No-GUI reviewer packet exporter compose performance summary missing"
+}
+if ($reviewerPacketExporterSource -notlike "*export_launch_packet.py*") {
+    throw "No-GUI reviewer packet exporter launch packet bridge missing"
+}
+$reviewerPacketContractText = & powershell -NoProfile -ExecutionPolicy Bypass -File $reviewerPacketExporterPath -ContractOnly
+if ($LASTEXITCODE -ne 0) {
+    throw "No-GUI reviewer packet exporter contract mode failed"
+}
+$reviewerPacketContract = ($reviewerPacketContractText -join "`n") | ConvertFrom-Json
+if ($reviewerPacketContract.schema -ne "rrkal_displaytools.no_gui_reviewer_packet_export.v1") {
+    throw "No-GUI reviewer packet exporter contract schema missing"
+}
+if ($reviewerPacketContract.compose_performance_summary_field -ne "compose_performance_summary") {
+    throw "No-GUI reviewer packet exporter compose performance field missing"
 }
 if ($composeParitySmoke.mode -ne "contract_only_no_render_side_effect") {
     throw "Compose parity smoke contract mode mismatch"

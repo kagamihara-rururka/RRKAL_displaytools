@@ -503,7 +503,7 @@
 
 ### 2026-05-30 Reviewer packet export
 
-- `reviewer_packet_export` now advertises `rrkal_displaytools.reviewer_packet_export.v1` in launch packets and renderer capabilities.
+- `reviewer_packet_export` now advertises `rrkal_displaytools.reviewer_packet_export.v1` in launch packets and renderer capabilities, including the no-GUI `scripts/export_reviewer_packet.ps1` exporter for clone machines that do not open Qt.
 - Qt Run/profile includes `Export reviewer packet`, writing `rrkal_displaytools.reviewer_packet.v1` with clone, launch, research, visual, Hydro/LOD, Ocean material, Style routes, Module boundary and Compose performance summaries plus focused packet evidence and a launch packet snapshot.
 - Handoff and smoke gate the export contract, packet schema, Qt action and included summary fields.
 

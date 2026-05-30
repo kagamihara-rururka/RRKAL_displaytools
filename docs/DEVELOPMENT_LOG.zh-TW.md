@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - No-GUI reviewer packet exporter
+
+Changes:
+- Added `scripts/export_reviewer_packet.ps1` to generate `rrkal_displaytools.reviewer_packet.v1` from the no-GUI launch packet path without opening Qt.
+- `reviewer_packet_export` now exposes the no-GUI script, command, contract-only smoke command and `rrkal_displaytools.no_gui_reviewer_packet_export.v1` schema across Qt, no-GUI launch packets and renderer capabilities.
+- The no-GUI reviewer packet includes `compose_performance_summary`, layer render-plan performance evidence and the launch packet snapshot.
+- Smoke gates source markers and runs the exporter in `-ContractOnly` mode without writing runtime artifacts.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
 ## 2026-05-30 - Reviewer packet compose performance handoff note
 
 Changes:
