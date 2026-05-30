@@ -878,6 +878,32 @@ def ocean_material_control_port_packet(
         "roughness": bounded_float(material.get("roughness"), 0.28, 0.02, 1.0),
         "foam": bounded_float(material.get("foam"), 0.12, 0.0, 1.0),
     }
+    performance_budget_presets = {
+        "safe_preview": {
+            "label": "Safe preview",
+            "wave_strength": 0.08,
+            "roughness": 0.12,
+            "foam": 0.02,
+            "intent": "lowest-cost interactive orientation",
+        },
+        "balanced": {
+            "label": "Balanced research",
+            "wave_strength": 0.22,
+            "roughness": 0.28,
+            "foam": 0.12,
+            "intent": "default scientific review",
+        },
+        "research_detail": {
+            "label": "Research detail",
+            "wave_strength": 0.34,
+            "roughness": 0.38,
+            "foam": 0.18,
+            "intent": "higher-detail still capture or short inspection",
+        },
+    }
+    performance_budget = str(material.get("performance_budget") or "balanced")
+    if performance_budget not in performance_budget_presets:
+        performance_budget = "balanced"
     renderer_flags = ["--ocean-wave-strength", "--ocean-roughness", "--ocean-foam"]
     taichi_uniforms = ["ocean_enabled", "wave_strength", "roughness", "foam", "time_seconds"]
     summary_parameter_fields = [
@@ -885,6 +911,7 @@ def ocean_material_control_port_packet(
         "wave_strength",
         "roughness",
         "foam",
+        "performance_budget",
         "renderer_apply_status",
         "sea_state_status",
         "sea_state_scalar_sample_schema",
@@ -895,12 +922,15 @@ def ocean_material_control_port_packet(
         "source": source,
         "enabled": bool(material.get("enabled", True)),
         "material_controls": controls,
+        "performance_budget": performance_budget,
+        "performance_budget_preset": performance_budget_presets[performance_budget],
+        "performance_budget_presets": performance_budget_presets,
         "renderer_flags": renderer_flags,
         "taichi_uniforms": taichi_uniforms,
         "ocean_material_summary_contract_schema": "rrkal_displaytools.ocean_material_summary_contract.v1",
         "ocean_material_summary_contract": {
             "schema": "rrkal_displaytools.ocean_material_summary_contract.v1",
-            "summary_format": "Ocean material: enabled={enabled}; wave={wave_strength}; roughness={roughness}; foam={foam}; apply={renderer_apply_status}; sea_state={sea_state_status}; sample={sea_state_scalar_sample_schema}; flags={renderer_flags}; governance=RRKAL-owned provider/cache",
+            "summary_format": "Ocean material: enabled={enabled}; wave={wave_strength}; roughness={roughness}; foam={foam}; budget={performance_budget}; apply={renderer_apply_status}; sea_state={sea_state_status}; sample={sea_state_scalar_sample_schema}; flags={renderer_flags}; governance=RRKAL-owned provider/cache",
             "summary_parameter_fields": summary_parameter_fields,
             "qt_copy_action": "copy_ocean_material_summary",
             "portable": True,
@@ -922,6 +952,11 @@ def ocean_material_control_port_packet(
             "performance_guard_action": "apply_ocean_3d_safe_preview",
             "performance_guard_preset": {"wave_strength": 0.08, "roughness": 0.12, "foam": 0.02},
             "performance_guard_boundary": "Safe preview lowers scalar ocean-material intensity only; true renderer pass reduction remains the layer render-plan merge follow-up.",
+            "performance_budget_combo_object": "ocean3DPerformanceBudgetCombo",
+            "performance_budget_label_object": "ocean3DPerformanceBudgetStrip",
+            "performance_budget_apply_action": "apply_ocean_3d_budget",
+            "performance_budget_selected": performance_budget,
+            "performance_budget_preset": performance_budget_presets[performance_budget],
             "performance_guard_summary_contract_schema": "rrkal_displaytools.taichi_ocean_3d_performance_guard_summary_contract.v1",
             "performance_guard_summary_contract": {
                 "schema": "rrkal_displaytools.taichi_ocean_3d_performance_guard_summary_contract.v1",
@@ -955,6 +990,10 @@ def ocean_material_control_port_packet(
             "performance_guard_label_object": "ocean3DPerformanceGuardStrip",
             "performance_guard_button_object": "ocean3DPerformanceSafePreviewButton",
             "performance_guard_action": "apply_ocean_3d_safe_preview",
+            "performance_budget_combo_object": "ocean3DPerformanceBudgetCombo",
+            "performance_budget_label_object": "ocean3DPerformanceBudgetStrip",
+            "performance_budget_apply_action": "apply_ocean_3d_budget",
+            "performance_budget_selected": performance_budget,
             "dialog_action": "open_taichi_ocean_3d_controls",
             "performance_followup": "post_decoupling_precompute_layer_render_plan_then_single_render_pass",
             "user_issue": "Ocean 3D controls must be visible from the control board, not only the Properties dock.",
@@ -3913,6 +3952,34 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "border:1px solid #caa85a; border-radius:8px; padding:6px 8px; font-weight:600; }"
         )
         layers_layout.addWidget(self.ocean_3d_performance_guard_label)
+        ocean_budget_row = QtWidgets.QHBoxLayout()
+        ocean_budget_row.addWidget(QtWidgets.QLabel("Ocean budget"))
+        self.ocean_3d_performance_budget_combo = QtWidgets.QComboBox()
+        self.ocean_3d_performance_budget_combo.setObjectName("ocean3DPerformanceBudgetCombo")
+        self.ocean_3d_performance_budget_combo.setToolTip(
+            "Choose a research-oriented Ocean 3D performance budget preset for interactive preview cost."
+        )
+        self.ocean_3d_performance_budget_combo.addItem("Safe preview", "safe_preview")
+        self.ocean_3d_performance_budget_combo.addItem("Balanced research", "balanced")
+        self.ocean_3d_performance_budget_combo.addItem("Research detail", "research_detail")
+        balanced_budget_index = self.ocean_3d_performance_budget_combo.findData("balanced")
+        if balanced_budget_index >= 0:
+            self.ocean_3d_performance_budget_combo.setCurrentIndex(balanced_budget_index)
+        self.ocean_3d_performance_budget_combo.currentIndexChanged.connect(
+            lambda _index: self.apply_ocean_3d_budget()
+        )
+        ocean_budget_row.addWidget(self.ocean_3d_performance_budget_combo, stretch=1)
+        layers_layout.addLayout(ocean_budget_row)
+        self.ocean_3d_performance_budget_label = QtWidgets.QLabel(
+            "Ocean 3D budget: balanced / Balanced research"
+        )
+        self.ocean_3d_performance_budget_label.setObjectName("ocean3DPerformanceBudgetStrip")
+        self.ocean_3d_performance_budget_label.setWordWrap(True)
+        self.ocean_3d_performance_budget_label.setStyleSheet(
+            "QLabel#ocean3DPerformanceBudgetStrip { color:#19364f; background:#e9f5ff; "
+            "border:1px solid #8fb8d2; border-radius:8px; padding:6px 8px; font-weight:600; }"
+        )
+        layers_layout.addWidget(self.ocean_3d_performance_budget_label)
         ocean_3d_safe_preview_button = QtWidgets.QPushButton("Ocean safe preview")
         ocean_3d_safe_preview_button.setObjectName("ocean3DPerformanceSafePreviewButton")
         ocean_3d_safe_preview_button.setToolTip(
@@ -5008,9 +5075,18 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "wave_strength": self.wave_edit.text().strip(),
                 "roughness": self.roughness_edit.text().strip(),
                 "foam": self.foam_edit.text().strip(),
+                "performance_budget": self.current_ocean_3d_performance_budget(),
             },
             "rrkal_displaytools_qt_panel",
         )
+
+    def current_ocean_3d_performance_budget(self) -> str:
+        combo = getattr(self, "ocean_3d_performance_budget_combo", None)
+        if combo is None:
+            return "balanced"
+        data = combo.currentData()
+        budget = str(data or combo.currentText() or "balanced")
+        return budget if budget in {"safe_preview", "balanced", "research_detail"} else "balanced"
 
     def ocean_3d_control_summary_text(self) -> str:
         packet = self.collect_ocean_material_control_port()
@@ -5021,6 +5097,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"wave={controls.get('wave_strength')}; "
             f"roughness={controls.get('roughness')}; "
             f"foam={controls.get('foam')}; "
+            f"budget={packet.get('performance_budget', 'balanced')}; "
             f"board={panel.get('control_board_status', 'wired_default_visible')}; "
             f"dialog={panel.get('qt_dialog_action', 'open_taichi_ocean_3d_controls')}; "
             f"followup={panel.get('render_pipeline_followup', 'post_decoupling_precompute_layer_render_plan_then_single_render_pass')}"
@@ -5034,6 +5111,18 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.ocean_3d_control_board_label.setText(f"Ocean 3D quick controls: {summary}")
         if hasattr(self, "ocean_3d_performance_guard_label"):
             self.ocean_3d_performance_guard_label.setText(self.ocean_3d_performance_guard_text())
+        if hasattr(self, "ocean_3d_performance_budget_label"):
+            self.ocean_3d_performance_budget_label.setText(self.ocean_3d_performance_budget_text())
+
+    def ocean_3d_performance_budget_text(self) -> str:
+        packet = self.collect_ocean_material_control_port()
+        preset = packet.get("performance_budget_preset") if isinstance(packet.get("performance_budget_preset"), dict) else {}
+        return (
+            "Ocean 3D budget: "
+            f"{packet.get('performance_budget', 'balanced')} / {preset.get('label', 'Balanced research')}; "
+            f"intent={preset.get('intent', 'default scientific review')}; "
+            "renderer-pass merge remains queued after module decoupling"
+        )
 
     def ocean_3d_performance_guard_text(self) -> str:
         return (
@@ -5047,12 +5136,43 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         )
 
     def apply_ocean_3d_safe_preview(self) -> None:
+        budget_combo = getattr(self, "ocean_3d_performance_budget_combo", None)
+        if budget_combo is not None:
+            safe_preview_index = budget_combo.findData("safe_preview")
+            if safe_preview_index >= 0:
+                budget_combo.blockSignals(True)
+                budget_combo.setCurrentIndex(safe_preview_index)
+                budget_combo.blockSignals(False)
         self.wave_edit.setText("0.08")
         self.roughness_edit.setText("0.12")
         self.foam_edit.setText("0.02")
         self.refresh_ocean_3d_control_summary()
         self.refresh_command_preview()
         self.set_layer_operation_status("Ocean 3D safe preview applied: wave=0.08 roughness=0.12 foam=0.02")
+
+    def apply_ocean_3d_budget(self) -> None:
+        packet = self.collect_ocean_material_control_port()
+        presets = packet.get("performance_budget_presets") if isinstance(packet.get("performance_budget_presets"), dict) else {}
+        preset = presets.get(self.current_ocean_3d_performance_budget()) if isinstance(presets, dict) else None
+        if not isinstance(preset, dict):
+            self.set_layer_operation_status("Ocean 3D budget preset unavailable")
+            return
+
+        def scalar_text(value: object) -> str:
+            try:
+                number = float(value)
+            except (TypeError, ValueError):
+                number = 0.0
+            return f"{number:.3f}".rstrip("0").rstrip(".") or "0"
+
+        self.wave_edit.setText(scalar_text(preset.get("wave_strength", 0.22)))
+        self.roughness_edit.setText(scalar_text(preset.get("roughness", 0.28)))
+        self.foam_edit.setText(scalar_text(preset.get("foam", 0.12)))
+        self.refresh_ocean_3d_control_summary()
+        self.refresh_command_preview()
+        self.set_layer_operation_status(
+            f"Ocean 3D budget applied: {preset.get('label', self.current_ocean_3d_performance_budget())}"
+        )
 
     def open_taichi_ocean_3d_controls(self) -> None:
         def bounded(value: object, default: float, lower: float, upper: float) -> float:
@@ -5078,7 +5198,16 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         summary.setObjectName("taichiOcean3DControlDialogSummary")
         summary.setWordWrap(True)
         layout.addWidget(summary)
+        packet = self.collect_ocean_material_control_port()
+        budget_presets = packet.get("performance_budget_presets") if isinstance(packet.get("performance_budget_presets"), dict) else {}
         form = QtWidgets.QFormLayout()
+        budget_combo = QtWidgets.QComboBox()
+        for budget_id, preset in budget_presets.items():
+            label = preset.get("label", budget_id) if isinstance(preset, dict) else budget_id
+            budget_combo.addItem(str(label), str(budget_id))
+        budget_index = budget_combo.findData(self.current_ocean_3d_performance_budget())
+        if budget_index >= 0:
+            budget_combo.setCurrentIndex(budget_index)
         wave_spin = QtWidgets.QDoubleSpinBox()
         wave_spin.setRange(0.0, 1.0)
         wave_spin.setDecimals(3)
@@ -5094,10 +5223,21 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         foam_spin.setDecimals(3)
         foam_spin.setSingleStep(0.01)
         foam_spin.setValue(bounded(self.foam_edit.text(), 0.12, 0.0, 1.0))
+        form.addRow("Performance budget", budget_combo)
         form.addRow("Wave strength", wave_spin)
         form.addRow("Roughness", roughness_spin)
         form.addRow("Foam", foam_spin)
         layout.addLayout(form)
+
+        def apply_budget_to_spinboxes() -> None:
+            preset = budget_presets.get(str(budget_combo.currentData())) if isinstance(budget_presets, dict) else None
+            if not isinstance(preset, dict):
+                return
+            wave_spin.setValue(bounded(preset.get("wave_strength"), 0.22, 0.0, 1.0))
+            roughness_spin.setValue(bounded(preset.get("roughness"), 0.28, 0.02, 1.0))
+            foam_spin.setValue(bounded(preset.get("foam"), 0.12, 0.0, 1.0))
+
+        budget_combo.currentIndexChanged.connect(lambda _index: apply_budget_to_spinboxes())
         performance_note = QtWidgets.QLabel(
             "Performance queue: after module decoupling, precompute a layer render plan and feed one combined render pass instead of independent layer renders."
         )
@@ -5115,6 +5255,13 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.wave_edit.setText(scalar_text(wave_spin.value()))
             self.roughness_edit.setText(scalar_text(roughness_spin.value()))
             self.foam_edit.setText(scalar_text(foam_spin.value()))
+            main_budget_combo = getattr(self, "ocean_3d_performance_budget_combo", None)
+            if main_budget_combo is not None:
+                main_budget_index = main_budget_combo.findData(str(budget_combo.currentData()))
+                if main_budget_index >= 0:
+                    main_budget_combo.blockSignals(True)
+                    main_budget_combo.setCurrentIndex(main_budget_index)
+                    main_budget_combo.blockSignals(False)
             self.refresh_command_preview()
             self.refresh_canvas_preview()
             self.refresh_ocean_3d_control_summary()
@@ -5143,6 +5290,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"wave={controls.get('wave_strength')}; "
             f"roughness={controls.get('roughness')}; "
             f"foam={controls.get('foam')}; "
+            f"budget={packet.get('performance_budget', 'balanced')}; "
             f"apply={apply_contract.get('status', 'unknown')}; "
             f"sea_state={sea_state.get('status', 'unknown')}; "
             f"sample={scalar_sample.get('schema', 'rrkal_displaytools.sea_state_scalar_sample.v1')}; "

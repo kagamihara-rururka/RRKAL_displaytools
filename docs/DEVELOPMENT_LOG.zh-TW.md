@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Ocean 3D performance budget controls
+
+Changes:
+- Added a visible Ocean 3D performance budget selector in the Qt Layers control board with Safe preview, Balanced research and Research detail presets.
+- Synced Ocean 3D budget state into the ocean material control port, summary text, control-board strip and Taichi 3D Ocean dialog so the UI and launch packet describe the same scalar material state.
+- Kept the real renderer pass reduction explicitly queued for the post-7:00 module decoupling / render-plan merge phase instead of mixing optimization into the UI control pass.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - dialogue-save transcript restore docs
 
 Changes:
