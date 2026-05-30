@@ -212,3 +212,9 @@ Displaytools 不負責：
 - `visual_review_readiness.frame_status` now reports separate status for renderer thumbnail and live preview.
 - Both entries are marked `inspect_action_available` and `runtime_dependent`, meaning the UI route exists while the actual frame depends on runtime capture/cache state.
 - Use this to distinguish a missing frame artifact from a missing Qt Inspect entry.
+
+## Visual review inspector view
+
+- `visual_review_readiness.inspector_view` now packages title, status badges, rows and hints for a single Qt Visual review inspector.
+- The view is copyable, so clone reviewers can paste the readiness state into issue notes or handoff logs.
+- Use it as the first user-facing summary before checking renderer thumbnail or live preview separately.

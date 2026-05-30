@@ -1345,6 +1345,21 @@ if ($handoff.visual_review_readiness.frame_status.renderer_thumbnail.artifact_st
 if ($handoff.visual_review_readiness.frame_status.live_preview.artifact_state -ne "runtime_dependent") {
     throw "Handoff inspection visual review readiness live preview artifact state missing or invalid"
 }
+if ($handoff.visual_review_readiness.inspector_view_schema -ne "rrkal_displaytools.visual_review_inspector_view.v1") {
+    throw "Handoff inspection visual review readiness inspector view schema missing or invalid"
+}
+if ($handoff.visual_review_readiness.inspector_view.title -ne "Visual readiness") {
+    throw "Handoff inspection visual review readiness inspector view title missing or invalid"
+}
+if ($handoff.visual_review_readiness.inspector_view.surface -ne "Qt Visual review inspector") {
+    throw "Handoff inspection visual review readiness inspector view surface missing or invalid"
+}
+if ($handoff.visual_review_readiness.inspector_view.rows.Count -lt 2) {
+    throw "Handoff inspection visual review readiness inspector view rows missing"
+}
+if (-not $handoff.visual_review_readiness.inspector_view.copyable) {
+    throw "Handoff inspection visual review readiness inspector view copyable flag missing"
+}
 $visualReviewGuidance = ($handoff.visual_review_readiness.missing_frame_guidance -join " ")
 if ($visualReviewGuidance -notmatch 'Inspect: Renderer thumbnail') {
     throw "Handoff inspection visual review readiness missing renderer thumbnail guidance"

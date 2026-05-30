@@ -229,6 +229,17 @@ Positioning:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+## 2026-05-30 - Visual review inspector view
+
+Changes:
+- Added `visual_review_inspector_view` metadata to `visual_review_readiness` packets.
+- The view now carries Qt-facing title, surface, status badges, rows, hints and copyable flag.
+- Handoff output includes the inspector view, and smoke gates schema plus key UI fields.
+- Updated clone quickstart, capability summary and GTD for the Visual review inspector view.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-30 - Visual review frame status
 
 Changes:

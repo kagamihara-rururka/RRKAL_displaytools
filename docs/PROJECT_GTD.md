@@ -351,3 +351,14 @@ Done:
 
 Next:
 - Continue wiring UI labels so Qt can show readiness, frame status and missing-frame hints in one inspector view.
+
+
+## 2026-05-30 - Visual review inspector view
+
+Done:
+- Added `visual_review_inspector_view` metadata to `visual_review_readiness`.
+- The view packages title, Qt surface, status badges, rows, hints and copyable flag.
+- Handoff and smoke gate the inspector view schema and key UI fields.
+
+Next:
+- Continue closing actual Qt command wiring so the `Inspect: Visual readiness` action can render this packet directly.

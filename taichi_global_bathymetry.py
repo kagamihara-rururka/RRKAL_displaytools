@@ -18260,6 +18260,29 @@ def visual_review_readiness_packet(source: str) -> dict[str, object]:
                 "missing_frame_hint": "Use Inspect: Live preview to check whether the renderer frame-capture route is active.",
             },
         },
+        "inspector_view_schema": "rrkal_displaytools.visual_review_inspector_view.v1",
+        "inspector_view": {
+            "title": "Visual readiness",
+            "surface": "Qt Visual review inspector",
+            "status_badges": ["renderer_thumbnail: inspect_action_available", "live_preview: inspect_action_available"],
+            "rows": [
+                {
+                    "label": "Renderer thumbnail",
+                    "action_id": "renderer_thumbnail",
+                    "status": "inspect_action_available",
+                    "artifact_state": "runtime_dependent",
+                    "hint": "Cached preview frame is checked by Inspect: Renderer thumbnail.",
+                },
+                {
+                    "label": "Live preview",
+                    "action_id": "live_preview",
+                    "status": "inspect_action_available",
+                    "artifact_state": "runtime_dependent",
+                    "hint": "Renderer frame-capture routing is checked by Inspect: Live preview.",
+                },
+            ],
+            "copyable": True,
+        },
         "recommended_sequence": ["Inspect: Visual readiness", "Inspect: Renderer thumbnail", "Inspect: Live preview"],
         "missing_frame_guidance": [
             "Run Inspect: Renderer thumbnail to confirm cached preview-frame availability.",
@@ -19732,4 +19755,3 @@ def main(argv: list[str] | None = None) -> None:
 
 if __name__ == "__main__":
     main()
-

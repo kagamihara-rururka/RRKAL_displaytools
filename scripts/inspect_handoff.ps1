@@ -155,6 +155,8 @@ $summary = [ordered]@{
         live_preview_ready = $visualReviewReadiness.live_preview_ready
         frame_status_schema = $visualReviewReadiness.frame_status_schema
         frame_status = $visualReviewReadiness.frame_status
+        inspector_view_schema = $visualReviewReadiness.inspector_view_schema
+        inspector_view = $visualReviewReadiness.inspector_view
         recommended_sequence = $visualReviewReadiness.recommended_sequence
         missing_frame_guidance = $visualReviewReadiness.missing_frame_guidance
     }

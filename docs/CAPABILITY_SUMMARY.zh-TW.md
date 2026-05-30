@@ -531,3 +531,9 @@
 - `visual_review_readiness.frame_status_schema` now advertises `rrkal_displaytools.visual_review_frame_status.v1`.
 - The packet reports renderer thumbnail and live preview frame status separately.
 - Smoke gates both statuses as `inspect_action_available` and both artifact states as `runtime_dependent`.
+
+## Visual review inspector view
+
+- `visual_review_readiness.inspector_view_schema` now advertises `rrkal_displaytools.visual_review_inspector_view.v1`.
+- The view provides a Qt-facing title, surface id, status badges, rows and hints.
+- Smoke gates the title, surface, row count and copyable flag through handoff output.
