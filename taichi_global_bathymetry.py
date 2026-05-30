@@ -17,6 +17,7 @@ import numpy as np
 import pandas as pd
 from cursor_geodesy import cursor_raycast_ack_payload, cursor_raycast_state_payload
 from closed_loop_status import renderer_closed_loop_status_packet
+from renderer_config_gateway import renderer_config_gateway_packet
 from pin_projection import pin_projection_contract_packet, project_pins_to_screen
 try:
     import xarray as xr
@@ -19338,11 +19339,13 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
                 {"id": "visual_review", "fields": ["visual_review_summary", "visual_feature_closure_matrix"]},
                 {"id": "goal_closure", "fields": ["goal_closure_scorecard", "goal_closure_scorecard.copy_summary_contract"]},
                 {"id": "compose_performance", "fields": ["compose_performance_summary", "layer_render_plan_performance.compose_pass_budget"]},
+                {"id": "config_gateway", "fields": ["renderer_config_gateway_summary", "renderer_config_gateway.changed_defaults"]},
             ],
             "portable": True,
         },
         "recommended_review_fields": [
             "compose_performance_summary",
+            "renderer_config_gateway.changed_defaults",
             "layer_selection_tool.selection_summary_contract.quick_actions_summary_contract",
             "layer_selection_affordance.active_quick_actions",
             "layer_render_plan_performance.compose_pass_budget",
@@ -19360,6 +19363,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "ocean_material_summary",
             "style_routes_summary",
             "module_boundary_summary",
+            "renderer_config_gateway_summary",
             "compose_performance_summary",
         ],
         "included_packet_fields": [
@@ -19374,6 +19378,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "ocean_material_control_port",
             "style_profile_renderer_routes",
             "module_boundary_registry",
+            "renderer_config_gateway",
             "layer_render_plan_performance",
             "goal_closure_scorecard",
             "reviewer_packet_export",
@@ -21552,6 +21557,9 @@ def renderer_capabilities_packet() -> dict[str, object]:
             "applies": ["launch_packet", "renderer_output_metadata_sidecar"],
             "boundary": "reference-only; displaytools records the value and RRKAL owns manifest/cache governance",
         },
+        "renderer_config_gateway": renderer_config_gateway_packet(
+            "taichi_global_bathymetry.renderer_capabilities"
+        ),
         "preview_frame_stream": {
             "schema": "rrkal_displaytools.preview_frame_stream.v1",
             "controls": ["preview-frame-file", "preview-frame-interval"],

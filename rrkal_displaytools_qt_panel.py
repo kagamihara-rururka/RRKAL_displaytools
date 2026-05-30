@@ -426,6 +426,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
                 {"id": "compose_performance", "fields": ["compose_performance_summary", "layer_render_plan_performance.compose_pass_budget"]},
                 {"id": "decoupling", "fields": ["decoupling_readiness_summary", "decoupling_readiness.first_extraction_order"]},
                 {"id": "controlled_interception", "fields": ["controlled_interception_summary", "controlled_interception_policy.blocked_patterns"]},
+                {"id": "config_gateway", "fields": ["renderer_config_gateway_summary", "renderer_config_gateway.changed_defaults"]},
             ],
             "portable": True,
         },
@@ -433,6 +434,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "compose_performance_summary",
             "decoupling_readiness.first_extraction_order",
             "controlled_interception_policy.blocked_patterns",
+            "renderer_config_gateway.changed_defaults",
             "layer_selection_tool.selection_summary_contract.quick_actions_summary_contract",
             "layer_selection_affordance.active_quick_actions",
             "layer_render_plan_performance.compose_pass_budget",
@@ -452,6 +454,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "module_boundary_summary",
             "decoupling_readiness_summary",
             "controlled_interception_summary",
+            "renderer_config_gateway_summary",
             "compose_performance_summary",
         ],
         "included_packet_fields": [
@@ -468,6 +471,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "module_boundary_registry",
             "decoupling_readiness",
             "controlled_interception_policy",
+            "renderer_config_gateway",
             "layer_render_plan_performance",
             "goal_closure_scorecard",
             "reviewer_packet_export",
@@ -4208,6 +4212,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         copy_decoupling_summary_button = QtWidgets.QPushButton("Copy decoupling summary")
         controlled_interception_button = QtWidgets.QPushButton("Inspect: Interception")
         copy_interception_summary_button = QtWidgets.QPushButton("Copy interception summary")
+        renderer_config_gateway_button = QtWidgets.QPushButton("Inspect: Config gateway")
+        copy_renderer_config_summary_button = QtWidgets.QPushButton("Copy config summary")
         copy_module_summary_button = QtWidgets.QPushButton("Copy module summary")
         clone_ready_button = QtWidgets.QPushButton("Inspect: Clone ready")
         copy_clone_summary_button = QtWidgets.QPushButton("Copy clone summary")
@@ -4265,6 +4271,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (copy_decoupling_summary_button, "Replay/contracts: copy the decoupling not-before gate, first extraction and gate command."),
             (controlled_interception_button, "Replay/contracts: inspect bounded import/output/runtime interception policy."),
             (copy_interception_summary_button, "Replay/contracts: copy the controlled interception summary and guardrail counts."),
+            (renderer_config_gateway_button, "Replay/contracts: inspect typed renderer argument normalization before post-7 extraction."),
+            (copy_renderer_config_summary_button, "Replay/contracts: copy normalized renderer config, changed defaults and config-only boundary."),
             (copy_module_summary_button, "Replay/contracts: copy module extraction order, stable contracts, Tk boundary and RRKAL governance summary."),
             (clone_ready_button, "Replay/contracts: inspect cross-machine clone readiness JSON."),
             (copy_clone_summary_button, "Replay/contracts: copy clone/setup/profile launch reviewer summary for cross-machine handoff."),
@@ -4321,6 +4329,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         copy_decoupling_summary_button.clicked.connect(self.copy_decoupling_readiness_summary)
         controlled_interception_button.clicked.connect(self.show_controlled_interception_policy)
         copy_interception_summary_button.clicked.connect(self.copy_controlled_interception_summary)
+        renderer_config_gateway_button.clicked.connect(self.show_renderer_config_gateway)
+        copy_renderer_config_summary_button.clicked.connect(self.copy_renderer_config_gateway_summary)
         copy_module_summary_button.clicked.connect(self.copy_module_boundary_summary)
         clone_ready_button.clicked.connect(self.show_cross_machine_clone_readiness)
         copy_clone_summary_button.clicked.connect(self.copy_clone_reviewer_summary)
@@ -4357,7 +4367,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         stop_button.clicked.connect(self.stop_renderer)
         action_sections = (
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button, export_reviewer_packet_button)),
-            ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, copy_reviewer_fields_button, copy_goal_scorecard_button, timeline_button, module_seams_button, decoupling_readiness_button, copy_decoupling_summary_button, controlled_interception_button, copy_interception_summary_button, copy_module_summary_button, clone_ready_button, copy_clone_summary_button)),
+            ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, copy_reviewer_fields_button, copy_goal_scorecard_button, timeline_button, module_seams_button, decoupling_readiness_button, copy_decoupling_summary_button, controlled_interception_button, copy_interception_summary_button, renderer_config_gateway_button, copy_renderer_config_summary_button, copy_module_summary_button, clone_ready_button, copy_clone_summary_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, ocean_3d_controls_action_button, copy_ocean_summary_button, copy_ocean_guard_summary_button, style_routes_button, copy_style_routes_summary_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
             ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, copy_visual_closure_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, copy_style_thumb_status_button, thumbnail_button, live_preview_button)),
@@ -5331,6 +5341,18 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
 
         return controlled_interception_policy_packet("rrkal_displaytools_qt_panel")
 
+    def collect_renderer_config_gateway(self) -> dict[str, object]:
+        from renderer_config_gateway import renderer_config_gateway_packet
+
+        profile = self.collect_profile()
+        renderer = profile.get("renderer") if isinstance(profile.get("renderer"), dict) else {}
+        ocean = profile.get("ocean_material") if isinstance(profile.get("ocean_material"), dict) else {}
+        value = dict(renderer)
+        value["ocean_wave_strength"] = ocean.get("wave_strength")
+        value["ocean_roughness"] = ocean.get("roughness")
+        value["ocean_foam"] = ocean.get("foam")
+        return renderer_config_gateway_packet("rrkal_displaytools_qt_panel", value)
+
     def module_boundary_summary_text(self, registry: dict[str, object] | None = None) -> str:
         registry = registry if isinstance(registry, dict) else self.collect_module_boundary_registry()
         contract = registry.get("decoupling_boundary_contract") if isinstance(registry.get("decoupling_boundary_contract"), dict) else {}
@@ -5379,6 +5401,21 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"blocked={len(blocked)}; "
             f"first_use={first_use.get('target', 'render_plan_compose')}; "
             "rule=scoped_visible_removable"
+        )
+
+    def renderer_config_gateway_summary_text(self, packet: dict[str, object] | None = None) -> str:
+        packet = packet if isinstance(packet, dict) else self.collect_renderer_config_gateway()
+        config = packet.get("config") if isinstance(packet.get("config"), dict) else {}
+        changed = packet.get("changed_defaults") if isinstance(packet.get("changed_defaults"), list) else []
+        changed_text = ",".join(str(item) for item in changed) or "none"
+        return (
+            "Renderer config gateway: "
+            f"schema={packet.get('schema', '-')}; "
+            f"style={config.get('style_profile', '-')}; "
+            f"size={config.get('width', '-')}x{config.get('height', '-')}; "
+            f"topo_step={config.get('topo_step', '-')}; "
+            f"changed={changed_text}; "
+            "boundary=config_only_no_qt_taichi_data_governance"
         )
 
     def collect_visual_feature_closure_matrix(self) -> dict[str, object]:
@@ -5634,6 +5671,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "module_boundary_summary": self.module_boundary_summary_text(),
             "decoupling_readiness_summary": self.decoupling_readiness_summary_text(),
             "controlled_interception_summary": self.controlled_interception_summary_text(),
+            "renderer_config_gateway_summary": self.renderer_config_gateway_summary_text(),
             "compose_performance_summary": self.compose_performance_reviewer_summary_text(),
             "goal_closure_scorecard": self.collect_goal_closure_scorecard(),
             "cross_machine_clone_readiness": self.collect_cross_machine_clone_readiness(),
@@ -5646,6 +5684,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "module_boundary_registry": self.collect_module_boundary_registry(),
             "decoupling_readiness": self.collect_decoupling_readiness(),
             "controlled_interception_policy": self.collect_controlled_interception_policy(),
+            "renderer_config_gateway": self.collect_renderer_config_gateway(),
             "visual_feature_closure_matrix": self.collect_visual_feature_closure_matrix(),
             "goal_closure_scorecard": self.collect_goal_closure_scorecard(),
             "renderer_output_artifact_contract": self.collect_renderer_output_artifact_contract(),
@@ -5702,6 +5741,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "module_boundary_registry": self.collect_module_boundary_registry(),
             "decoupling_readiness": self.collect_decoupling_readiness(),
             "controlled_interception_policy": self.collect_controlled_interception_policy(),
+            "renderer_config_gateway": self.collect_renderer_config_gateway(),
             "cross_machine_clone_readiness": self.collect_cross_machine_clone_readiness(),
             "profile_launch_readiness": self.collect_profile_launch_readiness(),
             "profile_launch_readiness_ui": self.collect_profile_launch_readiness_ui(),
@@ -10178,6 +10218,17 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         summary = self.controlled_interception_summary_text()
         QtWidgets.QApplication.clipboard().setText(summary)
         self.status.setText("Copied controlled interception summary to clipboard.")
+
+    def show_renderer_config_gateway(self) -> None:
+        self.command_text.setPlainText(
+            json.dumps(self.collect_renderer_config_gateway(), ensure_ascii=False, indent=2)
+        )
+        self.status.setText("Displayed renderer config gateway JSON")
+
+    def copy_renderer_config_gateway_summary(self) -> None:
+        summary = self.renderer_config_gateway_summary_text()
+        QtWidgets.QApplication.clipboard().setText(summary)
+        self.status.setText("Copied renderer config gateway summary to clipboard.")
 
     def show_cross_machine_clone_readiness(self) -> None:
         self.command_text.setPlainText(

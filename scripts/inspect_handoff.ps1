@@ -225,6 +225,14 @@ $summary = [ordered]@{
         included_packet_fields = $launchPacket.reviewer_packet_export.included_packet_fields
         portable = $launchPacket.reviewer_packet_export.portable
     }
+    renderer_config_gateway = @{
+        launch_packet_schema = $launchPacket.renderer_config_gateway.schema
+        renderer_capabilities_schema = $capabilities.renderer_config_gateway.schema
+        status = $launchPacket.renderer_config_gateway.status
+        changed_defaults = $launchPacket.renderer_config_gateway.changed_defaults
+        next_integration_target = $launchPacket.renderer_config_gateway.next_integration_target
+        boundary = $launchPacket.renderer_config_gateway.boundary
+    }
     profile_visual_quick_review = @{
         launch_packet_schema = $launchPacket.profile_ui_state_replay.schema
         renderer_capabilities_schema = $capabilities.profile_ui_state_replay.schema

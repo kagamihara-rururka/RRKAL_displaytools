@@ -1,5 +1,16 @@
 # Development Log
 
+## 2026-05-31 - Renderer config gateway UI/reviewer hook
+
+Changes:
+- Added `renderer_config_gateway` to launch packets, renderer capabilities, no-GUI reviewer packets and handoff inspection.
+- Added Qt Replay/contracts actions: `Inspect: Config gateway` and `Copy config summary`.
+- Smoke gate now verifies the config gateway reviewer fields, Qt actions, no-GUI exporter contract and handoff schemas.
+- Boundary: this is a typed config normalization/readout contract only; it does not launch Qt/Taichi or move post-7 renderer modules.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-31 - Renderer config gateway contract
 
 Changes:

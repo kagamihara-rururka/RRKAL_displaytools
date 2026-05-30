@@ -1049,6 +1049,9 @@ if ($launchPacket.reviewer_packet_export.field_guide.ordered_review_groups.id -n
 if ($launchPacket.reviewer_packet_export.field_guide.ordered_review_groups.id -notcontains "controlled_interception") {
     throw "Launch packet reviewer packet field guide controlled interception group missing"
 }
+if ($launchPacket.reviewer_packet_export.field_guide.ordered_review_groups.id -notcontains "config_gateway") {
+    throw "Launch packet reviewer packet field guide config gateway group missing"
+}
 if ($launchPacket.reviewer_packet_export.recommended_review_fields -notcontains "layer_render_plan_performance.compose_pass_budget") {
     throw "Launch packet reviewer recommended compose budget field missing"
 }
@@ -1057,6 +1060,9 @@ if ($launchPacket.reviewer_packet_export.recommended_review_fields -notcontains 
 }
 if ($launchPacket.reviewer_packet_export.recommended_review_fields -notcontains "controlled_interception_policy.blocked_patterns") {
     throw "Launch packet reviewer recommended controlled interception field missing"
+}
+if ($launchPacket.reviewer_packet_export.recommended_review_fields -notcontains "renderer_config_gateway.changed_defaults") {
+    throw "Launch packet reviewer recommended renderer config gateway field missing"
 }
 if ($launchPacket.reviewer_packet_export.recommended_review_fields -notcontains "layer_selection_tool.selection_summary_contract.quick_actions_summary_contract") {
     throw "Launch packet reviewer packet layer quick actions recommended field missing"
@@ -1088,6 +1094,9 @@ if ($launchPacket.reviewer_packet_export.included_summary_fields -notcontains "d
 if ($launchPacket.reviewer_packet_export.included_summary_fields -notcontains "controlled_interception_summary") {
     throw "Launch packet reviewer packet controlled interception summary field missing"
 }
+if ($launchPacket.reviewer_packet_export.included_summary_fields -notcontains "renderer_config_gateway_summary") {
+    throw "Launch packet reviewer packet renderer config gateway summary field missing"
+}
 if ($launchPacket.reviewer_packet_export.included_summary_fields -notcontains "compose_performance_summary") {
     throw "Launch packet reviewer packet compose performance summary field missing"
 }
@@ -1115,6 +1124,9 @@ if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "de
 if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "controlled_interception_policy") {
     throw "Launch packet reviewer packet controlled interception policy field missing"
 }
+if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "renderer_config_gateway") {
+    throw "Launch packet reviewer packet renderer config gateway field missing"
+}
 if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "layer_render_plan_performance") {
     throw "Launch packet reviewer packet render plan performance packet field missing"
 }
@@ -1126,6 +1138,12 @@ if ($launchPacket.controlled_interception_policy.schema -ne "rrkal_displaytools.
 }
 if ($launchPacket.controlled_interception_policy.blocked_patterns -notcontains "core_renderer_loop_import_forgery") {
     throw "Launch packet controlled interception core renderer import guard missing"
+}
+if ($launchPacket.renderer_config_gateway.schema -ne "rrkal_displaytools.renderer_config_gateway.v1") {
+    throw "Launch packet renderer config gateway schema missing"
+}
+if ($launchPacket.renderer_config_gateway.next_integration_target -notlike "*renderer argument normalization*") {
+    throw "Launch packet renderer config gateway integration target missing"
 }
 if ($launchPacket.layer_visual_presets.schema -ne "rrkal_displaytools.layer_visual_presets.v1") {
     throw "Launch packet layer_visual_presets schema missing or invalid"
@@ -2419,6 +2437,15 @@ if ($capabilities.reviewer_packet_export.included_packet_fields -notcontains "mo
 if ($capabilities.reviewer_packet_export.included_packet_fields -notcontains "layer_render_plan_performance") {
     throw "Renderer reviewer packet render plan performance packet field missing"
 }
+if ($capabilities.reviewer_packet_export.recommended_review_fields -notcontains "renderer_config_gateway.changed_defaults") {
+    throw "Renderer reviewer packet config gateway recommended field missing"
+}
+if ($capabilities.reviewer_packet_export.included_packet_fields -notcontains "renderer_config_gateway") {
+    throw "Renderer reviewer packet config gateway field missing"
+}
+if ($capabilities.renderer_config_gateway.schema -ne "rrkal_displaytools.renderer_config_gateway.v1") {
+    throw "Renderer capabilities config gateway schema missing"
+}
 if ($capabilities.layer_visual_presets.schema -ne "rrkal_displaytools.layer_visual_presets.v1") {
     throw "Renderer layer_visual_presets schema missing or invalid"
 }
@@ -3688,6 +3715,12 @@ if ($handoff.reviewer_packet_export.included_packet_fields -notcontains "module_
 }
 if ($handoff.reviewer_packet_export.included_packet_fields -notcontains "layer_render_plan_performance") {
     throw "Handoff inspection reviewer packet render plan performance packet field missing"
+}
+if ($handoff.renderer_config_gateway.launch_packet_schema -ne "rrkal_displaytools.renderer_config_gateway.v1") {
+    throw "Handoff renderer config gateway launch schema missing"
+}
+if ($handoff.renderer_config_gateway.renderer_capabilities_schema -ne "rrkal_displaytools.renderer_config_gateway.v1") {
+    throw "Handoff renderer config gateway capabilities schema missing"
 }
 if (-not $handoff.reviewer_packet_export.portable) {
     throw "Handoff inspection reviewer packet portability flag missing"
@@ -5332,6 +5365,9 @@ if ($reviewerPacketContract.decoupling_readiness_field -ne "decoupling_readiness
 if ($reviewerPacketContract.controlled_interception_policy_field -ne "controlled_interception_policy") {
     throw "No-GUI reviewer packet exporter controlled interception field missing"
 }
+if ($reviewerPacketContract.renderer_config_gateway_field -ne "renderer_config_gateway") {
+    throw "No-GUI reviewer packet exporter renderer config gateway field missing"
+}
 if ($composeParitySmoke.mode -ne "contract_only_no_render_side_effect") {
     throw "Compose parity smoke contract mode mismatch"
 }
@@ -5689,6 +5725,12 @@ if ($decouplingQtPanelSource -notmatch "Inspect: Interception") {
 if ($decouplingQtPanelSource -notmatch "Copy interception summary") {
     throw "Qt panel controlled interception copy summary action is missing"
 }
+if ($decouplingQtPanelSource -notmatch "Inspect: Config gateway") {
+    throw "Qt panel renderer config gateway Inspect action is missing"
+}
+if ($decouplingQtPanelSource -notmatch "Copy config summary") {
+    throw "Qt panel renderer config gateway copy summary action is missing"
+}
 if ($decouplingQtPanelSource -notmatch "show_decoupling_readiness") {
     throw "Qt panel decoupling readiness handler is missing"
 }
@@ -5700,6 +5742,12 @@ if ($decouplingQtPanelSource -notmatch "show_controlled_interception_policy") {
 }
 if ($decouplingQtPanelSource -notmatch "copy_controlled_interception_summary") {
     throw "Qt panel controlled interception copy summary handler is missing"
+}
+if ($decouplingQtPanelSource -notmatch "show_renderer_config_gateway") {
+    throw "Qt panel renderer config gateway inspect handler is missing"
+}
+if ($decouplingQtPanelSource -notmatch "copy_renderer_config_gateway_summary") {
+    throw "Qt panel renderer config gateway copy summary handler is missing"
 }
 if ($decouplingQtPanelSource -notmatch "collect_decoupling_readiness") {
     throw "Qt panel decoupling readiness collector is missing"

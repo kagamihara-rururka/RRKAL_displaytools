@@ -28,6 +28,7 @@ from controlled_interception import controlled_interception_policy_packet  # noq
 from decoupling_readiness import decoupling_readiness_packet  # noqa: E402
 from pin_projection import pin_projection_contract_packet  # noqa: E402
 from profile_schema import load_profile_payload, profile_payload_errors  # noqa: E402
+from renderer_config_gateway import renderer_config_gateway_packet  # noqa: E402
 
 
 BOOL_FLAGS = {
@@ -1244,6 +1245,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
                 {"id": "compose_performance", "fields": ["compose_performance_summary", "layer_render_plan_performance.compose_pass_budget"]},
                 {"id": "decoupling", "fields": ["decoupling_readiness_summary", "decoupling_readiness.first_extraction_order"]},
                 {"id": "controlled_interception", "fields": ["controlled_interception_summary", "controlled_interception_policy.blocked_patterns"]},
+                {"id": "config_gateway", "fields": ["renderer_config_gateway_summary", "renderer_config_gateway.changed_defaults"]},
             ],
             "portable": True,
         },
@@ -1251,6 +1253,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "compose_performance_summary",
             "decoupling_readiness.first_extraction_order",
             "controlled_interception_policy.blocked_patterns",
+            "renderer_config_gateway.changed_defaults",
             "layer_selection_tool.selection_summary_contract.quick_actions_summary_contract",
             "layer_selection_affordance.active_quick_actions",
             "layer_render_plan_performance.compose_pass_budget",
@@ -1270,6 +1273,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "module_boundary_summary",
             "decoupling_readiness_summary",
             "controlled_interception_summary",
+            "renderer_config_gateway_summary",
             "compose_performance_summary",
         ],
         "included_packet_fields": [
@@ -1286,6 +1290,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "module_boundary_registry",
             "decoupling_readiness",
             "controlled_interception_policy",
+            "renderer_config_gateway",
             "layer_render_plan_performance",
             "goal_closure_scorecard",
             "reviewer_packet_export",
@@ -3987,6 +3992,21 @@ def timeline_animation_export_packet(executed: bool = False) -> dict[str, object
     }
 
 
+def renderer_config_gateway_value(profile: dict[str, object], rrkal_data_manifest_ref: str = "") -> dict[str, object]:
+    renderer = profile.get("renderer") if isinstance(profile.get("renderer"), dict) else {}
+    ocean = profile.get("ocean_material") if isinstance(profile.get("ocean_material"), dict) else {}
+    value = dict(renderer)
+    if rrkal_data_manifest_ref:
+        value["rrkal_data_manifest_ref"] = rrkal_data_manifest_ref
+    if "wave_strength" in ocean:
+        value["ocean_wave_strength"] = ocean.get("wave_strength")
+    if "roughness" in ocean:
+        value["ocean_roughness"] = ocean.get("roughness")
+    if "foam" in ocean:
+        value["ocean_foam"] = ocean.get("foam")
+    return value
+
+
 def launch_packet(
     profile_path: Path,
     profile: dict[str, object],
@@ -4025,6 +4045,10 @@ def launch_packet(
             ],
         },
         "profile": profile,
+        "renderer_config_gateway": renderer_config_gateway_packet(
+            "scripts.export_launch_packet",
+            renderer_config_gateway_value(profile, manifest_ref),
+        ),
         "rrkal_data_manifest_ref": manifest_ref,
         "rrkal_data_manifest_ref_boundary": "Reference-only handoff field; displaytools does not discover, download, validate, import, or govern this manifest.",
         "layer_filter": layer_filter_packet(profile),
