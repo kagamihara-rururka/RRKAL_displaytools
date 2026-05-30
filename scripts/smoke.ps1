@@ -1259,6 +1259,53 @@ if ($hydrologyLodInspectorPacket.lod_hook_status -ne "contract_ready") {
 if ($hydrologyLodInspectorPacket.ack_file -ne "state/renderer_layer_runtime_ack.json") {
     throw "Hydrology/LOD inspector output ack file mismatch"
 }
+$oceanMaterialInspectorPath = Join-Path $RepoRoot "scripts\inspect_ocean_material.ps1"
+if (-not (Test-Path -LiteralPath $oceanMaterialInspectorPath)) {
+    throw "Ocean material inspector script is missing"
+}
+$oceanMaterialInspectorContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $oceanMaterialInspectorPath, "-ContractOnly")
+$oceanMaterialInspectorContract = ($oceanMaterialInspectorContractText -join "`n") | ConvertFrom-Json
+if ($oceanMaterialInspectorContract.schema -ne "rrkal_displaytools.ocean_material_inspector.v1") {
+    throw "Ocean material inspector contract schema missing"
+}
+if ($oceanMaterialInspectorContract.launch_packet_field -ne "ocean_material_control_port") {
+    throw "Ocean material inspector launch packet field mismatch"
+}
+if ($oceanMaterialInspectorContract.required_contracts -notcontains "rrkal_displaytools.taichi_ocean_3d_control_panel.v1") {
+    throw "Ocean material inspector missing Ocean 3D control panel contract"
+}
+if ($oceanMaterialInspectorContract.required_contracts -notcontains "rrkal_displaytools.sea_state_scalar_sample.v1") {
+    throw "Ocean material inspector missing sea-state scalar sample contract"
+}
+$oceanMaterialInspectorText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $oceanMaterialInspectorPath)
+$oceanMaterialInspectorPacket = ($oceanMaterialInspectorText -join "`n") | ConvertFrom-Json
+if ($oceanMaterialInspectorPacket.schema -ne "rrkal_displaytools.ocean_material_inspection.v1") {
+    throw "Ocean material inspector output schema missing"
+}
+if ($oceanMaterialInspectorPacket.control_port_schema -ne "rrkal_displaytools.ocean_material_control_port.v1") {
+    throw "Ocean material inspector control port schema missing"
+}
+if ($oceanMaterialInspectorPacket.qt_control_panel_schema -ne "rrkal_displaytools.taichi_ocean_3d_control_panel.v1") {
+    throw "Ocean material inspector Ocean 3D control panel schema missing"
+}
+if ($oceanMaterialInspectorPacket.control_board_audit_schema -ne "rrkal_displaytools.taichi_ocean_3d_control_board_audit.v1") {
+    throw "Ocean material inspector control board audit schema missing"
+}
+if ($oceanMaterialInspectorPacket.renderer_apply_contract_schema -ne "rrkal_displaytools.ocean_material_renderer_apply_contract.v1") {
+    throw "Ocean material inspector renderer apply contract schema missing"
+}
+if ($oceanMaterialInspectorPacket.sea_state_scalar_sample_schema -ne "rrkal_displaytools.sea_state_scalar_sample.v1") {
+    throw "Ocean material inspector sea-state scalar sample schema missing"
+}
+if ($oceanMaterialInspectorPacket.safe_preview_action -ne "apply_ocean_3d_safe_preview") {
+    throw "Ocean material inspector safe preview action mismatch"
+}
+if ($oceanMaterialInspectorPacket.control_board_status -ne "wired_default_visible") {
+    throw "Ocean material inspector control board status mismatch"
+}
+if ($oceanMaterialInspectorPacket.render_pipeline_followup -ne "post_decoupling_precompute_layer_render_plan_then_single_render_pass") {
+    throw "Ocean material inspector render pipeline followup mismatch"
+}
 $performanceSmokePath = Join-Path $RepoRoot "scripts\performance_smoke.ps1"
 if (-not (Test-Path -LiteralPath $performanceSmokePath)) {
     throw "Performance smoke script is missing"

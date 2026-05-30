@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - No-GUI Ocean material inspector
+
+- Added `scripts/inspect_ocean_material.ps1` for no-GUI inspection of Ocean material, Ocean 3D control panel, control-board audit, renderer apply and sea-state scalar contracts.
+- Smoke now verifies the inspector contract, safe-preview action, default-visible Ocean 3D control-board status and post-decoupling render-plan follow-up marker.
+- This makes the Ocean 3D control surface reviewable across machines without launching Qt while keeping provider IO/cache governance outside displaytools.
+- Smoke: PASS (`scripts\smoke.ps1`).
+
 ## 2026-05-31 - No-GUI Hydrology/LOD inspector
 
 - Added `scripts/inspect_hydrology_lod.ps1` for no-GUI inspection of Hydrology/LOD readiness and runtime evidence.
