@@ -3647,3 +3647,15 @@ Decision:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Qt Visual review Inspect group
+
+Changes:
+- Added `Inspect: Visual review` as a Qt Actions section for renderer pixel review.
+- Renamed renderer thumbnail/live preview controls to `Inspect: Renderer thumbnail` and `Inspect: Live preview`.
+- Added `renderer_thumbnail`, `live_preview`, and `visual_review` to `profile_ui_state_replay` across Qt, launch packet export, and renderer capability discovery.
+- Documented the Visual review group in profile schema, clone quickstart, capability summary, and GTD.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+

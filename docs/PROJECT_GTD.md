@@ -210,3 +210,14 @@ Last updated: 2026-05-29
 - 2026-05-30: Added Qt `Inspect: Layer matrix` action for direct layer capability matrix inspection and synced it to profile replay inspector contracts and quickstart.
 - 2026-05-30: Added Qt `Inspect: Timeline` action for direct Timeline runtime/keyframe/export contract inspection and synced it to profile replay inspector contracts and quickstart.
 - 2026-05-30: Added Qt `Inspect: Canvas state` to the Research interaction section and synced it to profile replay inspector contracts and clone quickstart guidance.
+
+
+## 2026-05-30 - Qt Visual review Inspect group
+
+Done:
+- Added `Inspect: Visual review` as a separate Qt Actions section.
+- Mapped renderer thumbnail and live preview actions into `profile_ui_state_replay.qt_inspector_action_groups.visual_review`.
+- Kept diagnostics/remediation controls separate from visual pixel inspection.
+
+Next:
+- Continue closing UIUX loops before backend closure, especially layer selection feedback and scientific annotation review.

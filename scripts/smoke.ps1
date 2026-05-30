@@ -326,7 +326,13 @@ if ($launchPacket.cross_machine_clone_readiness.handoff_first_command -notlike "
 if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "boundary_json") {
     throw "Launch packet profile_ui_state_replay Boundary inspector action missing"
 }
-if ([int]$launchPacket.profile_ui_state_replay.qt_inspector_action_count -lt 14) {
+if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "renderer_thumbnail") {
+    throw "Launch packet profile_ui_state_replay Renderer thumbnail inspector action missing"
+}
+if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "live_preview") {
+    throw "Launch packet profile_ui_state_replay Live preview inspector action missing"
+}
+if ([int]$launchPacket.profile_ui_state_replay.qt_inspector_action_count -lt 16) {
     throw "Launch packet profile_ui_state_replay inspector action count missing"
 }
 if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "canvas_state") {
@@ -341,11 +347,14 @@ if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "
 if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "layer_runtime") {
     throw "Launch packet profile_ui_state_replay layer runtime inspector action missing"
 }
-if ([int]$launchPacket.profile_ui_state_replay.qt_inspector_group_count -lt 3) {
+if ([int]$launchPacket.profile_ui_state_replay.qt_inspector_group_count -lt 4) {
     throw "Launch packet profile_ui_state_replay inspector group count missing"
 }
 if ($launchPacket.profile_ui_state_replay.qt_inspector_action_groups.id -notcontains "research_interaction") {
     throw "Launch packet profile_ui_state_replay research interaction group missing"
+}
+if ($launchPacket.profile_ui_state_replay.qt_inspector_action_groups.id -notcontains "visual_review") {
+    throw "Launch packet profile_ui_state_replay visual review group missing"
 }
 if ($launchPacket.profile_launch_readiness.schema -ne "rrkal_displaytools.profile_launch_readiness.v1") {
     throw "Launch packet profile_launch_readiness schema missing or invalid"
@@ -973,8 +982,17 @@ if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontain
 if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontains "Inspect: Layer matrix") {
     throw "Renderer profile_ui_state_replay layer matrix inspector label missing"
 }
+if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontains "Inspect: Renderer thumbnail") {
+    throw "Renderer profile_ui_state_replay Renderer thumbnail inspector label missing"
+}
+if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontains "Inspect: Live preview") {
+    throw "Renderer profile_ui_state_replay Live preview inspector label missing"
+}
 if ($capabilities.profile_ui_state_replay.qt_inspector_action_groups.id -notcontains "renderer_ports") {
     throw "Renderer profile_ui_state_replay renderer ports group missing"
+}
+if ($capabilities.profile_ui_state_replay.qt_inspector_action_groups.id -notcontains "visual_review") {
+    throw "Renderer profile_ui_state_replay visual review group missing"
 }
 if ($capabilities.profile_launch_readiness.schema -ne "rrkal_displaytools.profile_launch_readiness.v1") {
     throw "Renderer profile_launch_readiness schema missing or invalid"
@@ -1743,6 +1761,12 @@ if ($qtPanelSource -notlike "*Renderer ports: inspect layer capability matrix JS
 if ($qtPanelSource -notlike "*Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON*") {
     throw "Qt Research interaction inspector tooltip is missing"
 }
+if ($qtPanelSource -notlike "*Visual review: inspect latest renderer thumbnail PNG*") {
+    throw "Qt Visual review renderer thumbnail tooltip is missing"
+}
+if ($qtPanelSource -notlike "*Visual review: inspect file-based live renderer preview frame*") {
+    throw "Qt Visual review live preview tooltip is missing"
+}
 if ($qtPanelSource -notlike "*Research interaction: inspect Qt Canvas state, preview metadata and provenance summary*") {
     throw "Qt Canvas state inspector tooltip is missing"
 }
@@ -1788,6 +1812,12 @@ if ($qtPanelSource -notlike "*Inspect: Canvas state*") {
 if ($qtPanelSource -notlike "*Inspect: Boundary JSON*") {
     throw "Qt Boundary JSON inspector prefix is missing"
 }
+if ($qtPanelSource -notlike "*Inspect: Renderer thumbnail*") {
+    throw "Qt Renderer thumbnail inspector button is missing"
+}
+if ($qtPanelSource -notlike "*Inspect: Live preview*") {
+    throw "Qt Live preview inspector button is missing"
+}
 if ($qtPanelSource -notlike "*show_timeline_runtime_state*") {
     throw "Qt Timeline runtime state action is missing"
 }
@@ -1799,6 +1829,9 @@ if ($qtPanelSource -notlike "*Inspect: Replay/contracts*") {
 }
 if ($qtPanelSource -notlike "*Inspect: Research interaction*") {
     throw "Qt Actions Research interaction section is missing"
+}
+if ($qtPanelSource -notlike "*Inspect: Visual review*") {
+    throw "Qt Actions Visual review section is missing"
 }
 if ($qtPanelSource -notlike "*show_boundary_state*") {
     throw "Qt Boundary JSON action is missing"
@@ -1849,6 +1882,9 @@ if ($rendererSource -notlike "*qt_inspector_action_ids*") {
 }
 if ($rendererSource -notlike "*research_interaction*") {
     throw "Renderer capability profile UI state replay inspector group missing"
+}
+if ($rendererSource -notlike "*visual_review*") {
+    throw "Renderer capability profile UI state replay visual review group missing"
 }
 
 $scripts = Get-ChildItem scripts -Filter *.ps1
@@ -1947,6 +1983,9 @@ if ($launchPacketSource -notmatch 'qt_inspector_action_ids') {
 if ($launchPacketSource -notmatch 'qt_inspector_action_groups') {
     throw "Launch packet profile UI state replay inspector groups missing"
 }
+if ($launchPacketSource -notmatch 'visual_review') {
+    throw "Launch packet profile UI state replay visual review group missing"
+}
 if ($handoffInspectorSource -notmatch 'profile_ui_state_replay') {
     throw "Handoff inspection profile UI state replay output is missing"
 }
@@ -2005,6 +2044,12 @@ if ($profileSchemaDoc -notmatch 'canvas_state') {
 if ($profileSchemaDoc -notmatch 'qt_inspector_action_groups') {
     throw "Profile schema docs missing profile UI state replay inspector action groups"
 }
+if ($profileSchemaDoc -notmatch 'visual_review') {
+    throw "Profile schema docs missing visual review inspector action group"
+}
+if ($profileSchemaDoc -notmatch 'renderer_thumbnail') {
+    throw "Profile schema docs missing renderer thumbnail inspector action"
+}
 
 $cloneQuickstartDoc = Get-Content -LiteralPath (Join-Path $BoundaryIdentityRoot "docs\QUICKSTART_CLONE.zh-TW.md") -Raw -Encoding UTF8
 if ($cloneQuickstartDoc -notmatch 'Inspect: Clone ready') {
@@ -2012,6 +2057,9 @@ if ($cloneQuickstartDoc -notmatch 'Inspect: Clone ready') {
 }
 if ($cloneQuickstartDoc -notmatch 'Inspect: Boundary JSON') {
     throw "Clone quickstart missing Qt Inspect Boundary JSON guidance"
+}
+if ($cloneQuickstartDoc -notmatch 'Inspect: Live preview') {
+    throw "Clone quickstart missing Qt Inspect Live preview guidance"
 }
 if ($cloneQuickstartDoc -notmatch 'Replay/contracts') {
     throw "Clone quickstart missing Qt Inspect Replay/contracts group guidance"

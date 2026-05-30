@@ -330,3 +330,11 @@ Timeline playback plan 目前把 style、layer visibility/blend、pins、boundar
 - User/operator saved profiles live in `state/ui_profiles/` and are ignored.
 - Launch packets live in `state/showcase/` and are ignored.
 - RRKAL 若未來產生 displaytools profiles，應寫入此 schema shape，而不是直接控制 renderer internals。
+
+## Qt Inspect visual review group
+
+- `profile_ui_state_replay.qt_inspector_action_ids` now includes `renderer_thumbnail` and `live_preview`.
+- `profile_ui_state_replay.qt_inspector_action_groups` now includes `visual_review` for renderer pixel inspection surfaces.
+- `Inspect: Renderer thumbnail` opens the latest static renderer PNG when present.
+- `Inspect: Live preview` switches the Canvas Preview to the file-based renderer preview frame stream.
+- This group is UI replay metadata only; it does not imply data discovery, download, import, or cache governance.

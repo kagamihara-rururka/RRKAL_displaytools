@@ -1079,11 +1079,14 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         ("pin_pick", "Inspect: Pin pick"),
         ("cursor_geo", "Inspect: Cursor geo"),
         ("boundary_json", "Inspect: Boundary JSON"),
+        ("renderer_thumbnail", "Inspect: Renderer thumbnail"),
+        ("live_preview", "Inspect: Live preview"),
     ]
     qt_inspector_groups = [
         {"id": "replay_contracts", "label": "Replay/contracts", "action_ids": ["profile_replay", "timeline", "clone_ready", "module_seams"]},
         {"id": "renderer_ports", "label": "Renderer ports", "action_ids": ["hydro_lod", "ocean_port", "style_routes", "layer_matrix", "layer_runtime"]},
         {"id": "research_interaction", "label": "Research interaction", "action_ids": ["layer_pick", "canvas_state", "pin_pick", "cursor_geo", "boundary_json"]},
+        {"id": "visual_review", "label": "Visual review", "action_ids": ["renderer_thumbnail", "live_preview"]},
     ]
     return {
         "schema": "rrkal_displaytools.profile_ui_state_replay.v1",

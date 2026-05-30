@@ -253,6 +253,9 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                 "scope": [
                     "Qt profile UI replay label",
                     "Qt Profile replay JSON action",
+                    "Qt Visual review Inspect group",
+                    "Qt Renderer thumbnail Inspect action",
+                    "Qt Live preview Inspect action",
                     "launch packet profile_ui_state_replay contract",
                     "renderer capability profile_ui_state_replay discovery",
                     "handoff inspection profile_ui_state_replay output",
@@ -262,6 +265,9 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                 "evidence": [
                     "profileUiStateReplay",
                     "show_profile_ui_state_replay",
+                    "show_latest_renderer_thumbnail",
+                    "show_live_renderer_preview",
+                    "qt_inspector_action_groups.visual_review",
                     "rrkal_displaytools.profile_ui_state_replay.v1",
                     "profile_ui_state_replay.saved_state_groups",
                     "profile_ui_state_replay.replay_surfaces",

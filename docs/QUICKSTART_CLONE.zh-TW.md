@@ -153,3 +153,9 @@ Displaytools 不負責：
 - RRKAL asset registry
 
 以上仍由 RRKAL / `APIkeys_collection` 負責。
+
+## Qt Inspect: Visual review
+
+- After cloning on another machine, open `Inspect: Renderer thumbnail` to inspect the latest renderer PNG if the renderer has produced one.
+- Open `Inspect: Live preview` to switch Canvas Preview to the file-based live preview frame.
+- These actions sit under `Inspect: Visual review`, separate from renderer diagnostics, so researchers can distinguish pixel inspection from capability/remediation metadata.

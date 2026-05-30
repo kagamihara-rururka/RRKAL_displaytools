@@ -469,3 +469,10 @@
 
 - Qt Actions now labels Canvas state as `Inspect: Canvas state` inside the Research interaction section.
 - The action remains backed by the existing Canvas Preview state/provenance view and is now listed in profile replay inspector contracts.
+
+## Qt Inspect visual review
+
+- Qt Actions now exposes `Inspect: Visual review` as a first-class section.
+- `Inspect: Renderer thumbnail` provides a static renderer pixel checkpoint for clone/readback review.
+- `Inspect: Live preview` provides the file-based live preview frame path for renderer pixel review.
+- Launch packets and renderer capabilities advertise the `visual_review` group through `profile_ui_state_replay`.
