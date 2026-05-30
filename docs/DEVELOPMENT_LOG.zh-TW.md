@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Capability summary includes source map
+
+- Added `render_plan_compose_source_map` to `scripts/export_capability_summary.ps1`.
+- The current capability report now lists the no-code-move source map for the first post-7 extraction seam.
+- Smoke now gates the capability summary entry.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Pre-7 closure includes source map
 
 - Updated `scripts/check_pre7_closure_readiness.ps1` so the compact pre-7 checker also verifies the render-plan compose source-map inspector exists.

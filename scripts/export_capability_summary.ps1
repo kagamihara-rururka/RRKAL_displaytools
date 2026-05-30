@@ -83,6 +83,12 @@ $summary = [ordered]@{
             status = "armed_for_post_0700"
             description = "Formal pre-decoupling readiness, boundary inspection, render-plan compose work order and not-before gate protect the first code move."
             review_command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_pre_decoupling_readiness.ps1"
+        },
+        [ordered]@{
+            id = "render_plan_compose_source_map"
+            status = "ready_no_code_move"
+            description = "No-code-move source map lists the monolith helper seams for the first post-7 render-plan compose extraction."
+            review_command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_render_plan_compose_source_map.ps1"
         }
     )
     planned_capabilities = @(
