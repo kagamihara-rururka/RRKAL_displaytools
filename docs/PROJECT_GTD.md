@@ -14,7 +14,7 @@ Last updated: 2026-05-30
 | Hydrology and LOD hook | In progress | Hydrology readiness, layer diagnostics, LOD invalidation and layer-count contracts are represented in the prototype. The Qt panel exposes lake/river/border/maritime layer switches. | Converge water/hydrology layers into stable renderer-facing contract names. |
 | Ocean material and sea-state port | In progress | Ocean material controls and sea-condition diagnostics exist as contract-oriented scaffolding. The Qt panel exposes wave strength, roughness, foam, Ocean 3D safe preview, and research-oriented performance budget presets. | Keep scalar controls stable until 7:00, then move render-plan merge / pass reduction into the decoupling phase. |
 | Style renderer entries | In progress | Scientific/nautical/tactical/parchment style concepts are selectable in the Qt panel and `--style-profile`. | Create explicit renderer entry points for style profiles. |
-| Module boundaries | In progress | Monolith contains diagnostics for extraction readiness and seam matrices. `decoupling_readiness.py` now records the pre-7:00 UI closure policy and post-7:00 extraction order, and Qt exposes it through `Inspect: Decoupling`. | Start with render-plan compose extraction after the 7:00 decoupling gate. |
+| Module boundaries | In progress | Monolith contains diagnostics for extraction readiness and seam matrices. `decoupling_readiness.py` now records the pre-7:00 UI closure policy and post-7:00 extraction order; Qt exposes it through `Inspect: Decoupling` and `collect_decoupling_readiness()`. | Start with render-plan compose extraction after the 7:00 decoupling gate. |
 | Cloud/local workflow | MVP | `docs/WORKFLOW.zh-TW.md` and `docs/CODEX_CLOUD_HANDOFF.zh-TW.md` define GitHub as sync truth, `L:\\RRKAL_displaytools` as the local cloud-drive working copy, Codex Cloud as the long-running code/docs/CI surface, and local Windows as Qt/Taichi visual validation authority. | Convert the conversation backup step into a reusable skill after the private transcript repo policy is confirmed. |
 
 ## Working rules
@@ -37,6 +37,7 @@ Last updated: 2026-05-30
 
 ## Done
 - 2026-05-30: Documented Cloud/local development workflow and handoff entrypoint, including private transcript backup policy and maturity reporting requirements.
+- 2026-05-30: Added a reusable Qt `collect_decoupling_readiness()` collector for later reviewer/launch packet handoff.
 - 2026-05-30: Added Qt `Inspect: Decoupling` so the post-7 renderer extraction order is visible from the control panel.
 - 2026-05-30: Added bounded retry/backoff for smoke and handoff Python commands to tolerate transient cloud-drive `Errno 13` file-access denial.
 - 2026-05-30: Added smoke coverage for the decoupling readiness packet and render-plan-first extraction rule.

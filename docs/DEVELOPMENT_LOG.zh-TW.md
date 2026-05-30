@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Qt decoupling readiness collector
+
+Changes:
+- Added `collect_decoupling_readiness()` to the Qt panel so decoupling readiness has a reusable in-panel collector instead of a one-off action import.
+- Routed `Inspect: Decoupling` through the collector, preparing the field for reviewer/launch packet handoff without moving renderer code.
+- Smoke now gates the collector marker alongside the action and post-7 readiness phase.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Qt decoupling readiness Inspect action
 
 Changes:

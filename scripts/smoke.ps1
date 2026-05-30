@@ -5570,6 +5570,9 @@ if ($decouplingQtPanelSource -notmatch "Inspect: Decoupling") {
 if ($decouplingQtPanelSource -notmatch "show_decoupling_readiness") {
     throw "Qt panel decoupling readiness handler is missing"
 }
+if ($decouplingQtPanelSource -notmatch "collect_decoupling_readiness") {
+    throw "Qt panel decoupling readiness collector is missing"
+}
 if ($decouplingQtPanelSource -notmatch "post_07_decoupling") {
     throw "Qt panel decoupling readiness post-7 phase marker is missing"
 }

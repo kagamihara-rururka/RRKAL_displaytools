@@ -5304,6 +5304,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def collect_module_boundary_registry(self) -> dict[str, object]:
         return module_boundary_registry_packet("rrkal_displaytools_qt_panel")
 
+    def collect_decoupling_readiness(self) -> dict[str, object]:
+        from decoupling_readiness import decoupling_readiness_packet
+
+        return decoupling_readiness_packet("post_07_decoupling")
+
     def module_boundary_summary_text(self, registry: dict[str, object] | None = None) -> str:
         registry = registry if isinstance(registry, dict) else self.collect_module_boundary_registry()
         contract = registry.get("decoupling_boundary_contract") if isinstance(registry.get("decoupling_boundary_contract"), dict) else {}
@@ -10094,10 +10099,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.status.setText("已複製 module boundary 摘要")
 
     def show_decoupling_readiness(self) -> None:
-        from decoupling_readiness import decoupling_readiness_packet
-
         self.command_text.setPlainText(
-            json.dumps(decoupling_readiness_packet("post_07_decoupling"), ensure_ascii=False, indent=2)
+            json.dumps(self.collect_decoupling_readiness(), ensure_ascii=False, indent=2)
         )
         self.status.setText("已顯示 decoupling readiness JSON")
 
