@@ -1,5 +1,14 @@
 # Development Log
 
+## 2026-05-30 - Compose parity runner venv resolver
+
+Changes:
+- Updated `scripts/render_compose_parity_artifacts.ps1` to prefer `.venv\Scripts\python.exe` before falling back to `py -3`.
+- The runner manifest now records `python_command`, `python_uses_local_venv` and `python_fallback` for cross-machine diagnostics.
+- Smoke now gates the local venv resolver markers, and clone quickstart documents the resolver behavior.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
 ## 2026-05-30 - Cross-machine compose parity runner docs
 
 Changes:

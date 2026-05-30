@@ -30,9 +30,14 @@ $metadataArtifact = Join-Path $ArtifactDir "renderer_output_metadata.json"
 $runnerManifest = Join-Path $ArtifactDir "compose_parity_artifact_runner.json"
 $smokeManifest = Join-Path $ArtifactDir "render_compose_parity_smoke_manifest.json"
 
+$venvPython = Join-Path $RepoRoot ".venv\Scripts\python.exe"
+$useLocalVenv = Test-Path -LiteralPath $venvPython
+$pythonCommand = if ($useLocalVenv) { $venvPython } else { "py" }
+$pythonArgs = if ($useLocalVenv) { @() } else { @("-3") }
+
 $rendererCommand = @(
-    "py",
-    "-3",
+    $pythonCommand
+) + $pythonArgs + @(
     "taichi_global_bathymetry.py",
     "--once",
     "--headless",
@@ -88,6 +93,9 @@ $packet = [ordered]@{
     status = if ($SkipDiff) { "completed_diff_skipped" } else { "completed_with_diff" }
     runtime_merge_enabled = $false
     renderer_command = $rendererCommand
+    python_command = $pythonCommand
+    python_uses_local_venv = [bool]$useLocalVenv
+    python_fallback = "py -3"
     diff_command = $diffCommand
     diff_status = $diffStatus
     artifact_dir = $ArtifactDir

@@ -4806,6 +4806,12 @@ if ($composeParityArtifactRunnerSource -notlike "*rrkal_displaytools.compose_run
 if ($composeParityArtifactRunnerSource -notlike "*--compose-parity-artifact-dir*") {
     throw "Compose parity artifact runner renderer arg is missing"
 }
+if ($composeParityArtifactRunnerSource -notlike "*.venv\Scripts\python.exe*") {
+    throw "Compose parity artifact runner local venv resolver is missing"
+}
+if ($composeParityArtifactRunnerSource -notlike "*python_uses_local_venv*") {
+    throw "Compose parity artifact runner python resolver manifest field is missing"
+}
 if ($composeParityArtifactRunnerSource -notlike "*render_compose_parity_smoke.ps1*") {
     throw "Compose parity artifact runner diff handoff is missing"
 }

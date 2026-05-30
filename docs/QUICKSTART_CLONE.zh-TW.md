@@ -73,7 +73,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\render_quick_smoke.p
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts\render_compose_parity_artifacts.ps1
 ```
 
-這會產生 `state/compose_parity/baseline_sequential_frame_rgba.png`、`state/compose_parity/merged_candidate_frame_rgba.png`、`state/compose_parity/renderer_output_metadata.json`、`state/compose_parity/render_compose_parity_smoke_manifest.json` 與 `state/compose_parity/compose_parity_artifact_runner.json`。這些都是本機 runtime artifacts，不提交 Git。若只要產生 artifacts、暫不跑 RGBA diff，可加 `-SkipDiff`。
+這會產生 `state/compose_parity/baseline_sequential_frame_rgba.png`、`state/compose_parity/merged_candidate_frame_rgba.png`、`state/compose_parity/renderer_output_metadata.json`、`state/compose_parity/render_compose_parity_smoke_manifest.json` 與 `state/compose_parity/compose_parity_artifact_runner.json`。Runner 會優先使用 `.venv\Scripts\python.exe`，找不到才 fallback 到 `py -3`。這些都是本機 runtime artifacts，不提交 Git。若只要產生 artifacts、暫不跑 RGBA diff，可加 `-SkipDiff`。
 
 ## 5. 啟動 Qt 控制面板
 
