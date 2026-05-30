@@ -6976,6 +6976,9 @@ if ($cloneQuickstartDoc -notmatch 'Inspect: Capability summary') {
 if ($cloneQuickstartDoc -notmatch 'Inspect: Extraction dry-run') {
     throw "Clone quickstart missing Qt extraction dry-run guidance"
 }
+if ($cloneQuickstartDoc -notmatch 'Inspect: Source map') {
+    throw "Clone quickstart missing Qt source-map guidance"
+}
 if ($cloneQuickstartDoc -notmatch 'Inspect: Pre-7 closure') {
     throw "Clone quickstart missing Qt pre-7 closure guidance"
 }

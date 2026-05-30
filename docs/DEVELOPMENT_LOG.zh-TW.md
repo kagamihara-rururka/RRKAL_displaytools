@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Clone quickstart source-map path
+
+- Updated `docs/QUICKSTART_CLONE.zh-TW.md` so cloned-machine reviewers see `Inspect: Source map` in the Replay/contracts path.
+- Smoke now gates the clone quickstart for the source-map guidance.
+- This keeps cross-machine UI review aligned with the post-7 source-map seam before code move starts.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Runbook source-map entry command
 
 - Updated `docs/POST_0700_DECOUPLING_RUNBOOK.zh-TW.md` so the post-7 entry sequence runs `scripts\inspect_render_plan_compose_source_map.ps1`.
