@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Copyable layer navigation summary
+
+- Added `rrkal_displaytools.layer_navigation_summary_contract.v1` under `layer_research_workflow.navigation_hint` across the Qt launch packet, no-GUI launch packet and renderer capability discovery.
+- Added `Copy layer navigation` to the Qt Research interaction actions so researchers can copy the current navigation state, next action, selected layer, first visible layer, visible row count and filter context.
+- Kept this as a UI handoff action only; it does not mutate renderer visibility, cache, import or RRKAL data governance.
+- Smoke: PASS via `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; cloud-drive transient file-access retries occurred and recovered.
+
 ## 2026-05-31 - Layer navigation hint
 
 - Added `rrkal_displaytools.layer_navigation_hint.v1` to `layer_research_workflow` across the Qt launch packet, no-GUI launch packet and renderer capability discovery.

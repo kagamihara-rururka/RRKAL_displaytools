@@ -58,6 +58,7 @@ Last updated: 2026-05-30
 - 2026-05-31: Added Qt Ocean 3D board audit inspect/copy actions so control-board visibility evidence is directly reviewable.
 - 2026-05-31: Added Ocean 3D dialog interactive cost estimate and dialog-level safe preview action so researchers can avoid heavy scalar settings during live review.
 - 2026-05-31: Added `layerNavigationHint` so layer filter/group state explains whether to reveal selected, select first, clear filters or edit the visible active layer.
+- 2026-05-31: Added copyable layer navigation summary contract/action so the current hint can be handed off with state, next action, selected layer, first visible row and UI-only boundary.
 - 2026-05-31: Added Qt copyable render-plan work order summary for the post-decoupling single-pass optimization path.
 - 2026-05-31: Added contract-only spatial compression roadmap and Qt inspect/copy actions for DWT, spherical harmonics and neural-field strategy boundaries.
 - 2026-05-31: Added no-GUI style renderer routes inspector for parchment/tactical/scientific/nautical entrypoint review.

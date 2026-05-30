@@ -326,6 +326,12 @@ if ($launchPacket.layer_research_workflow.navigation_hint_schema -ne "rrkal_disp
 if ($launchPacket.layer_research_workflow.navigation_hint.qt_label_object -ne "layerNavigationHint") {
     throw "Launch packet layer navigation hint Qt label missing"
 }
+if ($launchPacket.layer_research_workflow.navigation_hint.navigation_summary_contract.schema -ne "rrkal_displaytools.layer_navigation_summary_contract.v1") {
+    throw "Launch packet layer navigation summary contract missing"
+}
+if ($launchPacket.layer_research_workflow.navigation_hint.navigation_summary_contract.qt_copy_action -ne "copy_layer_navigation_summary") {
+    throw "Launch packet layer navigation summary copy action mismatch"
+}
 if (@("reveal_selected_layer", "select_first_filtered_layer", "clear_filter_or_expand_groups", "edit_selected_layer") -notcontains $launchPacket.layer_research_workflow.navigation_hint.next_action) {
     throw "Launch packet layer navigation hint action invalid"
 }
@@ -2078,6 +2084,12 @@ if ($capabilities.layer_research_workflow.navigation_hint_schema -ne "rrkal_disp
 }
 if ($capabilities.layer_research_workflow.navigation_hint.qt_label_object -ne "layerNavigationHint") {
     throw "Renderer layer navigation hint Qt label missing"
+}
+if ($capabilities.layer_research_workflow.navigation_hint.navigation_summary_contract.schema -ne "rrkal_displaytools.layer_navigation_summary_contract.v1") {
+    throw "Renderer layer navigation summary contract missing"
+}
+if ($capabilities.layer_research_workflow.navigation_hint.navigation_summary_contract.qt_copy_action -ne "copy_layer_navigation_summary") {
+    throw "Renderer layer navigation summary copy action mismatch"
 }
 if (@("reveal_selected_layer", "select_first_filtered_layer", "clear_filter_or_expand_groups", "edit_selected_layer") -notcontains $capabilities.layer_research_workflow.navigation_hint.next_action) {
     throw "Renderer layer navigation hint action invalid"
@@ -5277,17 +5289,29 @@ if ($qtPanelSource -notlike "*copy_selection_summary_button*") {
 if ($qtPanelSource -notlike "*Copy layer controls guide*") {
     throw "Qt panel Layer controls guide copy button missing"
 }
+if ($qtPanelSource -notlike "*Copy layer navigation*") {
+    throw "Qt panel Layer navigation copy button missing"
+}
 if ($qtPanelSource -notlike "*layer_selection_summary_text*") {
     throw "Qt panel Layer selection summary formatter missing"
 }
 if ($qtPanelSource -notlike "*layer_controls_guide_text*") {
     throw "Qt panel Layer controls guide formatter missing"
 }
+if ($qtPanelSource -notlike "*layer_navigation_summary_text*") {
+    throw "Qt panel Layer navigation summary formatter missing"
+}
 if ($qtPanelSource -notlike "*copy_layer_selection_summary*") {
     throw "Qt panel Layer selection copy summary action missing"
 }
 if ($qtPanelSource -notlike "*copy_layer_controls_guide*") {
     throw "Qt panel Layer controls guide copy action missing"
+}
+if ($qtPanelSource -notlike "*copy_layer_navigation_summary*") {
+    throw "Qt panel Layer navigation copy action missing"
+}
+if ($qtPanelSource -notlike "*layer_navigation_summary_contract.v1*") {
+    throw "Qt panel Layer navigation summary contract missing"
 }
 if ($qtPanelSource -notlike "*quick_actions={quick_actions_text}*") {
     throw "Qt panel Layer selection quick actions summary text missing"

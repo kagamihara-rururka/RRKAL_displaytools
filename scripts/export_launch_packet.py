@@ -3168,6 +3168,7 @@ def layer_research_workflow_packet(
             "qt_copy_action": "copy_research_interaction_summary",
             "component_contract_fields": [
                 "layer_selection_tool.selection_summary_contract",
+                "layer_research_workflow.navigation_hint.navigation_summary_contract",
                 "pin_overlay.pin_summary_contract",
                 "cursor_geodesy_readout.cursor_summary_contract",
                 "boundary_emphasis_control.boundary_summary_contract",
@@ -3228,6 +3229,16 @@ def layer_navigation_hint_packet(
         "filter_preset": layer_filter.get("preset"),
         "filter_query": layer_filter.get("query"),
         "qt_label_object": "layerNavigationHint",
+        "navigation_summary_contract_schema": "rrkal_displaytools.layer_navigation_summary_contract.v1",
+        "navigation_summary_contract": {
+            "schema": "rrkal_displaytools.layer_navigation_summary_contract.v1",
+            "summary_format": "Layer navigation: state={state}; next={next_action}; selected={selected_layer}; first={first_matched_layer}; visible_rows={visible_row_count}; filter={filter_preset}/{filter_query}; boundary=ui_only",
+            "qt_label_object": "layerNavigationHint",
+            "qt_copy_action": "copy_layer_navigation_summary",
+            "launch_packet_field": "layer_research_workflow.navigation_hint.navigation_summary_contract",
+            "handoff_field": "layer_research_workflow.navigation_hint.navigation_summary_contract",
+            "portable": True,
+        },
         "boundary": "Qt navigation guidance only; it does not mutate renderer visibility, cache, import or RRKAL data governance.",
     }
 
