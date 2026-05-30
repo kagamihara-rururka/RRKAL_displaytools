@@ -1,5 +1,14 @@
 # Development Log
 
+## 2026-05-30 - Copyable compose budget summary
+
+Changes:
+- Added `rrkal_displaytools.layer_render_plan_compose_pass_budget_summary_contract.v1` to `layer_render_plan_performance` across launch packets, renderer capabilities and handoff inspection.
+- Qt Renderer diagnostics now includes `Copy compose budget`, copying compose run counts, timing fields, slowest phase, advice, target pass model and `runtime_merge=false` as one portable line.
+- Smoke gates the summary contract, Qt copy button/action and renderer markers.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
 ## 2026-05-30 - Compose budget bottleneck advice
 
 Changes:

@@ -644,6 +644,12 @@ if ($launchPacket.layer_render_plan_performance.compose_pass_budget.runtime_diag
 if ($launchPacket.layer_render_plan_performance.compose_pass_budget.bottleneck_advice_rules.compose_overlays -ne "run_parity_then_collapse_runs") {
     throw "Launch packet layer_render_plan_performance compose pass budget advice rule missing"
 }
+if ($launchPacket.layer_render_plan_performance.compose_pass_budget_summary_contract.schema -ne "rrkal_displaytools.layer_render_plan_compose_pass_budget_summary_contract.v1") {
+    throw "Launch packet layer_render_plan_performance compose pass budget summary contract missing"
+}
+if ($launchPacket.layer_render_plan_performance.compose_pass_budget_summary_contract.qt_copy_action -ne "copy_compose_pass_budget_summary") {
+    throw "Launch packet layer_render_plan_performance compose pass budget copy action missing"
+}
 if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_schema -ne "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1") {
     throw "Launch packet layer_render_plan_performance compose run parity contract schema missing"
 }
@@ -1978,6 +1984,9 @@ if ($capabilities.layer_render_plan_performance.compose_pass_budget.runtime_diag
 if ($capabilities.layer_render_plan_performance.compose_pass_budget.advice_field -ne "compose_bottleneck_advice") {
     throw "Renderer layer_render_plan_performance compose pass budget advice field missing"
 }
+if ($capabilities.layer_render_plan_performance.compose_pass_budget_summary_contract.qt_action_label -ne "Copy compose budget") {
+    throw "Renderer layer_render_plan_performance compose pass budget copy label missing"
+}
 if ($capabilities.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_schema -ne "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1") {
     throw "Renderer layer_render_plan_performance compose run parity contract schema missing"
 }
@@ -2839,6 +2848,9 @@ if ($handoff.layer_render_plan_performance.compose_pass_budget.runtime_diagnosti
 }
 if ($handoff.layer_render_plan_performance.compose_pass_budget.bottleneck_advice_rules.unknown -ne "await_runtime_metadata") {
     throw "Handoff inspection layer render plan performance compose pass budget default advice missing"
+}
+if ($handoff.layer_render_plan_performance.compose_pass_budget_summary_contract_schema -ne "rrkal_displaytools.layer_render_plan_compose_pass_budget_summary_contract.v1") {
+    throw "Handoff inspection layer render plan performance compose pass budget summary contract missing"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_schema -ne "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1") {
     throw "Handoff inspection layer render plan performance compose run parity contract schema missing"
@@ -4297,6 +4309,12 @@ if ($qtPanelSource -notlike "*composePassBudgetStrip*") {
 if ($qtPanelSource -notlike "*compose_pass_budget_summary_text*") {
     throw "Qt compose pass budget summary helper is missing"
 }
+if ($qtPanelSource -notlike "*Copy compose budget*") {
+    throw "Qt compose pass budget copy button is missing"
+}
+if ($qtPanelSource -notlike "*copy_compose_pass_budget_summary*") {
+    throw "Qt compose pass budget copy action is missing"
+}
 if ($qtPanelSource -notlike "*target={target}*") {
     throw "Qt compose pass budget target summary text is missing"
 }
@@ -4697,6 +4715,9 @@ if ($rendererSource -notlike "*cache_diagnostics.phase_timing_ms.compose_overlay
 }
 if ($rendererSource -notlike "*run_parity_then_collapse_runs*") {
     throw "Renderer compose pass budget advice marker is missing"
+}
+if ($rendererSource -notlike "*layer_render_plan_compose_pass_budget_summary_contract.v1*") {
+    throw "Renderer compose pass budget summary contract marker is missing"
 }
 if ($rendererSource -notlike "*rrkal_displaytools.compose_run_parity_artifact_runner.v1*") {
     throw "Renderer compose parity artifact runner schema marker is missing"

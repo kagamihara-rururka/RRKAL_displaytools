@@ -352,6 +352,8 @@ $summary = [ordered]@{
         compiled_plan_compose_runs_field = $layerRenderPlanPerformance.compiled_plan_compose_runs_field
         compose_pass_budget_schema = $layerRenderPlanPerformance.compose_pass_budget_schema
         compose_pass_budget = $layerRenderPlanPerformance.compose_pass_budget
+        compose_pass_budget_summary_contract_schema = $layerRenderPlanPerformance.compose_pass_budget_summary_contract.schema
+        compose_pass_budget_summary_contract = $layerRenderPlanPerformance.compose_pass_budget_summary_contract
 
 
 
