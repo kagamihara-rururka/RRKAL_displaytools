@@ -335,6 +335,21 @@ if ($launchPacket.style_profile_renderer_routes.renderer_entry_contract_schema -
 if ($launchPacket.style_profile_renderer_routes.required_route_contract_ids -notcontains "parchment") {
     throw "Launch packet style_profile_renderer_routes missing parchment route contract"
 }
+if ($launchPacket.style_template_visual_preview.schema -ne "rrkal_displaytools.style_template_visual_preview.v1") {
+    throw "Launch packet style_template_visual_preview schema missing or invalid"
+}
+if ($launchPacket.style_template_visual_preview.status -ne "ready") {
+    throw "Launch packet style_template_visual_preview not ready"
+}
+if ($launchPacket.style_template_visual_preview.preview_ids -notcontains "parchment") {
+    throw "Launch packet style_template_visual_preview missing parchment preview"
+}
+if ($launchPacket.style_template_visual_preview.preview_ids -notcontains "tactical") {
+    throw "Launch packet style_template_visual_preview missing tactical preview"
+}
+if ($launchPacket.style_template_visual_preview.qt_surface -ne "Looks/templates visual preview cards") {
+    throw "Launch packet style_template_visual_preview Qt surface mismatch"
+}
 if ($launchPacket.visual_feature_closure_matrix.schema -ne "rrkal_displaytools.visual_feature_closure_matrix.v1") {
     throw "Launch packet visual feature closure matrix schema missing or invalid"
 }
@@ -1177,6 +1192,15 @@ if ($capabilities.style_profile_renderer_routes.route_ids -notcontains "tactical
 if ($capabilities.style_profile_renderer_routes.renderer_entry_contract_schema -ne "rrkal_displaytools.style_renderer_entry_contract.v1") {
     throw "Renderer style_profile_renderer_routes entry contract schema missing"
 }
+if ($capabilities.style_template_visual_preview.schema -ne "rrkal_displaytools.style_template_visual_preview.v1") {
+    throw "Renderer style_template_visual_preview schema missing or invalid"
+}
+if ($capabilities.style_template_visual_preview.preview_ids -notcontains "parchment") {
+    throw "Renderer style_template_visual_preview missing parchment preview"
+}
+if ($capabilities.style_template_visual_preview.preview_ids -notcontains "tactical") {
+    throw "Renderer style_template_visual_preview missing tactical preview"
+}
 if ($capabilities.visual_feature_closure_matrix.schema -ne "rrkal_displaytools.visual_feature_closure_matrix.v1") {
     throw "Renderer visual feature closure matrix schema missing or invalid"
 }
@@ -1952,6 +1976,21 @@ if ($handoff.style_profile_renderer_routes.route_ids -notcontains "tactical") {
 if ($handoff.style_profile_renderer_routes.required_route_contract_ids -notcontains "parchment") {
     throw "Handoff inspection style_profile_renderer_routes missing parchment route contract"
 }
+if ($handoff.launch_packet_contracts.style_template_visual_preview -ne "rrkal_displaytools.style_template_visual_preview.v1") {
+    throw "Handoff inspection style_template_visual_preview launch contract missing or invalid"
+}
+if ($handoff.style_template_visual_preview.launch_packet_schema -ne "rrkal_displaytools.style_template_visual_preview.v1") {
+    throw "Handoff inspection style_template_visual_preview launch schema missing or invalid"
+}
+if ($handoff.style_template_visual_preview.renderer_capabilities_schema -ne "rrkal_displaytools.style_template_visual_preview.v1") {
+    throw "Handoff inspection style_template_visual_preview renderer schema missing or invalid"
+}
+if ($handoff.style_template_visual_preview.preview_ids -notcontains "parchment") {
+    throw "Handoff inspection style_template_visual_preview missing parchment preview"
+}
+if ($handoff.style_template_visual_preview.preview_ids -notcontains "tactical") {
+    throw "Handoff inspection style_template_visual_preview missing tactical preview"
+}
 if ($handoff.launch_packet_contracts.module_boundary_registry -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Handoff inspection module_boundary_registry launch contract missing or invalid"
 }
@@ -2382,6 +2421,12 @@ if ($qtPanelSource -notlike "*show_style_renderer_routes*") {
 }
 if ($qtPanelSource -notlike "*Style routes*") {
     throw "Qt Style routes action button is missing"
+}
+if ($qtPanelSource -notlike "*styleTemplateVisualPreview*") {
+    throw "Qt style template visual preview surface is missing"
+}
+if ($qtPanelSource -notlike "*collect_style_template_visual_preview*") {
+    throw "Qt style template visual preview collector is missing"
 }
 if ($qtPanelSource -notlike "*show_module_boundary_registry*") {
     throw "Qt module boundary registry JSON action is missing"

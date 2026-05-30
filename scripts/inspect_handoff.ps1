@@ -57,6 +57,7 @@ $summary = [ordered]@{
         style_renderer_entries = $launchPacket.style_renderer_entries.schema
         style_renderer_entry_contract = $launchPacket.style_renderer_entries.renderer_entry_contract_schema
         style_profile_renderer_routes = $launchPacket.style_profile_renderer_routes.schema
+        style_template_visual_preview = $launchPacket.style_template_visual_preview.schema
         module_boundary_registry = $launchPacket.module_boundary_registry.schema
         module_decoupling_boundary_contract = $launchPacket.module_boundary_registry.decoupling_boundary_contract.schema
         cross_machine_clone_readiness = $launchPacket.cross_machine_clone_readiness.schema
@@ -308,6 +309,15 @@ $summary = [ordered]@{
         renderer_entry_contract_schema = $launchPacket.style_profile_renderer_routes.renderer_entry_contract_schema
         required_route_contract_ids = $launchPacket.style_profile_renderer_routes.required_route_contract_ids
         required_routes = $launchPacket.style_profile_renderer_routes.required_routes
+    }
+    style_template_visual_preview = @{
+        launch_packet_schema = $launchPacket.style_template_visual_preview.schema
+        renderer_capabilities_schema = $capabilities.style_template_visual_preview.schema
+        status = $launchPacket.style_template_visual_preview.status
+        preview_count = $launchPacket.style_template_visual_preview.preview_count
+        preview_ids = $launchPacket.style_template_visual_preview.preview_ids
+        required_preview_ids = $launchPacket.style_template_visual_preview.required_preview_ids
+        qt_surface = $launchPacket.style_template_visual_preview.qt_surface
     }
     module_boundary_registry = @{
         launch_packet_schema = $launchPacket.module_boundary_registry.schema

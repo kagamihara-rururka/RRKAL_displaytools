@@ -171,6 +171,61 @@ def style_profile_renderer_routes_packet(
     }
 
 
+def style_template_visual_preview_packet(
+    style_entries: dict[str, object] | None,
+    source: str,
+) -> dict[str, object]:
+    style_entries = style_entries if isinstance(style_entries, dict) else style_renderer_entries_packet(source)
+    raw_entries = style_entries.get("entries") if isinstance(style_entries.get("entries"), list) else []
+    swatches = {
+        "scientific": ["#06204f", "#17a2b8", "#f5f7fa"],
+        "nautical": ["#073b4c", "#06d6a0", "#ffd166"],
+        "parchment": ["#3b2f2f", "#c2b280", "#8f2d1c"],
+        "tactical": ["#073b12", "#39ff14", "#ff3131"],
+    }
+    preview_cards = []
+    for entry in raw_entries:
+        if not isinstance(entry, dict):
+            continue
+        style_id = str(entry.get("id", ""))
+        if style_id not in swatches:
+            continue
+        preview_cards.append(
+            {
+                "id": style_id,
+                "label": str(entry.get("label", style_id.title())),
+                "swatches": swatches[style_id],
+                "qt_surface": "Looks/templates visual preview cards",
+                "selection_control": "style_combo",
+                "renderer_route_field": "style_profile_renderer_routes.routes",
+                "portable_command": ["py", "-3", "taichi_global_bathymetry.py", "--style-profile", style_id],
+                "template_supported": bool(entry.get("template_supported", True)),
+                "preview_state": "contract_preview",
+                "renderer_apply_boundary": "Preview cards expose visual intent; renderer style application still follows style_profile_renderer_routes.",
+            }
+        )
+    preview_ids = [str(card["id"]) for card in preview_cards]
+    required_preview_ids = ["scientific", "nautical", "parchment", "tactical"]
+    missing_preview_ids = [style_id for style_id in required_preview_ids if style_id not in preview_ids]
+    return {
+        "schema": "rrkal_displaytools.style_template_visual_preview.v1",
+        "source": source,
+        "status": "ready" if not missing_preview_ids else "partial",
+        "qt_surface": "Looks/templates visual preview cards",
+        "selection_control": "style_combo",
+        "preview_count": len(preview_cards),
+        "preview_ids": preview_ids,
+        "preview_cards": preview_cards,
+        "required_preview_ids": required_preview_ids,
+        "missing_preview_ids": missing_preview_ids,
+        "launch_packet_fields": ["style_template_visual_preview", "style_renderer_entries", "style_profile_renderer_routes"],
+        "renderer_capability_field": "style_template_visual_preview",
+        "handoff_field": "style_template_visual_preview",
+        "smoke_gate": "style_template_visual_preview",
+        "boundary": "Style template preview is Qt/UIUX metadata only; RRKAL data discovery, downloads, imports and cache governance stay outside displaytools.",
+    }
+
+
 def profile_launch_readiness_packet(
     source: str,
     style_entries: dict[str, object] | None = None,
@@ -2654,6 +2709,13 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.rrkal_manifest_ref_edit = QtWidgets.QLineEdit("")
         self.rrkal_manifest_ref_edit.setPlaceholderText("optional RRKAL manifest path/URL/reference")
         renderer_form.addRow("Style profile", self.style_combo)
+        self.style_template_preview_label = QtWidgets.QLabel("Style previews: Scientific / Nautical / Parchment / Tactical")
+        self.style_template_preview_label.setObjectName("styleTemplateVisualPreview")
+        self.style_template_preview_label.setWordWrap(True)
+        self.style_template_preview_label.setStyleSheet(
+            "QLabel#styleTemplateVisualPreview { background:#181b1f; color:#e9edf1; border:1px solid #3a4652; border-radius:6px; padding:6px; }"
+        )
+        renderer_form.addRow("Template preview", self.style_template_preview_label)
         renderer_form.addRow("UI backend", self.ui_combo)
         renderer_form.addRow("Topography", self.topo_combo)
         renderer_form.addRow("Data mode", self.data_combo)
@@ -4006,6 +4068,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "cursor_geodesy_ack_file": str(CURSOR_GEODESY_ACK_PATH),
             "style_renderer_entries": self.collect_style_renderer_entries(),
             "style_profile_renderer_routes": self.collect_style_profile_renderer_routes(),
+            "style_template_visual_preview": self.collect_style_template_visual_preview(),
             "module_boundary_registry": self.collect_module_boundary_registry(),
             "cross_machine_clone_readiness": self.collect_cross_machine_clone_readiness(),
             "profile_launch_readiness": self.collect_profile_launch_readiness(),
@@ -4132,6 +4195,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
 
     def collect_style_profile_renderer_routes(self) -> dict[str, object]:
         return style_profile_renderer_routes_packet(
+            self.collect_style_renderer_entries(),
+            "rrkal_displaytools_qt_panel",
+        )
+
+    def collect_style_template_visual_preview(self) -> dict[str, object]:
+        return style_template_visual_preview_packet(
             self.collect_style_renderer_entries(),
             "rrkal_displaytools_qt_panel",
         )
@@ -7864,6 +7933,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 {
                     "style_renderer_entries": self.collect_style_renderer_entries(),
                     "style_profile_renderer_routes": self.collect_style_profile_renderer_routes(),
+                    "style_template_visual_preview": self.collect_style_template_visual_preview(),
                 },
                 ensure_ascii=False,
                 indent=2,

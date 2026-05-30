@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Style template visual preview contract
+
+Changes:
+- Added `rrkal_displaytools.style_template_visual_preview.v1` for Qt launch packets, no-GUI launch packets, renderer capability discovery and handoff inspection.
+- Qt Renderer entry now exposes a `styleTemplateVisualPreview` surface for scientific, nautical, parchment and tactical preview-card intent.
+- Smoke now verifies preview IDs, swatches, Qt surface and route linkage while keeping RRKAL data discovery/cache governance outside displaytools.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Renderer output artifact contract
 
 Changes:
