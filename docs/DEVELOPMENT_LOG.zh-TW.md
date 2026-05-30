@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Qt pre-7 closure entry
+
+- Added `Inspect: Pre-7 closure` to Qt Replay/contracts so researchers can see the compact pre-7 closure readiness handoff from the panel.
+- The action exposes the smoke-gated script, checked surfaces and post-7 next action without moving renderer code.
+- Smoke now gates the button, action method and tooltip.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Pre-7 closure readiness check
 
 - Added `scripts/check_pre7_closure_readiness.ps1` as a no-code-move closure gate for reviewer route, capability summary, UIUX closure, workspace map, extraction dry-run, quickstart alignment and formal pre-decoupling gate presence.

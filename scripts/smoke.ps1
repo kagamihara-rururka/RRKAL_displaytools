@@ -6034,6 +6034,15 @@ if ($qtPanelSource -notlike "*Inspect: Extraction dry-run*") {
 if ($qtPanelSource -notlike "*Replay/contracts: inspect no-code-move render-plan extraction dry-run checklist JSON*") {
     throw "Qt extraction dry-run tooltip is missing"
 }
+if ($qtPanelSource -notlike "*Inspect: Pre-7 closure*") {
+    throw "Qt Actions pre-7 closure button is missing"
+}
+if ($qtPanelSource -notlike "*show_pre7_closure_readiness*") {
+    throw "Qt pre-7 closure action is missing"
+}
+if ($qtPanelSource -notlike "*Replay/contracts: inspect pre-7 closure readiness before the formal post-7 decoupling gate*") {
+    throw "Qt pre-7 closure tooltip is missing"
+}
 if ($qtPanelSource -notlike "*Inspect: Research interaction*") {
     throw "Qt Actions Research interaction section is missing"
 }
