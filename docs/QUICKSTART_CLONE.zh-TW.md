@@ -260,3 +260,9 @@ Displaytools 不負責：
 - `layer_selection_tool.selection_summary_contract` now documents the portable selected-layer summary.
 - Qt exposes `Copy selection summary` in the Research interaction group.
 - The summary keeps active layer, renderer pick bridge and brush/mask exclusion scope aligned for clone handoff.
+
+## Boundary emphasis summary contract
+
+- `boundary_emphasis_control.boundary_summary_contract` now documents the portable Boundary emphasis summary.
+- Qt exposes `Copy boundary summary` in the Research interaction group.
+- The summary keeps target mode, target layer, alignment, RGB/opacity and renderer bridge language aligned for clone handoff.

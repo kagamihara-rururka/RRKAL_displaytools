@@ -441,3 +441,14 @@ Done:
 
 Next:
 - Continue applying the same label/copy contract pattern to Boundary emphasis controls.
+
+
+## 2026-05-30 - Boundary emphasis summary contract
+
+Done:
+- Added `boundary_emphasis_summary_contract` to Boundary emphasis packets.
+- Added `Copy boundary summary` to the Qt Research interaction group.
+- Handoff and smoke gate the Boundary emphasis summary contract.
+
+Next:
+- Continue applying the same summary/copy pattern to pin and cursor geodesy research interactions.

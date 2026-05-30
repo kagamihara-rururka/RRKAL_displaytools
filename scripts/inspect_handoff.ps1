@@ -220,6 +220,8 @@ $summary = [ordered]@{
         row_double_click_binding = $launchPacket.boundary_emphasis_control.row_double_click_binding
         row_double_click_layer_keys = $launchPacket.boundary_emphasis_control.row_double_click_layer_keys
         qt_surface = $launchPacket.boundary_emphasis_control.qt_surface
+        boundary_summary_contract_schema = $launchPacket.boundary_emphasis_control.boundary_summary_contract_schema
+        boundary_summary_contract = $launchPacket.boundary_emphasis_control.boundary_summary_contract
     }
     boundary_highlight = @{
         launch_packet_schema = $launchPacket.boundary_highlight.schema

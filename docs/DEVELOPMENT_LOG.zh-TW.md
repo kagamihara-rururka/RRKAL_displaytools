@@ -229,6 +229,18 @@ Positioning:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+## 2026-05-30 - Boundary emphasis summary contract
+
+Changes:
+- Added `boundary_emphasis_summary_contract` to renderer capability, launch packet and Qt Boundary emphasis packets.
+- Added `Copy boundary summary` and `copy_boundary_emphasis_summary()` to the Qt Research interaction group.
+- Handoff output now exposes the Boundary emphasis summary contract.
+- Smoke gates launch packet, renderer capability, handoff and Qt source coverage for the summary contract.
+- Updated clone quickstart, capability summary and GTD.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-30 - Layer selection summary contract
 
 Changes:

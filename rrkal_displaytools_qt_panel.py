@@ -1824,6 +1824,16 @@ def boundary_emphasis_control_packet(
         "row_double_click_layer_keys": list(BOUNDARY_EMPHASIS_TARGET_BY_LAYER.keys()),
         "renderer_hook_status": "wired_via_boundary_highlight_mask",
         "renderer_bridge_contract": BOUNDARY_HIGHLIGHT_SCHEMA,
+        "boundary_summary_contract_schema": "rrkal_displaytools.boundary_emphasis_summary_contract.v1",
+        "boundary_summary_contract": {
+            "label": "Boundary emphasis",
+            "summary_format": "Boundary emphasis: target={target_mode}->{target_layer_key}; align={target_alignment_label}; color={color_rgb}; opacity={opacity}; bridge={renderer_bridge_contract}",
+            "qt_label_object": "boundary_emphasis_label",
+            "qt_copy_action": "copy_boundary_emphasis_summary",
+            "launch_packet_field": "boundary_emphasis_control.boundary_summary_contract",
+            "handoff_field": "boundary_emphasis_control.boundary_summary_contract",
+            "portable": True,
+        },
         "renderer_controls_mapped": ["target_layers", "color_rgb", "contrast", "alpha", "gamma", "breathing"],
         "dialog_feedback": ["rgb_swatch", "live_numeric_readout", "renderer_bridge_summary"],
         "value_preview_fields": ["target_mode", "target_alignment", "color_rgb", "contrast", "opacity", "gamma", "breathing_period_s"],
@@ -2773,6 +2783,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         pin_pick_button = QtWidgets.QPushButton("Inspect: Pin pick")
         cursor_geo_button = QtWidgets.QPushButton("Inspect: Cursor geo")
         boundary_state_button = QtWidgets.QPushButton("Inspect: Boundary JSON")
+        copy_boundary_summary_button = QtWidgets.QPushButton("Copy boundary summary")
         capabilities_button = QtWidgets.QPushButton("Renderer 能力")
         closed_loop_button = QtWidgets.QPushButton("閉環狀態")
         layer_manifest_button = QtWidgets.QPushButton("圖層 manifest")
@@ -2803,6 +2814,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (pin_pick_button, "Research interaction: inspect renderer Pin hover/click pick bridge JSON."),
             (cursor_geo_button, "Research interaction: inspect mouse cursor latitude/longitude geodesy bridge JSON."),
             (boundary_state_button, "Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON."),
+            (copy_boundary_summary_button, "Boundary emphasis: copy target, alignment, color, opacity and renderer bridge summary."),
             (visual_readiness_button, "Visual review: inspect thumbnail/live preview readiness, frame status and missing-frame hints JSON."),
             (copy_visual_summary_button, "Visual review: copy compact thumbnail/live preview readiness summary to clipboard."),
             (thumbnail_button, "Visual review: inspect latest renderer thumbnail PNG."),
@@ -2834,6 +2846,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         pin_pick_button.clicked.connect(self.show_pin_pick_state)
         cursor_geo_button.clicked.connect(self.show_cursor_geodesy_state)
         boundary_state_button.clicked.connect(self.show_boundary_state)
+        copy_boundary_summary_button.clicked.connect(self.copy_boundary_emphasis_summary)
         capabilities_button.clicked.connect(self.show_renderer_capabilities)
         closed_loop_button.clicked.connect(self.show_closed_loop_status)
         layer_manifest_button.clicked.connect(self.show_layer_manifest)
@@ -2850,7 +2863,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button)),
             ("Inspect: Replay/contracts", (profile_replay_button, timeline_button, module_seams_button, clone_ready_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, ocean_port_button, style_routes_button, layer_matrix_button, layer_runtime_button)),
-            ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, cursor_geo_button, boundary_state_button)),
+            ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, cursor_geo_button, boundary_state_button, copy_boundary_summary_button)),
             ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, thumbnail_button, live_preview_button)),
             ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, smoke_button)),
             ("Process", (launch_button, restart_button, stop_button)),
@@ -3921,6 +3934,21 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             state if isinstance(state, dict) else None,
             self.selected_layer_key,
             "rrkal_displaytools_qt_panel",
+        )
+
+    def boundary_emphasis_summary_text(self, packet: dict[str, object] | None = None) -> str:
+        packet = packet or self.collect_boundary_emphasis_control()
+        contract = packet.get("boundary_summary_contract", {})
+        label = "Boundary emphasis"
+        if isinstance(contract, dict):
+            label = str(contract.get("label") or label)
+        return (
+            f"{label}: "
+            f"target={packet.get('target_mode')}->{packet.get('target_layer_key') or '-'}; "
+            f"align={packet.get('target_alignment_label')}; "
+            f"color={packet.get('color_rgb')}; "
+            f"opacity={packet.get('opacity')}; "
+            f"bridge={packet.get('renderer_bridge_contract')}"
         )
 
     def collect_cursor_geodesy_readout(self) -> dict[str, object]:
@@ -7424,6 +7452,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             )
         )
         self.status.setText("已顯示 boundary emphasis / identity JSON")
+
+    def copy_boundary_emphasis_summary(self) -> None:
+        packet = self.collect_boundary_emphasis_control()
+        summary = self.boundary_emphasis_summary_text(packet)
+        QtWidgets.QApplication.clipboard().setText(summary)
+        if hasattr(self, "boundary_emphasis_label"):
+            self.boundary_emphasis_label.setText(summary)
+        self.status.setText("已複製 boundary emphasis 摘要")
 
     def show_pin_pick_state(self) -> None:
         try:

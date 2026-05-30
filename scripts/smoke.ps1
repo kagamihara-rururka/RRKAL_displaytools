@@ -278,6 +278,15 @@ if ($launchPacket.boundary_emphasis_control.row_double_click_binding -ne "ready"
 if ($launchPacket.boundary_emphasis_control.row_double_click_layer_keys -notcontains "eez_layer") {
     throw "Launch packet boundary_emphasis_control row double-click EEZ layer missing"
 }
+if ($launchPacket.boundary_emphasis_control.boundary_summary_contract_schema -ne "rrkal_displaytools.boundary_emphasis_summary_contract.v1") {
+    throw "Launch packet boundary_emphasis_control summary contract schema missing or invalid"
+}
+if ($launchPacket.boundary_emphasis_control.boundary_summary_contract.qt_copy_action -ne "copy_boundary_emphasis_summary") {
+    throw "Launch packet boundary_emphasis_control summary copy action missing or invalid"
+}
+if (-not $launchPacket.boundary_emphasis_control.boundary_summary_contract.portable) {
+    throw "Launch packet boundary_emphasis_control summary portability flag missing"
+}
 if ($launchPacket.style_renderer_entries.schema -ne "rrkal_displaytools.style_renderer_entries.v1") {
     throw "Launch packet style_renderer_entries schema missing or invalid"
 }
@@ -955,6 +964,12 @@ if (-not $capabilities.boundary_emphasis_control.target_alignment) {
 if ($capabilities.boundary_emphasis_control.row_double_click_binding -ne "ready") {
     throw "Renderer boundary_emphasis_control row double-click binding missing"
 }
+if ($capabilities.boundary_emphasis_control.boundary_summary_contract_schema -ne "rrkal_displaytools.boundary_emphasis_summary_contract.v1") {
+    throw "Renderer boundary_emphasis_control summary contract schema missing or invalid"
+}
+if ($capabilities.boundary_emphasis_control.boundary_summary_contract.qt_copy_action -ne "copy_boundary_emphasis_summary") {
+    throw "Renderer boundary_emphasis_control summary copy action missing or invalid"
+}
 if ($capabilities.style_renderer_entries.schema -ne "rrkal_displaytools.style_renderer_entries.v1") {
     throw "Renderer style_renderer_entries schema missing or invalid"
 }
@@ -1568,6 +1583,18 @@ if (-not $handoff.boundary_emphasis_control.target_alignment) {
 if ($handoff.boundary_emphasis_control.qt_surface -ne "Layers dock boundary emphasis dialog") {
     throw "Handoff inspection boundary_emphasis_control Qt surface mismatch"
 }
+if ($handoff.boundary_emphasis_control.boundary_summary_contract_schema -ne "rrkal_displaytools.boundary_emphasis_summary_contract.v1") {
+    throw "Handoff inspection boundary_emphasis_control summary contract schema missing or invalid"
+}
+if ($handoff.boundary_emphasis_control.boundary_summary_contract.qt_label_object -ne "boundary_emphasis_label") {
+    throw "Handoff inspection boundary_emphasis_control summary label object missing or invalid"
+}
+if ($handoff.boundary_emphasis_control.boundary_summary_contract.qt_copy_action -ne "copy_boundary_emphasis_summary") {
+    throw "Handoff inspection boundary_emphasis_control summary copy action missing or invalid"
+}
+if (-not $handoff.boundary_emphasis_control.boundary_summary_contract.portable) {
+    throw "Handoff inspection boundary_emphasis_control summary portability flag missing"
+}
 if ($handoff.boundary_highlight.ack_history_contract -ne "boundary_highlight_ack_history") {
     throw "Handoff inspection boundary_highlight ack history contract missing"
 }
@@ -2115,6 +2142,15 @@ if ($qtPanelSource -notlike "*copy_layer_selection_summary*") {
 }
 if ($qtPanelSource -notlike "*show_boundary_state*") {
     throw "Qt Boundary JSON action is missing"
+}
+if ($qtPanelSource -notlike "*copy_boundary_summary_button*") {
+    throw "Qt Boundary summary copy button missing"
+}
+if ($qtPanelSource -notlike "*boundary_emphasis_summary_text*") {
+    throw "Qt Boundary summary formatter missing"
+}
+if ($qtPanelSource -notlike "*copy_boundary_emphasis_summary*") {
+    throw "Qt Boundary summary copy action missing"
 }
 if ($qtPanelSource -notlike "*Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON*") {
     throw "Qt Boundary JSON action tooltip is missing"
