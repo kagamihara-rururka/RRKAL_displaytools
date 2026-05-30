@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Extract compose parity contract builder
+
+- Added `build_layer_render_plan_compose_run_parity_contract` to `render_core/render_plan.py`.
+- Updated `HybridRenderController.layer_render_plan_compose_run_parity_contract` to delegate to the extracted helper while preserving the existing `source` field.
+- Updated source-map and smoke source gates for the extracted parity markers.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Extract compose run builder
 
 - Added `build_layer_render_plan_compose_runs` to `render_core/render_plan.py`.

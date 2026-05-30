@@ -6407,13 +6407,13 @@ if ($rendererSource -notlike "*def layer_render_plan_compose_runs*") {
 if ($rendererSource -notlike "*def layer_render_plan_compose_run_parity_contract*") {
     throw "Renderer render plan compose run parity helper is missing"
 }
-if ($rendererSource -notlike "*block_compose_run_merge_until_visual_parity_passes*") {
+if ($renderPlanCombinedSource -notlike "*block_compose_run_merge_until_visual_parity_passes*") {
     throw "Renderer render plan compose run parity gate marker is missing"
 }
-if ($rendererSource -notlike "*sequential_compose_queue_vs_merged_candidate_rgba_diff*") {
+if ($renderPlanCombinedSource -notlike "*sequential_compose_queue_vs_merged_candidate_rgba_diff*") {
     throw "Renderer render plan compose run parity compare marker is missing"
 }
-if ($rendererSource -notlike "*baseline_sequential_frame_rgba*") {
+if ($renderPlanCombinedSource -notlike "*baseline_sequential_frame_rgba*") {
     throw "Renderer render plan compose run parity baseline artifact marker is missing"
 }
 if ($rendererSource -notlike "*render_compose_parity_smoke.ps1*") {

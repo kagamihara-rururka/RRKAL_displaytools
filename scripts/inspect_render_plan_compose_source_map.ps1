@@ -13,6 +13,7 @@ $targets = @(
     [ordered]@{ id = "alpha_blend_compose"; path = "render_core/render_plan.py"; pattern = "^def alpha_blend_compose\(" },
     [ordered]@{ id = "alpha_compose_transparent"; path = "render_core/render_plan.py"; pattern = "^def alpha_compose_transparent\(" },
     [ordered]@{ id = "build_layer_render_plan_compose_runs"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_compose_runs\(" },
+    [ordered]@{ id = "build_layer_render_plan_compose_run_parity_contract"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_compose_run_parity_contract\(" },
     [ordered]@{ id = "compose_runtime_overlay"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def compose_runtime_overlay\(" },
     [ordered]@{ id = "compose_runtime_blend"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def compose_runtime_blend\(" },
     [ordered]@{ id = "layer_render_plan_runtime_snapshot"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def layer_render_plan_runtime_snapshot\(" },

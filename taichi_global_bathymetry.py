@@ -23,6 +23,7 @@ from render_core.render_plan import (
     alpha_blend_compose,
     alpha_compose,
     alpha_compose_transparent,
+    build_layer_render_plan_compose_run_parity_contract,
     build_layer_render_plan_compose_runs,
 )
 from pin_projection import pin_projection_contract_packet, project_pins_to_screen
@@ -14145,41 +14146,10 @@ class HybridRenderController:
         self,
         compose_runs: list[dict[str, object]],
     ) -> dict[str, object]:
-        merge_candidates = [
-            run
-            for run in compose_runs
-            if isinstance(run, dict) and run.get("merge_safe") is True
-        ]
-        return {
-            "schema": "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1",
-            "source": "HybridRenderController.layer_render_plan_compose_run_parity_contract",
-            "status": "required_before_runtime_merge" if merge_candidates else "no_merge_candidates",
-            "runtime_merge_enabled": False,
-            "merge_candidate_run_count": len(merge_candidates),
-            "candidate_run_ids": [str(run.get("id")) for run in merge_candidates],
-            "compare_method": "sequential_compose_queue_vs_merged_candidate_rgba_diff",
-            "required_artifacts": [
-                "baseline_sequential_frame_rgba",
-                "merged_candidate_frame_rgba",
-                "max_abs_diff",
-                "changed_pixel_count",
-                "renderer_output_metadata",
-            ],
-            "tolerance": {
-                "max_abs_diff": 0,
-                "changed_pixel_count": 0,
-            },
-            "gate": "block_compose_run_merge_until_visual_parity_passes",
-            "parity_smoke_schema": "rrkal_displaytools.render_compose_parity_smoke.v1",
-            "parity_smoke_script": "scripts\\render_compose_parity_smoke.ps1",
-            "parity_smoke_manifest": "state/render_compose_parity_smoke_manifest.json",
-            "parity_smoke_default_mode": "contract_only_until_artifacts_then_rgba_diff",
-            "parity_smoke_precommit_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\render_compose_parity_smoke.ps1 -ContractOnly",
-            "parity_smoke_validates": ["png_dimensions_match", "max_abs_diff", "changed_pixel_count"],
-            "parity_smoke_pass_fields": ["passed", "max_abs_diff", "changed_pixel_count", "diff_status"],
-            "recommended_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\render_compose_parity_smoke.ps1",
-            "next_runtime_step": "add an opt-in merged alpha compose path and compare it against the sequential compose queue before enabling it by default",
-        }
+        return build_layer_render_plan_compose_run_parity_contract(
+            compose_runs,
+            source="HybridRenderController.layer_render_plan_compose_run_parity_contract",
+        )
 
     def apply_layer_render_plan_composition(self, steps: list[dict[str, object]] | None = None) -> np.ndarray:
         frame = self.globe_rgba
