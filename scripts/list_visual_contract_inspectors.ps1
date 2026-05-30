@@ -173,6 +173,14 @@ $entries = @(
         no_launch_side_effect = $true
     },
     [ordered]@{
+        id = "render_plan_extraction_dry_run"
+        category = "decoupling"
+        schema = "rrkal_displaytools.render_plan_extraction_dry_run_inspector.v1"
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_render_plan_extraction_dry_run.ps1"
+        proves = @("post-07 extraction checklist", "planned target files", "UIUX gate dependency", "stop conditions", "no code move")
+        no_launch_side_effect = $true
+    },
+    [ordered]@{
         id = "pre_decoupling_readiness_bundle"
         category = "decoupling"
         schema = "rrkal_displaytools.pre_decoupling_readiness_bundle_export.v1"
@@ -225,6 +233,7 @@ $entries = @(
         "layer_render_plan_performance",
         "decoupling_boundaries",
         "render_plan_compose_work_order",
+        "render_plan_extraction_dry_run",
         "pre_decoupling_readiness_bundle",
         "pre_decoupling_readiness_check",
         "pre_decoupling_snapshot",

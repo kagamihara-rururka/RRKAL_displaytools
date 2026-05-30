@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Render plan extraction dry-run inspector
+
+- Added `scripts/inspect_render_plan_extraction_dry_run.ps1` as a no-code-move checklist for the first post-7 render-plan compose extraction.
+- Registered the dry-run inspector in the visual contract inspector index, review packet pre-decoupling commands and smoke gates.
+- The dry run exposes planned target files, UIUX gate dependency, stop conditions and non-goals without creating modules or moving renderer code.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Pre-decoupling snapshot includes UIUX readiness
 
 - Updated `scripts/export_pre_decoupling_snapshot.ps1` so one-file handoff snapshots include `uiux_closure_readiness_check`.

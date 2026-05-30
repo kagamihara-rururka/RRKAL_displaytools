@@ -1244,6 +1244,9 @@ if ($visualInspectorIndex.entry_ids -notcontains "decoupling_boundaries") {
 if ($visualInspectorIndex.entry_ids -notcontains "render_plan_compose_work_order") {
     throw "Visual contract inspector index missing render plan compose work order inspector"
 }
+if ($visualInspectorIndex.entry_ids -notcontains "render_plan_extraction_dry_run") {
+    throw "Visual contract inspector index missing render plan extraction dry-run inspector"
+}
 if ($visualInspectorIndex.entry_ids -notcontains "pre_decoupling_readiness_bundle") {
     throw "Visual contract inspector index missing pre-decoupling readiness bundle"
 }
@@ -1371,6 +1374,9 @@ if ($visualReviewPacket.pre_decoupling_commands -notcontains "powershell -NoProf
 }
 if ($visualReviewPacket.pre_decoupling_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_render_plan_compose_work_order.ps1") {
     throw "Visual contract review packet missing render plan compose work order command"
+}
+if ($visualReviewPacket.pre_decoupling_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_render_plan_extraction_dry_run.ps1") {
+    throw "Visual contract review packet missing render plan extraction dry-run command"
 }
 if ($visualReviewPacket.pre_decoupling_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\export_pre_decoupling_readiness_bundle.ps1") {
     throw "Visual contract review packet missing pre-decoupling readiness bundle command"
@@ -1502,6 +1508,32 @@ if ($renderPlanComposeWorkOrder.source_helpers -notcontains "HybridRenderControl
 }
 if ($renderPlanComposeWorkOrder.non_goals -notcontains "Do not enable runtime compose-run merging before zero-diff parity artifacts exist.") {
     throw "Render plan compose work order parity non-goal missing"
+}
+$renderPlanExtractionDryRunPath = Join-Path $RepoRoot "scripts\inspect_render_plan_extraction_dry_run.ps1"
+if (-not (Test-Path -LiteralPath $renderPlanExtractionDryRunPath)) {
+    throw "Render plan extraction dry-run inspector is missing"
+}
+$renderPlanExtractionDryRunContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $renderPlanExtractionDryRunPath, "-ContractOnly")
+$renderPlanExtractionDryRunContract = ($renderPlanExtractionDryRunContractText -join "`n") | ConvertFrom-Json
+if ($renderPlanExtractionDryRunContract.schema -ne "rrkal_displaytools.render_plan_extraction_dry_run_inspector.v1") {
+    throw "Render plan extraction dry-run contract schema missing"
+}
+if ($renderPlanExtractionDryRunContract.output_schema -ne "rrkal_displaytools.render_plan_extraction_dry_run.v1") {
+    throw "Render plan extraction dry-run output schema missing"
+}
+$renderPlanExtractionDryRunText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $renderPlanExtractionDryRunPath)
+$renderPlanExtractionDryRun = ($renderPlanExtractionDryRunText -join "`n") | ConvertFrom-Json
+if ($renderPlanExtractionDryRun.schema -ne "rrkal_displaytools.render_plan_extraction_dry_run.v1") {
+    throw "Render plan extraction dry-run schema missing"
+}
+if ($renderPlanExtractionDryRun.code_move_performed -ne $false) {
+    throw "Render plan extraction dry-run must not move code"
+}
+if ($renderPlanExtractionDryRun.planned_target_files -notcontains "render_core/render_plan.py") {
+    throw "Render plan extraction dry-run target file missing"
+}
+if ($renderPlanExtractionDryRun.uiux_readiness_required_before_move -ne $true) {
+    throw "Render plan extraction dry-run UIUX gate missing"
 }
 $preDecouplingReadinessBundlePath = Join-Path $RepoRoot "scripts\export_pre_decoupling_readiness_bundle.ps1"
 if (-not (Test-Path -LiteralPath $preDecouplingReadinessBundlePath)) {
