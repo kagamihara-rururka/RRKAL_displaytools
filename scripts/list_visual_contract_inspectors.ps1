@@ -77,6 +77,14 @@ $entries = @(
         no_launch_side_effect = $true
     },
     [ordered]@{
+        id = "reviewer_first_run_route"
+        category = "cross_machine"
+        schema = "rrkal_displaytools.reviewer_first_run_route_inspector.v1"
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_reviewer_first_run_route.ps1"
+        proves = @("clone-to-review route", "researcher first-look surfaces", "Qt-first review checklist", "visible pending UIUX items")
+        no_launch_side_effect = $true
+    },
+    [ordered]@{
         id = "layer_visual_presets"
         category = "layer_control"
         schema = "rrkal_displaytools.layer_visual_presets_inspector.v1"
@@ -198,6 +206,7 @@ $entries = @(
         "timeline_uiux",
         "uiux_closure_readiness_check",
         "cross_machine_review_readiness_check",
+        "reviewer_first_run_route",
         "layer_visual_presets",
         "layer_operator_shortcuts",
         "research_interaction",

@@ -1205,6 +1205,9 @@ if ($visualInspectorIndex.entry_ids -notcontains "uiux_closure_readiness_check")
 if ($visualInspectorIndex.entry_ids -notcontains "cross_machine_review_readiness_check") {
     throw "Visual contract inspector index missing cross-machine review readiness check"
 }
+if ($visualInspectorIndex.entry_ids -notcontains "reviewer_first_run_route") {
+    throw "Visual contract inspector index missing reviewer first-run route inspector"
+}
 if ($visualInspectorIndex.entry_ids -notcontains "layer_visual_presets") {
     throw "Visual contract inspector index missing Layer visual presets inspector"
 }
@@ -1297,6 +1300,9 @@ if ($visualReviewPacket.inspector_entry_ids -notcontains "uiux_closure_readiness
 if ($visualReviewPacket.inspector_entry_ids -notcontains "cross_machine_review_readiness_check") {
     throw "Visual contract review packet missing cross-machine review readiness check"
 }
+if ($visualReviewPacket.inspector_entry_ids -notcontains "reviewer_first_run_route") {
+    throw "Visual contract review packet missing reviewer first-run route inspector"
+}
 if ($visualReviewPacket.inspector_entry_ids -notcontains "layer_visual_presets") {
     throw "Visual contract review packet missing Layer visual presets inspector"
 }
@@ -1332,6 +1338,9 @@ if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -Exec
 }
 if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_cross_machine_review_readiness.ps1") {
     throw "Visual contract review packet missing cross-machine review readiness check first command"
+}
+if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_reviewer_first_run_route.ps1") {
+    throw "Visual contract review packet missing reviewer first-run route command"
 }
 if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_layer_visual_presets.ps1") {
     throw "Visual contract review packet missing Layer visual presets first command"
@@ -1773,6 +1782,41 @@ if ($crossMachineReviewReadinessCheck.repo_url -ne "https://github.com/Kagamihar
 }
 if ($crossMachineReviewReadinessCheck.default_branch -ne "main") {
     throw "Cross-machine review readiness check default branch mismatch"
+}
+$reviewerFirstRunRoutePath = Join-Path $RepoRoot "scripts\inspect_reviewer_first_run_route.ps1"
+if (-not (Test-Path -LiteralPath $reviewerFirstRunRoutePath)) {
+    throw "Reviewer first-run route inspector script is missing"
+}
+$reviewerFirstRunRouteContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $reviewerFirstRunRoutePath, "-ContractOnly")
+$reviewerFirstRunRouteContract = ($reviewerFirstRunRouteContractText -join "`n") | ConvertFrom-Json
+if ($reviewerFirstRunRouteContract.schema -ne "rrkal_displaytools.reviewer_first_run_route_inspector.v1") {
+    throw "Reviewer first-run route inspector contract schema missing"
+}
+if ($reviewerFirstRunRouteContract.output_schema -ne "rrkal_displaytools.reviewer_first_run_route.v1") {
+    throw "Reviewer first-run route output schema missing"
+}
+if ($reviewerFirstRunRouteContract.required_contracts -notcontains "rrkal_displaytools.cross_machine_review_readiness_check_result.v1") {
+    throw "Reviewer first-run route cross-machine readiness dependency missing"
+}
+$reviewerFirstRunRouteText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $reviewerFirstRunRoutePath)
+$reviewerFirstRunRoute = ($reviewerFirstRunRouteText -join "`n") | ConvertFrom-Json
+if ($reviewerFirstRunRoute.schema -ne "rrkal_displaytools.reviewer_first_run_route.v1") {
+    throw "Reviewer first-run route schema missing"
+}
+if ($reviewerFirstRunRoute.status -ne "ready") {
+    throw "Reviewer first-run route status mismatch"
+}
+if ($reviewerFirstRunRoute.qt_first -ne $true) {
+    throw "Reviewer first-run route must remain Qt-first"
+}
+if ($reviewerFirstRunRoute.no_data_governance -ne $true) {
+    throw "Reviewer first-run route data-governance boundary missing"
+}
+if ($reviewerFirstRunRoute.renderer_code_move_allowed_before_0700 -ne $false) {
+    throw "Reviewer first-run route must block pre-07 renderer code moves"
+}
+if ($reviewerFirstRunRoute.next_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_cross_machine_review_readiness.ps1") {
+    throw "Reviewer first-run route cross-machine readiness command missing"
 }
 $layerVisualPresetsInspectorPath = Join-Path $RepoRoot "scripts\inspect_layer_visual_presets.ps1"
 if (-not (Test-Path -LiteralPath $layerVisualPresetsInspectorPath)) {

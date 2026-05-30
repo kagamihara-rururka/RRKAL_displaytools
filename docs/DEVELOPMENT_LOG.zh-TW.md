@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Reviewer first-run route inspector
+
+- Added `scripts/inspect_reviewer_first_run_route.ps1` as a no-GUI route for cloned-machine researcher review.
+- Registered the route in the visual contract inspector index, cross-machine review packet and smoke gates.
+- The route makes setup, smoke, handoff, Qt review, research interaction, Ocean 3D board and visible pending UIUX items explicit without launching Qt.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; transient cloud-drive file-access backoff warning observed, final retry passed).
+
 ## 2026-05-31 - Cross-machine review readiness check
 
 - Added `scripts/check_cross_machine_review_readiness.ps1` as a no-GUI pass/fail gate for cloned-machine review.
