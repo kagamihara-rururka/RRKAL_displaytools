@@ -23,6 +23,10 @@ $capabilities = Invoke-JsonPythonCommand @("taichi_global_bathymetry.py", "--pri
 $closedLoop = Invoke-JsonPythonCommand @("taichi_global_bathymetry.py", "--print-closed-loop-status")
 $launchPacket = Invoke-JsonPythonCommand @("scripts\export_launch_packet.py", "--template", "fast_synthetic")
 
+$profileUiGroups = @($launchPacket.profile_ui_state_replay.qt_inspector_action_groups)
+$researchInteractionActions = @(($profileUiGroups | Where-Object { $_.id -eq "research_interaction" } | Select-Object -First 1).action_ids)
+$visualReviewActions = @(($profileUiGroups | Where-Object { $_.id -eq "visual_review" } | Select-Object -First 1).action_ids)
+
 $summary = [ordered]@{
     schema = "rrkal_displaytools.handoff_inspection.v1"
     repo_role = "RRKAL displaytools renderer/UI handoff inspection"
@@ -133,10 +137,23 @@ $summary = [ordered]@{
         launch_packet_schema = $launchPacket.profile_ui_state_replay.schema
         renderer_capabilities_schema = $capabilities.profile_ui_state_replay.schema
         qt_inspector_action_count = $launchPacket.profile_ui_state_replay.qt_inspector_action_count
-        qt_inspector_group_ids = @($launchPacket.profile_ui_state_replay.qt_inspector_action_groups | ForEach-Object { $_.id })
-        research_interaction_actions = @(($launchPacket.profile_ui_state_replay.qt_inspector_action_groups | Where-Object { $_.id -eq "research_interaction" } | Select-Object -First 1).action_ids)
-        visual_review_actions = @(($launchPacket.profile_ui_state_replay.qt_inspector_action_groups | Where-Object { $_.id -eq "visual_review" } | Select-Object -First 1).action_ids)
+        qt_inspector_group_ids = @($profileUiGroups | ForEach-Object { $_.id })
+        research_interaction_actions = $researchInteractionActions
+        visual_review_actions = $visualReviewActions
         recommended_sequence = @("Inspect: Profile replay", "Inspect: Layer ops", "Inspect: Renderer thumbnail", "Inspect: Live preview")
+    }
+    visual_review_readiness = @{
+        schema = "rrkal_displaytools.visual_review_readiness.v1"
+        source_schema = $launchPacket.profile_ui_state_replay.schema
+        visual_review_actions = $visualReviewActions
+        renderer_thumbnail_ready = ($visualReviewActions -contains "renderer_thumbnail")
+        live_preview_ready = ($visualReviewActions -contains "live_preview")
+        recommended_sequence = @("Inspect: Renderer thumbnail", "Inspect: Live preview")
+        missing_frame_guidance = @(
+            "Run Inspect: Renderer thumbnail to confirm cached preview-frame availability.",
+            "Run Inspect: Live preview to confirm renderer frame-capture routing.",
+            "If both views are unavailable, launch Qt with a known style profile before filing a renderer issue."
+        )
     }
     cursor_geodesy_readout = @{
         launch_packet_schema = $launchPacket.cursor_geodesy_readout.schema

@@ -229,6 +229,17 @@ Positioning:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+## 2026-05-30 - Visual review readiness handoff
+
+Changes:
+- Added `visual_review_readiness` to `scripts\inspect_handoff.ps1`.
+- Handoff output now reports renderer thumbnail readiness, live preview readiness and missing-frame guidance.
+- Smoke gates the readiness packet, both readiness flags and thumbnail/live-preview guidance text.
+- Updated clone quickstart, capability summary and GTD for visual review readiness.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 
 ## 2026-05-30 - Qt Canvas state Inspect action
 

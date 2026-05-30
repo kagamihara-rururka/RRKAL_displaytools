@@ -318,3 +318,14 @@ Done:
 
 Next:
 - Continue closing visual review around renderer thumbnail/live preview availability and missing-frame guidance.
+
+
+## 2026-05-30 - Visual review readiness handoff
+
+Done:
+- Added `visual_review_readiness` to `scripts\inspect_handoff.ps1`.
+- Handoff now reports renderer thumbnail/live preview readiness and missing-frame guidance before Qt launch.
+- Smoke gates readiness flags and guidance text.
+
+Next:
+- Continue moving the same review clarity into Qt-side user-facing Inspect output where useful.

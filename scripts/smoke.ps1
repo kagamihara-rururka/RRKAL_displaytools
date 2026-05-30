@@ -1306,6 +1306,22 @@ if ($handoff.profile_visual_quick_review.visual_review_actions -notcontains "ren
 if ($handoff.profile_visual_quick_review.visual_review_actions -notcontains "live_preview") {
     throw "Handoff inspection profile visual quick review missing live preview action"
 }
+if ($handoff.visual_review_readiness.schema -ne "rrkal_displaytools.visual_review_readiness.v1") {
+    throw "Handoff inspection visual review readiness schema missing or invalid"
+}
+if (-not $handoff.visual_review_readiness.renderer_thumbnail_ready) {
+    throw "Handoff inspection visual review readiness missing renderer thumbnail readiness"
+}
+if (-not $handoff.visual_review_readiness.live_preview_ready) {
+    throw "Handoff inspection visual review readiness missing live preview readiness"
+}
+$visualReviewGuidance = ($handoff.visual_review_readiness.missing_frame_guidance -join " ")
+if ($visualReviewGuidance -notmatch 'Inspect: Renderer thumbnail') {
+    throw "Handoff inspection visual review readiness missing renderer thumbnail guidance"
+}
+if ($visualReviewGuidance -notmatch 'Inspect: Live preview') {
+    throw "Handoff inspection visual review readiness missing live preview guidance"
+}
 if ($handoff.launch_packet_contracts.layer_selection_tool -ne "rrkal_displaytools.layer_selection_tool.v1") {
     throw "Handoff inspection layer_selection_tool launch contract missing or invalid"
 }
@@ -2108,6 +2124,9 @@ if ($handoffInspectorSource -notmatch 'layer_operation_feedback') {
 }
 if ($handoffInspectorSource -notmatch 'profile_visual_quick_review') {
     throw "Handoff inspection profile visual quick review output is missing"
+}
+if ($handoffInspectorSource -notmatch 'visual_review_readiness') {
+    throw "Handoff inspection visual review readiness output is missing"
 }
 if ($handoffInspectorSource -notmatch 'saved_state_groups') {
     throw "Handoff inspection profile UI state replay saved groups output is missing"

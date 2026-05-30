@@ -513,3 +513,9 @@
 - Handoff inspection now exposes `profile_visual_quick_review`.
 - The quick review reports Qt inspector group ids, Research interaction actions, Visual review actions and a recommended cross-machine inspection sequence.
 - Smoke gates that Research interaction includes `layer_ops` and Visual review includes `renderer_thumbnail` / `live_preview`.
+
+## Visual review readiness
+
+- Handoff inspection now exposes `rrkal_displaytools.visual_review_readiness.v1`.
+- The packet reports Visual review action ids, renderer thumbnail readiness, live preview readiness and missing-frame guidance.
+- Smoke gates both readiness flags and the renderer thumbnail/live preview guidance text.

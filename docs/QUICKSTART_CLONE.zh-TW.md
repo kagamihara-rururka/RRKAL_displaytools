@@ -194,3 +194,9 @@ Displaytools 不負責：
 - `scripts\inspect_handoff.ps1` now reports `profile_visual_quick_review`.
 - Use it to confirm Research interaction actions include `layer_ops` and Visual review actions include `renderer_thumbnail` / `live_preview`.
 - Recommended quick sequence: `Inspect: Profile replay`, `Inspect: Layer ops`, `Inspect: Renderer thumbnail`, `Inspect: Live preview`.
+
+## Visual review readiness
+
+- `scripts\inspect_handoff.ps1` now reports `visual_review_readiness`.
+- Use it before launching Qt on another machine to confirm `renderer_thumbnail` and `live_preview` Inspect actions are available.
+- If preview frames are missing, follow the reported guidance: inspect renderer thumbnail, inspect live preview, then retry with a known style profile before filing a renderer issue.
