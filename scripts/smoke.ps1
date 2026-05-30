@@ -6287,6 +6287,12 @@ if ($qtPanelSource -notlike "*qt_inspector_action_groups*") {
 }
 
 $rendererSource = Get-Content -Raw -Encoding UTF8 taichi_global_bathymetry.py
+$renderPlanCoreSource = if (Test-Path -LiteralPath (Join-Path $RepoRoot "render_core\render_plan.py")) {
+    Get-Content -Raw -Encoding UTF8 (Join-Path $RepoRoot "render_core\render_plan.py")
+} else {
+    ""
+}
+$renderPlanCombinedSource = "$rendererSource`n$renderPlanCoreSource"
 if ($rendererSource -notlike "*def layer_render_plan_runtime_snapshot*") {
     throw "Renderer layer render plan runtime snapshot helper is missing"
 }
@@ -6458,10 +6464,10 @@ if ($rendererSource -notlike "*rrkal_displaytools.compose_run_parity_artifact_ru
 if ($rendererSource -notlike "*render_compose_parity_artifacts.ps1*") {
     throw "Renderer compose parity artifact runner script marker is missing"
 }
-if ($rendererSource -notlike "*adjacent_alpha_compose_overlays_can_be_collapsed_after_visual_parity_check*") {
+if ($renderPlanCombinedSource -notlike "*adjacent_alpha_compose_overlays_can_be_collapsed_after_visual_parity_check*") {
     throw "Renderer render plan compose runs merge-safe marker is missing"
 }
-if ($rendererSource -notlike "*preserve_per_layer_visibility_opacity_blend_semantics*") {
+if ($renderPlanCombinedSource -notlike "*preserve_per_layer_visibility_opacity_blend_semantics*") {
     throw "Renderer render plan compose runs semantic boundary marker is missing"
 }
 if ($rendererSource -notlike "*compose_merge_candidate_run_count*") {

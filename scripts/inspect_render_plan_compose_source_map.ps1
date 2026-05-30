@@ -12,6 +12,7 @@ $targets = @(
     [ordered]@{ id = "alpha_compose"; path = "render_core/render_plan.py"; pattern = "^def alpha_compose\(" },
     [ordered]@{ id = "alpha_blend_compose"; path = "render_core/render_plan.py"; pattern = "^def alpha_blend_compose\(" },
     [ordered]@{ id = "alpha_compose_transparent"; path = "render_core/render_plan.py"; pattern = "^def alpha_compose_transparent\(" },
+    [ordered]@{ id = "build_layer_render_plan_compose_runs"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_compose_runs\(" },
     [ordered]@{ id = "compose_runtime_overlay"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def compose_runtime_overlay\(" },
     [ordered]@{ id = "compose_runtime_blend"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def compose_runtime_blend\(" },
     [ordered]@{ id = "layer_render_plan_runtime_snapshot"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def layer_render_plan_runtime_snapshot\(" },
@@ -95,7 +96,7 @@ foreach ($target in $targets) {
     status = if ($missing.Count -eq 0) { "ready" } else { "incomplete" }
     source_files = @("taichi_global_bathymetry.py", "render_core/render_plan.py")
     target_module = "render_core/render_plan.py"
-    source_owner = "HybridRenderController and alpha compose helpers"
+    source_owner = "HybridRenderController and render_core render-plan helpers"
     no_code_move = $true
     runtime_merge_enabled = $false
     targets = $matches

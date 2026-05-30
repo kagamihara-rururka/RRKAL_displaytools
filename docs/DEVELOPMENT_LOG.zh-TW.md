@@ -1,5 +1,13 @@
 # Development Log
 
+## 2026-05-31 - Extract compose run builder
+
+- Added `build_layer_render_plan_compose_runs` to `render_core/render_plan.py`.
+- Updated `HybridRenderController.layer_render_plan_compose_runs` to delegate to the extracted pure helper while preserving the existing `source` field.
+- Updated source-map tracking for the new extracted helper.
+- Updated smoke source gates so compose-run markers can live in the extracted render-core module.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; first run exposed stale source-gate location for compose-run markers, fixed and reran successfully).
+
 ## 2026-05-31 - Extract alpha compose helpers
 
 - Moved `alpha_compose`, `alpha_blend_compose` and `alpha_compose_transparent` into `render_core/render_plan.py`.

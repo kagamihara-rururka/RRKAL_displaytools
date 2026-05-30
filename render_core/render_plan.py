@@ -68,3 +68,72 @@ def alpha_compose_transparent(background: np.ndarray, overlay: np.ndarray) -> np
     out[..., :3] = np.clip(out_rgb * 255.0, 0.0, 255.0).astype(np.uint8)
     out[..., 3:4] = np.clip(out_a * 255.0, 0.0, 255.0).astype(np.uint8)
     return out
+
+
+def build_layer_render_plan_compose_runs(
+    compose_queue: list[dict[str, object]],
+    *,
+    source: str = "render_core.render_plan.build_layer_render_plan_compose_runs",
+) -> dict[str, object]:
+    runs: list[dict[str, object]] = []
+    current_run: dict[str, object] | None = None
+    for step in compose_queue:
+        if not isinstance(step, dict):
+            continue
+        kind = str(step.get("kind") or "unknown")
+        step_id = str(step.get("id") or step.get("layer_id") or "unknown_step")
+        queue_order = int(step.get("queue_order", len(runs)))
+        if kind == "style_profile_postprocess":
+            run_kind = "postprocess"
+            merge_safe = False
+            merge_reason = "full_frame_style_profile_boundary"
+        elif kind == "alpha_compose":
+            run_kind = "alpha_compose_overlays"
+            merge_safe = True
+            merge_reason = "adjacent_alpha_compose_overlays_can_be_collapsed_after_visual_parity_check"
+        elif kind == "alpha_blend":
+            run_kind = "alpha_blend_overlay"
+            merge_safe = False
+            merge_reason = "blend_mode_specific_overlay_boundary"
+        elif kind in {"runtime_blend", "runtime_overlay"}:
+            run_kind = "runtime_layer_overlay"
+            merge_safe = False
+            merge_reason = "preserve_per_layer_visibility_opacity_blend_semantics"
+        else:
+            run_kind = "unknown_overlay"
+            merge_safe = False
+            merge_reason = "unknown_runtime_semantics"
+        can_extend = (
+            current_run is not None
+            and current_run.get("run_kind") == run_kind
+            and current_run.get("merge_safe") is True
+            and merge_safe
+        )
+        if not can_extend:
+            current_run = {
+                "id": f"compose_run_{len(runs)}",
+                "run_kind": run_kind,
+                "merge_safe": merge_safe,
+                "merge_reason": merge_reason,
+                "start_queue_order": queue_order,
+                "end_queue_order": queue_order,
+                "step_ids": [],
+                "step_count": 0,
+                "current_runtime_path": "sequential_compose_queue_execution",
+                "next_runtime_path": "merged_overlay_pass" if merge_safe else "preserve_ordered_step_execution",
+            }
+            runs.append(current_run)
+        current_run["end_queue_order"] = queue_order
+        step_ids = current_run.get("step_ids")
+        if isinstance(step_ids, list):
+            step_ids.append(step_id)
+        current_run["step_count"] = int(current_run.get("step_count", 0)) + 1
+    return {
+        "schema": "rrkal_displaytools.layer_render_plan_compose_runs.v1",
+        "source": source,
+        "status": "ready",
+        "run_count": len(runs),
+        "merge_candidate_run_count": sum(1 for run in runs if run.get("merge_safe") is True),
+        "runs": runs,
+        "next_optimization_target": "merge safe adjacent alpha_compose overlays after visual parity smoke is available",
+    }
