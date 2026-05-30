@@ -1038,8 +1038,14 @@ if ($launchPacket.reviewer_packet_export.field_guide.qt_copy_action -ne "copy_re
 if ($launchPacket.reviewer_packet_export.field_guide.ordered_review_groups.id -notcontains "layer_control") {
     throw "Launch packet reviewer packet field guide layer group missing"
 }
+if ($launchPacket.reviewer_packet_export.field_guide.ordered_review_groups.id -notcontains "decoupling") {
+    throw "Launch packet reviewer packet field guide decoupling group missing"
+}
 if ($launchPacket.reviewer_packet_export.recommended_review_fields -notcontains "layer_render_plan_performance.compose_pass_budget") {
     throw "Launch packet reviewer recommended compose budget field missing"
+}
+if ($launchPacket.reviewer_packet_export.recommended_review_fields -notcontains "decoupling_readiness.first_extraction_order") {
+    throw "Launch packet reviewer recommended decoupling field missing"
 }
 if ($launchPacket.reviewer_packet_export.recommended_review_fields -notcontains "layer_selection_tool.selection_summary_contract.quick_actions_summary_contract") {
     throw "Launch packet reviewer packet layer quick actions recommended field missing"
@@ -1065,6 +1071,9 @@ if ($launchPacket.reviewer_packet_export.included_summary_fields -notcontains "s
 if ($launchPacket.reviewer_packet_export.included_summary_fields -notcontains "module_boundary_summary") {
     throw "Launch packet reviewer packet module boundary summary field missing"
 }
+if ($launchPacket.reviewer_packet_export.included_summary_fields -notcontains "decoupling_readiness_summary") {
+    throw "Launch packet reviewer packet decoupling summary field missing"
+}
 if ($launchPacket.reviewer_packet_export.included_summary_fields -notcontains "compose_performance_summary") {
     throw "Launch packet reviewer packet compose performance summary field missing"
 }
@@ -1085,6 +1094,9 @@ if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "st
 }
 if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "module_boundary_registry") {
     throw "Launch packet reviewer packet module boundary packet field missing"
+}
+if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "decoupling_readiness") {
+    throw "Launch packet reviewer packet decoupling readiness packet field missing"
 }
 if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "layer_render_plan_performance") {
     throw "Launch packet reviewer packet render plan performance packet field missing"
@@ -5290,6 +5302,9 @@ if ($reviewerPacketContract.schema -ne "rrkal_displaytools.no_gui_reviewer_packe
 }
 if ($reviewerPacketContract.compose_performance_summary_field -ne "compose_performance_summary") {
     throw "No-GUI reviewer packet exporter compose performance field missing"
+}
+if ($reviewerPacketContract.decoupling_readiness_field -ne "decoupling_readiness") {
+    throw "No-GUI reviewer packet exporter decoupling readiness field missing"
 }
 if ($composeParitySmoke.mode -ne "contract_only_no_render_side_effect") {
     throw "Compose parity smoke contract mode mismatch"

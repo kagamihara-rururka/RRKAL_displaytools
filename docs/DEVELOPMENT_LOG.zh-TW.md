@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Reviewer packet decoupling readiness handoff
+
+Changes:
+- Added `decoupling_readiness` and `decoupling_readiness_summary` to Qt launch/reviewer packets and no-GUI launch/reviewer export paths.
+- Added a reviewer field-guide `decoupling` group pointing at `decoupling_readiness.first_extraction_order`.
+- Smoke now gates reviewer recommended fields, included summary/packet fields and no-GUI contract metadata for decoupling readiness.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Qt decoupling readiness collector
 
 Changes:
