@@ -437,6 +437,12 @@ if ($launchPacket.style_template_visual_preview.thumbnail_readiness_fields -notc
 if ($launchPacket.style_template_visual_preview.thumbnail_readiness_copy_action -ne "copy_style_thumbnail_readiness_summary") {
     throw "Launch packet style_template_visual_preview thumbnail readiness copy action missing"
 }
+if ($launchPacket.style_template_visual_preview.local_thumbnail_readiness_schema -ne "rrkal_displaytools.local_style_thumbnail_readiness.v1") {
+    throw "Launch packet style_template_visual_preview local thumbnail readiness schema missing"
+}
+if ($launchPacket.style_template_visual_preview.local_thumbnail_readiness_fields -notcontains "slots") {
+    throw "Launch packet style_template_visual_preview local thumbnail readiness slots field missing"
+}
 if ($launchPacket.visual_feature_closure_matrix.schema -ne "rrkal_displaytools.visual_feature_closure_matrix.v1") {
     throw "Launch packet visual feature closure matrix schema missing or invalid"
 }
@@ -1405,6 +1411,9 @@ if ($capabilities.style_template_visual_preview.thumbnail_readiness_summary_form
 if ($capabilities.style_template_visual_preview.thumbnail_readiness_copy_label -ne "Copy style thumb status") {
     throw "Renderer style_template_visual_preview thumbnail readiness copy label missing"
 }
+if ($capabilities.style_template_visual_preview.local_thumbnail_readiness_qt_action -ne "show_style_thumbnail_slots") {
+    throw "Renderer style_template_visual_preview local thumbnail readiness Qt action missing"
+}
 if ($capabilities.visual_feature_closure_matrix.schema -ne "rrkal_displaytools.visual_feature_closure_matrix.v1") {
     throw "Renderer visual feature closure matrix schema missing or invalid"
 }
@@ -2300,6 +2309,12 @@ if ($handoff.style_template_visual_preview.thumbnail_readiness_label_object -ne 
 if ($handoff.style_template_visual_preview.thumbnail_readiness_copy_action -ne "copy_style_thumbnail_readiness_summary") {
     throw "Handoff inspection style_template_visual_preview thumbnail readiness copy action missing"
 }
+if ($handoff.style_template_visual_preview.local_thumbnail_readiness_schema -ne "rrkal_displaytools.local_style_thumbnail_readiness.v1") {
+    throw "Handoff inspection style_template_visual_preview local thumbnail readiness schema missing"
+}
+if ($handoff.style_template_visual_preview.local_thumbnail_readiness_fields -notcontains "missing_ids") {
+    throw "Handoff inspection style_template_visual_preview local thumbnail readiness missing_ids field missing"
+}
 if ($handoff.launch_packet_contracts.module_boundary_registry -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Handoff inspection module_boundary_registry launch contract missing or invalid"
 }
@@ -2859,6 +2874,15 @@ if ($qtPanelSource -notlike "*copy_style_thumbnail_readiness_summary*") {
 }
 if ($qtPanelSource -notlike "*style_thumbnail_readiness_summary_text*") {
     throw "Qt style thumbnail readiness summary formatter is missing"
+}
+if ($qtPanelSource -notlike "*collect_local_style_thumbnail_readiness*") {
+    throw "Qt local style thumbnail readiness collector is missing"
+}
+if ($qtPanelSource -notlike "*local_thumbnail_readiness*") {
+    throw "Qt style thumbnail slots JSON local readiness output is missing"
+}
+if ($qtPanelSource -notlike "*rrkal_displaytools.local_style_thumbnail_readiness.v1*") {
+    throw "Qt local style thumbnail readiness schema is missing"
 }
 if ($qtPanelSource -like "*packet.get('preview_count')*selected={current_style}*") {
     throw "Qt style thumbnail readiness copy handler has stale undefined packet reference"

@@ -412,6 +412,11 @@
 - Qt Visual review now includes `Copy style thumb status`, backed by `copy_style_thumbnail_readiness_summary()`.
 - Handoff and smoke verify the copy action and label so thumbnail readiness can be pasted into cross-machine review notes.
 
+### 2026-05-30 Local style thumbnail readiness JSON
+
+- `Inspect: Style thumbs` now includes `local_thumbnail_readiness`, with each style slot reporting local path, absolute path, existence and ready/missing status.
+- `rrkal_displaytools.local_style_thumbnail_readiness.v1` documents that this only checks optional runtime PNG artifacts and does not render thumbnails or manage RRKAL caches.
+
 ### 2026-05-30 Qt Layer control feedback strip
 
 - Qt Layers dock now exposes `layerControlFeedbackStrip`, a compact active-layer status strip for visibility, lock, opacity, blend mode and renderer sync.

@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Local style thumbnail readiness JSON
+
+Changes:
+- Added `collect_local_style_thumbnail_readiness()` for local style thumbnail slot status.
+- `Inspect: Style thumbs` now includes local per-style thumbnail readiness details with path, absolute path, existence and ready/missing status.
+- Style preview packets, handoff inspection and smoke now advertise `rrkal_displaytools.local_style_thumbnail_readiness.v1`.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Style thumbnail readiness copy fix
 
 Changes:

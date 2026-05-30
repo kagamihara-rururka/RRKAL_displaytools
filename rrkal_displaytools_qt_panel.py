@@ -251,6 +251,9 @@ def style_template_visual_preview_packet(
         "thumbnail_readiness_summary_format": "Style thumbnails: ready={ready_count}/{required_count}; missing={missing_ids}; action={thumbnail_batch_script}",
         "thumbnail_readiness_copy_action": "copy_style_thumbnail_readiness_summary",
         "thumbnail_readiness_copy_label": "Copy style thumb status",
+        "local_thumbnail_readiness_schema": "rrkal_displaytools.local_style_thumbnail_readiness.v1",
+        "local_thumbnail_readiness_qt_action": "show_style_thumbnail_slots",
+        "local_thumbnail_readiness_fields": ["slots", "ready_count", "missing_count", "missing_ids", "summary_text"],
         "qt_interaction": "clickable_preview_cards_select_style_profile",
         "card_click_action": "apply_style_template_preview_card",
         "qt_card_object_prefix": "styleTemplateCard_",
@@ -4608,6 +4611,47 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"missing={missing_text}; action=Copy style thumbs command"
         )
 
+    def collect_local_style_thumbnail_readiness(self) -> dict[str, object]:
+        packet = self.collect_style_template_visual_preview()
+        cards = packet.get("preview_cards", [])
+        slots: list[dict[str, object]] = []
+        ready_count = 0
+        missing_ids: list[str] = []
+        if isinstance(cards, list):
+            for card in cards:
+                if not isinstance(card, dict):
+                    continue
+                style_id = str(card.get("id", ""))
+                thumbnail_path = str(card.get("thumbnail_path", f"state/style_previews/{style_id}.png"))
+                absolute_path = self.local_style_thumbnail_path(thumbnail_path)
+                exists = absolute_path.exists()
+                if exists:
+                    ready_count += 1
+                else:
+                    missing_ids.append(style_id)
+                slots.append(
+                    {
+                        "id": style_id,
+                        "thumbnail_path": thumbnail_path,
+                        "absolute_path": str(absolute_path),
+                        "exists": exists,
+                        "status": "ready" if exists else "missing",
+                    }
+                )
+        summary_text = self.style_thumbnail_readiness_summary_text(ready_count, len(slots), missing_ids)
+        return {
+            "schema": "rrkal_displaytools.local_style_thumbnail_readiness.v1",
+            "source": "rrkal_displaytools_qt_panel",
+            "status": "ready" if not missing_ids else "missing_runtime_artifacts",
+            "artifact_dir": packet.get("thumbnail_artifact_dir"),
+            "slots": slots,
+            "ready_count": ready_count,
+            "missing_count": len(missing_ids),
+            "missing_ids": missing_ids,
+            "summary_text": summary_text,
+            "boundary": "Local thumbnail readiness only checks optional runtime PNG artifacts; it does not render thumbnails or manage RRKAL data caches.",
+        }
+
     def copy_style_thumbnail_readiness_summary(self) -> None:
         summary = self.style_thumbnail_readiness_summary_text()
         QtWidgets.QApplication.clipboard().setText(summary)
@@ -8441,6 +8485,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 {
                     "style_template_visual_preview": packet,
                     "thumbnail_slots": packet.get("preview_cards", []),
+                    "local_thumbnail_readiness": self.collect_local_style_thumbnail_readiness(),
                     "thumbnail_batch_command": packet.get("thumbnail_batch_command"),
                     "thumbnail_missing_guidance": packet.get("thumbnail_missing_guidance"),
                 },
