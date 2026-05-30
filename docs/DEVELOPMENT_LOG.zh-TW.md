@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Cloud/local development workflow docs
+
+Changes:
+- Added `docs/WORKFLOW.zh-TW.md` to formalize GitHub as the sync truth, `L:\RRKAL_displaytools` as the local cloud-drive working copy, Codex Cloud as the long-running code/docs/CI surface, and local Windows as the Qt/Taichi visual validation authority.
+- Added `docs/CODEX_CLOUD_HANDOFF.zh-TW.md` as the first-read entrypoint for Codex Cloud, local Codex and other agents.
+- Updated agent/git handoff docs, docs index and GTD to include private raw transcript backup policy, the proposed `dialogue-save` private repo layout, temporary local GUI test clones, cache reset gates and maturity estimates in push reports.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - GitHub Actions smoke UTF-8 fix
 
 Changes:
