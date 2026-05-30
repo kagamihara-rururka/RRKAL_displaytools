@@ -385,3 +385,14 @@ Done:
 
 Next:
 - Continue tightening the visual review UI by summarizing thumbnail/live preview runtime artifact state in the visible status area.
+
+
+## 2026-05-30 - Qt Visual readiness runtime artifacts
+
+Done:
+- `collect_visual_review_readiness()` now adds runtime artifact status for renderer thumbnail and live preview.
+- Existing frame-status rows are updated with `frame_available` / `runtime_dependent` and artifact paths when available.
+- Smoke gates the Qt collector runtime artifact checks.
+
+Next:
+- Continue making the Qt visual review panel more user-facing by turning readiness JSON into a compact visible summary.

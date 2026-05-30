@@ -549,3 +549,9 @@
 - The Qt panel now includes `Inspect: Visual readiness` in the Visual review button group and Renderer menu.
 - `show_visual_review_readiness()` displays the copyable `visual_review_readiness` JSON packet.
 - Smoke gates the packet function, collector, button and Inspect action in `rrkal_displaytools_qt_panel.py`.
+
+## Qt Visual readiness runtime artifacts
+
+- `collect_visual_review_readiness()` now adds `rrkal_displaytools.visual_review_runtime_artifact_summary.v1`.
+- The Qt packet marks renderer thumbnail/live preview as `frame_available` when runtime frame artifacts exist.
+- Smoke gates that the Qt collector checks `latest_renderer_thumbnail_path()` and `RENDERER_PREVIEW_FRAME_PATH.exists()`.

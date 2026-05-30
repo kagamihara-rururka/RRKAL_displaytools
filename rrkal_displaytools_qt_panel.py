@@ -3725,7 +3725,60 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         return profile_ui_state_replay_packet("rrkal_displaytools_qt_panel")
 
     def collect_visual_review_readiness(self) -> dict[str, object]:
-        return visual_review_readiness_packet("rrkal_displaytools_qt_panel")
+        packet = visual_review_readiness_packet("rrkal_displaytools_qt_panel")
+        frame_status = packet.get("frame_status", {})
+        inspector_view = packet.get("inspector_view", {})
+        thumbnail_path = self.latest_renderer_thumbnail_path()
+        live_preview_exists = RENDERER_PREVIEW_FRAME_PATH.exists()
+
+        def display_path(path: Path | None) -> str | None:
+            if path is None:
+                return None
+            try:
+                return str(path.relative_to(ROOT))
+            except ValueError:
+                return str(path)
+
+        thumbnail_status = frame_status.get("renderer_thumbnail", {})
+        if isinstance(thumbnail_status, dict):
+            thumbnail_status["status"] = "frame_available" if thumbnail_path else "inspect_action_available"
+            thumbnail_status["artifact_state"] = "available" if thumbnail_path else "runtime_dependent"
+            thumbnail_status["artifact_path"] = display_path(thumbnail_path)
+
+        live_status = frame_status.get("live_preview", {})
+        if isinstance(live_status, dict):
+            live_status["status"] = "frame_available" if live_preview_exists else "inspect_action_available"
+            live_status["artifact_state"] = "available" if live_preview_exists else "runtime_dependent"
+            live_status["artifact_path"] = display_path(RENDERER_PREVIEW_FRAME_PATH) if live_preview_exists else None
+
+        if isinstance(inspector_view, dict):
+            inspector_view["status_badges"] = [
+                f"renderer_thumbnail: {thumbnail_status.get('status', 'unknown')}",
+                f"live_preview: {live_status.get('status', 'unknown')}",
+            ]
+            rows = inspector_view.get("rows", [])
+            if isinstance(rows, list):
+                for row in rows:
+                    if not isinstance(row, dict):
+                        continue
+                    if row.get("action_id") == "renderer_thumbnail":
+                        row["status"] = thumbnail_status.get("status", row.get("status"))
+                        row["artifact_state"] = thumbnail_status.get("artifact_state", row.get("artifact_state"))
+                        row["artifact_path"] = thumbnail_status.get("artifact_path")
+                    if row.get("action_id") == "live_preview":
+                        row["status"] = live_status.get("status", row.get("status"))
+                        row["artifact_state"] = live_status.get("artifact_state", row.get("artifact_state"))
+                        row["artifact_path"] = live_status.get("artifact_path")
+
+        packet["runtime_artifact_summary_schema"] = "rrkal_displaytools.visual_review_runtime_artifact_summary.v1"
+        packet["runtime_artifact_summary"] = {
+            "renderer_thumbnail_status": thumbnail_status.get("status", "unknown"),
+            "renderer_thumbnail_artifact_path": thumbnail_status.get("artifact_path"),
+            "live_preview_status": live_status.get("status", "unknown"),
+            "live_preview_artifact_path": live_status.get("artifact_path"),
+            "ui_status_surface": "Qt command/provenance text panel",
+        }
+        return packet
 
     def collect_layer_operation_feedback(self) -> dict[str, object]:
         return layer_operation_feedback_packet(

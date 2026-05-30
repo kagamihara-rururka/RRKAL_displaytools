@@ -2035,6 +2035,15 @@ if ($qtPanelSource -notlike "*show_visual_review_readiness*") {
 if ($qtPanelSource -notlike "*collect_visual_review_readiness*") {
     throw "Qt panel Visual readiness collector missing"
 }
+if ($qtPanelSource -notlike "*runtime_artifact_summary_schema*") {
+    throw "Qt panel Visual readiness runtime artifact summary missing"
+}
+if ($qtPanelSource -notlike "*latest_renderer_thumbnail_path()*") {
+    throw "Qt panel Visual readiness thumbnail artifact check missing"
+}
+if ($qtPanelSource -notlike "*RENDERER_PREVIEW_FRAME_PATH.exists()*") {
+    throw "Qt panel Visual readiness live preview artifact check missing"
+}
 if ($qtPanelSource -notlike "*show_boundary_state*") {
     throw "Qt Boundary JSON action is missing"
 }

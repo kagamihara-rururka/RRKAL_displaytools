@@ -230,3 +230,9 @@ Displaytools 不負責：
 - `rrkal_displaytools_qt_panel.py` now exposes `Inspect: Visual readiness`.
 - The action displays `visual_review_readiness` JSON in the command/provenance text panel before you inspect the renderer thumbnail or live preview.
 - Use it to distinguish available Qt Inspect routes from runtime-dependent preview frame artifacts.
+
+## Qt Visual readiness runtime artifacts
+
+- The Qt action now adds `runtime_artifact_summary`.
+- Renderer thumbnail and live preview statuses become `frame_available` when the relevant PNG/frame file exists, otherwise they stay `inspect_action_available` with `runtime_dependent` artifacts.
+- This lets clone reviewers distinguish "UI route exists" from "runtime frame has not been produced yet".

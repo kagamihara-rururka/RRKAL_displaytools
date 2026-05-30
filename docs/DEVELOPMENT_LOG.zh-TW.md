@@ -229,6 +229,17 @@ Positioning:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+## 2026-05-30 - Qt Visual readiness runtime artifacts
+
+Changes:
+- `collect_visual_review_readiness()` now inspects current renderer thumbnail and live preview frame artifact availability.
+- The Qt packet adds `runtime_artifact_summary` and updates inspector rows/status badges with artifact state and paths.
+- Smoke gates the runtime artifact summary plus thumbnail/live-preview artifact checks in the Qt collector.
+- Updated clone quickstart, capability summary and GTD for runtime artifact interpretation.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-30 - Qt Visual readiness action
 
 Changes:
