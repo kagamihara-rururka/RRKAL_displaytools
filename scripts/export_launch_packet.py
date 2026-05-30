@@ -1868,6 +1868,7 @@ def cross_machine_clone_readiness_packet(
         "cd RRKAL_displaytools",
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup_windows.ps1",
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/smoke.ps1",
+        "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/inspect_handoff.ps1",
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run_qt_panel.ps1",
     ]
     profile_ready = profile_readiness.get("readiness") == "ready"
@@ -1881,6 +1882,7 @@ def cross_machine_clone_readiness_packet(
         "repo_url": "https://github.com/Kagamihara-Ruruka/RRKAL_displaytools.git",
         "setup_doc": "docs/SETUP_WINDOWS.zh-TW.md",
         "qt_surface": "Layers dock cross-machine readiness label",
+        "qt_visible_fields": ["status", "required_command_count", "setup_doc", "first_run_smoke_command", "first_run_handoff_command"],
         "required_commands": required_commands,
         "launcher_options": launcher_options,
         "handoff_first_command": handoff_first_command,

@@ -38,7 +38,7 @@
 - `rrkal_displaytools.style_template_visual_preview.v1` adds a Qt Looks/templates visual preview-card contract for scientific, nautical, parchment and tactical styles. The Qt panel exposes `styleTemplateVisualPreview`, clickable `styleTemplateCard_<id>` cards, `Inspect: Style thumbs` and `Copy style thumbs command`; if a local `state/style_previews/<style>.png` exists, Qt loads it as the card icon. Launch packets, renderer capabilities, handoff inspection and smoke verify the preview IDs, swatches, Qt surface, click action, thumbnail slots, icon loader, `scripts/render_style_previews.ps1`, renderer output-artifact source contract and route handoff without moving RRKAL data discovery/cache governance into displaytools.
 - `rrkal_displaytools.module_boundary_registry.v1` marks extraction seams for contracts, Qt UI, Taichi render core, ocean material, style profiles, overlays, RRKAL-owned data sources and diagnostics. It now carries `rrkal_displaytools.module_decoupling_boundary_contract.v1`, which records extraction order, stable contracts required before moving code, forbidden cross-imports, Qt-first/Tk-not-primary policy and RRKAL-owned data discovery/import/cache governance boundaries.
 - `rrkal_displaytools.cross_machine_clone_readiness.v1` records the public repo URL, Windows setup doc, required first-run commands, explicit `first_run_smoke_command` / `first_run_handoff_command`, launcher options including `-HandoffFirst`, smoke-before-push rule, Qt-first boundary and handoff inspection steps so another machine can verify clone/setup/run state through launch packets, renderer capabilities, handoff inspection and smoke gates.
-- Qt Layers dock shows `Cross-machine clone readiness`, making clone/setup status visible beside profile/launch readiness instead of only inside JSON packets.
+- Qt Layers dock shows `Cross-machine clone readiness`, making clone/setup status plus first-run smoke/handoff commands visible beside profile/launch readiness instead of only inside JSON packets.
 - `rrkal_displaytools.profile_launch_readiness.v1` summarizes cross-machine readiness for profile schema, built-in templates, launch packet export, portable command, renderer capability discovery, style renderer entries and layer operator workflow groups. Qt launch/provenance packets, No-GUI launch packets, renderer capabilities, handoff inspection, closed-loop evidence and smoke gates must all report readiness as `ready`.
 - `rrkal_displaytools.profile_launch_readiness_ui.v1` makes that readiness visible in the Qt Layers dock as a `Profile/launch readiness` label, and the same UI surface is exposed through launch packets, renderer capabilities, handoff inspection, closed-loop evidence and smoke gates.
 - `rrkal_displaytools.visual_feature_closure_matrix.v1` summarizes the smoke-gated evidence fields for Qt-first UI, layer control, profile/launch, renderer capability discovery, cross-machine clone, Pin overlay, cursor geodesy, Boundary emphasis, Hydrology/LOD, Ocean material, style profiles and module boundaries. It is exposed through launch packets, renderer capabilities and handoff inspection; it summarizes contract evidence and does not claim a fresh runtime PNG without running the renderer.
@@ -457,6 +457,11 @@
 
 - `cross_machine_clone_readiness` now exposes `first_run_smoke_command` and `first_run_handoff_command`.
 - `copy_clone_reviewer_summary()` includes those commands so another Windows machine can run smoke and inspect handoff immediately after clone/setup.
+
+### 2026-05-30 Cross-machine readiness visible commands
+
+- `cross_machine_clone_readiness.qt_visible_fields` now includes first-run smoke and handoff command fields.
+- The Qt Layers dock `Cross-machine clone readiness` label displays both commands and the first-run order includes `scripts/inspect_handoff.ps1` before launching Qt.
 
 ### 2026-05-30 Launch reviewer summary contract
 

@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Cross-machine readiness visible commands
+
+Changes:
+- Added `qt_visible_fields` to `rrkal_displaytools.cross_machine_clone_readiness.v1` for first-run smoke and handoff commands.
+- The Qt Layers dock `Cross-machine clone readiness` label now displays first smoke and first handoff commands.
+- `first_run_order` now includes `scripts/inspect_handoff.ps1` before the Qt panel launch.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Cross-machine first-run commands
 
 Changes:

@@ -397,6 +397,7 @@ $summary = [ordered]@{
         status = $launchPacket.cross_machine_clone_readiness.status
         repo_url = $launchPacket.cross_machine_clone_readiness.repo_url
         setup_doc = $launchPacket.cross_machine_clone_readiness.setup_doc
+        qt_visible_fields = $launchPacket.cross_machine_clone_readiness.qt_visible_fields
         required_commands = $launchPacket.cross_machine_clone_readiness.required_commands
         launcher_options = $launchPacket.cross_machine_clone_readiness.launcher_options
         handoff_first_command = $launchPacket.cross_machine_clone_readiness.handoff_first_command
