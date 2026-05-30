@@ -85,6 +85,14 @@ $entries = @(
         no_launch_side_effect = $true
     },
     [ordered]@{
+        id = "capability_summary"
+        category = "handoff"
+        schema = "rrkal_displaytools.capability_summary_export.v1"
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\export_capability_summary.ps1"
+        proves = @("current capabilities", "planned capabilities", "repo boundaries", "post-push summary source")
+        no_launch_side_effect = $true
+    },
+    [ordered]@{
         id = "layer_visual_presets"
         category = "layer_control"
         schema = "rrkal_displaytools.layer_visual_presets_inspector.v1"
@@ -207,6 +215,7 @@ $entries = @(
         "uiux_closure_readiness_check",
         "cross_machine_review_readiness_check",
         "reviewer_first_run_route",
+        "capability_summary",
         "layer_visual_presets",
         "layer_operator_shortcuts",
         "research_interaction",

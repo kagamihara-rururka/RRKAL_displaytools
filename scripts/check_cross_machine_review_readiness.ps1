@@ -54,7 +54,7 @@ try {
         $lastError = $null
         for ($attempt = 1; $attempt -le 4; $attempt += 1) {
             try {
-                $output = & powershell -NoProfile -ExecutionPolicy Bypass -File $ScriptPath @Arguments
+                $output = & powershell -NoProfile -ExecutionPolicy Bypass -File $ScriptPath @Arguments 2>&1
                 $lastOutput = ($output | Out-String).Trim()
                 if ($LASTEXITCODE -ne 0) {
                     throw "exit code $LASTEXITCODE"
@@ -75,7 +75,7 @@ try {
         $lastError = $null
         for ($attempt = 1; $attempt -le 4; $attempt += 1) {
             try {
-                $output = & py -3 @Arguments
+                $output = & py -3 @Arguments 2>&1
                 $lastOutput = ($output | Out-String).Trim()
                 if ($LASTEXITCODE -ne 0) {
                     throw "exit code $LASTEXITCODE"

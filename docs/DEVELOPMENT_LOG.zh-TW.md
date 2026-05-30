@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Capability summary export
+
+- Added `scripts/export_capability_summary.ps1` as a no-GUI source for post-push current/planned capability reporting.
+- Registered the summary in the visual contract inspector index, cross-machine review packet and smoke gates.
+- The summary separates current Qt/layer/research/Ocean/Timeline/cross-machine/pre-decoupling capabilities from planned dockable panels, render-plan compose decoupling and deferred boundary identity work.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; transient cloud-drive file-access backoff warnings observed, final retry passed).
+
 ## 2026-05-31 - Reviewer first-run route inspector
 
 - Added `scripts/inspect_reviewer_first_run_route.ps1` as a no-GUI route for cloned-machine researcher review.

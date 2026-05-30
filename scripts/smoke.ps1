@@ -1208,6 +1208,9 @@ if ($visualInspectorIndex.entry_ids -notcontains "cross_machine_review_readiness
 if ($visualInspectorIndex.entry_ids -notcontains "reviewer_first_run_route") {
     throw "Visual contract inspector index missing reviewer first-run route inspector"
 }
+if ($visualInspectorIndex.entry_ids -notcontains "capability_summary") {
+    throw "Visual contract inspector index missing capability summary exporter"
+}
 if ($visualInspectorIndex.entry_ids -notcontains "layer_visual_presets") {
     throw "Visual contract inspector index missing Layer visual presets inspector"
 }
@@ -1303,6 +1306,9 @@ if ($visualReviewPacket.inspector_entry_ids -notcontains "cross_machine_review_r
 if ($visualReviewPacket.inspector_entry_ids -notcontains "reviewer_first_run_route") {
     throw "Visual contract review packet missing reviewer first-run route inspector"
 }
+if ($visualReviewPacket.inspector_entry_ids -notcontains "capability_summary") {
+    throw "Visual contract review packet missing capability summary exporter"
+}
 if ($visualReviewPacket.inspector_entry_ids -notcontains "layer_visual_presets") {
     throw "Visual contract review packet missing Layer visual presets inspector"
 }
@@ -1341,6 +1347,9 @@ if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -Exec
 }
 if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_reviewer_first_run_route.ps1") {
     throw "Visual contract review packet missing reviewer first-run route command"
+}
+if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\export_capability_summary.ps1") {
+    throw "Visual contract review packet missing capability summary command"
 }
 if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_layer_visual_presets.ps1") {
     throw "Visual contract review packet missing Layer visual presets first command"
@@ -1817,6 +1826,41 @@ if ($reviewerFirstRunRoute.renderer_code_move_allowed_before_0700 -ne $false) {
 }
 if ($reviewerFirstRunRoute.next_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_cross_machine_review_readiness.ps1") {
     throw "Reviewer first-run route cross-machine readiness command missing"
+}
+$capabilitySummaryPath = Join-Path $RepoRoot "scripts\export_capability_summary.ps1"
+if (-not (Test-Path -LiteralPath $capabilitySummaryPath)) {
+    throw "Capability summary exporter script is missing"
+}
+$capabilitySummaryContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $capabilitySummaryPath, "-ContractOnly")
+$capabilitySummaryContract = ($capabilitySummaryContractText -join "`n") | ConvertFrom-Json
+if ($capabilitySummaryContract.schema -ne "rrkal_displaytools.capability_summary_export.v1") {
+    throw "Capability summary export contract schema missing"
+}
+if ($capabilitySummaryContract.output_schema -ne "rrkal_displaytools.capability_summary.v1") {
+    throw "Capability summary output schema missing"
+}
+if ($capabilitySummaryContract.sections -notcontains "current_capabilities") {
+    throw "Capability summary current-capabilities section missing"
+}
+if ($capabilitySummaryContract.sections -notcontains "planned_capabilities") {
+    throw "Capability summary planned-capabilities section missing"
+}
+$capabilitySummaryText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $capabilitySummaryPath)
+$capabilitySummary = ($capabilitySummaryText -join "`n") | ConvertFrom-Json
+if ($capabilitySummary.schema -ne "rrkal_displaytools.capability_summary.v1") {
+    throw "Capability summary schema missing"
+}
+if ($capabilitySummary.status -ne "ready") {
+    throw "Capability summary status mismatch"
+}
+if (($capabilitySummary.current_capabilities | Where-Object { $_.id -eq "qt_first_control_panel" }).status -ne "mvp") {
+    throw "Capability summary Qt-first control panel capability missing"
+}
+if (-not ($capabilitySummary.planned_capabilities | Where-Object { $_.id -eq "render_plan_compose_decoupling" })) {
+    throw "Capability summary planned render-plan decoupling missing"
+}
+if (-not (($capabilitySummary.boundaries -join "`n") -match "RRKAL owns dataset discovery")) {
+    throw "Capability summary RRKAL boundary missing"
 }
 $layerVisualPresetsInspectorPath = Join-Path $RepoRoot "scripts\inspect_layer_visual_presets.ps1"
 if (-not (Test-Path -LiteralPath $layerVisualPresetsInspectorPath)) {
