@@ -689,8 +689,35 @@ if ($launchPacket.reviewer_packet_export.qt_action -ne "export_reviewer_packet_d
 if ($launchPacket.reviewer_packet_export.included_summary_fields -notcontains "launch_reviewer_summary") {
     throw "Launch packet reviewer packet launch summary field missing"
 }
+if ($launchPacket.reviewer_packet_export.included_summary_fields -notcontains "hydrology_lod_summary") {
+    throw "Launch packet reviewer packet hydrology summary field missing"
+}
+if ($launchPacket.reviewer_packet_export.included_summary_fields -notcontains "ocean_material_summary") {
+    throw "Launch packet reviewer packet ocean summary field missing"
+}
+if ($launchPacket.reviewer_packet_export.included_summary_fields -notcontains "style_routes_summary") {
+    throw "Launch packet reviewer packet style routes summary field missing"
+}
+if ($launchPacket.reviewer_packet_export.included_summary_fields -notcontains "module_boundary_summary") {
+    throw "Launch packet reviewer packet module boundary summary field missing"
+}
 if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "launch_packet_snapshot") {
     throw "Launch packet reviewer packet snapshot field missing"
+}
+if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "hydrology_lod_readiness") {
+    throw "Launch packet reviewer packet hydrology readiness packet field missing"
+}
+if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "hydrology_lod_runtime_evidence") {
+    throw "Launch packet reviewer packet hydrology runtime evidence packet field missing"
+}
+if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "ocean_material_control_port") {
+    throw "Launch packet reviewer packet ocean material packet field missing"
+}
+if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "style_profile_renderer_routes") {
+    throw "Launch packet reviewer packet style routes packet field missing"
+}
+if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "module_boundary_registry") {
+    throw "Launch packet reviewer packet module boundary packet field missing"
 }
 if (-not $launchPacket.reviewer_packet_export.portable) {
     throw "Launch packet reviewer packet portability flag missing"
@@ -1636,6 +1663,33 @@ if ($capabilities.reviewer_packet_export.qt_action -ne "export_reviewer_packet_d
 if ($capabilities.reviewer_packet_export.included_summary_fields -notcontains "clone_reviewer_summary") {
     throw "Renderer reviewer packet clone summary field missing"
 }
+if ($capabilities.reviewer_packet_export.included_summary_fields -notcontains "hydrology_lod_summary") {
+    throw "Renderer reviewer packet hydrology summary field missing"
+}
+if ($capabilities.reviewer_packet_export.included_summary_fields -notcontains "ocean_material_summary") {
+    throw "Renderer reviewer packet ocean summary field missing"
+}
+if ($capabilities.reviewer_packet_export.included_summary_fields -notcontains "style_routes_summary") {
+    throw "Renderer reviewer packet style routes summary field missing"
+}
+if ($capabilities.reviewer_packet_export.included_summary_fields -notcontains "module_boundary_summary") {
+    throw "Renderer reviewer packet module boundary summary field missing"
+}
+if ($capabilities.reviewer_packet_export.included_packet_fields -notcontains "hydrology_lod_readiness") {
+    throw "Renderer reviewer packet hydrology readiness packet field missing"
+}
+if ($capabilities.reviewer_packet_export.included_packet_fields -notcontains "hydrology_lod_runtime_evidence") {
+    throw "Renderer reviewer packet hydrology runtime evidence packet field missing"
+}
+if ($capabilities.reviewer_packet_export.included_packet_fields -notcontains "ocean_material_control_port") {
+    throw "Renderer reviewer packet ocean material packet field missing"
+}
+if ($capabilities.reviewer_packet_export.included_packet_fields -notcontains "style_profile_renderer_routes") {
+    throw "Renderer reviewer packet style routes packet field missing"
+}
+if ($capabilities.reviewer_packet_export.included_packet_fields -notcontains "module_boundary_registry") {
+    throw "Renderer reviewer packet module boundary packet field missing"
+}
 if ($capabilities.layer_visual_presets.schema -ne "rrkal_displaytools.layer_visual_presets.v1") {
     throw "Renderer layer_visual_presets schema missing or invalid"
 }
@@ -2546,6 +2600,33 @@ if ($handoff.reviewer_packet_export.qt_action -ne "export_reviewer_packet_dialog
 if ($handoff.reviewer_packet_export.included_summary_fields -notcontains "research_interaction_summary") {
     throw "Handoff inspection reviewer packet research summary field missing"
 }
+if ($handoff.reviewer_packet_export.included_summary_fields -notcontains "hydrology_lod_summary") {
+    throw "Handoff inspection reviewer packet hydrology summary field missing"
+}
+if ($handoff.reviewer_packet_export.included_summary_fields -notcontains "ocean_material_summary") {
+    throw "Handoff inspection reviewer packet ocean summary field missing"
+}
+if ($handoff.reviewer_packet_export.included_summary_fields -notcontains "style_routes_summary") {
+    throw "Handoff inspection reviewer packet style routes summary field missing"
+}
+if ($handoff.reviewer_packet_export.included_summary_fields -notcontains "module_boundary_summary") {
+    throw "Handoff inspection reviewer packet module boundary summary field missing"
+}
+if ($handoff.reviewer_packet_export.included_packet_fields -notcontains "hydrology_lod_readiness") {
+    throw "Handoff inspection reviewer packet hydrology readiness packet field missing"
+}
+if ($handoff.reviewer_packet_export.included_packet_fields -notcontains "hydrology_lod_runtime_evidence") {
+    throw "Handoff inspection reviewer packet hydrology runtime evidence packet field missing"
+}
+if ($handoff.reviewer_packet_export.included_packet_fields -notcontains "ocean_material_control_port") {
+    throw "Handoff inspection reviewer packet ocean material packet field missing"
+}
+if ($handoff.reviewer_packet_export.included_packet_fields -notcontains "style_profile_renderer_routes") {
+    throw "Handoff inspection reviewer packet style routes packet field missing"
+}
+if ($handoff.reviewer_packet_export.included_packet_fields -notcontains "module_boundary_registry") {
+    throw "Handoff inspection reviewer packet module boundary packet field missing"
+}
 if (-not $handoff.reviewer_packet_export.portable) {
     throw "Handoff inspection reviewer packet portability flag missing"
 }
@@ -2943,6 +3024,33 @@ if ($qtPanelSource -notlike "*export_reviewer_packet_dialog*") {
 }
 if ($qtPanelSource -notlike "*collect_reviewer_packet*") {
     throw "Qt reviewer packet collector is missing"
+}
+if ($qtPanelSource -notlike '*"hydrology_lod_summary": self.hydrology_lod_summary_text()*') {
+    throw "Qt reviewer packet hydrology summary output is missing"
+}
+if ($qtPanelSource -notlike '*"ocean_material_summary": self.ocean_material_summary_text()*') {
+    throw "Qt reviewer packet ocean summary output is missing"
+}
+if ($qtPanelSource -notlike '*"style_routes_summary": self.style_routes_summary_text()*') {
+    throw "Qt reviewer packet style routes summary output is missing"
+}
+if ($qtPanelSource -notlike '*"module_boundary_summary": self.module_boundary_summary_text()*') {
+    throw "Qt reviewer packet module boundary summary output is missing"
+}
+if ($qtPanelSource -notlike '*"hydrology_lod_readiness": self.collect_hydrology_lod_readiness()*') {
+    throw "Qt reviewer packet hydrology readiness output is missing"
+}
+if ($qtPanelSource -notlike '*"hydrology_lod_runtime_evidence": self.collect_hydrology_lod_runtime_evidence()*') {
+    throw "Qt reviewer packet hydrology runtime evidence output is missing"
+}
+if ($qtPanelSource -notlike '*"ocean_material_control_port": self.collect_ocean_material_control_port()*') {
+    throw "Qt reviewer packet ocean material output is missing"
+}
+if ($qtPanelSource -notlike '*"style_profile_renderer_routes": self.collect_style_profile_renderer_routes()*') {
+    throw "Qt reviewer packet style routes output is missing"
+}
+if ($qtPanelSource -notlike '*"module_boundary_registry": self.collect_module_boundary_registry()*') {
+    throw "Qt reviewer packet module boundary registry output is missing"
 }
 if ($qtPanelSource -notlike "*show_ocean_material_control_port*") {
     throw "Qt ocean material control port JSON action is missing"

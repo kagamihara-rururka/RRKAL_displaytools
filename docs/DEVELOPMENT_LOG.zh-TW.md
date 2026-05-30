@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Reviewer packet visual handoff summaries
+
+Changes:
+- Expanded `reviewer_packet_export.included_summary_fields` with Hydro/LOD, Ocean material, Style routes and Module boundary summaries.
+- Qt `collect_reviewer_packet()` now writes those summaries and focused packet evidence directly into `rrkal_displaytools.reviewer_packet.v1`.
+- Smoke now gates the added reviewer packet summary fields for launch packets and handoff inspection.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Module boundary copyable handoff summary
 
 Changes:
