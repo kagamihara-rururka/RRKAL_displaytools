@@ -650,6 +650,15 @@ if ($launchPacket.layer_render_plan_performance.compose_run_parity_smoke_manifes
 if ($launchPacket.layer_render_plan_performance.compose_run_parity_smoke_precommit_required -ne $false) {
     throw "Launch packet layer_render_plan_performance compose parity smoke precommit flag mismatch"
 }
+if ($launchPacket.layer_render_plan_performance.compose_run_parity_smoke_precommit_command -notlike "*-ContractOnly*") {
+    throw "Launch packet layer_render_plan_performance compose parity smoke precommit command missing contract-only mode"
+}
+if ($launchPacket.layer_render_plan_performance.compose_run_parity_smoke_validates -notcontains "max_abs_diff") {
+    throw "Launch packet layer_render_plan_performance compose parity smoke validation fields missing"
+}
+if ($launchPacket.layer_render_plan_performance.compose_run_parity_smoke_pass_fields -notcontains "changed_pixel_count") {
+    throw "Launch packet layer_render_plan_performance compose parity smoke pass fields missing"
+}
 if ($launchPacket.layer_render_plan_performance.compiled_plan_reuse_decision_field -ne "cache_reuse_decision") {
     throw "Launch packet layer_render_plan_performance reuse decision field missing"
 }
@@ -1915,6 +1924,15 @@ if ($capabilities.layer_render_plan_performance.compose_run_parity_smoke_manifes
 if ($capabilities.layer_render_plan_performance.compose_run_parity_smoke_precommit_required -ne $false) {
     throw "Renderer layer_render_plan_performance compose parity smoke precommit flag mismatch"
 }
+if ($capabilities.layer_render_plan_performance.compose_run_parity_smoke_precommit_command -notlike "*-ContractOnly*") {
+    throw "Renderer layer_render_plan_performance compose parity smoke precommit command missing contract-only mode"
+}
+if ($capabilities.layer_render_plan_performance.compose_run_parity_smoke_validates -notcontains "png_dimensions_match") {
+    throw "Renderer layer_render_plan_performance compose parity smoke validation fields missing"
+}
+if ($capabilities.layer_render_plan_performance.compose_run_parity_smoke_pass_fields -notcontains "diff_status") {
+    throw "Renderer layer_render_plan_performance compose parity smoke pass fields missing"
+}
 if ($capabilities.layer_render_plan_performance.compiled_plan_reuse_policy -ne "reuse_when_cache_key_matches_previous_compiled_plan") {
     throw "Renderer layer_render_plan_performance compiled plan reuse policy missing"
 }
@@ -2728,6 +2746,15 @@ if ($handoff.layer_render_plan_performance.compose_run_parity_smoke_manifest -ne
 }
 if ($handoff.layer_render_plan_performance.compose_run_parity_smoke_precommit_required -ne $false) {
     throw "Handoff inspection layer render plan performance compose parity smoke precommit flag mismatch"
+}
+if ($handoff.layer_render_plan_performance.compose_run_parity_smoke_precommit_command -notlike "*-ContractOnly*") {
+    throw "Handoff inspection layer render plan performance compose parity smoke precommit command missing contract-only mode"
+}
+if ($handoff.layer_render_plan_performance.compose_run_parity_smoke_validates -notcontains "changed_pixel_count") {
+    throw "Handoff inspection layer render plan performance compose parity smoke validation fields missing"
+}
+if ($handoff.layer_render_plan_performance.compose_run_parity_smoke_pass_fields -notcontains "max_abs_diff") {
+    throw "Handoff inspection layer render plan performance compose parity smoke pass fields missing"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_reuse_decision_field -ne "cache_reuse_decision") {
     throw "Handoff inspection layer render plan performance reuse decision field missing"
@@ -4586,8 +4613,40 @@ if ($composeParitySmokeSource -notlike "*ToleranceMaxAbsDiff*") {
 if ($composeParitySmokeSource -notlike "*WriteManifest*") {
     throw "Compose parity smoke manifest write switch is missing"
 }
+if ($composeParitySmokeSource -notlike "*ContractOnly*") {
+    throw "Compose parity smoke contract-only switch is missing"
+}
 if ($composeParitySmokeSource -notlike "*contract_only_no_render_side_effect*") {
     throw "Compose parity smoke side-effect boundary marker is missing"
+}
+if ($composeParitySmokeSource -notlike "*System.Drawing.Bitmap*") {
+    throw "Compose parity smoke PNG diff engine marker is missing"
+}
+if ($composeParitySmokeSource -notlike "*visual_parity_passed*") {
+    throw "Compose parity smoke pass status marker is missing"
+}
+if ($composeParitySmokeSource -notlike "*changed_pixel_count*") {
+    throw "Compose parity smoke changed pixel count marker is missing"
+}
+$composeParitySmokeText = & powershell -NoProfile -ExecutionPolicy Bypass -File $composeParitySmokePath -ContractOnly
+if ($LASTEXITCODE -ne 0) {
+    throw "Compose parity smoke contract mode failed"
+}
+$composeParitySmoke = ($composeParitySmokeText -join "`n") | ConvertFrom-Json
+if ($composeParitySmoke.schema -ne "rrkal_displaytools.render_compose_parity_smoke.v1") {
+    throw "Compose parity smoke contract mode schema missing"
+}
+if ($composeParitySmoke.status -ne "contract_only_forced") {
+    throw "Compose parity smoke forced contract mode status mismatch"
+}
+if ($composeParitySmoke.mode -ne "contract_only_no_render_side_effect") {
+    throw "Compose parity smoke contract mode mismatch"
+}
+if ($composeParitySmoke.contract_only -ne $true) {
+    throw "Compose parity smoke contract-only flag missing"
+}
+if ($composeParitySmoke.diff_engine -ne "System.Drawing.Bitmap.GetPixel") {
+    throw "Compose parity smoke diff engine missing"
 }
 
 $scripts = Get-ChildItem scripts -Filter *.ps1

@@ -1,5 +1,26 @@
 # Development Log
 
+## 2026-05-30 - Compose parity smoke precommit contract-only mode
+
+Changes:
+- Added `-ContractOnly` to `scripts/render_compose_parity_smoke.ps1` so pre-commit smoke is not affected by local `state/compose_parity` runtime PNG artifacts.
+- `scripts/smoke.ps1` now calls the parity smoke with `-ContractOnly`, while manual parity runs still perform RGBA PNG diff when baseline/candidate artifacts are supplied.
+- Launch packets, renderer capabilities and handoff inspection now expose the contract-only precommit command, making cross-machine smoke behavior stable.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
+## 2026-05-30 - Compose parity smoke PNG diff
+
+Changes:
+- Upgraded `scripts/render_compose_parity_smoke.ps1` from contract-only output to an artifact-aware RGBA PNG diff entrypoint.
+- When sequential baseline and merged-candidate PNG artifacts exist, the script now checks dimensions, computes `max_abs_diff` and `changed_pixel_count`, emits pass/fail fields and exits non-zero if visual parity fails.
+- `layer_render_plan_performance` now exposes compose parity smoke validation fields and pass fields through launch packets, renderer capabilities and handoff inspection.
+- Pre-commit smoke now executes the parity smoke in missing-artifact contract mode, proving the entrypoint works without rendering frames or writing runtime state.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Ocean 3D control-board audit and compose parity smoke entry
 
 Changes:
