@@ -229,6 +229,18 @@ Positioning:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+## 2026-05-30 - Qt Visual readiness visible summary
+
+Changes:
+- Added a `visualReviewReadiness` label to the Layers dock.
+- Added `visual_review_readiness_summary_text()` and `update_visual_review_readiness_label()`.
+- `Inspect: Visual readiness` now updates the compact visible summary and writes the full JSON packet.
+- Smoke gates the label, formatter and updater.
+- Updated clone quickstart, capability summary and GTD.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-30 - Qt Visual readiness runtime artifacts
 
 Changes:

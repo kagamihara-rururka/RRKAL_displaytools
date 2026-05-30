@@ -236,3 +236,9 @@ Displaytools 不負責：
 - The Qt action now adds `runtime_artifact_summary`.
 - Renderer thumbnail and live preview statuses become `frame_available` when the relevant PNG/frame file exists, otherwise they stay `inspect_action_available` with `runtime_dependent` artifacts.
 - This lets clone reviewers distinguish "UI route exists" from "runtime frame has not been produced yet".
+
+## Qt Visual readiness visible summary
+
+- The Layers dock now includes a `visualReviewReadiness` label.
+- Pressing `Inspect: Visual readiness` updates the label with thumbnail/live preview status and artifact paths.
+- This gives a compact visual-review state without reading the full JSON packet.

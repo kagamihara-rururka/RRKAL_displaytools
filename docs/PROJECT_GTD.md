@@ -396,3 +396,14 @@ Done:
 
 Next:
 - Continue making the Qt visual review panel more user-facing by turning readiness JSON into a compact visible summary.
+
+
+## 2026-05-30 - Qt Visual readiness visible summary
+
+Done:
+- Added the `visualReviewReadiness` label to the Layers dock.
+- `Inspect: Visual readiness` now updates a compact thumbnail/live-preview status summary.
+- Smoke gates the label object name, formatter and updater.
+
+Next:
+- Continue tightening visual review by adding a lightweight copy/share path for the compact summary.

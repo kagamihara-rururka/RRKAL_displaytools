@@ -555,3 +555,9 @@
 - `collect_visual_review_readiness()` now adds `rrkal_displaytools.visual_review_runtime_artifact_summary.v1`.
 - The Qt packet marks renderer thumbnail/live preview as `frame_available` when runtime frame artifacts exist.
 - Smoke gates that the Qt collector checks `latest_renderer_thumbnail_path()` and `RENDERER_PREVIEW_FRAME_PATH.exists()`.
+
+## Qt Visual readiness visible summary
+
+- The Layers dock now exposes a `visualReviewReadiness` label.
+- `show_visual_review_readiness()` updates the label through `visual_review_readiness_summary_text()`.
+- Smoke gates the label object name, summary formatter and label updater.

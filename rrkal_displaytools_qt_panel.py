@@ -2592,6 +2592,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.profile_ui_state_replay_label.setObjectName("profileUiStateReplay")
         self.profile_ui_state_replay_label.setWordWrap(True)
         layers_layout.addWidget(self.profile_ui_state_replay_label)
+        self.visual_review_readiness_label = QtWidgets.QLabel(
+            "Visual readiness: press Inspect: Visual readiness to summarize thumbnail/live preview artifacts."
+        )
+        self.visual_review_readiness_label.setObjectName("visualReviewReadiness")
+        self.visual_review_readiness_label.setWordWrap(True)
+        layers_layout.addWidget(self.visual_review_readiness_label)
         self.layer_operation_summary_label = QtWidgets.QLabel(
             "Layer operation summary: no active layer selected; use Select or click a layer row."
         )
@@ -2851,6 +2857,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             QLabel#layerHeader { color: #587087; font-size: 8.5pt; font-weight: 700; }
             QLabel#layerWorkflowHint { color: #405466; background: #eef5f8; border: 1px solid #b7c9d6; border-radius: 8px; padding: 6px 8px; }
             QLabel#profileUiStateReplay { color: #2f4f42; background: #edf7f1; border: 1px solid #9fc7ad; border-radius: 8px; padding: 6px 8px; }
+            QLabel#visualReviewReadiness { color: #5b3d18; background: #fff5dd; border: 1px solid #d8b165; border-radius: 8px; padding: 6px 8px; }
             QWidget#layerRow { border-bottom: 1px solid #d6e0ea; }
             QWidget#layerRow[selected="true"] { background: #dceeff; border: 1px solid #5b8db8; }
             QLabel#selectedLayer { color: #23435f; font-weight: 700; padding-top: 6px; }
@@ -3779,6 +3786,25 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "ui_status_surface": "Qt command/provenance text panel",
         }
         return packet
+
+    def visual_review_readiness_summary_text(self, packet: dict[str, object] | None = None) -> str:
+        packet = packet or self.collect_visual_review_readiness()
+        summary = packet.get("runtime_artifact_summary", {})
+        if not isinstance(summary, dict):
+            return "Visual readiness: runtime artifact summary unavailable."
+        thumbnail_status = summary.get("renderer_thumbnail_status", "unknown")
+        thumbnail_path = summary.get("renderer_thumbnail_artifact_path") or "no frame yet"
+        live_status = summary.get("live_preview_status", "unknown")
+        live_path = summary.get("live_preview_artifact_path") or "no frame yet"
+        return (
+            "Visual readiness: "
+            f"thumbnail={thumbnail_status} ({thumbnail_path}); "
+            f"live={live_status} ({live_path})"
+        )
+
+    def update_visual_review_readiness_label(self, packet: dict[str, object] | None = None) -> None:
+        if hasattr(self, "visual_review_readiness_label"):
+            self.visual_review_readiness_label.setText(self.visual_review_readiness_summary_text(packet))
 
     def collect_layer_operation_feedback(self) -> dict[str, object]:
         return layer_operation_feedback_packet(
@@ -7190,10 +7216,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.status.setText("Shown layer operation feedback JSON")
 
     def show_visual_review_readiness(self) -> None:
+        packet = self.collect_visual_review_readiness()
         self.command_text.setPlainText(
-            json.dumps(self.collect_visual_review_readiness(), ensure_ascii=False, indent=2)
+            json.dumps(packet, ensure_ascii=False, indent=2)
         )
-        self.status.setText("已顯示 visual review readiness JSON")
+        self.update_visual_review_readiness_label(packet)
+        self.status.setText(self.visual_review_readiness_summary_text(packet))
 
     def show_layer_runtime_state(self) -> None:
         self.write_layer_runtime_state()
