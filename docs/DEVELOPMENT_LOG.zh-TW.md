@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Qt Style thumbnail slots inspector
+
+Changes:
+- Added `Inspect: Style thumbs` to the Qt Actions visual review section.
+- The action displays `style_template_visual_preview`, thumbnail slots, missing guidance and local renderer `--output` commands in the JSON preview pane.
+- Smoke now verifies the inspector action, handler, launch packet metadata, renderer capabilities and handoff output.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Style preview thumbnail slots
 
 Changes:

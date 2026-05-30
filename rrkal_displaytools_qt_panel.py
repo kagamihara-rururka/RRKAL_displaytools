@@ -201,6 +201,7 @@ def style_template_visual_preview_packet(
                 "thumbnail_status": "slot_ready_runtime_artifact_optional",
                 "thumbnail_source_contract": "rrkal_displaytools.renderer_output_artifact_contract.v1",
                 "thumbnail_review_command": ["py", "-3", "taichi_global_bathymetry.py", "--style-profile", style_id, "--output", thumbnail_path],
+                "inspect_action_id": "style_thumbnail_slots",
                 "qt_surface": "Looks/templates visual preview cards",
                 "selection_control": "style_combo",
                 "renderer_route_field": "style_profile_renderer_routes.routes",
@@ -230,6 +231,10 @@ def style_template_visual_preview_packet(
         "thumbnail_source_contract": "rrkal_displaytools.renderer_output_artifact_contract.v1",
         "thumbnail_optional_runtime_artifact": True,
         "thumbnail_missing_guidance": "Run the thumbnail_review_command for a style profile to populate its local PNG slot; thumbnail PNGs are runtime artifacts, not required for pre-commit smoke.",
+        "qt_inspector_action_id": "style_thumbnail_slots",
+        "qt_inspector_action_label": "Inspect: Style thumbs",
+        "qt_inspector_handler": "show_style_thumbnail_slots",
+        "qt_inspector_surface": "Actions / Inspect: Visual review",
         "qt_interaction": "clickable_preview_cards_select_style_profile",
         "card_click_action": "apply_style_template_preview_card",
         "qt_card_object_prefix": "styleTemplateCard_",
@@ -3274,6 +3279,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         ocean_port_button = QtWidgets.QPushButton("Inspect: Ocean port")
         hydro_lod_button = QtWidgets.QPushButton("Inspect: Hydro LOD")
         style_routes_button = QtWidgets.QPushButton("Inspect: Style routes")
+        style_thumbnails_button = QtWidgets.QPushButton("Inspect: Style thumbs")
         module_seams_button = QtWidgets.QPushButton("Inspect: Module seams")
         clone_ready_button = QtWidgets.QPushButton("Inspect: Clone ready")
         copy_clone_summary_button = QtWidgets.QPushButton("Copy clone summary")
@@ -3309,6 +3315,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (ocean_port_button, "Renderer ports: inspect scalar ocean material and sea-state handoff JSON."),
             (hydro_lod_button, "Renderer ports: inspect hydrology layer and LOD hook readiness JSON."),
             (style_routes_button, "Renderer ports: inspect parchment and tactical style renderer route JSON."),
+            (style_thumbnails_button, "Visual review: inspect style template thumbnail slots and local renderer --output commands."),
             (layer_matrix_button, "Renderer ports: inspect layer capability matrix JSON."),
             (layer_runtime_button, "Renderer ports: inspect layer runtime state and renderer ack JSON."),
             (export_reviewer_packet_button, "Run/profile: export one JSON reviewer packet with clone, launch, research and visual summaries."),
@@ -3349,6 +3356,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         ocean_port_button.clicked.connect(self.show_ocean_material_control_port)
         hydro_lod_button.clicked.connect(self.show_hydrology_lod_status)
         style_routes_button.clicked.connect(self.show_style_renderer_routes)
+        style_thumbnails_button.clicked.connect(self.show_style_thumbnail_slots)
         module_seams_button.clicked.connect(self.show_module_boundary_registry)
         clone_ready_button.clicked.connect(self.show_cross_machine_clone_readiness)
         copy_clone_summary_button.clicked.connect(self.copy_clone_reviewer_summary)
@@ -3382,7 +3390,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, timeline_button, module_seams_button, clone_ready_button, copy_clone_summary_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, ocean_port_button, style_routes_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
-            ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, thumbnail_button, live_preview_button)),
+            ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, style_thumbnails_button, thumbnail_button, live_preview_button)),
             ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, smoke_button)),
             ("Process", (launch_button, restart_button, stop_button)),
         )
@@ -8162,6 +8170,21 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             )
         )
         self.status.setText("已顯示 style profile renderer routes JSON")
+
+    def show_style_thumbnail_slots(self) -> None:
+        packet = self.collect_style_template_visual_preview()
+        self.command_text.setPlainText(
+            json.dumps(
+                {
+                    "style_template_visual_preview": packet,
+                    "thumbnail_slots": packet.get("preview_cards", []),
+                    "thumbnail_missing_guidance": packet.get("thumbnail_missing_guidance"),
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        self.status.setText("已顯示 style thumbnail slots JSON")
 
     def show_module_boundary_registry(self) -> None:
         self.command_text.setPlainText(

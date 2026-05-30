@@ -377,6 +377,12 @@ if ($launchPacket.style_template_visual_preview.thumbnail_artifact_dir -ne "stat
 if ($launchPacket.style_template_visual_preview.preview_cards[0].thumbnail_path -notlike "state/style_previews/*.png") {
     throw "Launch packet style_template_visual_preview thumbnail path missing"
 }
+if ($launchPacket.style_template_visual_preview.qt_inspector_action_id -ne "style_thumbnail_slots") {
+    throw "Launch packet style_template_visual_preview thumbnail inspector action missing"
+}
+if ($launchPacket.style_template_visual_preview.qt_inspector_handler -ne "show_style_thumbnail_slots") {
+    throw "Launch packet style_template_visual_preview thumbnail inspector handler missing"
+}
 if ($launchPacket.visual_feature_closure_matrix.schema -ne "rrkal_displaytools.visual_feature_closure_matrix.v1") {
     throw "Launch packet visual feature closure matrix schema missing or invalid"
 }
@@ -1258,6 +1264,9 @@ if ($capabilities.style_template_visual_preview.thumbnail_source_contract -ne "r
 if ($capabilities.style_template_visual_preview.preview_cards[0].thumbnail_review_command -notcontains "--output") {
     throw "Renderer style_template_visual_preview thumbnail review command missing output flag"
 }
+if ($capabilities.style_template_visual_preview.qt_inspector_action_label -ne "Inspect: Style thumbs") {
+    throw "Renderer style_template_visual_preview thumbnail inspector label missing"
+}
 if ($capabilities.visual_feature_closure_matrix.schema -ne "rrkal_displaytools.visual_feature_closure_matrix.v1") {
     throw "Renderer visual feature closure matrix schema missing or invalid"
 }
@@ -2084,6 +2093,9 @@ if (-not $handoff.style_template_visual_preview.thumbnail_slots_enabled) {
 if ($handoff.style_template_visual_preview.thumbnail_artifact_dir -ne "state/style_previews") {
     throw "Handoff inspection style_template_visual_preview thumbnail artifact dir mismatch"
 }
+if ($handoff.style_template_visual_preview.qt_inspector_action_id -ne "style_thumbnail_slots") {
+    throw "Handoff inspection style_template_visual_preview thumbnail inspector action missing"
+}
 if ($handoff.launch_packet_contracts.module_boundary_registry -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Handoff inspection module_boundary_registry launch contract missing or invalid"
 }
@@ -2550,6 +2562,12 @@ if ($qtPanelSource -notlike "*state/style_previews*") {
 }
 if ($qtPanelSource -notlike "*thumbnail_review_command*") {
     throw "Qt style template thumbnail review command is missing"
+}
+if ($qtPanelSource -notlike "*Inspect: Style thumbs*") {
+    throw "Qt style thumbnail slots action button is missing"
+}
+if ($qtPanelSource -notlike "*show_style_thumbnail_slots*") {
+    throw "Qt style thumbnail slots Inspect handler is missing"
 }
 if ($qtPanelSource -notlike "*show_module_boundary_registry*") {
     throw "Qt module boundary registry JSON action is missing"

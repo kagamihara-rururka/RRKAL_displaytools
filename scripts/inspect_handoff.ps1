@@ -345,6 +345,9 @@ $summary = [ordered]@{
         thumbnail_slot_count = $launchPacket.style_template_visual_preview.thumbnail_slot_count
         thumbnail_artifact_dir = $launchPacket.style_template_visual_preview.thumbnail_artifact_dir
         thumbnail_source_contract = $launchPacket.style_template_visual_preview.thumbnail_source_contract
+        qt_inspector_action_id = $launchPacket.style_template_visual_preview.qt_inspector_action_id
+        qt_inspector_action_label = $launchPacket.style_template_visual_preview.qt_inspector_action_label
+        qt_inspector_handler = $launchPacket.style_template_visual_preview.qt_inspector_handler
     }
     module_boundary_registry = @{
         launch_packet_schema = $launchPacket.module_boundary_registry.schema
