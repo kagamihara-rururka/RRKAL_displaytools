@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Qt reviewer path hint
+
+- Added a visible reviewer path hint above the Qt Actions section.
+- The hint points cloned-machine reviewers through `Clone ready -> Reviewer route -> Capability summary -> UIUX closure -> Workspace map` before renderer launch or visual review.
+- Smoke now gates the hint text without launching Qt.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; transient cloud-drive file-access backoff warnings observed, final retry passed).
+
 ## 2026-05-31 - Clone quickstart Qt reviewer path
 
 - Updated `docs/QUICKSTART_CLONE.zh-TW.md` with the new Qt reviewer path: Reviewer route, Capability summary, UIUX closure and Workspace map.

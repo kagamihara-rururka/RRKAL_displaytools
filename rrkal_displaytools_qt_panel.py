@@ -4540,7 +4540,17 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, render_plan_perf_button, copy_compose_budget_button, copy_compose_parity_button, copy_render_plan_work_order_button, smoke_button)),
             ("Process", (launch_button, restart_button, stop_button)),
         )
+        review_path_hint = QtWidgets.QLabel(
+            "Review path: Clone ready -> Reviewer route -> Capability summary -> UIUX closure -> Workspace map"
+        )
+        review_path_hint.setObjectName("reviewPathHint")
+        review_path_hint.setWordWrap(True)
+        review_path_hint.setToolTip(
+            "Recommended first-look route for cloned machines before renderer launch or visual review."
+        )
         row = 0
+        actions.addWidget(review_path_hint, row, 0, 1, 4)
+        row += 1
         for section_title, section_buttons in action_sections:
             section_label = QtWidgets.QLabel(section_title)
             section_label.setObjectName("actionSectionHeader")

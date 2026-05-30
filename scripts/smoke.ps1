@@ -5990,6 +5990,9 @@ if ($qtPanelSource -notlike "*Inspect: Workspace map*") {
 if ($qtPanelSource -notlike "*Visual review: inspect Photoshop-like dock workspace map*") {
     throw "Qt workspace map tooltip is missing"
 }
+if ($qtPanelSource -notlike "*Review path: Clone ready -> Reviewer route -> Capability summary -> UIUX closure -> Workspace map*") {
+    throw "Qt reviewer path hint is missing"
+}
 if ($qtPanelSource -notlike "*visual_review_readiness_packet*") {
     throw "Qt panel visual review readiness packet missing"
 }
