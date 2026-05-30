@@ -348,6 +348,9 @@ $summary = [ordered]@{
         qt_inspector_action_id = $launchPacket.style_template_visual_preview.qt_inspector_action_id
         qt_inspector_action_label = $launchPacket.style_template_visual_preview.qt_inspector_action_label
         qt_inspector_handler = $launchPacket.style_template_visual_preview.qt_inspector_handler
+        thumbnail_icon_loading = $launchPacket.style_template_visual_preview.thumbnail_icon_loading
+        qt_icon_loader = $launchPacket.style_template_visual_preview.qt_icon_loader
+        thumbnail_icon_size = $launchPacket.style_template_visual_preview.thumbnail_icon_size
     }
     module_boundary_registry = @{
         launch_packet_schema = $launchPacket.module_boundary_registry.schema

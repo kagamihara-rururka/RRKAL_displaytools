@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Qt Style thumbnail card icons
+
+Changes:
+- Qt style cards now resolve `state/style_previews/<style>.png` locally and load existing PNGs as 96x54 card icons.
+- Missing thumbnails remain visible as `thumb: missing`, so runtime artifact absence is explicit without failing pre-commit smoke.
+- Smoke now verifies the icon-loading contract, Qt path resolver, `QIcon` loading and handoff metadata.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Qt Style thumbnail slots inspector
 
 Changes:

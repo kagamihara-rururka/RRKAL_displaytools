@@ -202,6 +202,8 @@ def style_template_visual_preview_packet(
                 "thumbnail_source_contract": "rrkal_displaytools.renderer_output_artifact_contract.v1",
                 "thumbnail_review_command": ["py", "-3", "taichi_global_bathymetry.py", "--style-profile", style_id, "--output", thumbnail_path],
                 "inspect_action_id": "style_thumbnail_slots",
+                "qt_card_icon_supported": True,
+                "qt_card_icon_missing_label": "thumb: missing",
                 "qt_surface": "Looks/templates visual preview cards",
                 "selection_control": "style_combo",
                 "renderer_route_field": "style_profile_renderer_routes.routes",
@@ -235,6 +237,10 @@ def style_template_visual_preview_packet(
         "qt_inspector_action_label": "Inspect: Style thumbs",
         "qt_inspector_handler": "show_style_thumbnail_slots",
         "qt_inspector_surface": "Actions / Inspect: Visual review",
+        "thumbnail_icon_loading": "qt_loads_existing_png_as_card_icon",
+        "qt_icon_loader": "refresh_style_template_preview_cards",
+        "thumbnail_icon_size": [96, 54],
+        "thumbnail_missing_card_text": "thumb: missing",
         "qt_interaction": "clickable_preview_cards_select_style_profile",
         "card_click_action": "apply_style_template_preview_card",
         "qt_card_object_prefix": "styleTemplateCard_",
@@ -4360,15 +4366,19 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             label = str(card.get("label", style_id.title()))
             swatches = card.get("swatches") if isinstance(card.get("swatches"), list) else []
             thumbnail_path = str(card.get("thumbnail_path", f"state/style_previews/{style_id}.png"))
-            button = QtWidgets.QPushButton(f"{label}\n{'  '.join(str(color) for color in swatches)}\nthumb: {thumbnail_path}")
+            button = QtWidgets.QPushButton(f"{label}\n{'  '.join(str(color) for color in swatches)}\nthumb: missing {thumbnail_path}")
             button.setObjectName(f"styleTemplateCard_{style_id}")
             button.setCheckable(True)
-            button.setMinimumHeight(54)
+            button.setMinimumHeight(72)
             button.setToolTip(f"Apply {label} style template to the renderer launch profile. Thumbnail slot: {thumbnail_path}")
             button.clicked.connect(lambda _checked=False, value=style_id: self.apply_style_template_preview_card(value))
             grid.addWidget(button, index // 2, index % 2)
             self.style_template_preview_buttons[style_id] = button
         return grid_widget
+
+    def local_style_thumbnail_path(self, thumbnail_path: str) -> Path:
+        path = Path(thumbnail_path)
+        return path if path.is_absolute() else ROOT / path
 
     def _style_template_preview_card_stylesheet(self, swatches: list[object], selected: bool) -> str:
         colors = [str(color) for color in swatches]
@@ -4391,7 +4401,19 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         card_by_id = {str(card.get("id")): card for card in cards if isinstance(card, dict)} if isinstance(cards, list) else {}
         for style_id, button in getattr(self, "style_template_preview_buttons", {}).items():
             card = card_by_id.get(style_id, {})
+            label = str(card.get("label", style_id.title())) if isinstance(card, dict) else style_id.title()
             swatches = card.get("swatches") if isinstance(card.get("swatches"), list) else []
+            thumbnail_path = str(card.get("thumbnail_path", f"state/style_previews/{style_id}.png")) if isinstance(card, dict) else f"state/style_previews/{style_id}.png"
+            thumbnail_file = self.local_style_thumbnail_path(thumbnail_path)
+            thumbnail_exists = thumbnail_file.exists()
+            button.setText(
+                f"{label}\n{'  '.join(str(color) for color in swatches)}\nthumb: {'ready' if thumbnail_exists else 'missing'} {thumbnail_path}"
+            )
+            if thumbnail_exists:
+                button.setIcon(QtGui.QIcon(str(thumbnail_file)))
+                button.setIconSize(QtCore.QSize(96, 54))
+            else:
+                button.setIcon(QtGui.QIcon())
             selected = style_id == current_style
             button.setChecked(selected)
             button.setStyleSheet(self._style_template_preview_card_stylesheet(swatches, selected))
