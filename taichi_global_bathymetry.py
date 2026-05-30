@@ -14103,19 +14103,86 @@ class HybridRenderController:
         )
         return steps
 
+    def layer_render_plan_step_overlay(self, step: dict[str, object]) -> object:
+        layer_id = str(step.get("layer_id") or step.get("id") or "")
+        if step.get("overlay_source") == "boundary_layer_rgba":
+            return self.boundary_layer_rgba.get(layer_id)
+        if step.get("overlay_attr"):
+            return getattr(self, str(step.get("overlay_attr")), None)
+        return None
+
+    def layer_render_plan_step_visible(self, step: dict[str, object]) -> bool:
+        layer_key = str(step.get("layer_id") or step.get("id") or "")
+        if layer_key in self.layer_visible:
+            return bool(self.layer_visible.get(layer_key, False))
+        return True
+
+    def layer_render_plan_overlay_is_transparent(self, overlay: object) -> bool:
+        if not isinstance(overlay, np.ndarray):
+            return False
+        if overlay.ndim < 3 or overlay.shape[-1] < 4:
+            return False
+        return not bool(np.any(overlay[..., 3]))
+
+    def layer_render_plan_compose_queue(
+        self,
+        composition_steps: list[dict[str, object]],
+    ) -> dict[str, object]:
+        queue: list[dict[str, object]] = []
+        skipped_steps: list[dict[str, object]] = []
+        for index, step in enumerate(composition_steps):
+            if not isinstance(step, dict):
+                skipped_steps.append({"source_order": index, "id": "unknown_step", "reason": "malformed_step"})
+                continue
+            step_id = str(step.get("id") or step.get("layer_id") or f"step_{index}")
+            kind = str(step.get("kind") or "")
+            if kind == "style_profile_postprocess":
+                queued = dict(step)
+                queued["source_order"] = index
+                queued["queue_order"] = len(queue)
+                queued["compose_queue_reason"] = "postprocess_required"
+                queue.append(queued)
+                continue
+            if not self.layer_render_plan_step_visible(step):
+                skipped_steps.append({"source_order": index, "id": step_id, "kind": kind, "reason": "hidden_layer"})
+                continue
+            overlay = self.layer_render_plan_step_overlay(step)
+            if overlay is None:
+                skipped_steps.append({"source_order": index, "id": step_id, "kind": kind, "reason": "missing_overlay"})
+                continue
+            if self.layer_render_plan_overlay_is_transparent(overlay):
+                skipped_steps.append({"source_order": index, "id": step_id, "kind": kind, "reason": "transparent_overlay"})
+                continue
+            queued = dict(step)
+            queued["source_order"] = index
+            queued["queue_order"] = len(queue)
+            queued["compose_queue_reason"] = "executable_overlay"
+            queue.append(queued)
+        return {
+            "schema": "rrkal_displaytools.layer_render_plan_compose_queue.v1",
+            "source": "HybridRenderController.layer_render_plan_compose_queue",
+            "status": "runtime_optimized",
+            "optimization_applied": True,
+            "optimization": "skip_hidden_missing_or_transparent_overlays_before_composition",
+            "input_step_count": len(composition_steps),
+            "executable_step_count": len(queue),
+            "skipped_step_count": len(skipped_steps),
+            "queue": queue,
+            "skipped_steps": skipped_steps,
+            "next_optimization_target": "collapse executable queue into fewer overlay composition passes",
+        }
+
     def apply_layer_render_plan_composition(self, steps: list[dict[str, object]] | None = None) -> np.ndarray:
         frame = self.globe_rgba
         plan_steps = steps if isinstance(steps, list) else self.layer_render_plan_composition_steps()
         step_timing_ms: dict[str, float] = {}
         for step in plan_steps:
+            if not isinstance(step, dict):
+                continue
             step_started_at = time.perf_counter()
             kind = str(step.get("kind"))
             layer_id = str(step.get("layer_id") or step.get("id") or "")
-            overlay = None
-            if step.get("overlay_source") == "boundary_layer_rgba":
-                overlay = self.boundary_layer_rgba.get(layer_id)
-            elif step.get("overlay_attr"):
-                overlay = getattr(self, str(step.get("overlay_attr")), None)
+            overlay = self.layer_render_plan_step_overlay(step)
             if kind == "runtime_blend" and overlay is not None:
                 frame = self.compose_runtime_blend(frame, layer_id, overlay)
             elif kind == "alpha_blend" and overlay is not None:
@@ -14570,6 +14637,7 @@ class HybridRenderController:
             force=force,
             defer_vector_overlays=defer_vector_overlays,
         )
+        compose_queue_packet = self.layer_render_plan_compose_queue(composition_steps)
         cache_key = self.layer_render_plan_cache_key(runtime_snapshot, composition_steps)
         invalidation_reasons = self.layer_render_plan_cache_invalidation_reasons(runtime_snapshot, cache_key)
         invalidation_scope = self.layer_render_plan_cache_invalidation_scope(runtime_snapshot, invalidation_reasons)
@@ -14607,6 +14675,11 @@ class HybridRenderController:
             plan["frame_index"] = int(getattr(self, "frame_index", 0))
             plan["runtime_snapshot"] = runtime_snapshot
             plan["dirty_flags"] = runtime_snapshot.get("dirty_flags", {})
+            plan["compose_queue"] = compose_queue_packet.get("queue", [])
+            plan["compose_queue_schema"] = "rrkal_displaytools.layer_render_plan_compose_queue.v1"
+            plan["compose_queue_packet"] = compose_queue_packet
+            plan["compose_queue_count"] = compose_queue_packet.get("executable_step_count", 0)
+            plan["compose_queue_skipped_count"] = compose_queue_packet.get("skipped_step_count", 0)
             return plan
         self.compiled_layer_render_plan_cache_key = cache_key
         return {
@@ -14647,6 +14720,11 @@ class HybridRenderController:
             "batch_targets": runtime_snapshot.get("batch_targets", []),
             "composition_steps": composition_steps,
             "composition_step_count": len(composition_steps),
+            "compose_queue": compose_queue_packet.get("queue", []),
+            "compose_queue_schema": "rrkal_displaytools.layer_render_plan_compose_queue.v1",
+            "compose_queue_packet": compose_queue_packet,
+            "compose_queue_count": compose_queue_packet.get("executable_step_count", 0),
+            "compose_queue_skipped_count": compose_queue_packet.get("skipped_step_count", 0),
             "compose_order": runtime_snapshot.get("compose_order", []),
             "apply_helper": "HybridRenderController.apply_layer_render_plan_composition",
             "single_pass_ready": False,
@@ -16505,8 +16583,13 @@ class HybridRenderController:
         phase_timing_ms["prepare_batches"] = (time.perf_counter() - prepare_started_at) * 1000.0
         self.layer_render_plan_snapshot = self.compiled_layer_render_plan.get("runtime_snapshot", {})
         composition_steps = self.compiled_layer_render_plan.get("composition_steps")
+        compose_queue = self.compiled_layer_render_plan.get("compose_queue")
         self.layer_render_step_timing_ms = {}
-        self.frame_rgba = self.apply_layer_render_plan_composition(composition_steps if isinstance(composition_steps, list) else None)
+        if isinstance(compose_queue, list):
+            composition_input = compose_queue
+        else:
+            composition_input = composition_steps if isinstance(composition_steps, list) else None
+        self.frame_rgba = self.apply_layer_render_plan_composition(composition_input)
         composition_timing = getattr(self, "layer_render_step_timing_ms", {})
         composition_timing = composition_timing if isinstance(composition_timing, dict) else {}
         phase_timing_ms["compose_overlays"] = float(composition_timing.get("compose_overlays", 0.0))
@@ -19623,6 +19706,10 @@ def layer_render_plan_cache_diagnostics_packet(
         "phase_timing_runtime": plan.get("phase_timing_runtime") if isinstance(plan.get("phase_timing_runtime"), dict) else {},
         "bottleneck_recommendation_schema": plan.get("bottleneck_recommendation_schema", "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1"),
         "bottleneck_recommendation": plan.get("bottleneck_recommendation") if isinstance(plan.get("bottleneck_recommendation"), dict) else {},
+        "compose_queue_schema": plan.get("compose_queue_schema", "rrkal_displaytools.layer_render_plan_compose_queue.v1"),
+        "compose_queue_count": plan.get("compose_queue_count", 0),
+        "compose_queue_skipped_count": plan.get("compose_queue_skipped_count", 0),
+        "compose_queue_packet": plan.get("compose_queue_packet") if isinstance(plan.get("compose_queue_packet"), dict) else {},
         "cache_key_available": bool(plan.get("cache_key")),
         "reuse_policy": plan.get("reuse_policy", "reuse_when_cache_key_matches_previous_compiled_plan") if available else "unavailable",
         "reuse_boundary": plan.get("reuse_boundary", "valid_until_dirty_flags_or_camera_change") if available else "unavailable",
@@ -19696,6 +19783,10 @@ def layer_render_plan_performance_packet(
         "compiled_plan_bottleneck_recommendation_schema": "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1",
         "compiled_plan_bottleneck_recommendation_helper": "HybridRenderController.layer_render_plan_bottleneck_recommendation",
         "compiled_plan_bottleneck_recommendation_field": "bottleneck_recommendation",
+        "compiled_plan_compose_queue_schema": "rrkal_displaytools.layer_render_plan_compose_queue.v1",
+        "compiled_plan_compose_queue_helper": "HybridRenderController.layer_render_plan_compose_queue",
+        "compiled_plan_compose_queue_field": "compose_queue",
+        "compiled_plan_compose_queue_skip_reasons": ["hidden_layer", "missing_overlay", "transparent_overlay"],
         "phase_timing_unit": "milliseconds",
         "compiled_plan_reuse_decision_field": "cache_reuse_decision",
         "compiled_plan_reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",

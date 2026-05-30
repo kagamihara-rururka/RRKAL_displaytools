@@ -1064,6 +1064,10 @@ def layer_render_plan_cache_diagnostics_packet(
         "phase_timing_runtime": plan.get("phase_timing_runtime") if isinstance(plan.get("phase_timing_runtime"), dict) else {},
         "bottleneck_recommendation_schema": plan.get("bottleneck_recommendation_schema", "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1"),
         "bottleneck_recommendation": plan.get("bottleneck_recommendation") if isinstance(plan.get("bottleneck_recommendation"), dict) else {},
+        "compose_queue_schema": plan.get("compose_queue_schema", "rrkal_displaytools.layer_render_plan_compose_queue.v1"),
+        "compose_queue_count": plan.get("compose_queue_count", 0),
+        "compose_queue_skipped_count": plan.get("compose_queue_skipped_count", 0),
+        "compose_queue_packet": plan.get("compose_queue_packet") if isinstance(plan.get("compose_queue_packet"), dict) else {},
         "cache_key_available": bool(plan.get("cache_key")),
         "reuse_policy": plan.get("reuse_policy", "reuse_when_cache_key_matches_previous_compiled_plan") if available else "unavailable",
         "reuse_boundary": plan.get("reuse_boundary", "valid_until_dirty_flags_or_camera_change") if available else "unavailable",
@@ -1137,6 +1141,10 @@ def layer_render_plan_performance_packet(
         "compiled_plan_bottleneck_recommendation_schema": "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1",
         "compiled_plan_bottleneck_recommendation_helper": "HybridRenderController.layer_render_plan_bottleneck_recommendation",
         "compiled_plan_bottleneck_recommendation_field": "bottleneck_recommendation",
+        "compiled_plan_compose_queue_schema": "rrkal_displaytools.layer_render_plan_compose_queue.v1",
+        "compiled_plan_compose_queue_helper": "HybridRenderController.layer_render_plan_compose_queue",
+        "compiled_plan_compose_queue_field": "compose_queue",
+        "compiled_plan_compose_queue_skip_reasons": ["hidden_layer", "missing_overlay", "transparent_overlay"],
         "phase_timing_unit": "milliseconds",
         "compiled_plan_reuse_decision_field": "cache_reuse_decision",
         "compiled_plan_reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",
@@ -4855,6 +4863,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         total_ms = timing_runtime.get("total_ms", "-")
         bottleneck = diagnostics.get("bottleneck_recommendation") if isinstance(diagnostics.get("bottleneck_recommendation"), dict) else {}
         next_opt = bottleneck.get("recommended_next_action", "unavailable")
+        compose_queue_count = diagnostics.get("compose_queue_count", 0)
+        compose_queue_skipped_count = diagnostics.get("compose_queue_skipped_count", 0)
         return (
             "Render plan cache: "
             f"status={diagnostics.get('status', 'unavailable')}; "
@@ -4872,6 +4882,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"slowest={slowest_phase}; "
             f"total_ms={total_ms}; "
             f"next_opt={next_opt}; "
+            f"queue={compose_queue_count}; "
+            f"skip={compose_queue_skipped_count}; "
             f"key={key_state}; "
             f"reuse={diagnostics.get('reuse_boundary', 'unavailable')}; "
             f"steps={diagnostics.get('composition_step_count', '-')}; "

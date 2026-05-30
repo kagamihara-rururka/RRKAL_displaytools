@@ -1,5 +1,17 @@
 # Development Log
 
+## 2026-05-30 - Render-plan compose queue optimization
+
+Changes:
+- Added `HybridRenderController.layer_render_plan_compose_queue()` to turn composition steps into an executable queue before the overlay compose pass runs.
+- The renderer now skips hidden, missing and transparent overlay steps before calling `apply_layer_render_plan_composition()`, while preserving the existing visual composition helper.
+- Compiled render-plan metadata and Qt diagnostics now expose `rrkal_displaytools.layer_render_plan_compose_queue.v1`, queue count and skipped-step count.
+- The Layers control-board render-plan strip now shows `queue=` and `skip=` beside runtime timing and bottleneck recommendation evidence.
+- Smoke gates now verify compose queue schema/helper/field, skip reasons, Qt summary text and renderer source markers.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Render-plan bottleneck recommendation
 
 Changes:

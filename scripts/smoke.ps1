@@ -605,6 +605,21 @@ if ($launchPacket.layer_render_plan_performance.compiled_plan_bottleneck_recomme
 if ($launchPacket.layer_render_plan_performance.compiled_plan_bottleneck_recommendation_field -ne "bottleneck_recommendation") {
     throw "Launch packet layer_render_plan_performance bottleneck recommendation field missing"
 }
+if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_queue_schema -ne "rrkal_displaytools.layer_render_plan_compose_queue.v1") {
+    throw "Launch packet layer_render_plan_performance compose queue schema missing"
+}
+if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_queue_helper -ne "HybridRenderController.layer_render_plan_compose_queue") {
+    throw "Launch packet layer_render_plan_performance compose queue helper missing"
+}
+if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_queue_field -ne "compose_queue") {
+    throw "Launch packet layer_render_plan_performance compose queue field missing"
+}
+if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_queue_skip_reasons -notcontains "hidden_layer") {
+    throw "Launch packet layer_render_plan_performance compose queue hidden-layer skip reason missing"
+}
+if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_queue_skip_reasons -notcontains "transparent_overlay") {
+    throw "Launch packet layer_render_plan_performance compose queue transparent-overlay skip reason missing"
+}
 if ($launchPacket.layer_render_plan_performance.compiled_plan_reuse_decision_field -ne "cache_reuse_decision") {
     throw "Launch packet layer_render_plan_performance reuse decision field missing"
 }
@@ -1816,6 +1831,21 @@ if ($capabilities.layer_render_plan_performance.compiled_plan_bottleneck_recomme
 if ($capabilities.layer_render_plan_performance.compiled_plan_bottleneck_recommendation_field -ne "bottleneck_recommendation") {
     throw "Renderer layer_render_plan_performance bottleneck recommendation field missing"
 }
+if ($capabilities.layer_render_plan_performance.compiled_plan_compose_queue_schema -ne "rrkal_displaytools.layer_render_plan_compose_queue.v1") {
+    throw "Renderer layer_render_plan_performance compose queue schema missing"
+}
+if ($capabilities.layer_render_plan_performance.compiled_plan_compose_queue_helper -ne "HybridRenderController.layer_render_plan_compose_queue") {
+    throw "Renderer layer_render_plan_performance compose queue helper missing"
+}
+if ($capabilities.layer_render_plan_performance.compiled_plan_compose_queue_field -ne "compose_queue") {
+    throw "Renderer layer_render_plan_performance compose queue field missing"
+}
+if ($capabilities.layer_render_plan_performance.compiled_plan_compose_queue_skip_reasons -notcontains "hidden_layer") {
+    throw "Renderer layer_render_plan_performance compose queue hidden-layer skip reason missing"
+}
+if ($capabilities.layer_render_plan_performance.compiled_plan_compose_queue_skip_reasons -notcontains "transparent_overlay") {
+    throw "Renderer layer_render_plan_performance compose queue transparent-overlay skip reason missing"
+}
 if ($capabilities.layer_render_plan_performance.compiled_plan_reuse_policy -ne "reuse_when_cache_key_matches_previous_compiled_plan") {
     throw "Renderer layer_render_plan_performance compiled plan reuse policy missing"
 }
@@ -2575,6 +2605,21 @@ if ($handoff.layer_render_plan_performance.compiled_plan_bottleneck_recommendati
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_bottleneck_recommendation_field -ne "bottleneck_recommendation") {
     throw "Handoff inspection layer render plan performance bottleneck recommendation field missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_compose_queue_schema -ne "rrkal_displaytools.layer_render_plan_compose_queue.v1") {
+    throw "Handoff inspection layer render plan performance compose queue schema missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_compose_queue_helper -ne "HybridRenderController.layer_render_plan_compose_queue") {
+    throw "Handoff inspection layer render plan performance compose queue helper missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_compose_queue_field -ne "compose_queue") {
+    throw "Handoff inspection layer render plan performance compose queue field missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_compose_queue_skip_reasons -notcontains "hidden_layer") {
+    throw "Handoff inspection layer render plan performance compose queue hidden-layer skip reason missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_compose_queue_skip_reasons -notcontains "transparent_overlay") {
+    throw "Handoff inspection layer render plan performance compose queue transparent-overlay skip reason missing"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_reuse_decision_field -ne "cache_reuse_decision") {
     throw "Handoff inspection layer render plan performance reuse decision field missing"
@@ -3886,6 +3931,18 @@ if ($qtPanelSource -notlike "*bottleneck_recommendation*") {
 if ($qtPanelSource -notlike "*next_opt={next_opt}*") {
     throw "Qt render plan bottleneck recommendation summary text is missing"
 }
+if ($qtPanelSource -notlike "*layer_render_plan_compose_queue.v1*") {
+    throw "Qt render plan compose queue schema is missing"
+}
+if ($qtPanelSource -notlike "*compose_queue_count*") {
+    throw "Qt render plan compose queue count is missing"
+}
+if ($qtPanelSource -notlike "*queue={compose_queue_count}*") {
+    throw "Qt render plan compose queue summary text is missing"
+}
+if ($qtPanelSource -notlike "*skip={compose_queue_skipped_count}*") {
+    throw "Qt render plan compose queue skip summary text is missing"
+}
 if ($qtPanelSource -notlike "*refresh_layer_render_plan_cache_diagnostics_strip*") {
     throw "Qt render plan cache diagnostics strip refresh is missing"
 }
@@ -4205,6 +4262,18 @@ if ($rendererSource -notlike "*def layer_render_plan_phase_timing_runtime_packet
 }
 if ($rendererSource -notlike "*def layer_render_plan_bottleneck_recommendation*") {
     throw "Renderer render plan bottleneck recommendation helper is missing"
+}
+if ($rendererSource -notlike "*def layer_render_plan_compose_queue*") {
+    throw "Renderer render plan compose queue helper is missing"
+}
+if ($rendererSource -notlike "*skip_hidden_missing_or_transparent_overlays_before_composition*") {
+    throw "Renderer render plan compose queue optimization marker is missing"
+}
+if ($rendererSource -notlike "*transparent_overlay*") {
+    throw "Renderer render plan compose queue transparent skip marker is missing"
+}
+if ($rendererSource -notlike "*self.compiled_layer_render_plan.get(`"compose_queue`")*") {
+    throw "Renderer render plan render path does not use compose queue"
 }
 if ($rendererSource -notlike "*collapse_overlay_composition_passes*") {
     throw "Renderer render plan overlay bottleneck recommendation marker is missing"

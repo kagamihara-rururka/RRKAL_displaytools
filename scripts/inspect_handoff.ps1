@@ -318,6 +318,22 @@ $summary = [ordered]@{
 
 
         compiled_plan_bottleneck_recommendation_field = $layerRenderPlanPerformance.compiled_plan_bottleneck_recommendation_field
+
+
+
+        compiled_plan_compose_queue_schema = $layerRenderPlanPerformance.compiled_plan_compose_queue_schema
+
+
+
+        compiled_plan_compose_queue_helper = $layerRenderPlanPerformance.compiled_plan_compose_queue_helper
+
+
+
+        compiled_plan_compose_queue_field = $layerRenderPlanPerformance.compiled_plan_compose_queue_field
+
+
+
+        compiled_plan_compose_queue_skip_reasons = $layerRenderPlanPerformance.compiled_plan_compose_queue_skip_reasons
         compiled_plan_reuse_decision_field = $layerRenderPlanPerformance.compiled_plan_reuse_decision_field
         compiled_plan_reuse_policy = $layerRenderPlanPerformance.compiled_plan_reuse_policy
         compiled_plan_reuse_status_values = $layerRenderPlanPerformance.compiled_plan_reuse_status_values
