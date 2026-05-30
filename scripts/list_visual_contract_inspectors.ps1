@@ -69,6 +69,14 @@ $entries = @(
         no_launch_side_effect = $true
     },
     [ordered]@{
+        id = "cross_machine_review_readiness_check"
+        category = "cross_machine"
+        schema = "rrkal_displaytools.cross_machine_review_readiness_check.v1"
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_cross_machine_review_readiness.ps1"
+        proves = @("public clone readiness", "first-run command visibility", "review packet portability", "UIUX readiness", "pre-decoupling contract availability")
+        no_launch_side_effect = $true
+    },
+    [ordered]@{
         id = "layer_visual_presets"
         category = "layer_control"
         schema = "rrkal_displaytools.layer_visual_presets_inspector.v1"
@@ -189,6 +197,7 @@ $entries = @(
         "uiux_closure_status",
         "timeline_uiux",
         "uiux_closure_readiness_check",
+        "cross_machine_review_readiness_check",
         "layer_visual_presets",
         "layer_operator_shortcuts",
         "research_interaction",

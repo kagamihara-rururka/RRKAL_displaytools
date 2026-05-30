@@ -1202,6 +1202,9 @@ if ($visualInspectorIndex.entry_ids -notcontains "timeline_uiux") {
 if ($visualInspectorIndex.entry_ids -notcontains "uiux_closure_readiness_check") {
     throw "Visual contract inspector index missing UIUX closure readiness check"
 }
+if ($visualInspectorIndex.entry_ids -notcontains "cross_machine_review_readiness_check") {
+    throw "Visual contract inspector index missing cross-machine review readiness check"
+}
 if ($visualInspectorIndex.entry_ids -notcontains "layer_visual_presets") {
     throw "Visual contract inspector index missing Layer visual presets inspector"
 }
@@ -1291,6 +1294,9 @@ if ($visualReviewPacket.inspector_entry_ids -notcontains "timeline_uiux") {
 if ($visualReviewPacket.inspector_entry_ids -notcontains "uiux_closure_readiness_check") {
     throw "Visual contract review packet missing UIUX closure readiness check"
 }
+if ($visualReviewPacket.inspector_entry_ids -notcontains "cross_machine_review_readiness_check") {
+    throw "Visual contract review packet missing cross-machine review readiness check"
+}
 if ($visualReviewPacket.inspector_entry_ids -notcontains "layer_visual_presets") {
     throw "Visual contract review packet missing Layer visual presets inspector"
 }
@@ -1323,6 +1329,9 @@ if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -Exec
 }
 if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_uiux_closure_readiness.ps1") {
     throw "Visual contract review packet missing UIUX closure readiness check first command"
+}
+if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_cross_machine_review_readiness.ps1") {
+    throw "Visual contract review packet missing cross-machine review readiness check first command"
 }
 if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_layer_visual_presets.ps1") {
     throw "Visual contract review packet missing Layer visual presets first command"
@@ -1729,6 +1738,41 @@ if ($uiuxClosureReadinessCheck.queued_items_visible -ne $true) {
 }
 if ($uiuxClosureReadinessCheck.runtime_merge_enabled -ne $false) {
     throw "UIUX closure readiness check must keep runtime merge disabled"
+}
+$crossMachineReviewReadinessCheckPath = Join-Path $RepoRoot "scripts\check_cross_machine_review_readiness.ps1"
+if (-not (Test-Path -LiteralPath $crossMachineReviewReadinessCheckPath)) {
+    throw "Cross-machine review readiness check script is missing"
+}
+$crossMachineReviewReadinessCheckContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $crossMachineReviewReadinessCheckPath, "-ContractOnly")
+$crossMachineReviewReadinessCheckContract = ($crossMachineReviewReadinessCheckContractText -join "`n") | ConvertFrom-Json
+if ($crossMachineReviewReadinessCheckContract.schema -ne "rrkal_displaytools.cross_machine_review_readiness_check.v1") {
+    throw "Cross-machine review readiness check contract schema missing"
+}
+if ($crossMachineReviewReadinessCheckContract.output_schema -ne "rrkal_displaytools.cross_machine_review_readiness_check_result.v1") {
+    throw "Cross-machine review readiness check output schema missing"
+}
+if ($crossMachineReviewReadinessCheckContract.checks -notcontains "uiux_readiness_pass") {
+    throw "Cross-machine review readiness check UIUX gate missing"
+}
+if ($crossMachineReviewReadinessCheckContract.checks -notcontains "pre_decoupling_readiness_contract_available") {
+    throw "Cross-machine review readiness check pre-decoupling contract gate missing"
+}
+$crossMachineReviewReadinessCheckText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $crossMachineReviewReadinessCheckPath)
+$crossMachineReviewReadinessCheck = ($crossMachineReviewReadinessCheckText -join "`n") | ConvertFrom-Json
+if ($crossMachineReviewReadinessCheck.schema -ne "rrkal_displaytools.cross_machine_review_readiness_check_result.v1") {
+    throw "Cross-machine review readiness check result schema missing"
+}
+if ($crossMachineReviewReadinessCheck.status -ne "pass") {
+    throw "Cross-machine review readiness check did not pass"
+}
+if ($crossMachineReviewReadinessCheck.ready_for_clone_review -ne $true) {
+    throw "Cross-machine review readiness check clone review flag missing"
+}
+if ($crossMachineReviewReadinessCheck.repo_url -ne "https://github.com/Kagamihara-Ruruka/RRKAL_displaytools.git") {
+    throw "Cross-machine review readiness check repo URL mismatch"
+}
+if ($crossMachineReviewReadinessCheck.default_branch -ne "main") {
+    throw "Cross-machine review readiness check default branch mismatch"
 }
 $layerVisualPresetsInspectorPath = Join-Path $RepoRoot "scripts\inspect_layer_visual_presets.ps1"
 if (-not (Test-Path -LiteralPath $layerVisualPresetsInspectorPath)) {

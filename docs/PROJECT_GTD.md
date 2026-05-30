@@ -2,10 +2,11 @@
 
 ## Agent Exchange 工作流規則
 
-- 新 session / 新 thread 開始時，先快速讀 `L:\AGENT_EXCHANGE\inbox\u_owner_all-projects.md` 與 `L:\AGENT_EXCHANGE\inbox\*_RRKAL_displaytools.md`。
-- 每個 checkpoint 結束、更新 handoff / development log 前，再快速檢查一次 displaytools 收信檔。
+- 新 session / 新 thread 開始時，先快速讀 `L:\AGENT_EXCHANGE\inbox\u_owner_all-projects.md`、`L:\AGENT_EXCHANGE\inbox\*_RRKAL_displaytools.md` 與 `L:\AGENT_EXCHANGE\inbox\*_RRKAL_project.md`。
+- 每個 checkpoint 結束、更新 handoff / development log 前，再快速檢查一次 displaytools / RRKAL_project 收信檔。
 - 大改、資料夾搬遷、OpenSpec、跨專案整合前，也要先讀交換區。
 - `L:\AGENT_EXCHANGE` 不進 GitHub；只把驗證後的決策或工程結果消化進本 repo 的 GTD / handoff / docs / OpenSpec / code。
+- 若 displaytools 發現需求或風險屬於其他專案，只寫交換區信件，不直接改對方 repo。
 
 Last updated: 2026-05-30
 
@@ -18,7 +19,7 @@ Last updated: 2026-05-30
 | UIUX closure status | MVP | `visual_feature_closure_matrix`, `goal_closure_scorecard`, `closed_loop_status` and `visual_review_readiness` are exposed through `scripts/inspect_uiux_closure_status.ps1`; queued/under-construction items remain visible and are not reported as done. | Keep this closure board current while UIUX contracts settle; after 7:00, use it to avoid regressing UI surfaces during module extraction. |
 | UIUX closure readiness | MVP | `scripts/check_uiux_closure_readiness.ps1` gives a single no-GUI pass/fail check over Qt-first UI, closure board, Timeline, layer presets, shortcuts, research interaction, renderer ports and disabled render-plan runtime merge. | Use this as the pre-7 UIUX checkpoint command before entering the formal post-7 decoupling gate. |
 | Timeline UIUX | MVP | Timeline playback readiness, renderer runtime handoff, PNG/GIF/MP4 export, camera/ocean/layer interpolation and discrete layer visibility/blend hold are exposed through `scripts/inspect_timeline_uiux.ps1`; blend crossfade and visibility fade remain visible pending items. | After decoupling, keep timeline contracts wired while extracting renderer modules; only close pending interpolation items with runtime evidence. |
-| Cross-machine onboarding / CI smoke | MVP | Added Windows helper scripts: `scripts/setup_windows.ps1`, `scripts/run_qt_panel.ps1`, `scripts/render_quick_smoke.ps1`, `scripts/smoke.ps1`, `scripts/list_visual_contract_inspectors.ps1` as a no-GUI reviewer command index, and `scripts/export_visual_contract_review_packet.ps1` as the one-packet cloned-machine handoff. The inspector index now includes layer workflow, style routes, hydrology/LOD and Ocean material contracts. | Add richer troubleshooting only after another machine reports concrete setup friction. |
+| Cross-machine onboarding / CI smoke | MVP | Added Windows helper scripts: `scripts/setup_windows.ps1`, `scripts/run_qt_panel.ps1`, `scripts/render_quick_smoke.ps1`, `scripts/smoke.ps1`, `scripts/list_visual_contract_inspectors.ps1` as a no-GUI reviewer command index, `scripts/export_visual_contract_review_packet.ps1` as the one-packet cloned-machine handoff, and `scripts/check_cross_machine_review_readiness.ps1` as the public clone / first-run / review readiness pass-fail gate. The inspector index now includes layer workflow, style routes, hydrology/LOD, Ocean material and UIUX readiness contracts. | Add richer troubleshooting only after another machine reports concrete setup friction. |
 | Profile templates / launch packets | MVP | Added named baseline scientific, maritime hydrology, parchment review, tactical ops, and fast synthetic templates under `profiles/`; `docs/PROFILE_SCHEMA.zh-TW.md` documents the schema; `profile_schema.py` owns validation rules; `scripts/validate_profiles.py` checks required fields in smoke. | Tune the preferred visual baseline after user review, then add project-specific templates as needed. |
 | Taichi globe prototype | MVP | `taichi_global_bathymetry.py` is imported as the current monolithic source of truth for the globe/bathymetry prototype and now exposes `--print-renderer-capabilities`. A bounded `--demo-closed-loop` preset exists, but the Qt panel defaults back to scientific/non-tactical baseline control. | Use the Qt panel for near-term visual review, then continue small reversible renderer slices inside the repo copy. |
 | Hydrology and LOD hook | In progress | Hydrology readiness, layer diagnostics, LOD invalidation and layer-count contracts are represented in the prototype. The Qt panel exposes lake/river/border/maritime layer switches, and `scripts/inspect_hydrology_lod.ps1` exposes no-GUI readiness/runtime evidence review for lake/river renderer targets. | After 7:00 decoupling, extract Hydrology/LOD contracts from the monolith and connect them to the render-plan compose path. |
@@ -78,6 +79,7 @@ Last updated: 2026-05-30
 - 2026-05-31: Added Boundary emphasis RGB/contrast/opacity/gamma/breathing fields to the no-GUI Research interaction inspector.
 - 2026-05-31: Added no-GUI Qt UIUX surface inspector for Qt-first panel grouping, research actions, renderer-port actions and layer operator closure.
 - 2026-05-31: Added no-GUI Layer visual presets inspector for hydrology/boundary/annotation presets, brush/mask exclusion and retained selection mode.
+- 2026-05-31: Added no-GUI cross-machine review readiness check for public clone target, first-run commands, portable review packet, UIUX readiness and pre-decoupling contract availability.
 - 2026-05-31: Added no-GUI Layer render-plan performance inspector for the post-decoupling single-pass optimization path and parity guard.
 - 2026-05-31: Added no-GUI UIUX closure status inspector so ready, queued and excluded UI features stay reviewable.
 - 2026-05-31: Added no-GUI Layer operator shortcuts inspector for keyboard shortcuts, active quick actions, operation groups and provenance review.

@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Cross-machine review readiness check
+
+- Added `scripts/check_cross_machine_review_readiness.ps1` as a no-GUI pass/fail gate for cloned-machine review.
+- Registered the check in the visual contract inspector index, cross-machine review packet and smoke gates.
+- The check verifies the public `main` clone target, first-run setup/smoke/handoff commands, portable review packet, UIUX readiness and pre-decoupling contract availability.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; transient cloud-drive file-access backoff warnings observed, final retry passed).
+
 ## 2026-05-31 - UIUX closure readiness check
 
 - Added `scripts/check_uiux_closure_readiness.ps1` as a no-GUI pass/fail check over the UIUX inspector set.
