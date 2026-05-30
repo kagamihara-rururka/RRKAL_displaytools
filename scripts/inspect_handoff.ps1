@@ -51,6 +51,7 @@ $summary = [ordered]@{
         cursor_geodesy_readout = $launchPacket.cursor_geodesy_readout.schema
         pin_overlay = $launchPacket.pin_overlay.schema
         style_renderer_entries = $launchPacket.style_renderer_entries.schema
+        style_renderer_entry_contract = $launchPacket.style_renderer_entries.renderer_entry_contract_schema
         style_profile_renderer_routes = $launchPacket.style_profile_renderer_routes.schema
         module_boundary_registry = $launchPacket.module_boundary_registry.schema
         cross_machine_clone_readiness = $launchPacket.cross_machine_clone_readiness.schema
@@ -266,6 +267,7 @@ $summary = [ordered]@{
         renderer_capabilities_schema = $capabilities.style_renderer_entries.schema
         entry_count = $launchPacket.style_renderer_entries.entry_count
         entry_ids = $launchPacket.style_renderer_entries.entry_ids
+        renderer_entry_contract_schema = $launchPacket.style_renderer_entries.renderer_entry_contract_schema
         parchment_entry_available = $launchPacket.style_renderer_entries.parchment_entry_available
         tactical_entry_available = $launchPacket.style_renderer_entries.tactical_entry_available
     }
@@ -275,6 +277,8 @@ $summary = [ordered]@{
         status = $launchPacket.style_profile_renderer_routes.status
         route_count = $launchPacket.style_profile_renderer_routes.route_count
         route_ids = $launchPacket.style_profile_renderer_routes.route_ids
+        renderer_entry_contract_schema = $launchPacket.style_profile_renderer_routes.renderer_entry_contract_schema
+        required_route_contract_ids = $launchPacket.style_profile_renderer_routes.required_route_contract_ids
         required_routes = $launchPacket.style_profile_renderer_routes.required_routes
     }
     module_boundary_registry = @{

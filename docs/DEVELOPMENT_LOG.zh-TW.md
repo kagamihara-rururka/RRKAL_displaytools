@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Style renderer entry contracts
+
+Changes:
+- Added `rrkal_displaytools.style_renderer_entry_contract.v1` to scientific, nautical, parchment and tactical style entries in Qt, no-GUI launch packets and renderer capability discovery.
+- Style routes now expose route contracts, making parchment/tactical portable commands and template support explicit in handoff inspection.
+- Smoke now verifies the nested entry contract and required parchment/tactical route contracts.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Ocean material renderer apply and sea-state scalar contracts
 
 Changes:

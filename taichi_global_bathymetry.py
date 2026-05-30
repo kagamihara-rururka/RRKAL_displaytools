@@ -18012,6 +18012,16 @@ def style_renderer_entries_packet(
                 "portable_command_supported": True,
                 "template_supported": True,
                 "renderer_entrypoint": f"taichi_global_bathymetry.py --style-profile {style_id}",
+                "renderer_entry_contract": {
+                    "schema": "rrkal_displaytools.style_renderer_entry_contract.v1",
+                    "style_profile": style_id,
+                    "portable_command": ["py", "-3", "taichi_global_bathymetry.py", "--style-profile", style_id],
+                    "profile_field": "renderer.style_profile",
+                    "qt_surface": "Looks/templates style profile selector",
+                    "template_supported": True,
+                    "smoke_gate": "style_renderer_entry_contract",
+                    "portable": True,
+                },
                 "selected": style_id == selected,
             }
         )
@@ -18022,6 +18032,7 @@ def style_renderer_entries_packet(
         "entry_count": len(entries),
         "entry_ids": [entry["id"] for entry in entries],
         "entries": entries,
+        "renderer_entry_contract_schema": "rrkal_displaytools.style_renderer_entry_contract.v1",
         "parchment_entry_available": "parchment" in style_ids,
         "tactical_entry_available": "tactical" in style_ids,
         "launch_packet_fields": ["style_renderer_entries", "profile.style_profile", "portable_command"],
@@ -18056,12 +18067,26 @@ def style_profile_renderer_routes_packet(
     route_ids = [str(route["id"]) for route in routes]
     required_routes = ["parchment", "tactical"]
     missing_routes = [route_id for route_id in required_routes if route_id not in route_ids]
+    route_contracts = [
+        {
+            "schema": "rrkal_displaytools.style_renderer_entry_contract.v1",
+            "style_profile": route["id"],
+            "portable_command": route["portable_command"],
+            "renderer_entrypoint": route["renderer_entrypoint"],
+            "template_supported": route["template_supported"],
+            "status": "ready",
+        }
+        for route in routes
+    ]
     return {
         "schema": "rrkal_displaytools.style_profile_renderer_routes.v1",
         "source": source,
         "route_count": len(routes),
         "route_ids": route_ids,
         "routes": routes,
+        "renderer_entry_contract_schema": "rrkal_displaytools.style_renderer_entry_contract.v1",
+        "route_contracts": route_contracts,
+        "required_route_contract_ids": required_routes,
         "required_routes": required_routes,
         "missing_routes": missing_routes,
         "status": "ready" if not missing_routes else "partial",

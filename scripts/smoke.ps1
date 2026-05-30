@@ -311,6 +311,12 @@ if ($launchPacket.style_renderer_entries.entry_ids -notcontains "parchment") {
 if ($launchPacket.style_renderer_entries.entry_ids -notcontains "tactical") {
     throw "Launch packet style_renderer_entries missing tactical entry"
 }
+if ($launchPacket.style_renderer_entries.renderer_entry_contract_schema -ne "rrkal_displaytools.style_renderer_entry_contract.v1") {
+    throw "Launch packet style_renderer_entries entry contract schema missing"
+}
+if ($launchPacket.style_renderer_entries.entries[2].renderer_entry_contract.schema -ne "rrkal_displaytools.style_renderer_entry_contract.v1") {
+    throw "Launch packet style renderer entry nested contract missing"
+}
 if ($launchPacket.style_profile_renderer_routes.schema -ne "rrkal_displaytools.style_profile_renderer_routes.v1") {
     throw "Launch packet style_profile_renderer_routes schema missing or invalid"
 }
@@ -322,6 +328,12 @@ if ($launchPacket.style_profile_renderer_routes.route_ids -notcontains "parchmen
 }
 if ($launchPacket.style_profile_renderer_routes.route_ids -notcontains "tactical") {
     throw "Launch packet style_profile_renderer_routes missing tactical route"
+}
+if ($launchPacket.style_profile_renderer_routes.renderer_entry_contract_schema -ne "rrkal_displaytools.style_renderer_entry_contract.v1") {
+    throw "Launch packet style_profile_renderer_routes entry contract schema missing"
+}
+if ($launchPacket.style_profile_renderer_routes.required_route_contract_ids -notcontains "parchment") {
+    throw "Launch packet style_profile_renderer_routes missing parchment route contract"
 }
 if ($launchPacket.module_boundary_registry.schema -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Launch packet module_boundary_registry schema missing or invalid"
@@ -1117,6 +1129,9 @@ if ($capabilities.style_renderer_entries.entry_ids -notcontains "parchment") {
 if ($capabilities.style_renderer_entries.entry_ids -notcontains "tactical") {
     throw "Renderer style_renderer_entries missing tactical entry"
 }
+if ($capabilities.style_renderer_entries.renderer_entry_contract_schema -ne "rrkal_displaytools.style_renderer_entry_contract.v1") {
+    throw "Renderer style_renderer_entries entry contract schema missing"
+}
 if ($capabilities.style_profile_renderer_routes.schema -ne "rrkal_displaytools.style_profile_renderer_routes.v1") {
     throw "Renderer style_profile_renderer_routes schema missing or invalid"
 }
@@ -1125,6 +1140,9 @@ if ($capabilities.style_profile_renderer_routes.route_ids -notcontains "parchmen
 }
 if ($capabilities.style_profile_renderer_routes.route_ids -notcontains "tactical") {
     throw "Renderer style_profile_renderer_routes missing tactical route"
+}
+if ($capabilities.style_profile_renderer_routes.renderer_entry_contract_schema -ne "rrkal_displaytools.style_renderer_entry_contract.v1") {
+    throw "Renderer style_profile_renderer_routes entry contract schema missing"
 }
 if ($capabilities.module_boundary_registry.schema -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Renderer module_boundary_registry schema missing or invalid"
@@ -1826,6 +1844,9 @@ if ($handoff.boundary_highlight.ack_history_fields -notcontains "updated_at_utc"
 if ($handoff.launch_packet_contracts.style_renderer_entries -ne "rrkal_displaytools.style_renderer_entries.v1") {
     throw "Handoff inspection style_renderer_entries launch contract missing or invalid"
 }
+if ($handoff.launch_packet_contracts.style_renderer_entry_contract -ne "rrkal_displaytools.style_renderer_entry_contract.v1") {
+    throw "Handoff inspection style renderer entry contract missing or invalid"
+}
 if ($handoff.style_renderer_entries.launch_packet_schema -ne "rrkal_displaytools.style_renderer_entries.v1") {
     throw "Handoff inspection style_renderer_entries launch schema missing or invalid"
 }
@@ -1838,6 +1859,9 @@ if ($handoff.style_renderer_entries.entry_ids -notcontains "parchment") {
 if ($handoff.style_renderer_entries.entry_ids -notcontains "tactical") {
     throw "Handoff inspection style_renderer_entries missing tactical entry"
 }
+if ($handoff.style_renderer_entries.renderer_entry_contract_schema -ne "rrkal_displaytools.style_renderer_entry_contract.v1") {
+    throw "Handoff inspection style_renderer_entries entry contract schema missing"
+}
 if ($handoff.launch_packet_contracts.style_profile_renderer_routes -ne "rrkal_displaytools.style_profile_renderer_routes.v1") {
     throw "Handoff inspection style_profile_renderer_routes launch contract missing or invalid"
 }
@@ -1849,6 +1873,9 @@ if ($handoff.style_profile_renderer_routes.renderer_capabilities_schema -ne "rrk
 }
 if ($handoff.style_profile_renderer_routes.route_ids -notcontains "tactical") {
     throw "Handoff inspection style_profile_renderer_routes missing tactical route"
+}
+if ($handoff.style_profile_renderer_routes.required_route_contract_ids -notcontains "parchment") {
+    throw "Handoff inspection style_profile_renderer_routes missing parchment route contract"
 }
 if ($handoff.launch_packet_contracts.module_boundary_registry -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Handoff inspection module_boundary_registry launch contract missing or invalid"
