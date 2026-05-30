@@ -1628,6 +1628,16 @@ def ocean_material_control_port_packet(
     }
     renderer_flags = ["--ocean-wave-strength", "--ocean-roughness", "--ocean-foam"]
     taichi_uniforms = ["ocean_enabled", "wave_strength", "roughness", "foam", "time_seconds"]
+    summary_parameter_fields = [
+        "enabled",
+        "wave_strength",
+        "roughness",
+        "foam",
+        "renderer_apply_status",
+        "sea_state_status",
+        "sea_state_scalar_sample_schema",
+        "renderer_flags",
+    ]
     return {
         "schema": "rrkal_displaytools.ocean_material_control_port.v1",
         "source": source,
@@ -1635,6 +1645,15 @@ def ocean_material_control_port_packet(
         "material_controls": controls,
         "renderer_flags": renderer_flags,
         "taichi_uniforms": taichi_uniforms,
+        "ocean_material_summary_contract_schema": "rrkal_displaytools.ocean_material_summary_contract.v1",
+        "ocean_material_summary_contract": {
+            "schema": "rrkal_displaytools.ocean_material_summary_contract.v1",
+            "summary_format": "Ocean material: enabled={enabled}; wave={wave_strength}; roughness={roughness}; foam={foam}; apply={renderer_apply_status}; sea_state={sea_state_status}; sample={sea_state_scalar_sample_schema}; flags={renderer_flags}; governance=RRKAL-owned provider/cache",
+            "summary_parameter_fields": summary_parameter_fields,
+            "qt_copy_action": "copy_ocean_material_summary",
+            "portable": True,
+        },
+        "summary_parameter_fields": summary_parameter_fields,
         "renderer_apply_contract_schema": "rrkal_displaytools.ocean_material_renderer_apply_contract.v1",
         "renderer_apply_contract": {
             "schema": "rrkal_displaytools.ocean_material_renderer_apply_contract.v1",

@@ -761,6 +761,18 @@ if ($launchPacket.ocean_material_control_port.schema -ne "rrkal_displaytools.oce
 if ($launchPacket.ocean_material_control_port.renderer_flags -notcontains "--ocean-wave-strength") {
     throw "Launch packet ocean_material_control_port missing wave flag"
 }
+if ($launchPacket.ocean_material_control_port.ocean_material_summary_contract.schema -ne "rrkal_displaytools.ocean_material_summary_contract.v1") {
+    throw "Launch packet ocean material summary contract missing or invalid"
+}
+if ($launchPacket.ocean_material_control_port.ocean_material_summary_contract.qt_copy_action -ne "copy_ocean_material_summary") {
+    throw "Launch packet ocean material summary copy action missing"
+}
+if ($launchPacket.ocean_material_control_port.ocean_material_summary_contract.summary_format -notlike "*wave={wave_strength}*sea_state={sea_state_status}*governance=RRKAL-owned provider/cache*") {
+    throw "Launch packet ocean material summary format missing handoff fields"
+}
+if ($launchPacket.ocean_material_control_port.summary_parameter_fields -notcontains "sea_state_scalar_sample_schema") {
+    throw "Launch packet ocean material summary parameter fields missing"
+}
 if ($launchPacket.ocean_material_control_port.renderer_apply_contract.schema -ne "rrkal_displaytools.ocean_material_renderer_apply_contract.v1") {
     throw "Launch packet ocean material renderer apply contract missing or invalid"
 }
@@ -1644,6 +1656,12 @@ if ($capabilities.ocean_material_control_port.schema -ne "rrkal_displaytools.oce
 }
 if ($capabilities.ocean_material_control_port.taichi_uniforms -notcontains "wave_strength") {
     throw "Renderer ocean_material_control_port Taichi uniforms missing"
+}
+if ($capabilities.ocean_material_control_port.ocean_material_summary_contract.schema -ne "rrkal_displaytools.ocean_material_summary_contract.v1") {
+    throw "Renderer ocean material summary contract missing or invalid"
+}
+if ($capabilities.ocean_material_control_port.ocean_material_summary_contract.qt_copy_action -ne "copy_ocean_material_summary") {
+    throw "Renderer ocean material summary copy action missing"
 }
 if ($capabilities.ocean_material_control_port.renderer_apply_contract.schema -ne "rrkal_displaytools.ocean_material_renderer_apply_contract.v1") {
     throw "Renderer ocean material apply contract missing or invalid"
@@ -2573,6 +2591,15 @@ if ($handoff.ocean_material_control_port.renderer_capabilities_schema -ne "rrkal
 if ($handoff.ocean_material_control_port.renderer_flags -notcontains "--ocean-foam") {
     throw "Handoff inspection ocean_material_control_port renderer flags missing"
 }
+if ($handoff.ocean_material_control_port.ocean_material_summary_contract_schema -ne "rrkal_displaytools.ocean_material_summary_contract.v1") {
+    throw "Handoff inspection ocean material summary contract missing or invalid"
+}
+if ($handoff.ocean_material_control_port.ocean_material_summary_contract.qt_copy_action -ne "copy_ocean_material_summary") {
+    throw "Handoff inspection ocean material summary copy action missing"
+}
+if ($handoff.ocean_material_control_port.summary_parameter_fields -notcontains "renderer_apply_status") {
+    throw "Handoff inspection ocean material summary parameter fields missing"
+}
 if ($handoff.ocean_material_control_port.renderer_apply_contract_schema -ne "rrkal_displaytools.ocean_material_renderer_apply_contract.v1") {
     throw "Handoff inspection ocean material renderer apply contract schema missing"
 }
@@ -2865,6 +2892,12 @@ if ($qtPanelSource -notlike "*collect_reviewer_packet*") {
 }
 if ($qtPanelSource -notlike "*show_ocean_material_control_port*") {
     throw "Qt ocean material control port JSON action is missing"
+}
+if ($qtPanelSource -notlike "*copy_ocean_material_summary*") {
+    throw "Qt ocean material copy summary action is missing"
+}
+if ($qtPanelSource -notlike "*Ocean material: *governance=RRKAL-owned provider/cache*") {
+    throw "Qt ocean material portable summary text missing"
 }
 if ($qtPanelSource -notlike "*Ocean port*") {
     throw "Qt Ocean port action button is missing"

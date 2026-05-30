@@ -812,6 +812,16 @@ def ocean_material_control_port_packet(
     }
     renderer_flags = ["--ocean-wave-strength", "--ocean-roughness", "--ocean-foam"]
     taichi_uniforms = ["ocean_enabled", "wave_strength", "roughness", "foam", "time_seconds"]
+    summary_parameter_fields = [
+        "enabled",
+        "wave_strength",
+        "roughness",
+        "foam",
+        "renderer_apply_status",
+        "sea_state_status",
+        "sea_state_scalar_sample_schema",
+        "renderer_flags",
+    ]
     return {
         "schema": "rrkal_displaytools.ocean_material_control_port.v1",
         "source": source,
@@ -819,6 +829,15 @@ def ocean_material_control_port_packet(
         "material_controls": controls,
         "renderer_flags": renderer_flags,
         "taichi_uniforms": taichi_uniforms,
+        "ocean_material_summary_contract_schema": "rrkal_displaytools.ocean_material_summary_contract.v1",
+        "ocean_material_summary_contract": {
+            "schema": "rrkal_displaytools.ocean_material_summary_contract.v1",
+            "summary_format": "Ocean material: enabled={enabled}; wave={wave_strength}; roughness={roughness}; foam={foam}; apply={renderer_apply_status}; sea_state={sea_state_status}; sample={sea_state_scalar_sample_schema}; flags={renderer_flags}; governance=RRKAL-owned provider/cache",
+            "summary_parameter_fields": summary_parameter_fields,
+            "qt_copy_action": "copy_ocean_material_summary",
+            "portable": True,
+        },
+        "summary_parameter_fields": summary_parameter_fields,
         "renderer_apply_contract_schema": "rrkal_displaytools.ocean_material_renderer_apply_contract.v1",
         "renderer_apply_contract": {
             "schema": "rrkal_displaytools.ocean_material_renderer_apply_contract.v1",
@@ -3430,6 +3449,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         copy_launch_summary_button = QtWidgets.QPushButton("Copy launch summary")
         timeline_button = QtWidgets.QPushButton("Inspect: Timeline")
         ocean_port_button = QtWidgets.QPushButton("Inspect: Ocean port")
+        copy_ocean_summary_button = QtWidgets.QPushButton("Copy Ocean summary")
         hydro_lod_button = QtWidgets.QPushButton("Inspect: Hydro LOD")
         copy_hydro_lod_summary_button = QtWidgets.QPushButton("Copy Hydro LOD summary")
         style_routes_button = QtWidgets.QPushButton("Inspect: Style routes")
@@ -3469,6 +3489,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (copy_launch_summary_button, "Replay/contracts: copy profile, portable command and launch packet reviewer summary."),
             (timeline_button, "Replay/contracts: inspect Timeline keyframes, runtime state and export options JSON."),
             (ocean_port_button, "Renderer ports: inspect scalar ocean material and sea-state handoff JSON."),
+            (copy_ocean_summary_button, "Renderer ports: copy Ocean material controls, apply status, sea-state scalar sample and RRKAL governance summary."),
             (hydro_lod_button, "Renderer ports: inspect hydrology layer and LOD hook readiness JSON."),
             (copy_hydro_lod_summary_button, "Renderer ports: copy Hydrology/LOD readiness, runtime evidence and state/ack/pick file summary."),
             (style_routes_button, "Renderer ports: inspect parchment and tactical style renderer route JSON."),
@@ -3513,6 +3534,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         copy_launch_summary_button.clicked.connect(self.copy_launch_reviewer_summary)
         timeline_button.clicked.connect(self.show_timeline_runtime_state)
         ocean_port_button.clicked.connect(self.show_ocean_material_control_port)
+        copy_ocean_summary_button.clicked.connect(self.copy_ocean_material_summary)
         hydro_lod_button.clicked.connect(self.show_hydrology_lod_status)
         copy_hydro_lod_summary_button.clicked.connect(self.copy_hydrology_lod_summary)
         style_routes_button.clicked.connect(self.show_style_renderer_routes)
@@ -3550,7 +3572,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         action_sections = (
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button, export_reviewer_packet_button)),
             ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, timeline_button, module_seams_button, clone_ready_button, copy_clone_summary_button)),
-            ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, style_routes_button, layer_matrix_button, layer_runtime_button)),
+            ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, copy_ocean_summary_button, style_routes_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
             ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, copy_style_thumb_status_button, thumbnail_button, live_preview_button)),
             ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, smoke_button)),
@@ -4284,6 +4306,31 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         return ocean_material_control_port_packet(
             self.collect_profile().get("ocean_material"),
             "rrkal_displaytools_qt_panel",
+        )
+
+    def ocean_material_summary_text(self, packet: dict[str, object] | None = None) -> str:
+        packet = packet if isinstance(packet, dict) else self.collect_ocean_material_control_port()
+        controls = packet.get("material_controls") if isinstance(packet.get("material_controls"), dict) else {}
+        apply_contract = packet.get("renderer_apply_contract") if isinstance(packet.get("renderer_apply_contract"), dict) else {}
+        sea_state = packet.get("sea_state_port") if isinstance(packet.get("sea_state_port"), dict) else {}
+        scalar_sample = (
+            sea_state.get("scalar_sample_contract")
+            if isinstance(sea_state.get("scalar_sample_contract"), dict)
+            else {}
+        )
+        flags = packet.get("renderer_flags")
+        flags_text = ",".join(str(flag) for flag in flags) if isinstance(flags, list) else str(flags or "-")
+        return (
+            "Ocean material: "
+            f"enabled={packet.get('enabled', True)}; "
+            f"wave={controls.get('wave_strength')}; "
+            f"roughness={controls.get('roughness')}; "
+            f"foam={controls.get('foam')}; "
+            f"apply={apply_contract.get('status', 'unknown')}; "
+            f"sea_state={sea_state.get('status', 'unknown')}; "
+            f"sample={scalar_sample.get('schema', 'rrkal_displaytools.sea_state_scalar_sample.v1')}; "
+            f"flags={flags_text}; "
+            "governance=RRKAL-owned provider/cache"
         )
 
     def collect_module_boundary_registry(self) -> dict[str, object]:
@@ -8527,6 +8574,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             json.dumps(self.collect_ocean_material_control_port(), ensure_ascii=False, indent=2)
         )
         self.status.setText("已顯示 ocean material / sea-state port JSON")
+
+    def copy_ocean_material_summary(self) -> None:
+        summary = self.ocean_material_summary_text()
+        QtWidgets.QApplication.clipboard().setText(summary)
+        self.status.setText("已複製 ocean material / sea-state 摘要")
 
     def show_hydrology_lod_status(self) -> None:
         self.command_text.setPlainText(

@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Ocean material copyable handoff summary
+
+Changes:
+- Added `rrkal_displaytools.ocean_material_summary_contract.v1` to Ocean material control port packets for Qt, launch export and renderer capability discovery.
+- Added a Qt `Copy Ocean summary` action that copies enabled state, wave strength, roughness, foam, renderer apply status, sea-state scalar sample schema and renderer flags.
+- Handoff inspection and smoke now gate the Ocean material summary contract while preserving RRKAL-owned provider/cache governance.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Hydrology LOD copyable handoff summary
 
 Changes:
