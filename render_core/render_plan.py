@@ -179,3 +179,43 @@ def build_layer_render_plan_compose_run_parity_contract(
         "recommended_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\render_compose_parity_smoke.ps1",
         "next_runtime_step": "add an opt-in merged alpha compose path and compare it against the sequential compose queue before enabling it by default",
     }
+
+
+def build_layer_render_plan_apply_path(
+    composition_steps: list[dict[str, object]],
+    batch_decisions: list[dict[str, object]],
+) -> list[dict[str, object]]:
+    decisions_by_id = {
+        str(decision.get("id")): decision
+        for decision in batch_decisions
+        if isinstance(decision, dict) and decision.get("scope") == "layer"
+    }
+    helper_by_kind = {
+        "runtime_blend": "HybridRenderController.compose_runtime_blend",
+        "alpha_blend": "alpha_blend_compose",
+        "alpha_compose": "alpha_compose",
+        "runtime_overlay": "HybridRenderController.compose_runtime_overlay",
+        "style_profile_postprocess": "apply_style_profile",
+    }
+    path: list[dict[str, object]] = []
+    for index, step in enumerate(composition_steps):
+        if not isinstance(step, dict):
+            continue
+        step_id = str(step.get("id") or step.get("layer_id") or "")
+        kind = str(step.get("kind") or "")
+        decision = decisions_by_id.get(step_id, {})
+        path.append(
+            {
+                "order": index,
+                "id": step_id,
+                "layer_id": step.get("layer_id"),
+                "kind": kind,
+                "decision": decision.get("decision", "compose_cached_overlay"),
+                "apply_helper": helper_by_kind.get(kind, "unknown_apply_helper"),
+                "overlay_attr": step.get("overlay_attr"),
+                "overlay_source": step.get("overlay_source"),
+                "current_runtime_path": "HybridRenderController.apply_layer_render_plan_composition",
+                "single_pass_candidate": kind in {"runtime_blend", "alpha_blend", "alpha_compose", "runtime_overlay"},
+            }
+        )
+    return path

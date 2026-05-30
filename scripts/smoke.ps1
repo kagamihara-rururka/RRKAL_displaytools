@@ -6371,13 +6371,13 @@ if ($rendererSource -notlike '*"compose_cached_overlay"*') {
 if ($rendererSource -notlike "*def layer_render_plan_apply_path*") {
     throw "Renderer render plan apply path helper is missing"
 }
-if ($rendererSource -notlike '*"apply_helper": helper_by_kind.get(kind, "unknown_apply_helper")*') {
+if ($renderPlanCombinedSource -notlike '*"apply_helper": helper_by_kind.get(kind, "unknown_apply_helper")*') {
     throw "Renderer render plan apply helper mapping is missing"
 }
 if ($rendererSource -notlike "*HybridRenderController.apply_layer_render_plan_composition*") {
     throw "Renderer render plan apply path current runtime helper is missing"
 }
-if ($rendererSource -notlike "*single_pass_candidate*") {
+if ($renderPlanCombinedSource -notlike "*single_pass_candidate*") {
     throw "Renderer render plan apply path single-pass candidate marker is missing"
 }
 if ($rendererSource -notlike "*compose_runtime_blend*") {

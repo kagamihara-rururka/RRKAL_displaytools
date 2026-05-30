@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Extract apply path builder
+
+- Added `build_layer_render_plan_apply_path` to `render_core/render_plan.py`.
+- Updated `HybridRenderController.layer_render_plan_apply_path` to delegate to the extracted pure helper.
+- Updated source-map and smoke source gates for apply-helper and single-pass candidate markers in render-core.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Extract compose parity contract builder
 
 - Added `build_layer_render_plan_compose_run_parity_contract` to `render_core/render_plan.py`.
