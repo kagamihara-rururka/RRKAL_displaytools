@@ -491,6 +491,12 @@ if ($launchPacket.cross_machine_clone_readiness.launcher_options -notcontains "-
 if ($launchPacket.cross_machine_clone_readiness.handoff_first_command -notlike "*run_qt_panel.ps1 -HandoffFirst") {
     throw "Launch packet cross_machine_clone_readiness handoff-first command mismatch"
 }
+if ($launchPacket.cross_machine_clone_readiness.first_run_smoke_command -notlike "*scripts/smoke.ps1") {
+    throw "Launch packet cross_machine_clone_readiness first-run smoke command missing"
+}
+if ($launchPacket.cross_machine_clone_readiness.first_run_handoff_command -notlike "*scripts/inspect_handoff.ps1") {
+    throw "Launch packet cross_machine_clone_readiness first-run handoff command missing"
+}
 if ($launchPacket.cross_machine_clone_readiness.clone_reviewer_summary_contract_schema -ne "rrkal_displaytools.clone_reviewer_summary_contract.v1") {
     throw "Launch packet clone reviewer summary contract schema missing or invalid"
 }
@@ -499,6 +505,9 @@ if ($launchPacket.cross_machine_clone_readiness.clone_reviewer_summary_contract.
 }
 if ($launchPacket.cross_machine_clone_readiness.clone_reviewer_summary_contract.component_contract_fields -notcontains "profile_launch_readiness") {
     throw "Launch packet clone reviewer summary component contracts incomplete"
+}
+if ($launchPacket.cross_machine_clone_readiness.clone_reviewer_summary_contract.summary_format -notlike "*first_smoke*") {
+    throw "Launch packet clone reviewer summary format missing first-run smoke"
 }
 if (-not $launchPacket.cross_machine_clone_readiness.clone_reviewer_summary_contract.portable) {
     throw "Launch packet clone reviewer summary portability flag missing"
@@ -1393,6 +1402,9 @@ if ($capabilities.cross_machine_clone_readiness.launcher_options -notcontains "-
 if ($capabilities.cross_machine_clone_readiness.handoff_first_command -notlike "*run_qt_panel.ps1 -HandoffFirst") {
     throw "Renderer cross_machine_clone_readiness handoff-first command mismatch"
 }
+if ($capabilities.cross_machine_clone_readiness.first_run_smoke_command -notlike "*scripts/smoke.ps1") {
+    throw "Renderer cross_machine_clone_readiness first-run smoke command missing"
+}
 if ($capabilities.cross_machine_clone_readiness.clone_reviewer_summary_contract_schema -ne "rrkal_displaytools.clone_reviewer_summary_contract.v1") {
     throw "Renderer clone reviewer summary contract schema missing or invalid"
 }
@@ -2264,6 +2276,12 @@ if ($handoff.cross_machine_clone_readiness.launcher_options -notcontains "-Hando
 if ($handoff.cross_machine_clone_readiness.handoff_first_command -notlike "*run_qt_panel.ps1 -HandoffFirst") {
     throw "Handoff inspection cross_machine_clone_readiness handoff-first command mismatch"
 }
+if ($handoff.cross_machine_clone_readiness.first_run_smoke_command -notlike "*scripts/smoke.ps1") {
+    throw "Handoff inspection cross_machine_clone_readiness first-run smoke command missing"
+}
+if ($handoff.cross_machine_clone_readiness.first_run_handoff_command -notlike "*scripts/inspect_handoff.ps1") {
+    throw "Handoff inspection cross_machine_clone_readiness first-run handoff command missing"
+}
 if ($handoff.cross_machine_clone_readiness.clone_reviewer_summary_contract_schema -ne "rrkal_displaytools.clone_reviewer_summary_contract.v1") {
     throw "Handoff inspection clone reviewer summary contract schema missing or invalid"
 }
@@ -2772,6 +2790,9 @@ if ($qtPanelSource -notlike "*copy_clone_reviewer_summary*") {
 }
 if ($qtPanelSource -notlike "*clone_reviewer_summary_text*") {
     throw "Qt clone reviewer summary formatter is missing"
+}
+if ($qtPanelSource -notlike "*first_run_smoke_command*") {
+    throw "Qt clone readiness first-run smoke command is missing"
 }
 if ($qtPanelSource -notlike "*Replay/contracts: inspect portable UI/profile replay coverage JSON*") {
     throw "Qt contract inspector tooltips are missing"

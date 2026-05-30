@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Cross-machine first-run commands
+
+Changes:
+- Added `first_run_smoke_command` and `first_run_handoff_command` to `rrkal_displaytools.cross_machine_clone_readiness.v1`.
+- Extended the clone reviewer summary format and Qt `copy_clone_reviewer_summary()` output with those first-run commands.
+- Handoff inspection and smoke now verify both commands across launch packets and renderer capability discovery.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Qt Layer lock disabled controls
 
 Changes:

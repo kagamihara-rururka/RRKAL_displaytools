@@ -1045,6 +1045,8 @@ def cross_machine_clone_readiness_packet(
     ]
     launcher_options = ["-SmokeFirst", "-HandoffFirst", "-Template", "-Profile"]
     handoff_first_command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/run_qt_panel.ps1 -HandoffFirst"
+    first_run_smoke_command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/smoke.ps1"
+    first_run_handoff_command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/inspect_handoff.ps1"
     first_run_order = [
         "git clone https://github.com/Kagamihara-Ruruka/RRKAL_displaytools.git",
         "cd RRKAL_displaytools",
@@ -1066,6 +1068,8 @@ def cross_machine_clone_readiness_packet(
         "required_commands": required_commands,
         "launcher_options": launcher_options,
         "handoff_first_command": handoff_first_command,
+        "first_run_smoke_command": first_run_smoke_command,
+        "first_run_handoff_command": first_run_handoff_command,
         "first_run_order": first_run_order,
         "qt_first": qt_first,
         "tk_primary_ui_allowed": not tk_not_primary,
@@ -1079,7 +1083,7 @@ def cross_machine_clone_readiness_packet(
         "clone_reviewer_summary_contract_schema": "rrkal_displaytools.clone_reviewer_summary_contract.v1",
         "clone_reviewer_summary_contract": {
             "label": "Clone reviewer",
-            "summary_format": "Clone reviewer: status={status}; repo={repo_url}; setup={setup_doc}; profile={profile_launch_readiness}; qt_first={qt_first}; smoke_required={smoke_required_before_push}; handoff_first={handoff_first_command}",
+            "summary_format": "Clone reviewer: status={status}; repo={repo_url}; setup={setup_doc}; profile={profile_launch_readiness}; qt_first={qt_first}; smoke_required={smoke_required_before_push}; first_smoke={first_run_smoke_command}; first_handoff={first_run_handoff_command}; handoff_first={handoff_first_command}",
             "qt_inspector_group": "replay_contracts",
             "qt_copy_action": "copy_clone_reviewer_summary",
             "component_contract_fields": [
@@ -4259,6 +4263,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"profile={packet.get('profile_launch_readiness')}; "
             f"qt_first={packet.get('qt_first')}; "
             f"smoke_required={packet.get('smoke_required_before_push')}; "
+            f"first_smoke={packet.get('first_run_smoke_command')}; "
+            f"first_handoff={packet.get('first_run_handoff_command')}; "
             f"handoff_first={packet.get('handoff_first_command')}"
         )
 
