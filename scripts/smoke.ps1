@@ -5978,6 +5978,12 @@ if ($qtPanelSource -notlike "*Inspect: Research interaction*") {
 if ($qtPanelSource -notlike "*Inspect: Visual review*") {
     throw "Qt Actions Visual review section is missing"
 }
+if ($qtPanelSource -notlike "*Inspect: UIUX closure*") {
+    throw "Qt Actions UIUX closure button is missing"
+}
+if ($qtPanelSource -notlike "*Visual review: inspect ready and queued UIUX closure matrix JSON*") {
+    throw "Qt UIUX closure tooltip is missing"
+}
 if ($qtPanelSource -notlike "*visual_review_readiness_packet*") {
     throw "Qt panel visual review readiness packet missing"
 }

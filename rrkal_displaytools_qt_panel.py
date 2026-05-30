@@ -4368,6 +4368,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         layer_manifest_button = QtWidgets.QPushButton("圖層 manifest")
         canvas_state_button = QtWidgets.QPushButton("Inspect: Canvas state")
         visual_readiness_button = QtWidgets.QPushButton("Inspect: Visual readiness")
+        uiux_closure_status_button = QtWidgets.QPushButton("Inspect: UIUX closure")
         copy_visual_summary_button = QtWidgets.QPushButton("Copy visual summary")
         copy_visual_closure_summary_button = QtWidgets.QPushButton("Copy closure matrix")
         copy_style_thumbs_command_button = QtWidgets.QPushButton("Copy style thumbs command")
@@ -4435,6 +4436,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (copy_boundary_summary_button, "Boundary emphasis: copy target, tuning values, identity warning and renderer ack summary."),
             (copy_research_summary_button, "Research interaction: copy selection, pin, cursor and boundary summaries as one portable handoff note."),
             (visual_readiness_button, "Visual review: inspect thumbnail/live preview readiness, frame status and missing-frame hints JSON."),
+            (uiux_closure_status_button, "Visual review: inspect ready and queued UIUX closure matrix JSON with construction items visible."),
             (copy_visual_summary_button, "Visual review: copy compact thumbnail/live preview readiness summary to clipboard."),
             (copy_visual_closure_summary_button, "Visual review: copy smoke-gated feature closure matrix with ready and queued feature groups."),
             (copy_style_thumbs_command_button, "Visual review: copy portable command for generating scientific/nautical/parchment/tactical style thumbnails."),
@@ -4511,6 +4513,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         layer_manifest_button.clicked.connect(self.show_layer_manifest)
         canvas_state_button.clicked.connect(self.show_canvas_state_preview)
         visual_readiness_button.clicked.connect(self.show_visual_review_readiness)
+        uiux_closure_status_button.clicked.connect(self.show_uiux_closure_status)
         copy_visual_summary_button.clicked.connect(self.copy_visual_review_readiness_summary)
         copy_visual_closure_summary_button.clicked.connect(self.copy_visual_feature_closure_summary)
         copy_style_thumbs_command_button.clicked.connect(self.copy_style_thumbnail_batch_command)
@@ -4530,7 +4533,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, copy_reviewer_fields_button, copy_goal_scorecard_button, timeline_button, reviewer_route_button, capability_summary_button, module_seams_button, decoupling_readiness_button, copy_decoupling_summary_button, controlled_interception_button, copy_interception_summary_button, renderer_config_gateway_button, copy_renderer_config_summary_button, performance_telemetry_button, copy_performance_smoke_summary_button, pre_decoupling_snapshot_button, copy_pre_decoupling_snapshot_command_button, spatial_compression_roadmap_button, copy_spatial_compression_summary_button, copy_module_summary_button, clone_ready_button, copy_clone_summary_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, ocean_3d_controls_action_button, copy_ocean_summary_button, copy_ocean_guard_summary_button, ocean_3d_board_audit_button, copy_ocean_3d_board_audit_button, style_routes_button, copy_style_routes_summary_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, copy_layer_controls_guide_button, copy_layer_navigation_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
-            ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, copy_visual_closure_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, copy_style_thumb_status_button, thumbnail_button, live_preview_button)),
+            ("Inspect: Visual review", (visual_readiness_button, uiux_closure_status_button, copy_visual_summary_button, copy_visual_closure_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, copy_style_thumb_status_button, thumbnail_button, live_preview_button)),
             ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, render_plan_perf_button, copy_compose_budget_button, copy_compose_parity_button, copy_render_plan_work_order_button, smoke_button)),
             ("Process", (launch_button, restart_button, stop_button)),
         )
@@ -10266,6 +10269,18 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         )
         self.update_visual_review_readiness_label(packet)
         self.status.setText(self.visual_review_readiness_summary_text(packet))
+
+    def show_uiux_closure_status(self) -> None:
+        packet = {
+            "schema": "rrkal_displaytools.uiux_closure_status_qt_view.v1",
+            "visual_feature_closure_matrix": self.collect_visual_feature_closure_matrix(),
+            "goal_closure_scorecard": self.collect_goal_closure_scorecard(),
+            "queued_items_visible": True,
+            "brush_mask_scope": "excluded",
+            "boundary": "Qt view only; renderer performance and RRKAL data governance remain separate.",
+        }
+        self.command_text.setPlainText(json.dumps(packet, ensure_ascii=False, indent=2))
+        self.status.setText("Displayed UIUX closure status JSON")
 
     def copy_visual_review_readiness_summary(self) -> None:
         packet = self.collect_visual_review_readiness()

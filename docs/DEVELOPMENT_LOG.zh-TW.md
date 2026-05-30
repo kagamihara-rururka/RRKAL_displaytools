@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Qt UIUX closure inspection button
+
+- Added `Inspect: UIUX closure` to the Qt Visual review section.
+- The button exposes `visual_feature_closure_matrix` and `goal_closure_scorecard` in the Qt command review pane so ready/queued items stay visible to researchers.
+- Smoke now gates the button label and tooltip without launching Qt.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; transient cloud-drive file-access backoff warning observed, final retry passed).
+
 ## 2026-05-31 - Qt reviewer route and capability summary buttons
 
 - Added Replay/contracts buttons in `rrkal_displaytools_qt_panel.py` for `Inspect: Reviewer route` and `Inspect: Capability summary`.
