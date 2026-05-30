@@ -1088,6 +1088,10 @@ def layer_render_plan_performance_packet(
         "cache_diagnostics_schema": "rrkal_displaytools.layer_render_plan_cache_diagnostics.v1",
         "cache_diagnostics_qt_action": "show_layer_render_plan_performance",
         "cache_diagnostics_metadata_source": "renderer_output_metadata.layer_render_plan",
+        "cache_diagnostics_control_board_schema": "rrkal_displaytools.layer_render_plan_cache_control_board.v1",
+        "cache_diagnostics_control_board_label_object": "renderPlanCacheDiagnosticsStrip",
+        "cache_diagnostics_control_board_button_object": "renderPlanCacheDiagnosticsButton",
+        "cache_diagnostics_control_board_default_visible": True,
         "metadata_sidecar_field": "layer_render_plan",
         "runtime_snapshot_wired": True,
         "deferred_until": "module_decoupling_boundary_contract_is_stable",
@@ -3506,6 +3510,22 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         ocean_3d_control_board_button.clicked.connect(self.open_taichi_ocean_3d_controls)
         layers_layout.addWidget(ocean_3d_control_board_button)
         self.refresh_ocean_3d_control_summary()
+        self.render_plan_cache_label = QtWidgets.QLabel("Render plan cache: waiting for renderer metadata")
+        self.render_plan_cache_label.setObjectName("renderPlanCacheDiagnosticsStrip")
+        self.render_plan_cache_label.setWordWrap(True)
+        self.render_plan_cache_label.setStyleSheet(
+            "QLabel#renderPlanCacheDiagnosticsStrip { color:#2b3416; background:#f1f8df; "
+            "border:1px solid #a8bd65; border-radius:8px; padding:6px 8px; font-weight:600; }"
+        )
+        layers_layout.addWidget(self.render_plan_cache_label)
+        render_plan_cache_button = QtWidgets.QPushButton("Render plan diagnostics")
+        render_plan_cache_button.setObjectName("renderPlanCacheDiagnosticsButton")
+        render_plan_cache_button.setToolTip(
+            "Inspect layer render-plan cache metadata and the queued single-pass optimization contract."
+        )
+        render_plan_cache_button.clicked.connect(self.show_layer_render_plan_performance)
+        layers_layout.addWidget(render_plan_cache_button)
+        self.refresh_layer_render_plan_cache_diagnostics_strip()
         self.boundary_emphasis_button = QtWidgets.QPushButton("Boundary emphasis controls...")
         self.boundary_emphasis_button.clicked.connect(self.open_boundary_emphasis_dialog)
         layers_layout.addWidget(self.boundary_emphasis_button)
@@ -4741,6 +4761,27 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         diagnostics["metadata_path"] = self.display_renderer_metadata_path(metadata_path)
         diagnostics["metadata_read_error"] = read_error
         return diagnostics
+
+    def layer_render_plan_cache_summary_text(self, diagnostics: dict[str, object] | None = None) -> str:
+        diagnostics = diagnostics if isinstance(diagnostics, dict) else self.collect_layer_render_plan_cache_diagnostics()
+        metadata_path = diagnostics.get("metadata_path") or "-"
+        read_error = diagnostics.get("metadata_read_error") or "-"
+        key_state = "yes" if diagnostics.get("cache_key_available") else "no"
+        return (
+            "Render plan cache: "
+            f"status={diagnostics.get('status', 'unavailable')}; "
+            f"cache={diagnostics.get('cache_status', 'unavailable')}; "
+            f"key={key_state}; "
+            f"steps={diagnostics.get('composition_step_count', '-')}; "
+            f"visible={diagnostics.get('visible_layer_count', '-')}; "
+            f"single_pass={diagnostics.get('single_pass_ready', False)}; "
+            f"metadata={metadata_path}; "
+            f"read_error={read_error}"
+        )
+
+    def refresh_layer_render_plan_cache_diagnostics_strip(self) -> None:
+        if hasattr(self, "render_plan_cache_label"):
+            self.render_plan_cache_label.setText(self.layer_render_plan_cache_summary_text())
 
     def collect_layer_render_plan_performance(self) -> dict[str, object]:
         packet = layer_render_plan_performance_packet(
@@ -8996,11 +9037,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
 
     def show_layer_render_plan_performance(self) -> None:
         performance = self.collect_layer_render_plan_performance()
+        diagnostics = performance.get("cache_diagnostics") if isinstance(performance.get("cache_diagnostics"), dict) else {}
+        if hasattr(self, "render_plan_cache_label"):
+            self.render_plan_cache_label.setText(self.layer_render_plan_cache_summary_text(diagnostics))
         self.command_text.setPlainText(
             json.dumps(
                 {
                     "layer_render_plan_performance": performance,
-                    "layer_render_plan_cache_diagnostics": performance.get("cache_diagnostics"),
+                    "layer_render_plan_cache_diagnostics": diagnostics,
                 },
                 ensure_ascii=False,
                 indent=2,

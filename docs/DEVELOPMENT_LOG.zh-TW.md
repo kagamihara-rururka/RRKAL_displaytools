@@ -1,5 +1,16 @@
 # Development Log
 
+## 2026-05-30 - Render-plan cache control-board strip
+
+Changes:
+- Added a default-visible Layers dock `renderPlanCacheDiagnosticsStrip` showing render-plan metadata/cache status, cache key availability, composition step count, visible layer count and single-pass readiness.
+- Added a `renderPlanCacheDiagnosticsButton` that opens the existing render-plan performance/cache diagnostics inspector from the control board.
+- Extended `rrkal_displaytools.layer_render_plan_performance.v1` with `rrkal_displaytools.layer_render_plan_cache_control_board.v1` evidence across launch packets, renderer capabilities and handoff inspection.
+- Smoke gates now verify the cache diagnostics strip/button, summary formatter, metadata-missing status and control-board contract.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Ocean control board and render-plan cache diagnostics
 
 Changes:

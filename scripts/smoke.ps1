@@ -527,6 +527,18 @@ if ($launchPacket.layer_render_plan_performance.cache_diagnostics_schema -ne "rr
 if ($launchPacket.layer_render_plan_performance.cache_diagnostics_qt_action -ne "show_layer_render_plan_performance") {
     throw "Launch packet layer_render_plan_performance cache diagnostics Qt action missing"
 }
+if ($launchPacket.layer_render_plan_performance.cache_diagnostics_control_board_schema -ne "rrkal_displaytools.layer_render_plan_cache_control_board.v1") {
+    throw "Launch packet layer_render_plan_performance cache diagnostics control board schema missing"
+}
+if ($launchPacket.layer_render_plan_performance.cache_diagnostics_control_board_label_object -ne "renderPlanCacheDiagnosticsStrip") {
+    throw "Launch packet layer_render_plan_performance cache diagnostics control board strip missing"
+}
+if ($launchPacket.layer_render_plan_performance.cache_diagnostics_control_board_button_object -ne "renderPlanCacheDiagnosticsButton") {
+    throw "Launch packet layer_render_plan_performance cache diagnostics control board button missing"
+}
+if ($launchPacket.layer_render_plan_performance.cache_diagnostics_control_board_default_visible -ne $true) {
+    throw "Launch packet layer_render_plan_performance cache diagnostics control board visibility missing"
+}
 if ($launchPacket.module_boundary_registry.schema -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Launch packet module_boundary_registry schema missing or invalid"
 }
@@ -1627,6 +1639,12 @@ if ($capabilities.layer_render_plan_performance.cache_diagnostics_schema -ne "rr
 if ($capabilities.layer_render_plan_performance.cache_diagnostics_metadata_source -ne "renderer_output_metadata.layer_render_plan") {
     throw "Renderer layer_render_plan_performance cache diagnostics metadata source missing"
 }
+if ($capabilities.layer_render_plan_performance.cache_diagnostics_control_board_schema -ne "rrkal_displaytools.layer_render_plan_cache_control_board.v1") {
+    throw "Renderer layer_render_plan_performance cache diagnostics control board schema missing"
+}
+if ($capabilities.layer_render_plan_performance.cache_diagnostics_control_board_label_object -ne "renderPlanCacheDiagnosticsStrip") {
+    throw "Renderer layer_render_plan_performance cache diagnostics control board strip missing"
+}
 if ($capabilities.module_boundary_registry.schema -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Renderer module_boundary_registry schema missing or invalid"
 }
@@ -2290,6 +2308,15 @@ if ($handoff.layer_render_plan_performance.cache_diagnostics_schema -ne "rrkal_d
 }
 if ($handoff.layer_render_plan_performance.cache_diagnostics_qt_action -ne "show_layer_render_plan_performance") {
     throw "Handoff inspection layer render plan performance cache diagnostics Qt action missing"
+}
+if ($handoff.layer_render_plan_performance.cache_diagnostics_control_board_schema -ne "rrkal_displaytools.layer_render_plan_cache_control_board.v1") {
+    throw "Handoff inspection layer render plan performance cache diagnostics control board schema missing"
+}
+if ($handoff.layer_render_plan_performance.cache_diagnostics_control_board_label_object -ne "renderPlanCacheDiagnosticsStrip") {
+    throw "Handoff inspection layer render plan performance cache diagnostics control board strip missing"
+}
+if ($handoff.layer_render_plan_performance.cache_diagnostics_control_board_default_visible -ne $true) {
+    throw "Handoff inspection layer render plan performance cache diagnostics control board visibility missing"
 }
 if ($handoff.launch_packet_contracts.layer_selection_tool -ne "rrkal_displaytools.layer_selection_tool.v1") {
     throw "Handoff inspection layer_selection_tool launch contract missing or invalid"
@@ -3468,6 +3495,21 @@ if ($qtPanelSource -notlike "*metadata_sidecar_missing*") {
 }
 if ($qtPanelSource -notlike "*Displayed layer render-plan performance and cache diagnostics*") {
     throw "Qt render plan cache diagnostics inspector status is missing"
+}
+if ($qtPanelSource -notlike "*renderPlanCacheDiagnosticsStrip*") {
+    throw "Qt render plan cache diagnostics control-board strip is missing"
+}
+if ($qtPanelSource -notlike "*renderPlanCacheDiagnosticsButton*") {
+    throw "Qt render plan cache diagnostics control-board button is missing"
+}
+if ($qtPanelSource -notlike "*layer_render_plan_cache_summary_text*") {
+    throw "Qt render plan cache diagnostics summary formatter is missing"
+}
+if ($qtPanelSource -notlike "*refresh_layer_render_plan_cache_diagnostics_strip*") {
+    throw "Qt render plan cache diagnostics strip refresh is missing"
+}
+if ($qtPanelSource -notlike "*rrkal_displaytools.layer_render_plan_cache_control_board.v1*") {
+    throw "Qt render plan cache diagnostics control-board contract is missing"
 }
 if ($qtPanelSource -notlike "*Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON*") {
     throw "Qt Research interaction inspector tooltip is missing"
