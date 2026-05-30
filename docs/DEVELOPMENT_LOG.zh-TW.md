@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Render plan compose source map
+
+- Added `scripts/inspect_render_plan_compose_source_map.ps1` to map the monolith helper lines for the first post-7 `render_plan_compose` extraction.
+- The inspector reports alpha compose helpers, `HybridRenderController.layer_render_plan_*` helpers, `apply_layer_render_plan_composition` and `compile_layer_render_plan` without moving code.
+- Smoke now gates the contract, output schema, ready status and required source-map targets.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Pre-7 closure includes post-07 runbook
 
 - Updated `scripts/check_pre7_closure_readiness.ps1` so the compact pre-7 checker also verifies the post-07 decoupling runbook.

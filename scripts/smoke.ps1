@@ -1544,6 +1544,34 @@ if ($renderPlanExtractionDryRun.planned_target_files -notcontains "render_core/r
 if ($renderPlanExtractionDryRun.uiux_readiness_required_before_move -ne $true) {
     throw "Render plan extraction dry-run UIUX gate missing"
 }
+
+$renderPlanComposeSourceMapPath = Join-Path $RepoRoot "scripts\inspect_render_plan_compose_source_map.ps1"
+if (-not (Test-Path -LiteralPath $renderPlanComposeSourceMapPath)) {
+    throw "Render plan compose source map inspector is missing"
+}
+$renderPlanComposeSourceMapContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $renderPlanComposeSourceMapPath, "-ContractOnly")
+$renderPlanComposeSourceMapContract = ($renderPlanComposeSourceMapContractText -join "`n") | ConvertFrom-Json
+if ($renderPlanComposeSourceMapContract.schema -ne "rrkal_displaytools.render_plan_compose_source_map_inspector.v1") {
+    throw "Render plan compose source map contract schema missing"
+}
+$renderPlanComposeSourceMapText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $renderPlanComposeSourceMapPath)
+$renderPlanComposeSourceMap = ($renderPlanComposeSourceMapText -join "`n") | ConvertFrom-Json
+if ($renderPlanComposeSourceMap.schema -ne "rrkal_displaytools.render_plan_compose_source_map.v1") {
+    throw "Render plan compose source map output schema missing"
+}
+if ($renderPlanComposeSourceMap.status -ne "ready") {
+    throw "Render plan compose source map did not report ready"
+}
+if ($renderPlanComposeSourceMap.missing_targets.Count -ne 0) {
+    throw "Render plan compose source map has missing targets"
+}
+if ($renderPlanComposeSourceMap.targets.id -notcontains "compile_layer_render_plan") {
+    throw "Render plan compose source map missing compile_layer_render_plan"
+}
+if ($renderPlanComposeSourceMap.targets.id -notcontains "apply_layer_render_plan_composition") {
+    throw "Render plan compose source map missing apply_layer_render_plan_composition"
+}
+
 $preDecouplingReadinessBundlePath = Join-Path $RepoRoot "scripts\export_pre_decoupling_readiness_bundle.ps1"
 if (-not (Test-Path -LiteralPath $preDecouplingReadinessBundlePath)) {
     throw "Pre-decoupling readiness bundle exporter is missing"
