@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Pre-decoupling bundle includes UIUX readiness
+
+- Updated `scripts/export_pre_decoupling_readiness_bundle.ps1` to embed the UIUX closure readiness check result.
+- Updated `scripts/check_pre_decoupling_readiness.ps1` so compact readiness also verifies the embedded UIUX result is passing.
+- Smoke now gates the bundle contract, normal bundle output and compact readiness result for UIUX readiness.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; transient cloud-drive file-access backoff warnings observed, final retry passed).
+
 ## 2026-05-31 - Pre-decoupling readiness checks UIUX gate
 
 - Updated `scripts/check_pre_decoupling_readiness.ps1` so the compact readiness check also requires `scripts/check_uiux_closure_readiness.ps1` before code movement.

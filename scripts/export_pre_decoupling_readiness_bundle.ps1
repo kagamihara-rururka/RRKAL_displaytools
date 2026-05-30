@@ -45,6 +45,7 @@ if ($ContractOnly) {
         included_reports = @(
             "visual_contract_inspector_index",
             "visual_contract_review_packet",
+            "uiux_closure_readiness_check",
             "pre_decoupling_gate_contract",
             "decoupling_boundary_inspection",
             "render_plan_compose_work_order",
@@ -59,6 +60,7 @@ if ($ContractOnly) {
 
 $visualInspectorIndex = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\list_visual_contract_inspectors.ps1")
 $visualReviewPacket = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\export_visual_contract_review_packet.ps1")
+$uiuxReadiness = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\check_uiux_closure_readiness.ps1")
 $preDecouplingGate = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\pre_decoupling_gate.ps1", "-ContractOnly")
 $decouplingBoundaryInspection = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_decoupling_boundaries.ps1")
 $renderPlanComposeWorkOrder = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_render_plan_compose_work_order.ps1")
@@ -77,6 +79,7 @@ if ($LASTEXITCODE -ne 0) {
     git_head = "$gitHead"
     visual_contract_inspector_index = $visualInspectorIndex
     visual_contract_review_packet = $visualReviewPacket
+    uiux_closure_readiness_check = $uiuxReadiness
     pre_decoupling_gate_contract = $preDecouplingGate
     decoupling_boundary_inspection = $decouplingBoundaryInspection
     render_plan_compose_work_order = $renderPlanComposeWorkOrder
@@ -86,6 +89,7 @@ if ($LASTEXITCODE -ne 0) {
     required_before_move = @($preDecouplingGate.required_before_move)
     ready_for_07_gate_review = (
         $preDecouplingGate.ready -eq $true -and
+        $uiuxReadiness.status -eq "pass" -and
         $decouplingBoundaryInspection.ready_for_07_gate_review -eq $true -and
         $renderPlanComposeWorkOrder.status -eq "ready_for_post_07_extraction"
     )

@@ -1518,6 +1518,9 @@ if ($preDecouplingReadinessBundleContract.output_schema -ne "rrkal_displaytools.
 if ($preDecouplingReadinessBundleContract.included_reports -notcontains "render_plan_compose_work_order") {
     throw "Pre-decoupling readiness bundle work order report missing"
 }
+if ($preDecouplingReadinessBundleContract.included_reports -notcontains "uiux_closure_readiness_check") {
+    throw "Pre-decoupling readiness bundle UIUX readiness report missing"
+}
 $preDecouplingReadinessBundleText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $preDecouplingReadinessBundlePath)
 $preDecouplingReadinessBundle = ($preDecouplingReadinessBundleText -join "`n") | ConvertFrom-Json
 if ($preDecouplingReadinessBundle.schema -ne "rrkal_displaytools.pre_decoupling_readiness_bundle.v1") {
@@ -1531,6 +1534,9 @@ if ($preDecouplingReadinessBundle.render_plan_compose_work_order.target_module -
 }
 if ($preDecouplingReadinessBundle.ready_for_07_gate_review -ne $true) {
     throw "Pre-decoupling readiness bundle not ready for 07 gate review"
+}
+if ($preDecouplingReadinessBundle.uiux_closure_readiness_check.status -ne "pass") {
+    throw "Pre-decoupling readiness bundle UIUX readiness check missing or not passing"
 }
 $preDecouplingReadinessCheckPath = Join-Path $RepoRoot "scripts\check_pre_decoupling_readiness.ps1"
 if (-not (Test-Path -LiteralPath $preDecouplingReadinessCheckPath)) {
@@ -1550,6 +1556,9 @@ if ($preDecouplingReadinessCheckContract.checks -notcontains "required_before_mo
 if ($preDecouplingReadinessCheckContract.checks -notcontains "uiux_readiness_required_before_move") {
     throw "Pre-decoupling readiness check UIUX required-before-move check missing"
 }
+if ($preDecouplingReadinessCheckContract.checks -notcontains "uiux_readiness_passed_in_bundle") {
+    throw "Pre-decoupling readiness check UIUX bundle pass check missing"
+}
 $preDecouplingReadinessCheckText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $preDecouplingReadinessCheckPath)
 $preDecouplingReadinessCheck = ($preDecouplingReadinessCheckText -join "`n") | ConvertFrom-Json
 if ($preDecouplingReadinessCheck.schema -ne "rrkal_displaytools.pre_decoupling_readiness_check_result.v1") {
@@ -1566,6 +1575,9 @@ if ($preDecouplingReadinessCheck.first_extraction_target -ne "render_core/render
 }
 if ($preDecouplingReadinessCheck.uiux_readiness_required_before_move -ne $true) {
     throw "Pre-decoupling readiness check UIUX required-before-move result missing"
+}
+if ($preDecouplingReadinessCheck.uiux_readiness_passed_in_bundle -ne $true) {
+    throw "Pre-decoupling readiness check UIUX bundle pass result missing"
 }
 $layerWorkflowInspectorPath = Join-Path $RepoRoot "scripts\inspect_layer_workflow.ps1"
 if (-not (Test-Path -LiteralPath $layerWorkflowInspectorPath)) {
