@@ -10,6 +10,8 @@ import argparse
 import json
 from datetime import UTC, datetime
 
+from controlled_interception import controlled_interception_policy_packet
+
 
 SCHEMA = "rrkal_displaytools.decoupling_readiness.v1"
 
@@ -30,6 +32,7 @@ def decoupling_readiness_packet(phase: str = "pre_07_ui_closure") -> dict[str, o
             "contract_only_gate_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/pre_decoupling_gate.ps1 -ContractOnly",
             "note": "Before the gate, continue UI/contract/handoff closure only; after the gate, start with render_plan_compose extraction.",
         },
+        "controlled_interception_policy": controlled_interception_policy_packet("decoupling_readiness"),
         "phase_policy": {
             "pre_07_ui_closure": {
                 "allowed": [

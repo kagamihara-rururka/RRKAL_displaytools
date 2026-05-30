@@ -5579,6 +5579,12 @@ if ($decouplingReadiness.operation_schedule.decoupling_not_before -ne "2026-05-3
 if ($decouplingReadiness.operation_schedule.pre_decoupling_gate_command -notlike "*scripts/pre_decoupling_gate.ps1*") {
     throw "Decoupling readiness pre-gate command missing"
 }
+if ($decouplingReadiness.controlled_interception_policy.schema -ne "rrkal_displaytools.controlled_interception_policy.v1") {
+    throw "Decoupling readiness controlled interception policy missing"
+}
+if ($decouplingReadiness.controlled_interception_policy.blocked_patterns -notcontains "permanent_builtins_print_patch") {
+    throw "Controlled interception permanent print patch guard missing"
+}
 if ($decouplingReadiness.first_extraction_order.Count -lt 5) {
     throw "Decoupling readiness first extraction order is incomplete"
 }
@@ -5587,6 +5593,24 @@ if (($decouplingReadiness.first_extraction_order | Select-Object -First 1).id -n
 }
 if ($decouplingReadiness.rrkal_boundary.rule -notmatch "Do not move discovery/download/import/cache lifecycle") {
     throw "Decoupling readiness RRKAL boundary guard is missing"
+}
+
+$controlledInterceptionJson = Invoke-CapturedNative py @("-3", (Join-Path $RepoRoot "controlled_interception.py"), "--source", "smoke")
+$controlledInterception = $controlledInterceptionJson | ConvertFrom-Json
+if ($controlledInterception.schema -ne "rrkal_displaytools.controlled_interception_policy.v1") {
+    throw "Controlled interception policy schema mismatch"
+}
+if ($controlledInterception.allowed_patterns.id -notcontains "import_shim") {
+    throw "Controlled interception import shim pattern missing"
+}
+if ($controlledInterception.allowed_patterns.id -notcontains "scoped_stdout_capture") {
+    throw "Controlled interception scoped stdout capture pattern missing"
+}
+if ($controlledInterception.allowed_patterns.id -notcontains "runtime_ack_hook") {
+    throw "Controlled interception runtime ack hook pattern missing"
+}
+if ($controlledInterception.blocked_patterns -notcontains "fake_visual_runtime_success_in_ci") {
+    throw "Controlled interception fake visual runtime success guard missing"
 }
 
 $decouplingQtPanelSource = Get-Content -LiteralPath (Join-Path $RepoRoot "rrkal_displaytools_qt_panel.py") -Raw -Encoding UTF8

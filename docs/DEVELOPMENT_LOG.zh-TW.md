@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Controlled interception policy packet
+
+Changes:
+- Added `controlled_interception.py` with `rrkal_displaytools.controlled_interception_policy.v1`.
+- Captured allowed interception patterns for import shims, scoped stdout capture, runtime ack hooks and packet normalization.
+- Smoke now gates the policy and its blocked patterns, including no permanent `builtins.print` patching and no fake CI visual-runtime success.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Suppress transient smoke retry noise
 
 Changes:
