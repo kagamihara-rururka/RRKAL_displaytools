@@ -84,6 +84,7 @@ if ($ContractOnly) {
             "decoupling_readiness",
             "pre_decoupling_gate",
             "decoupling_boundary_inspection",
+            "render_plan_compose_work_order",
             "performance_smoke_telemetry",
             "renderer_config_gateway",
             "controlled_interception_policy",
@@ -101,6 +102,7 @@ $rendererConfigGateway = Invoke-JsonPython @("renderer_config_gateway.py", "--sa
 $controlledInterception = Invoke-JsonPython @("controlled_interception.py", "--source", "pre_decoupling_snapshot")
 $preDecouplingGate = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\pre_decoupling_gate.ps1", "-ContractOnly")
 $decouplingBoundaryInspection = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_decoupling_boundaries.ps1")
+$renderPlanComposeWorkOrder = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_render_plan_compose_work_order.ps1")
 
 $head = (git rev-parse --short HEAD).Trim()
 if ($LASTEXITCODE -ne 0) {
@@ -128,6 +130,7 @@ $snapshot = [ordered]@{
     decoupling_readiness = $readiness
     pre_decoupling_gate = $preDecouplingGate
     decoupling_boundary_inspection = $decouplingBoundaryInspection
+    render_plan_compose_work_order = $renderPlanComposeWorkOrder
     performance_smoke_telemetry = $performanceContract
     renderer_config_gateway = $rendererConfigGateway
     controlled_interception_policy = $controlledInterception

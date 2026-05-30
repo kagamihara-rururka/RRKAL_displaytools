@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Render plan compose work order inspector
+
+- Added `scripts/inspect_render_plan_compose_work_order.ps1` to produce a no-GUI work order for the first post-7 extraction: `render_plan_compose -> render_core/render_plan.py`.
+- The work order records source helpers, keep-contracts, required schemas, smoke gates and non-goals, including that runtime compose-run merging remains disabled until zero-diff parity artifacts exist.
+- Registered the work order in the visual inspector index, review packet, pre-decoupling snapshot and runbook.
+- Smoke: PASS via `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; cloud-drive transient file-access retries occurred and recovered.
+
 ## 2026-05-31 - Boundary inspection in pre-decoupling snapshot
 
 - Added `decoupling_boundary_inspection` to `scripts/export_pre_decoupling_snapshot.ps1` output so the handoff snapshot includes the post-7 first extraction target and RRKAL data/cache boundary.

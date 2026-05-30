@@ -32,6 +32,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_decoupling_b
 
 This must report `first_extraction_id=render_plan_compose`, `first_extraction_target=render_core/render_plan.py`, `tk_primary_ui_allowed=false`, and the RRKAL data/cache governance boundary.
 
+For the first extraction work order, run:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_render_plan_compose_work_order.ps1
+```
+
+This must report the target module, source helpers, keep-contracts, smoke gates, and the non-goal that runtime compose-run merging stays disabled until zero-diff parity artifacts exist.
+
 ## First extraction order
 
 1. `render_plan_compose` -> `render_core/render_plan.py`
@@ -58,6 +66,7 @@ Start with pure render-plan helpers only. Preserve these fields while moving cod
 - `state/performance/stage_timing.jsonl`
 - `decoupling_readiness`
 - `decoupling_boundary_inspection`
+- `render_plan_compose_work_order`
 - `reviewer_packet_export`
 
 If a move requires runtime visual validation, stop after the smoke-gated commit and ask for local Qt/Taichi visual review.

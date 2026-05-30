@@ -77,6 +77,14 @@ $entries = @(
         no_launch_side_effect = $true
     },
     [ordered]@{
+        id = "render_plan_compose_work_order"
+        category = "decoupling"
+        schema = "rrkal_displaytools.render_plan_compose_work_order_inspector.v1"
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_render_plan_compose_work_order.ps1"
+        proves = @("target module", "source helpers", "keep contracts", "smoke gates", "runtime merge non-goal")
+        no_launch_side_effect = $true
+    },
+    [ordered]@{
         id = "handoff"
         category = "cross_machine"
         schema = "rrkal_displaytools.handoff_inspection.v1"
@@ -101,6 +109,7 @@ $entries = @(
         "ocean_material",
         "performance_smoke",
         "decoupling_boundaries",
+        "render_plan_compose_work_order",
         "pre_decoupling_snapshot",
         "pre_decoupling_gate"
     )

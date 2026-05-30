@@ -56,6 +56,7 @@ if ($LASTEXITCODE -ne 0) {
     pre_decoupling_commands = @(
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\performance_smoke.ps1 -ContractOnly",
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_decoupling_boundaries.ps1",
+        "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_render_plan_compose_work_order.ps1",
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\export_pre_decoupling_snapshot.ps1 -ContractOnly",
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\pre_decoupling_gate.ps1 -ContractOnly"
     )

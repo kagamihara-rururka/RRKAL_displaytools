@@ -1208,6 +1208,9 @@ if ($visualInspectorIndex.entry_ids -notcontains "pre_decoupling_snapshot") {
 if ($visualInspectorIndex.entry_ids -notcontains "decoupling_boundaries") {
     throw "Visual contract inspector index missing decoupling boundary inspector"
 }
+if ($visualInspectorIndex.entry_ids -notcontains "render_plan_compose_work_order") {
+    throw "Visual contract inspector index missing render plan compose work order inspector"
+}
 if ($visualInspectorIndex.recommended_cross_machine_sequence[0] -ne "renderer_config_gateway") {
     throw "Visual contract inspector index cross-machine sequence should start with config gateway"
 }
@@ -1263,6 +1266,9 @@ if ($visualReviewPacket.pre_decoupling_commands -notcontains "powershell -NoProf
 }
 if ($visualReviewPacket.pre_decoupling_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_decoupling_boundaries.ps1") {
     throw "Visual contract review packet missing decoupling boundary command"
+}
+if ($visualReviewPacket.pre_decoupling_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_render_plan_compose_work_order.ps1") {
+    throw "Visual contract review packet missing render plan compose work order command"
 }
 if ($visualReviewPacket.boundary -notlike "*RRKAL owns discovery/download/import/cache governance*") {
     throw "Visual contract review packet data-governance boundary missing"
@@ -1356,6 +1362,38 @@ if ($decouplingBoundaryInspectorPacket.tk_primary_ui_allowed -ne $false) {
 }
 if ($decouplingBoundaryInspectorPacket.rrkal_boundary.rule -notlike "*Do not move discovery/download/import/cache lifecycle*") {
     throw "Decoupling boundary inspection RRKAL boundary missing"
+}
+$renderPlanComposeWorkOrderPath = Join-Path $RepoRoot "scripts\inspect_render_plan_compose_work_order.ps1"
+if (-not (Test-Path -LiteralPath $renderPlanComposeWorkOrderPath)) {
+    throw "Render plan compose work order inspector script is missing"
+}
+$renderPlanComposeWorkOrderContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $renderPlanComposeWorkOrderPath, "-ContractOnly")
+$renderPlanComposeWorkOrderContract = ($renderPlanComposeWorkOrderContractText -join "`n") | ConvertFrom-Json
+if ($renderPlanComposeWorkOrderContract.schema -ne "rrkal_displaytools.render_plan_compose_work_order_inspector.v1") {
+    throw "Render plan compose work order inspector contract schema missing"
+}
+if ($renderPlanComposeWorkOrderContract.target_module -ne "render_core/render_plan.py") {
+    throw "Render plan compose work order target contract mismatch"
+}
+if ($renderPlanComposeWorkOrderContract.boundary -notlike "*does not move code*") {
+    throw "Render plan compose work order move boundary missing"
+}
+$renderPlanComposeWorkOrderText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $renderPlanComposeWorkOrderPath)
+$renderPlanComposeWorkOrder = ($renderPlanComposeWorkOrderText -join "`n") | ConvertFrom-Json
+if ($renderPlanComposeWorkOrder.schema -ne "rrkal_displaytools.render_plan_compose_work_order.v1") {
+    throw "Render plan compose work order schema missing"
+}
+if ($renderPlanComposeWorkOrder.first_extraction_id -ne "render_plan_compose") {
+    throw "Render plan compose work order extraction mismatch"
+}
+if ($renderPlanComposeWorkOrder.target_module -ne "render_core/render_plan.py") {
+    throw "Render plan compose work order target mismatch"
+}
+if ($renderPlanComposeWorkOrder.source_helpers -notcontains "HybridRenderController.compile_layer_render_plan") {
+    throw "Render plan compose work order compiled plan helper missing"
+}
+if ($renderPlanComposeWorkOrder.non_goals -notcontains "Do not enable runtime compose-run merging before zero-diff parity artifacts exist.") {
+    throw "Render plan compose work order parity non-goal missing"
 }
 $layerWorkflowInspectorPath = Join-Path $RepoRoot "scripts\inspect_layer_workflow.ps1"
 if (-not (Test-Path -LiteralPath $layerWorkflowInspectorPath)) {
@@ -6405,6 +6443,9 @@ if ($preDecouplingSnapshotContract.included_fields -notcontains "performance_smo
 if ($preDecouplingSnapshotContract.included_fields -notcontains "decoupling_boundary_inspection") {
     throw "Pre-decoupling snapshot boundary inspection field missing"
 }
+if ($preDecouplingSnapshotContract.included_fields -notcontains "render_plan_compose_work_order") {
+    throw "Pre-decoupling snapshot render plan compose work order field missing"
+}
 $preDecouplingSnapshotText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $preDecouplingSnapshotPath)
 $preDecouplingSnapshot = ($preDecouplingSnapshotText -join "`n") | ConvertFrom-Json
 if ($preDecouplingSnapshot.schema -ne "rrkal_displaytools.pre_decoupling_snapshot.v1") {
@@ -6421,6 +6462,12 @@ if ($preDecouplingSnapshot.decoupling_boundary_inspection.schema -ne "rrkal_disp
 }
 if ($preDecouplingSnapshot.decoupling_boundary_inspection.first_extraction_id -ne "render_plan_compose") {
     throw "Pre-decoupling snapshot boundary inspection first extraction mismatch"
+}
+if ($preDecouplingSnapshot.render_plan_compose_work_order.schema -ne "rrkal_displaytools.render_plan_compose_work_order.v1") {
+    throw "Pre-decoupling snapshot render plan compose work order schema missing"
+}
+if ($preDecouplingSnapshot.render_plan_compose_work_order.target_module -ne "render_core/render_plan.py") {
+    throw "Pre-decoupling snapshot render plan compose work order target mismatch"
 }
 if ($preDecouplingSnapshot.performance_smoke_telemetry.schema -ne "rrkal_displaytools.performance_smoke.v1") {
     throw "Pre-decoupling snapshot performance telemetry schema missing"
