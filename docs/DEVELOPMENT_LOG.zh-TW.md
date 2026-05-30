@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Style preview batch renderer script
+
+Changes:
+- Added `scripts/render_style_previews.ps1` to generate scientific, nautical, parchment and tactical thumbnail PNGs under `state/style_previews`.
+- Qt Actions now includes `Copy style thumbs command`, and style preview packets expose the batch script, portable command, expected outputs and validation targets.
+- Smoke verifies the batch command contract and PowerShell parser coverage without running the renderer during pre-commit validation.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Qt Style thumbnail card icons
 
 Changes:

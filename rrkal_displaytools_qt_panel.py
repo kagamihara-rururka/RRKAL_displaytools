@@ -233,6 +233,10 @@ def style_template_visual_preview_packet(
         "thumbnail_source_contract": "rrkal_displaytools.renderer_output_artifact_contract.v1",
         "thumbnail_optional_runtime_artifact": True,
         "thumbnail_missing_guidance": "Run the thumbnail_review_command for a style profile to populate its local PNG slot; thumbnail PNGs are runtime artifacts, not required for pre-commit smoke.",
+        "thumbnail_batch_script": "scripts/render_style_previews.ps1",
+        "thumbnail_batch_command": ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts/render_style_previews.ps1"],
+        "thumbnail_batch_outputs": [f"state/style_previews/{style_id}.png" for style_id in required_preview_ids],
+        "thumbnail_batch_validates": ["png_nonempty", "metadata_sidecar_schema", "style_profile_loop"],
         "qt_inspector_action_id": "style_thumbnail_slots",
         "qt_inspector_action_label": "Inspect: Style thumbs",
         "qt_inspector_handler": "show_style_thumbnail_slots",
@@ -3308,6 +3312,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         canvas_state_button = QtWidgets.QPushButton("Inspect: Canvas state")
         visual_readiness_button = QtWidgets.QPushButton("Inspect: Visual readiness")
         copy_visual_summary_button = QtWidgets.QPushButton("Copy visual summary")
+        copy_style_thumbs_command_button = QtWidgets.QPushButton("Copy style thumbs command")
         thumbnail_button = QtWidgets.QPushButton("Inspect: Renderer thumbnail")
         live_preview_button = QtWidgets.QPushButton("Inspect: Live preview")
         smoke_button = QtWidgets.QPushButton("Smoke check")
@@ -3342,6 +3347,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (copy_research_summary_button, "Research interaction: copy selection, pin, cursor and boundary summaries as one portable handoff note."),
             (visual_readiness_button, "Visual review: inspect thumbnail/live preview readiness, frame status and missing-frame hints JSON."),
             (copy_visual_summary_button, "Visual review: copy compact thumbnail/live preview readiness summary to clipboard."),
+            (copy_style_thumbs_command_button, "Visual review: copy portable command for generating scientific/nautical/parchment/tactical style thumbnails."),
             (thumbnail_button, "Visual review: inspect latest renderer thumbnail PNG."),
             (live_preview_button, "Visual review: inspect file-based live renderer preview frame."),
         ):
@@ -3385,6 +3391,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         canvas_state_button.clicked.connect(self.show_canvas_state_preview)
         visual_readiness_button.clicked.connect(self.show_visual_review_readiness)
         copy_visual_summary_button.clicked.connect(self.copy_visual_review_readiness_summary)
+        copy_style_thumbs_command_button.clicked.connect(self.copy_style_thumbnail_batch_command)
         thumbnail_button.clicked.connect(self.show_latest_renderer_thumbnail)
         live_preview_button.clicked.connect(self.show_live_renderer_preview)
         smoke_button.clicked.connect(self.run_smoke_check)
@@ -3396,7 +3403,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, timeline_button, module_seams_button, clone_ready_button, copy_clone_summary_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, ocean_port_button, style_routes_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
-            ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, style_thumbnails_button, thumbnail_button, live_preview_button)),
+            ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, thumbnail_button, live_preview_button)),
             ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, smoke_button)),
             ("Process", (launch_button, restart_button, stop_button)),
         )
@@ -8200,6 +8207,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 {
                     "style_template_visual_preview": packet,
                     "thumbnail_slots": packet.get("preview_cards", []),
+                    "thumbnail_batch_command": packet.get("thumbnail_batch_command"),
                     "thumbnail_missing_guidance": packet.get("thumbnail_missing_guidance"),
                 },
                 ensure_ascii=False,
@@ -8207,6 +8215,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             )
         )
         self.status.setText("已顯示 style thumbnail slots JSON")
+
+    def copy_style_thumbnail_batch_command(self) -> None:
+        command = self.collect_style_template_visual_preview().get("thumbnail_batch_command", [])
+        command_line = subprocess.list2cmdline([str(part) for part in command]) if isinstance(command, list) else str(command)
+        QtWidgets.QApplication.clipboard().setText(command_line)
+        self.status.setText("已複製 style thumbnail batch command")
 
     def show_module_boundary_registry(self) -> None:
         self.command_text.setPlainText(

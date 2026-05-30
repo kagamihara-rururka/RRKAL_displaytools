@@ -389,6 +389,15 @@ if ($launchPacket.style_template_visual_preview.thumbnail_icon_loading -ne "qt_l
 if ($launchPacket.style_template_visual_preview.preview_cards[0].qt_card_icon_supported -ne $true) {
     throw "Launch packet style_template_visual_preview card icon support missing"
 }
+if ($launchPacket.style_template_visual_preview.thumbnail_batch_script -ne "scripts/render_style_previews.ps1") {
+    throw "Launch packet style_template_visual_preview batch script missing"
+}
+if ($launchPacket.style_template_visual_preview.thumbnail_batch_command -notcontains "scripts/render_style_previews.ps1") {
+    throw "Launch packet style_template_visual_preview batch command missing"
+}
+if ($launchPacket.style_template_visual_preview.thumbnail_batch_validates -notcontains "metadata_sidecar_schema") {
+    throw "Launch packet style_template_visual_preview batch validation metadata missing"
+}
 if ($launchPacket.visual_feature_closure_matrix.schema -ne "rrkal_displaytools.visual_feature_closure_matrix.v1") {
     throw "Launch packet visual feature closure matrix schema missing or invalid"
 }
@@ -1279,6 +1288,9 @@ if ($capabilities.style_template_visual_preview.qt_icon_loader -ne "refresh_styl
 if ($capabilities.style_template_visual_preview.thumbnail_icon_size[0] -ne 96) {
     throw "Renderer style_template_visual_preview icon width mismatch"
 }
+if ($capabilities.style_template_visual_preview.thumbnail_batch_outputs -notcontains "state/style_previews/tactical.png") {
+    throw "Renderer style_template_visual_preview tactical thumbnail batch output missing"
+}
 if ($capabilities.visual_feature_closure_matrix.schema -ne "rrkal_displaytools.visual_feature_closure_matrix.v1") {
     throw "Renderer visual feature closure matrix schema missing or invalid"
 }
@@ -2111,6 +2123,9 @@ if ($handoff.style_template_visual_preview.qt_inspector_action_id -ne "style_thu
 if ($handoff.style_template_visual_preview.thumbnail_icon_loading -ne "qt_loads_existing_png_as_card_icon") {
     throw "Handoff inspection style_template_visual_preview icon loading contract missing"
 }
+if ($handoff.style_template_visual_preview.thumbnail_batch_script -ne "scripts/render_style_previews.ps1") {
+    throw "Handoff inspection style_template_visual_preview batch script missing"
+}
 if ($handoff.launch_packet_contracts.module_boundary_registry -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Handoff inspection module_boundary_registry launch contract missing or invalid"
 }
@@ -2592,6 +2607,15 @@ if ($qtPanelSource -notlike "*setIcon(QtGui.QIcon*") {
 }
 if ($qtPanelSource -notlike "*setIconSize(QtCore.QSize(96, 54))*") {
     throw "Qt style thumbnail card icon size is missing"
+}
+if ($qtPanelSource -notlike "*Copy style thumbs command*") {
+    throw "Qt style thumbnail batch copy button is missing"
+}
+if ($qtPanelSource -notlike "*copy_style_thumbnail_batch_command*") {
+    throw "Qt style thumbnail batch copy handler is missing"
+}
+if ($qtPanelSource -notlike "*thumbnail_batch_command*") {
+    throw "Qt style thumbnail batch command contract is missing"
 }
 if ($qtPanelSource -notlike "*show_module_boundary_registry*") {
     throw "Qt module boundary registry JSON action is missing"
