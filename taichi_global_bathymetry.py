@@ -19460,6 +19460,41 @@ def layer_hover_affordance_packet(
     }
 
 
+def layer_lock_affordance_packet(
+    source: str,
+    layer_stack: dict[str, dict[str, object]] | None = None,
+) -> dict[str, object]:
+    layer_stack = layer_stack if isinstance(layer_stack, dict) else {}
+    locked_layers = [
+        key
+        for key, state in layer_stack.items()
+        if isinstance(key, str) and isinstance(state, dict) and state.get("locked") is True
+    ]
+    summary_text = (
+        f"Layer locks: locked={len(locked_layers)}; row_property=locked; "
+        "visibility_control=disabled_when_locked"
+    )
+    return {
+        "schema": "rrkal_displaytools.layer_lock_affordance.v1",
+        "source": source,
+        "status": "ready",
+        "locked_layer_count": len(locked_layers),
+        "locked_layers": locked_layers,
+        "summary_text": summary_text,
+        "qt_surface": "Layers dock locked row tint / disabled visibility checkbox",
+        "row_object_name": "layerRow",
+        "locked_row_property": "locked",
+        "locked_row_stylesheet_selector": 'QWidget#layerRow[locked="true"]',
+        "visibility_control_disabled_when_locked": True,
+        "qt_checkbox_tooltip": "Lock is honored by renderer runtime sync for visibility, opacity, and blend updates.",
+        "launch_packet_fields": ["layer_lock_affordance", "layer_stack_ui", "layer_control_feedback_strip"],
+        "renderer_capability_field": "layer_lock_affordance",
+        "handoff_field": "layer_lock_affordance",
+        "smoke_gate": "layer_lock_affordance",
+        "boundary": "Qt lock affordance only; it visualizes lock state and disabled visibility controls without mutating RRKAL data governance.",
+    }
+
+
 def layer_research_workflow_packet(
     layer_filter: dict[str, object] | None,
     layer_group_view: dict[str, object] | None,
@@ -19916,6 +19951,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
         "layer_selection_tool": layer_selection_tool_packet("taichi_global_bathymetry.renderer_capabilities"),
         "layer_selection_affordance": layer_selection_affordance_packet("taichi_global_bathymetry.renderer_capabilities"),
         "layer_hover_affordance": layer_hover_affordance_packet("taichi_global_bathymetry.renderer_capabilities"),
+        "layer_lock_affordance": layer_lock_affordance_packet("taichi_global_bathymetry.renderer_capabilities"),
         "layer_research_workflow": layer_research_workflow_packet(None, None, layer_operator_groups_packet(layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"), "taichi_global_bathymetry.renderer_capabilities"), layer_capability_matrix_packet(), "taichi_global_bathymetry.renderer_capabilities"),
         "boundary_emphasis_control": boundary_emphasis_control_packet(None, None, "taichi_global_bathymetry.renderer_capabilities"),
         "cursor_geodesy_readout": cursor_geodesy_readout_packet("taichi_global_bathymetry.renderer_capabilities"),

@@ -52,6 +52,7 @@ $summary = [ordered]@{
         layer_selection_tool = $launchPacket.layer_selection_tool.schema
         layer_selection_affordance = $launchPacket.layer_selection_affordance.schema
         layer_hover_affordance = $launchPacket.layer_hover_affordance.schema
+        layer_lock_affordance = $launchPacket.layer_lock_affordance.schema
         layer_research_workflow = $launchPacket.layer_research_workflow.schema
         layer_control_feedback_strip = $launchPacket.layer_control_feedback_strip.schema
         boundary_emphasis_control = $launchPacket.boundary_emphasis_control.schema
@@ -158,6 +159,15 @@ $summary = [ordered]@{
         event_filter = $launchPacket.layer_hover_affordance.event_filter
         hover_events = $launchPacket.layer_hover_affordance.hover_events
         summary_text = $launchPacket.layer_hover_affordance.summary_text
+    }
+    layer_lock_affordance = @{
+        launch_packet_schema = $launchPacket.layer_lock_affordance.schema
+        renderer_capabilities_schema = $capabilities.layer_lock_affordance.schema
+        locked_layer_count = $launchPacket.layer_lock_affordance.locked_layer_count
+        locked_row_property = $launchPacket.layer_lock_affordance.locked_row_property
+        locked_row_stylesheet_selector = $launchPacket.layer_lock_affordance.locked_row_stylesheet_selector
+        visibility_control_disabled_when_locked = $launchPacket.layer_lock_affordance.visibility_control_disabled_when_locked
+        summary_text = $launchPacket.layer_lock_affordance.summary_text
     }
     layer_research_workflow = @{
         launch_packet_schema = $launchPacket.layer_research_workflow.schema

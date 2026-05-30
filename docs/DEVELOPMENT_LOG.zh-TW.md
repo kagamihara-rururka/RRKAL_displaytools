@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Qt Layer lock affordance
+
+Changes:
+- Added `rrkal_displaytools.layer_lock_affordance.v1` to Qt launch packets, no-GUI launch packets, renderer capability discovery and handoff inspection.
+- Qt Layers rows now carry a `locked` property with `QWidget#layerRow[locked="true"]` styling so locked scientific layers are visually distinct.
+- `refresh_layer_stack_status()` now keeps locked row styling and disabled visibility checkboxes synchronized with lock state.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Pin overlay summary occlusion vocabulary
 
 Changes:

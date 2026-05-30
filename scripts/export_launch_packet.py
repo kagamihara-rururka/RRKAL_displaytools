@@ -2350,6 +2350,41 @@ def layer_hover_affordance_packet(
     }
 
 
+def layer_lock_affordance_packet(
+    source: str,
+    layer_stack: dict[str, dict[str, object]] | None = None,
+) -> dict[str, object]:
+    layer_stack = layer_stack if isinstance(layer_stack, dict) else {}
+    locked_layers = [
+        key
+        for key, state in layer_stack.items()
+        if isinstance(key, str) and isinstance(state, dict) and state.get("locked") is True
+    ]
+    summary_text = (
+        f"Layer locks: locked={len(locked_layers)}; row_property=locked; "
+        "visibility_control=disabled_when_locked"
+    )
+    return {
+        "schema": "rrkal_displaytools.layer_lock_affordance.v1",
+        "source": source,
+        "status": "ready",
+        "locked_layer_count": len(locked_layers),
+        "locked_layers": locked_layers,
+        "summary_text": summary_text,
+        "qt_surface": "Layers dock locked row tint / disabled visibility checkbox",
+        "row_object_name": "layerRow",
+        "locked_row_property": "locked",
+        "locked_row_stylesheet_selector": 'QWidget#layerRow[locked="true"]',
+        "visibility_control_disabled_when_locked": True,
+        "qt_checkbox_tooltip": "Lock is honored by renderer runtime sync for visibility, opacity, and blend updates.",
+        "launch_packet_fields": ["layer_lock_affordance", "layer_stack_ui", "layer_control_feedback_strip"],
+        "renderer_capability_field": "layer_lock_affordance",
+        "handoff_field": "layer_lock_affordance",
+        "smoke_gate": "layer_lock_affordance",
+        "boundary": "Qt lock affordance only; it visualizes lock state and disabled visibility controls without mutating RRKAL data governance.",
+    }
+
+
 def layer_research_workflow_packet(
     layer_filter: dict[str, object] | None,
     layer_group_view: dict[str, object] | None,
@@ -3361,6 +3396,7 @@ def launch_packet(
         "layer_selection_tool": layer_selection_tool_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None),
         "layer_selection_affordance": layer_selection_affordance_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None, profile.get("layer_stack_ui") if isinstance(profile.get("layer_stack_ui"), dict) else None),
         "layer_hover_affordance": layer_hover_affordance_packet("scripts.export_launch_packet", None, profile.get("layer_stack_ui") if isinstance(profile.get("layer_stack_ui"), dict) else None),
+        "layer_lock_affordance": layer_lock_affordance_packet("scripts.export_launch_packet", profile.get("layer_stack_ui") if isinstance(profile.get("layer_stack_ui"), dict) else None),
         "layer_research_workflow": layer_research_workflow_packet(layer_filter_packet(profile), layer_group_view_packet(profile), layer_operator_groups_packet(layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None), "scripts.export_launch_packet"), layer_capability_matrix_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None, rrkal_data_manifest_ref), "scripts.export_launch_packet"),
         "boundary_emphasis_control": boundary_emphasis_control_packet(profile.get("boundary_emphasis_control") if isinstance(profile.get("boundary_emphasis_control"), dict) else None, profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None, "scripts.export_launch_packet"),
         "style_renderer_entries": style_renderer_entries_packet("scripts.export_launch_packet", profile.get("style_profile") if isinstance(profile.get("style_profile"), str) else None),

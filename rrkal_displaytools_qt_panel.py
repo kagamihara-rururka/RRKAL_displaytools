@@ -2198,6 +2198,41 @@ def layer_hover_affordance_packet(
     }
 
 
+def layer_lock_affordance_packet(
+    source: str,
+    layer_stack: dict[str, dict[str, object]] | None = None,
+) -> dict[str, object]:
+    layer_stack = layer_stack if isinstance(layer_stack, dict) else {}
+    locked_layers = [
+        key
+        for key, state in layer_stack.items()
+        if isinstance(key, str) and isinstance(state, dict) and state.get("locked") is True
+    ]
+    summary_text = (
+        f"Layer locks: locked={len(locked_layers)}; row_property=locked; "
+        "visibility_control=disabled_when_locked"
+    )
+    return {
+        "schema": "rrkal_displaytools.layer_lock_affordance.v1",
+        "source": source,
+        "status": "ready",
+        "locked_layer_count": len(locked_layers),
+        "locked_layers": locked_layers,
+        "summary_text": summary_text,
+        "qt_surface": "Layers dock locked row tint / disabled visibility checkbox",
+        "row_object_name": "layerRow",
+        "locked_row_property": "locked",
+        "locked_row_stylesheet_selector": 'QWidget#layerRow[locked="true"]',
+        "visibility_control_disabled_when_locked": True,
+        "qt_checkbox_tooltip": "Lock is honored by renderer runtime sync for visibility, opacity, and blend updates.",
+        "launch_packet_fields": ["layer_lock_affordance", "layer_stack_ui", "layer_control_feedback_strip"],
+        "renderer_capability_field": "layer_lock_affordance",
+        "handoff_field": "layer_lock_affordance",
+        "smoke_gate": "layer_lock_affordance",
+        "boundary": "Qt lock affordance only; it visualizes lock state and disabled visibility controls without mutating RRKAL data governance.",
+    }
+
+
 def layer_research_workflow_packet(
     layer_filter: dict[str, object] | None,
     layer_group_view: dict[str, object] | None,
@@ -3075,6 +3110,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             row = QtWidgets.QWidget()
             row.setObjectName("layerRow")
             row.setProperty("selected", False)
+            row.setProperty("locked", False)
             row.setMouseTracking(True)
             row.installEventFilter(self)
             row_layout = QtWidgets.QGridLayout(row)
@@ -3496,6 +3532,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             QLabel#layerHoverAffordance { color: #3d4a24; background: #f4f8e8; border: 1px solid #b5c77f; border-radius: 8px; padding: 6px 8px; font-weight: 600; }
             QLabel#pinOcclusionLegend { color: #4d2f16; background: #fff3dc; border: 1px solid #d7a45d; border-radius: 8px; padding: 6px 8px; font-weight: 600; }
             QWidget#layerRow { border-bottom: 1px solid #d6e0ea; }
+            QWidget#layerRow[locked="true"] { background: #f6edf9; border-left: 4px solid #7b4a9e; color: #5a3b68; }
             QWidget#layerRow[selected="true"] { background: #dceeff; border: 1px solid #5b8db8; }
             QLabel#selectedLayer { color: #23435f; font-weight: 700; padding-top: 6px; }
             QLabel#toolPaletteTitle { color: #23435f; font-weight: 700; padding-top: 6px; }
@@ -4280,6 +4317,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_selection_tool": self.collect_layer_selection_tool(),
             "layer_selection_affordance": self.collect_layer_selection_affordance(),
             "layer_hover_affordance": self.collect_layer_hover_affordance(),
+            "layer_lock_affordance": self.collect_layer_lock_affordance(),
             "layer_research_workflow": self.collect_layer_research_workflow(),
             "boundary_emphasis_control": self.collect_boundary_emphasis_control(),
             "cursor_geodesy_readout": self.collect_cursor_geodesy_readout(),
@@ -4715,6 +4753,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         label = getattr(self, "layer_hover_affordance_label", None)
         if label is not None:
             label.setText(str(self.collect_layer_hover_affordance(None).get("summary_text")))
+
+    def collect_layer_lock_affordance(self) -> dict[str, object]:
+        return layer_lock_affordance_packet(
+            "rrkal_displaytools_qt_panel",
+            self.collect_layer_stack_ui(),
+        )
 
     def layer_selection_summary_text(self, packet: dict[str, object] | None = None) -> str:
         packet = packet or self.collect_layer_selection_tool()
@@ -5947,7 +5991,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         locked = sum(1 for key, _label in LAYER_LABELS if self.layer_locks[key].isChecked())
         for key, _label in LAYER_LABELS:
             if key in self.checks and key in self.layer_locks:
-                self.checks[key].setEnabled(not self.layer_locks[key].isChecked())
+                is_locked = self.layer_locks[key].isChecked()
+                self.checks[key].setEnabled(not is_locked)
+                row = self.layer_rows.get(key)
+                if row is not None:
+                    row.setProperty("locked", is_locked)
+                    row.style().unpolish(row)
+                    row.style().polish(row)
+                    row.update()
         non_default = sum(
             1
             for key, _label in LAYER_LABELS

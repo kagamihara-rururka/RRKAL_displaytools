@@ -248,6 +248,18 @@ if ($launchPacket.layer_hover_affordance.qt_label_object -ne "layerHoverAffordan
 if ($launchPacket.layer_hover_affordance.event_filter -ne "layer_hover_event_targets") {
     throw "Launch packet layer_hover_affordance event filter mismatch"
 }
+if ($launchPacket.layer_lock_affordance.schema -ne "rrkal_displaytools.layer_lock_affordance.v1") {
+    throw "Launch packet layer_lock_affordance schema missing or invalid"
+}
+if ($launchPacket.layer_lock_affordance.locked_row_property -ne "locked") {
+    throw "Launch packet layer_lock_affordance row property mismatch"
+}
+if ($launchPacket.layer_lock_affordance.locked_row_stylesheet_selector -ne 'QWidget#layerRow[locked="true"]') {
+    throw "Launch packet layer_lock_affordance stylesheet selector mismatch"
+}
+if ($launchPacket.layer_lock_affordance.visibility_control_disabled_when_locked -ne $true) {
+    throw "Launch packet layer_lock_affordance disabled visibility control flag missing"
+}
 if ($launchPacket.layer_research_workflow.schema -ne "rrkal_displaytools.layer_research_workflow.v1") {
     throw "Launch packet layer_research_workflow schema missing or invalid"
 }
@@ -1162,6 +1174,15 @@ if ($capabilities.layer_hover_affordance.schema -ne "rrkal_displaytools.layer_ho
 if ($capabilities.layer_hover_affordance.hover_events -notcontains "QEvent.Enter") {
     throw "Renderer layer_hover_affordance enter event missing"
 }
+if ($capabilities.layer_lock_affordance.schema -ne "rrkal_displaytools.layer_lock_affordance.v1") {
+    throw "Renderer layer_lock_affordance schema missing or invalid"
+}
+if ($capabilities.layer_lock_affordance.qt_surface -ne "Layers dock locked row tint / disabled visibility checkbox") {
+    throw "Renderer layer_lock_affordance Qt surface mismatch"
+}
+if ($capabilities.layer_lock_affordance.visibility_control_disabled_when_locked -ne $true) {
+    throw "Renderer layer_lock_affordance disabled visibility control flag missing"
+}
 if ($capabilities.layer_research_workflow.schema -ne "rrkal_displaytools.layer_research_workflow.v1") {
     throw "Renderer layer_research_workflow schema missing or invalid"
 }
@@ -1925,6 +1946,18 @@ if ($handoff.layer_hover_affordance.launch_packet_schema -ne "rrkal_displaytools
 if ($handoff.layer_hover_affordance.qt_label_object -ne "layerHoverAffordance") {
     throw "Handoff inspection layer_hover_affordance label object missing"
 }
+if ($handoff.launch_packet_contracts.layer_lock_affordance -ne "rrkal_displaytools.layer_lock_affordance.v1") {
+    throw "Handoff inspection layer_lock_affordance launch contract missing or invalid"
+}
+if ($handoff.layer_lock_affordance.launch_packet_schema -ne "rrkal_displaytools.layer_lock_affordance.v1") {
+    throw "Handoff inspection layer_lock_affordance launch schema missing or invalid"
+}
+if ($handoff.layer_lock_affordance.renderer_capabilities_schema -ne "rrkal_displaytools.layer_lock_affordance.v1") {
+    throw "Handoff inspection layer_lock_affordance renderer schema missing or invalid"
+}
+if ($handoff.layer_lock_affordance.locked_row_property -ne "locked") {
+    throw "Handoff inspection layer_lock_affordance row property mismatch"
+}
 if ($handoff.layer_research_workflow.launch_packet_schema -ne "rrkal_displaytools.layer_research_workflow.v1") {
     throw "Handoff inspection layer_research_workflow launch schema missing or invalid"
 }
@@ -2590,6 +2623,18 @@ if ($qtPanelSource -notlike "*set_layer_hover_affordance*") {
 if ($qtPanelSource -notlike "*rrkal_displaytools.layer_hover_affordance.v1*") {
     throw "Qt layer hover affordance schema is missing"
 }
+if ($qtPanelSource -notlike "*rrkal_displaytools.layer_lock_affordance.v1*") {
+    throw "Qt layer lock affordance schema is missing"
+}
+if ($qtPanelSource -notlike "*collect_layer_lock_affordance*") {
+    throw "Qt layer lock affordance collector is missing"
+}
+if ($qtPanelSource -notlike '*locked="true"*') {
+    throw "Qt layer locked row stylesheet selector is missing"
+}
+if ($qtPanelSource -notlike '*setProperty("locked"*') {
+    throw "Qt layer locked row property update is missing"
+}
 if ($qtPanelSource -notlike "*click a row to select the active research layer*") {
     throw "Qt Layers workflow row-selection hint is missing"
 }
@@ -2967,6 +3012,9 @@ if ($rendererSource -notlike "*layer_selection_affordance_packet*") {
 if ($rendererSource -notlike "*layer_hover_affordance_packet*") {
     throw "Renderer capability layer hover affordance contract missing"
 }
+if ($rendererSource -notlike "*layer_lock_affordance_packet*") {
+    throw "Renderer capability layer lock affordance contract missing"
+}
 
 $scripts = Get-ChildItem scripts -Filter *.ps1
 foreach ($script in $scripts) {
@@ -3079,6 +3127,9 @@ if ($launchPacketSource -notmatch 'layer_selection_affordance') {
 if ($launchPacketSource -notmatch 'layer_hover_affordance') {
     throw "Launch packet layer hover affordance field missing"
 }
+if ($launchPacketSource -notmatch 'layer_lock_affordance') {
+    throw "Launch packet layer lock affordance field missing"
+}
 if ($handoffInspectorSource -notmatch 'profile_ui_state_replay') {
     throw "Handoff inspection profile UI state replay output is missing"
 }
@@ -3093,6 +3144,9 @@ if ($handoffInspectorSource -notmatch 'layer_selection_affordance') {
 }
 if ($handoffInspectorSource -notmatch 'layer_hover_affordance') {
     throw "Handoff inspection layer hover affordance output is missing"
+}
+if ($handoffInspectorSource -notmatch 'layer_lock_affordance') {
+    throw "Handoff inspection layer lock affordance output is missing"
 }
 if ($handoffInspectorSource -notmatch 'profile_visual_quick_review') {
     throw "Handoff inspection profile visual quick review output is missing"
