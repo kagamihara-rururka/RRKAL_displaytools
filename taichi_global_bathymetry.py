@@ -18596,18 +18596,59 @@ def ocean_material_control_port_packet(
         "roughness": bounded_float(material.get("roughness"), 0.28, 0.02, 1.0),
         "foam": bounded_float(material.get("foam"), 0.12, 0.0, 1.0),
     }
+    renderer_flags = ["--ocean-wave-strength", "--ocean-roughness", "--ocean-foam"]
+    taichi_uniforms = ["ocean_enabled", "wave_strength", "roughness", "foam", "time_seconds"]
     return {
         "schema": "rrkal_displaytools.ocean_material_control_port.v1",
         "source": source,
         "enabled": bool(material.get("enabled", True)),
         "material_controls": controls,
-        "renderer_flags": ["--ocean-wave-strength", "--ocean-roughness", "--ocean-foam"],
-        "taichi_uniforms": ["ocean_enabled", "wave_strength", "roughness", "foam", "time_seconds"],
+        "renderer_flags": renderer_flags,
+        "taichi_uniforms": taichi_uniforms,
+        "renderer_apply_contract_schema": "rrkal_displaytools.ocean_material_renderer_apply_contract.v1",
+        "renderer_apply_contract": {
+            "schema": "rrkal_displaytools.ocean_material_renderer_apply_contract.v1",
+            "status": "startup_cli_and_timeline_ready",
+            "input_sources": [
+                "profile.ocean_material",
+                "sea_state_port.scalar_sample_contract",
+                "timeline_ocean_material_interpolation",
+            ],
+            "renderer_flags": renderer_flags,
+            "taichi_uniforms": taichi_uniforms,
+            "applied_fields": list(controls),
+            "runtime_paths": [
+                "launch_packet.portable_command",
+                "timeline_ocean_material_interpolation.interpolated",
+            ],
+            "ack_contracts": [
+                "launch_packet.ocean_material_control_port",
+                "renderer_timeline_ack.timeline_ocean_material_interpolation",
+            ],
+            "pending": ["live_sea_state_stream_file", "provider_grid_sampling"],
+            "portable": True,
+            "boundary": "Renderer applies normalized scalar material fields from profile/launch/timeline contracts; provider IO and cache governance stay outside displaytools.",
+        },
         "sea_state_port": {
             "status": "manual_scalar_port_ready",
             "normalized_fields": ["wave_strength", "roughness", "foam", "timestamp"],
             "provider_ports": ["manual", "file", "url", "noaa_ww3", "hycom", "copernicus", "local_grid"],
             "renderer_consumes": ["wave_strength", "roughness", "foam"],
+            "scalar_sample_contract_schema": "rrkal_displaytools.sea_state_scalar_sample.v1",
+            "scalar_sample_contract": {
+                "schema": "rrkal_displaytools.sea_state_scalar_sample.v1",
+                "status": "normalized_scalar_contract_ready",
+                "required_fields": ["wave_strength", "roughness", "foam", "timestamp"],
+                "optional_fields": ["source_id", "valid_time_utc", "confidence", "provider_ref", "grid_cell"],
+                "value_ranges": {
+                    "wave_strength": [0.0, 1.0],
+                    "roughness": [0.02, 1.0],
+                    "foam": [0.0, 1.0],
+                },
+                "displaytools_role": "consume_normalized_scalars_only",
+                "rrkal_role": "provider discovery, download/import and cache governance",
+                "portable": True,
+            },
         },
         "qt_surface": "Properties dock ocean material controls",
         "launch_packet_fields": ["ocean_material_control_port", "profile.ocean_material", "command"],

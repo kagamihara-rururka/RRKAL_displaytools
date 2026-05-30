@@ -542,8 +542,26 @@ if ($launchPacket.ocean_material_control_port.schema -ne "rrkal_displaytools.oce
 if ($launchPacket.ocean_material_control_port.renderer_flags -notcontains "--ocean-wave-strength") {
     throw "Launch packet ocean_material_control_port missing wave flag"
 }
+if ($launchPacket.ocean_material_control_port.renderer_apply_contract.schema -ne "rrkal_displaytools.ocean_material_renderer_apply_contract.v1") {
+    throw "Launch packet ocean material renderer apply contract missing or invalid"
+}
+if ($launchPacket.ocean_material_control_port.renderer_apply_contract.status -ne "startup_cli_and_timeline_ready") {
+    throw "Launch packet ocean material renderer apply status mismatch"
+}
+if ($launchPacket.ocean_material_control_port.renderer_apply_contract.taichi_uniforms -notcontains "foam") {
+    throw "Launch packet ocean material renderer apply uniforms missing foam"
+}
+if (-not $launchPacket.ocean_material_control_port.renderer_apply_contract.portable) {
+    throw "Launch packet ocean material renderer apply contract is not portable"
+}
 if ($launchPacket.ocean_material_control_port.sea_state_port.normalized_fields -notcontains "wave_strength") {
     throw "Launch packet ocean_material_control_port sea-state normalized fields missing"
+}
+if ($launchPacket.ocean_material_control_port.sea_state_port.scalar_sample_contract.schema -ne "rrkal_displaytools.sea_state_scalar_sample.v1") {
+    throw "Launch packet ocean material sea-state scalar sample contract missing"
+}
+if ($launchPacket.ocean_material_control_port.sea_state_port.scalar_sample_contract.displaytools_role -ne "consume_normalized_scalars_only") {
+    throw "Launch packet ocean material sea-state displaytools role mismatch"
 }
 if ($launchPacket.layer_undo.schema -ne "rrkal_displaytools.layer_stack_undo.v1") {
     throw "Launch packet layer_undo schema missing or invalid"
@@ -1260,6 +1278,15 @@ if ($capabilities.ocean_material_control_port.schema -ne "rrkal_displaytools.oce
 }
 if ($capabilities.ocean_material_control_port.taichi_uniforms -notcontains "wave_strength") {
     throw "Renderer ocean_material_control_port Taichi uniforms missing"
+}
+if ($capabilities.ocean_material_control_port.renderer_apply_contract.schema -ne "rrkal_displaytools.ocean_material_renderer_apply_contract.v1") {
+    throw "Renderer ocean material apply contract missing or invalid"
+}
+if ($capabilities.ocean_material_control_port.renderer_apply_contract.input_sources -notcontains "timeline_ocean_material_interpolation") {
+    throw "Renderer ocean material apply contract timeline source missing"
+}
+if ($capabilities.ocean_material_control_port.sea_state_port.scalar_sample_contract.schema -ne "rrkal_displaytools.sea_state_scalar_sample.v1") {
+    throw "Renderer ocean material sea-state scalar sample contract missing"
 }
 if ($capabilities.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
     throw "Renderer layer_capability_matrix capability missing or invalid"
@@ -1985,6 +2012,12 @@ if ($handoff.hydrology_lod_runtime_evidence.ack_file -ne "state/renderer_layer_r
 if ($handoff.launch_packet_contracts.ocean_material_control_port -ne "rrkal_displaytools.ocean_material_control_port.v1") {
     throw "Handoff inspection ocean_material_control_port launch contract missing or invalid"
 }
+if ($handoff.launch_packet_contracts.ocean_material_renderer_apply_contract -ne "rrkal_displaytools.ocean_material_renderer_apply_contract.v1") {
+    throw "Handoff inspection ocean material renderer apply contract missing or invalid"
+}
+if ($handoff.launch_packet_contracts.sea_state_scalar_sample -ne "rrkal_displaytools.sea_state_scalar_sample.v1") {
+    throw "Handoff inspection sea-state scalar sample contract missing or invalid"
+}
 if ($handoff.ocean_material_control_port.launch_packet_schema -ne "rrkal_displaytools.ocean_material_control_port.v1") {
     throw "Handoff inspection ocean_material_control_port launch schema missing or invalid"
 }
@@ -1993,6 +2026,15 @@ if ($handoff.ocean_material_control_port.renderer_capabilities_schema -ne "rrkal
 }
 if ($handoff.ocean_material_control_port.renderer_flags -notcontains "--ocean-foam") {
     throw "Handoff inspection ocean_material_control_port renderer flags missing"
+}
+if ($handoff.ocean_material_control_port.renderer_apply_contract_schema -ne "rrkal_displaytools.ocean_material_renderer_apply_contract.v1") {
+    throw "Handoff inspection ocean material renderer apply contract schema missing"
+}
+if ($handoff.ocean_material_control_port.sea_state_scalar_sample_schema -ne "rrkal_displaytools.sea_state_scalar_sample.v1") {
+    throw "Handoff inspection ocean material sea-state scalar sample schema missing"
+}
+if (-not $handoff.ocean_material_control_port.portable) {
+    throw "Handoff inspection ocean material renderer apply contract is not portable"
 }
 if ($handoff.layer_capability_matrix.schema -ne "rrkal_displaytools.layer_capability_matrix.v1") {
     throw "Handoff inspection layer_capability_matrix summary missing or invalid"

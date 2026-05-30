@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Ocean material renderer apply and sea-state scalar contracts
+
+Changes:
+- Added `rrkal_displaytools.ocean_material_renderer_apply_contract.v1` to `ocean_material_control_port` for Qt, no-GUI launch packets and renderer capability discovery.
+- Added `rrkal_displaytools.sea_state_scalar_sample.v1` under `sea_state_port`, defining normalized wave/roughness/foam sample fields without moving provider discovery/download/cache governance into displaytools.
+- Handoff inspection and smoke now verify the renderer apply contract, timeline/source handoff and sea-state scalar sample boundary.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Hydrology LOD renderer apply contract
 
 Changes:
