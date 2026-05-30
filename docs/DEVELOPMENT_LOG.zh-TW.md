@@ -230,6 +230,21 @@ Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
 
+## 2026-05-30 - Qt Timeline Inspect action
+
+Scope:
+- Added `Inspect: Timeline` to the grouped Qt Actions panel.
+- The action writes the Timeline runtime state and opens the current `timeline_runtime_state` JSON in the command/JSON preview pane.
+- Added `timeline` to `profile_ui_state_replay.qt_inspector_action_ids` and the replay/contracts group across Qt, no-GUI launch packet and renderer capability discovery.
+- Updated clone quickstart and profile schema docs; smoke verifies the new action ID, label, tooltip and handler.
+
+Decision:
+- Timeline keyframes are part of profile/UI replay and need a direct Qt Inspect surface for cross-machine scientific review.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+
 ## 2026-05-30 - Qt Layer matrix Inspect action
 
 Scope:

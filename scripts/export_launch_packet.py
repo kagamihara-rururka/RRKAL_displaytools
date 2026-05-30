@@ -1066,6 +1066,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
     ]
     qt_inspector_actions = [
         ("profile_replay", "Inspect: Profile replay"),
+        ("timeline", "Inspect: Timeline"),
         ("ocean_port", "Inspect: Ocean port"),
         ("hydro_lod", "Inspect: Hydro LOD"),
         ("style_routes", "Inspect: Style routes"),
@@ -1079,7 +1080,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         ("boundary_json", "Inspect: Boundary JSON"),
     ]
     qt_inspector_groups = [
-        {"id": "replay_contracts", "label": "Replay/contracts", "action_ids": ["profile_replay", "clone_ready", "module_seams"]},
+        {"id": "replay_contracts", "label": "Replay/contracts", "action_ids": ["profile_replay", "timeline", "clone_ready", "module_seams"]},
         {"id": "renderer_ports", "label": "Renderer ports", "action_ids": ["hydro_lod", "ocean_port", "style_routes", "layer_matrix", "layer_runtime"]},
         {"id": "research_interaction", "label": "Research interaction", "action_ids": ["layer_pick", "pin_pick", "cursor_geo", "boundary_json"]},
     ]

@@ -459,3 +459,8 @@
 
 - Qt Actions now includes `Inspect: Layer matrix`, `Inspect: Layer runtime` and `Inspect: Layer pick`.
 - These actions expose existing layer capability matrix, layer runtime state/ack and selected-layer pick JSON from the grouped Actions panel, and are listed in profile replay inspector contracts.
+
+### 2026-05-30 Qt Timeline Inspect action
+
+- Qt Actions now includes `Inspect: Timeline`.
+- The action writes/opens the current Timeline runtime state JSON, covering Timeline state, keyframes, playback readiness, segment state, active step, export options and interpolation contracts.

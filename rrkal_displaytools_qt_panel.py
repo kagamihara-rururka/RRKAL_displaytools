@@ -260,6 +260,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
     ]
     qt_inspector_actions = [
         ("profile_replay", "Inspect: Profile replay"),
+        ("timeline", "Inspect: Timeline"),
         ("ocean_port", "Inspect: Ocean port"),
         ("hydro_lod", "Inspect: Hydro LOD"),
         ("style_routes", "Inspect: Style routes"),
@@ -273,7 +274,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         ("boundary_json", "Inspect: Boundary JSON"),
     ]
     qt_inspector_groups = [
-        {"id": "replay_contracts", "label": "Replay/contracts", "action_ids": ["profile_replay", "clone_ready", "module_seams"]},
+        {"id": "replay_contracts", "label": "Replay/contracts", "action_ids": ["profile_replay", "timeline", "clone_ready", "module_seams"]},
         {"id": "renderer_ports", "label": "Renderer ports", "action_ids": ["hydro_lod", "ocean_port", "style_routes", "layer_matrix", "layer_runtime"]},
         {"id": "research_interaction", "label": "Research interaction", "action_ids": ["layer_pick", "pin_pick", "cursor_geo", "boundary_json"]},
     ]
@@ -2603,6 +2604,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         open_local_profiles_button = QtWidgets.QPushButton("本機配置")
         export_packet_button = QtWidgets.QPushButton("匯出啟動包")
         profile_replay_button = QtWidgets.QPushButton("Inspect: Profile replay")
+        timeline_button = QtWidgets.QPushButton("Inspect: Timeline")
         ocean_port_button = QtWidgets.QPushButton("Inspect: Ocean port")
         hydro_lod_button = QtWidgets.QPushButton("Inspect: Hydro LOD")
         style_routes_button = QtWidgets.QPushButton("Inspect: Style routes")
@@ -2626,6 +2628,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         stop_button = QtWidgets.QPushButton("停止本面板啟動的程序")
         for button, tooltip in (
             (profile_replay_button, "Replay/contracts: inspect portable UI/profile replay coverage JSON."),
+            (timeline_button, "Replay/contracts: inspect Timeline keyframes, runtime state and export options JSON."),
             (ocean_port_button, "Renderer ports: inspect scalar ocean material and sea-state handoff JSON."),
             (hydro_lod_button, "Renderer ports: inspect hydrology layer and LOD hook readiness JSON."),
             (style_routes_button, "Renderer ports: inspect parchment and tactical style renderer route JSON."),
@@ -2649,6 +2652,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         open_local_profiles_button.clicked.connect(self.open_local_profile_dir)
         export_packet_button.clicked.connect(self.export_launch_packet_dialog)
         profile_replay_button.clicked.connect(self.show_profile_ui_state_replay)
+        timeline_button.clicked.connect(self.show_timeline_runtime_state)
         ocean_port_button.clicked.connect(self.show_ocean_material_control_port)
         hydro_lod_button.clicked.connect(self.show_hydrology_lod_status)
         style_routes_button.clicked.connect(self.show_style_renderer_routes)
@@ -2672,7 +2676,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         stop_button.clicked.connect(self.stop_renderer)
         action_sections = (
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button)),
-            ("Inspect: Replay/contracts", (profile_replay_button, module_seams_button, clone_ready_button)),
+            ("Inspect: Replay/contracts", (profile_replay_button, timeline_button, module_seams_button, clone_ready_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, ocean_port_button, style_routes_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, pin_pick_button, cursor_geo_button, boundary_state_button)),
             ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, canvas_state_button, thumbnail_button, live_preview_button, smoke_button)),
@@ -6979,6 +6983,13 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             json.dumps(self.collect_profile_ui_state_replay(), ensure_ascii=False, indent=2)
         )
         self.status.setText("已顯示 profile UI replay coverage JSON")
+
+    def show_timeline_runtime_state(self) -> None:
+        self.write_timeline_runtime_state()
+        self.command_text.setPlainText(
+            json.dumps(self.collect_timeline_runtime_state(), ensure_ascii=False, indent=2)
+        )
+        self.status.setText("已顯示 timeline runtime state JSON")
 
     def show_ocean_material_control_port(self) -> None:
         self.command_text.setPlainText(

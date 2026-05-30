@@ -326,8 +326,11 @@ if ($launchPacket.cross_machine_clone_readiness.handoff_first_command -notlike "
 if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "boundary_json") {
     throw "Launch packet profile_ui_state_replay Boundary inspector action missing"
 }
-if ([int]$launchPacket.profile_ui_state_replay.qt_inspector_action_count -lt 12) {
+if ([int]$launchPacket.profile_ui_state_replay.qt_inspector_action_count -lt 13) {
     throw "Launch packet profile_ui_state_replay inspector action count missing"
+}
+if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "timeline") {
+    throw "Launch packet profile_ui_state_replay Timeline inspector action missing"
 }
 if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "layer_matrix") {
     throw "Launch packet profile_ui_state_replay layer matrix inspector action missing"
@@ -957,6 +960,9 @@ if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontain
 }
 if ($capabilities.profile_ui_state_replay.qt_inspector_action_ids -notcontains "layer_pick") {
     throw "Renderer profile_ui_state_replay layer pick inspector action missing"
+}
+if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontains "Inspect: Timeline") {
+    throw "Renderer profile_ui_state_replay Timeline inspector label missing"
 }
 if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontains "Inspect: Layer matrix") {
     throw "Renderer profile_ui_state_replay layer matrix inspector label missing"
@@ -1719,6 +1725,9 @@ if ($qtPanelSource -notlike "*Clone ready*") {
 if ($qtPanelSource -notlike "*Replay/contracts: inspect portable UI/profile replay coverage JSON*") {
     throw "Qt contract inspector tooltips are missing"
 }
+if ($qtPanelSource -notlike "*Replay/contracts: inspect Timeline keyframes, runtime state and export options JSON*") {
+    throw "Qt Timeline inspector tooltip is missing"
+}
 if ($qtPanelSource -notlike "*Renderer ports: inspect scalar ocean material and sea-state handoff JSON*") {
     throw "Qt Renderer ports inspector tooltip is missing"
 }
@@ -1761,8 +1770,14 @@ if ($qtPanelSource -notlike "*Boundary JSON*") {
 if ($qtPanelSource -notlike "*Inspect: Profile replay*") {
     throw "Qt inspector action prefix is missing"
 }
+if ($qtPanelSource -notlike "*Inspect: Timeline*") {
+    throw "Qt Timeline inspector button is missing"
+}
 if ($qtPanelSource -notlike "*Inspect: Boundary JSON*") {
     throw "Qt Boundary JSON inspector prefix is missing"
+}
+if ($qtPanelSource -notlike "*show_timeline_runtime_state*") {
+    throw "Qt Timeline runtime state action is missing"
 }
 if ($qtPanelSource -notlike "*actionSectionHeader*") {
     throw "Qt Actions section headers are missing"
@@ -1968,6 +1983,9 @@ if ($profileSchemaDoc -notmatch 'layer_runtime') {
 }
 if ($profileSchemaDoc -notmatch 'layer_matrix') {
     throw "Profile schema docs missing layer matrix inspector action id"
+}
+if ($profileSchemaDoc -notmatch 'timeline') {
+    throw "Profile schema docs missing Timeline inspector action id"
 }
 if ($profileSchemaDoc -notmatch 'qt_inspector_action_groups') {
     throw "Profile schema docs missing profile UI state replay inspector action groups"
