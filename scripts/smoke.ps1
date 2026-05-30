@@ -1205,6 +1205,9 @@ if ($visualInspectorIndex.entry_ids -notcontains "performance_smoke") {
 if ($visualInspectorIndex.entry_ids -notcontains "pre_decoupling_snapshot") {
     throw "Visual contract inspector index missing pre-decoupling snapshot inspector"
 }
+if ($visualInspectorIndex.entry_ids -notcontains "decoupling_boundaries") {
+    throw "Visual contract inspector index missing decoupling boundary inspector"
+}
 if ($visualInspectorIndex.recommended_cross_machine_sequence[0] -ne "renderer_config_gateway") {
     throw "Visual contract inspector index cross-machine sequence should start with config gateway"
 }
@@ -1257,6 +1260,9 @@ if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -Exec
 }
 if ($visualReviewPacket.pre_decoupling_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\pre_decoupling_gate.ps1 -ContractOnly") {
     throw "Visual contract review packet missing pre-decoupling gate command"
+}
+if ($visualReviewPacket.pre_decoupling_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_decoupling_boundaries.ps1") {
+    throw "Visual contract review packet missing decoupling boundary command"
 }
 if ($visualReviewPacket.boundary -notlike "*RRKAL owns discovery/download/import/cache governance*") {
     throw "Visual contract review packet data-governance boundary missing"
@@ -1315,6 +1321,41 @@ if ($styleRoutesInspectorPacket.portable_route_commands.parchment -notlike "*--s
 }
 if ($styleRoutesInspectorPacket.portable_route_commands.tactical -notlike "*--style-profile tactical*") {
     throw "Style routes inspector tactical command missing"
+}
+$decouplingBoundaryInspectorPath = Join-Path $RepoRoot "scripts\inspect_decoupling_boundaries.ps1"
+if (-not (Test-Path -LiteralPath $decouplingBoundaryInspectorPath)) {
+    throw "Decoupling boundary inspector script is missing"
+}
+$decouplingBoundaryInspectorContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $decouplingBoundaryInspectorPath, "-ContractOnly")
+$decouplingBoundaryInspectorContract = ($decouplingBoundaryInspectorContractText -join "`n") | ConvertFrom-Json
+if ($decouplingBoundaryInspectorContract.schema -ne "rrkal_displaytools.decoupling_boundary_inspector.v1") {
+    throw "Decoupling boundary inspector contract schema missing"
+}
+if ($decouplingBoundaryInspectorContract.required_packets -notcontains "rrkal_displaytools.module_boundary_registry.v1") {
+    throw "Decoupling boundary inspector module registry contract missing"
+}
+if ($decouplingBoundaryInspectorContract.boundary -notlike "*does not move code*") {
+    throw "Decoupling boundary inspector move boundary missing"
+}
+$decouplingBoundaryInspectorText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $decouplingBoundaryInspectorPath)
+$decouplingBoundaryInspectorPacket = ($decouplingBoundaryInspectorText -join "`n") | ConvertFrom-Json
+if ($decouplingBoundaryInspectorPacket.schema -ne "rrkal_displaytools.decoupling_boundary_inspection.v1") {
+    throw "Decoupling boundary inspection schema missing"
+}
+if ($decouplingBoundaryInspectorPacket.first_extraction_id -ne "render_plan_compose") {
+    throw "Decoupling boundary inspection first extraction mismatch"
+}
+if ($decouplingBoundaryInspectorPacket.first_extraction_target -ne "render_core/render_plan.py") {
+    throw "Decoupling boundary inspection target mismatch"
+}
+if ($decouplingBoundaryInspectorPacket.module_boundary_contract_schema -ne "rrkal_displaytools.module_decoupling_boundary_contract.v1") {
+    throw "Decoupling boundary inspection module contract schema missing"
+}
+if ($decouplingBoundaryInspectorPacket.tk_primary_ui_allowed -ne $false) {
+    throw "Decoupling boundary inspection must keep Tk out of primary UI"
+}
+if ($decouplingBoundaryInspectorPacket.rrkal_boundary.rule -notlike "*Do not move discovery/download/import/cache lifecycle*") {
+    throw "Decoupling boundary inspection RRKAL boundary missing"
 }
 $layerWorkflowInspectorPath = Join-Path $RepoRoot "scripts\inspect_layer_workflow.ps1"
 if (-not (Test-Path -LiteralPath $layerWorkflowInspectorPath)) {
@@ -6338,6 +6379,12 @@ if (-not $preDecouplingGate.ready) {
 }
 if (-not $preDecouplingGate.requires_clean_worktree) {
     throw "Pre-decoupling gate clean-worktree requirement missing"
+}
+if ($preDecouplingGate.required_before_move -notcontains "scripts/inspect_decoupling_boundaries.ps1") {
+    throw "Pre-decoupling gate boundary inspector requirement missing"
+}
+if ($preDecouplingGate.decoupling_boundary_inspector_command -notlike "*scripts/inspect_decoupling_boundaries.ps1") {
+    throw "Pre-decoupling gate boundary inspector command missing"
 }
 
 $preDecouplingSnapshotPath = Join-Path $RepoRoot "scripts\export_pre_decoupling_snapshot.ps1"

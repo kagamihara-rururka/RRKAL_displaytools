@@ -34,6 +34,7 @@ def decoupling_readiness_packet(phase: str = "pre_07_ui_closure") -> dict[str, o
             "contract_only_gate_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/pre_decoupling_gate.ps1 -ContractOnly",
             "pre_decoupling_snapshot_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/export_pre_decoupling_snapshot.ps1",
             "pre_decoupling_snapshot_output": "state/decoupling/pre_decoupling_snapshot.json",
+            "decoupling_boundary_inspector_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/inspect_decoupling_boundaries.ps1",
             "note": "Before the gate, continue UI/contract/handoff closure only; after the gate, start with render_plan_compose extraction.",
         },
         "controlled_interception_policy": controlled_interception_policy_packet("decoupling_readiness"),
@@ -155,6 +156,7 @@ def decoupling_readiness_packet(phase: str = "pre_07_ui_closure") -> dict[str, o
         "smoke_gate_before_each_move": [
             "scripts/smoke.ps1",
             "scripts/performance_smoke.ps1",
+            "scripts/inspect_decoupling_boundaries.ps1",
             "git diff --check",
             "docs/DEVELOPMENT_LOG.zh-TW.md smoke result",
         ],

@@ -41,10 +41,12 @@ $gate = [ordered]@{
     stage_timing_schema = $readiness.observability_baseline.stage_timing_schema
     render_telemetry_schema = $readiness.observability_baseline.render_telemetry_schema
     performance_smoke_command = $readiness.observability_baseline.pre_move_command
+    decoupling_boundary_inspector_command = $readiness.operation_schedule.decoupling_boundary_inspector_command
     required_before_move = @(
         "clean git worktree",
         "scripts/smoke.ps1",
         "scripts/performance_smoke.ps1",
+        "scripts/inspect_decoupling_boundaries.ps1",
         "git diff --check",
         "docs/DEVELOPMENT_LOG.zh-TW.md smoke result"
     )
@@ -79,6 +81,9 @@ if ($gate.render_telemetry_schema -ne "rrkal_displaytools.render_telemetry.v1") 
 if ($performanceContract.schema -ne $gate.performance_smoke_schema) {
     throw "Pre-decoupling performance smoke contract-only command mismatch"
 }
+if ($gate.decoupling_boundary_inspector_command -notlike "*scripts/inspect_decoupling_boundaries.ps1") {
+    throw "Pre-decoupling boundary inspector command missing"
+}
 
 if (-not $ContractOnly) {
     $gitStatus = git status --porcelain
@@ -94,6 +99,10 @@ if (-not $ContractOnly) {
     }
     if (-not (Test-Path -LiteralPath $gate.performance_smoke_output_required)) {
         throw "Pre-decoupling performance smoke output missing after smoke"
+    }
+    powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_decoupling_boundaries.ps1
+    if ($LASTEXITCODE -ne 0) {
+        throw "Pre-decoupling boundary inspector failed"
     }
     $gate.smoke_executed = $true
 }

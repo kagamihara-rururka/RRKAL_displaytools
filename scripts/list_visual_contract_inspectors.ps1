@@ -69,6 +69,14 @@ $entries = @(
         no_launch_side_effect = $true
     },
     [ordered]@{
+        id = "decoupling_boundaries"
+        category = "decoupling"
+        schema = "rrkal_displaytools.decoupling_boundary_inspector.v1"
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_decoupling_boundaries.ps1"
+        proves = @("render_plan_compose target", "module boundary registry", "RRKAL data/cache boundary", "Qt-primary UI boundary")
+        no_launch_side_effect = $true
+    },
+    [ordered]@{
         id = "handoff"
         category = "cross_machine"
         schema = "rrkal_displaytools.handoff_inspection.v1"
@@ -92,6 +100,7 @@ $entries = @(
         "hydrology_lod",
         "ocean_material",
         "performance_smoke",
+        "decoupling_boundaries",
         "pre_decoupling_snapshot",
         "pre_decoupling_gate"
     )

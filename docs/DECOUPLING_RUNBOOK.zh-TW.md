@@ -22,6 +22,15 @@ The gate must report:
 - `requires_clean_worktree=true`
 - `observability_baseline_schema=rrkal_displaytools.decoupling_observability_baseline.v1`
 - `performance_smoke_schema=rrkal_displaytools.performance_smoke.v1`
+- `decoupling_boundary_inspector_command=scripts/inspect_decoupling_boundaries.ps1`
+
+For a read-only boundary review before code movement, run:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_decoupling_boundaries.ps1
+```
+
+This must report `first_extraction_id=render_plan_compose`, `first_extraction_target=render_core/render_plan.py`, `tk_primary_ui_allowed=false`, and the RRKAL data/cache governance boundary.
 
 ## First extraction order
 
@@ -48,6 +57,7 @@ Start with pure render-plan helpers only. Preserve these fields while moving cod
 - `performance_smoke_telemetry`
 - `state/performance/stage_timing.jsonl`
 - `decoupling_readiness`
+- `decoupling_boundary_inspection`
 - `reviewer_packet_export`
 
 If a move requires runtime visual validation, stop after the smoke-gated commit and ask for local Qt/Taichi visual review.

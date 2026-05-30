@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - No-GUI decoupling boundary inspector
+
+- Added `scripts/inspect_decoupling_boundaries.ps1` for read-only inspection of the post-7 decoupling boundary before code movement.
+- The inspector reports `render_plan_compose -> render_core/render_plan.py`, keep-contracts, module boundary registry fields, Qt-primary/Tk exclusion and the RRKAL discovery/download/import/cache ownership boundary.
+- Wired the inspector into decoupling readiness, pre-decoupling gate metadata, visual contract review packet and smoke gates.
+- Smoke: PASS via `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; first run hit a transient cloud-drive `-File` visibility miss for the pre-decoupling snapshot script, second full run recovered and passed.
+
 ## 2026-05-31 - No-GUI Layer workflow inspector
 
 - Added `scripts/inspect_layer_workflow.ps1` for no-GUI inspection of layer research workflow, selection summary, operator groups and navigation copy contract.
