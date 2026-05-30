@@ -4335,6 +4335,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         module_seams_button = QtWidgets.QPushButton("Inspect: Module seams")
         decoupling_readiness_button = QtWidgets.QPushButton("Inspect: Decoupling")
         extraction_dry_run_button = QtWidgets.QPushButton("Inspect: Extraction dry-run")
+        source_map_button = QtWidgets.QPushButton("Inspect: Source map")
         pre7_closure_button = QtWidgets.QPushButton("Inspect: Pre-7 closure")
         copy_pre7_closure_summary_button = QtWidgets.QPushButton("Copy pre-7 closure")
         copy_decoupling_summary_button = QtWidgets.QPushButton("Copy decoupling summary")
@@ -4412,6 +4413,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (module_seams_button, "Replay/contracts: inspect future module extraction seam registry JSON."),
             (decoupling_readiness_button, "Replay/contracts: inspect the pre-7 UI closure policy and post-7 module extraction order."),
             (extraction_dry_run_button, "Replay/contracts: inspect no-code-move render-plan extraction dry-run checklist JSON."),
+            (source_map_button, "Replay/contracts: inspect render-plan compose source-map command and required monolith helpers."),
             (pre7_closure_button, "Replay/contracts: inspect pre-7 closure readiness before the formal post-7 decoupling gate."),
             (copy_pre7_closure_summary_button, "Replay/contracts: copy pre-7 closure status, script and next gate action for checkpoint handoff."),
             (copy_decoupling_summary_button, "Replay/contracts: copy the decoupling not-before gate, first extraction and gate command."),
@@ -4488,6 +4490,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         module_seams_button.clicked.connect(self.show_module_boundary_registry)
         decoupling_readiness_button.clicked.connect(self.show_decoupling_readiness)
         extraction_dry_run_button.clicked.connect(self.show_render_plan_extraction_dry_run)
+        source_map_button.clicked.connect(self.show_render_plan_compose_source_map)
         pre7_closure_button.clicked.connect(self.show_pre7_closure_readiness)
         copy_pre7_closure_summary_button.clicked.connect(self.copy_pre7_closure_readiness_summary)
         copy_decoupling_summary_button.clicked.connect(self.copy_decoupling_readiness_summary)
@@ -4542,7 +4545,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         stop_button.clicked.connect(self.stop_renderer)
         action_sections = (
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button, export_reviewer_packet_button)),
-            ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, copy_reviewer_fields_button, copy_goal_scorecard_button, timeline_button, reviewer_route_button, capability_summary_button, module_seams_button, decoupling_readiness_button, extraction_dry_run_button, pre7_closure_button, copy_pre7_closure_summary_button, copy_decoupling_summary_button, controlled_interception_button, copy_interception_summary_button, renderer_config_gateway_button, copy_renderer_config_summary_button, performance_telemetry_button, copy_performance_smoke_summary_button, pre_decoupling_snapshot_button, copy_pre_decoupling_snapshot_command_button, spatial_compression_roadmap_button, copy_spatial_compression_summary_button, copy_module_summary_button, clone_ready_button, copy_clone_summary_button)),
+            ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, copy_reviewer_fields_button, copy_goal_scorecard_button, timeline_button, reviewer_route_button, capability_summary_button, module_seams_button, decoupling_readiness_button, extraction_dry_run_button, source_map_button, pre7_closure_button, copy_pre7_closure_summary_button, copy_decoupling_summary_button, controlled_interception_button, copy_interception_summary_button, renderer_config_gateway_button, copy_renderer_config_summary_button, performance_telemetry_button, copy_performance_smoke_summary_button, pre_decoupling_snapshot_button, copy_pre_decoupling_snapshot_command_button, spatial_compression_roadmap_button, copy_spatial_compression_summary_button, copy_module_summary_button, clone_ready_button, copy_clone_summary_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, ocean_3d_controls_action_button, copy_ocean_summary_button, copy_ocean_guard_summary_button, ocean_3d_board_audit_button, copy_ocean_3d_board_audit_button, style_routes_button, copy_style_routes_summary_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, copy_layer_controls_guide_button, copy_layer_navigation_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
             ("Inspect: Visual review", (visual_readiness_button, uiux_closure_status_button, workspace_map_button, copy_visual_summary_button, copy_visual_closure_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, copy_style_thumb_status_button, thumbnail_button, live_preview_button)),
@@ -10722,6 +10725,29 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def show_render_plan_extraction_dry_run(self) -> None:
         self.command_text.setPlainText(json.dumps(self.collect_render_plan_extraction_dry_run(), ensure_ascii=False, indent=2))
         self.status.setText("Displayed render-plan extraction dry-run JSON")
+
+    def collect_render_plan_compose_source_map(self) -> dict[str, object]:
+        return {
+            "schema": "rrkal_displaytools.qt_render_plan_compose_source_map.v1",
+            "status": "ready",
+            "no_code_move": True,
+            "script": "scripts\\inspect_render_plan_compose_source_map.ps1",
+            "source_file": "taichi_global_bathymetry.py",
+            "target_module": "render_core/render_plan.py",
+            "required_targets": [
+                "alpha_compose",
+                "alpha_blend_compose",
+                "layer_render_plan_compose_queue",
+                "layer_render_plan_compose_runs",
+                "apply_layer_render_plan_composition",
+                "compile_layer_render_plan",
+            ],
+            "next_action": "Run the source-map inspector after the formal post-7 gate and before moving render-plan helpers.",
+        }
+
+    def show_render_plan_compose_source_map(self) -> None:
+        self.command_text.setPlainText(json.dumps(self.collect_render_plan_compose_source_map(), ensure_ascii=False, indent=2))
+        self.status.setText("Displayed render-plan compose source-map JSON")
 
     def collect_pre7_closure_readiness(self) -> dict[str, object]:
         return {

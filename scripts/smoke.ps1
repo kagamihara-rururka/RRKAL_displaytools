@@ -6099,6 +6099,15 @@ if ($qtPanelSource -notlike "*Inspect: Extraction dry-run*") {
 if ($qtPanelSource -notlike "*Replay/contracts: inspect no-code-move render-plan extraction dry-run checklist JSON*") {
     throw "Qt extraction dry-run tooltip is missing"
 }
+if ($qtPanelSource -notlike "*Inspect: Source map*") {
+    throw "Qt Actions source map button is missing"
+}
+if ($qtPanelSource -notlike "*show_render_plan_compose_source_map*") {
+    throw "Qt source map action is missing"
+}
+if ($qtPanelSource -notlike "*Replay/contracts: inspect render-plan compose source-map command and required monolith helpers*") {
+    throw "Qt source map tooltip is missing"
+}
 if ($qtPanelSource -notlike "*Inspect: Pre-7 closure*") {
     throw "Qt Actions pre-7 closure button is missing"
 }

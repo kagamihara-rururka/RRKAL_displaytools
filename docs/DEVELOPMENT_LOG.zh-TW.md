@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Qt render-plan source map entry
+
+- Added `Inspect: Source map` to Qt Replay/contracts.
+- The action exposes the source-map inspector command, source file, target module and required monolith helper IDs without moving code.
+- Smoke now gates the button, action method and tooltip.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Source map in reviewer packet
 
 - Added `render_plan_compose_source_map` to the no-GUI visual contract inspector index.
