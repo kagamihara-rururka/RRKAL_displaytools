@@ -24,6 +24,7 @@ TIMELINE_EXPORT_MP4 = "timeline_animation.mp4"
 sys.path.insert(0, str(ROOT))
 
 from closed_loop_status import renderer_closed_loop_status_packet  # noqa: E402
+from controlled_interception import controlled_interception_policy_packet  # noqa: E402
 from decoupling_readiness import decoupling_readiness_packet  # noqa: E402
 from pin_projection import pin_projection_contract_packet  # noqa: E402
 from profile_schema import load_profile_payload, profile_payload_errors  # noqa: E402
@@ -1242,12 +1243,14 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
                 {"id": "goal_closure", "fields": ["goal_closure_scorecard", "goal_closure_scorecard.copy_summary_contract"]},
                 {"id": "compose_performance", "fields": ["compose_performance_summary", "layer_render_plan_performance.compose_pass_budget"]},
                 {"id": "decoupling", "fields": ["decoupling_readiness_summary", "decoupling_readiness.first_extraction_order"]},
+                {"id": "controlled_interception", "fields": ["controlled_interception_summary", "controlled_interception_policy.blocked_patterns"]},
             ],
             "portable": True,
         },
         "recommended_review_fields": [
             "compose_performance_summary",
             "decoupling_readiness.first_extraction_order",
+            "controlled_interception_policy.blocked_patterns",
             "layer_selection_tool.selection_summary_contract.quick_actions_summary_contract",
             "layer_selection_affordance.active_quick_actions",
             "layer_render_plan_performance.compose_pass_budget",
@@ -1266,6 +1269,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "style_routes_summary",
             "module_boundary_summary",
             "decoupling_readiness_summary",
+            "controlled_interception_summary",
             "compose_performance_summary",
         ],
         "included_packet_fields": [
@@ -1281,6 +1285,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "style_profile_renderer_routes",
             "module_boundary_registry",
             "decoupling_readiness",
+            "controlled_interception_policy",
             "layer_render_plan_performance",
             "goal_closure_scorecard",
             "reviewer_packet_export",
@@ -4037,6 +4042,7 @@ def launch_packet(
         "style_template_visual_preview": style_template_visual_preview_packet(style_renderer_entries_packet("scripts.export_launch_packet", profile.get("style_profile") if isinstance(profile.get("style_profile"), str) else None), "scripts.export_launch_packet"),
         "module_boundary_registry": module_boundary_registry_packet("scripts.export_launch_packet"),
         "decoupling_readiness": decoupling_readiness_packet("post_07_decoupling"),
+        "controlled_interception_policy": controlled_interception_policy_packet("scripts.export_launch_packet"),
         "cross_machine_clone_readiness": cross_machine_clone_readiness_packet(profile_launch_readiness_packet("scripts.export_launch_packet", style_renderer_entries_packet("scripts.export_launch_packet", profile.get("style_profile") if isinstance(profile.get("style_profile"), str) else None), layer_operator_groups_packet(layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None), "scripts.export_launch_packet")), module_boundary_registry_packet("scripts.export_launch_packet"), "scripts.export_launch_packet"),
         "profile_launch_readiness": profile_launch_readiness_packet("scripts.export_launch_packet", style_renderer_entries_packet("scripts.export_launch_packet", profile.get("style_profile") if isinstance(profile.get("style_profile"), str) else None), layer_operator_groups_packet(layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None), "scripts.export_launch_packet")),
         "profile_launch_readiness_ui": profile_launch_readiness_ui_packet(profile_launch_readiness_packet("scripts.export_launch_packet", style_renderer_entries_packet("scripts.export_launch_packet", profile.get("style_profile") if isinstance(profile.get("style_profile"), str) else None), layer_operator_groups_packet(layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None), "scripts.export_launch_packet")), "scripts.export_launch_packet"),

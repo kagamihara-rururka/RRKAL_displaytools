@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Reviewer packet controlled interception handoff
+
+Changes:
+- Added `controlled_interception_policy` and `controlled_interception_summary` to Qt launch/reviewer packets and no-GUI reviewer export.
+- Added a reviewer field-guide `controlled_interception` group pointing at blocked interception patterns.
+- Smoke now gates launch packet and no-GUI exporter coverage for the policy.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Controlled interception policy packet
 
 Changes:

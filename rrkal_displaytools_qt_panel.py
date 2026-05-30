@@ -425,12 +425,14 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
                 {"id": "goal_closure", "fields": ["goal_closure_scorecard", "goal_closure_scorecard.copy_summary_contract"]},
                 {"id": "compose_performance", "fields": ["compose_performance_summary", "layer_render_plan_performance.compose_pass_budget"]},
                 {"id": "decoupling", "fields": ["decoupling_readiness_summary", "decoupling_readiness.first_extraction_order"]},
+                {"id": "controlled_interception", "fields": ["controlled_interception_summary", "controlled_interception_policy.blocked_patterns"]},
             ],
             "portable": True,
         },
         "recommended_review_fields": [
             "compose_performance_summary",
             "decoupling_readiness.first_extraction_order",
+            "controlled_interception_policy.blocked_patterns",
             "layer_selection_tool.selection_summary_contract.quick_actions_summary_contract",
             "layer_selection_affordance.active_quick_actions",
             "layer_render_plan_performance.compose_pass_budget",
@@ -449,6 +451,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "style_routes_summary",
             "module_boundary_summary",
             "decoupling_readiness_summary",
+            "controlled_interception_summary",
             "compose_performance_summary",
         ],
         "included_packet_fields": [
@@ -464,6 +467,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "style_profile_renderer_routes",
             "module_boundary_registry",
             "decoupling_readiness",
+            "controlled_interception_policy",
             "layer_render_plan_performance",
             "goal_closure_scorecard",
             "reviewer_packet_export",
@@ -5316,6 +5320,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
 
         return decoupling_readiness_packet("post_07_decoupling")
 
+    def collect_controlled_interception_policy(self) -> dict[str, object]:
+        from controlled_interception import controlled_interception_policy_packet
+
+        return controlled_interception_policy_packet("rrkal_displaytools_qt_panel")
+
     def module_boundary_summary_text(self, registry: dict[str, object] | None = None) -> str:
         registry = registry if isinstance(registry, dict) else self.collect_module_boundary_registry()
         contract = registry.get("decoupling_boundary_contract") if isinstance(registry.get("decoupling_boundary_contract"), dict) else {}
@@ -5351,6 +5360,19 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"extractions={len(extraction_order)}; "
             f"gate={schedule.get('pre_decoupling_gate_command', 'scripts/pre_decoupling_gate.ps1')}; "
             f"boundary={boundary.get('rule', 'RRKAL owns data/cache governance')}"
+        )
+
+    def controlled_interception_summary_text(self, packet: dict[str, object] | None = None) -> str:
+        packet = packet if isinstance(packet, dict) else self.collect_controlled_interception_policy()
+        allowed = packet.get("allowed_patterns") if isinstance(packet.get("allowed_patterns"), list) else []
+        blocked = packet.get("blocked_patterns") if isinstance(packet.get("blocked_patterns"), list) else []
+        first_use = packet.get("first_decoupling_use") if isinstance(packet.get("first_decoupling_use"), dict) else {}
+        return (
+            "Controlled interception: "
+            f"allowed={len(allowed)}; "
+            f"blocked={len(blocked)}; "
+            f"first_use={first_use.get('target', 'render_plan_compose')}; "
+            "rule=scoped_visible_removable"
         )
 
     def collect_visual_feature_closure_matrix(self) -> dict[str, object]:
@@ -5605,6 +5627,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "style_routes_summary": self.style_routes_summary_text(),
             "module_boundary_summary": self.module_boundary_summary_text(),
             "decoupling_readiness_summary": self.decoupling_readiness_summary_text(),
+            "controlled_interception_summary": self.controlled_interception_summary_text(),
             "compose_performance_summary": self.compose_performance_reviewer_summary_text(),
             "goal_closure_scorecard": self.collect_goal_closure_scorecard(),
             "cross_machine_clone_readiness": self.collect_cross_machine_clone_readiness(),
@@ -5616,6 +5639,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "style_profile_renderer_routes": self.collect_style_profile_renderer_routes(),
             "module_boundary_registry": self.collect_module_boundary_registry(),
             "decoupling_readiness": self.collect_decoupling_readiness(),
+            "controlled_interception_policy": self.collect_controlled_interception_policy(),
             "visual_feature_closure_matrix": self.collect_visual_feature_closure_matrix(),
             "goal_closure_scorecard": self.collect_goal_closure_scorecard(),
             "renderer_output_artifact_contract": self.collect_renderer_output_artifact_contract(),
@@ -5671,6 +5695,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "style_template_visual_preview": self.collect_style_template_visual_preview(),
             "module_boundary_registry": self.collect_module_boundary_registry(),
             "decoupling_readiness": self.collect_decoupling_readiness(),
+            "controlled_interception_policy": self.collect_controlled_interception_policy(),
             "cross_machine_clone_readiness": self.collect_cross_machine_clone_readiness(),
             "profile_launch_readiness": self.collect_profile_launch_readiness(),
             "profile_launch_readiness_ui": self.collect_profile_launch_readiness_ui(),

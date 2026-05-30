@@ -37,6 +37,7 @@ Last updated: 2026-05-30
 
 ## Done
 - 2026-05-30: Documented Cloud/local development workflow and handoff entrypoint, including private transcript backup policy and maturity reporting requirements.
+- 2026-05-30: Added controlled interception policy to launch/reviewer packet handoff for cross-machine review.
 - 2026-05-30: Added `rrkal_displaytools.controlled_interception_policy.v1` for bounded import/output/runtime interception during smoke, handoff and module extraction.
 - 2026-05-30: Suppressed transient cloud-drive retry noise in passing smoke logs while preserving final failure output.
 - 2026-05-30: Added Qt `Copy decoupling summary` for handoff-friendly post-7 extraction readiness.

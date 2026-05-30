@@ -33,6 +33,7 @@ if ($ContractOnly) {
         writes_output = $false
         compose_performance_summary_field = "compose_performance_summary"
         decoupling_readiness_field = "decoupling_readiness"
+        controlled_interception_policy_field = "controlled_interception_policy"
         boundary = "Contract-only mode is for smoke checks; normal mode writes a local reviewer packet under state/."
     } | ConvertTo-Json -Depth 8
     exit 0
@@ -78,6 +79,7 @@ $composePerformanceSummary = "Compose budget: status={0}; runs=-; merge=-; compo
 )
 $decouplingFirst = @($launchPacket.decoupling_readiness.first_extraction_order | Select-Object -First 1)[0]
 $decouplingReadinessSummary = "Decoupling readiness: phase=$($launchPacket.decoupling_readiness.phase); first=$($decouplingFirst.id); extractions=$(@($launchPacket.decoupling_readiness.first_extraction_order).Count); boundary=$($launchPacket.decoupling_readiness.rrkal_boundary.rule)"
+$controlledInterceptionSummary = "Controlled interception: allowed=$(@($launchPacket.controlled_interception_policy.allowed_patterns).Count); blocked=$(@($launchPacket.controlled_interception_policy.blocked_patterns).Count); first_use=$($launchPacket.controlled_interception_policy.first_decoupling_use.target); rule=scoped_visible_removable"
 
 $reviewerPacket = [ordered]@{
     schema = "rrkal_displaytools.reviewer_packet.v1"
@@ -93,6 +95,7 @@ $reviewerPacket = [ordered]@{
     style_routes_summary = "Style routes: selected=$($launchPacket.style_profile_renderer_routes.selected_style); profiles=$($launchPacket.style_profile_renderer_routes.route_count)"
     module_boundary_summary = "Module seams: modules=$($launchPacket.module_boundary_registry.module_count); boundary=RRKAL-owned data/cache"
     decoupling_readiness_summary = $decouplingReadinessSummary
+    controlled_interception_summary = $controlledInterceptionSummary
     compose_performance_summary = $composePerformanceSummary
     cross_machine_clone_readiness = $launchPacket.cross_machine_clone_readiness
     profile_launch_readiness = $launchPacket.profile_launch_readiness
@@ -103,6 +106,7 @@ $reviewerPacket = [ordered]@{
     style_profile_renderer_routes = $launchPacket.style_profile_renderer_routes
     module_boundary_registry = $launchPacket.module_boundary_registry
     decoupling_readiness = $launchPacket.decoupling_readiness
+    controlled_interception_policy = $launchPacket.controlled_interception_policy
     visual_feature_closure_matrix = $launchPacket.visual_feature_closure_matrix
     renderer_output_artifact_contract = $launchPacket.renderer_output_artifact_contract
     layer_render_plan_performance = $performance
