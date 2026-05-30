@@ -1226,6 +1226,13 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
         "no_gui_export_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\export_reviewer_packet.ps1",
         "no_gui_contract_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\export_reviewer_packet.ps1 -ContractOnly",
         "no_gui_export_schema": "rrkal_displaytools.no_gui_reviewer_packet_export.v1",
+        "no_gui_primary_summary_field": "compose_performance_summary",
+        "recommended_review_fields": [
+            "compose_performance_summary",
+            "layer_render_plan_performance.compose_pass_budget",
+            "layer_render_plan_performance.compose_run_parity_artifact_workflow",
+            "visual_feature_closure_matrix",
+        ],
         "included_summary_fields": [
             "clone_reviewer_summary",
             "launch_reviewer_summary",

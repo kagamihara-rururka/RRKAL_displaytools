@@ -962,6 +962,12 @@ if ($launchPacket.reviewer_packet_export.no_gui_export_script -ne "scripts\expor
 if ($launchPacket.reviewer_packet_export.no_gui_export_schema -ne "rrkal_displaytools.no_gui_reviewer_packet_export.v1") {
     throw "Launch packet reviewer no-GUI export schema missing"
 }
+if ($launchPacket.reviewer_packet_export.no_gui_primary_summary_field -ne "compose_performance_summary") {
+    throw "Launch packet reviewer no-GUI primary summary field missing"
+}
+if ($launchPacket.reviewer_packet_export.recommended_review_fields -notcontains "layer_render_plan_performance.compose_pass_budget") {
+    throw "Launch packet reviewer recommended compose budget field missing"
+}
 if ($launchPacket.reviewer_packet_export.qt_action -ne "export_reviewer_packet_dialog") {
     throw "Launch packet reviewer packet Qt action missing or invalid"
 }
@@ -2212,6 +2218,9 @@ if ($capabilities.reviewer_packet_export.qt_action -ne "export_reviewer_packet_d
 if ($capabilities.reviewer_packet_export.no_gui_contract_command -notlike "*-ContractOnly*") {
     throw "Renderer reviewer no-GUI contract command missing"
 }
+if ($capabilities.reviewer_packet_export.recommended_review_fields -notcontains "layer_render_plan_performance.compose_run_parity_artifact_workflow") {
+    throw "Renderer reviewer recommended parity workflow field missing"
+}
 if ($capabilities.reviewer_packet_export.included_summary_fields -notcontains "clone_reviewer_summary") {
     throw "Renderer reviewer packet clone summary field missing"
 }
@@ -3424,6 +3433,12 @@ if ($handoff.reviewer_packet_export.qt_action -ne "export_reviewer_packet_dialog
 }
 if ($handoff.reviewer_packet_export.no_gui_export_script -ne "scripts\export_reviewer_packet.ps1") {
     throw "Handoff inspection reviewer no-GUI export script missing"
+}
+if ($handoff.reviewer_packet_export.no_gui_primary_summary_field -ne "compose_performance_summary") {
+    throw "Handoff inspection reviewer no-GUI primary summary field missing"
+}
+if ($handoff.reviewer_packet_export.recommended_review_fields -notcontains "compose_performance_summary") {
+    throw "Handoff inspection reviewer recommended compose summary field missing"
 }
 if ($handoff.reviewer_packet_export.included_summary_fields -notcontains "research_interaction_summary") {
     throw "Handoff inspection reviewer packet research summary field missing"

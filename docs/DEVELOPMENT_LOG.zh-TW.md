@@ -1,5 +1,14 @@
 # Development Log
 
+## 2026-05-30 - Reviewer packet no-GUI review fields
+
+Changes:
+- Added `no_gui_primary_summary_field=compose_performance_summary` to `reviewer_packet_export` across Qt, no-GUI launch packet export, renderer capabilities and handoff inspection.
+- Added `recommended_review_fields` for compose performance, compose pass budget, parity workflow and visual closure matrix evidence.
+- Smoke gates launch packet, renderer capability and handoff fields.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
 ## 2026-05-30 - No-GUI reviewer packet exporter
 
 Changes:
