@@ -347,6 +347,18 @@ if ($launchPacket.module_boundary_registry.target_modules -notcontains "render_c
 if ($launchPacket.module_boundary_registry.tk_primary_ui_allowed -ne $false) {
     throw "Launch packet module_boundary_registry must keep Tk out of primary UI"
 }
+if ($launchPacket.module_boundary_registry.decoupling_boundary_contract.schema -ne "rrkal_displaytools.module_decoupling_boundary_contract.v1") {
+    throw "Launch packet module decoupling boundary contract missing or invalid"
+}
+if ($launchPacket.module_boundary_registry.decoupling_boundary_contract.extraction_order -notcontains "render_core/taichi_globe.py") {
+    throw "Launch packet module decoupling boundary missing render core extraction order"
+}
+if ($launchPacket.module_boundary_registry.decoupling_boundary_contract.rrkal_owns -notcontains "dataset discovery") {
+    throw "Launch packet module decoupling boundary missing RRKAL ownership"
+}
+if ($launchPacket.module_boundary_registry.decoupling_boundary_contract.tk_primary_ui_allowed -ne $false) {
+    throw "Launch packet module decoupling boundary must keep Tk out of primary UI"
+}
 if ($launchPacket.cross_machine_clone_readiness.schema -ne "rrkal_displaytools.cross_machine_clone_readiness.v1") {
     throw "Launch packet cross_machine_clone_readiness schema missing or invalid"
 }
@@ -1150,6 +1162,12 @@ if ($capabilities.module_boundary_registry.schema -ne "rrkal_displaytools.module
 if ($capabilities.module_boundary_registry.target_modules -notcontains "data_sources/*") {
     throw "Renderer module_boundary_registry missing RRKAL data boundary"
 }
+if ($capabilities.module_boundary_registry.decoupling_boundary_contract.schema -ne "rrkal_displaytools.module_decoupling_boundary_contract.v1") {
+    throw "Renderer module decoupling boundary contract missing or invalid"
+}
+if ($capabilities.module_boundary_registry.decoupling_boundary_contract.stable_contracts_before_move -notcontains "smoke_gates") {
+    throw "Renderer module decoupling boundary stable contract list incomplete"
+}
 if ($capabilities.cross_machine_clone_readiness.schema -ne "rrkal_displaytools.cross_machine_clone_readiness.v1") {
     throw "Renderer cross_machine_clone_readiness schema missing or invalid"
 }
@@ -1880,6 +1898,9 @@ if ($handoff.style_profile_renderer_routes.required_route_contract_ids -notconta
 if ($handoff.launch_packet_contracts.module_boundary_registry -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Handoff inspection module_boundary_registry launch contract missing or invalid"
 }
+if ($handoff.launch_packet_contracts.module_decoupling_boundary_contract -ne "rrkal_displaytools.module_decoupling_boundary_contract.v1") {
+    throw "Handoff inspection module decoupling boundary contract missing or invalid"
+}
 if ($handoff.module_boundary_registry.launch_packet_schema -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Handoff inspection module_boundary_registry launch schema missing or invalid"
 }
@@ -1888,6 +1909,12 @@ if ($handoff.module_boundary_registry.renderer_capabilities_schema -ne "rrkal_di
 }
 if ($handoff.module_boundary_registry.tk_primary_ui_allowed -ne $false) {
     throw "Handoff inspection module_boundary_registry primary UI boundary invalid"
+}
+if ($handoff.module_boundary_registry.decoupling_boundary_contract_schema -ne "rrkal_displaytools.module_decoupling_boundary_contract.v1") {
+    throw "Handoff inspection module decoupling boundary schema missing"
+}
+if ($handoff.module_boundary_registry.extraction_order -notcontains "contracts/launch_packets.py") {
+    throw "Handoff inspection module decoupling extraction order missing contracts first step"
 }
 if ($handoff.launch_packet_contracts.cross_machine_clone_readiness -ne "rrkal_displaytools.cross_machine_clone_readiness.v1") {
     throw "Handoff inspection cross_machine_clone_readiness launch contract missing or invalid"

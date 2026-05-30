@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Module decoupling boundary contract
+
+Changes:
+- Added `rrkal_displaytools.module_decoupling_boundary_contract.v1` under `module_boundary_registry` for Qt, no-GUI launch packets and renderer capability discovery.
+- The contract records extraction order, stable contracts required before moving code, forbidden cross-imports, Qt-first/Tk-not-primary policy and RRKAL-owned data governance boundaries.
+- Handoff inspection and smoke now verify the decoupling contract before future module extraction work.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Style renderer entry contracts
 
 Changes:
