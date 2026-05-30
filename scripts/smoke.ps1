@@ -701,6 +701,18 @@ if ($launchPacket.pin_overlay.renderer_overlay_status -ne "wired_to_pin_overlay_
 if ($launchPacket.pin_overlay.cursor_fill_priority -ne "renderer_cursor_geodesy_state_then_ui_estimate") {
     throw "Launch packet pin_overlay cursor fill priority mismatch"
 }
+if ($launchPacket.pin_overlay.pin_summary_contract_schema -ne "rrkal_displaytools.pin_summary_contract.v1") {
+    throw "Launch packet pin_overlay summary contract schema missing or invalid"
+}
+if ($launchPacket.pin_overlay.pin_summary_contract.qt_list_object -ne "pinList") {
+    throw "Launch packet pin_overlay summary list object missing or invalid"
+}
+if ($launchPacket.pin_overlay.pin_summary_contract.qt_copy_action -ne "copy_pin_overlay_summary") {
+    throw "Launch packet pin_overlay summary copy action missing or invalid"
+}
+if (-not $launchPacket.pin_overlay.pin_summary_contract.portable) {
+    throw "Launch packet pin_overlay summary portability flag missing"
+}
 $timelineExportDir = Join-Path $env:TEMP "rrkal_displaytools_smoke_timeline_export"
 $timelineExportGif = Join-Path $timelineExportDir "smoke.gif"
 $timelineExportMp4 = Join-Path $timelineExportDir "smoke.mp4"
@@ -933,6 +945,12 @@ if ($capabilities.pin_overlay.horizon_control -ne "--pin-horizon-eps / PIN_HORIZ
 }
 if ($capabilities.pin_overlay.cursor_fill_sources -notcontains "renderer_cursor_geodesy_state") {
     throw "Renderer pin_overlay cursor fill source missing"
+}
+if ($capabilities.pin_overlay.pin_summary_contract_schema -ne "rrkal_displaytools.pin_summary_contract.v1") {
+    throw "Renderer pin_overlay summary contract schema missing or invalid"
+}
+if ($capabilities.pin_overlay.pin_summary_contract.qt_copy_action -ne "copy_pin_overlay_summary") {
+    throw "Renderer pin_overlay summary copy action missing or invalid"
 }
 if ($capabilities.boundary_emphasis_control.schema -ne "rrkal_displaytools.boundary_emphasis_control.v1") {
     throw "Renderer boundary_emphasis_control schema missing or invalid"
@@ -1544,6 +1562,18 @@ if ($handoff.pin_overlay.qt_ui_affordances -notcontains "projection_rotation_occ
 if ($handoff.pin_overlay.pin_list_summary_format -ne "source=<coordinate_source_label>") {
     throw "Handoff inspection pin_overlay list summary format missing"
 }
+if ($handoff.pin_overlay.pin_summary_contract_schema -ne "rrkal_displaytools.pin_summary_contract.v1") {
+    throw "Handoff inspection pin_overlay summary contract schema missing or invalid"
+}
+if ($handoff.pin_overlay.pin_summary_contract.qt_list_object -ne "pinList") {
+    throw "Handoff inspection pin_overlay summary list object missing or invalid"
+}
+if ($handoff.pin_overlay.pin_summary_contract.qt_copy_action -ne "copy_pin_overlay_summary") {
+    throw "Handoff inspection pin_overlay summary copy action missing or invalid"
+}
+if (-not $handoff.pin_overlay.pin_summary_contract.portable) {
+    throw "Handoff inspection pin_overlay summary portability flag missing"
+}
 if ($handoff.launch_packet_contracts.boundary_emphasis_control -ne "rrkal_displaytools.boundary_emphasis_control.v1") {
     throw "Handoff inspection boundary_emphasis_control launch contract missing or invalid"
 }
@@ -2034,6 +2064,15 @@ if ($qtPanelSource -notlike "*setAccessibleDescription*") {
 }
 if ($qtPanelSource -notlike "*Pin pick*") {
     throw "Qt Pin pick action button is missing"
+}
+if ($qtPanelSource -notlike "*pinList*") {
+    throw "Qt Pin list object name missing"
+}
+if ($qtPanelSource -notlike "*copy_pin_overlay_summary*") {
+    throw "Qt Pin overlay copy summary action missing"
+}
+if ($qtPanelSource -notlike "*pin_overlay_summary_text*") {
+    throw "Qt Pin overlay summary formatter missing"
 }
 if ($qtPanelSource -notlike "*Research interaction: inspect renderer Pin hover/click pick bridge JSON*") {
     throw "Qt Pin pick action tooltip is missing"

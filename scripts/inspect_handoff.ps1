@@ -200,6 +200,8 @@ $summary = [ordered]@{
         qt_ui_affordances = $launchPacket.pin_overlay.qt_ui_affordances
         qt_projection_note = $launchPacket.pin_overlay.qt_projection_note
         pin_list_summary_format = $launchPacket.pin_overlay.pin_list_summary_format
+        pin_summary_contract_schema = $launchPacket.pin_overlay.pin_summary_contract_schema
+        pin_summary_contract = $launchPacket.pin_overlay.pin_summary_contract
         current_status = $launchPacket.pin_overlay.current_status
     }
     boundary_emphasis_control = @{

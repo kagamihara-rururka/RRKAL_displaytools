@@ -2781,6 +2781,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         copy_selection_summary_button = QtWidgets.QPushButton("Copy selection summary")
         layer_ops_button = QtWidgets.QPushButton("Inspect: Layer ops")
         pin_pick_button = QtWidgets.QPushButton("Inspect: Pin pick")
+        copy_pin_summary_action_button = QtWidgets.QPushButton("Copy pin summary")
         cursor_geo_button = QtWidgets.QPushButton("Inspect: Cursor geo")
         boundary_state_button = QtWidgets.QPushButton("Inspect: Boundary JSON")
         copy_boundary_summary_button = QtWidgets.QPushButton("Copy boundary summary")
@@ -2812,6 +2813,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (layer_ops_button, "Layer ops: inspect active layer operation summary, last operation and replay metadata JSON."),
             (canvas_state_button, "Research interaction: inspect Qt Canvas state, preview metadata and provenance summary."),
             (pin_pick_button, "Research interaction: inspect renderer Pin hover/click pick bridge JSON."),
+            (copy_pin_summary_action_button, "Pin overlay: copy pin count, selected pin, source and projection/occlusion summary."),
             (cursor_geo_button, "Research interaction: inspect mouse cursor latitude/longitude geodesy bridge JSON."),
             (boundary_state_button, "Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON."),
             (copy_boundary_summary_button, "Boundary emphasis: copy target, alignment, color, opacity and renderer bridge summary."),
@@ -2844,6 +2846,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         copy_selection_summary_button.clicked.connect(self.copy_layer_selection_summary)
         layer_ops_button.clicked.connect(self.show_layer_operation_feedback)
         pin_pick_button.clicked.connect(self.show_pin_pick_state)
+        copy_pin_summary_action_button.clicked.connect(self.copy_pin_overlay_summary)
         cursor_geo_button.clicked.connect(self.show_cursor_geodesy_state)
         boundary_state_button.clicked.connect(self.show_boundary_state)
         copy_boundary_summary_button.clicked.connect(self.copy_boundary_emphasis_summary)
@@ -2863,7 +2866,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button)),
             ("Inspect: Replay/contracts", (profile_replay_button, timeline_button, module_seams_button, clone_ready_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, ocean_port_button, style_routes_button, layer_matrix_button, layer_runtime_button)),
-            ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, cursor_geo_button, boundary_state_button, copy_boundary_summary_button)),
+            ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, boundary_state_button, copy_boundary_summary_button)),
             ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, thumbnail_button, live_preview_button)),
             ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, smoke_button)),
             ("Process", (launch_button, restart_button, stop_button)),
@@ -3031,16 +3034,20 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         remove_pin_button = QtWidgets.QPushButton("移除選取 Pin")
         use_cursor_button = QtWidgets.QPushButton("用游標填入 Pin")
         show_pin_pick_button = QtWidgets.QPushButton("顯示 Pin pick JSON")
+        copy_pin_summary_button = QtWidgets.QPushButton("複製 Pin 摘要")
         add_pin_button.clicked.connect(self.add_pin_marker)
         remove_pin_button.clicked.connect(self.remove_selected_pin_marker)
         use_cursor_button.clicked.connect(self.fill_pin_from_cursor)
         show_pin_pick_button.clicked.connect(self.show_pin_pick_state)
+        copy_pin_summary_button.clicked.connect(self.copy_pin_overlay_summary)
         pin_actions.addWidget(add_pin_button)
         pin_actions.addWidget(remove_pin_button)
         pin_actions.addWidget(use_cursor_button)
         pin_actions.addWidget(show_pin_pick_button)
+        pin_actions.addWidget(copy_pin_summary_button)
         pin_form.addRow(pin_actions)
         self.pin_list = QtWidgets.QListWidget()
+        self.pin_list.setObjectName("pinList")
         self.pin_list.setMinimumHeight(110)
         self.pin_list.currentRowChanged.connect(self.select_pin_marker)
         pin_form.addRow("Pins", self.pin_list)
@@ -4555,6 +4562,25 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
 
     def collect_research_pins(self) -> list[dict[str, object]]:
         return [dict(pin) for pin in self.research_pins]
+
+    def pin_overlay_summary_text(self) -> str:
+        contract = pin_projection_contract_packet().get("pin_summary_contract", {})
+        label = "Pin overlay"
+        if isinstance(contract, dict):
+            label = str(contract.get("label") or label)
+        selected = self.selected_pin_packet()
+        selected_id = self.selected_pin_id or "none"
+        source_key = None
+        if isinstance(selected, dict):
+            source_key = str(selected.get("coordinate_source") or selected.get("placement") or "manual_lat_lon")
+        coordinate_source_label = self.pin_coordinate_source_label(source_key)
+        return (
+            f"{label}: pins={len(self.research_pins)}; "
+            f"selected={selected_id}; "
+            f"source={coordinate_source_label}; "
+            f"pick_state=state/{PIN_PICK_STATE_PATH.name}; "
+            "rotation=per_frame; occlusion=horizon_depth"
+        )
 
     def collect_boundary_highlight_state(self) -> dict[str, object]:
         return normalized_boundary_highlight_state(self.boundary_highlight_state)
@@ -7468,6 +7494,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             text = json.dumps(self.pin_pick_state_payload or {}, ensure_ascii=False, indent=2)
         self.command_text.setPlainText(text)
         self.status.setText(f"已顯示 Pin pick state JSON：{PIN_PICK_STATE_PATH}")
+
+    def copy_pin_overlay_summary(self) -> None:
+        summary = self.pin_overlay_summary_text()
+        QtWidgets.QApplication.clipboard().setText(summary)
+        self.status.setText("已複製 Pin overlay 摘要")
 
     def show_layer_pick_state(self) -> None:
         try:

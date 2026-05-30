@@ -452,3 +452,14 @@ Done:
 
 Next:
 - Continue applying the same summary/copy pattern to pin and cursor geodesy research interactions.
+
+
+## 2026-05-30 - Pin overlay summary contract
+
+Done:
+- Added `pin_summary_contract` to the Pin projection contract.
+- Added Pin overlay summary copy actions to Qt Pin Annotation and Research interaction surfaces.
+- Handoff and smoke gate the Pin summary contract.
+
+Next:
+- Continue applying the same summary/copy pattern to cursor geodesy research interactions.

@@ -222,6 +222,16 @@ def pin_projection_contract_packet() -> dict[str, Any]:
         ],
         "qt_projection_note": "Pin projection: renderer rotates geodetic markers with the globe every frame; back-side pins are hidden by horizon/depth occlusion.",
         "pin_list_summary_format": "source=<coordinate_source_label>",
+        "pin_summary_contract_schema": "rrkal_displaytools.pin_summary_contract.v1",
+        "pin_summary_contract": {
+            "label": "Pin overlay",
+            "summary_format": "Pin overlay: pins={pin_count}; selected={selected_pin_id}; source={coordinate_source_label}; pick_state={pin_pick_state_file}; rotation=per_frame; occlusion=horizon_depth",
+            "qt_list_object": "pinList",
+            "qt_copy_action": "copy_pin_overlay_summary",
+            "launch_packet_field": "pin_overlay.pin_summary_contract",
+            "handoff_field": "pin_overlay.pin_summary_contract",
+            "portable": True,
+        },
         "horizon_control": "--pin-horizon-eps / PIN_HORIZON_EPS",
         "current_status": "renderer overlay drawing wired; terrain/depth refinement pending",
     }

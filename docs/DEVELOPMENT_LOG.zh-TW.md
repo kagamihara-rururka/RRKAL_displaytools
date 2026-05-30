@@ -229,6 +229,18 @@ Positioning:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+## 2026-05-30 - Pin overlay summary contract
+
+Changes:
+- Added `pin_summary_contract` to the shared Pin projection contract.
+- Added `copy_pin_overlay_summary()` and Pin summary buttons to the Qt Pin Annotation panel and Research interaction group.
+- Handoff output now exposes the Pin overlay summary contract.
+- Smoke gates launch packet, renderer capability, handoff and Qt source coverage for the summary contract.
+- Updated clone quickstart, capability summary and GTD.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-30 - Boundary emphasis summary contract
 
 Changes:

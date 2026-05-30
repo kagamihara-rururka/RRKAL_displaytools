@@ -266,3 +266,9 @@ Displaytools 不負責：
 - `boundary_emphasis_control.boundary_summary_contract` now documents the portable Boundary emphasis summary.
 - Qt exposes `Copy boundary summary` in the Research interaction group.
 - The summary keeps target mode, target layer, alignment, RGB/opacity and renderer bridge language aligned for clone handoff.
+
+## Pin overlay summary contract
+
+- `pin_overlay.pin_summary_contract` now documents the portable Pin overlay summary.
+- Qt exposes Pin summary copy actions in the Pin Annotation panel and Research interaction group.
+- The summary keeps pin count, selected pin, coordinate source, pick bridge, rotation and occlusion language aligned for clone handoff.

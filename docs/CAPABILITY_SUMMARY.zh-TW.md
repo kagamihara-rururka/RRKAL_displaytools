@@ -585,3 +585,9 @@
 - `boundary_emphasis_control.boundary_summary_contract_schema` now advertises `rrkal_displaytools.boundary_emphasis_summary_contract.v1`.
 - The contract maps the existing Layers dock Boundary emphasis label to `copy_boundary_emphasis_summary`.
 - Smoke gates launch packet, renderer capability, handoff and Qt button/action coverage.
+
+## Pin overlay summary contract
+
+- `pin_overlay.pin_summary_contract_schema` now advertises `rrkal_displaytools.pin_summary_contract.v1`.
+- The contract maps the Pin list object to `copy_pin_overlay_summary`.
+- Smoke gates launch packet, renderer capability, handoff and Qt button/action coverage.
