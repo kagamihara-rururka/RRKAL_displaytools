@@ -329,10 +329,13 @@ if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "
 if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "renderer_thumbnail") {
     throw "Launch packet profile_ui_state_replay Renderer thumbnail inspector action missing"
 }
+if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "visual_readiness") {
+    throw "Launch packet profile_ui_state_replay Visual readiness inspector action missing"
+}
 if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "live_preview") {
     throw "Launch packet profile_ui_state_replay Live preview inspector action missing"
 }
-if ([int]$launchPacket.profile_ui_state_replay.qt_inspector_action_count -lt 18) {
+if ([int]$launchPacket.profile_ui_state_replay.qt_inspector_action_count -lt 19) {
     throw "Launch packet profile_ui_state_replay inspector action count missing"
 }
 if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "canvas_state") {
@@ -1000,6 +1003,9 @@ if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontain
 if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontains "Inspect: Renderer thumbnail") {
     throw "Renderer profile_ui_state_replay Renderer thumbnail inspector label missing"
 }
+if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontains "Inspect: Visual readiness") {
+    throw "Renderer profile_ui_state_replay Visual readiness inspector label missing"
+}
 if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontains "Inspect: Live preview") {
     throw "Renderer profile_ui_state_replay Live preview inspector label missing"
 }
@@ -1371,6 +1377,9 @@ if ($handoff.visual_review_readiness.qt_command_contract.payload_field -ne "visu
 }
 if ($handoff.visual_review_readiness.qt_command_contract.dispatch_status -ne "contract_ready") {
     throw "Handoff inspection visual review readiness Qt command contract dispatch status missing or invalid"
+}
+if ($handoff.visual_review_readiness.qt_command_contract.implementation_status -ne "wired_in_qt_panel") {
+    throw "Handoff inspection visual review readiness Qt command contract implementation status missing or invalid"
 }
 $visualReviewGuidance = ($handoff.visual_review_readiness.missing_frame_guidance -join " ")
 if ($visualReviewGuidance -notmatch 'Inspect: Renderer thumbnail') {
@@ -2013,6 +2022,18 @@ if ($qtPanelSource -notlike "*Inspect: Research interaction*") {
 }
 if ($qtPanelSource -notlike "*Inspect: Visual review*") {
     throw "Qt Actions Visual review section is missing"
+}
+if ($qtPanelSource -notlike "*visual_review_readiness_packet*") {
+    throw "Qt panel visual review readiness packet missing"
+}
+if ($qtPanelSource -notlike "*visual_readiness_button*") {
+    throw "Qt panel Visual readiness button missing"
+}
+if ($qtPanelSource -notlike "*show_visual_review_readiness*") {
+    throw "Qt panel Visual readiness Inspect action missing"
+}
+if ($qtPanelSource -notlike "*collect_visual_review_readiness*") {
+    throw "Qt panel Visual readiness collector missing"
 }
 if ($qtPanelSource -notlike "*show_boundary_state*") {
     throw "Qt Boundary JSON action is missing"

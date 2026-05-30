@@ -18289,9 +18289,9 @@ def visual_review_readiness_packet(source: str) -> dict[str, object]:
             "menu_label": "Inspect: Visual readiness",
             "payload_field": "visual_review_readiness.inspector_view",
             "dispatch_status": "contract_ready",
-            "implementation_status": "under_construction",
-            "module_boundary": "taichi_global_bathymetry.py owns current monolith dispatch; future split target is qt_ui/main_window.py.",
-            "fallback_user_message": "Visual readiness metadata is available through handoff, launch packet and renderer capabilities until direct Qt dispatch is wired.",
+            "implementation_status": "wired_in_qt_panel",
+            "module_boundary": "rrkal_displaytools_qt_panel.py owns current Qt dispatch; future split target is qt_ui/main_window.py.",
+            "fallback_user_message": "Visual readiness metadata remains available through handoff, launch packet and renderer capabilities for non-Qt review.",
         },
         "recommended_sequence": ["Inspect: Visual readiness", "Inspect: Renderer thumbnail", "Inspect: Live preview"],
         "missing_frame_guidance": [

@@ -229,6 +229,18 @@ Positioning:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+## 2026-05-30 - Qt Visual readiness action
+
+Changes:
+- Added `Inspect: Visual readiness` to the Qt Visual review button group and Renderer menu.
+- Added `visual_review_readiness_packet`, `collect_visual_review_readiness()` and `show_visual_review_readiness()` to `rrkal_displaytools_qt_panel.py`.
+- Updated the visual readiness command contract implementation status to `wired_in_qt_panel`.
+- Updated closed-loop evidence, clone quickstart, capability summary and GTD for the wired Qt action.
+- Smoke gates the Qt packet, button, collector, action and implementation status.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-30 - Visual readiness Qt command contract
 
 Changes:

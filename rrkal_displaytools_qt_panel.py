@@ -276,6 +276,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         ("pin_pick", "Inspect: Pin pick"),
         ("cursor_geo", "Inspect: Cursor geo"),
         ("boundary_json", "Inspect: Boundary JSON"),
+        ("visual_readiness", "Inspect: Visual readiness"),
         ("renderer_thumbnail", "Inspect: Renderer thumbnail"),
         ("live_preview", "Inspect: Live preview"),
     ]
@@ -283,7 +284,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         {"id": "replay_contracts", "label": "Replay/contracts", "action_ids": ["profile_replay", "timeline", "clone_ready", "module_seams"]},
         {"id": "renderer_ports", "label": "Renderer ports", "action_ids": ["hydro_lod", "ocean_port", "style_routes", "layer_matrix", "layer_runtime"]},
         {"id": "research_interaction", "label": "Research interaction", "action_ids": ["layer_pick", "selection_state", "layer_ops", "canvas_state", "pin_pick", "cursor_geo", "boundary_json"]},
-        {"id": "visual_review", "label": "Visual review", "action_ids": ["renderer_thumbnail", "live_preview"]},
+        {"id": "visual_review", "label": "Visual review", "action_ids": ["visual_readiness", "renderer_thumbnail", "live_preview"]},
     ]
     return {
         "schema": "rrkal_displaytools.profile_ui_state_replay.v1",
@@ -304,6 +305,76 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         "handoff_field": "profile_ui_state_replay",
         "summary_text": "Profiles preserve renderer settings, layer stack, pins, Boundary emphasis/warnings and Timeline keyframes for cross-machine UI replay.",
         "boundary": "Replay coverage describes portable UI/profile state; it does not imply RRKAL data discovery/cache governance or authoritative geospatial identity resolution.",
+    }
+
+
+def visual_review_readiness_packet(source: str) -> dict[str, object]:
+    visual_actions = ["visual_readiness", "renderer_thumbnail", "live_preview"]
+    return {
+        "schema": "rrkal_displaytools.visual_review_readiness.v1",
+        "source": source,
+        "status": "ready",
+        "visual_review_actions": visual_actions,
+        "qt_inspector_action_id": "visual_readiness",
+        "qt_inspector_action_label": "Inspect: Visual readiness",
+        "renderer_thumbnail_ready": True,
+        "live_preview_ready": True,
+        "frame_status_schema": "rrkal_displaytools.visual_review_frame_status.v1",
+        "frame_status": {
+            "renderer_thumbnail": {
+                "status": "inspect_action_available",
+                "artifact_state": "runtime_dependent",
+                "inspect_action_id": "renderer_thumbnail",
+                "missing_frame_hint": "Use Inspect: Renderer thumbnail to check whether a cached preview frame exists.",
+            },
+            "live_preview": {
+                "status": "inspect_action_available",
+                "artifact_state": "runtime_dependent",
+                "inspect_action_id": "live_preview",
+                "missing_frame_hint": "Use Inspect: Live preview to check whether the renderer frame-capture route is active.",
+            },
+        },
+        "inspector_view_schema": "rrkal_displaytools.visual_review_inspector_view.v1",
+        "inspector_view": {
+            "title": "Visual readiness",
+            "surface": "Qt Visual review inspector",
+            "status_badges": ["renderer_thumbnail: inspect_action_available", "live_preview: inspect_action_available"],
+            "rows": [
+                {
+                    "label": "Renderer thumbnail",
+                    "action_id": "renderer_thumbnail",
+                    "status": "inspect_action_available",
+                    "artifact_state": "runtime_dependent",
+                    "hint": "Cached preview frame is checked by Inspect: Renderer thumbnail.",
+                },
+                {
+                    "label": "Live preview",
+                    "action_id": "live_preview",
+                    "status": "inspect_action_available",
+                    "artifact_state": "runtime_dependent",
+                    "hint": "Renderer frame-capture routing is checked by Inspect: Live preview.",
+                },
+            ],
+            "copyable": True,
+        },
+        "qt_command_contract_schema": "rrkal_displaytools.visual_review_qt_command_contract.v1",
+        "qt_command_contract": {
+            "action_id": "visual_readiness",
+            "menu_label": "Inspect: Visual readiness",
+            "payload_field": "visual_review_readiness.inspector_view",
+            "dispatch_status": "contract_ready",
+            "implementation_status": "wired_in_qt_panel",
+            "module_boundary": "rrkal_displaytools_qt_panel.py owns current Qt dispatch; future split target is qt_ui/main_window.py.",
+            "fallback_user_message": "Visual readiness metadata remains available through handoff, launch packet and renderer capabilities for non-Qt review.",
+        },
+        "recommended_sequence": ["Inspect: Visual readiness", "Inspect: Renderer thumbnail", "Inspect: Live preview"],
+        "missing_frame_guidance": [
+            "Run Inspect: Renderer thumbnail to confirm cached preview-frame availability.",
+            "Run Inspect: Live preview to confirm renderer frame-capture routing.",
+            "If both views are unavailable, launch Qt with a known style profile before filing a renderer issue.",
+        ],
+        "summary_text": "Visual review readiness confirms the Qt Inspect path for renderer thumbnail and live preview before deeper renderer debugging.",
+        "boundary": "Readiness metadata only; it does not render a new frame, download data, or mutate renderer/cache state.",
     }
 
 
@@ -2679,6 +2750,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         closed_loop_button = QtWidgets.QPushButton("閉環狀態")
         layer_manifest_button = QtWidgets.QPushButton("圖層 manifest")
         canvas_state_button = QtWidgets.QPushButton("Inspect: Canvas state")
+        visual_readiness_button = QtWidgets.QPushButton("Inspect: Visual readiness")
         thumbnail_button = QtWidgets.QPushButton("Inspect: Renderer thumbnail")
         live_preview_button = QtWidgets.QPushButton("Inspect: Live preview")
         smoke_button = QtWidgets.QPushButton("Smoke check")
@@ -2702,6 +2774,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (pin_pick_button, "Research interaction: inspect renderer Pin hover/click pick bridge JSON."),
             (cursor_geo_button, "Research interaction: inspect mouse cursor latitude/longitude geodesy bridge JSON."),
             (boundary_state_button, "Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON."),
+            (visual_readiness_button, "Visual review: inspect thumbnail/live preview readiness, frame status and missing-frame hints JSON."),
             (thumbnail_button, "Visual review: inspect latest renderer thumbnail PNG."),
             (live_preview_button, "Visual review: inspect file-based live renderer preview frame."),
         ):
@@ -2734,6 +2807,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         closed_loop_button.clicked.connect(self.show_closed_loop_status)
         layer_manifest_button.clicked.connect(self.show_layer_manifest)
         canvas_state_button.clicked.connect(self.show_canvas_state_preview)
+        visual_readiness_button.clicked.connect(self.show_visual_review_readiness)
         thumbnail_button.clicked.connect(self.show_latest_renderer_thumbnail)
         live_preview_button.clicked.connect(self.show_live_renderer_preview)
         smoke_button.clicked.connect(self.run_smoke_check)
@@ -2745,7 +2819,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ("Inspect: Replay/contracts", (profile_replay_button, timeline_button, module_seams_button, clone_ready_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, ocean_port_button, style_routes_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, layer_ops_button, canvas_state_button, pin_pick_button, cursor_geo_button, boundary_state_button)),
-            ("Inspect: Visual review", (thumbnail_button, live_preview_button)),
+            ("Inspect: Visual review", (visual_readiness_button, thumbnail_button, live_preview_button)),
             ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, smoke_button)),
             ("Process", (launch_button, restart_button, stop_button)),
         )
@@ -2810,6 +2884,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         renderer_menu.addAction("Capabilities JSON", self.show_renderer_capabilities)
         renderer_menu.addAction("Closed-loop Status JSON", self.show_closed_loop_status)
         renderer_menu.addAction("Layer Manifest JSON", self.show_layer_manifest)
+        renderer_menu.addAction("Inspect: Visual readiness", self.show_visual_review_readiness)
         renderer_menu.addAction("Inspect: Renderer thumbnail", self.show_latest_renderer_thumbnail)
         renderer_menu.addAction("Inspect: Live preview", self.show_live_renderer_preview)
 
@@ -3490,6 +3565,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "selected_layer": self.selected_layer_key,
             "active_layer_operation_summary": self.active_layer_operation_summary_text(),
             "last_layer_operation": self.layer_operation_event_text(),
+            "visual_review_readiness": self.collect_visual_review_readiness(),
             "layer_operation_feedback": self.collect_layer_operation_feedback(),
             "layer_filter": self.collect_layer_filter_state(),
             "layer_group_view": self.collect_layer_group_view_state(),
@@ -3647,6 +3723,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
 
     def collect_profile_ui_state_replay(self) -> dict[str, object]:
         return profile_ui_state_replay_packet("rrkal_displaytools_qt_panel")
+
+    def collect_visual_review_readiness(self) -> dict[str, object]:
+        return visual_review_readiness_packet("rrkal_displaytools_qt_panel")
 
     def collect_layer_operation_feedback(self) -> dict[str, object]:
         return layer_operation_feedback_packet(
@@ -7056,6 +7135,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             json.dumps(self.collect_layer_operation_feedback(), ensure_ascii=False, indent=2)
         )
         self.status.setText("Shown layer operation feedback JSON")
+
+    def show_visual_review_readiness(self) -> None:
+        self.command_text.setPlainText(
+            json.dumps(self.collect_visual_review_readiness(), ensure_ascii=False, indent=2)
+        )
+        self.status.setText("已顯示 visual review readiness JSON")
 
     def show_layer_runtime_state(self) -> None:
         self.write_layer_runtime_state()

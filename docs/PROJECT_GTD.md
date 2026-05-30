@@ -373,3 +373,15 @@ Done:
 
 Next:
 - Implement actual monolith Qt dispatch for `visual_readiness`, then split toward `qt_ui/main_window.py` when the UI module boundary is ready.
+
+
+## 2026-05-30 - Qt Visual readiness action
+
+Done:
+- Added `Inspect: Visual readiness` to the Qt Visual review button group and Renderer menu.
+- Added `visual_review_readiness_packet`, collector and display method to `rrkal_displaytools_qt_panel.py`.
+- Updated the command contract implementation status to `wired_in_qt_panel`.
+- Smoke gates the Qt packet, button, collector, action and implementation status.
+
+Next:
+- Continue tightening the visual review UI by summarizing thumbnail/live preview runtime artifact state in the visible status area.

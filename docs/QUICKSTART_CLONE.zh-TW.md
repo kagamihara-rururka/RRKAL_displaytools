@@ -223,4 +223,10 @@ Displaytools 不負責：
 
 - `visual_review_readiness.qt_command_contract` now documents the `Inspect: Visual readiness` action contract.
 - The contract points Qt to `visual_review_readiness.inspector_view` as the payload field.
-- Current implementation status is `under_construction`; until direct Qt dispatch is wired, use handoff, launch packet or renderer capability output.
+- Current implementation status is `wired_in_qt_panel`; the Qt panel exposes both a Visual review button and Renderer menu action for this packet.
+
+## Qt Visual readiness action
+
+- `rrkal_displaytools_qt_panel.py` now exposes `Inspect: Visual readiness`.
+- The action displays `visual_review_readiness` JSON in the command/provenance text panel before you inspect the renderer thumbnail or live preview.
+- Use it to distinguish available Qt Inspect routes from runtime-dependent preview frame artifacts.

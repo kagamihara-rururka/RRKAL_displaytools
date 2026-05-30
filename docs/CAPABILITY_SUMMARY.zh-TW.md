@@ -542,4 +542,10 @@
 
 - `visual_review_readiness.qt_command_contract_schema` now advertises `rrkal_displaytools.visual_review_qt_command_contract.v1`.
 - The contract maps `visual_readiness` to `visual_review_readiness.inspector_view`.
-- Smoke gates action id, payload field and `contract_ready` dispatch status through handoff output.
+- Smoke gates action id, payload field, `contract_ready` dispatch status and `wired_in_qt_panel` implementation status through handoff output.
+
+## Qt Visual readiness action
+
+- The Qt panel now includes `Inspect: Visual readiness` in the Visual review button group and Renderer menu.
+- `show_visual_review_readiness()` displays the copyable `visual_review_readiness` JSON packet.
+- Smoke gates the packet function, collector, button and Inspect action in `rrkal_displaytools_qt_panel.py`.

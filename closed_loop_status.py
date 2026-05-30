@@ -254,6 +254,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "Qt profile UI replay label",
                     "Qt Profile replay JSON action",
                     "Qt Visual review Inspect group",
+                    "Qt Visual readiness Inspect action",
                     "Qt Selection state Inspect action",
                     "Qt Layer ops Inspect action",
                     "layer_operation_feedback replay contract",
@@ -272,6 +273,8 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "show_layer_operation_feedback",
                     "rrkal_displaytools.layer_operation_feedback.v1",
                     "selection_state",
+                    "show_visual_review_readiness",
+                    "rrkal_displaytools.visual_review_readiness.v1",
                     "show_latest_renderer_thumbnail",
                     "show_live_renderer_preview",
                     "qt_inspector_action_groups.visual_review",
@@ -447,7 +450,6 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
         ],
         "external_dependencies": ["RRKAL data manifest validation/ingest/governance"],
     }
-
 
 
 
