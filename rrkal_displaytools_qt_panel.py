@@ -1199,6 +1199,25 @@ def layer_render_plan_performance_packet(
                 "next_step": "Run the manual diff command on generated artifacts and require zero-diff evidence before enabling runtime merge.",
                 "boundary": "Workflow metadata only; runtime artifacts stay under state/ and are not committed.",
             },
+            "compose_run_parity_summary_contract_schema": "rrkal_displaytools.compose_run_parity_summary_contract.v1",
+            "compose_run_parity_summary_contract": {
+                "schema": "rrkal_displaytools.compose_run_parity_summary_contract.v1",
+                "summary_format": "Compose parity: status={status}; producer={producer_status}; dir={artifact_dir}; baseline={baseline_artifact}; candidate={candidate_artifact}; produce={producer_command}; diff={manual_diff_command}; precommit={precommit_command}; runtime_merge=false",
+                "summary_parameter_fields": [
+                    "status",
+                    "producer_status",
+                    "artifact_dir",
+                    "baseline_artifact",
+                    "candidate_artifact",
+                    "producer_command",
+                    "manual_diff_command",
+                    "precommit_command",
+                ],
+                "qt_copy_action": "copy_compose_parity_workflow_summary",
+                "qt_action_label": "Copy compose parity",
+                "portable": True,
+                "boundary": "Copyable command summary only; runtime artifacts remain local under state/compose_parity.",
+            },
             "phase_timing_unit": "milliseconds",
             "compiled_plan_reuse_decision_field": "cache_reuse_decision",
             "compiled_plan_reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",
@@ -3846,6 +3865,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         copy_style_thumb_status_button = QtWidgets.QPushButton("Copy style thumb status")
         thumbnail_button = QtWidgets.QPushButton("Inspect: Renderer thumbnail")
         live_preview_button = QtWidgets.QPushButton("Inspect: Live preview")
+        copy_compose_parity_button = QtWidgets.QPushButton("Copy compose parity")
         render_plan_perf_button = QtWidgets.QPushButton("Inspect: Render plan perf")
         smoke_button = QtWidgets.QPushButton("Smoke check")
         launch_button = QtWidgets.QPushButton("啟動地球儀")
@@ -3888,6 +3908,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (copy_style_thumb_status_button, "Visual review: copy local style thumbnail ready/missing status summary."),
             (thumbnail_button, "Visual review: inspect latest renderer thumbnail PNG."),
             (live_preview_button, "Visual review: inspect file-based live renderer preview frame."),
+            (copy_compose_parity_button, "Renderer diagnostics: copy compose parity artifact producer and diff commands."),
             (render_plan_perf_button, "Renderer diagnostics: inspect queued layer render-plan precompute and single-pass performance contract."),
         ):
             button.setToolTip(tooltip)
@@ -3939,6 +3960,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         copy_style_thumb_status_button.clicked.connect(self.copy_style_thumbnail_readiness_summary)
         thumbnail_button.clicked.connect(self.show_latest_renderer_thumbnail)
         live_preview_button.clicked.connect(self.show_live_renderer_preview)
+        copy_compose_parity_button.clicked.connect(self.copy_compose_parity_workflow_summary)
         render_plan_perf_button.clicked.connect(self.show_layer_render_plan_performance)
         smoke_button.clicked.connect(self.run_smoke_check)
         launch_button.clicked.connect(self.launch_renderer)
@@ -3950,7 +3972,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, ocean_3d_controls_action_button, copy_ocean_summary_button, style_routes_button, copy_style_routes_summary_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
             ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, copy_style_thumb_status_button, thumbnail_button, live_preview_button)),
-            ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, render_plan_perf_button, smoke_button)),
+            ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, render_plan_perf_button, copy_compose_parity_button, smoke_button)),
             ("Process", (launch_button, restart_button, stop_button)),
         )
         row = 0
@@ -9229,6 +9251,28 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             )
         )
         self.status.setText("Displayed layer render-plan performance and cache diagnostics")
+
+    def compose_parity_workflow_summary_text(self, packet: dict[str, object] | None = None) -> str:
+        packet = packet if isinstance(packet, dict) else self.collect_layer_render_plan_performance()
+        workflow = packet.get("compose_run_parity_artifact_workflow")
+        workflow = workflow if isinstance(workflow, dict) else {}
+        return (
+            "Compose parity: "
+            f"status={workflow.get('status', 'unknown')}; "
+            f"producer={workflow.get('producer_status', 'unknown')}; "
+            f"dir={workflow.get('artifact_dir', '-')}; "
+            f"baseline={workflow.get('baseline_artifact', '-')}; "
+            f"candidate={workflow.get('candidate_artifact', '-')}; "
+            f"produce={workflow.get('producer_command', '-')}; "
+            f"diff={workflow.get('manual_diff_command', '-')}; "
+            f"precommit={workflow.get('precommit_command', '-')}; "
+            "runtime_merge=false"
+        )
+
+    def copy_compose_parity_workflow_summary(self) -> None:
+        summary = self.compose_parity_workflow_summary_text()
+        QtWidgets.QApplication.clipboard().setText(summary)
+        self.status.setText("Copied compose parity workflow summary")
 
     def show_profile_ui_state_replay(self) -> None:
         self.command_text.setPlainText(

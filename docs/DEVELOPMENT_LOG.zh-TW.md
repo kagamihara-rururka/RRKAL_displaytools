@@ -1,5 +1,16 @@
 # Development Log
 
+## 2026-05-30 - Compose parity copyable workflow summary
+
+Changes:
+- Added `rrkal_displaytools.compose_run_parity_summary_contract.v1` to `layer_render_plan_performance`.
+- Qt Renderer diagnostics now includes `Copy compose parity`, which copies producer, diff, baseline/candidate artifact and precommit commands as one portable handoff line.
+- Launch packets, renderer capabilities and handoff inspection now expose the compose parity summary contract and copy action.
+- Smoke gates the copy button, copy handler, summary helper, contract fields and renderer contract markers.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Compose parity artifact producer
 
 Changes:
