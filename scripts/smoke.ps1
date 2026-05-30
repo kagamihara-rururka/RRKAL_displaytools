@@ -6521,16 +6521,16 @@ if ($rendererSource -notlike "*compose_overlays*") {
 if ($rendererSource -notlike "*future_single_pass_candidate*") {
     throw "Renderer render plan future single-pass phase marker is missing"
 }
-if ($rendererSource -notlike "*centralized_overlay_composition*") {
+if ($renderPlanCombinedSource -notlike "*centralized_overlay_composition*") {
     throw "Renderer render plan execution mode marker is missing"
 }
-if ($rendererSource -notlike "*single_pass_candidate_count*") {
+if ($renderPlanCombinedSource -notlike "*single_pass_candidate_count*") {
     throw "Renderer render plan single-pass candidate count marker is missing"
 }
-if ($rendererSource -notlike "*single_pass_blockers*") {
+if ($renderPlanCombinedSource -notlike "*single_pass_blockers*") {
     throw "Renderer render plan single-pass blockers marker is missing"
 }
-if ($rendererSource -notlike "*replace per-step overlay helpers with a unified Taichi render/composite pass*") {
+if ($renderPlanCombinedSource -notlike "*replace per-step overlay helpers with a unified Taichi render/composite pass*") {
     throw "Renderer render plan next refactor target marker is missing"
 }
 if ($rendererSource -notlike '*"layer_render_plan": getattr(self, "layer_render_plan_snapshot"*') {

@@ -219,3 +219,47 @@ def build_layer_render_plan_apply_path(
             }
         )
     return path
+
+
+def build_layer_render_plan_execution_summary(
+    apply_path: list[dict[str, object]],
+    batch_decisions: list[dict[str, object]],
+    *,
+    source: str = "render_core.render_plan.build_layer_render_plan_execution_summary",
+) -> dict[str, object]:
+    helper_counts: dict[str, int] = {}
+    decision_counts: dict[str, int] = {}
+    single_pass_candidate_count = 0
+    single_pass_blockers: list[str] = []
+    for item in apply_path:
+        if not isinstance(item, dict):
+            continue
+        helper = str(item.get("apply_helper") or "unknown_apply_helper")
+        helper_counts[helper] = helper_counts.get(helper, 0) + 1
+        decision = str(item.get("decision") or "unknown_decision")
+        decision_counts[decision] = decision_counts.get(decision, 0) + 1
+        if item.get("single_pass_candidate"):
+            single_pass_candidate_count += 1
+        else:
+            single_pass_blockers.append(str(item.get("id") or "unknown_step"))
+    batch_decision_counts: dict[str, int] = {}
+    for item in batch_decisions:
+        if not isinstance(item, dict):
+            continue
+        decision = str(item.get("decision") or "unknown_decision")
+        batch_decision_counts[decision] = batch_decision_counts.get(decision, 0) + 1
+    return {
+        "schema": "rrkal_displaytools.layer_render_plan_execution_summary.v1",
+        "source": source,
+        "current_execution_mode": "centralized_overlay_composition",
+        "current_apply_helper": "HybridRenderController.apply_layer_render_plan_composition",
+        "runtime_optimization_applied": False,
+        "apply_path_count": len(apply_path),
+        "batch_decision_count": len(batch_decisions),
+        "single_pass_candidate_count": single_pass_candidate_count,
+        "single_pass_blockers": single_pass_blockers,
+        "helper_counts": helper_counts,
+        "decision_counts": decision_counts,
+        "batch_decision_counts": batch_decision_counts,
+        "next_refactor_target": "replace per-step overlay helpers with a unified Taichi render/composite pass",
+    }

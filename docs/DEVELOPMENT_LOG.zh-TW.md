@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Extract execution summary builder
+
+- Added `build_layer_render_plan_execution_summary` to `render_core/render_plan.py`.
+- Updated `HybridRenderController.layer_render_plan_execution_summary` to delegate to the extracted pure helper while preserving the existing `source` field.
+- Updated source-map and smoke gates for the extracted execution summary markers.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Extract apply path builder
 
 - Added `build_layer_render_plan_apply_path` to `render_core/render_plan.py`.
