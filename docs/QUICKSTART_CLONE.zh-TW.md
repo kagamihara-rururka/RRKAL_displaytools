@@ -242,3 +242,9 @@ Displaytools 不負責：
 - The Layers dock now includes a `visualReviewReadiness` label.
 - Pressing `Inspect: Visual readiness` updates the label with thumbnail/live preview status and artifact paths.
 - This gives a compact visual-review state without reading the full JSON packet.
+
+## Qt Visual readiness copy summary
+
+- The Visual review group now includes `Copy visual summary`.
+- It copies the compact thumbnail/live-preview readiness summary to the clipboard.
+- Use this when recording renderer-preview state in lab notes, issues or cross-machine handoff.

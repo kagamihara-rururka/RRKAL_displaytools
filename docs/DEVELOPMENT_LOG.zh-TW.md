@@ -229,6 +229,18 @@ Positioning:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+## 2026-05-30 - Qt Visual readiness copy summary
+
+Changes:
+- Added `Copy visual summary` to the Qt Visual review action group.
+- Added `copy_visual_review_readiness_summary()` to copy the compact thumbnail/live-preview readiness summary.
+- The copy action also refreshes the visible `visualReviewReadiness` label.
+- Smoke gates the copy button and action.
+- Updated clone quickstart, capability summary and GTD.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-30 - Qt Visual readiness visible summary
 
 Changes:

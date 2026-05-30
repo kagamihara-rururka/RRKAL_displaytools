@@ -561,3 +561,9 @@
 - The Layers dock now exposes a `visualReviewReadiness` label.
 - `show_visual_review_readiness()` updates the label through `visual_review_readiness_summary_text()`.
 - Smoke gates the label object name, summary formatter and label updater.
+
+## Qt Visual readiness copy summary
+
+- The Visual review group now includes `Copy visual summary`.
+- `copy_visual_review_readiness_summary()` copies the compact readiness summary to the clipboard and refreshes the visible label.
+- Smoke gates the copy button and copy action.

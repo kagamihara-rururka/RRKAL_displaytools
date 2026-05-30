@@ -2053,6 +2053,12 @@ if ($qtPanelSource -notlike "*visual_review_readiness_summary_text*") {
 if ($qtPanelSource -notlike "*update_visual_review_readiness_label*") {
     throw "Qt panel Visual readiness label updater missing"
 }
+if ($qtPanelSource -notlike "*copy_visual_summary_button*") {
+    throw "Qt panel Visual readiness copy summary button missing"
+}
+if ($qtPanelSource -notlike "*copy_visual_review_readiness_summary*") {
+    throw "Qt panel Visual readiness copy summary action missing"
+}
 if ($qtPanelSource -notlike "*show_boundary_state*") {
     throw "Qt Boundary JSON action is missing"
 }

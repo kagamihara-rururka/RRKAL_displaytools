@@ -2757,6 +2757,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         layer_manifest_button = QtWidgets.QPushButton("圖層 manifest")
         canvas_state_button = QtWidgets.QPushButton("Inspect: Canvas state")
         visual_readiness_button = QtWidgets.QPushButton("Inspect: Visual readiness")
+        copy_visual_summary_button = QtWidgets.QPushButton("Copy visual summary")
         thumbnail_button = QtWidgets.QPushButton("Inspect: Renderer thumbnail")
         live_preview_button = QtWidgets.QPushButton("Inspect: Live preview")
         smoke_button = QtWidgets.QPushButton("Smoke check")
@@ -2781,6 +2782,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (cursor_geo_button, "Research interaction: inspect mouse cursor latitude/longitude geodesy bridge JSON."),
             (boundary_state_button, "Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON."),
             (visual_readiness_button, "Visual review: inspect thumbnail/live preview readiness, frame status and missing-frame hints JSON."),
+            (copy_visual_summary_button, "Visual review: copy compact thumbnail/live preview readiness summary to clipboard."),
             (thumbnail_button, "Visual review: inspect latest renderer thumbnail PNG."),
             (live_preview_button, "Visual review: inspect file-based live renderer preview frame."),
         ):
@@ -2814,6 +2816,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         layer_manifest_button.clicked.connect(self.show_layer_manifest)
         canvas_state_button.clicked.connect(self.show_canvas_state_preview)
         visual_readiness_button.clicked.connect(self.show_visual_review_readiness)
+        copy_visual_summary_button.clicked.connect(self.copy_visual_review_readiness_summary)
         thumbnail_button.clicked.connect(self.show_latest_renderer_thumbnail)
         live_preview_button.clicked.connect(self.show_live_renderer_preview)
         smoke_button.clicked.connect(self.run_smoke_check)
@@ -2825,7 +2828,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ("Inspect: Replay/contracts", (profile_replay_button, timeline_button, module_seams_button, clone_ready_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, ocean_port_button, style_routes_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, layer_ops_button, canvas_state_button, pin_pick_button, cursor_geo_button, boundary_state_button)),
-            ("Inspect: Visual review", (visual_readiness_button, thumbnail_button, live_preview_button)),
+            ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, thumbnail_button, live_preview_button)),
             ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, smoke_button)),
             ("Process", (launch_button, restart_button, stop_button)),
         )
@@ -7222,6 +7225,13 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         )
         self.update_visual_review_readiness_label(packet)
         self.status.setText(self.visual_review_readiness_summary_text(packet))
+
+    def copy_visual_review_readiness_summary(self) -> None:
+        packet = self.collect_visual_review_readiness()
+        summary = self.visual_review_readiness_summary_text(packet)
+        QtWidgets.QApplication.clipboard().setText(summary)
+        self.update_visual_review_readiness_label(packet)
+        self.status.setText("已複製 visual readiness 摘要")
 
     def show_layer_runtime_state(self) -> None:
         self.write_layer_runtime_state()

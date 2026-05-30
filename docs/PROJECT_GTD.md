@@ -407,3 +407,14 @@ Done:
 
 Next:
 - Continue tightening visual review by adding a lightweight copy/share path for the compact summary.
+
+
+## 2026-05-30 - Qt Visual readiness copy summary
+
+Done:
+- Added `Copy visual summary` to the Visual review action group.
+- Added `copy_visual_review_readiness_summary()` to copy the compact status summary to the clipboard.
+- Smoke gates the copy button and action.
+
+Next:
+- Continue tightening visual review by aligning the copy summary with profile/launch packet handoff labels.
