@@ -1,5 +1,14 @@
 # Development Log
 
+## 2026-05-30 - Compose budget runtime timing fields
+
+Changes:
+- Extended `rrkal_displaytools.layer_render_plan_compose_pass_budget.v1` with runtime diagnostic fields for `cache_diagnostics.phase_timing_ms.compose_overlays`, `cache_diagnostics.slowest_phase_id` and `cache_diagnostics.slow_frame_threshold_ms`.
+- Qt `composePassBudgetStrip` now displays `compose_ms=` and `slowest=` from latest renderer metadata when available, while preserving safe `-` fallback before a runtime frame exists.
+- Smoke gates launch packet, renderer capability, handoff and Qt source markers for the timing fields.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
 ## 2026-05-30 - Compose pass budget readiness strip
 
 Changes:

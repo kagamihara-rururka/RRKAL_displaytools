@@ -2013,6 +2013,11 @@ def layer_render_plan_performance_packet(
                 "ui_summary_format": "Compose budget: runs={compose_run_count}; merge_candidates={compose_merge_candidate_run_count}; evidence=compose_parity_runner; runtime_merge=false",
                 "qt_label_object": "composePassBudgetStrip",
                 "qt_refresh": "refresh_layer_render_plan_cache_diagnostics_strip",
+                "runtime_diagnostic_fields": [
+                    "cache_diagnostics.phase_timing_ms.compose_overlays",
+                    "cache_diagnostics.slowest_phase_id",
+                    "cache_diagnostics.slow_frame_threshold_ms",
+                ],
                 "runtime_merge_enabled": False,
                 "boundary": "Budget metadata only; renderer keeps the existing sequential compose path until parity evidence proves the collapsed path.",
             },

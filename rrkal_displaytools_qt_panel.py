@@ -1197,6 +1197,11 @@ def layer_render_plan_performance_packet(
                 "ui_summary_format": "Compose budget: runs={compose_run_count}; merge_candidates={compose_merge_candidate_run_count}; evidence=compose_parity_runner; runtime_merge=false",
                 "qt_label_object": "composePassBudgetStrip",
                 "qt_refresh": "refresh_layer_render_plan_cache_diagnostics_strip",
+                "runtime_diagnostic_fields": [
+                    "cache_diagnostics.phase_timing_ms.compose_overlays",
+                    "cache_diagnostics.slowest_phase_id",
+                    "cache_diagnostics.slow_frame_threshold_ms",
+                ],
                 "runtime_merge_enabled": False,
                 "boundary": "Budget metadata only; renderer keeps the existing sequential compose path until parity evidence proves the collapsed path.",
             },
@@ -9309,6 +9314,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         diagnostics = packet.get("cache_diagnostics") if isinstance(packet.get("cache_diagnostics"), dict) else {}
         compose_runs = diagnostics.get("compose_run_count", "-")
         merge_candidates = diagnostics.get("compose_merge_candidate_run_count", "-")
+        phase_timing = diagnostics.get("phase_timing_ms") if isinstance(diagnostics.get("phase_timing_ms"), dict) else {}
+        compose_ms = phase_timing.get("compose_overlays", "-")
+        slowest_phase = diagnostics.get("slowest_phase_id", "-")
         target = budget.get("target_pass_model", "-")
         status = budget.get("status", "unknown")
         return (
@@ -9316,6 +9324,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"status={status}; "
             f"runs={compose_runs}; "
             f"merge={merge_candidates}; "
+            f"compose_ms={compose_ms}; "
+            f"slowest={slowest_phase}; "
             f"target={target}; "
             "evidence=compose_parity_runner; "
             "runtime_merge=false"
