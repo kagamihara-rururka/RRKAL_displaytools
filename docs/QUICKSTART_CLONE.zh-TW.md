@@ -43,6 +43,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_handoff.ps1
 
 Qt 開啟後也可以在 Replay/contracts 使用 `Copy clone summary`，把 repo、setup doc、profile readiness、Qt-first、smoke-required 與 handoff-first 指令整理成可貼到交接紀錄的摘要。
 同一區也有 `Copy launch summary`，用來複製 profile readiness、portable command、launch packet fields 與 renderer capability field。
+Run/profile 區的 `Export reviewer packet` 會輸出 `state/showcase/reviewer_packet.json`，包含 clone、launch、research、visual 摘要與 launch packet snapshot。
 
 ## 4. 跑提交級 smoke
 

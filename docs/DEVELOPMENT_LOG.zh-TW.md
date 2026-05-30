@@ -1,5 +1,17 @@
 # Development Log
 
+## 2026-05-30 - Reviewer packet export
+
+Changes:
+- Added `reviewer_packet_export` to Qt launch packets, no-GUI launch packets and renderer capabilities.
+- Added Qt `Export reviewer packet`, writing `rrkal_displaytools.reviewer_packet.v1` with clone, launch, research and visual summaries plus a launch packet snapshot.
+- Handoff output now exposes the reviewer packet export contract.
+- Smoke gates launch packet, renderer capability, handoff and Qt source coverage.
+- Updated clone quickstart, capability summary and GTD.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-30 - Launch reviewer summary contract
 
 Changes:

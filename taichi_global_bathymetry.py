@@ -18180,6 +18180,35 @@ def profile_launch_readiness_ui_packet(
     }
 
 
+def reviewer_packet_export_packet(source: str) -> dict[str, object]:
+    return {
+        "schema": "rrkal_displaytools.reviewer_packet_export.v1",
+        "source": source,
+        "status": "ready",
+        "reviewer_packet_schema": "rrkal_displaytools.reviewer_packet.v1",
+        "qt_action": "export_reviewer_packet_dialog",
+        "qt_action_label": "Export reviewer packet",
+        "default_output": "state/showcase/reviewer_packet.json",
+        "included_summary_fields": [
+            "clone_reviewer_summary",
+            "launch_reviewer_summary",
+            "research_interaction_summary",
+            "visual_review_summary",
+        ],
+        "included_packet_fields": [
+            "launch_packet_snapshot",
+            "cross_machine_clone_readiness",
+            "profile_launch_readiness",
+            "profile_ui_state_replay",
+            "reviewer_packet_export",
+        ],
+        "launch_packet_field": "reviewer_packet_export",
+        "renderer_capability_field": "reviewer_packet_export",
+        "handoff_field": "reviewer_packet_export",
+        "portable": True,
+    }
+
+
 def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
     saved_groups = [
         "renderer_config",
@@ -19452,6 +19481,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
         "profile_launch_readiness": profile_launch_readiness_packet("taichi_global_bathymetry.renderer_capabilities", style_renderer_entries_packet("taichi_global_bathymetry.renderer_capabilities"), layer_operator_groups_packet(layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"), "taichi_global_bathymetry.renderer_capabilities")),
         "profile_launch_readiness_ui": profile_launch_readiness_ui_packet(profile_launch_readiness_packet("taichi_global_bathymetry.renderer_capabilities", style_renderer_entries_packet("taichi_global_bathymetry.renderer_capabilities"), layer_operator_groups_packet(layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"), "taichi_global_bathymetry.renderer_capabilities")), "taichi_global_bathymetry.renderer_capabilities"),
         "profile_ui_state_replay": profile_ui_state_replay_packet("taichi_global_bathymetry.renderer_capabilities"),
+        "reviewer_packet_export": reviewer_packet_export_packet("taichi_global_bathymetry.renderer_capabilities"),
         "visual_review_readiness": visual_review_readiness_packet("taichi_global_bathymetry.renderer_capabilities"),
         "layer_visual_presets": layer_visual_presets_packet("taichi_global_bathymetry.renderer_capabilities"),
         "layer_visual_preset_runtime_feedback": layer_visual_preset_runtime_feedback_packet(layer_visual_presets_packet("taichi_global_bathymetry.renderer_capabilities"), None, "taichi_global_bathymetry.renderer_capabilities"),

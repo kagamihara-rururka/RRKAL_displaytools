@@ -449,6 +449,24 @@ if ($launchPacket.profile_launch_readiness_ui.readiness -ne "ready") {
 if ($launchPacket.profile_launch_readiness_ui.qt_surface -ne "Layers dock readiness label") {
     throw "Launch packet profile_launch_readiness_ui surface mismatch"
 }
+if ($launchPacket.reviewer_packet_export.schema -ne "rrkal_displaytools.reviewer_packet_export.v1") {
+    throw "Launch packet reviewer_packet_export schema missing or invalid"
+}
+if ($launchPacket.reviewer_packet_export.reviewer_packet_schema -ne "rrkal_displaytools.reviewer_packet.v1") {
+    throw "Launch packet reviewer packet schema missing or invalid"
+}
+if ($launchPacket.reviewer_packet_export.qt_action -ne "export_reviewer_packet_dialog") {
+    throw "Launch packet reviewer packet Qt action missing or invalid"
+}
+if ($launchPacket.reviewer_packet_export.included_summary_fields -notcontains "launch_reviewer_summary") {
+    throw "Launch packet reviewer packet launch summary field missing"
+}
+if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "launch_packet_snapshot") {
+    throw "Launch packet reviewer packet snapshot field missing"
+}
+if (-not $launchPacket.reviewer_packet_export.portable) {
+    throw "Launch packet reviewer packet portability flag missing"
+}
 if ($launchPacket.layer_visual_presets.schema -ne "rrkal_displaytools.layer_visual_presets.v1") {
     throw "Launch packet layer_visual_presets schema missing or invalid"
 }
@@ -1165,6 +1183,15 @@ if ($capabilities.profile_launch_readiness_ui.schema -ne "rrkal_displaytools.pro
 if ($capabilities.profile_launch_readiness_ui.readiness -ne "ready") {
     throw "Renderer profile_launch_readiness_ui should be ready"
 }
+if ($capabilities.reviewer_packet_export.schema -ne "rrkal_displaytools.reviewer_packet_export.v1") {
+    throw "Renderer reviewer_packet_export schema missing or invalid"
+}
+if ($capabilities.reviewer_packet_export.qt_action -ne "export_reviewer_packet_dialog") {
+    throw "Renderer reviewer packet Qt action missing or invalid"
+}
+if ($capabilities.reviewer_packet_export.included_summary_fields -notcontains "clone_reviewer_summary") {
+    throw "Renderer reviewer packet clone summary field missing"
+}
 if ($capabilities.layer_visual_presets.schema -ne "rrkal_displaytools.layer_visual_presets.v1") {
     throw "Renderer layer_visual_presets schema missing or invalid"
 }
@@ -1838,6 +1865,24 @@ if ($handoff.profile_launch_readiness_ui.renderer_capabilities_schema -ne "rrkal
 if ($handoff.profile_launch_readiness_ui.qt_surface -ne "Layers dock readiness label") {
     throw "Handoff inspection profile_launch_readiness_ui surface mismatch"
 }
+if ($handoff.launch_packet_contracts.reviewer_packet_export -ne "rrkal_displaytools.reviewer_packet_export.v1") {
+    throw "Handoff inspection reviewer_packet_export launch contract missing or invalid"
+}
+if ($handoff.reviewer_packet_export.launch_packet_schema -ne "rrkal_displaytools.reviewer_packet_export.v1") {
+    throw "Handoff inspection reviewer_packet_export launch schema missing or invalid"
+}
+if ($handoff.reviewer_packet_export.renderer_capabilities_schema -ne "rrkal_displaytools.reviewer_packet_export.v1") {
+    throw "Handoff inspection reviewer_packet_export renderer schema missing or invalid"
+}
+if ($handoff.reviewer_packet_export.qt_action -ne "export_reviewer_packet_dialog") {
+    throw "Handoff inspection reviewer packet Qt action missing or invalid"
+}
+if ($handoff.reviewer_packet_export.included_summary_fields -notcontains "research_interaction_summary") {
+    throw "Handoff inspection reviewer packet research summary field missing"
+}
+if (-not $handoff.reviewer_packet_export.portable) {
+    throw "Handoff inspection reviewer packet portability flag missing"
+}
 if ($handoff.launch_packet_contracts.layer_visual_presets -ne "rrkal_displaytools.layer_visual_presets.v1") {
     throw "Handoff inspection layer_visual_presets launch contract missing or invalid"
 }
@@ -2112,6 +2157,15 @@ if ($qtPanelSource -notlike "*copy_launch_reviewer_summary*") {
 }
 if ($qtPanelSource -notlike "*launch_reviewer_summary_text*") {
     throw "Qt launch reviewer summary formatter is missing"
+}
+if ($qtPanelSource -notlike "*Export reviewer packet*") {
+    throw "Qt reviewer packet export button is missing"
+}
+if ($qtPanelSource -notlike "*export_reviewer_packet_dialog*") {
+    throw "Qt reviewer packet export action is missing"
+}
+if ($qtPanelSource -notlike "*collect_reviewer_packet*") {
+    throw "Qt reviewer packet collector is missing"
 }
 if ($qtPanelSource -notlike "*show_ocean_material_control_port*") {
     throw "Qt ocean material control port JSON action is missing"

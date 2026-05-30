@@ -407,6 +407,12 @@
 - Qt Replay/contracts includes `Copy launch summary`, which copies readiness checks, portable command and launch packet fields for reviewer handoff.
 - Smoke gates launch packet, renderer capability, handoff and Qt source coverage.
 
+### 2026-05-30 Reviewer packet export
+
+- `reviewer_packet_export` now advertises `rrkal_displaytools.reviewer_packet_export.v1` in launch packets and renderer capabilities.
+- Qt Run/profile includes `Export reviewer packet`, writing `rrkal_displaytools.reviewer_packet.v1` with clone, launch, research and visual summaries plus a launch packet snapshot.
+- Handoff and smoke gate the export contract, packet schema, Qt action and included summary fields.
+
 ### 2026-05-30 Qt contract inspector tooltips
 
 - The Qt Actions inspector buttons now include tooltips and accessible descriptions for Profile replay, Ocean port, Hydro LOD, Style routes, Module seams and Clone ready.

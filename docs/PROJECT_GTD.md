@@ -507,3 +507,14 @@ Done:
 
 Next:
 - Continue tightening one-click reviewer packet export for clone users.
+
+
+## 2026-05-30 - Reviewer packet export
+
+Done:
+- Added `reviewer_packet_export` to launch packets and renderer capabilities.
+- Added Qt `Export reviewer packet` to write clone/launch/research/visual summaries plus launch packet snapshot.
+- Handoff and smoke gate the reviewer packet export contract.
+
+Next:
+- Return to backend-facing renderer LOD, hydrology and ocean material closed loops.

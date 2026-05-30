@@ -57,6 +57,7 @@ $summary = [ordered]@{
         profile_launch_readiness = $launchPacket.profile_launch_readiness.schema
         profile_launch_readiness_ui = $launchPacket.profile_launch_readiness_ui.schema
         profile_ui_state_replay = $launchPacket.profile_ui_state_replay.schema
+        reviewer_packet_export = $launchPacket.reviewer_packet_export.schema
         layer_visual_presets = $launchPacket.layer_visual_presets.schema
         layer_visual_preset_runtime_feedback = $launchPacket.layer_visual_preset_runtime_feedback.schema
         layer_operation_feedback = $launchPacket.layer_operation_feedback.schema
@@ -138,6 +139,17 @@ $summary = [ordered]@{
         saved_state_groups = $launchPacket.profile_ui_state_replay.saved_state_groups
         replay_surfaces = $launchPacket.profile_ui_state_replay.replay_surfaces
         summary_text = $launchPacket.profile_ui_state_replay.summary_text
+    }
+    reviewer_packet_export = @{
+        launch_packet_schema = $launchPacket.reviewer_packet_export.schema
+        renderer_capabilities_schema = $capabilities.reviewer_packet_export.schema
+        status = $launchPacket.reviewer_packet_export.status
+        reviewer_packet_schema = $launchPacket.reviewer_packet_export.reviewer_packet_schema
+        qt_action = $launchPacket.reviewer_packet_export.qt_action
+        default_output = $launchPacket.reviewer_packet_export.default_output
+        included_summary_fields = $launchPacket.reviewer_packet_export.included_summary_fields
+        included_packet_fields = $launchPacket.reviewer_packet_export.included_packet_fields
+        portable = $launchPacket.reviewer_packet_export.portable
     }
     profile_visual_quick_review = @{
         launch_packet_schema = $launchPacket.profile_ui_state_replay.schema

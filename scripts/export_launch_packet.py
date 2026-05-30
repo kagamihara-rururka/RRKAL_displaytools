@@ -1070,6 +1070,35 @@ def profile_launch_readiness_ui_packet(
     }
 
 
+def reviewer_packet_export_packet(source: str) -> dict[str, object]:
+    return {
+        "schema": "rrkal_displaytools.reviewer_packet_export.v1",
+        "source": source,
+        "status": "ready",
+        "reviewer_packet_schema": "rrkal_displaytools.reviewer_packet.v1",
+        "qt_action": "export_reviewer_packet_dialog",
+        "qt_action_label": "Export reviewer packet",
+        "default_output": "state/showcase/reviewer_packet.json",
+        "included_summary_fields": [
+            "clone_reviewer_summary",
+            "launch_reviewer_summary",
+            "research_interaction_summary",
+            "visual_review_summary",
+        ],
+        "included_packet_fields": [
+            "launch_packet_snapshot",
+            "cross_machine_clone_readiness",
+            "profile_launch_readiness",
+            "profile_ui_state_replay",
+            "reviewer_packet_export",
+        ],
+        "launch_packet_field": "reviewer_packet_export",
+        "renderer_capability_field": "reviewer_packet_export",
+        "handoff_field": "reviewer_packet_export",
+        "portable": True,
+    }
+
+
 def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
     saved_groups = [
         "renderer_config",
@@ -2897,6 +2926,7 @@ def launch_packet(
         "profile_launch_readiness": profile_launch_readiness_packet("scripts.export_launch_packet", style_renderer_entries_packet("scripts.export_launch_packet", profile.get("style_profile") if isinstance(profile.get("style_profile"), str) else None), layer_operator_groups_packet(layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None), "scripts.export_launch_packet")),
         "profile_launch_readiness_ui": profile_launch_readiness_ui_packet(profile_launch_readiness_packet("scripts.export_launch_packet", style_renderer_entries_packet("scripts.export_launch_packet", profile.get("style_profile") if isinstance(profile.get("style_profile"), str) else None), layer_operator_groups_packet(layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None), "scripts.export_launch_packet")), "scripts.export_launch_packet"),
         "profile_ui_state_replay": profile_ui_state_replay_packet("scripts.export_launch_packet"),
+        "reviewer_packet_export": reviewer_packet_export_packet("scripts.export_launch_packet"),
         "visual_review_readiness": visual_review_readiness_packet("scripts.export_launch_packet"),
         "layer_visual_presets": layer_visual_presets_packet("scripts.export_launch_packet"),
         "layer_visual_preset_runtime_feedback": layer_visual_preset_runtime_feedback_packet(layer_visual_presets_packet("scripts.export_launch_packet"), None, "scripts.export_launch_packet"),

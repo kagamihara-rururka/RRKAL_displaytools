@@ -254,6 +254,35 @@ def profile_launch_readiness_ui_packet(
     }
 
 
+def reviewer_packet_export_packet(source: str) -> dict[str, object]:
+    return {
+        "schema": "rrkal_displaytools.reviewer_packet_export.v1",
+        "source": source,
+        "status": "ready",
+        "reviewer_packet_schema": "rrkal_displaytools.reviewer_packet.v1",
+        "qt_action": "export_reviewer_packet_dialog",
+        "qt_action_label": "Export reviewer packet",
+        "default_output": "state/showcase/reviewer_packet.json",
+        "included_summary_fields": [
+            "clone_reviewer_summary",
+            "launch_reviewer_summary",
+            "research_interaction_summary",
+            "visual_review_summary",
+        ],
+        "included_packet_fields": [
+            "launch_packet_snapshot",
+            "cross_machine_clone_readiness",
+            "profile_launch_readiness",
+            "profile_ui_state_replay",
+            "reviewer_packet_export",
+        ],
+        "launch_packet_field": "reviewer_packet_export",
+        "renderer_capability_field": "reviewer_packet_export",
+        "handoff_field": "reviewer_packet_export",
+        "portable": True,
+    }
+
+
 def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
     saved_groups = [
         "renderer_config",
@@ -2828,6 +2857,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         open_templates_button = QtWidgets.QPushButton("模板目錄")
         open_local_profiles_button = QtWidgets.QPushButton("本機配置")
         export_packet_button = QtWidgets.QPushButton("匯出啟動包")
+        export_reviewer_packet_button = QtWidgets.QPushButton("Export reviewer packet")
         profile_replay_button = QtWidgets.QPushButton("Inspect: Profile replay")
         copy_launch_summary_button = QtWidgets.QPushButton("Copy launch summary")
         timeline_button = QtWidgets.QPushButton("Inspect: Timeline")
@@ -2871,6 +2901,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (style_routes_button, "Renderer ports: inspect parchment and tactical style renderer route JSON."),
             (layer_matrix_button, "Renderer ports: inspect layer capability matrix JSON."),
             (layer_runtime_button, "Renderer ports: inspect layer runtime state and renderer ack JSON."),
+            (export_reviewer_packet_button, "Run/profile: export one JSON reviewer packet with clone, launch, research and visual summaries."),
             (module_seams_button, "Replay/contracts: inspect future module extraction seam registry JSON."),
             (clone_ready_button, "Replay/contracts: inspect cross-machine clone readiness JSON."),
             (copy_clone_summary_button, "Replay/contracts: copy clone/setup/profile launch reviewer summary for cross-machine handoff."),
@@ -2901,6 +2932,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         open_templates_button.clicked.connect(self.open_template_dir)
         open_local_profiles_button.clicked.connect(self.open_local_profile_dir)
         export_packet_button.clicked.connect(self.export_launch_packet_dialog)
+        export_reviewer_packet_button.clicked.connect(self.export_reviewer_packet_dialog)
         profile_replay_button.clicked.connect(self.show_profile_ui_state_replay)
         copy_launch_summary_button.clicked.connect(self.copy_launch_reviewer_summary)
         timeline_button.clicked.connect(self.show_timeline_runtime_state)
@@ -2936,7 +2968,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         restart_button.clicked.connect(self.restart_renderer)
         stop_button.clicked.connect(self.stop_renderer)
         action_sections = (
-            ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button)),
+            ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button, export_reviewer_packet_button)),
             ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, timeline_button, module_seams_button, clone_ready_button, copy_clone_summary_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, ocean_port_button, style_routes_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
@@ -3685,6 +3717,25 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"handoff_first={packet.get('handoff_first_command')}"
         )
 
+    def collect_reviewer_packet_export(self) -> dict[str, object]:
+        return reviewer_packet_export_packet("rrkal_displaytools_qt_panel")
+
+    def collect_reviewer_packet(self) -> dict[str, object]:
+        return {
+            "schema": "rrkal_displaytools.reviewer_packet.v1",
+            "created_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "source": "rrkal_displaytools_qt_panel",
+            "reviewer_packet_export": self.collect_reviewer_packet_export(),
+            "clone_reviewer_summary": self.clone_reviewer_summary_text(),
+            "launch_reviewer_summary": self.launch_reviewer_summary_text(),
+            "research_interaction_summary": self.research_interaction_summary_text(),
+            "visual_review_summary": self.visual_review_readiness_summary_text(),
+            "cross_machine_clone_readiness": self.collect_cross_machine_clone_readiness(),
+            "profile_launch_readiness": self.collect_profile_launch_readiness(),
+            "profile_ui_state_replay": self.collect_profile_ui_state_replay(),
+            "launch_packet_snapshot": self.collect_launch_packet(),
+        }
+
     def collect_launch_packet(self) -> dict[str, object]:
         return {
             "schema": "rrkal_displaytools.launch_packet.v1",
@@ -3726,6 +3777,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "cross_machine_clone_readiness": self.collect_cross_machine_clone_readiness(),
             "profile_launch_readiness": self.collect_profile_launch_readiness(),
             "profile_launch_readiness_ui": self.collect_profile_launch_readiness_ui(),
+            "reviewer_packet_export": self.collect_reviewer_packet_export(),
             "layer_visual_presets": self.collect_layer_visual_presets(),
             "layer_visual_preset_runtime_feedback": self.collect_layer_visual_preset_runtime_feedback(),
             "hydrology_lod_readiness": self.collect_hydrology_lod_readiness(),
@@ -7861,6 +7913,24 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             encoding="utf-8",
         )
         self.status.setText(f"已匯出啟動包：{path}")
+
+    @QtCore.pyqtSlot()
+    def export_reviewer_packet_dialog(self) -> None:
+        SHOWCASE_DIR.mkdir(parents=True, exist_ok=True)
+        default_path = SHOWCASE_DIR / "reviewer_packet.json"
+        path, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self,
+            "匯出 reviewer packet",
+            str(default_path),
+            "JSON packets (*.json)",
+        )
+        if not path:
+            return
+        Path(path).write_text(
+            json.dumps(self.collect_reviewer_packet(), ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        self.status.setText(f"已匯出 reviewer packet：{path}")
 
     @QtCore.pyqtSlot()
     def show_renderer_capabilities(self) -> None:
