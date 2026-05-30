@@ -21211,6 +21211,7 @@ def layer_research_workflow_packet(
     warning_list = capability_matrix.get("runtime_warning_list") if isinstance(capability_matrix.get("runtime_warning_list"), dict) else {}
     remediation = capability_matrix.get("renderer_diagnostics_remediation") if isinstance(capability_matrix.get("renderer_diagnostics_remediation"), dict) else {}
     selected_layer = capability_matrix.get("selected_layer") or layer_filter.get("selected_layer")
+    navigation_hint = layer_navigation_hint_packet(layer_filter, layer_group_view, selected_layer, source)
     ready = (
         capability_matrix.get("schema") == "rrkal_displaytools.layer_capability_matrix.v1"
         and operator_groups.get("schema") == "rrkal_displaytools.layer_operator_groups.v1"
@@ -21226,6 +21227,8 @@ def layer_research_workflow_packet(
         "filter_query": layer_filter.get("query"),
         "first_matched_layer": layer_filter.get("first_matched_layer"),
         "selected_layer_visible": layer_filter.get("selected_layer_visible"),
+        "navigation_hint_schema": navigation_hint.get("schema"),
+        "navigation_hint": navigation_hint,
         "group_view_schema": layer_group_view.get("schema"),
         "visible_row_count": layer_group_view.get("visible_row_count"),
         "selected_layer_hidden_by_group": layer_group_view.get("selected_layer_hidden_by_group"),
@@ -21262,6 +21265,58 @@ def layer_research_workflow_packet(
             "portable": True,
         },
         "boundary": "Research workflow summarizes existing Qt layer controls and renderer diagnostics; it does not mutate renderer state or RRKAL data governance.",
+    }
+
+
+def layer_navigation_hint_packet(
+    layer_filter: dict[str, object] | None,
+    layer_group_view: dict[str, object] | None,
+    selected_layer: object,
+    source: str,
+) -> dict[str, object]:
+    layer_filter = layer_filter if isinstance(layer_filter, dict) else {}
+    layer_group_view = layer_group_view if isinstance(layer_group_view, dict) else {}
+    selected_layer_key = str(selected_layer) if selected_layer else None
+    first_matched = layer_filter.get("first_matched_layer")
+    visible_count = int(layer_group_view.get("visible_row_count") or layer_filter.get("visible_matched_count") or 0)
+    selected_visible = bool(layer_filter.get("selected_layer_visible"))
+    selected_hidden_by_group = bool(layer_group_view.get("selected_layer_hidden_by_group"))
+    reveal_available = bool(layer_filter.get("selected_layer_reveal_available")) or selected_hidden_by_group
+    if selected_layer_key and reveal_available:
+        state = "selected_hidden"
+        next_action = "reveal_selected_layer"
+        message = "Active layer is hidden by the current filter or collapsed group; use Reveal selected before editing."
+    elif not selected_layer_key and first_matched:
+        state = "no_active_layer"
+        next_action = "select_first_filtered_layer"
+        message = "No active layer is selected; select the first visible matched layer before changing controls."
+    elif visible_count == 0:
+        state = "no_visible_rows"
+        next_action = "clear_filter_or_expand_groups"
+        message = "No layer rows are visible; clear the filter or expand groups."
+    elif selected_layer_key and selected_visible:
+        state = "ready"
+        next_action = "edit_selected_layer"
+        message = "Active layer is visible; visibility, lock, opacity, blend and diagnostics controls are safe to review."
+    else:
+        state = "select_visible_layer"
+        next_action = "select_first_filtered_layer"
+        message = "A visible filtered layer is available; select one before editing layer-scoped controls."
+    return {
+        "schema": "rrkal_displaytools.layer_navigation_hint.v1",
+        "source": source,
+        "state": state,
+        "next_action": next_action,
+        "message": message,
+        "selected_layer": selected_layer_key,
+        "first_matched_layer": first_matched,
+        "visible_row_count": visible_count,
+        "selected_layer_visible": selected_visible,
+        "selected_layer_hidden_by_group": selected_hidden_by_group,
+        "filter_preset": layer_filter.get("preset"),
+        "filter_query": layer_filter.get("query"),
+        "qt_label_object": "layerNavigationHint",
+        "boundary": "Qt navigation guidance only; it does not mutate renderer visibility, cache, import or RRKAL data governance.",
     }
 
 

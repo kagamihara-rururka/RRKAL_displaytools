@@ -11,7 +11,9 @@ At session start, checkpoint close, and before large refactors, folder moves, Op
 
 Only validated decisions or engineering outcomes should be converted into this repo's GTD, handoff, docs, OpenSpec, code, smoke logs, commits, or CI notes.
 
-最後更新：2026-05-30
+If a displaytools observation belongs to another project, write it to `L:\AGENT_EXCHANGE\inbox\c_3_<target_project>.md` using the exchange template instead of editing that repo. Outgoing advice must not interrupt the receiving writer's checkpoint and only becomes actionable after the target repo validates it.
+
+最後更新：2026-05-31
 
 ## 核心原則
 

@@ -320,6 +320,15 @@ if ($launchPacket.layer_research_workflow.schema -ne "rrkal_displaytools.layer_r
 if ($launchPacket.layer_research_workflow.status -ne "ready") {
     throw "Launch packet layer_research_workflow not ready"
 }
+if ($launchPacket.layer_research_workflow.navigation_hint_schema -ne "rrkal_displaytools.layer_navigation_hint.v1") {
+    throw "Launch packet layer navigation hint schema missing"
+}
+if ($launchPacket.layer_research_workflow.navigation_hint.qt_label_object -ne "layerNavigationHint") {
+    throw "Launch packet layer navigation hint Qt label missing"
+}
+if (@("reveal_selected_layer", "select_first_filtered_layer", "clear_filter_or_expand_groups", "edit_selected_layer") -notcontains $launchPacket.layer_research_workflow.navigation_hint.next_action) {
+    throw "Launch packet layer navigation hint action invalid"
+}
 if ($launchPacket.layer_research_workflow.qt_surface -ne "Layers dock research workflow label") {
     throw "Launch packet layer_research_workflow Qt surface mismatch"
 }
@@ -2063,6 +2072,15 @@ if ($capabilities.layer_operator_groups.schema -ne "rrkal_displaytools.layer_ope
 }
 if ([int]$capabilities.layer_operator_groups.complete_group_count -lt 5) {
     throw "Renderer layer_operator_groups incomplete"
+}
+if ($capabilities.layer_research_workflow.navigation_hint_schema -ne "rrkal_displaytools.layer_navigation_hint.v1") {
+    throw "Renderer layer navigation hint schema missing"
+}
+if ($capabilities.layer_research_workflow.navigation_hint.qt_label_object -ne "layerNavigationHint") {
+    throw "Renderer layer navigation hint Qt label missing"
+}
+if (@("reveal_selected_layer", "select_first_filtered_layer", "clear_filter_or_expand_groups", "edit_selected_layer") -notcontains $capabilities.layer_research_workflow.navigation_hint.next_action) {
+    throw "Renderer layer navigation hint action invalid"
 }
 if ($capabilities.layer_selection_tool.schema -ne "rrkal_displaytools.layer_selection_tool.v1") {
     throw "Renderer layer_selection_tool schema missing or invalid"
@@ -4436,6 +4454,9 @@ if ($qtPanelSource -notlike "*layerControlFeedbackStrip*") {
 }
 if ($qtPanelSource -notlike "*collect_layer_control_feedback_strip*") {
     throw "Qt layer control feedback strip collector is missing"
+}
+if ($qtPanelSource -notlike "*layerNavigationHint*") {
+    throw "Qt layer navigation hint label is missing"
 }
 if ($qtPanelSource -notlike "*rrkal_displaytools.layer_control_feedback_strip.v1*") {
     throw "Qt layer control feedback strip schema is missing"

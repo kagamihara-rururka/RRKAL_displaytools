@@ -1,5 +1,13 @@
 # Development Log
 
+## 2026-05-31 - Layer navigation hint
+
+- Added `rrkal_displaytools.layer_navigation_hint.v1` to `layer_research_workflow` across the Qt launch packet, no-GUI launch packet and renderer capability discovery.
+- Added a `layerNavigationHint` label to the Qt Layers dock so researchers can see whether the active layer is hidden by filter/group state and which action to take next.
+- Added the outgoing Agent Exchange rule to workflow docs: c_3 writes cross-project observations to `L:\AGENT_EXCHANGE\inbox\c_3_<target_project>.md` instead of editing another repo.
+- Kept the hint UI-only; it does not mutate renderer visibility, cache, import or RRKAL data governance.
+- Smoke: PASS via `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; cloud-drive transient file-access retries occurred and recovered.
+
 ## 2026-05-31 - Ocean 3D dialog cost estimate
 
 - Added `rrkal_displaytools.taichi_ocean_3d_interactive_cost_estimate.v1` to the Ocean material control port in Qt launch packets, no-GUI launch packets and renderer capability discovery.
