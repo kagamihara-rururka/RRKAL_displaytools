@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Visual contract inspector index
+
+- Added `scripts/list_visual_contract_inspectors.ps1` to list no-GUI reviewer commands for config gateway, style routes, Hydrology/LOD, Ocean material, performance smoke and pre-decoupling gates.
+- Smoke now verifies the index schema, key inspector IDs, recommended cross-machine sequence and no-launch/no-data-governance boundary.
+- This gives a cloned machine one entrypoint for deciding which displaytools contracts to inspect before visual/runtime work.
+- Smoke: PASS (`scripts\smoke.ps1`).
+
 ## 2026-05-31 - No-GUI Ocean material inspector
 
 - Added `scripts/inspect_ocean_material.ps1` for no-GUI inspection of Ocean material, Ocean 3D control panel, control-board audit, renderer apply and sea-state scalar contracts.

@@ -1160,6 +1160,42 @@ if ($launchPacket.performance_smoke_telemetry.schema -ne "rrkal_displaytools.per
 if ($launchPacket.performance_smoke_telemetry.output_paths -notcontains "state/performance/stage_timing.jsonl") {
     throw "Launch packet performance smoke stage timing output path missing"
 }
+$visualInspectorIndexPath = Join-Path $RepoRoot "scripts\list_visual_contract_inspectors.ps1"
+if (-not (Test-Path -LiteralPath $visualInspectorIndexPath)) {
+    throw "Visual contract inspector index script is missing"
+}
+$visualInspectorIndexText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $visualInspectorIndexPath)
+$visualInspectorIndex = ($visualInspectorIndexText -join "`n") | ConvertFrom-Json
+if ($visualInspectorIndex.schema -ne "rrkal_displaytools.visual_contract_inspector_index.v1") {
+    throw "Visual contract inspector index schema missing"
+}
+if ($visualInspectorIndex.entry_ids -notcontains "hydrology_lod") {
+    throw "Visual contract inspector index missing Hydrology/LOD inspector"
+}
+if ($visualInspectorIndex.entry_ids -notcontains "ocean_material") {
+    throw "Visual contract inspector index missing Ocean material inspector"
+}
+if ($visualInspectorIndex.entry_ids -notcontains "style_routes") {
+    throw "Visual contract inspector index missing style routes inspector"
+}
+if ($visualInspectorIndex.entry_ids -notcontains "renderer_config_gateway") {
+    throw "Visual contract inspector index missing renderer config gateway inspector"
+}
+if ($visualInspectorIndex.entry_ids -notcontains "performance_smoke") {
+    throw "Visual contract inspector index missing performance smoke inspector"
+}
+if ($visualInspectorIndex.entry_ids -notcontains "pre_decoupling_snapshot") {
+    throw "Visual contract inspector index missing pre-decoupling snapshot inspector"
+}
+if ($visualInspectorIndex.recommended_cross_machine_sequence[0] -ne "renderer_config_gateway") {
+    throw "Visual contract inspector index cross-machine sequence should start with config gateway"
+}
+if ($visualInspectorIndex.boundary -notlike "*does not launch Qt, Taichi*") {
+    throw "Visual contract inspector index launch boundary missing"
+}
+if ($visualInspectorIndex.boundary -notlike "*dataset discovery, import or cache governance*") {
+    throw "Visual contract inspector index data-governance boundary missing"
+}
 $configGatewayInspectorPath = Join-Path $RepoRoot "scripts\inspect_renderer_config_gateway.ps1"
 if (-not (Test-Path -LiteralPath $configGatewayInspectorPath)) {
     throw "Renderer config gateway inspector script is missing"
