@@ -114,6 +114,8 @@ $summary = [ordered]@{
         pick_state_file = $launchPacket.layer_selection_tool.renderer_pick_bridge.pick_state_file
         selectable_layer_count = $launchPacket.layer_selection_tool.selectable_layer_count
         brush_mask_scope = $launchPacket.layer_selection_tool.brush_mask_scope
+        selection_summary_contract_schema = $launchPacket.layer_selection_tool.selection_summary_contract_schema
+        selection_summary_contract = $launchPacket.layer_selection_tool.selection_summary_contract
     }
     layer_research_workflow = @{
         launch_packet_schema = $launchPacket.layer_research_workflow.schema

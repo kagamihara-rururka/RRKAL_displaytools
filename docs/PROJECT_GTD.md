@@ -430,3 +430,14 @@ Done:
 
 Next:
 - Continue aligning profile/launch/handoff labels for layer selection and boundary emphasis controls.
+
+
+## 2026-05-30 - Layer selection summary contract
+
+Done:
+- Added `layer_selection_summary_contract` to layer selection packets.
+- Added `Copy selection summary` to the Qt Research interaction group.
+- Handoff and smoke gate the selected-layer summary contract.
+
+Next:
+- Continue applying the same label/copy contract pattern to Boundary emphasis controls.

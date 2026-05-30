@@ -1678,6 +1678,16 @@ def layer_selection_tool_packet(source: str, selected_layer: str | None = None) 
             "layer_research_workflow",
         ],
         "renderer_capability_field": "layer_selection_tool",
+        "selection_summary_contract_schema": "rrkal_displaytools.layer_selection_summary_contract.v1",
+        "selection_summary_contract": {
+            "label": "Layer selection",
+            "summary_format": "Layer selection: selected={selected_layer} ({selected_layer_label}); pick_state={pick_state_file}; brush_mask={brush_mask_scope}",
+            "qt_label_object": "selectedLayer",
+            "qt_copy_action": "copy_layer_selection_summary",
+            "launch_packet_field": "layer_selection_tool.selection_summary_contract",
+            "handoff_field": "layer_selection_tool.selection_summary_contract",
+            "portable": True,
+        },
         "copyable_provenance": True,
         "boundary": "Selection tool state bridges Qt active-layer UX and renderer pick context only; brush/mask editing and RRKAL data governance stay out of scope.",
     }
@@ -2758,6 +2768,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         layer_runtime_button = QtWidgets.QPushButton("Inspect: Layer runtime")
         layer_pick_button = QtWidgets.QPushButton("Inspect: Layer pick")
         selection_state_button = QtWidgets.QPushButton("Inspect: Selection state")
+        copy_selection_summary_button = QtWidgets.QPushButton("Copy selection summary")
         layer_ops_button = QtWidgets.QPushButton("Inspect: Layer ops")
         pin_pick_button = QtWidgets.QPushButton("Inspect: Pin pick")
         cursor_geo_button = QtWidgets.QPushButton("Inspect: Cursor geo")
@@ -2786,6 +2797,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (clone_ready_button, "Replay/contracts: inspect cross-machine clone readiness JSON."),
             (layer_pick_button, "Research interaction: inspect selected-layer renderer pick JSON."),
             (selection_state_button, "Selection state: inspect active Qt layer selection, pick history and renderer target JSON."),
+            (copy_selection_summary_button, "Selection state: copy active layer, pick bridge and brush/mask scope summary."),
             (layer_ops_button, "Layer ops: inspect active layer operation summary, last operation and replay metadata JSON."),
             (canvas_state_button, "Research interaction: inspect Qt Canvas state, preview metadata and provenance summary."),
             (pin_pick_button, "Research interaction: inspect renderer Pin hover/click pick bridge JSON."),
@@ -2817,6 +2829,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         layer_runtime_button.clicked.connect(self.show_layer_runtime_state)
         layer_pick_button.clicked.connect(self.show_layer_pick_state)
         selection_state_button.clicked.connect(self.show_layer_pick_state)
+        copy_selection_summary_button.clicked.connect(self.copy_layer_selection_summary)
         layer_ops_button.clicked.connect(self.show_layer_operation_feedback)
         pin_pick_button.clicked.connect(self.show_pin_pick_state)
         cursor_geo_button.clicked.connect(self.show_cursor_geodesy_state)
@@ -2837,7 +2850,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button)),
             ("Inspect: Replay/contracts", (profile_replay_button, timeline_button, module_seams_button, clone_ready_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, ocean_port_button, style_routes_button, layer_matrix_button, layer_runtime_button)),
-            ("Inspect: Research interaction", (layer_pick_button, selection_state_button, layer_ops_button, canvas_state_button, pin_pick_button, cursor_geo_button, boundary_state_button)),
+            ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, cursor_geo_button, boundary_state_button)),
             ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, thumbnail_button, live_preview_button)),
             ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, smoke_button)),
             ("Process", (launch_button, restart_button, stop_button)),
@@ -3874,6 +3887,24 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "rrkal_displaytools_qt_panel",
             self.selected_layer_key,
         )
+
+    def layer_selection_summary_text(self, packet: dict[str, object] | None = None) -> str:
+        packet = packet or self.collect_layer_selection_tool()
+        contract = packet.get("selection_summary_contract", {})
+        label = "Layer selection"
+        if isinstance(contract, dict):
+            label = str(contract.get("label") or label)
+        selected_layer = self.selected_layer_key or "none"
+        selected_label = next(
+            (text for key, text in LAYER_LABELS if key == self.selected_layer_key),
+            selected_layer,
+        )
+        pick_bridge = packet.get("renderer_pick_bridge", {})
+        pick_state_file = "state/renderer_layer_pick_state.json"
+        if isinstance(pick_bridge, dict):
+            pick_state_file = str(pick_bridge.get("pick_state_file") or pick_state_file)
+        brush_mask_scope = str(packet.get("brush_mask_scope") or "excluded")
+        return f"{label}: selected={selected_layer} ({selected_label}); pick_state={pick_state_file}; brush_mask={brush_mask_scope}"
 
     def collect_layer_research_workflow(self) -> dict[str, object]:
         return layer_research_workflow_packet(
@@ -7409,6 +7440,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             text = json.dumps(self.layer_pick_state_payload or {}, ensure_ascii=False, indent=2)
         self.command_text.setPlainText(text)
         self.status.setText(f"已顯示 layer pick state JSON：{LAYER_PICK_STATE_PATH}")
+
+    def copy_layer_selection_summary(self) -> None:
+        summary = self.layer_selection_summary_text()
+        QtWidgets.QApplication.clipboard().setText(summary)
+        self.status.setText("已複製 layer selection 摘要")
 
     def toggle_selected_layer_visibility(self) -> None:
         key = self.selected_layer_key

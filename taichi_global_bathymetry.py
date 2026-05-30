@@ -18940,6 +18940,16 @@ def layer_selection_tool_packet(source: str, selected_layer: str | None = None) 
             "layer_research_workflow",
         ],
         "renderer_capability_field": "layer_selection_tool",
+        "selection_summary_contract_schema": "rrkal_displaytools.layer_selection_summary_contract.v1",
+        "selection_summary_contract": {
+            "label": "Layer selection",
+            "summary_format": "Layer selection: selected={selected_layer} ({selected_layer_label}); pick_state={pick_state_file}; brush_mask={brush_mask_scope}",
+            "qt_label_object": "selectedLayer",
+            "qt_copy_action": "copy_layer_selection_summary",
+            "launch_packet_field": "layer_selection_tool.selection_summary_contract",
+            "handoff_field": "layer_selection_tool.selection_summary_contract",
+            "portable": True,
+        },
         "copyable_provenance": True,
         "boundary": "Selection tool state bridges Qt active-layer UX and renderer pick context only; brush/mask editing and RRKAL data governance stay out of scope.",
     }

@@ -254,3 +254,9 @@ Displaytools 不負責：
 - `visual_review_readiness.copy_summary_contract` now documents the portable summary label, format, Qt label object and copy action.
 - The same contract appears in launch packets and handoff output.
 - Use it to keep Qt-visible summaries, copied notes and cross-machine handoff language aligned.
+
+## Layer selection summary contract
+
+- `layer_selection_tool.selection_summary_contract` now documents the portable selected-layer summary.
+- Qt exposes `Copy selection summary` in the Research interaction group.
+- The summary keeps active layer, renderer pick bridge and brush/mask exclusion scope aligned for clone handoff.

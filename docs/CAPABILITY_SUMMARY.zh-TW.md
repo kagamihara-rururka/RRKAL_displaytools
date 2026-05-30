@@ -573,3 +573,9 @@
 - `visual_review_readiness.copy_summary_contract_schema` now advertises `rrkal_displaytools.visual_review_copy_summary_contract.v1`.
 - The contract defines the summary label, format, Qt label object, Qt copy action, launch packet field and handoff field.
 - Smoke gates the contract schema, label object, copy action and portability flag through handoff output.
+
+## Layer selection summary contract
+
+- `layer_selection_tool.selection_summary_contract_schema` now advertises `rrkal_displaytools.layer_selection_summary_contract.v1`.
+- The contract maps the existing `selectedLayer` label to `copy_layer_selection_summary`.
+- Smoke gates launch packet, renderer capability, handoff and Qt button/action coverage.

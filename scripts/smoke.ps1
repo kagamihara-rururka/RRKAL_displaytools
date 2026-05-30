@@ -215,6 +215,18 @@ if ($launchPacket.layer_selection_tool.brush_mask_scope -ne "excluded") {
 if ($launchPacket.layer_selection_tool.qt_surfaces -notcontains "Boundary row emphasis action badge") {
     throw "Launch packet layer_selection_tool boundary action badge surface missing"
 }
+if ($launchPacket.layer_selection_tool.selection_summary_contract_schema -ne "rrkal_displaytools.layer_selection_summary_contract.v1") {
+    throw "Launch packet layer_selection_tool selection summary contract schema missing or invalid"
+}
+if ($launchPacket.layer_selection_tool.selection_summary_contract.qt_label_object -ne "selectedLayer") {
+    throw "Launch packet layer_selection_tool selection summary label object missing or invalid"
+}
+if ($launchPacket.layer_selection_tool.selection_summary_contract.qt_copy_action -ne "copy_layer_selection_summary") {
+    throw "Launch packet layer_selection_tool selection summary copy action missing or invalid"
+}
+if (-not $launchPacket.layer_selection_tool.selection_summary_contract.portable) {
+    throw "Launch packet layer_selection_tool selection summary portability flag missing"
+}
 if ($launchPacket.layer_research_workflow.schema -ne "rrkal_displaytools.layer_research_workflow.v1") {
     throw "Launch packet layer_research_workflow schema missing or invalid"
 }
@@ -862,6 +874,12 @@ if ($capabilities.layer_selection_tool.brush_mask_scope -ne "excluded") {
 if ($capabilities.layer_selection_tool.qt_surfaces -notcontains "Boundary row emphasis action badge") {
     throw "Renderer layer_selection_tool boundary action badge surface missing"
 }
+if ($capabilities.layer_selection_tool.selection_summary_contract_schema -ne "rrkal_displaytools.layer_selection_summary_contract.v1") {
+    throw "Renderer layer_selection_tool selection summary contract schema missing or invalid"
+}
+if ($capabilities.layer_selection_tool.selection_summary_contract.qt_copy_action -ne "copy_layer_selection_summary") {
+    throw "Renderer layer_selection_tool selection summary copy action missing or invalid"
+}
 if ($capabilities.layer_research_workflow.schema -ne "rrkal_displaytools.layer_research_workflow.v1") {
     throw "Renderer layer_research_workflow schema missing or invalid"
 }
@@ -1417,6 +1435,18 @@ if ($handoff.layer_selection_tool.pick_state_file -ne "state/renderer_layer_pick
 }
 if ($handoff.layer_selection_tool.brush_mask_scope -ne "excluded") {
     throw "Handoff inspection layer_selection_tool must exclude brush/mask scope"
+}
+if ($handoff.layer_selection_tool.selection_summary_contract_schema -ne "rrkal_displaytools.layer_selection_summary_contract.v1") {
+    throw "Handoff inspection layer_selection_tool selection summary contract schema missing or invalid"
+}
+if ($handoff.layer_selection_tool.selection_summary_contract.qt_label_object -ne "selectedLayer") {
+    throw "Handoff inspection layer_selection_tool selection summary label object missing or invalid"
+}
+if ($handoff.layer_selection_tool.selection_summary_contract.qt_copy_action -ne "copy_layer_selection_summary") {
+    throw "Handoff inspection layer_selection_tool selection summary copy action missing or invalid"
+}
+if (-not $handoff.layer_selection_tool.selection_summary_contract.portable) {
+    throw "Handoff inspection layer_selection_tool selection summary portability flag missing"
 }
 if ($handoff.layer_research_workflow.launch_packet_schema -ne "rrkal_displaytools.layer_research_workflow.v1") {
     throw "Handoff inspection layer_research_workflow launch schema missing or invalid"
@@ -2073,6 +2103,15 @@ if ($qtPanelSource -notlike "*copy_visual_review_readiness_summary*") {
 }
 if ($qtPanelSource -notlike "*copy_summary_contract*") {
     throw "Qt panel Visual readiness copy summary contract missing"
+}
+if ($qtPanelSource -notlike "*copy_selection_summary_button*") {
+    throw "Qt panel Layer selection copy summary button missing"
+}
+if ($qtPanelSource -notlike "*layer_selection_summary_text*") {
+    throw "Qt panel Layer selection summary formatter missing"
+}
+if ($qtPanelSource -notlike "*copy_layer_selection_summary*") {
+    throw "Qt panel Layer selection copy summary action missing"
 }
 if ($qtPanelSource -notlike "*show_boundary_state*") {
     throw "Qt Boundary JSON action is missing"
