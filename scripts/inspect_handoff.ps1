@@ -353,6 +353,10 @@ $summary = [ordered]@{
         renderer_entry_contract_schema = $launchPacket.style_profile_renderer_routes.renderer_entry_contract_schema
         required_route_contract_ids = $launchPacket.style_profile_renderer_routes.required_route_contract_ids
         required_routes = $launchPacket.style_profile_renderer_routes.required_routes
+        portable_route_commands = $launchPacket.style_profile_renderer_routes.portable_route_commands
+        style_routes_summary_contract_schema = $launchPacket.style_profile_renderer_routes.style_routes_summary_contract.schema
+        style_routes_summary_contract = $launchPacket.style_profile_renderer_routes.style_routes_summary_contract
+        summary_parameter_fields = $launchPacket.style_profile_renderer_routes.summary_parameter_fields
     }
     style_template_visual_preview = @{
         launch_packet_schema = $launchPacket.style_template_visual_preview.schema

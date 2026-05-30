@@ -380,6 +380,18 @@ if ($launchPacket.style_profile_renderer_routes.route_ids -notcontains "tactical
 if ($launchPacket.style_profile_renderer_routes.renderer_entry_contract_schema -ne "rrkal_displaytools.style_renderer_entry_contract.v1") {
     throw "Launch packet style_profile_renderer_routes entry contract schema missing"
 }
+if ($launchPacket.style_profile_renderer_routes.style_routes_summary_contract.schema -ne "rrkal_displaytools.style_routes_summary_contract.v1") {
+    throw "Launch packet style routes summary contract missing or invalid"
+}
+if ($launchPacket.style_profile_renderer_routes.style_routes_summary_contract.qt_copy_action -ne "copy_style_routes_summary") {
+    throw "Launch packet style routes summary copy action missing"
+}
+if ($launchPacket.style_profile_renderer_routes.style_routes_summary_contract.summary_format -notlike "*parchment={parchment_command}*tactical={tactical_command}*boundary=RRKAL-owned data/cache*") {
+    throw "Launch packet style routes summary format missing required route commands"
+}
+if ($launchPacket.style_profile_renderer_routes.summary_parameter_fields -notcontains "portable_route_commands") {
+    throw "Launch packet style routes summary parameter fields missing"
+}
 if ($launchPacket.style_profile_renderer_routes.required_route_contract_ids -notcontains "parchment") {
     throw "Launch packet style_profile_renderer_routes missing parchment route contract"
 }
@@ -1414,6 +1426,12 @@ if ($capabilities.style_profile_renderer_routes.route_ids -notcontains "tactical
 if ($capabilities.style_profile_renderer_routes.renderer_entry_contract_schema -ne "rrkal_displaytools.style_renderer_entry_contract.v1") {
     throw "Renderer style_profile_renderer_routes entry contract schema missing"
 }
+if ($capabilities.style_profile_renderer_routes.style_routes_summary_contract.schema -ne "rrkal_displaytools.style_routes_summary_contract.v1") {
+    throw "Renderer style routes summary contract missing or invalid"
+}
+if ($capabilities.style_profile_renderer_routes.style_routes_summary_contract.qt_copy_action -ne "copy_style_routes_summary") {
+    throw "Renderer style routes summary copy action missing"
+}
 if ($capabilities.style_template_visual_preview.schema -ne "rrkal_displaytools.style_template_visual_preview.v1") {
     throw "Renderer style_template_visual_preview schema missing or invalid"
 }
@@ -2330,6 +2348,15 @@ if ($handoff.style_profile_renderer_routes.route_ids -notcontains "tactical") {
 if ($handoff.style_profile_renderer_routes.required_route_contract_ids -notcontains "parchment") {
     throw "Handoff inspection style_profile_renderer_routes missing parchment route contract"
 }
+if ($handoff.style_profile_renderer_routes.style_routes_summary_contract_schema -ne "rrkal_displaytools.style_routes_summary_contract.v1") {
+    throw "Handoff inspection style routes summary contract missing or invalid"
+}
+if ($handoff.style_profile_renderer_routes.style_routes_summary_contract.qt_copy_action -ne "copy_style_routes_summary") {
+    throw "Handoff inspection style routes summary copy action missing"
+}
+if ($handoff.style_profile_renderer_routes.summary_parameter_fields -notcontains "required_routes") {
+    throw "Handoff inspection style routes summary parameter fields missing"
+}
 if ($handoff.launch_packet_contracts.style_template_visual_preview -ne "rrkal_displaytools.style_template_visual_preview.v1") {
     throw "Handoff inspection style_template_visual_preview launch contract missing or invalid"
 }
@@ -2916,6 +2943,12 @@ if ($qtPanelSource -notlike "*Hydro LOD*") {
 }
 if ($qtPanelSource -notlike "*show_style_renderer_routes*") {
     throw "Qt style renderer routes JSON action is missing"
+}
+if ($qtPanelSource -notlike "*copy_style_routes_summary*") {
+    throw "Qt style routes copy summary action is missing"
+}
+if ($qtPanelSource -notlike "*Style routes: *boundary=RRKAL-owned data/cache*") {
+    throw "Qt style routes portable summary text missing"
 }
 if ($qtPanelSource -notlike "*Style routes*") {
     throw "Qt Style routes action button is missing"

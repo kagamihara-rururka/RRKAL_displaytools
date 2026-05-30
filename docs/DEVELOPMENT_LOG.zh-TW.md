@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Style routes copyable handoff summary
+
+Changes:
+- Added `rrkal_displaytools.style_routes_summary_contract.v1` to style profile renderer route packets for Qt, launch export and renderer capability discovery.
+- Added a Qt `Copy Style routes summary` action that copies route readiness, route IDs, required parchment/tactical coverage and portable commands.
+- Handoff inspection and smoke now gate the style routes summary contract while keeping RRKAL data/cache governance outside displaytools.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Ocean material copyable handoff summary
 
 Changes:

@@ -141,6 +141,19 @@ def style_profile_renderer_routes_packet(
     route_ids = [str(route["id"]) for route in routes]
     required_routes = ["parchment", "tactical"]
     missing_routes = [route_id for route_id in required_routes if route_id not in route_ids]
+    portable_route_commands = {
+        str(route["id"]): " ".join(str(part) for part in route.get("portable_command", []))
+        for route in routes
+        if isinstance(route, dict)
+    }
+    summary_parameter_fields = [
+        "status",
+        "route_count",
+        "route_ids",
+        "required_routes",
+        "missing_routes",
+        "portable_route_commands",
+    ]
     route_contracts = [
         {
             "schema": "rrkal_displaytools.style_renderer_entry_contract.v1",
@@ -163,6 +176,16 @@ def style_profile_renderer_routes_packet(
         "required_route_contract_ids": required_routes,
         "required_routes": required_routes,
         "missing_routes": missing_routes,
+        "portable_route_commands": portable_route_commands,
+        "style_routes_summary_contract_schema": "rrkal_displaytools.style_routes_summary_contract.v1",
+        "style_routes_summary_contract": {
+            "schema": "rrkal_displaytools.style_routes_summary_contract.v1",
+            "summary_format": "Style routes: status={status}; routes={route_count}; ids={route_ids}; required={required_routes}; missing={missing_routes}; parchment={parchment_command}; tactical={tactical_command}; boundary=RRKAL-owned data/cache",
+            "summary_parameter_fields": summary_parameter_fields,
+            "qt_copy_action": "copy_style_routes_summary",
+            "portable": True,
+        },
+        "summary_parameter_fields": summary_parameter_fields,
         "status": "ready" if not missing_routes else "partial",
         "qt_surface": "Looks/templates style profile selector",
         "launch_packet_fields": ["style_profile_renderer_routes", "style_renderer_entries", "portable_command"],
@@ -3453,6 +3476,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         hydro_lod_button = QtWidgets.QPushButton("Inspect: Hydro LOD")
         copy_hydro_lod_summary_button = QtWidgets.QPushButton("Copy Hydro LOD summary")
         style_routes_button = QtWidgets.QPushButton("Inspect: Style routes")
+        copy_style_routes_summary_button = QtWidgets.QPushButton("Copy Style routes summary")
         style_thumbnails_button = QtWidgets.QPushButton("Inspect: Style thumbs")
         module_seams_button = QtWidgets.QPushButton("Inspect: Module seams")
         clone_ready_button = QtWidgets.QPushButton("Inspect: Clone ready")
@@ -3493,6 +3517,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (hydro_lod_button, "Renderer ports: inspect hydrology layer and LOD hook readiness JSON."),
             (copy_hydro_lod_summary_button, "Renderer ports: copy Hydrology/LOD readiness, runtime evidence and state/ack/pick file summary."),
             (style_routes_button, "Renderer ports: inspect parchment and tactical style renderer route JSON."),
+            (copy_style_routes_summary_button, "Renderer ports: copy scientific/nautical/parchment/tactical route readiness and portable command summary."),
             (style_thumbnails_button, "Visual review: inspect style template thumbnail slots and local renderer --output commands."),
             (layer_matrix_button, "Renderer ports: inspect layer capability matrix JSON."),
             (layer_runtime_button, "Renderer ports: inspect layer runtime state and renderer ack JSON."),
@@ -3538,6 +3563,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         hydro_lod_button.clicked.connect(self.show_hydrology_lod_status)
         copy_hydro_lod_summary_button.clicked.connect(self.copy_hydrology_lod_summary)
         style_routes_button.clicked.connect(self.show_style_renderer_routes)
+        copy_style_routes_summary_button.clicked.connect(self.copy_style_routes_summary)
         style_thumbnails_button.clicked.connect(self.show_style_thumbnail_slots)
         module_seams_button.clicked.connect(self.show_module_boundary_registry)
         clone_ready_button.clicked.connect(self.show_cross_machine_clone_readiness)
@@ -3572,7 +3598,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         action_sections = (
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button, export_reviewer_packet_button)),
             ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, timeline_button, module_seams_button, clone_ready_button, copy_clone_summary_button)),
-            ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, copy_ocean_summary_button, style_routes_button, layer_matrix_button, layer_runtime_button)),
+            ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, copy_ocean_summary_button, style_routes_button, copy_style_routes_summary_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
             ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, copy_style_thumb_status_button, thumbnail_button, live_preview_button)),
             ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, smoke_button)),
@@ -4564,6 +4590,24 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         return style_profile_renderer_routes_packet(
             self.collect_style_renderer_entries(),
             "rrkal_displaytools_qt_panel",
+        )
+
+    def style_routes_summary_text(self, routes_packet: dict[str, object] | None = None) -> str:
+        routes_packet = routes_packet if isinstance(routes_packet, dict) else self.collect_style_profile_renderer_routes()
+        route_ids = routes_packet.get("route_ids") if isinstance(routes_packet.get("route_ids"), list) else []
+        required_routes = routes_packet.get("required_routes") if isinstance(routes_packet.get("required_routes"), list) else []
+        missing_routes = routes_packet.get("missing_routes") if isinstance(routes_packet.get("missing_routes"), list) else []
+        commands = routes_packet.get("portable_route_commands") if isinstance(routes_packet.get("portable_route_commands"), dict) else {}
+        return (
+            "Style routes: "
+            f"status={routes_packet.get('status', 'unknown')}; "
+            f"routes={routes_packet.get('route_count', 0)}; "
+            f"ids={','.join(str(route_id) for route_id in route_ids) or '-'}; "
+            f"required={','.join(str(route_id) for route_id in required_routes) or '-'}; "
+            f"missing={','.join(str(route_id) for route_id in missing_routes) or '-'}; "
+            f"parchment={commands.get('parchment', '-')}; "
+            f"tactical={commands.get('tactical', '-')}; "
+            "boundary=RRKAL-owned data/cache"
         )
 
     def collect_style_template_visual_preview(self) -> dict[str, object]:
@@ -8615,6 +8659,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             )
         )
         self.status.setText("已顯示 style profile renderer routes JSON")
+
+    def copy_style_routes_summary(self) -> None:
+        summary = self.style_routes_summary_text()
+        QtWidgets.QApplication.clipboard().setText(summary)
+        self.status.setText("已複製 style routes 摘要")
 
     def show_style_thumbnail_slots(self) -> None:
         packet = self.collect_style_template_visual_preview()

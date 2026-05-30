@@ -957,6 +957,19 @@ def style_profile_renderer_routes_packet(
     route_ids = [str(route["id"]) for route in routes]
     required_routes = ["parchment", "tactical"]
     missing_routes = [route_id for route_id in required_routes if route_id not in route_ids]
+    portable_route_commands = {
+        str(route["id"]): " ".join(str(part) for part in route.get("portable_command", []))
+        for route in routes
+        if isinstance(route, dict)
+    }
+    summary_parameter_fields = [
+        "status",
+        "route_count",
+        "route_ids",
+        "required_routes",
+        "missing_routes",
+        "portable_route_commands",
+    ]
     route_contracts = [
         {
             "schema": "rrkal_displaytools.style_renderer_entry_contract.v1",
@@ -979,6 +992,16 @@ def style_profile_renderer_routes_packet(
         "required_route_contract_ids": required_routes,
         "required_routes": required_routes,
         "missing_routes": missing_routes,
+        "portable_route_commands": portable_route_commands,
+        "style_routes_summary_contract_schema": "rrkal_displaytools.style_routes_summary_contract.v1",
+        "style_routes_summary_contract": {
+            "schema": "rrkal_displaytools.style_routes_summary_contract.v1",
+            "summary_format": "Style routes: status={status}; routes={route_count}; ids={route_ids}; required={required_routes}; missing={missing_routes}; parchment={parchment_command}; tactical={tactical_command}; boundary=RRKAL-owned data/cache",
+            "summary_parameter_fields": summary_parameter_fields,
+            "qt_copy_action": "copy_style_routes_summary",
+            "portable": True,
+        },
+        "summary_parameter_fields": summary_parameter_fields,
         "status": "ready" if not missing_routes else "partial",
         "qt_surface": "Looks/templates style profile selector",
         "launch_packet_fields": ["style_profile_renderer_routes", "style_renderer_entries", "portable_command"],
