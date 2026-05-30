@@ -1118,6 +1118,15 @@ if ($launchPacket.ocean_material_control_port.qt_control_panel.control_board_lab
 if ($launchPacket.ocean_material_control_port.qt_control_panel.control_board_button_object -ne "ocean3DControlBoardButton") {
     throw "Launch packet Taichi ocean 3D control board button missing"
 }
+if ($launchPacket.ocean_material_control_port.qt_control_panel.performance_guard_schema -ne "rrkal_displaytools.taichi_ocean_3d_performance_guard.v1") {
+    throw "Launch packet Taichi ocean 3D performance guard schema missing"
+}
+if ($launchPacket.ocean_material_control_port.qt_control_panel.performance_guard_button_object -ne "ocean3DPerformanceSafePreviewButton") {
+    throw "Launch packet Taichi ocean 3D safe preview button missing"
+}
+if ($launchPacket.ocean_material_control_port.qt_control_panel.performance_guard_action -ne "apply_ocean_3d_safe_preview") {
+    throw "Launch packet Taichi ocean 3D safe preview action missing"
+}
 if ($launchPacket.ocean_material_control_port.qt_control_panel.control_board_default_visible -ne $true) {
     throw "Launch packet Taichi ocean 3D control board visibility flag missing"
 }
@@ -2328,6 +2337,15 @@ if ($capabilities.ocean_material_control_port.qt_control_panel.control_board_lab
 }
 if ($capabilities.ocean_material_control_port.qt_control_panel.control_board_default_visible -ne $true) {
     throw "Renderer Taichi ocean 3D control board visibility flag missing"
+}
+if ($capabilities.ocean_material_control_port.qt_control_panel.performance_guard_schema -ne "rrkal_displaytools.taichi_ocean_3d_performance_guard.v1") {
+    throw "Renderer Taichi ocean 3D performance guard schema missing"
+}
+if ($capabilities.ocean_material_control_port.qt_control_panel.performance_guard_label_object -ne "ocean3DPerformanceGuardStrip") {
+    throw "Renderer Taichi ocean 3D performance guard strip missing"
+}
+if ($capabilities.ocean_material_control_port.qt_control_panel.performance_guard_action -ne "apply_ocean_3d_safe_preview") {
+    throw "Renderer Taichi ocean 3D safe preview action missing"
 }
 if ($capabilities.ocean_material_control_port.qt_control_panel.control_board_status -ne "wired_default_visible") {
     throw "Renderer Taichi ocean 3D control board status missing"
@@ -3987,6 +4005,15 @@ if ($qtPanelSource -notlike "*Open: Ocean 3D controls*") {
 }
 if ($qtPanelSource -notlike "*open_taichi_ocean_3d_controls*") {
     throw "Qt Taichi ocean 3D control dialog handler is missing"
+}
+if ($qtPanelSource -notlike "*ocean3DPerformanceGuardStrip*") {
+    throw "Qt Taichi ocean 3D performance guard strip is missing"
+}
+if ($qtPanelSource -notlike "*ocean3DPerformanceSafePreviewButton*") {
+    throw "Qt Taichi ocean 3D safe preview button is missing"
+}
+if ($qtPanelSource -notlike "*apply_ocean_3d_safe_preview*") {
+    throw "Qt Taichi ocean 3D safe preview handler is missing"
 }
 if ($qtPanelSource -notlike "*taichiOcean3DControlPanel*") {
     throw "Qt Taichi ocean 3D control panel label is missing"

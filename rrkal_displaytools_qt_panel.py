@@ -893,6 +893,12 @@ def ocean_material_control_port_packet(
             "control_board_surface": "Layers dock quick strip",
             "control_board_label_object": "ocean3DControlBoardStrip",
             "control_board_button_object": "ocean3DControlBoardButton",
+            "performance_guard_schema": "rrkal_displaytools.taichi_ocean_3d_performance_guard.v1",
+            "performance_guard_label_object": "ocean3DPerformanceGuardStrip",
+            "performance_guard_button_object": "ocean3DPerformanceSafePreviewButton",
+            "performance_guard_action": "apply_ocean_3d_safe_preview",
+            "performance_guard_preset": {"wave_strength": 0.08, "roughness": 0.12, "foam": 0.02},
+            "performance_guard_boundary": "Safe preview lowers scalar ocean-material intensity only; true renderer pass reduction remains the layer render-plan merge follow-up.",
             "control_board_default_visible": True,
             "control_board_status": "wired_default_visible",
             "control_board_audit_schema": "rrkal_displaytools.taichi_ocean_3d_control_board_audit.v1",
@@ -914,6 +920,9 @@ def ocean_material_control_port_packet(
             "secondary_surfaces": ["Properties dock", "Renderer ports action group"],
             "label_object": "ocean3DControlBoardStrip",
             "button_object": "ocean3DControlBoardButton",
+            "performance_guard_label_object": "ocean3DPerformanceGuardStrip",
+            "performance_guard_button_object": "ocean3DPerformanceSafePreviewButton",
+            "performance_guard_action": "apply_ocean_3d_safe_preview",
             "dialog_action": "open_taichi_ocean_3d_controls",
             "performance_followup": "post_decoupling_precompute_layer_render_plan_then_single_render_pass",
             "user_issue": "Ocean 3D controls must be visible from the control board, not only the Properties dock.",
@@ -3750,6 +3759,23 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         )
         ocean_3d_control_board_button.clicked.connect(self.open_taichi_ocean_3d_controls)
         layers_layout.addWidget(ocean_3d_control_board_button)
+        self.ocean_3d_performance_guard_label = QtWidgets.QLabel(
+            "Ocean 3D performance guard: safe preview available; backend optimization waits for render-plan merge"
+        )
+        self.ocean_3d_performance_guard_label.setObjectName("ocean3DPerformanceGuardStrip")
+        self.ocean_3d_performance_guard_label.setWordWrap(True)
+        self.ocean_3d_performance_guard_label.setStyleSheet(
+            "QLabel#ocean3DPerformanceGuardStrip { color:#4b3515; background:#fff6df; "
+            "border:1px solid #caa85a; border-radius:8px; padding:6px 8px; font-weight:600; }"
+        )
+        layers_layout.addWidget(self.ocean_3d_performance_guard_label)
+        ocean_3d_safe_preview_button = QtWidgets.QPushButton("Ocean safe preview")
+        ocean_3d_safe_preview_button.setObjectName("ocean3DPerformanceSafePreviewButton")
+        ocean_3d_safe_preview_button.setToolTip(
+            "Apply a low-cost Taichi Ocean scalar preset while keeping true pass reduction queued for render-plan optimization."
+        )
+        ocean_3d_safe_preview_button.clicked.connect(self.apply_ocean_3d_safe_preview)
+        layers_layout.addWidget(ocean_3d_safe_preview_button)
         self.refresh_ocean_3d_control_summary()
         self.render_plan_cache_label = QtWidgets.QLabel("Render plan cache: waiting for renderer metadata")
         self.render_plan_cache_label.setObjectName("renderPlanCacheDiagnosticsStrip")
@@ -4850,6 +4876,27 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.ocean_3d_control_label.setText(summary)
         if hasattr(self, "ocean_3d_control_board_label"):
             self.ocean_3d_control_board_label.setText(f"Ocean 3D quick controls: {summary}")
+        if hasattr(self, "ocean_3d_performance_guard_label"):
+            self.ocean_3d_performance_guard_label.setText(self.ocean_3d_performance_guard_text())
+
+    def ocean_3d_performance_guard_text(self) -> str:
+        return (
+            "Ocean 3D performance guard: "
+            "safe_preview=wave:0.08/roughness:0.12/foam:0.02; "
+            "true_optimization=post_decoupling_render_plan_merge; "
+            "current_values="
+            f"wave:{self.wave_edit.text().strip() or '0.22'}/"
+            f"roughness:{self.roughness_edit.text().strip() or '0.28'}/"
+            f"foam:{self.foam_edit.text().strip() or '0.12'}"
+        )
+
+    def apply_ocean_3d_safe_preview(self) -> None:
+        self.wave_edit.setText("0.08")
+        self.roughness_edit.setText("0.12")
+        self.foam_edit.setText("0.02")
+        self.refresh_ocean_3d_control_summary()
+        self.refresh_command_preview()
+        self.set_layer_operation_status("Ocean 3D safe preview applied: wave=0.08 roughness=0.12 foam=0.02")
 
     def open_taichi_ocean_3d_controls(self) -> None:
         def bounded(value: object, default: float, lower: float, upper: float) -> float:
