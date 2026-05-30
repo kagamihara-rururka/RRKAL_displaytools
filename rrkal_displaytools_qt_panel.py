@@ -2572,7 +2572,15 @@ def layer_selection_tool_packet(source: str, selected_layer: str | None = None) 
         "selection_summary_contract_schema": "rrkal_displaytools.layer_selection_summary_contract.v1",
         "selection_summary_contract": {
             "label": "Layer selection",
-            "summary_format": "Layer selection: selected={selected_layer} ({selected_layer_label}); pick_state={pick_state_file}; brush_mask={brush_mask_scope}",
+            "summary_format": "Layer selection: selected={selected_layer} ({selected_layer_label}); pick_state={pick_state_file}; quick_actions=visible/lock/solo/diagnostics; brush_mask={brush_mask_scope}",
+            "quick_actions_summary_contract_schema": "rrkal_displaytools.active_layer_quick_actions_summary_contract.v1",
+            "quick_actions_summary_contract": {
+                "schema": "rrkal_displaytools.active_layer_quick_actions_summary_contract.v1",
+                "summary_format": "quick_actions=visible/lock/solo/diagnostics; guide=activeLayerActionGuideStrip; buttons=activeLayerQuickActions; brush_mask=excluded",
+                "source_packet_field": "layer_selection_affordance.active_quick_actions",
+                "qt_copy_action": "copy_layer_selection_summary",
+                "portable": True,
+            },
             "qt_label_object": "selectedLayer",
             "qt_copy_action": "copy_layer_selection_summary",
             "launch_packet_field": "layer_selection_tool.selection_summary_contract",
@@ -5918,7 +5926,16 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if isinstance(pick_bridge, dict):
             pick_state_file = str(pick_bridge.get("pick_state_file") or pick_state_file)
         brush_mask_scope = str(packet.get("brush_mask_scope") or "excluded")
-        return f"{label}: selected={selected_layer} ({selected_label}); pick_state={pick_state_file}; brush_mask={brush_mask_scope}"
+        affordance = self.collect_layer_selection_affordance()
+        quick_actions = affordance.get("active_quick_actions") if isinstance(affordance, dict) else None
+        if not isinstance(quick_actions, list):
+            quick_actions = ["toggle_visibility", "toggle_lock", "solo", "diagnostics"]
+        quick_actions_text = "/".join(str(action).replace("toggle_", "") for action in quick_actions)
+        return (
+            f"{label}: selected={selected_layer} ({selected_label}); "
+            f"pick_state={pick_state_file}; quick_actions={quick_actions_text}; "
+            f"brush_mask={brush_mask_scope}"
+        )
 
     def collect_layer_research_workflow(self) -> dict[str, object]:
         return layer_research_workflow_packet(

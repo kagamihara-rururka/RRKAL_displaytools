@@ -224,6 +224,12 @@ if ($launchPacket.layer_selection_tool.selection_summary_contract.qt_label_objec
 if ($launchPacket.layer_selection_tool.selection_summary_contract.qt_copy_action -ne "copy_layer_selection_summary") {
     throw "Launch packet layer_selection_tool selection summary copy action missing or invalid"
 }
+if ($launchPacket.layer_selection_tool.selection_summary_contract.quick_actions_summary_contract.schema -ne "rrkal_displaytools.active_layer_quick_actions_summary_contract.v1") {
+    throw "Launch packet layer_selection_tool quick actions summary contract missing or invalid"
+}
+if ($launchPacket.layer_selection_tool.selection_summary_contract.summary_format -notlike "*quick_actions=visible/lock/solo/diagnostics*") {
+    throw "Launch packet layer_selection_tool quick actions summary format missing"
+}
 if (-not $launchPacket.layer_selection_tool.selection_summary_contract.portable) {
     throw "Launch packet layer_selection_tool selection summary portability flag missing"
 }
@@ -1633,6 +1639,12 @@ if ($capabilities.layer_selection_tool.selection_summary_contract_schema -ne "rr
 if ($capabilities.layer_selection_tool.selection_summary_contract.qt_copy_action -ne "copy_layer_selection_summary") {
     throw "Renderer layer_selection_tool selection summary copy action missing or invalid"
 }
+if ($capabilities.layer_selection_tool.selection_summary_contract.quick_actions_summary_contract.schema -ne "rrkal_displaytools.active_layer_quick_actions_summary_contract.v1") {
+    throw "Renderer layer_selection_tool quick actions summary contract missing or invalid"
+}
+if ($capabilities.layer_selection_tool.selection_summary_contract.quick_actions_summary_contract.source_packet_field -ne "layer_selection_affordance.active_quick_actions") {
+    throw "Renderer layer_selection_tool quick actions source field missing"
+}
 if ($capabilities.layer_selection_affordance.schema -ne "rrkal_displaytools.layer_selection_affordance.v1") {
     throw "Renderer layer_selection_affordance schema missing or invalid"
 }
@@ -3019,6 +3031,9 @@ if ($handoff.layer_selection_tool.selection_summary_contract.qt_label_object -ne
 }
 if ($handoff.layer_selection_tool.selection_summary_contract.qt_copy_action -ne "copy_layer_selection_summary") {
     throw "Handoff inspection layer_selection_tool selection summary copy action missing or invalid"
+}
+if ($handoff.layer_selection_tool.selection_summary_contract.quick_actions_summary_contract.schema -ne "rrkal_displaytools.active_layer_quick_actions_summary_contract.v1") {
+    throw "Handoff inspection layer_selection_tool quick actions summary contract missing or invalid"
 }
 if (-not $handoff.layer_selection_tool.selection_summary_contract.portable) {
     throw "Handoff inspection layer_selection_tool selection summary portability flag missing"
@@ -4635,6 +4650,12 @@ if ($qtPanelSource -notlike "*layer_selection_summary_text*") {
 }
 if ($qtPanelSource -notlike "*copy_layer_selection_summary*") {
     throw "Qt panel Layer selection copy summary action missing"
+}
+if ($qtPanelSource -notlike "*quick_actions={quick_actions_text}*") {
+    throw "Qt panel Layer selection quick actions summary text missing"
+}
+if ($qtPanelSource -notlike "*active_layer_quick_actions_summary_contract.v1*") {
+    throw "Qt panel Layer selection quick actions summary contract missing"
 }
 if ($qtPanelSource -notlike "*show_boundary_state*") {
     throw "Qt Boundary JSON action is missing"

@@ -20822,7 +20822,15 @@ def layer_selection_tool_packet(source: str, selected_layer: str | None = None) 
         "selection_summary_contract_schema": "rrkal_displaytools.layer_selection_summary_contract.v1",
         "selection_summary_contract": {
             "label": "Layer selection",
-            "summary_format": "Layer selection: selected={selected_layer} ({selected_layer_label}); pick_state={pick_state_file}; brush_mask={brush_mask_scope}",
+            "summary_format": "Layer selection: selected={selected_layer} ({selected_layer_label}); pick_state={pick_state_file}; quick_actions=visible/lock/solo/diagnostics; brush_mask={brush_mask_scope}",
+            "quick_actions_summary_contract_schema": "rrkal_displaytools.active_layer_quick_actions_summary_contract.v1",
+            "quick_actions_summary_contract": {
+                "schema": "rrkal_displaytools.active_layer_quick_actions_summary_contract.v1",
+                "summary_format": "quick_actions=visible/lock/solo/diagnostics; guide=activeLayerActionGuideStrip; buttons=activeLayerQuickActions; brush_mask=excluded",
+                "source_packet_field": "layer_selection_affordance.active_quick_actions",
+                "qt_copy_action": "copy_layer_selection_summary",
+                "portable": True,
+            },
             "qt_label_object": "selectedLayer",
             "qt_copy_action": "copy_layer_selection_summary",
             "launch_packet_field": "layer_selection_tool.selection_summary_contract",

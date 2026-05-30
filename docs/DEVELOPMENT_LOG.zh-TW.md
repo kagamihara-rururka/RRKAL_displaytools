@@ -1,5 +1,14 @@
 # Development Log
 
+## 2026-05-30 - Active layer quick actions copy summary
+
+Changes:
+- Upgraded `Copy selection summary` so the portable layer-selection handoff now includes active-layer quick actions: Visible, Lock, Solo and Diagnostics.
+- Added `rrkal_displaytools.active_layer_quick_actions_summary_contract.v1` to the layer selection summary contract across Qt, no-GUI launch packets, renderer capabilities and handoff inspection.
+- Smoke now gates the quick-action summary contract, source packet field and Qt summary text.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
 ## 2026-05-30 - Ocean 3D guard copy summary
 
 Changes:
