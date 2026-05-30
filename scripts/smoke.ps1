@@ -530,6 +530,15 @@ if ($launchPacket.layer_render_plan_performance.compiled_plan_invalidation_helpe
 if ($launchPacket.layer_render_plan_performance.compiled_plan_invalidation_reasons_field -ne "cache_invalidation_reasons") {
     throw "Launch packet layer_render_plan_performance invalidation reasons field missing"
 }
+if ($launchPacket.layer_render_plan_performance.compiled_plan_invalidation_scope_schema -ne "rrkal_displaytools.layer_render_plan_cache_invalidation_scope.v1") {
+    throw "Launch packet layer_render_plan_performance invalidation scope schema missing"
+}
+if ($launchPacket.layer_render_plan_performance.compiled_plan_invalidation_scope_helper -ne "HybridRenderController.layer_render_plan_cache_invalidation_scope") {
+    throw "Launch packet layer_render_plan_performance invalidation scope helper missing"
+}
+if ($launchPacket.layer_render_plan_performance.compiled_plan_invalidation_scope_field -ne "cache_invalidation_scope") {
+    throw "Launch packet layer_render_plan_performance invalidation scope field missing"
+}
 if ($launchPacket.layer_render_plan_performance.compiled_plan_reuse_decision_field -ne "cache_reuse_decision") {
     throw "Launch packet layer_render_plan_performance reuse decision field missing"
 }
@@ -1666,6 +1675,15 @@ if ($capabilities.layer_render_plan_performance.compiled_plan_invalidation_helpe
 if ($capabilities.layer_render_plan_performance.compiled_plan_invalidation_reasons_field -ne "cache_invalidation_reasons") {
     throw "Renderer layer_render_plan_performance invalidation reasons field missing"
 }
+if ($capabilities.layer_render_plan_performance.compiled_plan_invalidation_scope_schema -ne "rrkal_displaytools.layer_render_plan_cache_invalidation_scope.v1") {
+    throw "Renderer layer_render_plan_performance invalidation scope schema missing"
+}
+if ($capabilities.layer_render_plan_performance.compiled_plan_invalidation_scope_helper -ne "HybridRenderController.layer_render_plan_cache_invalidation_scope") {
+    throw "Renderer layer_render_plan_performance invalidation scope helper missing"
+}
+if ($capabilities.layer_render_plan_performance.compiled_plan_invalidation_scope_field -ne "cache_invalidation_scope") {
+    throw "Renderer layer_render_plan_performance invalidation scope field missing"
+}
 if ($capabilities.layer_render_plan_performance.compiled_plan_reuse_policy -ne "reuse_when_cache_key_matches_previous_compiled_plan") {
     throw "Renderer layer_render_plan_performance compiled plan reuse policy missing"
 }
@@ -2350,6 +2368,15 @@ if ($handoff.layer_render_plan_performance.compiled_plan_invalidation_reason_sch
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_invalidation_helper -ne "HybridRenderController.layer_render_plan_cache_invalidation_reasons") {
     throw "Handoff inspection layer render plan performance invalidation helper missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_invalidation_scope_schema -ne "rrkal_displaytools.layer_render_plan_cache_invalidation_scope.v1") {
+    throw "Handoff inspection layer render plan performance invalidation scope schema missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_invalidation_scope_helper -ne "HybridRenderController.layer_render_plan_cache_invalidation_scope") {
+    throw "Handoff inspection layer render plan performance invalidation scope helper missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_invalidation_scope_field -ne "cache_invalidation_scope") {
+    throw "Handoff inspection layer render plan performance invalidation scope field missing"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_reuse_decision_field -ne "cache_reuse_decision") {
     throw "Handoff inspection layer render plan performance reuse decision field missing"
@@ -3562,6 +3589,15 @@ if ($qtPanelSource -notlike "*cache_invalidation_reasons*") {
 if ($qtPanelSource -notlike "*cache_reuse_decision*") {
     throw "Qt render plan reuse decision diagnostics field is missing"
 }
+if ($qtPanelSource -notlike "*layer_render_plan_cache_invalidation_scope.v1*") {
+    throw "Qt render plan invalidation scope schema is missing"
+}
+if ($qtPanelSource -notlike "*cache_invalidation_scope*") {
+    throw "Qt render plan invalidation scope diagnostics field is missing"
+}
+if ($qtPanelSource -notlike "*scope={scope_text}*") {
+    throw "Qt render plan invalidation scope summary text is missing"
+}
 if ($qtPanelSource -notlike "*collect_layer_render_plan_cache_diagnostics*") {
     throw "Qt render plan cache diagnostics collector is missing"
 }
@@ -3842,6 +3878,21 @@ if ($rendererSource -notlike "*cache_key_changed*") {
 }
 if ($rendererSource -notlike "*cache_key_match*") {
     throw "Renderer render plan cache-key-match reuse marker is missing"
+}
+if ($rendererSource -notlike "*def layer_render_plan_cache_invalidation_scope*") {
+    throw "Renderer render plan cache invalidation scope helper is missing"
+}
+if ($rendererSource -notlike '*"scope": "batch"*') {
+    throw "Renderer render plan batch invalidation scope marker is missing"
+}
+if ($rendererSource -notlike '*"scope": "global"*') {
+    throw "Renderer render plan global invalidation scope marker is missing"
+}
+if ($rendererSource -notlike '*"scope": "plan"*') {
+    throw "Renderer render plan plan invalidation scope marker is missing"
+}
+if ($rendererSource -notlike '*"scope": "reuse"*') {
+    throw "Renderer render plan reuse scope marker is missing"
 }
 if ($rendererSource -notlike '*"layer_render_plan": getattr(self, "layer_render_plan_snapshot"*') {
     if ($rendererSource -notlike '*"layer_render_plan": getattr(self, "compiled_layer_render_plan"*') {

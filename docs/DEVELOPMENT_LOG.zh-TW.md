@@ -1,5 +1,16 @@
 # Development Log
 
+## 2026-05-30 - Render-plan invalidation scope
+
+Changes:
+- Added `HybridRenderController.layer_render_plan_cache_invalidation_scope()` to map dirty flags and cache-key decisions to batch/global/plan/reuse scopes.
+- Compiled render-plan metadata and Qt diagnostics now expose `cache_invalidation_scope_schema` and `cache_invalidation_scope`.
+- The Layers control-board render-plan cache strip now shows a compact `scope=` summary next to decision and reason text.
+- Smoke gates now verify scope schema/helper/field plus renderer source markers for batch, global, plan and reuse scopes.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Render-plan cache invalidation reasons
 
 Changes:

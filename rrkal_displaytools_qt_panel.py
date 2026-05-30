@@ -1045,6 +1045,8 @@ def layer_render_plan_cache_diagnostics_packet(
         "cache_reuse_decision": plan.get("cache_reuse_decision", plan.get("cache_status", "unavailable")),
         "cache_invalidation_reason_schema": plan.get("cache_invalidation_reason_schema", "rrkal_displaytools.layer_render_plan_cache_invalidation_reasons.v1"),
         "cache_invalidation_reasons": plan.get("cache_invalidation_reasons") if isinstance(plan.get("cache_invalidation_reasons"), list) else (["metadata_sidecar_missing"] if not available else []),
+        "cache_invalidation_scope_schema": plan.get("cache_invalidation_scope_schema", "rrkal_displaytools.layer_render_plan_cache_invalidation_scope.v1"),
+        "cache_invalidation_scope": plan.get("cache_invalidation_scope") if isinstance(plan.get("cache_invalidation_scope"), list) else ([] if available else [{"scope": "metadata", "id": "metadata_sidecar_missing", "dirty_flag": None}]),
         "cache_key_available": bool(plan.get("cache_key")),
         "reuse_policy": plan.get("reuse_policy", "reuse_when_cache_key_matches_previous_compiled_plan") if available else "unavailable",
         "reuse_boundary": plan.get("reuse_boundary", "valid_until_dirty_flags_or_camera_change") if available else "unavailable",
@@ -1094,6 +1096,9 @@ def layer_render_plan_performance_packet(
         "compiled_plan_invalidation_reason_schema": "rrkal_displaytools.layer_render_plan_cache_invalidation_reasons.v1",
         "compiled_plan_invalidation_helper": "HybridRenderController.layer_render_plan_cache_invalidation_reasons",
         "compiled_plan_invalidation_reasons_field": "cache_invalidation_reasons",
+        "compiled_plan_invalidation_scope_schema": "rrkal_displaytools.layer_render_plan_cache_invalidation_scope.v1",
+        "compiled_plan_invalidation_scope_helper": "HybridRenderController.layer_render_plan_cache_invalidation_scope",
+        "compiled_plan_invalidation_scope_field": "cache_invalidation_scope",
         "compiled_plan_reuse_decision_field": "cache_reuse_decision",
         "compiled_plan_reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",
         "compiled_plan_reuse_status_values": ["compiled", "reused"],
@@ -4784,12 +4789,18 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         key_state = "yes" if diagnostics.get("cache_key_available") else "no"
         reasons = diagnostics.get("cache_invalidation_reasons")
         reason_text = ",".join(str(reason) for reason in reasons[:3]) if isinstance(reasons, list) else "-"
+        scopes = diagnostics.get("cache_invalidation_scope")
+        if isinstance(scopes, list):
+            scope_text = ",".join(str(scope.get("id", "-")) for scope in scopes[:3] if isinstance(scope, dict))
+        else:
+            scope_text = "-"
         return (
             "Render plan cache: "
             f"status={diagnostics.get('status', 'unavailable')}; "
             f"cache={diagnostics.get('cache_status', 'unavailable')}; "
             f"decision={diagnostics.get('cache_reuse_decision', 'unavailable')}; "
             f"reasons={reason_text}; "
+            f"scope={scope_text}; "
             f"key={key_state}; "
             f"reuse={diagnostics.get('reuse_boundary', 'unavailable')}; "
             f"steps={diagnostics.get('composition_step_count', '-')}; "

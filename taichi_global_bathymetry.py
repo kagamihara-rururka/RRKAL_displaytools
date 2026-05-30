@@ -14166,6 +14166,36 @@ class HybridRenderController:
             reasons.append("cache_key_match")
         return reasons
 
+    def layer_render_plan_cache_invalidation_scope(
+        self,
+        runtime_snapshot: dict[str, object],
+        invalidation_reasons: list[str],
+    ) -> list[dict[str, object]]:
+        dirty_flags = runtime_snapshot.get("dirty_flags") if isinstance(runtime_snapshot.get("dirty_flags"), dict) else {}
+        batch_targets = runtime_snapshot.get("batch_targets") if isinstance(runtime_snapshot.get("batch_targets"), list) else []
+        scopes: list[dict[str, object]] = []
+        for batch in batch_targets:
+            if not isinstance(batch, dict):
+                continue
+            dirty_flag = str(batch.get("dirty_flag") or "")
+            if dirty_flag and dirty_flags.get(dirty_flag) is True:
+                scopes.append(
+                    {
+                        "scope": "batch",
+                        "id": str(batch.get("id") or dirty_flag),
+                        "dirty_flag": dirty_flag,
+                        "source": batch.get("source"),
+                    }
+                )
+        for global_flag in ("force", "changed"):
+            if dirty_flags.get(global_flag) is True:
+                scopes.append({"scope": "global", "id": global_flag, "dirty_flag": global_flag})
+        if "cache_key_changed" in invalidation_reasons or "no_previous_compiled_plan" in invalidation_reasons:
+            scopes.append({"scope": "plan", "id": "compiled_layer_render_plan", "dirty_flag": "cache_key"})
+        if not scopes and "cache_key_match" in invalidation_reasons:
+            scopes.append({"scope": "reuse", "id": "compiled_layer_render_plan", "dirty_flag": None})
+        return scopes
+
     def compile_layer_render_plan(
         self,
         changed: bool | None = None,
@@ -14180,12 +14210,14 @@ class HybridRenderController:
         )
         cache_key = self.layer_render_plan_cache_key(runtime_snapshot, composition_steps)
         invalidation_reasons = self.layer_render_plan_cache_invalidation_reasons(runtime_snapshot, cache_key)
+        invalidation_scope = self.layer_render_plan_cache_invalidation_scope(runtime_snapshot, invalidation_reasons)
         cached_plan = getattr(self, "compiled_layer_render_plan", None)
         if isinstance(cached_plan, dict) and getattr(self, "compiled_layer_render_plan_cache_key", None) == cache_key:
             plan = dict(cached_plan)
             plan["cache_status"] = "reused"
             plan["cache_reuse_decision"] = "reused"
             plan["cache_invalidation_reasons"] = invalidation_reasons
+            plan["cache_invalidation_scope"] = invalidation_scope
             plan["reuse_policy"] = "reuse_when_cache_key_matches_previous_compiled_plan"
             plan["reuse_boundary"] = plan.get("reuse_boundary", "valid_until_dirty_flags_or_camera_change")
             plan["frame_index"] = int(getattr(self, "frame_index", 0))
@@ -14202,6 +14234,8 @@ class HybridRenderController:
             "cache_key": cache_key,
             "cache_invalidation_reasons": invalidation_reasons,
             "cache_invalidation_reason_schema": "rrkal_displaytools.layer_render_plan_cache_invalidation_reasons.v1",
+            "cache_invalidation_scope": invalidation_scope,
+            "cache_invalidation_scope_schema": "rrkal_displaytools.layer_render_plan_cache_invalidation_scope.v1",
             "reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",
             "reuse_status_values": ["compiled", "reused"],
             "runtime_optimization_applied": False,
@@ -19151,6 +19185,8 @@ def layer_render_plan_cache_diagnostics_packet(
         "cache_reuse_decision": plan.get("cache_reuse_decision", plan.get("cache_status", "unavailable")),
         "cache_invalidation_reason_schema": plan.get("cache_invalidation_reason_schema", "rrkal_displaytools.layer_render_plan_cache_invalidation_reasons.v1"),
         "cache_invalidation_reasons": plan.get("cache_invalidation_reasons") if isinstance(plan.get("cache_invalidation_reasons"), list) else (["metadata_sidecar_missing"] if not available else []),
+        "cache_invalidation_scope_schema": plan.get("cache_invalidation_scope_schema", "rrkal_displaytools.layer_render_plan_cache_invalidation_scope.v1"),
+        "cache_invalidation_scope": plan.get("cache_invalidation_scope") if isinstance(plan.get("cache_invalidation_scope"), list) else ([] if available else [{"scope": "metadata", "id": "metadata_sidecar_missing", "dirty_flag": None}]),
         "cache_key_available": bool(plan.get("cache_key")),
         "reuse_policy": plan.get("reuse_policy", "reuse_when_cache_key_matches_previous_compiled_plan") if available else "unavailable",
         "reuse_boundary": plan.get("reuse_boundary", "valid_until_dirty_flags_or_camera_change") if available else "unavailable",
@@ -19200,6 +19236,9 @@ def layer_render_plan_performance_packet(
         "compiled_plan_invalidation_reason_schema": "rrkal_displaytools.layer_render_plan_cache_invalidation_reasons.v1",
         "compiled_plan_invalidation_helper": "HybridRenderController.layer_render_plan_cache_invalidation_reasons",
         "compiled_plan_invalidation_reasons_field": "cache_invalidation_reasons",
+        "compiled_plan_invalidation_scope_schema": "rrkal_displaytools.layer_render_plan_cache_invalidation_scope.v1",
+        "compiled_plan_invalidation_scope_helper": "HybridRenderController.layer_render_plan_cache_invalidation_scope",
+        "compiled_plan_invalidation_scope_field": "cache_invalidation_scope",
         "compiled_plan_reuse_decision_field": "cache_reuse_decision",
         "compiled_plan_reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",
         "compiled_plan_reuse_status_values": ["compiled", "reused"],
