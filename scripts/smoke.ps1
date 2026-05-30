@@ -1064,6 +1064,9 @@ if ($launchPacket.reviewer_packet_export.recommended_review_fields -notcontains 
 if ($launchPacket.reviewer_packet_export.recommended_review_fields -notcontains "renderer_config_gateway.changed_defaults") {
     throw "Launch packet reviewer recommended renderer config gateway field missing"
 }
+if ($launchPacket.reviewer_packet_export.recommended_review_fields -notcontains "performance_smoke_telemetry.output_paths") {
+    throw "Launch packet reviewer recommended performance smoke field missing"
+}
 if ($launchPacket.reviewer_packet_export.recommended_review_fields -notcontains "layer_selection_tool.selection_summary_contract.quick_actions_summary_contract") {
     throw "Launch packet reviewer packet layer quick actions recommended field missing"
 }
@@ -1097,6 +1100,9 @@ if ($launchPacket.reviewer_packet_export.included_summary_fields -notcontains "c
 if ($launchPacket.reviewer_packet_export.included_summary_fields -notcontains "renderer_config_gateway_summary") {
     throw "Launch packet reviewer packet renderer config gateway summary field missing"
 }
+if ($launchPacket.reviewer_packet_export.included_summary_fields -notcontains "performance_smoke_summary") {
+    throw "Launch packet reviewer packet performance smoke summary field missing"
+}
 if ($launchPacket.reviewer_packet_export.included_summary_fields -notcontains "compose_performance_summary") {
     throw "Launch packet reviewer packet compose performance summary field missing"
 }
@@ -1127,6 +1133,9 @@ if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "co
 if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "renderer_config_gateway") {
     throw "Launch packet reviewer packet renderer config gateway field missing"
 }
+if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "performance_smoke_telemetry") {
+    throw "Launch packet reviewer packet performance smoke telemetry field missing"
+}
 if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "layer_render_plan_performance") {
     throw "Launch packet reviewer packet render plan performance packet field missing"
 }
@@ -1144,6 +1153,12 @@ if ($launchPacket.renderer_config_gateway.schema -ne "rrkal_displaytools.rendere
 }
 if ($launchPacket.renderer_config_gateway.next_integration_target -notlike "*renderer argument normalization*") {
     throw "Launch packet renderer config gateway integration target missing"
+}
+if ($launchPacket.performance_smoke_telemetry.schema -ne "rrkal_displaytools.performance_smoke.v1") {
+    throw "Launch packet performance smoke telemetry schema missing"
+}
+if ($launchPacket.performance_smoke_telemetry.output_paths -notcontains "state/performance/stage_timing.jsonl") {
+    throw "Launch packet performance smoke stage timing output path missing"
 }
 $configGatewayInspectorPath = Join-Path $RepoRoot "scripts\inspect_renderer_config_gateway.ps1"
 if (-not (Test-Path -LiteralPath $configGatewayInspectorPath)) {
@@ -2530,8 +2545,14 @@ if ($capabilities.reviewer_packet_export.recommended_review_fields -notcontains 
 if ($capabilities.reviewer_packet_export.included_packet_fields -notcontains "renderer_config_gateway") {
     throw "Renderer reviewer packet config gateway field missing"
 }
+if ($capabilities.reviewer_packet_export.included_packet_fields -notcontains "performance_smoke_telemetry") {
+    throw "Renderer reviewer packet performance smoke telemetry field missing"
+}
 if ($capabilities.renderer_config_gateway.schema -ne "rrkal_displaytools.renderer_config_gateway.v1") {
     throw "Renderer capabilities config gateway schema missing"
+}
+if ($capabilities.performance_smoke_telemetry.schema -ne "rrkal_displaytools.performance_smoke.v1") {
+    throw "Renderer capabilities performance smoke telemetry schema missing"
 }
 if ($capabilities.layer_visual_presets.schema -ne "rrkal_displaytools.layer_visual_presets.v1") {
     throw "Renderer layer_visual_presets schema missing or invalid"
@@ -3808,6 +3829,12 @@ if ($handoff.renderer_config_gateway.launch_packet_schema -ne "rrkal_displaytool
 }
 if ($handoff.renderer_config_gateway.renderer_capabilities_schema -ne "rrkal_displaytools.renderer_config_gateway.v1") {
     throw "Handoff renderer config gateway capabilities schema missing"
+}
+if ($handoff.performance_smoke_telemetry.launch_packet_schema -ne "rrkal_displaytools.performance_smoke.v1") {
+    throw "Handoff performance smoke telemetry launch schema missing"
+}
+if ($handoff.performance_smoke_telemetry.render_telemetry_schema -ne "rrkal_displaytools.render_telemetry.v1") {
+    throw "Handoff performance smoke telemetry render schema missing"
 }
 if (-not $handoff.reviewer_packet_export.portable) {
     throw "Handoff inspection reviewer packet portability flag missing"
@@ -5467,6 +5494,9 @@ if ($reviewerPacketContract.controlled_interception_policy_field -ne "controlled
 if ($reviewerPacketContract.renderer_config_gateway_field -ne "renderer_config_gateway") {
     throw "No-GUI reviewer packet exporter renderer config gateway field missing"
 }
+if ($reviewerPacketContract.performance_smoke_telemetry_field -ne "performance_smoke_telemetry") {
+    throw "No-GUI reviewer packet exporter performance smoke telemetry field missing"
+}
 if ($composeParitySmoke.mode -ne "contract_only_no_render_side_effect") {
     throw "Compose parity smoke contract mode mismatch"
 }
@@ -5830,6 +5860,12 @@ if ($decouplingQtPanelSource -notmatch "Inspect: Config gateway") {
 if ($decouplingQtPanelSource -notmatch "Copy config summary") {
     throw "Qt panel renderer config gateway copy summary action is missing"
 }
+if ($decouplingQtPanelSource -notmatch "Inspect: Perf telemetry") {
+    throw "Qt panel performance telemetry Inspect action is missing"
+}
+if ($decouplingQtPanelSource -notmatch "Copy perf smoke summary") {
+    throw "Qt panel performance telemetry copy summary action is missing"
+}
 if ($decouplingQtPanelSource -notmatch "show_decoupling_readiness") {
     throw "Qt panel decoupling readiness handler is missing"
 }
@@ -5847,6 +5883,12 @@ if ($decouplingQtPanelSource -notmatch "show_renderer_config_gateway") {
 }
 if ($decouplingQtPanelSource -notmatch "copy_renderer_config_gateway_summary") {
     throw "Qt panel renderer config gateway copy summary handler is missing"
+}
+if ($decouplingQtPanelSource -notmatch "show_performance_smoke_telemetry") {
+    throw "Qt panel performance telemetry inspect handler is missing"
+}
+if ($decouplingQtPanelSource -notmatch "copy_performance_smoke_summary") {
+    throw "Qt panel performance telemetry copy summary handler is missing"
 }
 if ($decouplingQtPanelSource -notmatch "collect_decoupling_readiness") {
     throw "Qt panel decoupling readiness collector is missing"

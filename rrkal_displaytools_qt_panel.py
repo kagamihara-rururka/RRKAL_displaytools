@@ -427,6 +427,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
                 {"id": "decoupling", "fields": ["decoupling_readiness_summary", "decoupling_readiness.first_extraction_order"]},
                 {"id": "controlled_interception", "fields": ["controlled_interception_summary", "controlled_interception_policy.blocked_patterns"]},
                 {"id": "config_gateway", "fields": ["renderer_config_gateway_summary", "renderer_config_gateway.changed_defaults"]},
+                {"id": "performance_telemetry", "fields": ["performance_smoke_summary", "performance_smoke_telemetry.output_paths"]},
             ],
             "portable": True,
         },
@@ -435,6 +436,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "decoupling_readiness.first_extraction_order",
             "controlled_interception_policy.blocked_patterns",
             "renderer_config_gateway.changed_defaults",
+            "performance_smoke_telemetry.output_paths",
             "layer_selection_tool.selection_summary_contract.quick_actions_summary_contract",
             "layer_selection_affordance.active_quick_actions",
             "layer_render_plan_performance.compose_pass_budget",
@@ -455,6 +457,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "decoupling_readiness_summary",
             "controlled_interception_summary",
             "renderer_config_gateway_summary",
+            "performance_smoke_summary",
             "compose_performance_summary",
         ],
         "included_packet_fields": [
@@ -472,6 +475,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "decoupling_readiness",
             "controlled_interception_policy",
             "renderer_config_gateway",
+            "performance_smoke_telemetry",
             "layer_render_plan_performance",
             "goal_closure_scorecard",
             "reviewer_packet_export",
@@ -4215,6 +4219,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         copy_interception_summary_button = QtWidgets.QPushButton("Copy interception summary")
         renderer_config_gateway_button = QtWidgets.QPushButton("Inspect: Config gateway")
         copy_renderer_config_summary_button = QtWidgets.QPushButton("Copy config summary")
+        performance_telemetry_button = QtWidgets.QPushButton("Inspect: Perf telemetry")
+        copy_performance_smoke_summary_button = QtWidgets.QPushButton("Copy perf smoke summary")
         copy_module_summary_button = QtWidgets.QPushButton("Copy module summary")
         clone_ready_button = QtWidgets.QPushButton("Inspect: Clone ready")
         copy_clone_summary_button = QtWidgets.QPushButton("Copy clone summary")
@@ -4275,6 +4281,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (copy_interception_summary_button, "Replay/contracts: copy the controlled interception summary and guardrail counts."),
             (renderer_config_gateway_button, "Replay/contracts: inspect typed renderer argument normalization before post-7 extraction."),
             (copy_renderer_config_summary_button, "Replay/contracts: copy normalized renderer config, changed defaults and config-only boundary."),
+            (performance_telemetry_button, "Replay/contracts: inspect performance smoke telemetry schema and output paths without running a heavy benchmark."),
+            (copy_performance_smoke_summary_button, "Replay/contracts: copy performance smoke entrypoint, JSON/JSONL outputs and RRKAL boundary."),
             (copy_module_summary_button, "Replay/contracts: copy module extraction order, stable contracts, Tk boundary and RRKAL governance summary."),
             (clone_ready_button, "Replay/contracts: inspect cross-machine clone readiness JSON."),
             (copy_clone_summary_button, "Replay/contracts: copy clone/setup/profile launch reviewer summary for cross-machine handoff."),
@@ -4334,6 +4342,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         copy_interception_summary_button.clicked.connect(self.copy_controlled_interception_summary)
         renderer_config_gateway_button.clicked.connect(self.show_renderer_config_gateway)
         copy_renderer_config_summary_button.clicked.connect(self.copy_renderer_config_gateway_summary)
+        performance_telemetry_button.clicked.connect(self.show_performance_smoke_telemetry)
+        copy_performance_smoke_summary_button.clicked.connect(self.copy_performance_smoke_summary)
         copy_module_summary_button.clicked.connect(self.copy_module_boundary_summary)
         clone_ready_button.clicked.connect(self.show_cross_machine_clone_readiness)
         copy_clone_summary_button.clicked.connect(self.copy_clone_reviewer_summary)
@@ -4371,7 +4381,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         stop_button.clicked.connect(self.stop_renderer)
         action_sections = (
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button, export_reviewer_packet_button)),
-            ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, copy_reviewer_fields_button, copy_goal_scorecard_button, timeline_button, module_seams_button, decoupling_readiness_button, copy_decoupling_summary_button, controlled_interception_button, copy_interception_summary_button, renderer_config_gateway_button, copy_renderer_config_summary_button, copy_module_summary_button, clone_ready_button, copy_clone_summary_button)),
+            ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, copy_reviewer_fields_button, copy_goal_scorecard_button, timeline_button, module_seams_button, decoupling_readiness_button, copy_decoupling_summary_button, controlled_interception_button, copy_interception_summary_button, renderer_config_gateway_button, copy_renderer_config_summary_button, performance_telemetry_button, copy_performance_smoke_summary_button, copy_module_summary_button, clone_ready_button, copy_clone_summary_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, ocean_3d_controls_action_button, copy_ocean_summary_button, copy_ocean_guard_summary_button, style_routes_button, copy_style_routes_summary_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, copy_layer_controls_guide_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
             ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, copy_visual_closure_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, copy_style_thumb_status_button, thumbnail_button, live_preview_button)),
@@ -5357,6 +5367,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         value["ocean_foam"] = ocean.get("foam")
         return renderer_config_gateway_packet("rrkal_displaytools_qt_panel", value)
 
+    def collect_performance_smoke_telemetry(self) -> dict[str, object]:
+        from performance_telemetry import contract_packet
+
+        return contract_packet()
+
     def module_boundary_summary_text(self, registry: dict[str, object] | None = None) -> str:
         registry = registry if isinstance(registry, dict) else self.collect_module_boundary_registry()
         contract = registry.get("decoupling_boundary_contract") if isinstance(registry.get("decoupling_boundary_contract"), dict) else {}
@@ -5420,6 +5435,21 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"topo_step={config.get('topo_step', '-')}; "
             f"changed={changed_text}; "
             "boundary=config_only_no_qt_taichi_data_governance"
+        )
+
+    def performance_smoke_summary_text(self, packet: dict[str, object] | None = None) -> str:
+        packet = packet if isinstance(packet, dict) else self.collect_performance_smoke_telemetry()
+        output_paths = packet.get("output_paths") if isinstance(packet.get("output_paths"), list) else []
+        render_fields = packet.get("render_fields") if isinstance(packet.get("render_fields"), list) else []
+        return (
+            "Performance smoke telemetry: "
+            f"schema={packet.get('schema', '-')}; "
+            f"stage_schema={packet.get('stage_timing_schema', '-')}; "
+            f"render_schema={packet.get('render_telemetry_schema', '-')}; "
+            f"outputs={','.join(str(path) for path in output_paths) or '-'}; "
+            f"render_fields={len(render_fields)}; "
+            "command=powershell -NoProfile -ExecutionPolicy Bypass -File scripts/performance_smoke.ps1; "
+            "boundary=displaytools-only-no-rrkal-crawler-cache"
         )
 
     def collect_visual_feature_closure_matrix(self) -> dict[str, object]:
@@ -5676,6 +5706,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "decoupling_readiness_summary": self.decoupling_readiness_summary_text(),
             "controlled_interception_summary": self.controlled_interception_summary_text(),
             "renderer_config_gateway_summary": self.renderer_config_gateway_summary_text(),
+            "performance_smoke_summary": self.performance_smoke_summary_text(),
             "compose_performance_summary": self.compose_performance_reviewer_summary_text(),
             "goal_closure_scorecard": self.collect_goal_closure_scorecard(),
             "cross_machine_clone_readiness": self.collect_cross_machine_clone_readiness(),
@@ -5689,6 +5720,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "decoupling_readiness": self.collect_decoupling_readiness(),
             "controlled_interception_policy": self.collect_controlled_interception_policy(),
             "renderer_config_gateway": self.collect_renderer_config_gateway(),
+            "performance_smoke_telemetry": self.collect_performance_smoke_telemetry(),
             "visual_feature_closure_matrix": self.collect_visual_feature_closure_matrix(),
             "goal_closure_scorecard": self.collect_goal_closure_scorecard(),
             "renderer_output_artifact_contract": self.collect_renderer_output_artifact_contract(),
@@ -5746,6 +5778,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "decoupling_readiness": self.collect_decoupling_readiness(),
             "controlled_interception_policy": self.collect_controlled_interception_policy(),
             "renderer_config_gateway": self.collect_renderer_config_gateway(),
+            "performance_smoke_telemetry": self.collect_performance_smoke_telemetry(),
             "cross_machine_clone_readiness": self.collect_cross_machine_clone_readiness(),
             "profile_launch_readiness": self.collect_profile_launch_readiness(),
             "profile_launch_readiness_ui": self.collect_profile_launch_readiness_ui(),
@@ -10249,6 +10282,17 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         summary = self.renderer_config_gateway_summary_text()
         QtWidgets.QApplication.clipboard().setText(summary)
         self.status.setText("Copied renderer config gateway summary to clipboard.")
+
+    def show_performance_smoke_telemetry(self) -> None:
+        self.command_text.setPlainText(
+            json.dumps(self.collect_performance_smoke_telemetry(), ensure_ascii=False, indent=2)
+        )
+        self.status.setText("Displayed performance smoke telemetry contract JSON")
+
+    def copy_performance_smoke_summary(self) -> None:
+        summary = self.performance_smoke_summary_text()
+        QtWidgets.QApplication.clipboard().setText(summary)
+        self.status.setText("Copied performance smoke telemetry summary to clipboard.")
 
     def show_cross_machine_clone_readiness(self) -> None:
         self.command_text.setPlainText(

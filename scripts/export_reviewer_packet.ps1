@@ -35,6 +35,7 @@ if ($ContractOnly) {
         decoupling_readiness_field = "decoupling_readiness"
         controlled_interception_policy_field = "controlled_interception_policy"
         renderer_config_gateway_field = "renderer_config_gateway"
+        performance_smoke_telemetry_field = "performance_smoke_telemetry"
         boundary = "Contract-only mode is for smoke checks; normal mode writes a local reviewer packet under state/."
     } | ConvertTo-Json -Depth 8
     exit 0
@@ -84,6 +85,7 @@ $controlledInterceptionSummary = "Controlled interception: allowed=$(@($launchPa
 $rendererConfigChanged = @($launchPacket.renderer_config_gateway.changed_defaults) -join ","
 if (-not $rendererConfigChanged) { $rendererConfigChanged = "none" }
 $rendererConfigGatewaySummary = "Renderer config gateway: schema=$($launchPacket.renderer_config_gateway.schema); style=$($launchPacket.renderer_config_gateway.config.style_profile); size=$($launchPacket.renderer_config_gateway.config.width)x$($launchPacket.renderer_config_gateway.config.height); topo_step=$($launchPacket.renderer_config_gateway.config.topo_step); changed=$rendererConfigChanged; boundary=config_only_no_qt_taichi_data_governance"
+$performanceSmokeSummary = "Performance smoke telemetry: schema=$($launchPacket.performance_smoke_telemetry.schema); stage_schema=$($launchPacket.performance_smoke_telemetry.stage_timing_schema); render_schema=$($launchPacket.performance_smoke_telemetry.render_telemetry_schema); command=powershell -NoProfile -ExecutionPolicy Bypass -File scripts\performance_smoke.ps1; boundary=displaytools-only-no-rrkal-crawler-cache"
 
 $reviewerPacket = [ordered]@{
     schema = "rrkal_displaytools.reviewer_packet.v1"
@@ -101,6 +103,7 @@ $reviewerPacket = [ordered]@{
     decoupling_readiness_summary = $decouplingReadinessSummary
     controlled_interception_summary = $controlledInterceptionSummary
     renderer_config_gateway_summary = $rendererConfigGatewaySummary
+    performance_smoke_summary = $performanceSmokeSummary
     compose_performance_summary = $composePerformanceSummary
     cross_machine_clone_readiness = $launchPacket.cross_machine_clone_readiness
     profile_launch_readiness = $launchPacket.profile_launch_readiness
@@ -113,6 +116,7 @@ $reviewerPacket = [ordered]@{
     decoupling_readiness = $launchPacket.decoupling_readiness
     controlled_interception_policy = $launchPacket.controlled_interception_policy
     renderer_config_gateway = $launchPacket.renderer_config_gateway
+    performance_smoke_telemetry = $launchPacket.performance_smoke_telemetry
     visual_feature_closure_matrix = $launchPacket.visual_feature_closure_matrix
     renderer_output_artifact_contract = $launchPacket.renderer_output_artifact_contract
     layer_render_plan_performance = $performance

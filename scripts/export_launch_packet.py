@@ -27,6 +27,7 @@ from closed_loop_status import renderer_closed_loop_status_packet  # noqa: E402
 from controlled_interception import controlled_interception_policy_packet  # noqa: E402
 from decoupling_readiness import decoupling_readiness_packet  # noqa: E402
 from pin_projection import pin_projection_contract_packet  # noqa: E402
+from performance_telemetry import contract_packet as performance_smoke_contract_packet  # noqa: E402
 from profile_schema import load_profile_payload, profile_payload_errors  # noqa: E402
 from renderer_config_gateway import renderer_config_gateway_packet  # noqa: E402
 
@@ -1246,6 +1247,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
                 {"id": "decoupling", "fields": ["decoupling_readiness_summary", "decoupling_readiness.first_extraction_order"]},
                 {"id": "controlled_interception", "fields": ["controlled_interception_summary", "controlled_interception_policy.blocked_patterns"]},
                 {"id": "config_gateway", "fields": ["renderer_config_gateway_summary", "renderer_config_gateway.changed_defaults"]},
+                {"id": "performance_telemetry", "fields": ["performance_smoke_summary", "performance_smoke_telemetry.output_paths"]},
             ],
             "portable": True,
         },
@@ -1254,6 +1256,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "decoupling_readiness.first_extraction_order",
             "controlled_interception_policy.blocked_patterns",
             "renderer_config_gateway.changed_defaults",
+            "performance_smoke_telemetry.output_paths",
             "layer_selection_tool.selection_summary_contract.quick_actions_summary_contract",
             "layer_selection_affordance.active_quick_actions",
             "layer_render_plan_performance.compose_pass_budget",
@@ -1274,6 +1277,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "decoupling_readiness_summary",
             "controlled_interception_summary",
             "renderer_config_gateway_summary",
+            "performance_smoke_summary",
             "compose_performance_summary",
         ],
         "included_packet_fields": [
@@ -1291,6 +1295,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "decoupling_readiness",
             "controlled_interception_policy",
             "renderer_config_gateway",
+            "performance_smoke_telemetry",
             "layer_render_plan_performance",
             "goal_closure_scorecard",
             "reviewer_packet_export",
@@ -4049,6 +4054,7 @@ def launch_packet(
             "scripts.export_launch_packet",
             renderer_config_gateway_value(profile, manifest_ref),
         ),
+        "performance_smoke_telemetry": performance_smoke_contract_packet(),
         "rrkal_data_manifest_ref": manifest_ref,
         "rrkal_data_manifest_ref_boundary": "Reference-only handoff field; displaytools does not discover, download, validate, import, or govern this manifest.",
         "layer_filter": layer_filter_packet(profile),

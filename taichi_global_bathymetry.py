@@ -17,6 +17,7 @@ import numpy as np
 import pandas as pd
 from cursor_geodesy import cursor_raycast_ack_payload, cursor_raycast_state_payload
 from closed_loop_status import renderer_closed_loop_status_packet
+from performance_telemetry import contract_packet as performance_smoke_contract_packet
 from renderer_config_gateway import renderer_config_gateway_packet
 from pin_projection import pin_projection_contract_packet, project_pins_to_screen
 try:
@@ -19340,12 +19341,14 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
                 {"id": "goal_closure", "fields": ["goal_closure_scorecard", "goal_closure_scorecard.copy_summary_contract"]},
                 {"id": "compose_performance", "fields": ["compose_performance_summary", "layer_render_plan_performance.compose_pass_budget"]},
                 {"id": "config_gateway", "fields": ["renderer_config_gateway_summary", "renderer_config_gateway.changed_defaults"]},
+                {"id": "performance_telemetry", "fields": ["performance_smoke_summary", "performance_smoke_telemetry.output_paths"]},
             ],
             "portable": True,
         },
         "recommended_review_fields": [
             "compose_performance_summary",
             "renderer_config_gateway.changed_defaults",
+            "performance_smoke_telemetry.output_paths",
             "layer_selection_tool.selection_summary_contract.quick_actions_summary_contract",
             "layer_selection_affordance.active_quick_actions",
             "layer_render_plan_performance.compose_pass_budget",
@@ -19364,6 +19367,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "style_routes_summary",
             "module_boundary_summary",
             "renderer_config_gateway_summary",
+            "performance_smoke_summary",
             "compose_performance_summary",
         ],
         "included_packet_fields": [
@@ -19379,6 +19383,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "style_profile_renderer_routes",
             "module_boundary_registry",
             "renderer_config_gateway",
+            "performance_smoke_telemetry",
             "layer_render_plan_performance",
             "goal_closure_scorecard",
             "reviewer_packet_export",
@@ -21560,6 +21565,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
         "renderer_config_gateway": renderer_config_gateway_packet(
             "taichi_global_bathymetry.renderer_capabilities"
         ),
+        "performance_smoke_telemetry": performance_smoke_contract_packet(),
         "preview_frame_stream": {
             "schema": "rrkal_displaytools.preview_frame_stream.v1",
             "controls": ["preview-frame-file", "preview-frame-interval"],

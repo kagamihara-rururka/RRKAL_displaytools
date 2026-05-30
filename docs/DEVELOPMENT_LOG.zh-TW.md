@@ -1,5 +1,16 @@
 # Development Log
 
+## 2026-05-31 - Performance telemetry reviewer visibility
+
+Changes:
+- Added `performance_smoke_telemetry` contract packets to no-GUI launch packets, renderer capabilities, reviewer packets and handoff inspection.
+- Added Qt Replay/contracts actions: `Inspect: Perf telemetry` and `Copy perf smoke summary`.
+- Reviewer exports now include `performance_smoke_summary` and the performance telemetry contract field.
+- Boundary: reviewer/Qt visibility only exposes the contract and output paths; heavy or full GPU profiling is still not part of regular smoke.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-31 - Displaytools performance smoke telemetry
 
 Changes:

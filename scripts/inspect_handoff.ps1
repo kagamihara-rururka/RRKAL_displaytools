@@ -233,6 +233,14 @@ $summary = [ordered]@{
         next_integration_target = $launchPacket.renderer_config_gateway.next_integration_target
         boundary = $launchPacket.renderer_config_gateway.boundary
     }
+    performance_smoke_telemetry = @{
+        launch_packet_schema = $launchPacket.performance_smoke_telemetry.schema
+        renderer_capabilities_schema = $capabilities.performance_smoke_telemetry.schema
+        stage_timing_schema = $launchPacket.performance_smoke_telemetry.stage_timing_schema
+        render_telemetry_schema = $launchPacket.performance_smoke_telemetry.render_telemetry_schema
+        output_paths = $launchPacket.performance_smoke_telemetry.output_paths
+        boundary = $launchPacket.performance_smoke_telemetry.boundary
+    }
     profile_visual_quick_review = @{
         launch_packet_schema = $launchPacket.profile_ui_state_replay.schema
         renderer_capabilities_schema = $capabilities.profile_ui_state_replay.schema
