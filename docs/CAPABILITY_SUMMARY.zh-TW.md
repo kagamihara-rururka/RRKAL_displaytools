@@ -464,3 +464,8 @@
 
 - Qt Actions now includes `Inspect: Timeline`.
 - The action writes/opens the current Timeline runtime state JSON, covering Timeline state, keyframes, playback readiness, segment state, active step, export options and interpolation contracts.
+
+### 2026-05-30 Qt Canvas state Inspect action
+
+- Qt Actions now labels Canvas state as `Inspect: Canvas state` inside the Research interaction section.
+- The action remains backed by the existing Canvas Preview state/provenance view and is now listed in profile replay inspector contracts.

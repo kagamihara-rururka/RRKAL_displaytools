@@ -269,6 +269,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         ("layer_matrix", "Inspect: Layer matrix"),
         ("layer_runtime", "Inspect: Layer runtime"),
         ("layer_pick", "Inspect: Layer pick"),
+        ("canvas_state", "Inspect: Canvas state"),
         ("pin_pick", "Inspect: Pin pick"),
         ("cursor_geo", "Inspect: Cursor geo"),
         ("boundary_json", "Inspect: Boundary JSON"),
@@ -276,7 +277,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
     qt_inspector_groups = [
         {"id": "replay_contracts", "label": "Replay/contracts", "action_ids": ["profile_replay", "timeline", "clone_ready", "module_seams"]},
         {"id": "renderer_ports", "label": "Renderer ports", "action_ids": ["hydro_lod", "ocean_port", "style_routes", "layer_matrix", "layer_runtime"]},
-        {"id": "research_interaction", "label": "Research interaction", "action_ids": ["layer_pick", "pin_pick", "cursor_geo", "boundary_json"]},
+        {"id": "research_interaction", "label": "Research interaction", "action_ids": ["layer_pick", "canvas_state", "pin_pick", "cursor_geo", "boundary_json"]},
     ]
     return {
         "schema": "rrkal_displaytools.profile_ui_state_replay.v1",
@@ -2619,7 +2620,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         capabilities_button = QtWidgets.QPushButton("Renderer 能力")
         closed_loop_button = QtWidgets.QPushButton("閉環狀態")
         layer_manifest_button = QtWidgets.QPushButton("圖層 manifest")
-        canvas_state_button = QtWidgets.QPushButton("Canvas state")
+        canvas_state_button = QtWidgets.QPushButton("Inspect: Canvas state")
         thumbnail_button = QtWidgets.QPushButton("Renderer thumbnail")
         live_preview_button = QtWidgets.QPushButton("Live preview")
         smoke_button = QtWidgets.QPushButton("Smoke check")
@@ -2637,6 +2638,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (module_seams_button, "Replay/contracts: inspect future module extraction seam registry JSON."),
             (clone_ready_button, "Replay/contracts: inspect cross-machine clone readiness JSON."),
             (layer_pick_button, "Research interaction: inspect selected-layer renderer pick JSON."),
+            (canvas_state_button, "Research interaction: inspect Qt Canvas state, preview metadata and provenance summary."),
             (pin_pick_button, "Research interaction: inspect renderer Pin hover/click pick bridge JSON."),
             (cursor_geo_button, "Research interaction: inspect mouse cursor latitude/longitude geodesy bridge JSON."),
             (boundary_state_button, "Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON."),
@@ -2678,8 +2680,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button)),
             ("Inspect: Replay/contracts", (profile_replay_button, timeline_button, module_seams_button, clone_ready_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, ocean_port_button, style_routes_button, layer_matrix_button, layer_runtime_button)),
-            ("Inspect: Research interaction", (layer_pick_button, pin_pick_button, cursor_geo_button, boundary_state_button)),
-            ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, canvas_state_button, thumbnail_button, live_preview_button, smoke_button)),
+            ("Inspect: Research interaction", (layer_pick_button, canvas_state_button, pin_pick_button, cursor_geo_button, boundary_state_button)),
+            ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, thumbnail_button, live_preview_button, smoke_button)),
             ("Process", (launch_button, restart_button, stop_button)),
         )
         row = 0

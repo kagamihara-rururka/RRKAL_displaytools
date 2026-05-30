@@ -326,8 +326,11 @@ if ($launchPacket.cross_machine_clone_readiness.handoff_first_command -notlike "
 if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "boundary_json") {
     throw "Launch packet profile_ui_state_replay Boundary inspector action missing"
 }
-if ([int]$launchPacket.profile_ui_state_replay.qt_inspector_action_count -lt 13) {
+if ([int]$launchPacket.profile_ui_state_replay.qt_inspector_action_count -lt 14) {
     throw "Launch packet profile_ui_state_replay inspector action count missing"
+}
+if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "canvas_state") {
+    throw "Launch packet profile_ui_state_replay Canvas state inspector action missing"
 }
 if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "timeline") {
     throw "Launch packet profile_ui_state_replay Timeline inspector action missing"
@@ -963,6 +966,9 @@ if ($capabilities.profile_ui_state_replay.qt_inspector_action_ids -notcontains "
 }
 if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontains "Inspect: Timeline") {
     throw "Renderer profile_ui_state_replay Timeline inspector label missing"
+}
+if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontains "Inspect: Canvas state") {
+    throw "Renderer profile_ui_state_replay Canvas state inspector label missing"
 }
 if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontains "Inspect: Layer matrix") {
     throw "Renderer profile_ui_state_replay layer matrix inspector label missing"
@@ -1737,6 +1743,9 @@ if ($qtPanelSource -notlike "*Renderer ports: inspect layer capability matrix JS
 if ($qtPanelSource -notlike "*Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON*") {
     throw "Qt Research interaction inspector tooltip is missing"
 }
+if ($qtPanelSource -notlike "*Research interaction: inspect Qt Canvas state, preview metadata and provenance summary*") {
+    throw "Qt Canvas state inspector tooltip is missing"
+}
 if ($qtPanelSource -notlike "*Inspect: Layer matrix*") {
     throw "Qt Layer matrix inspector button is missing"
 }
@@ -1772,6 +1781,9 @@ if ($qtPanelSource -notlike "*Inspect: Profile replay*") {
 }
 if ($qtPanelSource -notlike "*Inspect: Timeline*") {
     throw "Qt Timeline inspector button is missing"
+}
+if ($qtPanelSource -notlike "*Inspect: Canvas state*") {
+    throw "Qt Canvas state inspector button is missing"
 }
 if ($qtPanelSource -notlike "*Inspect: Boundary JSON*") {
     throw "Qt Boundary JSON inspector prefix is missing"
@@ -1987,6 +1999,9 @@ if ($profileSchemaDoc -notmatch 'layer_matrix') {
 if ($profileSchemaDoc -notmatch 'timeline') {
     throw "Profile schema docs missing Timeline inspector action id"
 }
+if ($profileSchemaDoc -notmatch 'canvas_state') {
+    throw "Profile schema docs missing Canvas state inspector action id"
+}
 if ($profileSchemaDoc -notmatch 'qt_inspector_action_groups') {
     throw "Profile schema docs missing profile UI state replay inspector action groups"
 }
@@ -2003,6 +2018,9 @@ if ($cloneQuickstartDoc -notmatch 'Replay/contracts') {
 }
 if ($cloneQuickstartDoc -notmatch 'Research interaction') {
     throw "Clone quickstart missing Qt Inspect Research interaction group guidance"
+}
+if ($cloneQuickstartDoc -notmatch 'Inspect: Canvas state') {
+    throw "Clone quickstart missing Qt Inspect Canvas state guidance"
 }
 
 Write-Host "Smoke passed."

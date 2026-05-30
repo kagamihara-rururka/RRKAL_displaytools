@@ -108,7 +108,7 @@ Qt 面板目前可做：
 
 - Replay/contracts：先開 `Inspect: Clone ready`、`Inspect: Profile replay`、`Inspect: Timeline`、`Inspect: Module seams`，確認 portable command、profile replay coverage、Timeline runtime/keyframes 與模組邊界。
 - Renderer ports：再開 `Inspect: Hydro LOD`、`Inspect: Ocean port`、`Inspect: Style routes`、`Inspect: Layer matrix`、`Inspect: Layer runtime`，確認 hydrology/LOD、sea-state scalar port、parchment/tactical renderer routes、layer capability matrix 與 layer runtime ack。
-- Research interaction：最後開 `Inspect: Layer pick`、`Inspect: Pin pick`、`Inspect: Cursor geo`、`Inspect: Boundary JSON`，確認 selected-layer pick、Pin pick、滑鼠經緯度、Boundary/EEZ 強調與 identity warning。
+- Research interaction：最後開 `Inspect: Layer pick`、`Inspect: Canvas state`、`Inspect: Pin pick`、`Inspect: Cursor geo`、`Inspect: Boundary JSON`，確認 selected-layer pick、Canvas Preview/provenance、Pin pick、滑鼠經緯度、Boundary/EEZ 強調與 identity warning。
 
 ## 6. Canvas Preview / Live preview
 

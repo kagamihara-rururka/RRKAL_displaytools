@@ -230,6 +230,20 @@ Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
 
+## 2026-05-30 - Qt Canvas state Inspect action
+
+Scope:
+- Renamed the Actions panel Canvas state entry to `Inspect: Canvas state` and moved it under Inspect: Research interaction.
+- Added `canvas_state` to `profile_ui_state_replay.qt_inspector_action_ids` and the research interaction group across Qt, no-GUI launch packet and renderer capability discovery.
+- Updated clone quickstart and profile schema docs; smoke verifies the action ID, label, tooltip and quickstart guidance.
+
+Decision:
+- Canvas Preview state/provenance is part of scientific visual inspection and should be grouped with the other research interaction Inspect actions.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+
 ## 2026-05-30 - Qt Timeline Inspect action
 
 Scope:

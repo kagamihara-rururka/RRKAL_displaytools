@@ -209,3 +209,4 @@ Last updated: 2026-05-29
 - 2026-05-30: Added Qt `Inspect: Layer runtime` and `Inspect: Layer pick` actions, and included them in profile replay inspector IDs/groups and clone quickstart guidance.
 - 2026-05-30: Added Qt `Inspect: Layer matrix` action for direct layer capability matrix inspection and synced it to profile replay inspector contracts and quickstart.
 - 2026-05-30: Added Qt `Inspect: Timeline` action for direct Timeline runtime/keyframe/export contract inspection and synced it to profile replay inspector contracts and quickstart.
+- 2026-05-30: Added Qt `Inspect: Canvas state` to the Research interaction section and synced it to profile replay inspector contracts and clone quickstart guidance.
