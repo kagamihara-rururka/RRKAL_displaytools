@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-31 - Qt render-plan work order summary
+
+- Added `Copy render-plan work order` to the Qt Renderer diagnostics actions.
+- The summary captures the queued post-decoupling path: precompute layer state, compose queue, compose runs, parity evidence, final single Taichi render pass and `runtime_merge=false`.
+- Smoke: PASS (`scripts\smoke.ps1`).
+
 ## 2026-05-31 - Qt Ocean 3D board audit visibility
 
 - Added `Inspect: Ocean 3D board` and `Copy Ocean board audit` to the Qt Renderer ports actions.

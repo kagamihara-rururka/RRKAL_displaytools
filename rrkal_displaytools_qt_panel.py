@@ -4256,6 +4256,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         copy_compose_parity_button = QtWidgets.QPushButton("Copy compose parity")
         copy_compose_budget_button = QtWidgets.QPushButton("Copy compose budget")
         render_plan_perf_button = QtWidgets.QPushButton("Inspect: Render plan perf")
+        copy_render_plan_work_order_button = QtWidgets.QPushButton("Copy render-plan work order")
         smoke_button = QtWidgets.QPushButton("Smoke check")
         launch_button = QtWidgets.QPushButton("啟動地球儀")
         restart_button = QtWidgets.QPushButton("套用並重啟")
@@ -4317,6 +4318,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (copy_compose_parity_button, "Renderer diagnostics: copy compose parity artifact producer and diff commands."),
             (copy_compose_budget_button, "Renderer diagnostics: copy compose budget timing, bottleneck advice and runtime-merge status."),
             (render_plan_perf_button, "Renderer diagnostics: inspect queued layer render-plan precompute and single-pass performance contract."),
+            (copy_render_plan_work_order_button, "Renderer diagnostics: copy the post-decoupling render-plan compose work order as one reviewer handoff line."),
         ):
             button.setToolTip(tooltip)
             button.setAccessibleDescription(tooltip)
@@ -4387,6 +4389,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         copy_compose_parity_button.clicked.connect(self.copy_compose_parity_workflow_summary)
         copy_compose_budget_button.clicked.connect(self.copy_compose_pass_budget_summary)
         render_plan_perf_button.clicked.connect(self.show_layer_render_plan_performance)
+        copy_render_plan_work_order_button.clicked.connect(self.copy_render_plan_work_order_summary)
         smoke_button.clicked.connect(self.run_smoke_check)
         launch_button.clicked.connect(self.launch_renderer)
         restart_button.clicked.connect(self.restart_renderer)
@@ -4397,7 +4400,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, ocean_3d_controls_action_button, copy_ocean_summary_button, copy_ocean_guard_summary_button, ocean_3d_board_audit_button, copy_ocean_3d_board_audit_button, style_routes_button, copy_style_routes_summary_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, copy_layer_controls_guide_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
             ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, copy_visual_closure_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, copy_style_thumb_status_button, thumbnail_button, live_preview_button)),
-            ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, render_plan_perf_button, copy_compose_budget_button, copy_compose_parity_button, smoke_button)),
+            ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, render_plan_perf_button, copy_compose_budget_button, copy_compose_parity_button, copy_render_plan_work_order_button, smoke_button)),
             ("Process", (launch_button, restart_button, stop_button)),
         )
         row = 0
@@ -10157,6 +10160,32 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         summary = self.compose_pass_budget_summary_text()
         QtWidgets.QApplication.clipboard().setText(summary)
         self.status.setText("Copied compose pass budget summary")
+
+    def render_plan_work_order_summary_text(self, packet: dict[str, object] | None = None) -> str:
+        packet = packet if isinstance(packet, dict) else self.collect_layer_render_plan_performance()
+        stage_order = packet.get("stage_order") if isinstance(packet.get("stage_order"), list) else []
+        budget = packet.get("compose_pass_budget") if isinstance(packet.get("compose_pass_budget"), dict) else {}
+        workflow = packet.get("compose_run_parity_artifact_workflow")
+        workflow = workflow if isinstance(workflow, dict) else {}
+        first_stage = str(stage_order[0]) if stage_order else "precompute_layer_state"
+        final_stage = str(stage_order[-1]) if stage_order else "submit_single_taichi_render_pass"
+        return (
+            "Render-plan work order: "
+            f"status={packet.get('status', '-')}; "
+            f"first={first_stage}; "
+            f"queue={packet.get('compiled_plan_compose_queue_schema', '-')}; "
+            f"runs={packet.get('compiled_plan_compose_runs_schema', '-')}; "
+            f"target={budget.get('target_pass_model', '-')}; "
+            f"parity={workflow.get('precommit_command', packet.get('compose_run_parity_smoke_precommit_command', '-'))}; "
+            f"final={final_stage}; "
+            "runtime_merge=false; "
+            "next=post_07_render_plan_compose_extraction"
+        )
+
+    def copy_render_plan_work_order_summary(self) -> None:
+        summary = self.render_plan_work_order_summary_text()
+        QtWidgets.QApplication.clipboard().setText(summary)
+        self.status.setText("Copied render-plan work order summary")
 
     def compose_performance_reviewer_summary_text(self, packet: dict[str, object] | None = None) -> str:
         packet = packet if isinstance(packet, dict) else self.collect_layer_render_plan_performance()

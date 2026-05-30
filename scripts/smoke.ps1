@@ -4783,8 +4783,17 @@ if ($qtPanelSource -notlike "*compose_pass_budget_summary_text*") {
 if ($qtPanelSource -notlike "*Copy compose budget*") {
     throw "Qt compose pass budget copy button is missing"
 }
+if ($qtPanelSource -notlike "*Copy render-plan work order*") {
+    throw "Qt render-plan work order copy button is missing"
+}
 if ($qtPanelSource -notlike "*copy_compose_pass_budget_summary*") {
     throw "Qt compose pass budget copy action is missing"
+}
+if ($qtPanelSource -notlike "*copy_render_plan_work_order_summary*") {
+    throw "Qt render-plan work order copy action is missing"
+}
+if ($qtPanelSource -notlike "*Render-plan work order: *next=post_07_render_plan_compose_extraction*") {
+    throw "Qt render-plan work order summary text is missing"
 }
 if ($qtPanelSource -notlike "*target={target}*") {
     throw "Qt compose pass budget target summary text is missing"
