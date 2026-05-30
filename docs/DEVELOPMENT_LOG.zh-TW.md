@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Pin overlay summary occlusion vocabulary
+
+Changes:
+- Extended `copy_pin_overlay_summary()` output with the shared Pin occlusion status vocabulary and `pinOcclusionLegend` object name.
+- Updated `pin_summary_contract.summary_format` so launch packets, renderer capabilities and handoff preserve those visibility semantics for research notes.
+- Smoke now verifies the summary format and Qt source path for `occlusion_statuses`.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Qt Pin occlusion legend
 
 Changes:

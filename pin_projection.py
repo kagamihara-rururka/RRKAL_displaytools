@@ -229,7 +229,7 @@ def pin_projection_contract_packet() -> dict[str, Any]:
         "pin_summary_contract_schema": "rrkal_displaytools.pin_summary_contract.v1",
         "pin_summary_contract": {
             "label": "Pin overlay",
-            "summary_format": "Pin overlay: pins={pin_count}; selected={selected_pin_id}; source={coordinate_source_label}; pick_state={pin_pick_state_file}; rotation=per_frame; occlusion=horizon_depth",
+            "summary_format": "Pin overlay: pins={pin_count}; selected={selected_pin_id}; source={coordinate_source_label}; pick_state={pin_pick_state_file}; rotation=per_frame; occlusion=horizon_depth; occlusion_statuses={occlusion_status_values}; legend={qt_occlusion_legend_object}",
             "qt_list_object": "pinList",
             "qt_copy_action": "copy_pin_overlay_summary",
             "launch_packet_field": "pin_overlay.pin_summary_contract",

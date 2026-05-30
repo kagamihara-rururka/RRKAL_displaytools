@@ -953,6 +953,9 @@ if ($launchPacket.pin_overlay.pin_summary_contract.qt_list_object -ne "pinList")
 if ($launchPacket.pin_overlay.pin_summary_contract.qt_copy_action -ne "copy_pin_overlay_summary") {
     throw "Launch packet pin_overlay summary copy action missing or invalid"
 }
+if ($launchPacket.pin_overlay.pin_summary_contract.summary_format -notlike "*occlusion_statuses*") {
+    throw "Launch packet pin_overlay summary format missing occlusion statuses"
+}
 if (-not $launchPacket.pin_overlay.pin_summary_contract.portable) {
     throw "Launch packet pin_overlay summary portability flag missing"
 }
@@ -1227,6 +1230,9 @@ if ($capabilities.pin_overlay.pin_summary_contract_schema -ne "rrkal_displaytool
 }
 if ($capabilities.pin_overlay.pin_summary_contract.qt_copy_action -ne "copy_pin_overlay_summary") {
     throw "Renderer pin_overlay summary copy action missing or invalid"
+}
+if ($capabilities.pin_overlay.pin_summary_contract.summary_format -notlike "*legend={qt_occlusion_legend_object}*") {
+    throw "Renderer pin_overlay summary format missing occlusion legend"
 }
 if ($capabilities.boundary_emphasis_control.schema -ne "rrkal_displaytools.boundary_emphasis_control.v1") {
     throw "Renderer boundary_emphasis_control schema missing or invalid"
@@ -2036,6 +2042,9 @@ if ($handoff.pin_overlay.pin_summary_contract.qt_list_object -ne "pinList") {
 if ($handoff.pin_overlay.pin_summary_contract.qt_copy_action -ne "copy_pin_overlay_summary") {
     throw "Handoff inspection pin_overlay summary copy action missing or invalid"
 }
+if ($handoff.pin_overlay.pin_summary_contract.summary_format -notlike "*occlusion_statuses*") {
+    throw "Handoff inspection pin_overlay summary format missing occlusion statuses"
+}
 if (-not $handoff.pin_overlay.pin_summary_contract.portable) {
     throw "Handoff inspection pin_overlay summary portability flag missing"
 }
@@ -2754,6 +2763,9 @@ if ($qtPanelSource -notlike "*copy_pin_overlay_summary*") {
 }
 if ($qtPanelSource -notlike "*pin_overlay_summary_text*") {
     throw "Qt Pin overlay summary formatter missing"
+}
+if ($qtPanelSource -notlike "*occlusion_statuses*") {
+    throw "Qt Pin overlay summary occlusion statuses missing"
 }
 if ($qtPanelSource -notlike "*pinOcclusionLegend*") {
     throw "Qt Pin occlusion legend object is missing"

@@ -5417,10 +5417,17 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         return [dict(pin) for pin in self.research_pins]
 
     def pin_overlay_summary_text(self) -> str:
-        contract = pin_projection_contract_packet().get("pin_summary_contract", {})
+        projection_contract = pin_projection_contract_packet()
+        contract = projection_contract.get("pin_summary_contract", {})
         label = "Pin overlay"
         if isinstance(contract, dict):
             label = str(contract.get("label") or label)
+        occlusion_statuses = projection_contract.get("occlusion_status_values", [])
+        if isinstance(occlusion_statuses, list):
+            occlusion_status_text = ",".join(str(value) for value in occlusion_statuses)
+        else:
+            occlusion_status_text = "unknown"
+        legend_object = str(projection_contract.get("qt_occlusion_legend_object") or "pinOcclusionLegend")
         selected = self.selected_pin_packet()
         selected_id = self.selected_pin_id or "none"
         source_key = None
@@ -5432,7 +5439,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"selected={selected_id}; "
             f"source={coordinate_source_label}; "
             f"pick_state=state/{PIN_PICK_STATE_PATH.name}; "
-            "rotation=per_frame; occlusion=horizon_depth"
+            "rotation=per_frame; "
+            f"occlusion=horizon_depth; occlusion_statuses={occlusion_status_text}; "
+            f"legend={legend_object}"
         )
 
     def collect_boundary_highlight_state(self) -> dict[str, object]:

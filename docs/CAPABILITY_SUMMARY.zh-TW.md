@@ -421,6 +421,11 @@
 - Pin Annotation now exposes `pinOcclusionLegend`, sourced from `rrkal_displaytools.pin_projection.v1`.
 - Launch packets, renderer capabilities, handoff inspection and smoke now verify the visible/behind_horizon/off_viewport/invalid occlusion status vocabulary and the Qt legend object.
 
+### 2026-05-30 Pin overlay summary occlusion vocabulary
+
+- `copy_pin_overlay_summary()` now includes the shared occlusion status vocabulary and `pinOcclusionLegend` object name.
+- `pin_summary_contract.summary_format` records those fields so cross-machine handoff and research notes preserve the same Pin visibility semantics.
+
 ### 2026-05-30 Qt Module seams JSON action
 
 - Qt Actions now includes `Module seams`, which displays the live `module_boundary_registry` payload in the JSON preview pane.
