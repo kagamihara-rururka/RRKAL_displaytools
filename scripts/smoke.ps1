@@ -5984,6 +5984,12 @@ if ($qtPanelSource -notlike "*Inspect: UIUX closure*") {
 if ($qtPanelSource -notlike "*Visual review: inspect ready and queued UIUX closure matrix JSON*") {
     throw "Qt UIUX closure tooltip is missing"
 }
+if ($qtPanelSource -notlike "*Inspect: Workspace map*") {
+    throw "Qt Actions workspace map button is missing"
+}
+if ($qtPanelSource -notlike "*Visual review: inspect Photoshop-like dock workspace map*") {
+    throw "Qt workspace map tooltip is missing"
+}
 if ($qtPanelSource -notlike "*visual_review_readiness_packet*") {
     throw "Qt panel visual review readiness packet missing"
 }

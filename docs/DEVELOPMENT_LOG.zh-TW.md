@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Qt workspace map inspection button
+
+- Added `Inspect: Workspace map` to the Qt Visual review section.
+- The button exposes the Photoshop-like dock workflow map, panel roles, researcher flow, visible non-goals and future `qt_ui/main_window.py` split target.
+- Smoke now gates the button label and tooltip without launching Qt.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Qt UIUX closure inspection button
 
 - Added `Inspect: UIUX closure` to the Qt Visual review section.

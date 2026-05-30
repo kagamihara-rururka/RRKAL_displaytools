@@ -4369,6 +4369,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         canvas_state_button = QtWidgets.QPushButton("Inspect: Canvas state")
         visual_readiness_button = QtWidgets.QPushButton("Inspect: Visual readiness")
         uiux_closure_status_button = QtWidgets.QPushButton("Inspect: UIUX closure")
+        workspace_map_button = QtWidgets.QPushButton("Inspect: Workspace map")
         copy_visual_summary_button = QtWidgets.QPushButton("Copy visual summary")
         copy_visual_closure_summary_button = QtWidgets.QPushButton("Copy closure matrix")
         copy_style_thumbs_command_button = QtWidgets.QPushButton("Copy style thumbs command")
@@ -4437,6 +4438,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (copy_research_summary_button, "Research interaction: copy selection, pin, cursor and boundary summaries as one portable handoff note."),
             (visual_readiness_button, "Visual review: inspect thumbnail/live preview readiness, frame status and missing-frame hints JSON."),
             (uiux_closure_status_button, "Visual review: inspect ready and queued UIUX closure matrix JSON with construction items visible."),
+            (workspace_map_button, "Visual review: inspect Photoshop-like dock workspace map, panel roles and researcher workflow boundary."),
             (copy_visual_summary_button, "Visual review: copy compact thumbnail/live preview readiness summary to clipboard."),
             (copy_visual_closure_summary_button, "Visual review: copy smoke-gated feature closure matrix with ready and queued feature groups."),
             (copy_style_thumbs_command_button, "Visual review: copy portable command for generating scientific/nautical/parchment/tactical style thumbnails."),
@@ -4514,6 +4516,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         canvas_state_button.clicked.connect(self.show_canvas_state_preview)
         visual_readiness_button.clicked.connect(self.show_visual_review_readiness)
         uiux_closure_status_button.clicked.connect(self.show_uiux_closure_status)
+        workspace_map_button.clicked.connect(self.show_workspace_map)
         copy_visual_summary_button.clicked.connect(self.copy_visual_review_readiness_summary)
         copy_visual_closure_summary_button.clicked.connect(self.copy_visual_feature_closure_summary)
         copy_style_thumbs_command_button.clicked.connect(self.copy_style_thumbnail_batch_command)
@@ -4533,7 +4536,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, copy_reviewer_fields_button, copy_goal_scorecard_button, timeline_button, reviewer_route_button, capability_summary_button, module_seams_button, decoupling_readiness_button, copy_decoupling_summary_button, controlled_interception_button, copy_interception_summary_button, renderer_config_gateway_button, copy_renderer_config_summary_button, performance_telemetry_button, copy_performance_smoke_summary_button, pre_decoupling_snapshot_button, copy_pre_decoupling_snapshot_command_button, spatial_compression_roadmap_button, copy_spatial_compression_summary_button, copy_module_summary_button, clone_ready_button, copy_clone_summary_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, ocean_3d_controls_action_button, copy_ocean_summary_button, copy_ocean_guard_summary_button, ocean_3d_board_audit_button, copy_ocean_3d_board_audit_button, style_routes_button, copy_style_routes_summary_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, copy_layer_controls_guide_button, copy_layer_navigation_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
-            ("Inspect: Visual review", (visual_readiness_button, uiux_closure_status_button, copy_visual_summary_button, copy_visual_closure_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, copy_style_thumb_status_button, thumbnail_button, live_preview_button)),
+            ("Inspect: Visual review", (visual_readiness_button, uiux_closure_status_button, workspace_map_button, copy_visual_summary_button, copy_visual_closure_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, copy_style_thumb_status_button, thumbnail_button, live_preview_button)),
             ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, render_plan_perf_button, copy_compose_budget_button, copy_compose_parity_button, copy_render_plan_work_order_button, smoke_button)),
             ("Process", (launch_button, restart_button, stop_button)),
         )
@@ -10281,6 +10284,42 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         }
         self.command_text.setPlainText(json.dumps(packet, ensure_ascii=False, indent=2))
         self.status.setText("Displayed UIUX closure status JSON")
+
+    def collect_workspace_map(self) -> dict[str, object]:
+        return {
+            "schema": "rrkal_displaytools.qt_workspace_map.v1",
+            "status": "ready",
+            "design_intent": "Photoshop-like dock workflow for scientific visualization review",
+            "qt_first": True,
+            "tk_primary_ui_allowed": False,
+            "panels": [
+                {"id": "tool_options", "role": "profile/template/style source and launch options"},
+                {"id": "looks_templates", "role": "scientific/nautical/parchment/tactical visual presets"},
+                {"id": "layers", "role": "layer selection, visibility, locks, presets and researcher quick actions"},
+                {"id": "properties", "role": "selected layer, Boundary emphasis and Ocean material properties"},
+                {"id": "central_preview", "role": "renderer command, reviewer JSON and visual preview output"},
+                {"id": "timeline", "role": "camera/ocean/layer keyframes and export controls"},
+                {"id": "history", "role": "operator action trace, pending work and provenance reminders"},
+                {"id": "actions", "role": "Replay/contracts, renderer ports, research interaction and visual review commands"},
+            ],
+            "researcher_flow": [
+                "choose profile/template",
+                "select layer",
+                "adjust properties or emphasis",
+                "inspect reviewer JSON",
+                "launch/smoke/render only after command state is clear",
+            ],
+            "visible_non_goals": [
+                "brush/mask editing",
+                "RRKAL discovery/download/import/cache governance",
+                "authoritative boundary/EEZ identity resolution inside displaytools",
+            ],
+            "future_split_target": "qt_ui/main_window.py after renderer contracts stabilize",
+        }
+
+    def show_workspace_map(self) -> None:
+        self.command_text.setPlainText(json.dumps(self.collect_workspace_map(), ensure_ascii=False, indent=2))
+        self.status.setText("Displayed Qt workspace map JSON")
 
     def copy_visual_review_readiness_summary(self) -> None:
         packet = self.collect_visual_review_readiness()
