@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Pre-decoupling readiness bundle
+
+- Added `scripts/export_pre_decoupling_readiness_bundle.ps1` as a single no-GUI handoff packet for the pre-7 decoupling state.
+- The bundle includes the visual inspector index, visual review packet, pre-decoupling gate contract, boundary inspection, render-plan compose work order and snapshot export contract without writing state.
+- Registered the bundle in the visual inspector index, review packet, runbook and smoke gates.
+- Smoke: PASS via `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-31 - Render plan compose work order gate
 
 - Added `render_plan_compose_work_order_command` and schema evidence to `scripts/pre_decoupling_gate.ps1`.

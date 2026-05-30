@@ -1211,6 +1211,9 @@ if ($visualInspectorIndex.entry_ids -notcontains "decoupling_boundaries") {
 if ($visualInspectorIndex.entry_ids -notcontains "render_plan_compose_work_order") {
     throw "Visual contract inspector index missing render plan compose work order inspector"
 }
+if ($visualInspectorIndex.entry_ids -notcontains "pre_decoupling_readiness_bundle") {
+    throw "Visual contract inspector index missing pre-decoupling readiness bundle"
+}
 if ($visualInspectorIndex.recommended_cross_machine_sequence[0] -ne "renderer_config_gateway") {
     throw "Visual contract inspector index cross-machine sequence should start with config gateway"
 }
@@ -1269,6 +1272,9 @@ if ($visualReviewPacket.pre_decoupling_commands -notcontains "powershell -NoProf
 }
 if ($visualReviewPacket.pre_decoupling_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_render_plan_compose_work_order.ps1") {
     throw "Visual contract review packet missing render plan compose work order command"
+}
+if ($visualReviewPacket.pre_decoupling_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\export_pre_decoupling_readiness_bundle.ps1") {
+    throw "Visual contract review packet missing pre-decoupling readiness bundle command"
 }
 if ($visualReviewPacket.boundary -notlike "*RRKAL owns discovery/download/import/cache governance*") {
     throw "Visual contract review packet data-governance boundary missing"
@@ -1394,6 +1400,35 @@ if ($renderPlanComposeWorkOrder.source_helpers -notcontains "HybridRenderControl
 }
 if ($renderPlanComposeWorkOrder.non_goals -notcontains "Do not enable runtime compose-run merging before zero-diff parity artifacts exist.") {
     throw "Render plan compose work order parity non-goal missing"
+}
+$preDecouplingReadinessBundlePath = Join-Path $RepoRoot "scripts\export_pre_decoupling_readiness_bundle.ps1"
+if (-not (Test-Path -LiteralPath $preDecouplingReadinessBundlePath)) {
+    throw "Pre-decoupling readiness bundle exporter is missing"
+}
+$preDecouplingReadinessBundleContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $preDecouplingReadinessBundlePath, "-ContractOnly")
+$preDecouplingReadinessBundleContract = ($preDecouplingReadinessBundleContractText -join "`n") | ConvertFrom-Json
+if ($preDecouplingReadinessBundleContract.schema -ne "rrkal_displaytools.pre_decoupling_readiness_bundle_export.v1") {
+    throw "Pre-decoupling readiness bundle export schema missing"
+}
+if ($preDecouplingReadinessBundleContract.output_schema -ne "rrkal_displaytools.pre_decoupling_readiness_bundle.v1") {
+    throw "Pre-decoupling readiness bundle output schema missing"
+}
+if ($preDecouplingReadinessBundleContract.included_reports -notcontains "render_plan_compose_work_order") {
+    throw "Pre-decoupling readiness bundle work order report missing"
+}
+$preDecouplingReadinessBundleText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $preDecouplingReadinessBundlePath)
+$preDecouplingReadinessBundle = ($preDecouplingReadinessBundleText -join "`n") | ConvertFrom-Json
+if ($preDecouplingReadinessBundle.schema -ne "rrkal_displaytools.pre_decoupling_readiness_bundle.v1") {
+    throw "Pre-decoupling readiness bundle schema missing"
+}
+if ($preDecouplingReadinessBundle.first_extraction_id -ne "render_plan_compose") {
+    throw "Pre-decoupling readiness bundle first extraction mismatch"
+}
+if ($preDecouplingReadinessBundle.render_plan_compose_work_order.target_module -ne "render_core/render_plan.py") {
+    throw "Pre-decoupling readiness bundle work order target mismatch"
+}
+if ($preDecouplingReadinessBundle.ready_for_07_gate_review -ne $true) {
+    throw "Pre-decoupling readiness bundle not ready for 07 gate review"
 }
 $layerWorkflowInspectorPath = Join-Path $RepoRoot "scripts\inspect_layer_workflow.ps1"
 if (-not (Test-Path -LiteralPath $layerWorkflowInspectorPath)) {

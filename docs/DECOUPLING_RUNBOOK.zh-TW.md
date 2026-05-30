@@ -43,6 +43,14 @@ This must report the target module, source helpers, keep-contracts, smoke gates,
 
 The pre-decoupling gate treats this work order as required-before-move evidence. If it fails, do not start extraction.
 
+For the one-command no-GUI readiness bundle, run:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\export_pre_decoupling_readiness_bundle.ps1
+```
+
+This bundles the inspector index, review packet, gate contract, boundary inspection, render-plan work order and snapshot export contract without writing state.
+
 ## First extraction order
 
 1. `render_plan_compose` -> `render_core/render_plan.py`

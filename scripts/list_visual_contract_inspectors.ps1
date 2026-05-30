@@ -85,6 +85,14 @@ $entries = @(
         no_launch_side_effect = $true
     },
     [ordered]@{
+        id = "pre_decoupling_readiness_bundle"
+        category = "decoupling"
+        schema = "rrkal_displaytools.pre_decoupling_readiness_bundle_export.v1"
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\export_pre_decoupling_readiness_bundle.ps1"
+        proves = @("single readiness bundle", "gate contract", "boundary inspection", "render plan work order", "snapshot contract")
+        no_launch_side_effect = $true
+    },
+    [ordered]@{
         id = "handoff"
         category = "cross_machine"
         schema = "rrkal_displaytools.handoff_inspection.v1"
@@ -110,6 +118,7 @@ $entries = @(
         "performance_smoke",
         "decoupling_boundaries",
         "render_plan_compose_work_order",
+        "pre_decoupling_readiness_bundle",
         "pre_decoupling_snapshot",
         "pre_decoupling_gate"
     )
