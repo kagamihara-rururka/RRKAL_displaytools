@@ -4345,8 +4345,23 @@ if ($qtPanelSource -notlike "*copy_ocean_material_summary*") {
 if ($qtPanelSource -notlike "*Copy Ocean guard*") {
     throw "Qt Ocean 3D performance guard copy button is missing"
 }
+if ($qtPanelSource -notlike "*Inspect: Ocean 3D board*") {
+    throw "Qt Ocean 3D control-board audit inspect button is missing"
+}
+if ($qtPanelSource -notlike "*Copy Ocean board audit*") {
+    throw "Qt Ocean 3D control-board audit copy button is missing"
+}
 if ($qtPanelSource -notlike "*copy_ocean_3d_performance_guard_summary*") {
     throw "Qt Ocean 3D performance guard copy action is missing"
+}
+if ($qtPanelSource -notlike "*show_ocean_3d_control_board_audit*") {
+    throw "Qt Ocean 3D control-board audit inspect action is missing"
+}
+if ($qtPanelSource -notlike "*copy_ocean_3d_control_board_audit_summary*") {
+    throw "Qt Ocean 3D control-board audit copy action is missing"
+}
+if ($qtPanelSource -notlike "*taichi_ocean_3d_control_board_qt_entry.v1*") {
+    throw "Qt Ocean 3D control-board audit entry schema is missing"
 }
 if ($qtPanelSource -notlike "*Ocean 3D performance guard: *true_optimization=post_decoupling_render_plan_merge*") {
     throw "Qt Ocean 3D performance guard portable summary text missing"

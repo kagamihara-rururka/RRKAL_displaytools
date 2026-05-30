@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-31 - Qt Ocean 3D board audit visibility
+
+- Added `Inspect: Ocean 3D board` and `Copy Ocean board audit` to the Qt Renderer ports actions.
+- The audit entry exposes control-board visibility, object names, dialog action, safe-preview action and the post-decoupling render-plan optimization boundary.
+- Smoke: PASS (`scripts\smoke.ps1`).
+
 ## 2026-05-31 - Qt pre-decoupling snapshot entry
 
 - Added a Qt Replay/contracts entry for the pre-decoupling snapshot command and generated output path.

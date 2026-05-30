@@ -4207,6 +4207,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         ocean_3d_controls_action_button = QtWidgets.QPushButton("Open: Ocean 3D controls")
         copy_ocean_summary_button = QtWidgets.QPushButton("Copy Ocean summary")
         copy_ocean_guard_summary_button = QtWidgets.QPushButton("Copy Ocean guard")
+        ocean_3d_board_audit_button = QtWidgets.QPushButton("Inspect: Ocean 3D board")
+        copy_ocean_3d_board_audit_button = QtWidgets.QPushButton("Copy Ocean board audit")
         hydro_lod_button = QtWidgets.QPushButton("Inspect: Hydro LOD")
         copy_hydro_lod_summary_button = QtWidgets.QPushButton("Copy Hydro LOD summary")
         style_routes_button = QtWidgets.QPushButton("Inspect: Style routes")
@@ -4268,6 +4270,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (ocean_3d_controls_action_button, "Renderer ports: open Taichi 3D Ocean Water scalar controls from the Qt control board."),
             (copy_ocean_summary_button, "Renderer ports: copy Ocean material controls, apply status, sea-state scalar sample and RRKAL governance summary."),
             (copy_ocean_guard_summary_button, "Renderer ports: copy Ocean 3D safe-preview guard, action and render-plan optimization boundary."),
+            (ocean_3d_board_audit_button, "Renderer ports: inspect Ocean 3D control-board visibility, object names and post-decoupling performance boundary."),
+            (copy_ocean_3d_board_audit_button, "Renderer ports: copy Ocean 3D control-board audit summary for reviewer handoff."),
             (hydro_lod_button, "Renderer ports: inspect hydrology layer and LOD hook readiness JSON."),
             (copy_hydro_lod_summary_button, "Renderer ports: copy Hydrology/LOD readiness, runtime evidence and state/ack/pick file summary."),
             (style_routes_button, "Renderer ports: inspect parchment and tactical style renderer route JSON."),
@@ -4334,6 +4338,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         ocean_3d_controls_action_button.clicked.connect(self.open_taichi_ocean_3d_controls)
         copy_ocean_summary_button.clicked.connect(self.copy_ocean_material_summary)
         copy_ocean_guard_summary_button.clicked.connect(self.copy_ocean_3d_performance_guard_summary)
+        ocean_3d_board_audit_button.clicked.connect(self.show_ocean_3d_control_board_audit)
+        copy_ocean_3d_board_audit_button.clicked.connect(self.copy_ocean_3d_control_board_audit_summary)
         hydro_lod_button.clicked.connect(self.show_hydrology_lod_status)
         copy_hydro_lod_summary_button.clicked.connect(self.copy_hydrology_lod_summary)
         style_routes_button.clicked.connect(self.show_style_renderer_routes)
@@ -4388,7 +4394,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         action_sections = (
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button, export_reviewer_packet_button)),
             ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, copy_reviewer_fields_button, copy_goal_scorecard_button, timeline_button, module_seams_button, decoupling_readiness_button, copy_decoupling_summary_button, controlled_interception_button, copy_interception_summary_button, renderer_config_gateway_button, copy_renderer_config_summary_button, performance_telemetry_button, copy_performance_smoke_summary_button, pre_decoupling_snapshot_button, copy_pre_decoupling_snapshot_command_button, copy_module_summary_button, clone_ready_button, copy_clone_summary_button)),
-            ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, ocean_3d_controls_action_button, copy_ocean_summary_button, copy_ocean_guard_summary_button, style_routes_button, copy_style_routes_summary_button, layer_matrix_button, layer_runtime_button)),
+            ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, ocean_3d_controls_action_button, copy_ocean_summary_button, copy_ocean_guard_summary_button, ocean_3d_board_audit_button, copy_ocean_3d_board_audit_button, style_routes_button, copy_style_routes_summary_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, copy_layer_controls_guide_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
             ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, copy_visual_closure_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, copy_style_thumb_status_button, thumbnail_button, live_preview_button)),
             ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, render_plan_perf_button, copy_compose_budget_button, copy_compose_parity_button, smoke_button)),
@@ -5183,6 +5189,38 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"wave:{self.wave_edit.text().strip() or '0.22'}/"
             f"roughness:{self.roughness_edit.text().strip() or '0.28'}/"
             f"foam:{self.foam_edit.text().strip() or '0.12'}"
+        )
+
+    def collect_ocean_3d_control_board_audit_entry(self) -> dict[str, object]:
+        packet = self.collect_ocean_material_control_port()
+        panel = packet.get("qt_control_panel") if isinstance(packet.get("qt_control_panel"), dict) else {}
+        audit = packet.get("control_board_audit") if isinstance(packet.get("control_board_audit"), dict) else {}
+        return {
+            "schema": "rrkal_displaytools.taichi_ocean_3d_control_board_qt_entry.v1",
+            "status": panel.get("control_board_status", "wired_default_visible"),
+            "source_audit_schema": audit.get("schema", "rrkal_displaytools.taichi_ocean_3d_control_board_audit.v1"),
+            "primary_surface": audit.get("primary_surface", "Layers dock quick strip"),
+            "control_board_default_visible": panel.get("control_board_default_visible", True),
+            "control_board_label_object": panel.get("control_board_label_object", "ocean3DControlBoardStrip"),
+            "control_board_button_object": panel.get("control_board_button_object", "ocean3DControlBoardButton"),
+            "dialog_action": panel.get("qt_dialog_action", "open_taichi_ocean_3d_controls"),
+            "safe_preview_action": panel.get("performance_guard_action", "apply_ocean_3d_safe_preview"),
+            "safe_preview_button_object": panel.get("performance_guard_button_object", "ocean3DPerformanceSafePreviewButton"),
+            "render_pipeline_followup": panel.get("render_pipeline_followup", "post_decoupling_precompute_layer_render_plan_then_single_render_pass"),
+            "boundary": "Qt exposes visibility and scalar controls only; render-pass merge remains queued for post-decoupling optimization.",
+        }
+
+    def ocean_3d_control_board_audit_summary_text(self) -> str:
+        audit = self.collect_ocean_3d_control_board_audit_entry()
+        return (
+            "Ocean 3D board audit: "
+            f"status={audit.get('status', '-')}; "
+            f"surface={audit.get('primary_surface', '-')}; "
+            f"visible={audit.get('control_board_default_visible', '-')}; "
+            f"button={audit.get('control_board_button_object', '-')}; "
+            f"dialog={audit.get('dialog_action', '-')}; "
+            f"safe_preview={audit.get('safe_preview_action', '-')}; "
+            f"followup={audit.get('render_pipeline_followup', '-')}"
         )
 
     def apply_ocean_3d_safe_preview(self) -> None:
@@ -10218,6 +10256,17 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         summary = self.ocean_3d_performance_guard_summary_text()
         QtWidgets.QApplication.clipboard().setText(summary)
         self.status.setText("Copied Ocean 3D performance guard summary to clipboard.")
+
+    def show_ocean_3d_control_board_audit(self) -> None:
+        self.command_text.setPlainText(
+            json.dumps(self.collect_ocean_3d_control_board_audit_entry(), ensure_ascii=False, indent=2)
+        )
+        self.status.setText("Displayed Ocean 3D control-board audit JSON")
+
+    def copy_ocean_3d_control_board_audit_summary(self) -> None:
+        summary = self.ocean_3d_control_board_audit_summary_text()
+        QtWidgets.QApplication.clipboard().setText(summary)
+        self.status.setText("Copied Ocean 3D control-board audit summary to clipboard.")
 
     def show_hydrology_lod_status(self) -> None:
         self.command_text.setPlainText(
