@@ -1288,6 +1288,24 @@ if ($handoff.layer_operation_feedback.launch_packet_schema -ne "rrkal_displaytoo
 if ($handoff.layer_operation_feedback.renderer_capabilities_schema -ne "rrkal_displaytools.layer_operation_feedback.v1") {
     throw "Handoff inspection layer_operation_feedback renderer capability schema missing or invalid"
 }
+if ($handoff.profile_visual_quick_review.launch_packet_schema -ne "rrkal_displaytools.profile_ui_state_replay.v1") {
+    throw "Handoff inspection profile visual quick review schema missing or invalid"
+}
+if ($handoff.profile_visual_quick_review.qt_inspector_group_ids -notcontains "research_interaction") {
+    throw "Handoff inspection profile visual quick review missing research interaction group"
+}
+if ($handoff.profile_visual_quick_review.qt_inspector_group_ids -notcontains "visual_review") {
+    throw "Handoff inspection profile visual quick review missing visual review group"
+}
+if ($handoff.profile_visual_quick_review.research_interaction_actions -notcontains "layer_ops") {
+    throw "Handoff inspection profile visual quick review missing Layer ops action"
+}
+if ($handoff.profile_visual_quick_review.visual_review_actions -notcontains "renderer_thumbnail") {
+    throw "Handoff inspection profile visual quick review missing renderer thumbnail action"
+}
+if ($handoff.profile_visual_quick_review.visual_review_actions -notcontains "live_preview") {
+    throw "Handoff inspection profile visual quick review missing live preview action"
+}
 if ($handoff.launch_packet_contracts.layer_selection_tool -ne "rrkal_displaytools.layer_selection_tool.v1") {
     throw "Handoff inspection layer_selection_tool launch contract missing or invalid"
 }
@@ -2087,6 +2105,9 @@ if ($handoffInspectorSource -notmatch 'profile_ui_state_replay') {
 }
 if ($handoffInspectorSource -notmatch 'layer_operation_feedback') {
     throw "Handoff inspection layer operation feedback output is missing"
+}
+if ($handoffInspectorSource -notmatch 'profile_visual_quick_review') {
+    throw "Handoff inspection profile visual quick review output is missing"
 }
 if ($handoffInspectorSource -notmatch 'saved_state_groups') {
     throw "Handoff inspection profile UI state replay saved groups output is missing"

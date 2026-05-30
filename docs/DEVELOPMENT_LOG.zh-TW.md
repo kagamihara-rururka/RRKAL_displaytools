@@ -3743,3 +3743,14 @@ Changes:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Handoff profile/visual quick review
+
+Changes:
+- Added `profile_visual_quick_review` to `scripts\inspect_handoff.ps1`.
+- Handoff output now reports Qt inspector group ids, Research interaction actions, Visual review actions and a recommended Inspect sequence.
+- Smoke gates `layer_ops`, `renderer_thumbnail` and `live_preview` through handoff output.
+- Updated clone quickstart, capability summary and GTD for cross-machine profile/visual quick review.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

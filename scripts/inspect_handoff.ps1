@@ -129,6 +129,15 @@ $summary = [ordered]@{
         replay_surfaces = $launchPacket.profile_ui_state_replay.replay_surfaces
         summary_text = $launchPacket.profile_ui_state_replay.summary_text
     }
+    profile_visual_quick_review = @{
+        launch_packet_schema = $launchPacket.profile_ui_state_replay.schema
+        renderer_capabilities_schema = $capabilities.profile_ui_state_replay.schema
+        qt_inspector_action_count = $launchPacket.profile_ui_state_replay.qt_inspector_action_count
+        qt_inspector_group_ids = @($launchPacket.profile_ui_state_replay.qt_inspector_action_groups | ForEach-Object { $_.id })
+        research_interaction_actions = @(($launchPacket.profile_ui_state_replay.qt_inspector_action_groups | Where-Object { $_.id -eq "research_interaction" } | Select-Object -First 1).action_ids)
+        visual_review_actions = @(($launchPacket.profile_ui_state_replay.qt_inspector_action_groups | Where-Object { $_.id -eq "visual_review" } | Select-Object -First 1).action_ids)
+        recommended_sequence = @("Inspect: Profile replay", "Inspect: Layer ops", "Inspect: Renderer thumbnail", "Inspect: Live preview")
+    }
     cursor_geodesy_readout = @{
         launch_packet_schema = $launchPacket.cursor_geodesy_readout.schema
         renderer_capabilities_schema = $capabilities.cursor_geodesy_readout.schema

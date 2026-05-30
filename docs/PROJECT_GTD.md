@@ -307,3 +307,14 @@ Done:
 
 Next:
 - Continue tightening cross-machine quick review around profile replay and visual review actions.
+
+
+## 2026-05-30 - Handoff profile/visual quick review
+
+Done:
+- Added `profile_visual_quick_review` to `scripts\inspect_handoff.ps1`.
+- The handoff summary now reports Research interaction and Visual review action ids plus a recommended Inspect sequence.
+- Smoke gates `layer_ops`, `renderer_thumbnail` and `live_preview` availability through handoff output.
+
+Next:
+- Continue closing visual review around renderer thumbnail/live preview availability and missing-frame guidance.

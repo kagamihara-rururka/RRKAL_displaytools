@@ -188,3 +188,9 @@ Displaytools 不負責：
 - Use `Inspect: Layer ops` to review active layer operation summary, `Last layer operation`, operator group readiness and undo depth from one JSON packet.
 - The same packet is exported as `layer_operation_feedback`, so cross-machine reviewers can inspect layer-operation provenance even without reproducing every click.
 - `scripts\inspect_handoff.ps1` also reports `layer_operation_feedback`, so `-HandoffFirst` users can review this loop before launching Qt.
+
+## Handoff profile/visual quick review
+
+- `scripts\inspect_handoff.ps1` now reports `profile_visual_quick_review`.
+- Use it to confirm Research interaction actions include `layer_ops` and Visual review actions include `renderer_thumbnail` / `live_preview`.
+- Recommended quick sequence: `Inspect: Profile replay`, `Inspect: Layer ops`, `Inspect: Renderer thumbnail`, `Inspect: Live preview`.

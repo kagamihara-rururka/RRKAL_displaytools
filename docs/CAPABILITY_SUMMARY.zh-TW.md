@@ -507,3 +507,9 @@
 - `rrkal_displaytools.layer_operation_feedback.v1` combines active layer summary, last layer operation, operator groups and undo depth into one copyable packet.
 - Qt launch/provenance packets, No-GUI launch packets and renderer capabilities advertise `layer_operation_feedback`.
 - Handoff inspection now reports `layer_operation_feedback`, giving clone/review users a read-only summary before opening Qt.
+
+## Handoff profile/visual quick review
+
+- Handoff inspection now exposes `profile_visual_quick_review`.
+- The quick review reports Qt inspector group ids, Research interaction actions, Visual review actions and a recommended cross-machine inspection sequence.
+- Smoke gates that Research interaction includes `layer_ops` and Visual review includes `renderer_thumbnail` / `live_preview`.
