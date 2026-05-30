@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Pre-decoupling gate script
+
+Changes:
+- Added `scripts/pre_decoupling_gate.ps1` to verify the post-7 decoupling gate before moving renderer code.
+- The gate checks `rrkal_displaytools.decoupling_readiness.v1`, requires `render_plan_compose` as the first extraction and preserves the RRKAL data/cache boundary.
+- Smoke now runs the gate in `-ContractOnly` mode so the pre-decoupling entrypoint remains portable without recursively running smoke.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Reviewer packet decoupling readiness handoff
 
 Changes:

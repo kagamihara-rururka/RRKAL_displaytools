@@ -5592,4 +5592,20 @@ if ($decouplingQtPanelSource -notmatch "post_07_decoupling") {
     throw "Qt panel decoupling readiness post-7 phase marker is missing"
 }
 
+$preDecouplingGatePath = Join-Path $RepoRoot "scripts\pre_decoupling_gate.ps1"
+if (-not (Test-Path -LiteralPath $preDecouplingGatePath)) {
+    throw "Pre-decoupling gate script is missing"
+}
+$preDecouplingGateText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $preDecouplingGatePath, "-ContractOnly")
+$preDecouplingGate = ($preDecouplingGateText -join "`n") | ConvertFrom-Json
+if ($preDecouplingGate.schema -ne "rrkal_displaytools.pre_decoupling_gate.v1") {
+    throw "Pre-decoupling gate schema mismatch"
+}
+if ($preDecouplingGate.first_extraction_id -ne "render_plan_compose") {
+    throw "Pre-decoupling gate first extraction mismatch"
+}
+if (-not $preDecouplingGate.ready) {
+    throw "Pre-decoupling gate did not report ready"
+}
+
 Write-Host "Smoke passed."
