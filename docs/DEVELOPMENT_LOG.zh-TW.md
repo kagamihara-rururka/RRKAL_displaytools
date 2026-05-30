@@ -1,5 +1,16 @@
 # Development Log
 
+## 2026-05-30 - Render-plan cache invalidation reasons
+
+Changes:
+- Added `HybridRenderController.layer_render_plan_cache_invalidation_reasons()` to classify compiled render-plan cache decisions.
+- Compiled plan metadata now exposes `cache_reuse_decision`, `cache_invalidation_reason_schema` and `cache_invalidation_reasons` with markers such as `dirty_flag:*`, `no_previous_compiled_plan`, `cache_key_changed` and `cache_key_match`.
+- Qt render-plan cache diagnostics and the Layers control-board summary now show reuse decision and invalidation reasons alongside cache status.
+- Smoke gates now verify invalidation schema/helper/fields and renderer source markers across launch packets, renderer capabilities, handoff inspection and source checks.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Compiled render-plan reuse policy
 
 Changes:

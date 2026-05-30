@@ -14146,6 +14146,26 @@ class HybridRenderController:
         }
         return json.dumps(payload, sort_keys=True, default=str)
 
+    def layer_render_plan_cache_invalidation_reasons(
+        self,
+        runtime_snapshot: dict[str, object],
+        cache_key: str,
+    ) -> list[str]:
+        reasons: list[str] = []
+        dirty_flags = runtime_snapshot.get("dirty_flags") if isinstance(runtime_snapshot.get("dirty_flags"), dict) else {}
+        for flag, value in dirty_flags.items():
+            if value is True:
+                reasons.append(f"dirty_flag:{flag}")
+        cached_plan = getattr(self, "compiled_layer_render_plan", None)
+        previous_key = getattr(self, "compiled_layer_render_plan_cache_key", None)
+        if not isinstance(cached_plan, dict):
+            reasons.append("no_previous_compiled_plan")
+        elif previous_key != cache_key:
+            reasons.append("cache_key_changed")
+        if not reasons:
+            reasons.append("cache_key_match")
+        return reasons
+
     def compile_layer_render_plan(
         self,
         changed: bool | None = None,
@@ -14159,10 +14179,13 @@ class HybridRenderController:
             defer_vector_overlays=defer_vector_overlays,
         )
         cache_key = self.layer_render_plan_cache_key(runtime_snapshot, composition_steps)
+        invalidation_reasons = self.layer_render_plan_cache_invalidation_reasons(runtime_snapshot, cache_key)
         cached_plan = getattr(self, "compiled_layer_render_plan", None)
         if isinstance(cached_plan, dict) and getattr(self, "compiled_layer_render_plan_cache_key", None) == cache_key:
             plan = dict(cached_plan)
             plan["cache_status"] = "reused"
+            plan["cache_reuse_decision"] = "reused"
+            plan["cache_invalidation_reasons"] = invalidation_reasons
             plan["reuse_policy"] = "reuse_when_cache_key_matches_previous_compiled_plan"
             plan["reuse_boundary"] = plan.get("reuse_boundary", "valid_until_dirty_flags_or_camera_change")
             plan["frame_index"] = int(getattr(self, "frame_index", 0))
@@ -14175,7 +14198,10 @@ class HybridRenderController:
             "source": "HybridRenderController.compile_layer_render_plan",
             "status": "compiled_snapshot",
             "cache_status": "compiled",
+            "cache_reuse_decision": "compiled",
             "cache_key": cache_key,
+            "cache_invalidation_reasons": invalidation_reasons,
+            "cache_invalidation_reason_schema": "rrkal_displaytools.layer_render_plan_cache_invalidation_reasons.v1",
             "reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",
             "reuse_status_values": ["compiled", "reused"],
             "runtime_optimization_applied": False,
@@ -19122,6 +19148,9 @@ def layer_render_plan_cache_diagnostics_packet(
         "compiled_plan_schema": plan.get("schema") if available else "rrkal_displaytools.compiled_layer_render_plan.v1",
         "runtime_snapshot_schema": runtime_snapshot.get("schema") if runtime_snapshot else "rrkal_displaytools.layer_render_plan_runtime_snapshot.v1",
         "cache_status": plan.get("cache_status", "unavailable"),
+        "cache_reuse_decision": plan.get("cache_reuse_decision", plan.get("cache_status", "unavailable")),
+        "cache_invalidation_reason_schema": plan.get("cache_invalidation_reason_schema", "rrkal_displaytools.layer_render_plan_cache_invalidation_reasons.v1"),
+        "cache_invalidation_reasons": plan.get("cache_invalidation_reasons") if isinstance(plan.get("cache_invalidation_reasons"), list) else (["metadata_sidecar_missing"] if not available else []),
         "cache_key_available": bool(plan.get("cache_key")),
         "reuse_policy": plan.get("reuse_policy", "reuse_when_cache_key_matches_previous_compiled_plan") if available else "unavailable",
         "reuse_boundary": plan.get("reuse_boundary", "valid_until_dirty_flags_or_camera_change") if available else "unavailable",
@@ -19168,6 +19197,10 @@ def layer_render_plan_performance_packet(
         "compiled_plan_helper": "HybridRenderController.compile_layer_render_plan",
         "compiled_plan_cache_key_helper": "HybridRenderController.layer_render_plan_cache_key",
         "compiled_plan_cache_status_field": "cache_status",
+        "compiled_plan_invalidation_reason_schema": "rrkal_displaytools.layer_render_plan_cache_invalidation_reasons.v1",
+        "compiled_plan_invalidation_helper": "HybridRenderController.layer_render_plan_cache_invalidation_reasons",
+        "compiled_plan_invalidation_reasons_field": "cache_invalidation_reasons",
+        "compiled_plan_reuse_decision_field": "cache_reuse_decision",
         "compiled_plan_reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",
         "compiled_plan_reuse_status_values": ["compiled", "reused"],
         "compiled_plan_reuse_boundary_field": "reuse_boundary",
