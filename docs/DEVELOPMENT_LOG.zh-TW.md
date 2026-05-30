@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Boundary emphasis inspector controls
+
+- Expanded `scripts/inspect_research_interaction.ps1` to expose Boundary emphasis RGB, contrast, opacity, gamma, breathing and renderer-control mapping values.
+- Smoke now gates the Boundary emphasis summary contract and required renderer mappings for color, contrast, alpha, gamma and breathing.
+- This keeps the territory/EEZ emphasis UI reviewable without opening Qt and without claiming authoritative legal boundary identity resolution.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; transient cloud-drive file-access backoff warnings observed, final retry passed).
+
 ## 2026-05-31 - Research interaction inspector
 
 - Added `scripts/inspect_research_interaction.ps1` as a no-GUI reviewer packet for selected layer state, cursor geodesy, Pin overlay occlusion and Boundary emphasis contracts.

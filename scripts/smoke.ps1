@@ -1535,6 +1535,30 @@ if ($researchInteractionInspectorPacket.pin_overlay_schema -ne "rrkal_displaytoo
 if ($researchInteractionInspectorPacket.boundary_emphasis_control_schema -ne "rrkal_displaytools.boundary_emphasis_control.v1") {
     throw "Research interaction boundary emphasis schema missing"
 }
+if ($researchInteractionInspectorPacket.boundary_summary_contract_schema -ne "rrkal_displaytools.boundary_emphasis_summary_contract.v1") {
+    throw "Research interaction boundary emphasis summary contract missing"
+}
+if ($researchInteractionInspectorPacket.boundary_color_rgb.Count -ne 3) {
+    throw "Research interaction boundary RGB control must expose three channels"
+}
+if ($researchInteractionInspectorPacket.boundary_renderer_controls_mapped -notcontains "color_rgb") {
+    throw "Research interaction boundary RGB renderer mapping missing"
+}
+if ($researchInteractionInspectorPacket.boundary_renderer_controls_mapped -notcontains "contrast") {
+    throw "Research interaction boundary contrast renderer mapping missing"
+}
+if ($researchInteractionInspectorPacket.boundary_renderer_controls_mapped -notcontains "alpha") {
+    throw "Research interaction boundary opacity/alpha renderer mapping missing"
+}
+if ($researchInteractionInspectorPacket.boundary_renderer_controls_mapped -notcontains "gamma") {
+    throw "Research interaction boundary gamma renderer mapping missing"
+}
+if ($researchInteractionInspectorPacket.boundary_renderer_controls_mapped -notcontains "breathing") {
+    throw "Research interaction boundary breathing renderer mapping missing"
+}
+if ($researchInteractionInspectorPacket.boundary_breathing_period_s -le 0) {
+    throw "Research interaction boundary breathing period must be positive"
+}
 if ($researchInteractionInspectorPacket.research_interaction_action_ids -notcontains "pin_pick") {
     throw "Research interaction inspector pin action missing"
 }
