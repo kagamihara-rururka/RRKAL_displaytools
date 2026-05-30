@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Clone quickstart Qt reviewer path
+
+- Updated `docs/QUICKSTART_CLONE.zh-TW.md` with the new Qt reviewer path: Reviewer route, Capability summary, UIUX closure and Workspace map.
+- Smoke now gates the quickstart document for those cross-machine Qt review actions.
+- This keeps clone-after-setup guidance aligned with the current Qt UI without launching Qt.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; transient cloud-drive file-access backoff warnings observed, final retry passed).
+
 ## 2026-05-31 - Qt workspace map inspection button
 
 - Added `Inspect: Workspace map` to the Qt Visual review section.

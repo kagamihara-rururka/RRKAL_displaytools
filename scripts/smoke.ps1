@@ -6804,8 +6804,20 @@ if ($cloneQuickstartDoc -notmatch 'Inspect: Layer ops') {
 if ($cloneQuickstartDoc -notmatch 'Replay/contracts') {
     throw "Clone quickstart missing Qt Inspect Replay/contracts group guidance"
 }
+if ($cloneQuickstartDoc -notmatch 'Inspect: Reviewer route') {
+    throw "Clone quickstart missing Qt reviewer route guidance"
+}
+if ($cloneQuickstartDoc -notmatch 'Inspect: Capability summary') {
+    throw "Clone quickstart missing Qt capability summary guidance"
+}
 if ($cloneQuickstartDoc -notmatch 'Research interaction') {
     throw "Clone quickstart missing Qt Inspect Research interaction group guidance"
+}
+if ($cloneQuickstartDoc -notmatch 'Inspect: UIUX closure') {
+    throw "Clone quickstart missing Qt UIUX closure guidance"
+}
+if ($cloneQuickstartDoc -notmatch 'Inspect: Workspace map') {
+    throw "Clone quickstart missing Qt workspace map guidance"
 }
 if ($cloneQuickstartDoc -notmatch 'Inspect: Canvas state') {
     throw "Clone quickstart missing Qt Inspect Canvas state guidance"
