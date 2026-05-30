@@ -45,6 +45,14 @@ $entries = @(
         no_launch_side_effect = $true
     },
     [ordered]@{
+        id = "uiux_closure_status"
+        category = "uiux"
+        schema = "rrkal_displaytools.uiux_closure_status_inspector.v1"
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_uiux_closure_status.ps1"
+        proves = @("ready feature count", "queued followups", "under-construction items visible", "visual review readiness")
+        no_launch_side_effect = $true
+    },
+    [ordered]@{
         id = "layer_visual_presets"
         category = "layer_control"
         schema = "rrkal_displaytools.layer_visual_presets_inspector.v1"
@@ -154,6 +162,7 @@ $entries = @(
         "style_routes",
         "layer_workflow",
         "qt_uiux_surface",
+        "uiux_closure_status",
         "layer_visual_presets",
         "research_interaction",
         "hydrology_lod",

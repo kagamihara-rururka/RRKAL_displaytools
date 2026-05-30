@@ -1193,6 +1193,9 @@ if ($visualInspectorIndex.entry_ids -notcontains "layer_workflow") {
 if ($visualInspectorIndex.entry_ids -notcontains "qt_uiux_surface") {
     throw "Visual contract inspector index missing Qt UIUX surface inspector"
 }
+if ($visualInspectorIndex.entry_ids -notcontains "uiux_closure_status") {
+    throw "Visual contract inspector index missing UIUX closure status inspector"
+}
 if ($visualInspectorIndex.entry_ids -notcontains "layer_visual_presets") {
     throw "Visual contract inspector index missing Layer visual presets inspector"
 }
@@ -1270,6 +1273,9 @@ if ($visualReviewPacket.inspector_entry_ids -notcontains "layer_workflow") {
 if ($visualReviewPacket.inspector_entry_ids -notcontains "qt_uiux_surface") {
     throw "Visual contract review packet missing Qt UIUX surface inspector"
 }
+if ($visualReviewPacket.inspector_entry_ids -notcontains "uiux_closure_status") {
+    throw "Visual contract review packet missing UIUX closure status inspector"
+}
 if ($visualReviewPacket.inspector_entry_ids -notcontains "layer_visual_presets") {
     throw "Visual contract review packet missing Layer visual presets inspector"
 }
@@ -1290,6 +1296,9 @@ if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -Exec
 }
 if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_qt_uiux_surface.ps1") {
     throw "Visual contract review packet missing Qt UIUX surface first command"
+}
+if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_uiux_closure_status.ps1") {
+    throw "Visual contract review packet missing UIUX closure status first command"
 }
 if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_layer_visual_presets.ps1") {
     throw "Visual contract review packet missing Layer visual presets first command"
@@ -1570,6 +1579,47 @@ if ($qtUiuxSurfaceInspectorPacket.renderer_port_action_ids -notcontains "ocean_p
 }
 if ($qtUiuxSurfaceInspectorPacket.layer_operator_complete_group_count -lt 5) {
     throw "Qt UIUX surface layer operator group closure incomplete"
+}
+$uiuxClosureStatusInspectorPath = Join-Path $RepoRoot "scripts\inspect_uiux_closure_status.ps1"
+if (-not (Test-Path -LiteralPath $uiuxClosureStatusInspectorPath)) {
+    throw "UIUX closure status inspector script is missing"
+}
+$uiuxClosureStatusInspectorContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $uiuxClosureStatusInspectorPath, "-ContractOnly")
+$uiuxClosureStatusInspectorContract = ($uiuxClosureStatusInspectorContractText -join "`n") | ConvertFrom-Json
+if ($uiuxClosureStatusInspectorContract.schema -ne "rrkal_displaytools.uiux_closure_status_inspector.v1") {
+    throw "UIUX closure status inspector contract schema missing"
+}
+if ($uiuxClosureStatusInspectorContract.required_contracts -notcontains "rrkal_displaytools.visual_feature_closure_matrix.v1") {
+    throw "UIUX closure status inspector visual feature matrix contract missing"
+}
+if ($uiuxClosureStatusInspectorContract.required_contracts -notcontains "rrkal_displaytools.closed_loop_status.v1") {
+    throw "UIUX closure status inspector closed loop contract missing"
+}
+$uiuxClosureStatusInspectorText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $uiuxClosureStatusInspectorPath)
+$uiuxClosureStatusInspectorPacket = ($uiuxClosureStatusInspectorText -join "`n") | ConvertFrom-Json
+if ($uiuxClosureStatusInspectorPacket.schema -ne "rrkal_displaytools.uiux_closure_status_inspection.v1") {
+    throw "UIUX closure status inspection schema missing"
+}
+if ($uiuxClosureStatusInspectorPacket.visual_feature_status -ne "ready_with_queued_performance_followup") {
+    throw "UIUX closure status must preserve queued performance followup"
+}
+if ($uiuxClosureStatusInspectorPacket.ready_feature_count -lt 12) {
+    throw "UIUX closure status ready feature count regressed"
+}
+if ($uiuxClosureStatusInspectorPacket.goal_queued_category_count -lt 1) {
+    throw "UIUX closure status queued category count missing"
+}
+if ($uiuxClosureStatusInspectorPacket.construction_status -ne "queued_items_visible_not_claimed_done") {
+    throw "UIUX closure status must keep queued items visible"
+}
+if ($uiuxClosureStatusInspectorPacket.excluded_tools -notcontains "brush_tools") {
+    throw "UIUX closure status must keep brush tools excluded"
+}
+if ($uiuxClosureStatusInspectorPacket.excluded_tools -notcontains "mask_painting_tools") {
+    throw "UIUX closure status must keep mask painting tools excluded"
+}
+if ($uiuxClosureStatusInspectorPacket.visual_review_actions -notcontains "visual_readiness") {
+    throw "UIUX closure status visual readiness action missing"
 }
 $layerVisualPresetsInspectorPath = Join-Path $RepoRoot "scripts\inspect_layer_visual_presets.ps1"
 if (-not (Test-Path -LiteralPath $layerVisualPresetsInspectorPath)) {

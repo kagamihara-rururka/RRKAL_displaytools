@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - UIUX closure status inspector
+
+- Added `scripts/inspect_uiux_closure_status.ps1` as a no-GUI closure board for visual feature readiness, goal scorecard, closed-loop status and visual review readiness.
+- Registered the inspector in the visual contract inspector index, cross-machine review packet and smoke gates.
+- Smoke now verifies queued items remain visible, performance followup is not reported as done, and brush/mask tools stay excluded.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; transient cloud-drive file-access backoff warnings observed, final retry passed).
+
 ## 2026-05-31 - Layer render-plan performance inspector
 
 - Added `scripts/inspect_layer_render_plan_performance.ps1` as a no-GUI reviewer packet for the post-decoupling render-plan performance path.
