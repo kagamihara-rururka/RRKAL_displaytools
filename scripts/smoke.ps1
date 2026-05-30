@@ -1190,6 +1190,9 @@ if ($visualInspectorIndex.entry_ids -notcontains "hydrology_lod") {
 if ($visualInspectorIndex.entry_ids -notcontains "layer_workflow") {
     throw "Visual contract inspector index missing Layer workflow inspector"
 }
+if ($visualInspectorIndex.entry_ids -notcontains "research_interaction") {
+    throw "Visual contract inspector index missing Research interaction inspector"
+}
 if ($visualInspectorIndex.entry_ids -notcontains "ocean_material") {
     throw "Visual contract inspector index missing Ocean material inspector"
 }
@@ -1255,6 +1258,9 @@ if ($visualReviewPacket.inspector_entry_ids -notcontains "hydrology_lod") {
 if ($visualReviewPacket.inspector_entry_ids -notcontains "layer_workflow") {
     throw "Visual contract review packet missing Layer workflow inspector"
 }
+if ($visualReviewPacket.inspector_entry_ids -notcontains "research_interaction") {
+    throw "Visual contract review packet missing Research interaction inspector"
+}
 if ($visualReviewPacket.inspector_entry_ids -notcontains "ocean_material") {
     throw "Visual contract review packet missing Ocean material inspector"
 }
@@ -1266,6 +1272,9 @@ if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -Exec
 }
 if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_layer_workflow.ps1") {
     throw "Visual contract review packet missing Layer workflow first command"
+}
+if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_research_interaction.ps1") {
+    throw "Visual contract review packet missing Research interaction first command"
 }
 if ($visualReviewPacket.pre_decoupling_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\pre_decoupling_gate.ps1 -ContractOnly") {
     throw "Visual contract review packet missing pre-decoupling gate command"
@@ -1493,6 +1502,47 @@ if ($layerWorkflowInspectorPacket.navigation_copy_action -ne "copy_layer_navigat
 }
 if (@("reveal_selected_layer", "select_first_filtered_layer", "clear_filter_or_expand_groups", "edit_selected_layer") -notcontains $layerWorkflowInspectorPacket.next_action) {
     throw "Layer workflow inspection next action invalid"
+}
+$researchInteractionInspectorPath = Join-Path $RepoRoot "scripts\inspect_research_interaction.ps1"
+if (-not (Test-Path -LiteralPath $researchInteractionInspectorPath)) {
+    throw "Research interaction inspector script is missing"
+}
+$researchInteractionInspectorContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $researchInteractionInspectorPath, "-ContractOnly")
+$researchInteractionInspectorContract = ($researchInteractionInspectorContractText -join "`n") | ConvertFrom-Json
+if ($researchInteractionInspectorContract.schema -ne "rrkal_displaytools.research_interaction_inspector.v1") {
+    throw "Research interaction inspector contract schema missing"
+}
+if ($researchInteractionInspectorContract.required_contracts -notcontains "rrkal_displaytools.cursor_geodesy_readout.v1") {
+    throw "Research interaction inspector cursor contract missing"
+}
+if ($researchInteractionInspectorContract.required_contracts -notcontains "rrkal_displaytools.pin_projection.v1") {
+    throw "Research interaction inspector pin contract missing"
+}
+if ($researchInteractionInspectorContract.required_contracts -notcontains "rrkal_displaytools.boundary_emphasis_control.v1") {
+    throw "Research interaction inspector boundary emphasis contract missing"
+}
+$researchInteractionInspectorText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $researchInteractionInspectorPath)
+$researchInteractionInspectorPacket = ($researchInteractionInspectorText -join "`n") | ConvertFrom-Json
+if ($researchInteractionInspectorPacket.schema -ne "rrkal_displaytools.research_interaction_inspection.v1") {
+    throw "Research interaction inspection schema missing"
+}
+if ($researchInteractionInspectorPacket.cursor_geodesy_schema -ne "rrkal_displaytools.cursor_geodesy_readout.v1") {
+    throw "Research interaction cursor geodesy schema missing"
+}
+if ($researchInteractionInspectorPacket.pin_overlay_schema -ne "rrkal_displaytools.pin_projection.v1") {
+    throw "Research interaction pin overlay schema missing"
+}
+if ($researchInteractionInspectorPacket.boundary_emphasis_control_schema -ne "rrkal_displaytools.boundary_emphasis_control.v1") {
+    throw "Research interaction boundary emphasis schema missing"
+}
+if ($researchInteractionInspectorPacket.research_interaction_action_ids -notcontains "pin_pick") {
+    throw "Research interaction inspector pin action missing"
+}
+if ($researchInteractionInspectorPacket.research_interaction_action_ids -notcontains "cursor_geo") {
+    throw "Research interaction inspector cursor action missing"
+}
+if ($researchInteractionInspectorPacket.research_interaction_action_ids -notcontains "boundary_json") {
+    throw "Research interaction inspector boundary action missing"
 }
 $hydrologyLodInspectorPath = Join-Path $RepoRoot "scripts\inspect_hydrology_lod.ps1"
 if (-not (Test-Path -LiteralPath $hydrologyLodInspectorPath)) {

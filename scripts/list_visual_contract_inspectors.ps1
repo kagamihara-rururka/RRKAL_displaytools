@@ -37,6 +37,14 @@ $entries = @(
         no_launch_side_effect = $true
     },
     [ordered]@{
+        id = "research_interaction"
+        category = "research_interaction"
+        schema = "rrkal_displaytools.research_interaction_inspector.v1"
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_research_interaction.ps1"
+        proves = @("selected layer review", "pin occlusion contract", "cursor geodesy bridge", "boundary emphasis state")
+        no_launch_side_effect = $true
+    },
+    [ordered]@{
         id = "ocean_material"
         category = "renderer_ports"
         schema = "rrkal_displaytools.ocean_material_inspector.v1"
@@ -121,6 +129,7 @@ $entries = @(
         "renderer_config_gateway",
         "style_routes",
         "layer_workflow",
+        "research_interaction",
         "hydrology_lod",
         "ocean_material",
         "performance_smoke",

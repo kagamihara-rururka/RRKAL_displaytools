@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Research interaction inspector
+
+- Added `scripts/inspect_research_interaction.ps1` as a no-GUI reviewer packet for selected layer state, cursor geodesy, Pin overlay occlusion and Boundary emphasis contracts.
+- Registered the inspector in the visual contract inspector index, cross-machine review packet and smoke gates.
+- Kept this as a contract/UIUX closure step only; it does not launch Qt/Taichi or change renderer runtime behavior.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; transient cloud-drive file-access backoff warnings observed, final retry passed).
+
 ## 2026-05-31 - Pre-decoupling gate time enforcement
 
 - Added a formal `decoupling_not_before=2026-05-31T07:00:00+08:00` time gate to `scripts/pre_decoupling_gate.ps1`.
