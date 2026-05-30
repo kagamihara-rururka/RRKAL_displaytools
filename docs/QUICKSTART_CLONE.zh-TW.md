@@ -119,7 +119,7 @@ Qt 面板目前可做：
 
 跨機器 clone 後建議先按 Actions 裡的 `Inspect:` 檢查入口：
 
-- Replay/contracts：先開 `Inspect: Clone ready`、`Inspect: Reviewer route`、`Inspect: Capability summary`、`Inspect: Profile replay`、`Inspect: Timeline`、`Inspect: Module seams`，確認 portable command、clone/setup/smoke/handoff/Qt review 路線、目前/預計功能、profile replay coverage、Timeline runtime/keyframes 與模組邊界。
+- Replay/contracts：先開 `Inspect: Clone ready`、`Inspect: Reviewer route`、`Inspect: Capability summary`、`Inspect: Profile replay`、`Inspect: Timeline`、`Inspect: Module seams`、`Inspect: Extraction dry-run`，確認 portable command、clone/setup/smoke/handoff/Qt review 路線、目前/預計功能、profile replay coverage、Timeline runtime/keyframes、模組邊界與 post-7 render-plan extraction checklist。
 - Renderer ports：再開 `Inspect: Hydro LOD`、`Inspect: Ocean port`、`Inspect: Style routes`、`Inspect: Layer matrix`、`Inspect: Layer runtime`，確認 hydrology/LOD、sea-state scalar port、parchment/tactical renderer routes、layer capability matrix 與 layer runtime ack。
 - Research interaction：最後開 `Inspect: Layer pick`、`Inspect: Canvas state`、`Inspect: Pin pick`、`Inspect: Cursor geo`、`Inspect: Boundary JSON`，確認 selected-layer pick、Canvas Preview/provenance、Pin pick、滑鼠經緯度、Boundary/EEZ 強調與 identity warning。
 - Visual review：再看 `Inspect: UIUX closure` 與 `Inspect: Workspace map`，確認 ready/queued 功能狀態、workspace dock 角色、研究者操作流與 visible non-goals。

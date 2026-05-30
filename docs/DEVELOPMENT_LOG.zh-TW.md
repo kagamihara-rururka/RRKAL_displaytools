@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Clone quickstart extraction dry-run path
+
+- Updated `docs/QUICKSTART_CLONE.zh-TW.md` so cloned-machine reviewers see `Inspect: Extraction dry-run` in the Replay/contracts path.
+- Smoke now gates the clone quickstart for the extraction dry-run guidance.
+- This keeps the docs aligned with the new Qt dry-run entry before post-7 extraction starts.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; transient cloud-drive file-access backoff warning observed, final retry passed).
+
 ## 2026-05-31 - Qt extraction dry-run entry
 
 - Added `Inspect: Extraction dry-run` to Qt Replay/contracts.

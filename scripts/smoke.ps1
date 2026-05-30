@@ -6875,6 +6875,9 @@ if ($cloneQuickstartDoc -notmatch 'Inspect: Reviewer route') {
 if ($cloneQuickstartDoc -notmatch 'Inspect: Capability summary') {
     throw "Clone quickstart missing Qt capability summary guidance"
 }
+if ($cloneQuickstartDoc -notmatch 'Inspect: Extraction dry-run') {
+    throw "Clone quickstart missing Qt extraction dry-run guidance"
+}
 if ($cloneQuickstartDoc -notmatch 'Research interaction') {
     throw "Clone quickstart missing Qt Inspect Research interaction group guidance"
 }
