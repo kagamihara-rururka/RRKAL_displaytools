@@ -1,4 +1,16 @@
-﻿# Development Log
+# Development Log
+
+## 2026-05-30 - Cursor geodesy summary contract
+
+Changes:
+- Added `cursor_summary_contract` to the Qt, launch packet and renderer Cursor geodesy readout emitters.
+- Added `copy_cursor_geodesy_summary()` and `Copy cursor summary` to the Qt Research interaction group.
+- Handoff output now exposes the Cursor geodesy summary contract.
+- Smoke gates launch packet, renderer capability, handoff and Qt source coverage for the summary contract.
+- Updated clone quickstart, capability summary and GTD.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
 ## 2026-05-30 - Cursor geodesy state ack bridge contract
 

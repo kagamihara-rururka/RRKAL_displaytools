@@ -272,3 +272,9 @@ Displaytools 不負責：
 - `pin_overlay.pin_summary_contract` now documents the portable Pin overlay summary.
 - Qt exposes Pin summary copy actions in the Pin Annotation panel and Research interaction group.
 - The summary keeps pin count, selected pin, coordinate source, pick bridge, rotation and occlusion language aligned for clone handoff.
+
+## Cursor geodesy summary contract
+
+- `cursor_geodesy_readout.cursor_summary_contract` now documents the portable cursor geodesy summary.
+- Qt exposes `Copy cursor summary` in the Research interaction group.
+- The summary keeps source, hit state, latitude/longitude, renderer state/ack files and raycast method aligned for clone handoff.

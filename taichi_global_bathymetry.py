@@ -19033,6 +19033,16 @@ def cursor_geodesy_readout_packet(source: str) -> dict[str, object]:
         "renderer_controls": ["cursor-geodesy-state-file", "cursor-geodesy-ack-file"],
         "runtime_events": ["qt_mouse_press", "qt_mouse_move", "vispy_mouse_press", "vispy_mouse_move"],
         "runtime_bridge_fields": ["screen_x", "screen_y", "latitude", "longitude", "hit", "camera_yaw_deg", "camera_pitch_deg", "frame_index", "updated_at_utc"],
+        "cursor_summary_contract_schema": "rrkal_displaytools.cursor_geodesy_summary_contract.v1",
+        "cursor_summary_contract": {
+            "label": "Cursor geodesy",
+            "summary_format": "Cursor geodesy: source={source}; state={hit_state}; lat={latitude}; lon={longitude}; state_file={renderer_raycast_state_file}; ack_file={renderer_raycast_ack_file}; method={renderer_raycast_method}",
+            "qt_label_object": "canvasMeta",
+            "qt_copy_action": "copy_cursor_geodesy_summary",
+            "launch_packet_field": "cursor_geodesy_readout.cursor_summary_contract",
+            "handoff_field": "cursor_geodesy_readout.cursor_summary_contract",
+            "portable": True,
+        },
         "researcher_note": "Canvas preview gives immediate lon/lat feedback; renderer mouse events now write a smoke-gated state/ack bridge for Taichi globe raycast results.",
     }
 

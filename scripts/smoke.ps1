@@ -686,6 +686,15 @@ if ($launchPacket.cursor_geodesy_readout.runtime_bridge_fields -notcontains "upd
 if ($launchPacket.cursor_geodesy_readout.renderer_controls -notcontains "cursor-geodesy-state-file") {
     throw "Launch packet cursor_geodesy_readout state-file renderer control missing"
 }
+if ($launchPacket.cursor_geodesy_readout.cursor_summary_contract_schema -ne "rrkal_displaytools.cursor_geodesy_summary_contract.v1") {
+    throw "Launch packet cursor_geodesy_readout summary contract schema missing or invalid"
+}
+if ($launchPacket.cursor_geodesy_readout.cursor_summary_contract.qt_copy_action -ne "copy_cursor_geodesy_summary") {
+    throw "Launch packet cursor_geodesy_readout summary copy action missing or invalid"
+}
+if (-not $launchPacket.cursor_geodesy_readout.cursor_summary_contract.portable) {
+    throw "Launch packet cursor_geodesy_readout summary portability flag missing"
+}
 if ($launchPacket.pin_overlay.schema -ne "rrkal_displaytools.pin_projection.v1") {
     throw "Launch packet pin_overlay schema missing or invalid"
 }
@@ -933,6 +942,12 @@ if ($capabilities.cursor_geodesy_readout.runtime_bridge_fields -notcontains "hit
 }
 if ($capabilities.cursor_geodesy_readout.runtime_events -notcontains "qt_mouse_move") {
     throw "Renderer cursor_geodesy_readout qt_mouse_move runtime event missing"
+}
+if ($capabilities.cursor_geodesy_readout.cursor_summary_contract_schema -ne "rrkal_displaytools.cursor_geodesy_summary_contract.v1") {
+    throw "Renderer cursor_geodesy_readout summary contract schema missing or invalid"
+}
+if ($capabilities.cursor_geodesy_readout.cursor_summary_contract.qt_copy_action -ne "copy_cursor_geodesy_summary") {
+    throw "Renderer cursor_geodesy_readout summary copy action missing or invalid"
 }
 if ($capabilities.pin_overlay.schema -ne "rrkal_displaytools.pin_projection.v1") {
     throw "Renderer pin_overlay schema missing or invalid"
@@ -1520,6 +1535,15 @@ if ($handoff.cursor_geodesy_readout.renderer_raycast_ack_file -ne "state/rendere
 if ($handoff.cursor_geodesy_readout.renderer_controls -notcontains "cursor-geodesy-ack-file") {
     throw "Handoff inspection cursor_geodesy_readout ack-file renderer control missing"
 }
+if ($handoff.cursor_geodesy_readout.cursor_summary_contract_schema -ne "rrkal_displaytools.cursor_geodesy_summary_contract.v1") {
+    throw "Handoff inspection cursor_geodesy_readout summary contract schema missing or invalid"
+}
+if ($handoff.cursor_geodesy_readout.cursor_summary_contract.qt_copy_action -ne "copy_cursor_geodesy_summary") {
+    throw "Handoff inspection cursor_geodesy_readout summary copy action missing or invalid"
+}
+if (-not $handoff.cursor_geodesy_readout.cursor_summary_contract.portable) {
+    throw "Handoff inspection cursor_geodesy_readout summary portability flag missing"
+}
 if ($handoff.launch_packet_contracts.pin_overlay -ne "rrkal_displaytools.pin_projection.v1") {
     throw "Handoff inspection pin_overlay launch contract missing or invalid"
 }
@@ -2088,6 +2112,15 @@ if ($qtPanelSource -notlike "*show_cursor_geodesy_state*") {
 }
 if ($qtPanelSource -notlike "*Research interaction: inspect mouse cursor latitude/longitude geodesy bridge JSON*") {
     throw "Qt Cursor geo action tooltip is missing"
+}
+if ($qtPanelSource -notlike "*Copy cursor summary*") {
+    throw "Qt Cursor geo copy summary button is missing"
+}
+if ($qtPanelSource -notlike "*copy_cursor_geodesy_summary*") {
+    throw "Qt Cursor geo copy summary action is missing"
+}
+if ($qtPanelSource -notlike "*cursor_geodesy_summary_text*") {
+    throw "Qt Cursor geo summary formatter is missing"
 }
 if ($qtPanelSource -notlike "*Boundary JSON*") {
     throw "Qt Boundary JSON action button is missing"

@@ -1876,6 +1876,16 @@ def cursor_geodesy_readout_packet(
         "renderer_controls": ["cursor-geodesy-state-file", "cursor-geodesy-ack-file"],
         "runtime_events": ["qt_mouse_press", "qt_mouse_move", "vispy_mouse_press", "vispy_mouse_move"],
         "runtime_bridge_fields": ["screen_x", "screen_y", "latitude", "longitude", "hit", "camera_yaw_deg", "camera_pitch_deg", "frame_index", "updated_at_utc"],
+        "cursor_summary_contract_schema": "rrkal_displaytools.cursor_geodesy_summary_contract.v1",
+        "cursor_summary_contract": {
+            "label": "Cursor geodesy",
+            "summary_format": "Cursor geodesy: source={source}; state={hit_state}; lat={latitude}; lon={longitude}; state_file={renderer_raycast_state_file}; ack_file={renderer_raycast_ack_file}; method={renderer_raycast_method}",
+            "qt_label_object": "canvasMeta",
+            "qt_copy_action": "copy_cursor_geodesy_summary",
+            "launch_packet_field": "cursor_geodesy_readout.cursor_summary_contract",
+            "handoff_field": "cursor_geodesy_readout.cursor_summary_contract",
+            "portable": True,
+        },
         "researcher_note": "Canvas preview gives immediate lon/lat feedback; renderer mouse events now write a smoke-gated state/ack bridge for Taichi globe raycast results.",
     }
 
@@ -2783,6 +2793,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         pin_pick_button = QtWidgets.QPushButton("Inspect: Pin pick")
         copy_pin_summary_action_button = QtWidgets.QPushButton("Copy pin summary")
         cursor_geo_button = QtWidgets.QPushButton("Inspect: Cursor geo")
+        copy_cursor_summary_button = QtWidgets.QPushButton("Copy cursor summary")
         boundary_state_button = QtWidgets.QPushButton("Inspect: Boundary JSON")
         copy_boundary_summary_button = QtWidgets.QPushButton("Copy boundary summary")
         capabilities_button = QtWidgets.QPushButton("Renderer 能力")
@@ -2815,6 +2826,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (pin_pick_button, "Research interaction: inspect renderer Pin hover/click pick bridge JSON."),
             (copy_pin_summary_action_button, "Pin overlay: copy pin count, selected pin, source and projection/occlusion summary."),
             (cursor_geo_button, "Research interaction: inspect mouse cursor latitude/longitude geodesy bridge JSON."),
+            (copy_cursor_summary_button, "Cursor geodesy: copy source, hit state, latitude/longitude and renderer state/ack bridge summary."),
             (boundary_state_button, "Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON."),
             (copy_boundary_summary_button, "Boundary emphasis: copy target, alignment, color, opacity and renderer bridge summary."),
             (visual_readiness_button, "Visual review: inspect thumbnail/live preview readiness, frame status and missing-frame hints JSON."),
@@ -2848,6 +2860,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         pin_pick_button.clicked.connect(self.show_pin_pick_state)
         copy_pin_summary_action_button.clicked.connect(self.copy_pin_overlay_summary)
         cursor_geo_button.clicked.connect(self.show_cursor_geodesy_state)
+        copy_cursor_summary_button.clicked.connect(self.copy_cursor_geodesy_summary)
         boundary_state_button.clicked.connect(self.show_boundary_state)
         copy_boundary_summary_button.clicked.connect(self.copy_boundary_emphasis_summary)
         capabilities_button.clicked.connect(self.show_renderer_capabilities)
@@ -2866,7 +2879,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button)),
             ("Inspect: Replay/contracts", (profile_replay_button, timeline_button, module_seams_button, clone_ready_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, ocean_port_button, style_routes_button, layer_matrix_button, layer_runtime_button)),
-            ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, boundary_state_button, copy_boundary_summary_button)),
+            ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button)),
             ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, thumbnail_button, live_preview_button)),
             ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, smoke_button)),
             ("Process", (launch_button, restart_button, stop_button)),
@@ -3963,6 +3976,38 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.cursor_latitude,
             self.cursor_longitude,
             "rrkal_displaytools_qt_panel",
+        )
+
+    def cursor_geodesy_summary_text(self) -> str:
+        packet = self.collect_cursor_geodesy_readout()
+        contract = packet.get("cursor_summary_contract", {})
+        label = "Cursor geodesy"
+        if isinstance(contract, dict):
+            label = str(contract.get("label") or label)
+        state = self.cursor_geodesy_state_payload if isinstance(self.cursor_geodesy_state_payload, dict) else {}
+        ack = self.cursor_geodesy_ack_payload if isinstance(self.cursor_geodesy_ack_payload, dict) else {}
+        hit = state.get("hit", ack.get("hit"))
+        latitude = state.get("latitude", ack.get("latitude", packet.get("latitude")))
+        longitude = state.get("longitude", ack.get("longitude", packet.get("longitude")))
+        if hit is True and isinstance(latitude, (int, float)) and isinstance(longitude, (int, float)):
+            hit_state = "hit"
+            position = f"lat={float(latitude):.4f}; lon={float(longitude):.4f}"
+        elif hit is False:
+            hit_state = "outside_globe"
+            position = "lat=-; lon=-"
+        elif packet.get("last_known_position_available") and isinstance(latitude, (int, float)) and isinstance(longitude, (int, float)):
+            hit_state = "preview_estimate"
+            position = f"lat={float(latitude):.4f}; lon={float(longitude):.4f}"
+        else:
+            hit_state = "pending"
+            position = "lat=-; lon=-"
+        return (
+            f"{label}: source={packet.get('source')}; "
+            f"state={hit_state}; "
+            f"{position}; "
+            f"state_file={packet.get('renderer_raycast_state_file')}; "
+            f"ack_file={packet.get('renderer_raycast_ack_file')}; "
+            f"method={packet.get('renderer_raycast_method')}"
         )
 
     def open_boundary_emphasis_dialog(self, layer_key: str | bool | None = None) -> None:
@@ -7461,6 +7506,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             )
         )
         self.status.setText("已顯示 cursor geodesy bridge JSON")
+
+    def copy_cursor_geodesy_summary(self) -> None:
+        summary = self.cursor_geodesy_summary_text()
+        QtWidgets.QApplication.clipboard().setText(summary)
+        self.status.setText("已複製 cursor geodesy 摘要")
 
     def show_boundary_state(self) -> None:
         self.command_text.setPlainText(

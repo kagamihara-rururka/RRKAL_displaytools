@@ -184,6 +184,8 @@ $summary = [ordered]@{
         runtime_events = $launchPacket.cursor_geodesy_readout.runtime_events
         runtime_bridge_fields = $launchPacket.cursor_geodesy_readout.runtime_bridge_fields
         qt_surface = $launchPacket.cursor_geodesy_readout.qt_surface
+        cursor_summary_contract_schema = $launchPacket.cursor_geodesy_readout.cursor_summary_contract_schema
+        cursor_summary_contract = $launchPacket.cursor_geodesy_readout.cursor_summary_contract
     }
     pin_overlay = @{
         launch_packet_schema = $launchPacket.pin_overlay.schema

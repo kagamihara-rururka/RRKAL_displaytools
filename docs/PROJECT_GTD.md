@@ -463,3 +463,14 @@ Done:
 
 Next:
 - Continue applying the same summary/copy pattern to cursor geodesy research interactions.
+
+
+## 2026-05-30 - Cursor geodesy summary contract
+
+Done:
+- Added `cursor_summary_contract` to the Cursor geodesy readout contract.
+- Added `Copy cursor summary` to the Qt Research interaction group.
+- Handoff and smoke gate the Cursor geodesy summary contract.
+
+Next:
+- Continue consolidating Qt research interaction summaries into clone/handoff reviewer flows.

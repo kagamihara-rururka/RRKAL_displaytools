@@ -591,3 +591,9 @@
 - `pin_overlay.pin_summary_contract_schema` now advertises `rrkal_displaytools.pin_summary_contract.v1`.
 - The contract maps the Pin list object to `copy_pin_overlay_summary`.
 - Smoke gates launch packet, renderer capability, handoff and Qt button/action coverage.
+
+## Cursor geodesy summary contract
+
+- `cursor_geodesy_readout.cursor_summary_contract_schema` now advertises `rrkal_displaytools.cursor_geodesy_summary_contract.v1`.
+- The contract maps the Cursor geo research action to `copy_cursor_geodesy_summary`.
+- Smoke gates launch packet, renderer capability, handoff and Qt button/action coverage.
