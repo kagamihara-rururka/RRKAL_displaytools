@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Pre-decoupling gate requires UIUX readiness
+
+- Updated `scripts/pre_decoupling_gate.ps1` so the formal post-7 gate includes `scripts/check_uiux_closure_readiness.ps1`.
+- Contract-only gate output now exposes the UIUX readiness command/schema and required-before-move step.
+- Full gate execution will run the UIUX readiness check before boundary/work-order inspectors can pass renderer code movement.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - UIUX readiness includes Qt reviewer path
 
 - Expanded `scripts/check_uiux_closure_readiness.ps1` to include Reviewer route, Capability summary, Qt reviewer path hint, UIUX closure, Workspace map and clone quickstart alignment.

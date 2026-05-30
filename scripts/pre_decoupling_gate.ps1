@@ -42,6 +42,7 @@ function Invoke-JsonPowerShell {
 
 $readiness = Invoke-JsonPython @("decoupling_readiness.py", "--phase", "post_07_decoupling")
 $performanceContract = Invoke-JsonPython @("performance_telemetry.py", "--contract-only")
+$uiuxReadinessContract = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\check_uiux_closure_readiness.ps1", "-ContractOnly")
 $workOrderContract = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_render_plan_compose_work_order.ps1", "-ContractOnly")
 $firstExtraction = @($readiness.first_extraction_order | Select-Object -First 1)[0]
 $decouplingNotBefore = [DateTimeOffset]::Parse($readiness.operation_schedule.decoupling_not_before)
@@ -63,12 +64,15 @@ $gate = [ordered]@{
     stage_timing_schema = $readiness.observability_baseline.stage_timing_schema
     render_telemetry_schema = $readiness.observability_baseline.render_telemetry_schema
     performance_smoke_command = $readiness.observability_baseline.pre_move_command
+    uiux_readiness_command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_uiux_closure_readiness.ps1"
+    uiux_readiness_schema = $uiuxReadinessContract.output_schema
     decoupling_boundary_inspector_command = $readiness.operation_schedule.decoupling_boundary_inspector_command
     render_plan_compose_work_order_command = $readiness.operation_schedule.render_plan_compose_work_order_command
     render_plan_compose_work_order_schema = $workOrderContract.output_schema
     required_before_move = @(
         "clean git worktree",
         "scripts/smoke.ps1",
+        "scripts/check_uiux_closure_readiness.ps1",
         "scripts/performance_smoke.ps1",
         "scripts/inspect_decoupling_boundaries.ps1",
         "scripts/inspect_render_plan_compose_work_order.ps1",
@@ -79,6 +83,7 @@ $gate = [ordered]@{
     blocked_scope = @($readiness.phase_policy.post_07_decoupling.blocked)
     rrkal_boundary_rule = $readiness.rrkal_boundary.rule
     smoke_executed = $false
+    uiux_readiness_executed = $false
     performance_smoke_output_required = "state/performance/stage_timing.jsonl"
 }
 
@@ -105,6 +110,9 @@ if ($gate.render_telemetry_schema -ne "rrkal_displaytools.render_telemetry.v1") 
 }
 if ($performanceContract.schema -ne $gate.performance_smoke_schema) {
     throw "Pre-decoupling performance smoke contract-only command mismatch"
+}
+if ($gate.uiux_readiness_schema -ne "rrkal_displaytools.uiux_closure_readiness_check_result.v1") {
+    throw "Pre-decoupling UIUX readiness contract missing"
 }
 if ($gate.decoupling_boundary_inspector_command -notlike "*scripts/inspect_decoupling_boundaries.ps1") {
     throw "Pre-decoupling boundary inspector command missing"
@@ -134,6 +142,11 @@ if (-not $ContractOnly) {
     if (-not (Test-Path -LiteralPath $gate.performance_smoke_output_required)) {
         throw "Pre-decoupling performance smoke output missing after smoke"
     }
+    powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_uiux_closure_readiness.ps1
+    if ($LASTEXITCODE -ne 0) {
+        throw "Pre-decoupling UIUX readiness check failed"
+    }
+    $gate.uiux_readiness_executed = $true
     powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_decoupling_boundaries.ps1
     if ($LASTEXITCODE -ne 0) {
         throw "Pre-decoupling boundary inspector failed"

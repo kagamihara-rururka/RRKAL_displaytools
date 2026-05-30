@@ -7089,6 +7089,15 @@ if ($preDecouplingGate.observability_baseline_schema -ne "rrkal_displaytools.dec
 if ($preDecouplingGate.performance_smoke_schema -ne "rrkal_displaytools.performance_smoke.v1") {
     throw "Pre-decoupling gate performance smoke schema missing"
 }
+if ($preDecouplingGate.uiux_readiness_schema -ne "rrkal_displaytools.uiux_closure_readiness_check_result.v1") {
+    throw "Pre-decoupling gate UIUX readiness schema missing"
+}
+if ($preDecouplingGate.required_before_move -notcontains "scripts/check_uiux_closure_readiness.ps1") {
+    throw "Pre-decoupling gate UIUX readiness required step missing"
+}
+if ($preDecouplingGate.uiux_readiness_command -notlike "*scripts\check_uiux_closure_readiness.ps1") {
+    throw "Pre-decoupling gate UIUX readiness command missing"
+}
 if ($preDecouplingGate.required_before_move -notcontains "scripts/performance_smoke.ps1") {
     throw "Pre-decoupling gate performance smoke required step missing"
 }
