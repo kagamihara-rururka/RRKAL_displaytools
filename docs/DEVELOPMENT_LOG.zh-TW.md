@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Pre-7 closure includes post-07 runbook
+
+- Updated `scripts/check_pre7_closure_readiness.ps1` so the compact pre-7 checker also verifies the post-07 decoupling runbook.
+- The checker now requires the runbook to document `render_plan_compose` and `runtime_merge=false`.
+- Smoke now gates the new `post0700_decoupling_runbook` check id.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Post-07 decoupling runbook
 
 - Added `docs/POST_0700_DECOUPLING_RUNBOOK.zh-TW.md` for the first post-7 `render_plan_compose` code-move slice.

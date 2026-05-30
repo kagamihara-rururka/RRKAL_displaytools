@@ -65,6 +65,7 @@ $contract = [ordered]@{
         "Qt workspace map",
         "Qt extraction dry-run",
         "clone quickstart reviewer path",
+        "post-07 decoupling runbook",
         "formal pre-decoupling gate presence"
     )
 }
@@ -119,6 +120,10 @@ Add-Check $checks "formal_pre_decoupling_gate_exists" "Formal pre-decoupling gat
 Add-Check $checks "not_before_gate_declared" "The 07:00 +08:00 not-before gate is still declared." `
     (Test-RepoFileContains "decoupling_readiness.py" "2026-05-31T07:00:00+08:00") `
     "decoupling_readiness.py contains 2026-05-31T07:00:00+08:00"
+
+Add-Check $checks "post0700_decoupling_runbook" "Post-07 decoupling runbook documents the first code-move scope." `
+    ((Test-RepoFileContains "docs/POST_0700_DECOUPLING_RUNBOOK.zh-TW.md" "render_plan_compose") -and (Test-RepoFileContains "docs/POST_0700_DECOUPLING_RUNBOOK.zh-TW.md" "runtime_merge=false")) `
+    "docs/POST_0700_DECOUPLING_RUNBOOK.zh-TW.md contains render_plan_compose and runtime_merge=false"
 
 Add-Check $checks "first_extraction_target_documented" "GTD points the first post-7 extraction to render-plan compose." `
     (Test-RepoFileContains "docs/PROJECT_GTD.md" "Start with render-plan compose extraction after the 7:00 decoupling gate.") `

@@ -7314,6 +7314,9 @@ if ($pre7Closure.schema -ne "rrkal_displaytools.pre7_closure_readiness_check.v1"
 if ($pre7Closure.status -ne "pass") {
     throw "Pre-7 closure readiness did not pass"
 }
+if ($pre7Closure.checks.id -notcontains "post0700_decoupling_runbook") {
+    throw "Pre-7 closure readiness missing post-07 runbook check"
+}
 if (-not $pre7Closure.ready_for_post7_gate) {
     throw "Pre-7 closure readiness did not report post-7 gate readiness"
 }
