@@ -1196,6 +1196,9 @@ if ($visualInspectorIndex.entry_ids -notcontains "qt_uiux_surface") {
 if ($visualInspectorIndex.entry_ids -notcontains "uiux_closure_status") {
     throw "Visual contract inspector index missing UIUX closure status inspector"
 }
+if ($visualInspectorIndex.entry_ids -notcontains "timeline_uiux") {
+    throw "Visual contract inspector index missing Timeline UIUX inspector"
+}
 if ($visualInspectorIndex.entry_ids -notcontains "layer_visual_presets") {
     throw "Visual contract inspector index missing Layer visual presets inspector"
 }
@@ -1279,6 +1282,9 @@ if ($visualReviewPacket.inspector_entry_ids -notcontains "qt_uiux_surface") {
 if ($visualReviewPacket.inspector_entry_ids -notcontains "uiux_closure_status") {
     throw "Visual contract review packet missing UIUX closure status inspector"
 }
+if ($visualReviewPacket.inspector_entry_ids -notcontains "timeline_uiux") {
+    throw "Visual contract review packet missing Timeline UIUX inspector"
+}
 if ($visualReviewPacket.inspector_entry_ids -notcontains "layer_visual_presets") {
     throw "Visual contract review packet missing Layer visual presets inspector"
 }
@@ -1305,6 +1311,9 @@ if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -Exec
 }
 if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_uiux_closure_status.ps1") {
     throw "Visual contract review packet missing UIUX closure status first command"
+}
+if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_timeline_uiux.ps1") {
+    throw "Visual contract review packet missing Timeline UIUX first command"
 }
 if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_layer_visual_presets.ps1") {
     throw "Visual contract review packet missing Layer visual presets first command"
@@ -1629,6 +1638,56 @@ if ($uiuxClosureStatusInspectorPacket.excluded_tools -notcontains "mask_painting
 }
 if ($uiuxClosureStatusInspectorPacket.visual_review_actions -notcontains "visual_readiness") {
     throw "UIUX closure status visual readiness action missing"
+}
+$timelineUiuxInspectorPath = Join-Path $RepoRoot "scripts\inspect_timeline_uiux.ps1"
+if (-not (Test-Path -LiteralPath $timelineUiuxInspectorPath)) {
+    throw "Timeline UIUX inspector script is missing"
+}
+$timelineUiuxInspectorContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $timelineUiuxInspectorPath, "-ContractOnly")
+$timelineUiuxInspectorContract = ($timelineUiuxInspectorContractText -join "`n") | ConvertFrom-Json
+if ($timelineUiuxInspectorContract.schema -ne "rrkal_displaytools.timeline_uiux_inspector.v1") {
+    throw "Timeline UIUX inspector contract schema missing"
+}
+if ($timelineUiuxInspectorContract.required_contracts -notcontains "rrkal_displaytools.timeline_playback_readiness.v1") {
+    throw "Timeline UIUX inspector playback readiness contract missing"
+}
+if ($timelineUiuxInspectorContract.required_contracts -notcontains "rrkal_displaytools.timeline_animation_export.v1") {
+    throw "Timeline UIUX inspector animation export contract missing"
+}
+$timelineUiuxInspectorText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $timelineUiuxInspectorPath)
+$timelineUiuxInspectorPacket = ($timelineUiuxInspectorText -join "`n") | ConvertFrom-Json
+if ($timelineUiuxInspectorPacket.schema -ne "rrkal_displaytools.timeline_uiux_inspection.v1") {
+    throw "Timeline UIUX inspection schema missing"
+}
+if ($timelineUiuxInspectorPacket.playback_readiness_schema -ne "rrkal_displaytools.timeline_playback_readiness.v1") {
+    throw "Timeline UIUX playback readiness schema missing"
+}
+if ($timelineUiuxInspectorPacket.renderer_timeline_playback -ne $true) {
+    throw "Timeline UIUX renderer playback readiness missing"
+}
+if ($timelineUiuxInspectorPacket.animation_export -ne $true) {
+    throw "Timeline UIUX animation export readiness missing"
+}
+if ($timelineUiuxInspectorPacket.animation_applies -notcontains "timeline_gif_animation") {
+    throw "Timeline UIUX GIF export capability missing"
+}
+if ($timelineUiuxInspectorPacket.animation_applies -notcontains "timeline_mp4_video") {
+    throw "Timeline UIUX MP4 export capability missing"
+}
+if ($timelineUiuxInspectorPacket.layer_opacity_supported -ne $true) {
+    throw "Timeline UIUX layer opacity interpolation support missing"
+}
+if ($timelineUiuxInspectorPacket.layer_discrete_hold_supported -ne $true) {
+    throw "Timeline UIUX layer discrete hold support missing"
+}
+if ($timelineUiuxInspectorPacket.readiness_pending -notcontains "blend_crossfade_interpolation") {
+    throw "Timeline UIUX pending blend crossfade item missing"
+}
+if ($timelineUiuxInspectorPacket.readiness_pending -notcontains "visibility_fade_interpolation") {
+    throw "Timeline UIUX pending visibility fade item missing"
+}
+if ($timelineUiuxInspectorPacket.construction_status -ne "timeline_contract_ready_with_visible_pending_items") {
+    throw "Timeline UIUX construction status mismatch"
 }
 $layerVisualPresetsInspectorPath = Join-Path $RepoRoot "scripts\inspect_layer_visual_presets.ps1"
 if (-not (Test-Path -LiteralPath $layerVisualPresetsInspectorPath)) {

@@ -53,6 +53,14 @@ $entries = @(
         no_launch_side_effect = $true
     },
     [ordered]@{
+        id = "timeline_uiux"
+        category = "uiux"
+        schema = "rrkal_displaytools.timeline_uiux_inspector.v1"
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_timeline_uiux.ps1"
+        proves = @("timeline playback readiness", "animation export contract", "layer opacity interpolation", "pending timeline items visible")
+        no_launch_side_effect = $true
+    },
+    [ordered]@{
         id = "layer_visual_presets"
         category = "layer_control"
         schema = "rrkal_displaytools.layer_visual_presets_inspector.v1"
@@ -171,6 +179,7 @@ $entries = @(
         "layer_workflow",
         "qt_uiux_surface",
         "uiux_closure_status",
+        "timeline_uiux",
         "layer_visual_presets",
         "layer_operator_shortcuts",
         "research_interaction",

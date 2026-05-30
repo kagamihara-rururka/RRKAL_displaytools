@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Timeline UIUX inspector
+
+- Added `scripts/inspect_timeline_uiux.ps1` as a no-GUI reviewer packet for timeline playback readiness, runtime handoff, animation export, layer opacity interpolation and layer visibility/blend discrete hold.
+- Registered the inspector in the visual contract inspector index, cross-machine review packet and smoke gates.
+- Smoke now verifies renderer timeline playback, GIF/MP4 export capability, layer interpolation support and visible pending items for blend crossfade / visibility fade.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; transient cloud-drive file-access backoff warning observed, final retry passed).
+
 ## 2026-05-31 - Layer operator shortcuts inspector
 
 - Added `scripts/inspect_layer_operator_shortcuts.ps1` as a no-GUI reviewer packet for layer keyboard shortcuts, active quick actions, operation groups and copyable provenance.
