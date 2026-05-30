@@ -14163,6 +14163,8 @@ class HybridRenderController:
         if isinstance(cached_plan, dict) and getattr(self, "compiled_layer_render_plan_cache_key", None) == cache_key:
             plan = dict(cached_plan)
             plan["cache_status"] = "reused"
+            plan["reuse_policy"] = "reuse_when_cache_key_matches_previous_compiled_plan"
+            plan["reuse_boundary"] = plan.get("reuse_boundary", "valid_until_dirty_flags_or_camera_change")
             plan["frame_index"] = int(getattr(self, "frame_index", 0))
             plan["runtime_snapshot"] = runtime_snapshot
             plan["dirty_flags"] = runtime_snapshot.get("dirty_flags", {})
@@ -14174,6 +14176,8 @@ class HybridRenderController:
             "status": "compiled_snapshot",
             "cache_status": "compiled",
             "cache_key": cache_key,
+            "reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",
+            "reuse_status_values": ["compiled", "reused"],
             "runtime_optimization_applied": False,
             "optimization_target": "precompute_layer_state_then_single_render_pass",
             "frame_index": int(getattr(self, "frame_index", 0)),
@@ -19119,6 +19123,9 @@ def layer_render_plan_cache_diagnostics_packet(
         "runtime_snapshot_schema": runtime_snapshot.get("schema") if runtime_snapshot else "rrkal_displaytools.layer_render_plan_runtime_snapshot.v1",
         "cache_status": plan.get("cache_status", "unavailable"),
         "cache_key_available": bool(plan.get("cache_key")),
+        "reuse_policy": plan.get("reuse_policy", "reuse_when_cache_key_matches_previous_compiled_plan") if available else "unavailable",
+        "reuse_boundary": plan.get("reuse_boundary", "valid_until_dirty_flags_or_camera_change") if available else "unavailable",
+        "cache_status_values": ["compiled", "reused", "unavailable"],
         "composition_step_count": plan.get("composition_step_count", runtime_snapshot.get("composition_step_count")),
         "visible_layer_count": runtime_snapshot.get("visible_layer_count"),
         "dirty_flags": plan.get("dirty_flags") if isinstance(plan.get("dirty_flags"), dict) else runtime_snapshot.get("dirty_flags", {}),
@@ -19161,6 +19168,11 @@ def layer_render_plan_performance_packet(
         "compiled_plan_helper": "HybridRenderController.compile_layer_render_plan",
         "compiled_plan_cache_key_helper": "HybridRenderController.layer_render_plan_cache_key",
         "compiled_plan_cache_status_field": "cache_status",
+        "compiled_plan_reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",
+        "compiled_plan_reuse_status_values": ["compiled", "reused"],
+        "compiled_plan_reuse_boundary_field": "reuse_boundary",
+        "compiled_plan_reuse_boundary": "valid_until_dirty_flags_or_camera_change",
+        "compiled_plan_reuse_runtime_fields": ["cache_key", "cache_status", "reuse_policy", "reuse_boundary", "frame_index", "dirty_flags"],
         "cache_diagnostics_schema": "rrkal_displaytools.layer_render_plan_cache_diagnostics.v1",
         "cache_diagnostics_qt_action": "show_layer_render_plan_performance",
         "cache_diagnostics_metadata_source": "renderer_output_metadata.layer_render_plan",

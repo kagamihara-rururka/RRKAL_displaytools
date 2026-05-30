@@ -521,6 +521,18 @@ if ($launchPacket.layer_render_plan_performance.compiled_plan_schema -ne "rrkal_
 if ($launchPacket.layer_render_plan_performance.compiled_plan_cache_status_field -ne "cache_status") {
     throw "Launch packet layer_render_plan_performance compiled plan cache status field missing"
 }
+if ($launchPacket.layer_render_plan_performance.compiled_plan_reuse_policy -ne "reuse_when_cache_key_matches_previous_compiled_plan") {
+    throw "Launch packet layer_render_plan_performance compiled plan reuse policy missing"
+}
+if ($launchPacket.layer_render_plan_performance.compiled_plan_reuse_status_values -notcontains "reused") {
+    throw "Launch packet layer_render_plan_performance compiled plan reuse status values missing"
+}
+if ($launchPacket.layer_render_plan_performance.compiled_plan_reuse_boundary_field -ne "reuse_boundary") {
+    throw "Launch packet layer_render_plan_performance compiled plan reuse boundary field missing"
+}
+if ($launchPacket.layer_render_plan_performance.compiled_plan_reuse_runtime_fields -notcontains "reuse_policy") {
+    throw "Launch packet layer_render_plan_performance compiled plan reuse runtime fields missing"
+}
 if ($launchPacket.layer_render_plan_performance.cache_diagnostics_schema -ne "rrkal_displaytools.layer_render_plan_cache_diagnostics.v1") {
     throw "Launch packet layer_render_plan_performance cache diagnostics schema missing"
 }
@@ -1633,6 +1645,15 @@ if ($capabilities.layer_render_plan_performance.compiled_plan_helper -ne "Hybrid
 if ($capabilities.layer_render_plan_performance.compiled_plan_cache_key_helper -ne "HybridRenderController.layer_render_plan_cache_key") {
     throw "Renderer layer_render_plan_performance cache key helper missing"
 }
+if ($capabilities.layer_render_plan_performance.compiled_plan_reuse_policy -ne "reuse_when_cache_key_matches_previous_compiled_plan") {
+    throw "Renderer layer_render_plan_performance compiled plan reuse policy missing"
+}
+if ($capabilities.layer_render_plan_performance.compiled_plan_reuse_status_values -notcontains "compiled") {
+    throw "Renderer layer_render_plan_performance compiled plan reuse status values missing"
+}
+if ($capabilities.layer_render_plan_performance.compiled_plan_reuse_boundary -ne "valid_until_dirty_flags_or_camera_change") {
+    throw "Renderer layer_render_plan_performance compiled plan reuse boundary missing"
+}
 if ($capabilities.layer_render_plan_performance.cache_diagnostics_schema -ne "rrkal_displaytools.layer_render_plan_cache_diagnostics.v1") {
     throw "Renderer layer_render_plan_performance cache diagnostics schema missing"
 }
@@ -2302,6 +2323,15 @@ if ($handoff.layer_render_plan_performance.compiled_plan_schema -ne "rrkal_displ
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_cache_key_helper -ne "HybridRenderController.layer_render_plan_cache_key") {
     throw "Handoff inspection layer render plan performance cache key helper missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_reuse_policy -ne "reuse_when_cache_key_matches_previous_compiled_plan") {
+    throw "Handoff inspection layer render plan performance compiled plan reuse policy missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_reuse_status_values -notcontains "reused") {
+    throw "Handoff inspection layer render plan performance compiled plan reuse status values missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_reuse_boundary_field -ne "reuse_boundary") {
+    throw "Handoff inspection layer render plan performance compiled plan reuse boundary field missing"
 }
 if ($handoff.layer_render_plan_performance.cache_diagnostics_schema -ne "rrkal_displaytools.layer_render_plan_cache_diagnostics.v1") {
     throw "Handoff inspection layer render plan performance cache diagnostics schema missing"
@@ -3484,6 +3514,15 @@ if ($qtPanelSource -notlike "*compiled_layer_render_plan.v1*") {
 if ($qtPanelSource -notlike "*layer_render_plan_cache_diagnostics.v1*") {
     throw "Qt render plan cache diagnostics contract is missing"
 }
+if ($qtPanelSource -notlike "*compiled_plan_reuse_policy*") {
+    throw "Qt render plan compiled reuse policy contract is missing"
+}
+if ($qtPanelSource -notlike "*reuse_when_cache_key_matches_previous_compiled_plan*") {
+    throw "Qt render plan compiled reuse policy value is missing"
+}
+if ($qtPanelSource -notlike "*compiled_plan_reuse_runtime_fields*") {
+    throw "Qt render plan compiled reuse runtime fields are missing"
+}
 if ($qtPanelSource -notlike "*collect_layer_render_plan_cache_diagnostics*") {
     throw "Qt render plan cache diagnostics collector is missing"
 }
@@ -3740,6 +3779,15 @@ if ($rendererSource -notlike '*"cache_status": "compiled"*') {
 }
 if ($rendererSource -notlike '*cache_status*reused*') {
     throw "Renderer compiled layer render plan reuse branch is missing"
+}
+if ($rendererSource -notlike '*reuse_when_cache_key_matches_previous_compiled_plan*') {
+    throw "Renderer compiled render plan reuse policy is missing"
+}
+if ($rendererSource -notlike '*reuse_boundary*valid_until_dirty_flags_or_camera_change*') {
+    throw "Renderer compiled render plan reuse boundary is missing"
+}
+if ($rendererSource -notlike '*getattr(self, "compiled_layer_render_plan_cache_key", None) == cache_key*') {
+    throw "Renderer compiled render plan cache-key reuse guard is missing"
 }
 if ($rendererSource -notlike '*"layer_render_plan": getattr(self, "layer_render_plan_snapshot"*') {
     if ($rendererSource -notlike '*"layer_render_plan": getattr(self, "compiled_layer_render_plan"*') {

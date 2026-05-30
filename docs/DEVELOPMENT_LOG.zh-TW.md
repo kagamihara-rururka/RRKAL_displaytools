@@ -1,5 +1,16 @@
 # Development Log
 
+## 2026-05-30 - Compiled render-plan reuse policy
+
+Changes:
+- Exposed the renderer's compiled render-plan reuse behavior as `compiled_plan_reuse_policy`, with status values `compiled` / `reused`.
+- Added `reuse_policy` and `reuse_boundary` to compiled render-plan metadata, including the existing cache-key reuse branch in `HybridRenderController.compile_layer_render_plan()`.
+- Extended cache diagnostics summaries with reuse boundary evidence so the Layers control board can explain when a cached compiled plan remains valid.
+- Smoke gates now verify reuse policy, status values, boundary fields and the renderer cache-key reuse guard across launch packets, renderer capabilities, handoff inspection and source checks.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Render-plan cache control-board strip
 
 Changes:
