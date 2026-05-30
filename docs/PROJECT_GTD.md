@@ -37,6 +37,7 @@ Last updated: 2026-05-30
 
 ## Done
 - 2026-05-30: Documented Cloud/local development workflow and handoff entrypoint, including private transcript backup policy and maturity reporting requirements.
+- 2026-05-30: Added Qt `Copy decoupling summary` for handoff-friendly post-7 extraction readiness.
 - 2026-05-30: Added `docs/DECOUPLING_RUNBOOK.zh-TW.md` and linked it from handoff docs for the post-7 renderer extraction phase.
 - 2026-05-30: Added a clean-worktree guard to the pre-decoupling gate for post-7 renderer extraction.
 - 2026-05-30: Added explicit Asia/Taipei schedule metadata to the decoupling readiness packet for the 2026-05-31 07:00 not-before gate.

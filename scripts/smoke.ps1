@@ -5588,8 +5588,14 @@ $decouplingQtPanelSource = Get-Content -LiteralPath (Join-Path $RepoRoot "rrkal_
 if ($decouplingQtPanelSource -notmatch "Inspect: Decoupling") {
     throw "Qt panel decoupling Inspect action is missing"
 }
+if ($decouplingQtPanelSource -notmatch "Copy decoupling summary") {
+    throw "Qt panel decoupling copy summary action is missing"
+}
 if ($decouplingQtPanelSource -notmatch "show_decoupling_readiness") {
     throw "Qt panel decoupling readiness handler is missing"
+}
+if ($decouplingQtPanelSource -notmatch "copy_decoupling_readiness_summary") {
+    throw "Qt panel decoupling copy summary handler is missing"
 }
 if ($decouplingQtPanelSource -notmatch "collect_decoupling_readiness") {
     throw "Qt panel decoupling readiness collector is missing"

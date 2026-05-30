@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Qt copy decoupling readiness summary
+
+Changes:
+- Added Qt `Copy decoupling summary` to the Replay/contracts action group.
+- The copied summary includes phase, not-before time, first extraction, pre-decoupling gate command and RRKAL boundary rule.
+- Smoke now gates the action label and handler.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Post-7 decoupling runbook
 
 Changes:
