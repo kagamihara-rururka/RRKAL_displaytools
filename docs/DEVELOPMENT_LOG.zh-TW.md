@@ -229,6 +229,17 @@ Positioning:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+## 2026-05-30 - Visual readiness Qt command contract
+
+Changes:
+- Added `visual_review_qt_command_contract` metadata to `visual_review_readiness` packets.
+- The contract maps `visual_readiness` / `Inspect: Visual readiness` to `visual_review_readiness.inspector_view`.
+- Handoff output includes the command contract, and smoke gates schema, action id, payload field and dispatch status.
+- Documented the current monolith boundary and future `qt_ui/main_window.py` split target.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-30 - Visual review inspector view
 
 Changes:

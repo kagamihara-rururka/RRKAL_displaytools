@@ -157,6 +157,8 @@ $summary = [ordered]@{
         frame_status = $visualReviewReadiness.frame_status
         inspector_view_schema = $visualReviewReadiness.inspector_view_schema
         inspector_view = $visualReviewReadiness.inspector_view
+        qt_command_contract_schema = $visualReviewReadiness.qt_command_contract_schema
+        qt_command_contract = $visualReviewReadiness.qt_command_contract
         recommended_sequence = $visualReviewReadiness.recommended_sequence
         missing_frame_guidance = $visualReviewReadiness.missing_frame_guidance
     }

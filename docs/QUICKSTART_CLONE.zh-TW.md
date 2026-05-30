@@ -218,3 +218,9 @@ Displaytools 不負責：
 - `visual_review_readiness.inspector_view` now packages title, status badges, rows and hints for a single Qt Visual review inspector.
 - The view is copyable, so clone reviewers can paste the readiness state into issue notes or handoff logs.
 - Use it as the first user-facing summary before checking renderer thumbnail or live preview separately.
+
+## Visual readiness Qt command contract
+
+- `visual_review_readiness.qt_command_contract` now documents the `Inspect: Visual readiness` action contract.
+- The contract points Qt to `visual_review_readiness.inspector_view` as the payload field.
+- Current implementation status is `under_construction`; until direct Qt dispatch is wired, use handoff, launch packet or renderer capability output.

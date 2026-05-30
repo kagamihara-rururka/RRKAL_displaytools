@@ -362,3 +362,14 @@ Done:
 
 Next:
 - Continue closing actual Qt command wiring so the `Inspect: Visual readiness` action can render this packet directly.
+
+
+## 2026-05-30 - Visual readiness Qt command contract
+
+Done:
+- Added `visual_review_qt_command_contract` metadata to `visual_review_readiness`.
+- The contract maps `Inspect: Visual readiness` to `visual_review_readiness.inspector_view`.
+- Handoff and smoke gate the contract schema, action id, payload field and dispatch status.
+
+Next:
+- Implement actual monolith Qt dispatch for `visual_readiness`, then split toward `qt_ui/main_window.py` when the UI module boundary is ready.

@@ -537,3 +537,9 @@
 - `visual_review_readiness.inspector_view_schema` now advertises `rrkal_displaytools.visual_review_inspector_view.v1`.
 - The view provides a Qt-facing title, surface id, status badges, rows and hints.
 - Smoke gates the title, surface, row count and copyable flag through handoff output.
+
+## Visual readiness Qt command contract
+
+- `visual_review_readiness.qt_command_contract_schema` now advertises `rrkal_displaytools.visual_review_qt_command_contract.v1`.
+- The contract maps `visual_readiness` to `visual_review_readiness.inspector_view`.
+- Smoke gates action id, payload field and `contract_ready` dispatch status through handoff output.

@@ -1360,6 +1360,18 @@ if ($handoff.visual_review_readiness.inspector_view.rows.Count -lt 2) {
 if (-not $handoff.visual_review_readiness.inspector_view.copyable) {
     throw "Handoff inspection visual review readiness inspector view copyable flag missing"
 }
+if ($handoff.visual_review_readiness.qt_command_contract_schema -ne "rrkal_displaytools.visual_review_qt_command_contract.v1") {
+    throw "Handoff inspection visual review readiness Qt command contract schema missing or invalid"
+}
+if ($handoff.visual_review_readiness.qt_command_contract.action_id -ne "visual_readiness") {
+    throw "Handoff inspection visual review readiness Qt command contract action id missing or invalid"
+}
+if ($handoff.visual_review_readiness.qt_command_contract.payload_field -ne "visual_review_readiness.inspector_view") {
+    throw "Handoff inspection visual review readiness Qt command contract payload field missing or invalid"
+}
+if ($handoff.visual_review_readiness.qt_command_contract.dispatch_status -ne "contract_ready") {
+    throw "Handoff inspection visual review readiness Qt command contract dispatch status missing or invalid"
+}
 $visualReviewGuidance = ($handoff.visual_review_readiness.missing_frame_guidance -join " ")
 if ($visualReviewGuidance -notmatch 'Inspect: Renderer thumbnail') {
     throw "Handoff inspection visual review readiness missing renderer thumbnail guidance"
