@@ -1,5 +1,17 @@
 # Development Log
 
+## 2026-05-30 - Render-plan bottleneck recommendation
+
+Changes:
+- Added `HybridRenderController.layer_render_plan_bottleneck_recommendation()` to convert measured phase timing into the next optimization target.
+- Compiled render-plan metadata and Qt diagnostics now expose `rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1` and `bottleneck_recommendation`.
+- Recommendations map `prepare_batches` to static batch/cache reuse, `compose_overlays` to collapsed overlay composition, `postprocess` to folded/deferred style work and `future_single_pass_candidate` to a unified Taichi composite pass prototype.
+- The Layers control-board render-plan strip now shows `next_opt=` beside runtime timing and slowest phase evidence.
+- Smoke gates now verify recommendation schema/helper/field, Qt summary text and renderer recommendation markers.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Render-plan phase timing runtime evidence
 
 Changes:

@@ -14468,6 +14468,59 @@ class HybridRenderController:
             "next_runtime_step": "wrap phase boundaries with perf_counter and write measured phase_timing_ms into renderer metadata",
         }
 
+    def layer_render_plan_bottleneck_recommendation(
+        self,
+        phase_timing_runtime: dict[str, object],
+    ) -> dict[str, object]:
+        timing = phase_timing_runtime if isinstance(phase_timing_runtime, dict) else {}
+        slowest_phase_id = str(timing.get("slowest_phase_id") or "unavailable")
+        measured = bool(timing.get("runtime_measurements_available"))
+        phase_plan = {
+            "prepare_batches": {
+                "recommended_next_action": "reuse_static_geometry_batches",
+                "target_helper": "HybridRenderController.compile_layer_render_plan",
+                "optimization_boundary": "cache renderer-ready hydrology, boundary, traffic and pin batches before composition",
+            },
+            "compose_overlays": {
+                "recommended_next_action": "collapse_overlay_composition_passes",
+                "target_helper": "HybridRenderController.apply_layer_render_plan_composition",
+                "optimization_boundary": "replace per-layer alpha/runtime helper sequence with fewer unified composite passes",
+            },
+            "postprocess": {
+                "recommended_next_action": "fold_or_defer_style_profile_postprocess",
+                "target_helper": "apply_style_profile",
+                "optimization_boundary": "avoid repeated full-frame tone/style work when style profile is unchanged",
+            },
+            "future_single_pass_candidate": {
+                "recommended_next_action": "prototype_single_taichi_composite_pass",
+                "target_helper": "HybridRenderController.apply_layer_render_plan_composition",
+                "optimization_boundary": "consume compiled layer state in one Taichi render/composite path",
+            },
+        }
+        selected = phase_plan.get(
+            slowest_phase_id,
+            {
+                "recommended_next_action": "collect_more_runtime_phase_timing",
+                "target_helper": "HybridRenderController.layer_render_plan_phase_timing_runtime_packet",
+                "optimization_boundary": "wait for measured phase_timing_ms before changing render behavior",
+            },
+        )
+        return {
+            "schema": "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1",
+            "source": "HybridRenderController.layer_render_plan_bottleneck_recommendation",
+            "status": "ready" if measured else "waiting_for_runtime_metadata",
+            "basis_schema": timing.get("schema", "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1"),
+            "slowest_phase_id": slowest_phase_id,
+            "slowest_phase_ms": timing.get("slowest_phase_ms", 0.0),
+            "total_ms": timing.get("total_ms", 0.0),
+            "slow_frame": bool(timing.get("slow_frame", False)),
+            "recommended_next_action": selected["recommended_next_action"],
+            "target_helper": selected["target_helper"],
+            "optimization_boundary": selected["optimization_boundary"],
+            "runtime_optimization_applied": False,
+            "next_commit_scope": "implement the recommended action only after smoke-gated phase timing confirms the bottleneck",
+        }
+
     def layer_render_plan_phase_timing_runtime_packet(
         self,
         phase_timing_ms: dict[str, float],
@@ -14485,7 +14538,7 @@ class HybridRenderController:
             slowest_phase_id = max(measured, key=lambda key: measured[key])
             slowest_phase_ms = measured.get(slowest_phase_id, 0.0)
         threshold_ms = 33.3
-        return {
+        packet = {
             "schema": "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1",
             "source": "HybridRenderController.layer_render_plan_phase_timing_runtime_packet",
             "status": "measured" if measured else "unavailable",
@@ -14501,6 +14554,9 @@ class HybridRenderController:
             "frame_index": int(frame_index),
             "next_optimization_use": "identify whether prepare_batches, compose_overlays or postprocess dominates before replacing the render loop",
         }
+        packet["bottleneck_recommendation_schema"] = "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1"
+        packet["bottleneck_recommendation"] = self.layer_render_plan_bottleneck_recommendation(packet)
+        return packet
 
     def compile_layer_render_plan(
         self,
@@ -14524,6 +14580,7 @@ class HybridRenderController:
         phase_timing_contract = self.layer_render_plan_phase_timing_contract(execution_phases)
         phase_timing_runtime = getattr(self, "layer_render_plan_phase_timing_runtime", {})
         phase_timing_runtime = phase_timing_runtime if isinstance(phase_timing_runtime, dict) else {}
+        bottleneck_recommendation = phase_timing_runtime.get("bottleneck_recommendation") if isinstance(phase_timing_runtime.get("bottleneck_recommendation"), dict) else self.layer_render_plan_bottleneck_recommendation(phase_timing_runtime)
         cached_plan = getattr(self, "compiled_layer_render_plan", None)
         if isinstance(cached_plan, dict) and getattr(self, "compiled_layer_render_plan_cache_key", None) == cache_key:
             plan = dict(cached_plan)
@@ -14543,6 +14600,8 @@ class HybridRenderController:
             plan["phase_timing_contract_schema"] = "rrkal_displaytools.layer_render_plan_phase_timing_contract.v1"
             plan["phase_timing_runtime"] = phase_timing_runtime
             plan["phase_timing_runtime_schema"] = "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1"
+            plan["bottleneck_recommendation"] = bottleneck_recommendation
+            plan["bottleneck_recommendation_schema"] = "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1"
             plan["reuse_policy"] = "reuse_when_cache_key_matches_previous_compiled_plan"
             plan["reuse_boundary"] = plan.get("reuse_boundary", "valid_until_dirty_flags_or_camera_change")
             plan["frame_index"] = int(getattr(self, "frame_index", 0))
@@ -14576,6 +14635,8 @@ class HybridRenderController:
             "phase_timing_contract_schema": "rrkal_displaytools.layer_render_plan_phase_timing_contract.v1",
             "phase_timing_runtime": phase_timing_runtime,
             "phase_timing_runtime_schema": "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1",
+            "bottleneck_recommendation": bottleneck_recommendation,
+            "bottleneck_recommendation_schema": "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1",
             "reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",
             "reuse_status_values": ["compiled", "reused"],
             "runtime_optimization_applied": False,
@@ -19560,6 +19621,8 @@ def layer_render_plan_cache_diagnostics_packet(
         "phase_timing_contract": plan.get("phase_timing_contract") if isinstance(plan.get("phase_timing_contract"), dict) else {},
         "phase_timing_runtime_schema": plan.get("phase_timing_runtime_schema", "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1"),
         "phase_timing_runtime": plan.get("phase_timing_runtime") if isinstance(plan.get("phase_timing_runtime"), dict) else {},
+        "bottleneck_recommendation_schema": plan.get("bottleneck_recommendation_schema", "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1"),
+        "bottleneck_recommendation": plan.get("bottleneck_recommendation") if isinstance(plan.get("bottleneck_recommendation"), dict) else {},
         "cache_key_available": bool(plan.get("cache_key")),
         "reuse_policy": plan.get("reuse_policy", "reuse_when_cache_key_matches_previous_compiled_plan") if available else "unavailable",
         "reuse_boundary": plan.get("reuse_boundary", "valid_until_dirty_flags_or_camera_change") if available else "unavailable",
@@ -19630,6 +19693,9 @@ def layer_render_plan_performance_packet(
         "compiled_plan_phase_timing_runtime_schema": "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1",
         "compiled_plan_phase_timing_runtime_helper": "HybridRenderController.layer_render_plan_phase_timing_runtime_packet",
         "compiled_plan_phase_timing_runtime_field": "phase_timing_runtime",
+        "compiled_plan_bottleneck_recommendation_schema": "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1",
+        "compiled_plan_bottleneck_recommendation_helper": "HybridRenderController.layer_render_plan_bottleneck_recommendation",
+        "compiled_plan_bottleneck_recommendation_field": "bottleneck_recommendation",
         "phase_timing_unit": "milliseconds",
         "compiled_plan_reuse_decision_field": "cache_reuse_decision",
         "compiled_plan_reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",

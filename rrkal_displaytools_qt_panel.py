@@ -1062,6 +1062,8 @@ def layer_render_plan_cache_diagnostics_packet(
         "phase_timing_contract": plan.get("phase_timing_contract") if isinstance(plan.get("phase_timing_contract"), dict) else {},
         "phase_timing_runtime_schema": plan.get("phase_timing_runtime_schema", "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1"),
         "phase_timing_runtime": plan.get("phase_timing_runtime") if isinstance(plan.get("phase_timing_runtime"), dict) else {},
+        "bottleneck_recommendation_schema": plan.get("bottleneck_recommendation_schema", "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1"),
+        "bottleneck_recommendation": plan.get("bottleneck_recommendation") if isinstance(plan.get("bottleneck_recommendation"), dict) else {},
         "cache_key_available": bool(plan.get("cache_key")),
         "reuse_policy": plan.get("reuse_policy", "reuse_when_cache_key_matches_previous_compiled_plan") if available else "unavailable",
         "reuse_boundary": plan.get("reuse_boundary", "valid_until_dirty_flags_or_camera_change") if available else "unavailable",
@@ -1132,6 +1134,9 @@ def layer_render_plan_performance_packet(
         "compiled_plan_phase_timing_runtime_schema": "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1",
         "compiled_plan_phase_timing_runtime_helper": "HybridRenderController.layer_render_plan_phase_timing_runtime_packet",
         "compiled_plan_phase_timing_runtime_field": "phase_timing_runtime",
+        "compiled_plan_bottleneck_recommendation_schema": "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1",
+        "compiled_plan_bottleneck_recommendation_helper": "HybridRenderController.layer_render_plan_bottleneck_recommendation",
+        "compiled_plan_bottleneck_recommendation_field": "bottleneck_recommendation",
         "phase_timing_unit": "milliseconds",
         "compiled_plan_reuse_decision_field": "cache_reuse_decision",
         "compiled_plan_reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",
@@ -4848,6 +4853,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         runtime_timing_status = timing_runtime.get("status", "unavailable")
         slowest_phase = timing_runtime.get("slowest_phase_id", "-")
         total_ms = timing_runtime.get("total_ms", "-")
+        bottleneck = diagnostics.get("bottleneck_recommendation") if isinstance(diagnostics.get("bottleneck_recommendation"), dict) else {}
+        next_opt = bottleneck.get("recommended_next_action", "unavailable")
         return (
             "Render plan cache: "
             f"status={diagnostics.get('status', 'unavailable')}; "
@@ -4864,6 +4871,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"runtime_timing={runtime_timing_status}; "
             f"slowest={slowest_phase}; "
             f"total_ms={total_ms}; "
+            f"next_opt={next_opt}; "
             f"key={key_state}; "
             f"reuse={diagnostics.get('reuse_boundary', 'unavailable')}; "
             f"steps={diagnostics.get('composition_step_count', '-')}; "

@@ -309,6 +309,15 @@ $summary = [ordered]@{
         compiled_plan_phase_timing_runtime_helper = $layerRenderPlanPerformance.compiled_plan_phase_timing_runtime_helper
 
         compiled_plan_phase_timing_runtime_field = $layerRenderPlanPerformance.compiled_plan_phase_timing_runtime_field
+
+
+        compiled_plan_bottleneck_recommendation_schema = $layerRenderPlanPerformance.compiled_plan_bottleneck_recommendation_schema
+
+
+        compiled_plan_bottleneck_recommendation_helper = $layerRenderPlanPerformance.compiled_plan_bottleneck_recommendation_helper
+
+
+        compiled_plan_bottleneck_recommendation_field = $layerRenderPlanPerformance.compiled_plan_bottleneck_recommendation_field
         compiled_plan_reuse_decision_field = $layerRenderPlanPerformance.compiled_plan_reuse_decision_field
         compiled_plan_reuse_policy = $layerRenderPlanPerformance.compiled_plan_reuse_policy
         compiled_plan_reuse_status_values = $layerRenderPlanPerformance.compiled_plan_reuse_status_values

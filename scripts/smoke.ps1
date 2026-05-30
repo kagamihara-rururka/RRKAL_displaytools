@@ -596,6 +596,15 @@ if ($launchPacket.layer_render_plan_performance.compiled_plan_phase_timing_runti
 if ($launchPacket.layer_render_plan_performance.compiled_plan_phase_timing_runtime_field -ne "phase_timing_runtime") {
     throw "Launch packet layer_render_plan_performance phase timing runtime field missing"
 }
+if ($launchPacket.layer_render_plan_performance.compiled_plan_bottleneck_recommendation_schema -ne "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1") {
+    throw "Launch packet layer_render_plan_performance bottleneck recommendation schema missing"
+}
+if ($launchPacket.layer_render_plan_performance.compiled_plan_bottleneck_recommendation_helper -ne "HybridRenderController.layer_render_plan_bottleneck_recommendation") {
+    throw "Launch packet layer_render_plan_performance bottleneck recommendation helper missing"
+}
+if ($launchPacket.layer_render_plan_performance.compiled_plan_bottleneck_recommendation_field -ne "bottleneck_recommendation") {
+    throw "Launch packet layer_render_plan_performance bottleneck recommendation field missing"
+}
 if ($launchPacket.layer_render_plan_performance.compiled_plan_reuse_decision_field -ne "cache_reuse_decision") {
     throw "Launch packet layer_render_plan_performance reuse decision field missing"
 }
@@ -1798,6 +1807,15 @@ if ($capabilities.layer_render_plan_performance.compiled_plan_phase_timing_runti
 if ($capabilities.layer_render_plan_performance.compiled_plan_phase_timing_runtime_field -ne "phase_timing_runtime") {
     throw "Renderer layer_render_plan_performance phase timing runtime field missing"
 }
+if ($capabilities.layer_render_plan_performance.compiled_plan_bottleneck_recommendation_schema -ne "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1") {
+    throw "Renderer layer_render_plan_performance bottleneck recommendation schema missing"
+}
+if ($capabilities.layer_render_plan_performance.compiled_plan_bottleneck_recommendation_helper -ne "HybridRenderController.layer_render_plan_bottleneck_recommendation") {
+    throw "Renderer layer_render_plan_performance bottleneck recommendation helper missing"
+}
+if ($capabilities.layer_render_plan_performance.compiled_plan_bottleneck_recommendation_field -ne "bottleneck_recommendation") {
+    throw "Renderer layer_render_plan_performance bottleneck recommendation field missing"
+}
 if ($capabilities.layer_render_plan_performance.compiled_plan_reuse_policy -ne "reuse_when_cache_key_matches_previous_compiled_plan") {
     throw "Renderer layer_render_plan_performance compiled plan reuse policy missing"
 }
@@ -2548,6 +2566,15 @@ if ($handoff.layer_render_plan_performance.compiled_plan_phase_timing_runtime_he
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_phase_timing_runtime_field -ne "phase_timing_runtime") {
     throw "Handoff inspection layer render plan performance phase timing runtime field missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_bottleneck_recommendation_schema -ne "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1") {
+    throw "Handoff inspection layer render plan performance bottleneck recommendation schema missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_bottleneck_recommendation_helper -ne "HybridRenderController.layer_render_plan_bottleneck_recommendation") {
+    throw "Handoff inspection layer render plan performance bottleneck recommendation helper missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_bottleneck_recommendation_field -ne "bottleneck_recommendation") {
+    throw "Handoff inspection layer render plan performance bottleneck recommendation field missing"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_reuse_decision_field -ne "cache_reuse_decision") {
     throw "Handoff inspection layer render plan performance reuse decision field missing"
@@ -3850,6 +3877,15 @@ if ($qtPanelSource -notlike "*runtime_timing={runtime_timing_status}*") {
 if ($qtPanelSource -notlike "*slowest={slowest_phase}*") {
     throw "Qt render plan slowest phase summary text is missing"
 }
+if ($qtPanelSource -notlike "*layer_render_plan_bottleneck_recommendation.v1*") {
+    throw "Qt render plan bottleneck recommendation schema is missing"
+}
+if ($qtPanelSource -notlike "*bottleneck_recommendation*") {
+    throw "Qt render plan bottleneck recommendation diagnostics are missing"
+}
+if ($qtPanelSource -notlike "*next_opt={next_opt}*") {
+    throw "Qt render plan bottleneck recommendation summary text is missing"
+}
 if ($qtPanelSource -notlike "*refresh_layer_render_plan_cache_diagnostics_strip*") {
     throw "Qt render plan cache diagnostics strip refresh is missing"
 }
@@ -4166,6 +4202,18 @@ if ($rendererSource -notlike "*def layer_render_plan_phase_timing_contract*") {
 }
 if ($rendererSource -notlike "*def layer_render_plan_phase_timing_runtime_packet*") {
     throw "Renderer render plan phase timing runtime helper is missing"
+}
+if ($rendererSource -notlike "*def layer_render_plan_bottleneck_recommendation*") {
+    throw "Renderer render plan bottleneck recommendation helper is missing"
+}
+if ($rendererSource -notlike "*collapse_overlay_composition_passes*") {
+    throw "Renderer render plan overlay bottleneck recommendation marker is missing"
+}
+if ($rendererSource -notlike "*reuse_static_geometry_batches*") {
+    throw "Renderer render plan static batch bottleneck recommendation marker is missing"
+}
+if ($rendererSource -notlike "*prototype_single_taichi_composite_pass*") {
+    throw "Renderer render plan single pass bottleneck recommendation marker is missing"
 }
 if ($rendererSource -notlike "*phase_timing_ms*") {
     throw "Renderer render plan phase timing runtime measurements marker is missing"
