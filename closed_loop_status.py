@@ -254,6 +254,7 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                     "Qt profile UI replay label",
                     "Qt Profile replay JSON action",
                     "Qt Visual review Inspect group",
+                    "Qt Selection state Inspect action",
                     "Qt Renderer thumbnail Inspect action",
                     "Qt Live preview Inspect action",
                     "launch packet profile_ui_state_replay contract",
@@ -265,6 +266,8 @@ def renderer_closed_loop_status_packet() -> dict[str, object]:
                 "evidence": [
                     "profileUiStateReplay",
                     "show_profile_ui_state_replay",
+                    "show_layer_pick_state",
+                    "selection_state",
                     "show_latest_renderer_thumbnail",
                     "show_live_renderer_preview",
                     "qt_inspector_action_groups.visual_review",

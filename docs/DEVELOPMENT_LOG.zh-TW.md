@@ -3669,3 +3669,14 @@ Changes:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+## 2026-05-30 - Qt Selection state Inspect action
+
+Changes:
+- Added `Inspect: Selection state` to the Qt Research interaction actions.
+- Wired it to the existing layer pick state output so active layer selection/pick history/renderer target review has a clear researcher-facing entry.
+- Added `selection_state` to profile UI replay metadata across Qt, launch packet export, and renderer capability discovery.
+- Updated smoke and docs for the new selection inspector.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+

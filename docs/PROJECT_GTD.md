@@ -231,3 +231,14 @@ Done:
 
 Next:
 - Continue UIUX closure on selection/layer operation feedback for research workflows.
+
+
+## 2026-05-30 - Qt Selection state Inspect action
+
+Done:
+- Added `Inspect: Selection state` to Research interaction.
+- Reused the existing layer pick state handler so active layer selection has a task-oriented inspection entry without duplicating backend state.
+- Added smoke/docs gates for `selection_state`.
+
+Next:
+- Continue improving layer operation feedback and research annotation review before backend closure.

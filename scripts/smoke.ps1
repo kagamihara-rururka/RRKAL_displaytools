@@ -332,7 +332,7 @@ if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "
 if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "live_preview") {
     throw "Launch packet profile_ui_state_replay Live preview inspector action missing"
 }
-if ([int]$launchPacket.profile_ui_state_replay.qt_inspector_action_count -lt 16) {
+if ([int]$launchPacket.profile_ui_state_replay.qt_inspector_action_count -lt 17) {
     throw "Launch packet profile_ui_state_replay inspector action count missing"
 }
 if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "canvas_state") {
@@ -346,6 +346,9 @@ if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "
 }
 if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "layer_runtime") {
     throw "Launch packet profile_ui_state_replay layer runtime inspector action missing"
+}
+if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "selection_state") {
+    throw "Launch packet profile_ui_state_replay selection state inspector action missing"
 }
 if ([int]$launchPacket.profile_ui_state_replay.qt_inspector_group_count -lt 4) {
     throw "Launch packet profile_ui_state_replay inspector group count missing"
@@ -981,6 +984,9 @@ if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontain
 }
 if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontains "Inspect: Layer matrix") {
     throw "Renderer profile_ui_state_replay layer matrix inspector label missing"
+}
+if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontains "Inspect: Selection state") {
+    throw "Renderer profile_ui_state_replay Selection state inspector label missing"
 }
 if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontains "Inspect: Renderer thumbnail") {
     throw "Renderer profile_ui_state_replay Renderer thumbnail inspector label missing"
@@ -1779,6 +1785,9 @@ if ($qtPanelSource -notlike "*Inspect: Layer runtime*") {
 if ($qtPanelSource -notlike "*Inspect: Layer pick*") {
     throw "Qt Layer pick inspector button is missing"
 }
+if ($qtPanelSource -notlike "*Inspect: Selection state*") {
+    throw "Qt Selection state inspector button is missing"
+}
 if ($qtPanelSource -notlike "*setAccessibleDescription*") {
     throw "Qt contract inspector accessible descriptions are missing"
 }
@@ -1787,6 +1796,9 @@ if ($qtPanelSource -notlike "*Pin pick*") {
 }
 if ($qtPanelSource -notlike "*Research interaction: inspect renderer Pin hover/click pick bridge JSON*") {
     throw "Qt Pin pick action tooltip is missing"
+}
+if ($qtPanelSource -notlike "*Selection state: inspect active Qt layer selection, pick history and renderer target JSON*") {
+    throw "Qt Selection state inspector tooltip is missing"
 }
 if ($qtPanelSource -notlike "*Cursor geo*") {
     throw "Qt Cursor geo action button is missing"
@@ -2056,6 +2068,9 @@ if ($profileSchemaDoc -notmatch 'visual_review') {
 if ($profileSchemaDoc -notmatch 'renderer_thumbnail') {
     throw "Profile schema docs missing renderer thumbnail inspector action"
 }
+if ($profileSchemaDoc -notmatch 'selection_state') {
+    throw "Profile schema docs missing selection state inspector action"
+}
 
 $cloneQuickstartDoc = Get-Content -LiteralPath (Join-Path $BoundaryIdentityRoot "docs\QUICKSTART_CLONE.zh-TW.md") -Raw -Encoding UTF8
 if ($cloneQuickstartDoc -notmatch 'Inspect: Clone ready') {
@@ -2066,6 +2081,9 @@ if ($cloneQuickstartDoc -notmatch 'Inspect: Boundary JSON') {
 }
 if ($cloneQuickstartDoc -notmatch 'Inspect: Live preview') {
     throw "Clone quickstart missing Qt Inspect Live preview guidance"
+}
+if ($cloneQuickstartDoc -notmatch 'Inspect: Selection state') {
+    throw "Clone quickstart missing Qt Inspect Selection state guidance"
 }
 if ($cloneQuickstartDoc -notmatch 'Replay/contracts') {
     throw "Clone quickstart missing Qt Inspect Replay/contracts group guidance"

@@ -481,3 +481,9 @@
 
 - Renderer menu visual preview entries now use `Inspect: Renderer thumbnail` and `Inspect: Live preview`.
 - This keeps the menu bar, Actions panel, launch packet inspector labels, and smoke gates aligned around one inspection vocabulary.
+
+## Qt Inspect selection state
+
+- Qt Actions now exposes `Inspect: Selection state` inside Research interaction.
+- The action calls the existing layer pick state JSON path, but labels it around the researcher task: confirming active layer selection and renderer target before analysis/export.
+- Launch packets and renderer capabilities advertise `selection_state` through `profile_ui_state_replay`.

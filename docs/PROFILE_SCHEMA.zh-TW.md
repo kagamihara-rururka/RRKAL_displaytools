@@ -338,3 +338,9 @@ Timeline playback plan 目前把 style、layer visibility/blend、pins、boundar
 - `Inspect: Renderer thumbnail` opens the latest static renderer PNG when present.
 - `Inspect: Live preview` switches the Canvas Preview to the file-based renderer preview frame stream.
 - This group is UI replay metadata only; it does not imply data discovery, download, import, or cache governance.
+
+## Qt Inspect selection state
+
+- `profile_ui_state_replay.qt_inspector_action_ids` now includes `selection_state`.
+- `Inspect: Selection state` is a researcher-facing alias for the existing layer pick state output, focused on active Qt layer selection, pick history, and renderer target review.
+- It is part of the `research_interaction` inspector group and does not perform authoritative polygon/EEZ identity resolution.

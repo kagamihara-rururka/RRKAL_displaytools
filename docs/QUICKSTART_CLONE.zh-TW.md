@@ -164,3 +164,8 @@ Displaytools 不負責：
 
 - The Renderer menu mirrors the Actions panel labels for visual review: `Inspect: Renderer thumbnail` and `Inspect: Live preview`.
 - Use either the menu or the `Inspect: Visual review` Actions section; both call the same Qt preview handlers.
+
+## Qt Inspect: Selection state
+
+- Use `Inspect: Selection state` when checking which layer is currently active for research operations.
+- It reuses the layer pick state output, so clone users can review active layer selection, pick history, and renderer target metadata before treating a view as reproducible.
