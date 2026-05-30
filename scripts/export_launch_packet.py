@@ -1248,6 +1248,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "layer_selection_tool.selection_summary_contract.quick_actions_summary_contract",
             "layer_selection_affordance.active_quick_actions",
             "layer_render_plan_performance.compose_pass_budget",
+            "layer_render_plan_performance.compose_run_merge_preflight",
             "layer_render_plan_performance.compose_run_parity_artifact_workflow",
             "visual_feature_closure_matrix",
             "goal_closure_scorecard.copy_summary_contract",
@@ -1891,7 +1892,7 @@ def goal_closure_scorecard_packet(
         {"id": "renderer_capability_discovery", "status": feature_status.get("renderer_capability_discovery", "ready"), "evidence_fields": ["renderer_capabilities", "style_renderer_entries"], "reviewer_path": "renderer_capabilities"},
         {"id": "cross_machine_use", "status": feature_status.get("cross_machine_clone", "ready"), "evidence_fields": ["cross_machine_clone_readiness", "reviewer_packet_export.field_guide"], "reviewer_path": "clone_reviewer_summary"},
         {"id": "visual_features", "status": visual_matrix.get("status", "ready_with_queued_performance_followup"), "evidence_fields": ["visual_feature_closure_matrix", "visual_review_readiness"], "reviewer_path": "visual_feature_closure_matrix.copy_summary_contract"},
-        {"id": "renderer_performance", "status": feature_status.get("renderer_performance", "queued"), "evidence_fields": ["layer_render_plan_performance", "compose_performance_summary"], "reviewer_path": "layer_render_plan_performance.compose_pass_budget"},
+        {"id": "renderer_performance", "status": feature_status.get("renderer_performance", "queued"), "evidence_fields": ["layer_render_plan_performance", "compose_performance_summary"], "reviewer_path": "layer_render_plan_performance.compose_run_merge_preflight"},
     ]
     ready_count = sum(1 for category in categories if category.get("status") == "ready")
     queued_count = sum(1 for category in categories if category.get("status") == "queued")
@@ -2116,7 +2117,7 @@ def layer_render_plan_performance_packet(
             "compose_run_parity_smoke_precommit_required": False,
             "compose_run_parity_smoke_precommit_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\render_compose_parity_smoke.ps1 -ContractOnly",
             "compose_run_parity_smoke_validates": ["png_dimensions_match", "max_abs_diff", "changed_pixel_count"],
-            "compose_run_parity_smoke_pass_fields": ["passed", "max_abs_diff", "changed_pixel_count", "diff_status"],
+            "compose_run_parity_smoke_pass_fields": ["passed", "precommit_gate_passed", "visual_parity_passed", "max_abs_diff", "changed_pixel_count", "diff_status", "notification_level"],
             "compose_pass_budget_schema": "rrkal_displaytools.layer_render_plan_compose_pass_budget.v1",
             "compose_pass_budget": {
                 "schema": "rrkal_displaytools.layer_render_plan_compose_pass_budget.v1",
@@ -2149,7 +2150,42 @@ def layer_render_plan_performance_packet(
                 "runtime_merge_enabled": False,
                 "boundary": "Budget metadata only; renderer keeps the existing sequential compose path until parity evidence proves the collapsed path.",
             },
-            "compose_pass_budget_summary_contract_schema": "rrkal_displaytools.layer_render_plan_compose_pass_budget_summary_contract.v1",
+            "compose_run_merge_preflight_schema": "rrkal_displaytools.compose_run_merge_preflight.v1",
+        "compose_run_merge_preflight": {
+            "schema": "rrkal_displaytools.compose_run_merge_preflight.v1",
+            "status": "blocked_until_zero_diff_parity_artifacts",
+            "runtime_merge_enabled": False,
+            "target_optimization": "collapse_adjacent_alpha_compose_runs",
+            "required_evidence": [
+                "compose_run_parity_artifact_workflow.runner_manifest",
+                "state/compose_parity/baseline_sequential_frame_rgba.png",
+                "state/compose_parity/merged_candidate_frame_rgba.png",
+                "render_compose_parity_smoke.visual_parity_passed",
+            ],
+            "preflight_checks": [
+                "runner_available",
+                "baseline_artifact_exists",
+                "candidate_artifact_exists",
+                "png_dimensions_match",
+                "max_abs_diff_zero",
+                "changed_pixel_count_zero",
+            ],
+            "failure_policy": "keep_sequential_compose_queue",
+            "success_next_step": "enable_manual_collapsed_run_candidate_behind_flag",
+            "qt_summary_field": "composePassBudgetStrip",
+            "reviewer_field": "layer_render_plan_performance.compose_run_merge_preflight",
+        },
+        "compose_run_merge_preflight_summary_contract_schema": "rrkal_displaytools.compose_run_merge_preflight_summary_contract.v1",
+        "compose_run_merge_preflight_summary_contract": {
+            "schema": "rrkal_displaytools.compose_run_merge_preflight_summary_contract.v1",
+            "summary_format": "Compose merge preflight: status={status}; runtime_merge={runtime_merge_enabled}; required={required_evidence}; next={success_next_step}",
+            "qt_copy_action": "copy_compose_pass_budget_summary",
+            "launch_packet_field": "layer_render_plan_performance.compose_run_merge_preflight",
+            "renderer_capability_field": "layer_render_plan_performance.compose_run_merge_preflight",
+            "handoff_field": "layer_render_plan_performance.compose_run_merge_preflight",
+            "portable": True,
+        },        "compose_pass_budget_summary_contract_schema": "rrkal_displaytools.layer_render_plan_compose_pass_budget_summary_contract.v1",
+
             "compose_pass_budget_summary_contract": {
                 "schema": "rrkal_displaytools.layer_render_plan_compose_pass_budget_summary_contract.v1",
                 "summary_format": "Compose budget: status={status}; runs={compose_run_count}; merge={compose_merge_candidate_run_count}; compose_ms={compose_ms}; slowest={slowest_phase_id}; advice={compose_bottleneck_advice}; target={target_pass_model}; runtime_merge=false",

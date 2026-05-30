@@ -1,5 +1,15 @@
 # Capability Summary
 
+### 2026-05-30 GitHub Actions smoke UTF-8 fix
+
+- The GitHub `smoke` workflow now sets `PYTHONUTF8=1` and `PYTHONIOENCODING=utf-8`, matching `scripts/smoke.ps1` so launch packet JSON with Chinese labels can be printed on Windows CI.
+- This addresses the repeated red-X commit notifications caused by `UnicodeEncodeError` on GitHub Actions, not by local renderer smoke failures.
+
+### 2026-05-30 Compose parity smoke pending notification
+
+- `scripts/render_compose_parity_smoke.ps1` now separates `precommit_gate_passed` from `visual_parity_passed`, so contract-only checks do not trigger failed-smoke notifications while parity artifacts are still pending.
+- Real artifact diff failures still return `passed=false` and `notification_level=error`; runtime compose merge remains disabled until zero-diff evidence exists.
+
 最後更新：2026-05-30
 
 ## 目前已有功能

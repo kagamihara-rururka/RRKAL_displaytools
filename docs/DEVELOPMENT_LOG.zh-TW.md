@@ -1,5 +1,25 @@
 # Development Log
 
+## 2026-05-30 - GitHub Actions smoke UTF-8 fix
+
+Changes:
+- Fixed the repeated GitHub mobile red-X notifications by forcing the GitHub `smoke` workflow and `scripts/smoke.ps1` Python child processes to use UTF-8 stdout/stderr.
+- Root cause was GitHub Windows runner using a non-UTF-8 console codec while `scripts/export_launch_packet.py` printed launch packets containing Chinese layer labels.
+- Added a smoke guard so the workflow must keep `PYTHONUTF8` and `PYTHONIOENCODING` configured.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
+## 2026-05-30 - Compose parity smoke pending notification
+
+Changes:
+- Adjusted `scripts/render_compose_parity_smoke.ps1` so contract-only and missing-artifact runs report `precommit_gate_passed=true`, `visual_parity_passed=null`, `notification_level=info` and `notification_suppressed=true` instead of surfacing as failed smoke.
+- Kept actual RGBA artifact diff failures as `notification_level=error` and `passed=false`, preserving the safety gate before any compose-run merge can be enabled.
+- Updated launch / renderer / handoff-facing parity smoke fields and smoke checks to distinguish precommit gate health from visual parity evidence.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Goal closure scorecard
 
 Changes:

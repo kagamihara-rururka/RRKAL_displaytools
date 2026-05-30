@@ -1,4 +1,9 @@
 $ErrorActionPreference = "Stop"
+
+$env:PYTHONUTF8 = "1"
+$env:PYTHONIOENCODING = "utf-8"
+[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+$OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 $RepoRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 Set-Location $RepoRoot
 
@@ -5165,6 +5170,12 @@ if ($composeParitySmokeSource -notlike "*System.Drawing.Bitmap*") {
 if ($composeParitySmokeSource -notlike "*visual_parity_passed*") {
     throw "Compose parity smoke pass status marker is missing"
 }
+if ($composeParitySmokeSource -notlike "*precommit_gate_passed*") {
+    throw "Compose parity smoke precommit gate marker is missing"
+}
+if ($composeParitySmokeSource -notlike "*notification_suppressed*") {
+    throw "Compose parity smoke notification suppression marker is missing"
+}
 if ($composeParitySmokeSource -notlike "*changed_pixel_count*") {
     throw "Compose parity smoke changed pixel count marker is missing"
 }
@@ -5178,6 +5189,18 @@ if ($composeParitySmoke.schema -ne "rrkal_displaytools.render_compose_parity_smo
 }
 if ($composeParitySmoke.status -ne "contract_only_forced") {
     throw "Compose parity smoke forced contract mode status mismatch"
+}
+if ($composeParitySmoke.precommit_gate_passed -ne $true) {
+    throw "Compose parity smoke contract mode precommit gate should pass"
+}
+if ($null -ne $composeParitySmoke.visual_parity_passed) {
+    throw "Compose parity smoke contract mode visual parity should be pending"
+}
+if ($composeParitySmoke.notification_level -ne "info") {
+    throw "Compose parity smoke contract mode notification level should be info"
+}
+if ($composeParitySmoke.notification_suppressed -ne $true) {
+    throw "Compose parity smoke contract mode notification should be suppressed"
 }
 $composeParityArtifactRunnerPath = Join-Path $RepoRoot "scripts\render_compose_parity_artifacts.ps1"
 if (-not (Test-Path -LiteralPath $composeParityArtifactRunnerPath)) {
@@ -5473,6 +5496,18 @@ if ($cloneQuickstartDoc -notmatch 'Research interaction') {
 }
 if ($cloneQuickstartDoc -notmatch 'Inspect: Canvas state') {
     throw "Clone quickstart missing Qt Inspect Canvas state guidance"
+}
+
+$githubSmokeWorkflowPath = Join-Path $RepoRoot ".github\workflows\smoke.yml"
+if (-not (Test-Path -LiteralPath $githubSmokeWorkflowPath)) {
+    throw "GitHub smoke workflow is missing"
+}
+$githubSmokeWorkflowSource = Get-Content -LiteralPath $githubSmokeWorkflowPath -Raw -Encoding UTF8
+if ($githubSmokeWorkflowSource -notlike "*PYTHONUTF8*") {
+    throw "GitHub smoke workflow UTF-8 Python mode is missing"
+}
+if ($githubSmokeWorkflowSource -notlike "*PYTHONIOENCODING*") {
+    throw "GitHub smoke workflow UTF-8 stdio encoding is missing"
 }
 
 Write-Host "Smoke passed."
