@@ -31,7 +31,7 @@
 - `rrkal_displaytools.pin_projection.v1` verifies that research Pins are geodetic annotations projected every frame from the current globe camera and hidden behind the horizon when `view_z <= horizon_eps`; renderer depth/terrain refinement remains a later backend pass.
 - `rrkal_displaytools.style_renderer_entries.v1` exposes scientific, nautical, parchment and tactical renderer entry contracts. Each entry now carries `rrkal_displaytools.style_renderer_entry_contract.v1`, recording the `--style-profile <id>` CLI args, `renderer.style_profile` field, portable command, Qt surface and template support; Qt launch/provenance packets, No-GUI launch packets, renderer capabilities, handoff inspection, closed-loop evidence and smoke gates verify parchment/tactical availability.
 - `rrkal_displaytools.style_profile_renderer_routes.v1` turns those entries into explicit renderer routes with `py -3 taichi_global_bathymetry.py --style-profile <id>` portable commands and route contracts, with parchment and tactical route contracts required by smoke and handoff inspection.
-- `rrkal_displaytools.style_template_visual_preview.v1` adds a Qt Looks/templates visual preview-card contract for scientific, nautical, parchment and tactical styles. The Qt panel exposes `styleTemplateVisualPreview`, while launch packets, renderer capabilities, handoff inspection and smoke verify the preview IDs, swatches, Qt surface and route handoff without moving RRKAL data discovery/cache governance into displaytools.
+- `rrkal_displaytools.style_template_visual_preview.v1` adds a Qt Looks/templates visual preview-card contract for scientific, nautical, parchment and tactical styles. The Qt panel exposes `styleTemplateVisualPreview` and clickable `styleTemplateCard_<id>` cards that update `style_combo`, while launch packets, renderer capabilities, handoff inspection and smoke verify the preview IDs, swatches, Qt surface, click action and route handoff without moving RRKAL data discovery/cache governance into displaytools.
 - `rrkal_displaytools.module_boundary_registry.v1` marks extraction seams for contracts, Qt UI, Taichi render core, ocean material, style profiles, overlays, RRKAL-owned data sources and diagnostics. It now carries `rrkal_displaytools.module_decoupling_boundary_contract.v1`, which records extraction order, stable contracts required before moving code, forbidden cross-imports, Qt-first/Tk-not-primary policy and RRKAL-owned data discovery/import/cache governance boundaries.
 - `rrkal_displaytools.cross_machine_clone_readiness.v1` records the public repo URL, Windows setup doc, required first-run commands, launcher options including `-HandoffFirst`, smoke-before-push rule, Qt-first boundary and handoff inspection steps so another machine can verify clone/setup/run state through launch packets, renderer capabilities, handoff inspection and smoke gates.
 - Qt Layers dock shows `Cross-machine clone readiness`, making clone/setup status visible beside profile/launch readiness instead of only inside JSON packets.
@@ -67,7 +67,7 @@
 - Layer capability matrix 下一步可補更細 renderer diagnostics，並等 RRKAL 提供 governed authoritative polygon identity source 後再做讀取/比對。
 - Point/icon opacity/blend 下一步處理其他新增獨立 overlay，前提是 renderer 有可單獨合成的 frame overlay。
 - Layer stack 下一步是 selected layer 的 authoritative polygon territory identity、開放線段面域推論與更完整 renderer diagnostics。
-- Style / Looks panel 已有 smoke-gated template preview-card contract；下一步是把目前文字/色票摘要升級為真正縮圖卡片與可點選 template gallery。
+- Style / Looks panel 已有 smoke-gated template preview cards；下一步是把目前色票卡片升級為 renderer thumbnail-backed gallery。
 - Select 工具已接 renderer selected-layer object picking bridge；Canvas Preview 本身仍保留 Qt-side hit bands，也可嵌入最近 renderer PNG thumbnail 或 file-based live renderer frame stream。Pin 下一步是補更細的 renderer interaction ack 與 globe mask / depth buffer refinement；Brush/Mask 暫不納入本輪 UI。
 - Boundary highlight 下一步是從目前 line hover outline/glow、source-property feature identity、閉合 ring area hit、閉合 ring polygon preview 與 fill gamma/contrast tone 控制，升級到 authoritative 疆域/領海/EEZ identity 與開放線段面域推論。
 - Renderer headless/once output 會在 image output 旁寫出 `.metadata.json` sidecar，記錄 renderer state、layer state、selected-layer pick、boundary highlight、closed-loop status、RRKAL data manifest reference 與 RRKAL/displaytools 邊界。`--rrkal-data-manifest-ref` / Qt `RRKAL manifest ref` 只做 reference passthrough；manifest validation/ingest/governance 會在 closed-loop status 中列為 RRKAL external dependency，不列為 displaytools pending。
@@ -392,6 +392,7 @@
 
 - Qt Looks/templates now exposes a `styleTemplateVisualPreview` surface and `rrkal_displaytools.style_template_visual_preview.v1`.
 - Launch packets, renderer capabilities, handoff inspection and smoke verify scientific, nautical, parchment and tactical preview card IDs, swatches and route linkage.
+- The Qt cards are clickable through `apply_style_template_preview_card`, updating `style_combo` from the primary Qt UI.
 
 ### 2026-05-30 Qt Module seams JSON action
 

@@ -218,6 +218,10 @@ def style_template_visual_preview_packet(
         "preview_cards": preview_cards,
         "required_preview_ids": required_preview_ids,
         "missing_preview_ids": missing_preview_ids,
+        "qt_interaction": "clickable_preview_cards_select_style_profile",
+        "card_click_action": "apply_style_template_preview_card",
+        "qt_card_object_prefix": "styleTemplateCard_",
+        "interaction_state": "implemented_in_qt",
         "launch_packet_fields": ["style_template_visual_preview", "style_renderer_entries", "style_profile_renderer_routes"],
         "renderer_capability_field": "style_template_visual_preview",
         "handoff_field": "style_template_visual_preview",
@@ -2716,6 +2720,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "QLabel#styleTemplateVisualPreview { background:#181b1f; color:#e9edf1; border:1px solid #3a4652; border-radius:6px; padding:6px; }"
         )
         renderer_form.addRow("Template preview", self.style_template_preview_label)
+        self.style_template_preview_cards = self._create_style_template_preview_cards()
+        renderer_form.addRow("Template cards", self.style_template_preview_cards)
+        self.style_combo.currentTextChanged.connect(lambda _text: self.refresh_style_template_preview_cards())
+        self.refresh_style_template_preview_cards()
         renderer_form.addRow("UI backend", self.ui_combo)
         renderer_form.addRow("Topography", self.topo_combo)
         renderer_form.addRow("Data mode", self.data_combo)
@@ -4204,6 +4212,68 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.collect_style_renderer_entries(),
             "rrkal_displaytools_qt_panel",
         )
+
+    def _create_style_template_preview_cards(self) -> QtWidgets.QWidget:
+        grid_widget = QtWidgets.QWidget()
+        grid_widget.setObjectName("styleTemplatePreviewCardGrid")
+        grid = QtWidgets.QGridLayout(grid_widget)
+        grid.setContentsMargins(0, 0, 0, 0)
+        grid.setHorizontalSpacing(6)
+        grid.setVerticalSpacing(6)
+        self.style_template_preview_buttons: dict[str, QtWidgets.QPushButton] = {}
+        cards = self.collect_style_template_visual_preview().get("preview_cards", [])
+        if not isinstance(cards, list):
+            cards = []
+        for index, card in enumerate(cards):
+            if not isinstance(card, dict):
+                continue
+            style_id = str(card.get("id", ""))
+            label = str(card.get("label", style_id.title()))
+            swatches = card.get("swatches") if isinstance(card.get("swatches"), list) else []
+            button = QtWidgets.QPushButton(f"{label}\n{'  '.join(str(color) for color in swatches)}")
+            button.setObjectName(f"styleTemplateCard_{style_id}")
+            button.setCheckable(True)
+            button.setMinimumHeight(54)
+            button.setToolTip(f"Apply {label} style template to the renderer launch profile")
+            button.clicked.connect(lambda _checked=False, value=style_id: self.apply_style_template_preview_card(value))
+            grid.addWidget(button, index // 2, index % 2)
+            self.style_template_preview_buttons[style_id] = button
+        return grid_widget
+
+    def _style_template_preview_card_stylesheet(self, swatches: list[object], selected: bool) -> str:
+        colors = [str(color) for color in swatches]
+        first = colors[0] if len(colors) > 0 else "#1b1f24"
+        second = colors[1] if len(colors) > 1 else "#2f3a44"
+        third = colors[2] if len(colors) > 2 else "#e9edf1"
+        border = "#f5d061" if selected else "#3a4652"
+        return (
+            "QPushButton {"
+            f"background:qlineargradient(x1:0,y1:0,x2:1,y2:1,stop:0 {first}, stop:0.58 {second}, stop:1 {third});"
+            f"border:2px solid {border}; border-radius:8px; padding:6px; color:#f4f7fb; font-weight:600;"
+            "}"
+            "QPushButton:checked { color:#ffffff; }"
+        )
+
+    def refresh_style_template_preview_cards(self) -> None:
+        packet = self.collect_style_template_visual_preview()
+        current_style = self.style_combo.currentText() if hasattr(self, "style_combo") else ""
+        cards = packet.get("preview_cards", [])
+        card_by_id = {str(card.get("id")): card for card in cards if isinstance(card, dict)} if isinstance(cards, list) else {}
+        for style_id, button in getattr(self, "style_template_preview_buttons", {}).items():
+            card = card_by_id.get(style_id, {})
+            swatches = card.get("swatches") if isinstance(card.get("swatches"), list) else []
+            selected = style_id == current_style
+            button.setChecked(selected)
+            button.setStyleSheet(self._style_template_preview_card_stylesheet(swatches, selected))
+        if hasattr(self, "style_template_preview_label"):
+            self.style_template_preview_label.setText(
+                f"Style previews: {packet.get('preview_count')} cards; selected={current_style}; click a card to update Style profile."
+            )
+
+    def apply_style_template_preview_card(self, style_id: str) -> None:
+        self._set_combo(self.style_combo, style_id)
+        self.refresh_style_template_preview_cards()
+        self.status.setText(f"已套用 style template preview card: {style_id}")
 
     def collect_profile_launch_readiness(self) -> dict[str, object]:
         return profile_launch_readiness_packet(

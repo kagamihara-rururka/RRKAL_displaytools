@@ -350,6 +350,12 @@ if ($launchPacket.style_template_visual_preview.preview_ids -notcontains "tactic
 if ($launchPacket.style_template_visual_preview.qt_surface -ne "Looks/templates visual preview cards") {
     throw "Launch packet style_template_visual_preview Qt surface mismatch"
 }
+if ($launchPacket.style_template_visual_preview.qt_interaction -ne "clickable_preview_cards_select_style_profile") {
+    throw "Launch packet style_template_visual_preview interaction missing"
+}
+if ($launchPacket.style_template_visual_preview.card_click_action -ne "apply_style_template_preview_card") {
+    throw "Launch packet style_template_visual_preview click action missing"
+}
 if ($launchPacket.visual_feature_closure_matrix.schema -ne "rrkal_displaytools.visual_feature_closure_matrix.v1") {
     throw "Launch packet visual feature closure matrix schema missing or invalid"
 }
@@ -1201,6 +1207,9 @@ if ($capabilities.style_template_visual_preview.preview_ids -notcontains "parchm
 if ($capabilities.style_template_visual_preview.preview_ids -notcontains "tactical") {
     throw "Renderer style_template_visual_preview missing tactical preview"
 }
+if ($capabilities.style_template_visual_preview.qt_card_object_prefix -ne "styleTemplateCard_") {
+    throw "Renderer style_template_visual_preview Qt card object prefix missing"
+}
 if ($capabilities.visual_feature_closure_matrix.schema -ne "rrkal_displaytools.visual_feature_closure_matrix.v1") {
     throw "Renderer visual feature closure matrix schema missing or invalid"
 }
@@ -1991,6 +2000,9 @@ if ($handoff.style_template_visual_preview.preview_ids -notcontains "parchment")
 if ($handoff.style_template_visual_preview.preview_ids -notcontains "tactical") {
     throw "Handoff inspection style_template_visual_preview missing tactical preview"
 }
+if ($handoff.style_template_visual_preview.card_click_action -ne "apply_style_template_preview_card") {
+    throw "Handoff inspection style_template_visual_preview click action missing"
+}
 if ($handoff.launch_packet_contracts.module_boundary_registry -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Handoff inspection module_boundary_registry launch contract missing or invalid"
 }
@@ -2427,6 +2439,12 @@ if ($qtPanelSource -notlike "*styleTemplateVisualPreview*") {
 }
 if ($qtPanelSource -notlike "*collect_style_template_visual_preview*") {
     throw "Qt style template visual preview collector is missing"
+}
+if ($qtPanelSource -notlike "*apply_style_template_preview_card*") {
+    throw "Qt style template visual preview click action is missing"
+}
+if ($qtPanelSource -notlike "*styleTemplateCard_*") {
+    throw "Qt style template visual preview cards are missing"
 }
 if ($qtPanelSource -notlike "*show_module_boundary_registry*") {
     throw "Qt module boundary registry JSON action is missing"

@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Clickable Style template preview cards
+
+Changes:
+- Upgraded the Qt Looks/templates preview from a static summary into clickable `styleTemplateCard_<id>` cards for scientific, nautical, parchment and tactical profiles.
+- Card clicks now call `apply_style_template_preview_card`, update `style_combo`, refresh selected-card styling and keep launch/profile routing unchanged.
+- Smoke now verifies the card interaction contract across launch packet, renderer capabilities, handoff inspection and Qt source.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Style template visual preview contract
 
 Changes:

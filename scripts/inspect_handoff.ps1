@@ -318,6 +318,9 @@ $summary = [ordered]@{
         preview_ids = $launchPacket.style_template_visual_preview.preview_ids
         required_preview_ids = $launchPacket.style_template_visual_preview.required_preview_ids
         qt_surface = $launchPacket.style_template_visual_preview.qt_surface
+        qt_interaction = $launchPacket.style_template_visual_preview.qt_interaction
+        card_click_action = $launchPacket.style_template_visual_preview.card_click_action
+        qt_card_object_prefix = $launchPacket.style_template_visual_preview.qt_card_object_prefix
     }
     module_boundary_registry = @{
         launch_packet_schema = $launchPacket.module_boundary_registry.schema
