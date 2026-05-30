@@ -874,10 +874,14 @@ def ocean_material_control_port_packet(
         "qt_control_panel_schema": "rrkal_displaytools.taichi_ocean_3d_control_panel.v1",
         "qt_control_panel": {
             "schema": "rrkal_displaytools.taichi_ocean_3d_control_panel.v1",
-            "surface": "Properties dock + Taichi 3D Ocean controls dialog",
+            "surface": "Properties dock + Layers dock quick strip + Taichi 3D Ocean controls dialog",
             "dock_object": "propertiesDock",
             "label_object": "taichiOcean3DControlPanel",
             "button_object": "taichiOcean3DControlButton",
+            "control_board_surface": "Layers dock quick strip",
+            "control_board_label_object": "ocean3DControlBoardStrip",
+            "control_board_button_object": "ocean3DControlBoardButton",
+            "control_board_default_visible": True,
             "qt_dialog_action": "open_taichi_ocean_3d_controls",
             "button_label": "Taichi 3D Ocean controls",
             "fields": ["wave_strength", "roughness", "foam"],
@@ -931,7 +935,7 @@ def ocean_material_control_port_packet(
                 "portable": True,
             },
         },
-        "qt_surface": "Properties dock ocean material controls + Taichi 3D Ocean controls dialog",
+        "qt_surface": "Properties dock ocean material controls + Layers dock Ocean 3D quick controls + Taichi 3D Ocean controls dialog",
         "launch_packet_fields": ["ocean_material_control_port", "profile.ocean_material", "command"],
         "renderer_capability_field": "ocean_material_control_port",
         "boundary": "Displaytools passes scalar ocean material controls and sea-state handoff fields only; RRKAL/provider modules own discovery, download, import and cache governance.",
@@ -1021,6 +1025,34 @@ def renderer_output_artifact_contract_packet(source: str) -> dict[str, object]:
     }
 
 
+def layer_render_plan_cache_diagnostics_packet(
+    metadata_payload: dict[str, object] | None,
+    source: str,
+) -> dict[str, object]:
+    metadata = metadata_payload if isinstance(metadata_payload, dict) else {}
+    plan = metadata.get("layer_render_plan") if isinstance(metadata.get("layer_render_plan"), dict) else {}
+    runtime_snapshot = plan.get("runtime_snapshot") if isinstance(plan.get("runtime_snapshot"), dict) else {}
+    available = bool(plan)
+    return {
+        "schema": "rrkal_displaytools.layer_render_plan_cache_diagnostics.v1",
+        "source": source,
+        "status": "available" if available else "unavailable",
+        "metadata_sidecar_schema": metadata.get("schema"),
+        "metadata_sidecar_field": "layer_render_plan",
+        "compiled_plan_schema": plan.get("schema") if available else "rrkal_displaytools.compiled_layer_render_plan.v1",
+        "runtime_snapshot_schema": runtime_snapshot.get("schema") if runtime_snapshot else "rrkal_displaytools.layer_render_plan_runtime_snapshot.v1",
+        "cache_status": plan.get("cache_status", "unavailable"),
+        "cache_key_available": bool(plan.get("cache_key")),
+        "composition_step_count": plan.get("composition_step_count", runtime_snapshot.get("composition_step_count")),
+        "visible_layer_count": runtime_snapshot.get("visible_layer_count"),
+        "dirty_flags": plan.get("dirty_flags") if isinstance(plan.get("dirty_flags"), dict) else runtime_snapshot.get("dirty_flags", {}),
+        "single_pass_ready": bool(plan.get("single_pass_ready", False)),
+        "runtime_optimization_applied": bool(plan.get("runtime_optimization_applied", False)),
+        "qt_inspector_action": "show_layer_render_plan_performance",
+        "boundary": "Diagnostics reads renderer metadata sidecar cache evidence; unavailable means no runtime frame metadata has been produced yet.",
+    }
+
+
 def layer_render_plan_performance_packet(
     source: str,
     layer_capability_matrix: dict[str, object] | None = None,
@@ -1053,6 +1085,9 @@ def layer_render_plan_performance_packet(
         "compiled_plan_helper": "HybridRenderController.compile_layer_render_plan",
         "compiled_plan_cache_key_helper": "HybridRenderController.layer_render_plan_cache_key",
         "compiled_plan_cache_status_field": "cache_status",
+        "cache_diagnostics_schema": "rrkal_displaytools.layer_render_plan_cache_diagnostics.v1",
+        "cache_diagnostics_qt_action": "show_layer_render_plan_performance",
+        "cache_diagnostics_metadata_source": "renderer_output_metadata.layer_render_plan",
         "metadata_sidecar_field": "layer_render_plan",
         "runtime_snapshot_wired": True,
         "deferred_until": "module_decoupling_boundary_contract_is_stable",
@@ -3455,6 +3490,22 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_control_feedback_strip_label.setObjectName("layerControlFeedbackStrip")
         self.layer_control_feedback_strip_label.setWordWrap(True)
         layers_layout.addWidget(self.layer_control_feedback_strip_label)
+        self.ocean_3d_control_board_label = QtWidgets.QLabel("Ocean 3D quick controls: initializing")
+        self.ocean_3d_control_board_label.setObjectName("ocean3DControlBoardStrip")
+        self.ocean_3d_control_board_label.setWordWrap(True)
+        self.ocean_3d_control_board_label.setStyleSheet(
+            "QLabel#ocean3DControlBoardStrip { color:#12384f; background:#e7f5ff; "
+            "border:1px solid #79abc7; border-radius:8px; padding:6px 8px; font-weight:600; }"
+        )
+        layers_layout.addWidget(self.ocean_3d_control_board_label)
+        ocean_3d_control_board_button = QtWidgets.QPushButton("Ocean 3D controls")
+        ocean_3d_control_board_button.setObjectName("ocean3DControlBoardButton")
+        ocean_3d_control_board_button.setToolTip(
+            "Open the same Taichi 3D Ocean Water scalar control window from the default-visible Layers control board."
+        )
+        ocean_3d_control_board_button.clicked.connect(self.open_taichi_ocean_3d_controls)
+        layers_layout.addWidget(ocean_3d_control_board_button)
+        self.refresh_ocean_3d_control_summary()
         self.boundary_emphasis_button = QtWidgets.QPushButton("Boundary emphasis controls...")
         self.boundary_emphasis_button.clicked.connect(self.open_boundary_emphasis_dialog)
         layers_layout.addWidget(self.boundary_emphasis_button)
@@ -4509,8 +4560,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         )
 
     def refresh_ocean_3d_control_summary(self) -> None:
+        summary = self.ocean_3d_control_summary_text()
         if hasattr(self, "ocean_3d_control_label"):
-            self.ocean_3d_control_label.setText(self.ocean_3d_control_summary_text())
+            self.ocean_3d_control_label.setText(summary)
+        if hasattr(self, "ocean_3d_control_board_label"):
+            self.ocean_3d_control_board_label.setText(f"Ocean 3D quick controls: {summary}")
 
     def open_taichi_ocean_3d_controls(self) -> None:
         def bounded(value: object, default: float, lower: float, upper: float) -> float:
@@ -4636,12 +4690,66 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def collect_renderer_output_artifact_contract(self) -> dict[str, object]:
         return renderer_output_artifact_contract_packet("rrkal_displaytools_qt_panel")
 
+    def latest_renderer_metadata_path(self) -> Path | None:
+        candidates: list[Path] = []
+        if self.renderer_thumbnail_path is not None:
+            candidates.append(self.renderer_thumbnail_path)
+        latest_thumbnail = self.latest_renderer_thumbnail_path()
+        if latest_thumbnail is not None:
+            candidates.append(latest_thumbnail)
+        candidates.append(ROOT / "state" / "showcase" / "quick_smoke.png")
+        candidates.append(RENDERER_PREVIEW_FRAME_PATH)
+
+        seen: set[str] = set()
+        for image_path in candidates:
+            path = Path(image_path)
+            key = str(path)
+            if key in seen:
+                continue
+            seen.add(key)
+            metadata_path = path.with_suffix(path.suffix + ".metadata.json")
+            if metadata_path.exists():
+                return metadata_path
+        return None
+
+    def display_renderer_metadata_path(self, path: Path | None) -> str | None:
+        if path is None:
+            return None
+        try:
+            return str(path.relative_to(ROOT))
+        except ValueError:
+            return str(path)
+
+    def load_latest_renderer_metadata_payload(self) -> tuple[dict[str, object] | None, Path | None, str | None]:
+        metadata_path = self.latest_renderer_metadata_path()
+        if metadata_path is None:
+            return None, None, "metadata_sidecar_missing"
+        try:
+            payload = json.loads(metadata_path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            return None, metadata_path, str(exc)
+        if not isinstance(payload, dict):
+            return None, metadata_path, "metadata_payload_not_object"
+        return payload, metadata_path, None
+
+    def collect_layer_render_plan_cache_diagnostics(self) -> dict[str, object]:
+        payload, metadata_path, read_error = self.load_latest_renderer_metadata_payload()
+        diagnostics = layer_render_plan_cache_diagnostics_packet(
+            payload,
+            "rrkal_displaytools_qt_panel",
+        )
+        diagnostics["metadata_path"] = self.display_renderer_metadata_path(metadata_path)
+        diagnostics["metadata_read_error"] = read_error
+        return diagnostics
+
     def collect_layer_render_plan_performance(self) -> dict[str, object]:
-        return layer_render_plan_performance_packet(
+        packet = layer_render_plan_performance_packet(
             "rrkal_displaytools_qt_panel",
             self.collect_layer_capability_matrix(),
             self.collect_module_boundary_registry(),
         )
+        packet["cache_diagnostics"] = self.collect_layer_render_plan_cache_diagnostics()
+        return packet
 
     def collect_cross_machine_clone_readiness(self) -> dict[str, object]:
         return cross_machine_clone_readiness_packet(
@@ -8887,10 +8995,18 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.status.setText("已顯示 layer capability matrix JSON")
 
     def show_layer_render_plan_performance(self) -> None:
+        performance = self.collect_layer_render_plan_performance()
         self.command_text.setPlainText(
-            json.dumps(self.collect_layer_render_plan_performance(), ensure_ascii=False, indent=2)
+            json.dumps(
+                {
+                    "layer_render_plan_performance": performance,
+                    "layer_render_plan_cache_diagnostics": performance.get("cache_diagnostics"),
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
         )
-        self.status.setText("Displayed layer render-plan performance contract")
+        self.status.setText("Displayed layer render-plan performance and cache diagnostics")
 
     def show_profile_ui_state_replay(self) -> None:
         self.command_text.setPlainText(

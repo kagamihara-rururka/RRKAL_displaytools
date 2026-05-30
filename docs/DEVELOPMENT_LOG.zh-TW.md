@@ -1,5 +1,16 @@
 # Development Log
 
+## 2026-05-30 - Ocean control board and render-plan cache diagnostics
+
+Changes:
+- Added a default-visible Layers dock Ocean 3D quick control strip that opens the same Taichi 3D Ocean Water scalar control dialog as the Properties dock.
+- Extended `rrkal_displaytools.taichi_ocean_3d_control_panel.v1` with control-board object evidence so the ocean water controls are not hidden behind a tabified Properties dock.
+- Completed `rrkal_displaytools.layer_render_plan_cache_diagnostics.v1` wiring in Qt, reading renderer metadata sidecar cache evidence and returning `metadata_sidecar_missing` when no runtime metadata exists.
+- Smoke gates now verify the Ocean 3D control-board entry and render-plan cache diagnostics across launch packets, renderer capabilities, handoff inspection and Qt source.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Compiled render-plan cache key
 
 Changes:

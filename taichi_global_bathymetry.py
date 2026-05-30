@@ -18950,10 +18950,14 @@ def ocean_material_control_port_packet(
         "qt_control_panel_schema": "rrkal_displaytools.taichi_ocean_3d_control_panel.v1",
         "qt_control_panel": {
             "schema": "rrkal_displaytools.taichi_ocean_3d_control_panel.v1",
-            "surface": "Properties dock + Taichi 3D Ocean controls dialog",
+            "surface": "Properties dock + Layers dock quick strip + Taichi 3D Ocean controls dialog",
             "dock_object": "propertiesDock",
             "label_object": "taichiOcean3DControlPanel",
             "button_object": "taichiOcean3DControlButton",
+            "control_board_surface": "Layers dock quick strip",
+            "control_board_label_object": "ocean3DControlBoardStrip",
+            "control_board_button_object": "ocean3DControlBoardButton",
+            "control_board_default_visible": True,
             "qt_dialog_action": "open_taichi_ocean_3d_controls",
             "button_label": "Taichi 3D Ocean controls",
             "fields": ["wave_strength", "roughness", "foam"],
@@ -19007,7 +19011,7 @@ def ocean_material_control_port_packet(
                 "portable": True,
             },
         },
-        "qt_surface": "Properties dock ocean material controls + Taichi 3D Ocean controls dialog",
+        "qt_surface": "Properties dock ocean material controls + Layers dock Ocean 3D quick controls + Taichi 3D Ocean controls dialog",
         "launch_packet_fields": ["ocean_material_control_port", "profile.ocean_material", "command"],
         "renderer_capability_field": "ocean_material_control_port",
         "boundary": "Displaytools passes scalar ocean material controls and sea-state handoff fields only; RRKAL/provider modules own discovery, download, import and cache governance.",
@@ -19097,6 +19101,34 @@ def renderer_output_artifact_contract_packet(source: str) -> dict[str, object]:
     }
 
 
+def layer_render_plan_cache_diagnostics_packet(
+    metadata_payload: dict[str, object] | None,
+    source: str,
+) -> dict[str, object]:
+    metadata = metadata_payload if isinstance(metadata_payload, dict) else {}
+    plan = metadata.get("layer_render_plan") if isinstance(metadata.get("layer_render_plan"), dict) else {}
+    runtime_snapshot = plan.get("runtime_snapshot") if isinstance(plan.get("runtime_snapshot"), dict) else {}
+    available = bool(plan)
+    return {
+        "schema": "rrkal_displaytools.layer_render_plan_cache_diagnostics.v1",
+        "source": source,
+        "status": "available" if available else "unavailable",
+        "metadata_sidecar_schema": metadata.get("schema"),
+        "metadata_sidecar_field": "layer_render_plan",
+        "compiled_plan_schema": plan.get("schema") if available else "rrkal_displaytools.compiled_layer_render_plan.v1",
+        "runtime_snapshot_schema": runtime_snapshot.get("schema") if runtime_snapshot else "rrkal_displaytools.layer_render_plan_runtime_snapshot.v1",
+        "cache_status": plan.get("cache_status", "unavailable"),
+        "cache_key_available": bool(plan.get("cache_key")),
+        "composition_step_count": plan.get("composition_step_count", runtime_snapshot.get("composition_step_count")),
+        "visible_layer_count": runtime_snapshot.get("visible_layer_count"),
+        "dirty_flags": plan.get("dirty_flags") if isinstance(plan.get("dirty_flags"), dict) else runtime_snapshot.get("dirty_flags", {}),
+        "single_pass_ready": bool(plan.get("single_pass_ready", False)),
+        "runtime_optimization_applied": bool(plan.get("runtime_optimization_applied", False)),
+        "qt_inspector_action": "show_layer_render_plan_performance",
+        "boundary": "Diagnostics reads renderer metadata sidecar cache evidence; unavailable means no runtime frame metadata has been produced yet.",
+    }
+
+
 def layer_render_plan_performance_packet(
     source: str,
     layer_capability_matrix: dict[str, object] | None = None,
@@ -19129,6 +19161,9 @@ def layer_render_plan_performance_packet(
         "compiled_plan_helper": "HybridRenderController.compile_layer_render_plan",
         "compiled_plan_cache_key_helper": "HybridRenderController.layer_render_plan_cache_key",
         "compiled_plan_cache_status_field": "cache_status",
+        "cache_diagnostics_schema": "rrkal_displaytools.layer_render_plan_cache_diagnostics.v1",
+        "cache_diagnostics_qt_action": "show_layer_render_plan_performance",
+        "cache_diagnostics_metadata_source": "renderer_output_metadata.layer_render_plan",
         "metadata_sidecar_field": "layer_render_plan",
         "runtime_snapshot_wired": True,
         "deferred_until": "module_decoupling_boundary_contract_is_stable",

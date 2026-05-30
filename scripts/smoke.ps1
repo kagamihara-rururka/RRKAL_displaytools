@@ -521,6 +521,12 @@ if ($launchPacket.layer_render_plan_performance.compiled_plan_schema -ne "rrkal_
 if ($launchPacket.layer_render_plan_performance.compiled_plan_cache_status_field -ne "cache_status") {
     throw "Launch packet layer_render_plan_performance compiled plan cache status field missing"
 }
+if ($launchPacket.layer_render_plan_performance.cache_diagnostics_schema -ne "rrkal_displaytools.layer_render_plan_cache_diagnostics.v1") {
+    throw "Launch packet layer_render_plan_performance cache diagnostics schema missing"
+}
+if ($launchPacket.layer_render_plan_performance.cache_diagnostics_qt_action -ne "show_layer_render_plan_performance") {
+    throw "Launch packet layer_render_plan_performance cache diagnostics Qt action missing"
+}
 if ($launchPacket.module_boundary_registry.schema -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Launch packet module_boundary_registry schema missing or invalid"
 }
@@ -859,6 +865,15 @@ if ($launchPacket.ocean_material_control_port.qt_control_panel.qt_dialog_action 
 }
 if ($launchPacket.ocean_material_control_port.qt_control_panel.render_pipeline_followup -ne "post_decoupling_precompute_layer_render_plan_then_single_render_pass") {
     throw "Launch packet Taichi ocean 3D control panel performance followup missing"
+}
+if ($launchPacket.ocean_material_control_port.qt_control_panel.control_board_label_object -ne "ocean3DControlBoardStrip") {
+    throw "Launch packet Taichi ocean 3D control board strip missing"
+}
+if ($launchPacket.ocean_material_control_port.qt_control_panel.control_board_button_object -ne "ocean3DControlBoardButton") {
+    throw "Launch packet Taichi ocean 3D control board button missing"
+}
+if ($launchPacket.ocean_material_control_port.qt_control_panel.control_board_default_visible -ne $true) {
+    throw "Launch packet Taichi ocean 3D control board visibility flag missing"
 }
 if ($launchPacket.ocean_material_control_port.ocean_material_summary_contract.schema -ne "rrkal_displaytools.ocean_material_summary_contract.v1") {
     throw "Launch packet ocean material summary contract missing or invalid"
@@ -1606,6 +1621,12 @@ if ($capabilities.layer_render_plan_performance.compiled_plan_helper -ne "Hybrid
 if ($capabilities.layer_render_plan_performance.compiled_plan_cache_key_helper -ne "HybridRenderController.layer_render_plan_cache_key") {
     throw "Renderer layer_render_plan_performance cache key helper missing"
 }
+if ($capabilities.layer_render_plan_performance.cache_diagnostics_schema -ne "rrkal_displaytools.layer_render_plan_cache_diagnostics.v1") {
+    throw "Renderer layer_render_plan_performance cache diagnostics schema missing"
+}
+if ($capabilities.layer_render_plan_performance.cache_diagnostics_metadata_source -ne "renderer_output_metadata.layer_render_plan") {
+    throw "Renderer layer_render_plan_performance cache diagnostics metadata source missing"
+}
 if ($capabilities.module_boundary_registry.schema -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Renderer module_boundary_registry schema missing or invalid"
 }
@@ -1839,6 +1860,12 @@ if ($capabilities.ocean_material_control_port.qt_control_panel.qt_dialog_action 
 }
 if ($capabilities.ocean_material_control_port.qt_control_panel.render_pipeline_followup -ne "post_decoupling_precompute_layer_render_plan_then_single_render_pass") {
     throw "Renderer Taichi ocean 3D control panel performance followup missing"
+}
+if ($capabilities.ocean_material_control_port.qt_control_panel.control_board_label_object -ne "ocean3DControlBoardStrip") {
+    throw "Renderer Taichi ocean 3D control board strip missing"
+}
+if ($capabilities.ocean_material_control_port.qt_control_panel.control_board_default_visible -ne $true) {
+    throw "Renderer Taichi ocean 3D control board visibility flag missing"
 }
 if ($capabilities.ocean_material_control_port.ocean_material_summary_contract.schema -ne "rrkal_displaytools.ocean_material_summary_contract.v1") {
     throw "Renderer ocean material summary contract missing or invalid"
@@ -2257,6 +2284,12 @@ if ($handoff.layer_render_plan_performance.compiled_plan_schema -ne "rrkal_displ
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_cache_key_helper -ne "HybridRenderController.layer_render_plan_cache_key") {
     throw "Handoff inspection layer render plan performance cache key helper missing"
+}
+if ($handoff.layer_render_plan_performance.cache_diagnostics_schema -ne "rrkal_displaytools.layer_render_plan_cache_diagnostics.v1") {
+    throw "Handoff inspection layer render plan performance cache diagnostics schema missing"
+}
+if ($handoff.layer_render_plan_performance.cache_diagnostics_qt_action -ne "show_layer_render_plan_performance") {
+    throw "Handoff inspection layer render plan performance cache diagnostics Qt action missing"
 }
 if ($handoff.launch_packet_contracts.layer_selection_tool -ne "rrkal_displaytools.layer_selection_tool.v1") {
     throw "Handoff inspection layer_selection_tool launch contract missing or invalid"
@@ -2873,6 +2906,12 @@ if ($handoff.ocean_material_control_port.qt_dialog_action -ne "open_taichi_ocean
 if ($handoff.ocean_material_control_port.render_pipeline_followup -ne "post_decoupling_precompute_layer_render_plan_then_single_render_pass") {
     throw "Handoff inspection Taichi ocean 3D control panel performance followup missing"
 }
+if ($handoff.ocean_material_control_port.control_board_label_object -ne "ocean3DControlBoardStrip") {
+    throw "Handoff inspection Taichi ocean 3D control board strip missing"
+}
+if ($handoff.ocean_material_control_port.control_board_default_visible -ne $true) {
+    throw "Handoff inspection Taichi ocean 3D control board visibility flag missing"
+}
 if ($handoff.ocean_material_control_port.ocean_material_summary_contract_schema -ne "rrkal_displaytools.ocean_material_summary_contract.v1") {
     throw "Handoff inspection ocean material summary contract missing or invalid"
 }
@@ -3226,6 +3265,15 @@ if ($qtPanelSource -notlike "*open_taichi_ocean_3d_controls*") {
 if ($qtPanelSource -notlike "*taichiOcean3DControlPanel*") {
     throw "Qt Taichi ocean 3D control panel label is missing"
 }
+if ($qtPanelSource -notlike "*ocean3DControlBoardStrip*") {
+    throw "Qt Taichi ocean 3D default-visible control board strip is missing"
+}
+if ($qtPanelSource -notlike "*ocean3DControlBoardButton*") {
+    throw "Qt Taichi ocean 3D default-visible control board button is missing"
+}
+if ($qtPanelSource -notlike "*control_board_default_visible*") {
+    throw "Qt Taichi ocean 3D control board visibility contract is missing"
+}
 if ($qtPanelSource -notlike "*post_decoupling_precompute_layer_render_plan_then_single_render_pass*") {
     throw "Qt Taichi ocean 3D performance followup marker is missing"
 }
@@ -3405,6 +3453,21 @@ if ($qtPanelSource -notlike "*apply_layer_render_plan_composition*") {
 }
 if ($qtPanelSource -notlike "*compiled_layer_render_plan.v1*") {
     throw "Qt render plan performance compiled plan contract is missing"
+}
+if ($qtPanelSource -notlike "*layer_render_plan_cache_diagnostics.v1*") {
+    throw "Qt render plan cache diagnostics contract is missing"
+}
+if ($qtPanelSource -notlike "*collect_layer_render_plan_cache_diagnostics*") {
+    throw "Qt render plan cache diagnostics collector is missing"
+}
+if ($qtPanelSource -notlike "*latest_renderer_metadata_path*") {
+    throw "Qt render plan cache diagnostics metadata resolver is missing"
+}
+if ($qtPanelSource -notlike "*metadata_sidecar_missing*") {
+    throw "Qt render plan cache diagnostics missing-sidecar status is missing"
+}
+if ($qtPanelSource -notlike "*Displayed layer render-plan performance and cache diagnostics*") {
+    throw "Qt render plan cache diagnostics inspector status is missing"
 }
 if ($qtPanelSource -notlike "*Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON*") {
     throw "Qt Research interaction inspector tooltip is missing"
