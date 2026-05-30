@@ -974,6 +974,12 @@ if ($launchPacket.reviewer_packet_export.no_gui_primary_summary_field -ne "compo
 if ($launchPacket.reviewer_packet_export.recommended_review_fields -notcontains "layer_render_plan_performance.compose_pass_budget") {
     throw "Launch packet reviewer recommended compose budget field missing"
 }
+if ($launchPacket.reviewer_packet_export.recommended_review_fields -notcontains "layer_selection_tool.selection_summary_contract.quick_actions_summary_contract") {
+    throw "Launch packet reviewer packet layer quick actions recommended field missing"
+}
+if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "layer_selection_affordance") {
+    throw "Launch packet reviewer packet layer selection affordance packet field missing"
+}
 if ($launchPacket.reviewer_packet_export.qt_action -ne "export_reviewer_packet_dialog") {
     throw "Launch packet reviewer packet Qt action missing or invalid"
 }
@@ -2248,6 +2254,12 @@ if ($capabilities.reviewer_packet_export.no_gui_contract_command -notlike "*-Con
 if ($capabilities.reviewer_packet_export.recommended_review_fields -notcontains "layer_render_plan_performance.compose_run_parity_artifact_workflow") {
     throw "Renderer reviewer recommended parity workflow field missing"
 }
+if ($capabilities.reviewer_packet_export.recommended_review_fields -notcontains "layer_selection_tool.selection_summary_contract.quick_actions_summary_contract") {
+    throw "Renderer reviewer packet layer quick actions recommended field missing"
+}
+if ($capabilities.reviewer_packet_export.included_packet_fields -notcontains "layer_selection_tool") {
+    throw "Renderer reviewer packet layer selection tool packet field missing"
+}
 if ($capabilities.reviewer_packet_export.included_summary_fields -notcontains "clone_reviewer_summary") {
     throw "Renderer reviewer packet clone summary field missing"
 }
@@ -3484,6 +3496,12 @@ if ($handoff.reviewer_packet_export.no_gui_primary_summary_field -ne "compose_pe
 }
 if ($handoff.reviewer_packet_export.recommended_review_fields -notcontains "compose_performance_summary") {
     throw "Handoff inspection reviewer recommended compose summary field missing"
+}
+if ($handoff.reviewer_packet_export.recommended_review_fields -notcontains "layer_selection_tool.selection_summary_contract.quick_actions_summary_contract") {
+    throw "Handoff inspection reviewer packet layer quick actions recommended field missing"
+}
+if ($handoff.reviewer_packet_export.included_packet_fields -notcontains "layer_selection_affordance") {
+    throw "Handoff inspection reviewer packet layer selection affordance packet field missing"
 }
 if ($handoff.reviewer_packet_export.included_summary_fields -notcontains "research_interaction_summary") {
     throw "Handoff inspection reviewer packet research summary field missing"

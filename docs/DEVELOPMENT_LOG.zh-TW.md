@@ -1,5 +1,14 @@
 # Development Log
 
+## 2026-05-30 - Reviewer packet layer quick actions fields
+
+Changes:
+- Added layer quick-actions review paths to `reviewer_packet_export.recommended_review_fields` so reviewer packets point directly to active-layer Visible/Lock/Solo/Diagnostics handoff evidence.
+- Added `layer_selection_tool` and `layer_selection_affordance` to reviewer packet included packet fields across Qt, no-GUI launch packets and renderer capability discovery.
+- Smoke now gates launch, renderer capability and handoff inspection coverage for these reviewer packet fields.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
 ## 2026-05-30 - Active layer quick actions copy summary
 
 Changes:

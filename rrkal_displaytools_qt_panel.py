@@ -413,6 +413,8 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
         "no_gui_primary_summary_field": "compose_performance_summary",
         "recommended_review_fields": [
             "compose_performance_summary",
+            "layer_selection_tool.selection_summary_contract.quick_actions_summary_contract",
+            "layer_selection_affordance.active_quick_actions",
             "layer_render_plan_performance.compose_pass_budget",
             "layer_render_plan_performance.compose_run_parity_artifact_workflow",
             "visual_feature_closure_matrix",
@@ -433,6 +435,8 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "cross_machine_clone_readiness",
             "profile_launch_readiness",
             "profile_ui_state_replay",
+            "layer_selection_tool",
+            "layer_selection_affordance",
             "hydrology_lod_readiness",
             "hydrology_lod_runtime_evidence",
             "ocean_material_control_port",
