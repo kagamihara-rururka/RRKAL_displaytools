@@ -5658,6 +5658,24 @@ if (-not $headlessShimSelfTest.restored) {
     throw "Headless import shim self-test did not restore sys.modules state"
 }
 
+$rendererConfigGatewayText = Invoke-CapturedNative py @("-3", (Join-Path $RepoRoot "renderer_config_gateway.py"), "--sample-width", "2048", "--sample-map-projection", "globe")
+$rendererConfigGateway = $rendererConfigGatewayText | ConvertFrom-Json
+if ($rendererConfigGateway.schema -ne "rrkal_displaytools.renderer_config_gateway.v1") {
+    throw "Renderer config gateway schema mismatch"
+}
+if ($rendererConfigGateway.config.width -ne 2048) {
+    throw "Renderer config gateway width normalization failed"
+}
+if ($rendererConfigGateway.config.map_projection -ne "globe") {
+    throw "Renderer config gateway map projection default/sample failed"
+}
+if ($rendererConfigGateway.replaces_pattern -ne "getattr(args, <field>, <default>)") {
+    throw "Renderer config gateway getattr replacement marker missing"
+}
+if ($rendererConfigGateway.boundary -notmatch "does not launch Qt, Taichi") {
+    throw "Renderer config gateway boundary marker missing"
+}
+
 $decouplingQtPanelSource = Get-Content -LiteralPath (Join-Path $RepoRoot "rrkal_displaytools_qt_panel.py") -Raw -Encoding UTF8
 if ($decouplingQtPanelSource -notmatch "Inspect: Decoupling") {
     throw "Qt panel decoupling Inspect action is missing"

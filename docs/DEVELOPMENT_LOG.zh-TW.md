@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-31 - Renderer config gateway contract
+
+Changes:
+- Added `renderer_config_gateway.py` with `rrkal_displaytools.renderer_config_gateway.v1`.
+- Introduced a typed `RendererConfig` dataclass and normalization helper as the pre-decoupling replacement path for scattered `getattr(args, ...)` access.
+- Smoke now gates width/map-projection normalization, the `getattr` replacement marker and the no-launch/no-data-governance boundary.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-31 - Headless import shim contract
 
 Changes:
