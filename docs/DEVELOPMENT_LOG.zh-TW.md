@@ -1,5 +1,17 @@
 # Development Log
 
+## 2026-05-31 - Pre-decoupling snapshot exporter
+
+Changes:
+- Added `scripts/export_pre_decoupling_snapshot.ps1` to export one no-GUI JSON handoff snapshot before post-7 module extraction.
+- The snapshot includes decoupling readiness, pre-decoupling gate contract, performance smoke telemetry contract, renderer config gateway, controlled interception policy and git state.
+- Added the snapshot command/output to `decoupling_readiness.operation_schedule`.
+- Smoke verifies contract-only mode, normal snapshot export, required schemas and the `render_plan_compose` next action.
+- Boundary: snapshot export is handoff/readiness only; it does not move renderer code, launch Qt, run live network or touch RRKAL data/cache governance.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-31 - Decoupling observability baseline gate
 
 Changes:

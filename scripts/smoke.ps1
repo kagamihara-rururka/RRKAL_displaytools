@@ -5765,6 +5765,12 @@ if ($decouplingReadiness.operation_schedule.decoupling_not_before -ne "2026-05-3
 if ($decouplingReadiness.operation_schedule.pre_decoupling_gate_command -notlike "*scripts/pre_decoupling_gate.ps1*") {
     throw "Decoupling readiness pre-gate command missing"
 }
+if ($decouplingReadiness.operation_schedule.pre_decoupling_snapshot_command -notlike "*scripts/export_pre_decoupling_snapshot.ps1*") {
+    throw "Decoupling readiness snapshot command missing"
+}
+if ($decouplingReadiness.operation_schedule.pre_decoupling_snapshot_output -ne "state/decoupling/pre_decoupling_snapshot.json") {
+    throw "Decoupling readiness snapshot output path missing"
+}
 if ($decouplingReadiness.controlled_interception_policy.schema -ne "rrkal_displaytools.controlled_interception_policy.v1") {
     throw "Decoupling readiness controlled interception policy missing"
 }
@@ -5938,6 +5944,45 @@ if (-not $preDecouplingGate.ready) {
 }
 if (-not $preDecouplingGate.requires_clean_worktree) {
     throw "Pre-decoupling gate clean-worktree requirement missing"
+}
+
+$preDecouplingSnapshotPath = Join-Path $RepoRoot "scripts\export_pre_decoupling_snapshot.ps1"
+if (-not (Test-Path -LiteralPath $preDecouplingSnapshotPath)) {
+    throw "Pre-decoupling snapshot exporter is missing"
+}
+$preDecouplingSnapshotContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $preDecouplingSnapshotPath, "-ContractOnly")
+$preDecouplingSnapshotContract = ($preDecouplingSnapshotContractText -join "`n") | ConvertFrom-Json
+if ($preDecouplingSnapshotContract.schema -ne "rrkal_displaytools.pre_decoupling_snapshot_export.v1") {
+    throw "Pre-decoupling snapshot exporter contract schema missing"
+}
+if ($preDecouplingSnapshotContract.output_schema -ne "rrkal_displaytools.pre_decoupling_snapshot.v1") {
+    throw "Pre-decoupling snapshot output schema contract missing"
+}
+if ($preDecouplingSnapshotContract.included_fields -notcontains "performance_smoke_telemetry") {
+    throw "Pre-decoupling snapshot performance field missing"
+}
+$preDecouplingSnapshotText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $preDecouplingSnapshotPath)
+$preDecouplingSnapshot = ($preDecouplingSnapshotText -join "`n") | ConvertFrom-Json
+if ($preDecouplingSnapshot.schema -ne "rrkal_displaytools.pre_decoupling_snapshot.v1") {
+    throw "Pre-decoupling snapshot schema missing"
+}
+if ($preDecouplingSnapshot.decoupling_readiness.schema -ne "rrkal_displaytools.decoupling_readiness.v1") {
+    throw "Pre-decoupling snapshot readiness schema missing"
+}
+if ($preDecouplingSnapshot.pre_decoupling_gate.schema -ne "rrkal_displaytools.pre_decoupling_gate.v1") {
+    throw "Pre-decoupling snapshot gate schema missing"
+}
+if ($preDecouplingSnapshot.performance_smoke_telemetry.schema -ne "rrkal_displaytools.performance_smoke.v1") {
+    throw "Pre-decoupling snapshot performance telemetry schema missing"
+}
+if ($preDecouplingSnapshot.renderer_config_gateway.schema -ne "rrkal_displaytools.renderer_config_gateway.v1") {
+    throw "Pre-decoupling snapshot renderer config gateway schema missing"
+}
+if ($preDecouplingSnapshot.next_action -notlike "*render_plan_compose*") {
+    throw "Pre-decoupling snapshot next action missing"
+}
+if (-not (Test-Path -LiteralPath (Join-Path $RepoRoot "state\decoupling\pre_decoupling_snapshot.json"))) {
+    throw "Pre-decoupling snapshot output file missing"
 }
 
 Write-Host "Smoke passed."

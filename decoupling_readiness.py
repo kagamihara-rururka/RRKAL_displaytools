@@ -32,6 +32,8 @@ def decoupling_readiness_packet(phase: str = "pre_07_ui_closure") -> dict[str, o
             "decoupling_not_before": "2026-05-31T07:00:00+08:00",
             "pre_decoupling_gate_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/pre_decoupling_gate.ps1",
             "contract_only_gate_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/pre_decoupling_gate.ps1 -ContractOnly",
+            "pre_decoupling_snapshot_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/export_pre_decoupling_snapshot.ps1",
+            "pre_decoupling_snapshot_output": "state/decoupling/pre_decoupling_snapshot.json",
             "note": "Before the gate, continue UI/contract/handoff closure only; after the gate, start with render_plan_compose extraction.",
         },
         "controlled_interception_policy": controlled_interception_policy_packet("decoupling_readiness"),
