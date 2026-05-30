@@ -239,6 +239,18 @@ if ($launchPacket.layer_research_workflow.qt_surface -ne "Layers dock research w
 if ($launchPacket.layer_research_workflow.researcher_path -notcontains "Select or reveal a layer") {
     throw "Launch packet layer_research_workflow researcher path incomplete"
 }
+if ($launchPacket.layer_research_workflow.research_summary_contract_schema -ne "rrkal_displaytools.research_interaction_summary_contract.v1") {
+    throw "Launch packet research interaction summary contract schema missing or invalid"
+}
+if ($launchPacket.layer_research_workflow.research_summary_contract.qt_copy_action -ne "copy_research_interaction_summary") {
+    throw "Launch packet research interaction summary copy action missing or invalid"
+}
+if ($launchPacket.layer_research_workflow.research_summary_contract.component_contract_fields -notcontains "cursor_geodesy_readout.cursor_summary_contract") {
+    throw "Launch packet research interaction summary component contracts incomplete"
+}
+if (-not $launchPacket.layer_research_workflow.research_summary_contract.portable) {
+    throw "Launch packet research interaction summary portability flag missing"
+}
 if ($launchPacket.boundary_emphasis_control.schema -ne "rrkal_displaytools.boundary_emphasis_control.v1") {
     throw "Launch packet boundary_emphasis_control schema missing or invalid"
 }
@@ -916,6 +928,12 @@ if ($capabilities.layer_research_workflow.schema -ne "rrkal_displaytools.layer_r
 if ($capabilities.layer_research_workflow.status -ne "ready") {
     throw "Renderer layer_research_workflow not ready"
 }
+if ($capabilities.layer_research_workflow.research_summary_contract_schema -ne "rrkal_displaytools.research_interaction_summary_contract.v1") {
+    throw "Renderer research interaction summary contract schema missing or invalid"
+}
+if ($capabilities.layer_research_workflow.research_summary_contract.qt_copy_action -ne "copy_research_interaction_summary") {
+    throw "Renderer research interaction summary copy action missing or invalid"
+}
 if ($capabilities.cursor_geodesy_readout.schema -ne "rrkal_displaytools.cursor_geodesy_readout.v1") {
     throw "Renderer cursor_geodesy_readout schema missing or invalid"
 }
@@ -1504,6 +1522,15 @@ if ($handoff.layer_research_workflow.renderer_capabilities_schema -ne "rrkal_dis
 }
 if ($handoff.layer_research_workflow.qt_surface -ne "Layers dock research workflow label") {
     throw "Handoff inspection layer_research_workflow Qt surface mismatch"
+}
+if ($handoff.layer_research_workflow.research_summary_contract_schema -ne "rrkal_displaytools.research_interaction_summary_contract.v1") {
+    throw "Handoff inspection research interaction summary contract schema missing or invalid"
+}
+if ($handoff.layer_research_workflow.research_summary_contract.qt_copy_action -ne "copy_research_interaction_summary") {
+    throw "Handoff inspection research interaction summary copy action missing or invalid"
+}
+if (-not $handoff.layer_research_workflow.research_summary_contract.portable) {
+    throw "Handoff inspection research interaction summary portability flag missing"
 }
 if ($handoff.launch_packet_contracts.cursor_geodesy_readout -ne "rrkal_displaytools.cursor_geodesy_readout.v1") {
     throw "Handoff inspection cursor_geodesy_readout launch contract missing or invalid"
@@ -2121,6 +2148,15 @@ if ($qtPanelSource -notlike "*copy_cursor_geodesy_summary*") {
 }
 if ($qtPanelSource -notlike "*cursor_geodesy_summary_text*") {
     throw "Qt Cursor geo summary formatter is missing"
+}
+if ($qtPanelSource -notlike "*Copy research summary*") {
+    throw "Qt research interaction copy summary button is missing"
+}
+if ($qtPanelSource -notlike "*copy_research_interaction_summary*") {
+    throw "Qt research interaction copy summary action is missing"
+}
+if ($qtPanelSource -notlike "*research_interaction_summary_text*") {
+    throw "Qt research interaction summary formatter is missing"
 }
 if ($qtPanelSource -notlike "*Boundary JSON*") {
     throw "Qt Boundary JSON action button is missing"

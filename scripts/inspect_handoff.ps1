@@ -128,6 +128,8 @@ $summary = [ordered]@{
         workflow_hint = $launchPacket.layer_research_workflow.workflow_hint
         workflow_hint_surface = $launchPacket.layer_research_workflow.workflow_hint_surface
         qt_surface = $launchPacket.layer_research_workflow.qt_surface
+        research_summary_contract_schema = $launchPacket.layer_research_workflow.research_summary_contract_schema
+        research_summary_contract = $launchPacket.layer_research_workflow.research_summary_contract
     }
     profile_ui_state_replay = @{
         launch_packet_schema = $launchPacket.profile_ui_state_replay.schema

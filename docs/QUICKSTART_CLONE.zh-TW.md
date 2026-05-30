@@ -278,3 +278,9 @@ Displaytools 不負責：
 - `cursor_geodesy_readout.cursor_summary_contract` now documents the portable cursor geodesy summary.
 - Qt exposes `Copy cursor summary` in the Research interaction group.
 - The summary keeps source, hit state, latitude/longitude, renderer state/ack files and raycast method aligned for clone handoff.
+
+## Research interaction summary bundle
+
+- `layer_research_workflow.research_summary_contract` now documents the portable reviewer summary bundle.
+- Qt exposes `Copy research summary` in the Research interaction group.
+- The bundle combines layer selection, Pin overlay, cursor geodesy and Boundary emphasis summaries for cross-machine notes.

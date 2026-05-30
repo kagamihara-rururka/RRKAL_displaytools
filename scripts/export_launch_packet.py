@@ -1092,6 +1092,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         ("pin_pick", "Inspect: Pin pick"),
         ("cursor_geo", "Inspect: Cursor geo"),
         ("boundary_json", "Inspect: Boundary JSON"),
+        ("research_summary", "Copy research summary"),
         ("visual_readiness", "Inspect: Visual readiness"),
         ("renderer_thumbnail", "Inspect: Renderer thumbnail"),
         ("live_preview", "Inspect: Live preview"),
@@ -1099,7 +1100,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
     qt_inspector_groups = [
         {"id": "replay_contracts", "label": "Replay/contracts", "action_ids": ["profile_replay", "timeline", "clone_ready", "module_seams"]},
         {"id": "renderer_ports", "label": "Renderer ports", "action_ids": ["hydro_lod", "ocean_port", "style_routes", "layer_matrix", "layer_runtime"]},
-        {"id": "research_interaction", "label": "Research interaction", "action_ids": ["layer_pick", "selection_state", "layer_ops", "canvas_state", "pin_pick", "cursor_geo", "boundary_json"]},
+        {"id": "research_interaction", "label": "Research interaction", "action_ids": ["layer_pick", "selection_state", "layer_ops", "canvas_state", "pin_pick", "cursor_geo", "boundary_json", "research_summary"]},
         {"id": "visual_review", "label": "Visual review", "action_ids": ["visual_readiness", "renderer_thumbnail", "live_preview"]},
     ]
     return {
@@ -1892,6 +1893,22 @@ def layer_research_workflow_packet(
         "qt_surface": "Layers dock research workflow label",
         "launch_packet_fields": ["layer_research_workflow", "layer_filter", "layer_group_view", "layer_capability_matrix"],
         "renderer_capability_field": "layer_research_workflow",
+        "research_summary_contract_schema": "rrkal_displaytools.research_interaction_summary_contract.v1",
+        "research_summary_contract": {
+            "label": "Research interaction",
+            "summary_format": "Research interaction: {layer_selection} | {pin_overlay} | {cursor_geodesy} | {boundary_emphasis}",
+            "qt_inspector_group": "research_interaction",
+            "qt_copy_action": "copy_research_interaction_summary",
+            "component_contract_fields": [
+                "layer_selection_tool.selection_summary_contract",
+                "pin_overlay.pin_summary_contract",
+                "cursor_geodesy_readout.cursor_summary_contract",
+                "boundary_emphasis_control.boundary_summary_contract",
+            ],
+            "launch_packet_field": "layer_research_workflow.research_summary_contract",
+            "handoff_field": "layer_research_workflow.research_summary_contract",
+            "portable": True,
+        },
         "boundary": "Research workflow summarizes existing Qt layer controls and renderer diagnostics; it does not mutate renderer state or RRKAL data governance.",
     }
 

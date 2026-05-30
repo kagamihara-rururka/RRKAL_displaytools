@@ -1,5 +1,17 @@
 # Development Log
 
+## 2026-05-30 - Research interaction summary bundle
+
+Changes:
+- Added `research_summary_contract` to `layer_research_workflow` in Qt, launch packet and renderer capability emitters.
+- Added `copy_research_interaction_summary()` and `Copy research summary` to the Qt Research interaction group.
+- Handoff output now exposes the bundled research interaction summary contract.
+- Smoke gates launch packet, renderer capability, handoff and Qt source coverage.
+- Updated clone quickstart, capability summary and GTD.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-30 - Cursor geodesy summary contract
 
 Changes:

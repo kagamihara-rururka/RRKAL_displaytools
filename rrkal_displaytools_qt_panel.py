@@ -276,6 +276,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         ("pin_pick", "Inspect: Pin pick"),
         ("cursor_geo", "Inspect: Cursor geo"),
         ("boundary_json", "Inspect: Boundary JSON"),
+        ("research_summary", "Copy research summary"),
         ("visual_readiness", "Inspect: Visual readiness"),
         ("renderer_thumbnail", "Inspect: Renderer thumbnail"),
         ("live_preview", "Inspect: Live preview"),
@@ -283,7 +284,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
     qt_inspector_groups = [
         {"id": "replay_contracts", "label": "Replay/contracts", "action_ids": ["profile_replay", "timeline", "clone_ready", "module_seams"]},
         {"id": "renderer_ports", "label": "Renderer ports", "action_ids": ["hydro_lod", "ocean_port", "style_routes", "layer_matrix", "layer_runtime"]},
-        {"id": "research_interaction", "label": "Research interaction", "action_ids": ["layer_pick", "selection_state", "layer_ops", "canvas_state", "pin_pick", "cursor_geo", "boundary_json"]},
+        {"id": "research_interaction", "label": "Research interaction", "action_ids": ["layer_pick", "selection_state", "layer_ops", "canvas_state", "pin_pick", "cursor_geo", "boundary_json", "research_summary"]},
         {"id": "visual_review", "label": "Visual review", "action_ids": ["visual_readiness", "renderer_thumbnail", "live_preview"]},
     ]
     return {
@@ -1740,6 +1741,22 @@ def layer_research_workflow_packet(
         "qt_surface": "Layers dock research workflow label",
         "launch_packet_fields": ["layer_research_workflow", "layer_filter", "layer_group_view", "layer_capability_matrix"],
         "renderer_capability_field": "layer_research_workflow",
+        "research_summary_contract_schema": "rrkal_displaytools.research_interaction_summary_contract.v1",
+        "research_summary_contract": {
+            "label": "Research interaction",
+            "summary_format": "Research interaction: {layer_selection} | {pin_overlay} | {cursor_geodesy} | {boundary_emphasis}",
+            "qt_inspector_group": "research_interaction",
+            "qt_copy_action": "copy_research_interaction_summary",
+            "component_contract_fields": [
+                "layer_selection_tool.selection_summary_contract",
+                "pin_overlay.pin_summary_contract",
+                "cursor_geodesy_readout.cursor_summary_contract",
+                "boundary_emphasis_control.boundary_summary_contract",
+            ],
+            "launch_packet_field": "layer_research_workflow.research_summary_contract",
+            "handoff_field": "layer_research_workflow.research_summary_contract",
+            "portable": True,
+        },
         "boundary": "Research workflow summarizes existing Qt layer controls and renderer diagnostics; it does not mutate renderer state or RRKAL data governance.",
     }
 
@@ -2796,6 +2813,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         copy_cursor_summary_button = QtWidgets.QPushButton("Copy cursor summary")
         boundary_state_button = QtWidgets.QPushButton("Inspect: Boundary JSON")
         copy_boundary_summary_button = QtWidgets.QPushButton("Copy boundary summary")
+        copy_research_summary_button = QtWidgets.QPushButton("Copy research summary")
         capabilities_button = QtWidgets.QPushButton("Renderer 能力")
         closed_loop_button = QtWidgets.QPushButton("閉環狀態")
         layer_manifest_button = QtWidgets.QPushButton("圖層 manifest")
@@ -2829,6 +2847,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (copy_cursor_summary_button, "Cursor geodesy: copy source, hit state, latitude/longitude and renderer state/ack bridge summary."),
             (boundary_state_button, "Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON."),
             (copy_boundary_summary_button, "Boundary emphasis: copy target, alignment, color, opacity and renderer bridge summary."),
+            (copy_research_summary_button, "Research interaction: copy selection, pin, cursor and boundary summaries as one portable handoff note."),
             (visual_readiness_button, "Visual review: inspect thumbnail/live preview readiness, frame status and missing-frame hints JSON."),
             (copy_visual_summary_button, "Visual review: copy compact thumbnail/live preview readiness summary to clipboard."),
             (thumbnail_button, "Visual review: inspect latest renderer thumbnail PNG."),
@@ -2863,6 +2882,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         copy_cursor_summary_button.clicked.connect(self.copy_cursor_geodesy_summary)
         boundary_state_button.clicked.connect(self.show_boundary_state)
         copy_boundary_summary_button.clicked.connect(self.copy_boundary_emphasis_summary)
+        copy_research_summary_button.clicked.connect(self.copy_research_interaction_summary)
         capabilities_button.clicked.connect(self.show_renderer_capabilities)
         closed_loop_button.clicked.connect(self.show_closed_loop_status)
         layer_manifest_button.clicked.connect(self.show_layer_manifest)
@@ -2879,7 +2899,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button)),
             ("Inspect: Replay/contracts", (profile_replay_button, timeline_button, module_seams_button, clone_ready_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, ocean_port_button, style_routes_button, layer_matrix_button, layer_runtime_button)),
-            ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button)),
+            ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
             ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, thumbnail_button, live_preview_button)),
             ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, smoke_button)),
             ("Process", (launch_button, restart_button, stop_button)),
@@ -4009,6 +4029,19 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"ack_file={packet.get('renderer_raycast_ack_file')}; "
             f"method={packet.get('renderer_raycast_method')}"
         )
+
+    def research_interaction_summary_text(self) -> str:
+        contract = self.collect_layer_research_workflow().get("research_summary_contract", {})
+        label = "Research interaction"
+        if isinstance(contract, dict):
+            label = str(contract.get("label") or label)
+        parts = [
+            self.layer_selection_summary_text(),
+            self.pin_overlay_summary_text(),
+            self.cursor_geodesy_summary_text(),
+            self.boundary_emphasis_summary_text(),
+        ]
+        return f"{label}: " + " | ".join(parts)
 
     def open_boundary_emphasis_dialog(self, layer_key: str | bool | None = None) -> None:
         if isinstance(layer_key, bool):
@@ -7511,6 +7544,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         summary = self.cursor_geodesy_summary_text()
         QtWidgets.QApplication.clipboard().setText(summary)
         self.status.setText("已複製 cursor geodesy 摘要")
+
+    def copy_research_interaction_summary(self) -> None:
+        summary = self.research_interaction_summary_text()
+        QtWidgets.QApplication.clipboard().setText(summary)
+        self.status.setText("已複製 research interaction 摘要")
 
     def show_boundary_state(self) -> None:
         self.command_text.setPlainText(

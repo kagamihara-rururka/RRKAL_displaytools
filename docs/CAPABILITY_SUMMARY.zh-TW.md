@@ -597,3 +597,9 @@
 - `cursor_geodesy_readout.cursor_summary_contract_schema` now advertises `rrkal_displaytools.cursor_geodesy_summary_contract.v1`.
 - The contract maps the Cursor geo research action to `copy_cursor_geodesy_summary`.
 - Smoke gates launch packet, renderer capability, handoff and Qt button/action coverage.
+
+## Research interaction summary bundle
+
+- `layer_research_workflow.research_summary_contract_schema` now advertises `rrkal_displaytools.research_interaction_summary_contract.v1`.
+- The contract bundles layer selection, Pin overlay, cursor geodesy and Boundary emphasis copy summaries for reviewer handoff.
+- Qt exposes `Copy research summary`, and smoke gates launch packet, renderer capability, handoff and Qt source coverage.

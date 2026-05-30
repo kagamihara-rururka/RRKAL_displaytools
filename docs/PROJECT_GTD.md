@@ -474,3 +474,14 @@ Done:
 
 Next:
 - Continue consolidating Qt research interaction summaries into clone/handoff reviewer flows.
+
+
+## 2026-05-30 - Research interaction summary bundle
+
+Done:
+- Added `research_summary_contract` to `layer_research_workflow`.
+- Added `Copy research summary` to the Qt Research interaction group.
+- Handoff and smoke gate the bundled reviewer summary contract.
+
+Next:
+- Continue tightening clone/handoff reviewer flow around profile and launch packet review.
