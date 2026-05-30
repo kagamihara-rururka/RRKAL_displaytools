@@ -77,6 +77,14 @@ $entries = @(
         no_launch_side_effect = $true
     },
     [ordered]@{
+        id = "layer_render_plan_performance"
+        category = "performance"
+        schema = "rrkal_displaytools.layer_render_plan_performance_inspector.v1"
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_layer_render_plan_performance.ps1"
+        proves = @("precompute render plan target", "single-pass optimization queue", "runtime merge disabled", "zero-diff parity required")
+        no_launch_side_effect = $true
+    },
+    [ordered]@{
         id = "pre_decoupling_snapshot"
         category = "decoupling"
         schema = "rrkal_displaytools.pre_decoupling_snapshot_export.v1"
@@ -151,6 +159,7 @@ $entries = @(
         "hydrology_lod",
         "ocean_material",
         "performance_smoke",
+        "layer_render_plan_performance",
         "decoupling_boundaries",
         "render_plan_compose_work_order",
         "pre_decoupling_readiness_bundle",

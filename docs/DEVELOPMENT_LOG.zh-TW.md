@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Layer render-plan performance inspector
+
+- Added `scripts/inspect_layer_render_plan_performance.ps1` as a no-GUI reviewer packet for the post-decoupling render-plan performance path.
+- Registered the inspector in the visual contract inspector index, cross-machine review packet and smoke gates.
+- Smoke now verifies the precompute-then-single-render optimization target, disabled runtime merge, zero-diff parity evidence and sequential-queue failure policy.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; transient cloud-drive file-access backoff warning observed, final retry passed).
+
 ## 2026-05-31 - Layer visual presets inspector
 
 - Added `scripts/inspect_layer_visual_presets.ps1` as a no-GUI reviewer packet for layer visual presets, runtime ack feedback, selection tool and selection affordance state.

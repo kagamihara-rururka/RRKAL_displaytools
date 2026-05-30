@@ -1211,6 +1211,9 @@ if ($visualInspectorIndex.entry_ids -notcontains "renderer_config_gateway") {
 if ($visualInspectorIndex.entry_ids -notcontains "performance_smoke") {
     throw "Visual contract inspector index missing performance smoke inspector"
 }
+if ($visualInspectorIndex.entry_ids -notcontains "layer_render_plan_performance") {
+    throw "Visual contract inspector index missing layer render-plan performance inspector"
+}
 if ($visualInspectorIndex.entry_ids -notcontains "pre_decoupling_snapshot") {
     throw "Visual contract inspector index missing pre-decoupling snapshot inspector"
 }
@@ -1293,6 +1296,9 @@ if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -Exec
 }
 if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_research_interaction.ps1") {
     throw "Visual contract review packet missing Research interaction first command"
+}
+if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_layer_render_plan_performance.ps1") {
+    throw "Visual contract review packet missing layer render-plan performance first command"
 }
 if ($visualReviewPacket.pre_decoupling_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\pre_decoupling_gate.ps1 -ContractOnly") {
     throw "Visual contract review packet missing pre-decoupling gate command"
@@ -1670,6 +1676,47 @@ if ($researchInteractionInspectorPacket.research_interaction_action_ids -notcont
 }
 if ($researchInteractionInspectorPacket.research_interaction_action_ids -notcontains "boundary_json") {
     throw "Research interaction inspector boundary action missing"
+}
+$layerRenderPlanPerformanceInspectorPath = Join-Path $RepoRoot "scripts\inspect_layer_render_plan_performance.ps1"
+if (-not (Test-Path -LiteralPath $layerRenderPlanPerformanceInspectorPath)) {
+    throw "Layer render-plan performance inspector script is missing"
+}
+$layerRenderPlanPerformanceInspectorContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $layerRenderPlanPerformanceInspectorPath, "-ContractOnly")
+$layerRenderPlanPerformanceInspectorContract = ($layerRenderPlanPerformanceInspectorContractText -join "`n") | ConvertFrom-Json
+if ($layerRenderPlanPerformanceInspectorContract.schema -ne "rrkal_displaytools.layer_render_plan_performance_inspector.v1") {
+    throw "Layer render-plan performance inspector contract schema missing"
+}
+if ($layerRenderPlanPerformanceInspectorContract.required_contracts -notcontains "rrkal_displaytools.layer_render_plan_performance.v1") {
+    throw "Layer render-plan performance inspector performance contract missing"
+}
+if ($layerRenderPlanPerformanceInspectorContract.required_contracts -notcontains "rrkal_displaytools.compose_run_merge_preflight.v1") {
+    throw "Layer render-plan performance inspector merge preflight contract missing"
+}
+$layerRenderPlanPerformanceInspectorText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $layerRenderPlanPerformanceInspectorPath)
+$layerRenderPlanPerformanceInspectorPacket = ($layerRenderPlanPerformanceInspectorText -join "`n") | ConvertFrom-Json
+if ($layerRenderPlanPerformanceInspectorPacket.schema -ne "rrkal_displaytools.layer_render_plan_performance_inspection.v1") {
+    throw "Layer render-plan performance inspection schema missing"
+}
+if ($layerRenderPlanPerformanceInspectorPacket.optimization_target -ne "precompute_layer_state_then_single_render_pass") {
+    throw "Layer render-plan performance optimization target mismatch"
+}
+if ($layerRenderPlanPerformanceInspectorPacket.runtime_optimization_applied -ne $false) {
+    throw "Layer render-plan performance must not claim runtime optimization yet"
+}
+if ($layerRenderPlanPerformanceInspectorPacket.compose_runtime_merge_enabled -ne $false) {
+    throw "Layer render-plan compose runtime merge must remain disabled"
+}
+if ($layerRenderPlanPerformanceInspectorPacket.merge_preflight_runtime_merge_enabled -ne $false) {
+    throw "Layer render-plan merge preflight must keep runtime merge disabled"
+}
+if ($layerRenderPlanPerformanceInspectorPacket.compose_required_evidence -notcontains "max_abs_diff=0") {
+    throw "Layer render-plan compose parity evidence missing max_abs_diff=0"
+}
+if ($layerRenderPlanPerformanceInspectorPacket.merge_preflight_failure_policy -ne "keep_sequential_compose_queue") {
+    throw "Layer render-plan merge failure policy must keep sequential queue"
+}
+if ($layerRenderPlanPerformanceInspectorPacket.module_boundary_tk_primary_ui_allowed -ne $false) {
+    throw "Layer render-plan module boundary must keep Tk out of primary UI"
 }
 $hydrologyLodInspectorPath = Join-Path $RepoRoot "scripts\inspect_hydrology_lod.ps1"
 if (-not (Test-Path -LiteralPath $hydrologyLodInspectorPath)) {
