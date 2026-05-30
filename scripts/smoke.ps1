@@ -6503,13 +6503,13 @@ if ($rendererSource -notlike "*self.compiled_layer_render_plan[`"phase_timing_ru
 if ($rendererSource -notlike "*time.perf_counter*") {
     throw "Renderer render plan phase timing perf counter marker is missing"
 }
-if ($rendererSource -notlike "*phase_ms.*") {
+if ($renderPlanCombinedSource -notlike "*phase_ms.*") {
     throw "Renderer render plan phase timing probe key marker is missing"
 }
 if ($rendererSource -notlike "*slow_frame_threshold_ms*") {
     throw "Renderer render plan slow frame timing threshold marker is missing"
 }
-if ($rendererSource -notlike "*perf_counter_start*") {
+if ($renderPlanCombinedSource -notlike "*perf_counter_start*") {
     throw "Renderer render plan phase timing recommended start marker is missing"
 }
 if ($renderPlanCombinedSource -notlike "*prepare_batches*") {

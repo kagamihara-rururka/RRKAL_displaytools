@@ -9,6 +9,7 @@ from .render_plan import (
     build_layer_render_plan_compose_runs,
     build_layer_render_plan_execution_summary,
     build_layer_render_plan_execution_phases,
+    build_layer_render_plan_phase_timing_contract,
 )
 
 __all__ = [
@@ -20,4 +21,5 @@ __all__ = [
     "build_layer_render_plan_compose_runs",
     "build_layer_render_plan_execution_summary",
     "build_layer_render_plan_execution_phases",
+    "build_layer_render_plan_phase_timing_contract",
 ]

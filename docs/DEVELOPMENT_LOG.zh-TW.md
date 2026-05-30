@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Extract phase timing contract builder
+
+- Added `build_layer_render_plan_phase_timing_contract` to `render_core/render_plan.py`.
+- Updated `HybridRenderController.layer_render_plan_phase_timing_contract` to delegate to the extracted pure helper.
+- Updated source-map and smoke gates for phase timing contract markers in render-core.
+- Smoke: PASS after updating the relocated `phase_ms.*` source gate (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Extract execution phases builder
 
 - Added `build_layer_render_plan_execution_phases` to `render_core/render_plan.py`.

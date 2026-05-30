@@ -28,6 +28,7 @@ from render_core.render_plan import (
     build_layer_render_plan_compose_runs,
     build_layer_render_plan_execution_phases,
     build_layer_render_plan_execution_summary,
+    build_layer_render_plan_phase_timing_contract,
 )
 from pin_projection import pin_projection_contract_packet, project_pins_to_screen
 try:
@@ -14498,33 +14499,7 @@ class HybridRenderController:
         self,
         execution_phases: list[dict[str, object]],
     ) -> dict[str, object]:
-        phase_probe_points = []
-        for phase in execution_phases:
-            if not isinstance(phase, dict):
-                continue
-            phase_id = str(phase.get("id") or "unknown_phase")
-            phase_probe_points.append(
-                {
-                    "phase_id": phase_id,
-                    "order": phase.get("order"),
-                    "probe_key": f"phase_ms.{phase_id}",
-                    "recommended_start": f"{phase_id}.perf_counter_start",
-                    "recommended_end": f"{phase_id}.perf_counter_end",
-                    "metadata_field": f"phase_timing_ms.{phase_id}",
-                }
-            )
-        return {
-            "schema": "rrkal_displaytools.layer_render_plan_phase_timing_contract.v1",
-            "source": "HybridRenderController.layer_render_plan_phase_timing_contract",
-            "status": "probe_contract_ready",
-            "runtime_measurements_available": False,
-            "timing_unit": "milliseconds",
-            "slow_frame_threshold_ms": 33.3,
-            "phase_probe_count": len(phase_probe_points),
-            "phase_probe_points": phase_probe_points,
-            "summary_fields": ["total_ms", "phase_timing_ms", "slowest_phase_id", "frame_index"],
-            "next_runtime_step": "wrap phase boundaries with perf_counter and write measured phase_timing_ms into renderer metadata",
-        }
+        return build_layer_render_plan_phase_timing_contract(execution_phases)
 
     def layer_render_plan_bottleneck_recommendation(
         self,
