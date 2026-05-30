@@ -1,5 +1,13 @@
 # Development Log
 
+## 2026-05-30 - Reviewer packet compose performance handoff note
+
+Changes:
+- Updated clone quickstart to identify `compose_performance_summary` as the first reviewer-packet field for cross-machine renderer performance review.
+- Updated agent handoff rules to mention `compose_performance_summary` in push reports when compose budget, parity runner or renderer performance work changes.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
 ## 2026-05-30 - Reviewer packet compose performance summary
 
 Changes:

@@ -31,6 +31,7 @@
 - Commit scoped code/docs before starting the next round.
 - Push main when network/GitHub access is available.
 - After every push, report in Chinese what capabilities the program currently has, then add a second section summarizing planned/next capabilities.
+- For cross-machine reviewer handoff, call out `compose_performance_summary` when renderer performance, parity runner or compose budget work changed.
 
 ## Current source of truth
 
