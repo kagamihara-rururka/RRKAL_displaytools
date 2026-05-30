@@ -515,6 +515,9 @@ if ($launchPacket.layer_render_plan_performance.metadata_sidecar_field -ne "laye
 if ($launchPacket.layer_render_plan_performance.composition_apply_helper -ne "HybridRenderController.apply_layer_render_plan_composition") {
     throw "Launch packet layer_render_plan_performance composition apply helper missing"
 }
+if ($launchPacket.layer_render_plan_performance.compiled_plan_schema -ne "rrkal_displaytools.compiled_layer_render_plan.v1") {
+    throw "Launch packet layer_render_plan_performance compiled plan schema missing"
+}
 if ($launchPacket.module_boundary_registry.schema -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Launch packet module_boundary_registry schema missing or invalid"
 }
@@ -1594,6 +1597,9 @@ if ($capabilities.layer_render_plan_performance.runtime_snapshot_helper -ne "Hyb
 if ($capabilities.layer_render_plan_performance.composition_apply_helper -ne "HybridRenderController.apply_layer_render_plan_composition") {
     throw "Renderer layer_render_plan_performance composition apply helper missing"
 }
+if ($capabilities.layer_render_plan_performance.compiled_plan_helper -ne "HybridRenderController.compile_layer_render_plan") {
+    throw "Renderer layer_render_plan_performance compiled plan helper missing"
+}
 if ($capabilities.module_boundary_registry.schema -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Renderer module_boundary_registry schema missing or invalid"
 }
@@ -2239,6 +2245,9 @@ if ($handoff.layer_render_plan_performance.runtime_snapshot_helper -ne "HybridRe
 }
 if ($handoff.layer_render_plan_performance.composition_apply_helper -ne "HybridRenderController.apply_layer_render_plan_composition") {
     throw "Handoff inspection layer render plan performance composition apply helper missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_schema -ne "rrkal_displaytools.compiled_layer_render_plan.v1") {
+    throw "Handoff inspection layer render plan performance compiled plan schema missing"
 }
 if ($handoff.launch_packet_contracts.layer_selection_tool -ne "rrkal_displaytools.layer_selection_tool.v1") {
     throw "Handoff inspection layer_selection_tool launch contract missing or invalid"
@@ -3385,6 +3394,9 @@ if ($qtPanelSource -notlike "*metadata_sidecar_field*: *layer_render_plan*") {
 if ($qtPanelSource -notlike "*apply_layer_render_plan_composition*") {
     throw "Qt render plan performance composition helper contract is missing"
 }
+if ($qtPanelSource -notlike "*compiled_layer_render_plan.v1*") {
+    throw "Qt render plan performance compiled plan contract is missing"
+}
 if ($qtPanelSource -notlike "*Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON*") {
     throw "Qt Research interaction inspector tooltip is missing"
 }
@@ -3603,14 +3615,22 @@ if ($rendererSource -notlike "*def layer_render_plan_composition_steps*") {
 if ($rendererSource -notlike "*def apply_layer_render_plan_composition*") {
     throw "Renderer layer render plan composition apply helper is missing"
 }
+if ($rendererSource -notlike "*def compile_layer_render_plan*") {
+    throw "Renderer compiled layer render plan helper is missing"
+}
 if ($rendererSource -notlike '*"layer_render_plan": getattr(self, "layer_render_plan_snapshot"*') {
-    throw "Renderer metadata layer render plan sidecar field is missing"
+    if ($rendererSource -notlike '*"layer_render_plan": getattr(self, "compiled_layer_render_plan"*') {
+        throw "Renderer metadata layer render plan sidecar field is missing"
+    }
 }
 if ($rendererSource -notlike "*self.layer_render_plan_snapshot = self.layer_render_plan_runtime_snapshot*") {
     throw "Renderer render_if_needed does not update the layer render plan snapshot"
 }
-if ($rendererSource -notlike "*self.frame_rgba = self.apply_layer_render_plan_composition(composition_steps)*") {
+if ($rendererSource -notlike "*self.frame_rgba = self.apply_layer_render_plan_composition(*") {
     throw "Renderer render_if_needed is not using the layer render plan composition helper"
+}
+if ($rendererSource -notlike "*self.compiled_layer_render_plan = self.compile_layer_render_plan*") {
+    throw "Renderer render_if_needed does not compile the layer render plan before composition"
 }
 if ($rendererSource -notlike "*last_layer_pick_screen*") {
     throw "Renderer layer pick screen position state missing"

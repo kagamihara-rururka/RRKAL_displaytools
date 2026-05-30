@@ -14126,6 +14126,36 @@ class HybridRenderController:
                 frame = apply_style_profile(frame, getattr(self.args, "style_profile", "scientific"))
         return frame
 
+    def compile_layer_render_plan(
+        self,
+        changed: bool | None = None,
+        force: bool = False,
+        defer_vector_overlays: bool | None = None,
+    ) -> dict[str, object]:
+        composition_steps = self.layer_render_plan_composition_steps()
+        runtime_snapshot = self.layer_render_plan_runtime_snapshot(
+            changed=changed,
+            force=force,
+            defer_vector_overlays=defer_vector_overlays,
+        )
+        return {
+            "schema": "rrkal_displaytools.compiled_layer_render_plan.v1",
+            "source": "HybridRenderController.compile_layer_render_plan",
+            "status": "compiled_snapshot",
+            "runtime_optimization_applied": False,
+            "optimization_target": "precompute_layer_state_then_single_render_pass",
+            "frame_index": int(getattr(self, "frame_index", 0)),
+            "runtime_snapshot": runtime_snapshot,
+            "dirty_flags": runtime_snapshot.get("dirty_flags", {}),
+            "batch_targets": runtime_snapshot.get("batch_targets", []),
+            "composition_steps": composition_steps,
+            "composition_step_count": len(composition_steps),
+            "compose_order": runtime_snapshot.get("compose_order", []),
+            "apply_helper": "HybridRenderController.apply_layer_render_plan_composition",
+            "single_pass_ready": False,
+            "reuse_boundary": "valid_until_dirty_flags_or_camera_change",
+        }
+
     def output_metadata_path(self) -> Path | None:
         if self.output_path is None:
             return None
@@ -14169,7 +14199,7 @@ class HybridRenderController:
             "selected_layer_semantic_target": self.selected_layer_semantic_target,
             "last_layer_pick_result": self.last_layer_pick_result,
             "boundary_highlight": getattr(self, "boundary_highlight_state", {}),
-            "layer_render_plan": getattr(self, "layer_render_plan_snapshot", self.layer_render_plan_runtime_snapshot()),
+            "layer_render_plan": getattr(self, "compiled_layer_render_plan", self.compile_layer_render_plan()),
             "closed_loop_status": renderer_closed_loop_status_packet(),
             "rrkal_data_manifest_ref": getattr(self.args, "rrkal_data_manifest_ref", ""),
             "rrkal_data_manifest_ref_boundary": "Reference-only; displaytools records the RRKAL manifest reference but does not discover, download, validate, import, or govern it.",
@@ -15971,9 +16001,10 @@ class HybridRenderController:
                 self._render_boundaries_if_needed(force=force)
             self.overlay_dirty = False
 
-        composition_steps = self.layer_render_plan_composition_steps()
-        self.layer_render_plan_snapshot = self.layer_render_plan_runtime_snapshot(changed=changed, force=force)
-        self.frame_rgba = self.apply_layer_render_plan_composition(composition_steps)
+        self.compiled_layer_render_plan = self.compile_layer_render_plan(changed=changed, force=force)
+        self.layer_render_plan_snapshot = self.compiled_layer_render_plan.get("runtime_snapshot", {})
+        composition_steps = self.compiled_layer_render_plan.get("composition_steps")
+        self.frame_rgba = self.apply_layer_render_plan_composition(composition_steps if isinstance(composition_steps, list) else None)
         self.last_render_ms = (time.time() - start) * 1000.0
         if self.output_path and (getattr(self.args, "once", False) or getattr(self.args, "headless", False)):
             from PIL import Image
@@ -19062,6 +19093,8 @@ def layer_render_plan_performance_packet(
         "runtime_snapshot_helper": "HybridRenderController.layer_render_plan_runtime_snapshot",
         "composition_steps_helper": "HybridRenderController.layer_render_plan_composition_steps",
         "composition_apply_helper": "HybridRenderController.apply_layer_render_plan_composition",
+        "compiled_plan_schema": "rrkal_displaytools.compiled_layer_render_plan.v1",
+        "compiled_plan_helper": "HybridRenderController.compile_layer_render_plan",
         "metadata_sidecar_field": "layer_render_plan",
         "runtime_snapshot_wired": True,
         "deferred_until": "module_decoupling_boundary_contract_is_stable",

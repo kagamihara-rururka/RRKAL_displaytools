@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Compiled layer render-plan snapshot
+
+Changes:
+- Added `compile_layer_render_plan()` to produce `rrkal_displaytools.compiled_layer_render_plan.v1` with dirty flags, batch targets and composition steps in one reusable snapshot.
+- Renderer metadata now writes the compiled plan under `layer_render_plan`, while preserving the nested runtime snapshot and `runtime_optimization_applied=false`.
+- Smoke now gates the compiled plan schema/helper across launch packets, renderer capabilities, handoff inspection and renderer source wiring.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Renderer render-plan composition helper
 
 Changes:

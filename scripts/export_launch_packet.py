@@ -1865,6 +1865,8 @@ def layer_render_plan_performance_packet(
         "runtime_snapshot_helper": "HybridRenderController.layer_render_plan_runtime_snapshot",
         "composition_steps_helper": "HybridRenderController.layer_render_plan_composition_steps",
         "composition_apply_helper": "HybridRenderController.apply_layer_render_plan_composition",
+        "compiled_plan_schema": "rrkal_displaytools.compiled_layer_render_plan.v1",
+        "compiled_plan_helper": "HybridRenderController.compile_layer_render_plan",
         "metadata_sidecar_field": "layer_render_plan",
         "runtime_snapshot_wired": True,
         "deferred_until": "module_decoupling_boundary_contract_is_stable",
