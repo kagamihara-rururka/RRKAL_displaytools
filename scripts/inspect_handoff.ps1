@@ -53,6 +53,7 @@ $summary = [ordered]@{
         profile_ui_state_replay = $launchPacket.profile_ui_state_replay.schema
         layer_visual_presets = $launchPacket.layer_visual_presets.schema
         layer_visual_preset_runtime_feedback = $launchPacket.layer_visual_preset_runtime_feedback.schema
+        layer_operation_feedback = $launchPacket.layer_operation_feedback.schema
         hydrology_lod_readiness = $launchPacket.hydrology_lod_readiness.schema
         hydrology_lod_runtime_evidence = $launchPacket.hydrology_lod_runtime_evidence.schema
         ocean_material_control_port = $launchPacket.ocean_material_control_port.schema
@@ -89,6 +90,15 @@ $summary = [ordered]@{
         group_count = $launchPacket.layer_operator_groups.group_count
         complete_group_count = $launchPacket.layer_operator_groups.complete_group_count
         group_ids = @($launchPacket.layer_operator_groups.groups | ForEach-Object { $_.id })
+    }
+    layer_operation_feedback = @{
+        launch_packet_schema = $launchPacket.layer_operation_feedback.schema
+        renderer_capabilities_schema = $capabilities.layer_operation_feedback.schema
+        selected_layer = $launchPacket.layer_operation_feedback.selected_layer
+        active_layer_operation_summary = $launchPacket.layer_operation_feedback.active_layer_operation_summary
+        last_layer_operation = $launchPacket.layer_operation_feedback.last_layer_operation
+        operator_group_summary = $launchPacket.layer_operation_feedback.operator_group_summary
+        undo_depth = $launchPacket.layer_operation_feedback.undo_depth
     }
     layer_selection_tool = @{
         launch_packet_schema = $launchPacket.layer_selection_tool.schema

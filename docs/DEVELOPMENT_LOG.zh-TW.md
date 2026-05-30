@@ -3732,3 +3732,14 @@ Changes:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Handoff Layer ops review
+
+Changes:
+- Added `layer_operation_feedback` to `scripts\inspect_handoff.ps1`.
+- Handoff output now reports launch packet schema, renderer capability schema, active summary, last operation, operator group summary and undo depth.
+- Smoke now gates the handoff layer operation feedback path.
+- Updated clone quickstart, capability summary and GTD for `-HandoffFirst` layer ops review.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

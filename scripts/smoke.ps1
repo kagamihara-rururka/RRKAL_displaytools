@@ -1279,6 +1279,15 @@ if ($handoff.layer_operator_groups.renderer_capabilities_schema -ne "rrkal_displ
 if ([int]$handoff.layer_operator_groups.complete_group_count -lt 5) {
     throw "Handoff inspection layer_operator_groups incomplete"
 }
+if ($handoff.launch_packet_contracts.layer_operation_feedback -ne "rrkal_displaytools.layer_operation_feedback.v1") {
+    throw "Handoff inspection launch packet layer_operation_feedback schema missing or invalid"
+}
+if ($handoff.layer_operation_feedback.launch_packet_schema -ne "rrkal_displaytools.layer_operation_feedback.v1") {
+    throw "Handoff inspection layer_operation_feedback launch packet schema missing or invalid"
+}
+if ($handoff.layer_operation_feedback.renderer_capabilities_schema -ne "rrkal_displaytools.layer_operation_feedback.v1") {
+    throw "Handoff inspection layer_operation_feedback renderer capability schema missing or invalid"
+}
 if ($handoff.launch_packet_contracts.layer_selection_tool -ne "rrkal_displaytools.layer_selection_tool.v1") {
     throw "Handoff inspection layer_selection_tool launch contract missing or invalid"
 }
@@ -2075,6 +2084,9 @@ if ($launchPacketSource -notmatch 'layer_operation_feedback') {
 }
 if ($handoffInspectorSource -notmatch 'profile_ui_state_replay') {
     throw "Handoff inspection profile UI state replay output is missing"
+}
+if ($handoffInspectorSource -notmatch 'layer_operation_feedback') {
+    throw "Handoff inspection layer operation feedback output is missing"
 }
 if ($handoffInspectorSource -notmatch 'saved_state_groups') {
     throw "Handoff inspection profile UI state replay saved groups output is missing"

@@ -296,3 +296,14 @@ Done:
 
 Next:
 - Continue UIUX closure on profile replay discoverability and cross-machine review flows.
+
+
+## 2026-05-30 - Handoff Layer ops review
+
+Done:
+- Added `layer_operation_feedback` to `scripts\inspect_handoff.ps1`.
+- Smoke now verifies handoff launch packet and renderer capability schemas for layer operation feedback.
+- Updated clone/capability docs for `-HandoffFirst` review of layer operation state.
+
+Next:
+- Continue tightening cross-machine quick review around profile replay and visual review actions.
