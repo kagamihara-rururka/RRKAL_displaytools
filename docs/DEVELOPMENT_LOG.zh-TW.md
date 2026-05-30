@@ -1,5 +1,17 @@
 # Development Log
 
+## 2026-05-30 - Ocean 3D control-board audit and compose parity smoke entry
+
+Changes:
+- Added `rrkal_displaytools.taichi_ocean_3d_control_board_audit.v1` so the Taichi Ocean 3D controls are explicitly tracked as default-visible control-board UI, not only a Properties dock control.
+- The Qt Layers control board now labels the button as `Taichi Ocean 3D controls` and shows `board=wired_default_visible` in the Ocean 3D quick summary.
+- Added `scripts/render_compose_parity_smoke.ps1` as a contract-only parity smoke entry for the next compose-run merge step.
+- `layer_render_plan_performance` now exposes the parity smoke schema, script, manifest and precommit flag through launch packets, renderer capabilities and handoff inspection.
+- This records the next optimization direction requested by the user: after module decoupling, precompute layer state/compose queue first, then render through one unified Taichi render/composite path instead of independent per-layer render paths.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Render-plan compose run parity contract
 
 Changes:

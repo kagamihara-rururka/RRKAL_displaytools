@@ -882,6 +882,9 @@ def ocean_material_control_port_packet(
             "control_board_label_object": "ocean3DControlBoardStrip",
             "control_board_button_object": "ocean3DControlBoardButton",
             "control_board_default_visible": True,
+            "control_board_status": "wired_default_visible",
+            "control_board_audit_schema": "rrkal_displaytools.taichi_ocean_3d_control_board_audit.v1",
+            "control_board_audit_field": "control_board_audit",
             "qt_dialog_action": "open_taichi_ocean_3d_controls",
             "button_label": "Taichi 3D Ocean controls",
             "fields": ["wave_strength", "roughness", "foam"],
@@ -889,6 +892,19 @@ def ocean_material_control_port_packet(
             "writes_renderer_flags": renderer_flags,
             "render_pipeline_followup": "post_decoupling_precompute_layer_render_plan_then_single_render_pass",
             "performance_note": "Ocean scalars are UI/apply controls here; layer batching and render-plan precompute are scheduled after module decoupling.",
+        },
+        "control_board_audit_schema": "rrkal_displaytools.taichi_ocean_3d_control_board_audit.v1",
+        "control_board_audit": {
+            "schema": "rrkal_displaytools.taichi_ocean_3d_control_board_audit.v1",
+            "status": "wired_default_visible",
+            "default_visible": True,
+            "primary_surface": "Layers dock quick strip",
+            "secondary_surfaces": ["Properties dock", "Renderer ports action group"],
+            "label_object": "ocean3DControlBoardStrip",
+            "button_object": "ocean3DControlBoardButton",
+            "dialog_action": "open_taichi_ocean_3d_controls",
+            "performance_followup": "post_decoupling_precompute_layer_render_plan_then_single_render_pass",
+            "user_issue": "Ocean 3D controls must be visible from the control board, not only the Properties dock.",
         },
         "renderer_apply_contract_schema": "rrkal_displaytools.ocean_material_renderer_apply_contract.v1",
         "renderer_apply_contract": {
@@ -1153,13 +1169,17 @@ def layer_render_plan_performance_packet(
         "compiled_plan_compose_queue_skip_reasons": ["hidden_layer", "missing_overlay", "transparent_overlay"],
         "compiled_plan_compose_runs_schema": "rrkal_displaytools.layer_render_plan_compose_runs.v1",
         "compiled_plan_compose_runs_helper": "HybridRenderController.layer_render_plan_compose_runs",
-        "compiled_plan_compose_runs_field": "compose_runs",
-        "compiled_plan_compose_run_parity_contract_schema": "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1",
-        "compiled_plan_compose_run_parity_contract_helper": "HybridRenderController.layer_render_plan_compose_run_parity_contract",
-        "compiled_plan_compose_run_parity_contract_field": "compose_run_parity_contract",
-        "phase_timing_unit": "milliseconds",
-        "compiled_plan_reuse_decision_field": "cache_reuse_decision",
-        "compiled_plan_reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",
+            "compiled_plan_compose_runs_field": "compose_runs",
+            "compiled_plan_compose_run_parity_contract_schema": "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1",
+            "compiled_plan_compose_run_parity_contract_helper": "HybridRenderController.layer_render_plan_compose_run_parity_contract",
+            "compiled_plan_compose_run_parity_contract_field": "compose_run_parity_contract",
+            "compose_run_parity_smoke_schema": "rrkal_displaytools.render_compose_parity_smoke.v1",
+            "compose_run_parity_smoke_script": "scripts\\render_compose_parity_smoke.ps1",
+            "compose_run_parity_smoke_manifest": "state/render_compose_parity_smoke_manifest.json",
+            "compose_run_parity_smoke_precommit_required": False,
+            "phase_timing_unit": "milliseconds",
+            "compiled_plan_reuse_decision_field": "cache_reuse_decision",
+            "compiled_plan_reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",
         "compiled_plan_reuse_status_values": ["compiled", "reused"],
         "compiled_plan_reuse_boundary_field": "reuse_boundary",
         "compiled_plan_reuse_boundary": "valid_until_dirty_flags_or_camera_change",
@@ -3581,7 +3601,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "border:1px solid #79abc7; border-radius:8px; padding:6px 8px; font-weight:600; }"
         )
         layers_layout.addWidget(self.ocean_3d_control_board_label)
-        ocean_3d_control_board_button = QtWidgets.QPushButton("Ocean 3D controls")
+        ocean_3d_control_board_button = QtWidgets.QPushButton("Taichi Ocean 3D controls")
         ocean_3d_control_board_button.setObjectName("ocean3DControlBoardButton")
         ocean_3d_control_board_button.setToolTip(
             "Open the same Taichi 3D Ocean Water scalar control window from the default-visible Layers control board."
@@ -4654,6 +4674,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"wave={controls.get('wave_strength')}; "
             f"roughness={controls.get('roughness')}; "
             f"foam={controls.get('foam')}; "
+            f"board={panel.get('control_board_status', 'wired_default_visible')}; "
             f"dialog={panel.get('qt_dialog_action', 'open_taichi_ocean_3d_controls')}; "
             f"followup={panel.get('render_pipeline_followup', 'post_decoupling_precompute_layer_render_plan_then_single_render_pass')}"
         )
@@ -4881,6 +4902,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         compose_merge_candidate_run_count = diagnostics.get("compose_merge_candidate_run_count", 0)
         parity = diagnostics.get("compose_run_parity_contract") if isinstance(diagnostics.get("compose_run_parity_contract"), dict) else {}
         parity_status = parity.get("status", "unavailable")
+        parity_smoke = parity.get("parity_smoke_script", "scripts\\render_compose_parity_smoke.ps1")
         return (
             "Render plan cache: "
             f"status={diagnostics.get('status', 'unavailable')}; "
@@ -4903,6 +4925,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"runs={compose_run_count}; "
             f"merge={compose_merge_candidate_run_count}; "
             f"parity={parity_status}; "
+            f"parity_smoke={parity_smoke}; "
             f"key={key_state}; "
             f"reuse={diagnostics.get('reuse_boundary', 'unavailable')}; "
             f"steps={diagnostics.get('composition_step_count', '-')}; "

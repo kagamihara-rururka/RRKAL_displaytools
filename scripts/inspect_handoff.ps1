@@ -83,6 +83,7 @@ $summary = [ordered]@{
         ocean_material_control_port = $launchPacket.ocean_material_control_port.schema
         ocean_material_renderer_apply_contract = $launchPacket.ocean_material_control_port.renderer_apply_contract.schema
         taichi_ocean_3d_control_panel = $launchPacket.ocean_material_control_port.qt_control_panel.schema
+        taichi_ocean_3d_control_board_audit = $launchPacket.ocean_material_control_port.control_board_audit.schema
         sea_state_scalar_sample = $launchPacket.ocean_material_control_port.sea_state_port.scalar_sample_contract.schema
         layer_undo = $launchPacket.layer_undo.schema
         session_journal = $launchPacket.session_journal.schema
@@ -367,6 +368,10 @@ $summary = [ordered]@{
 
 
         compiled_plan_compose_run_parity_contract_field = $layerRenderPlanPerformance.compiled_plan_compose_run_parity_contract_field
+        compose_run_parity_smoke_schema = $layerRenderPlanPerformance.compose_run_parity_smoke_schema
+        compose_run_parity_smoke_script = $layerRenderPlanPerformance.compose_run_parity_smoke_script
+        compose_run_parity_smoke_manifest = $layerRenderPlanPerformance.compose_run_parity_smoke_manifest
+        compose_run_parity_smoke_precommit_required = $layerRenderPlanPerformance.compose_run_parity_smoke_precommit_required
         compiled_plan_reuse_decision_field = $layerRenderPlanPerformance.compiled_plan_reuse_decision_field
         compiled_plan_reuse_policy = $layerRenderPlanPerformance.compiled_plan_reuse_policy
         compiled_plan_reuse_status_values = $layerRenderPlanPerformance.compiled_plan_reuse_status_values
@@ -646,6 +651,9 @@ $summary = [ordered]@{
         control_board_label_object = $launchPacket.ocean_material_control_port.qt_control_panel.control_board_label_object
         control_board_button_object = $launchPacket.ocean_material_control_port.qt_control_panel.control_board_button_object
         control_board_default_visible = $launchPacket.ocean_material_control_port.qt_control_panel.control_board_default_visible
+        control_board_status = $launchPacket.ocean_material_control_port.qt_control_panel.control_board_status
+        control_board_audit_schema = $launchPacket.ocean_material_control_port.control_board_audit.schema
+        control_board_audit = $launchPacket.ocean_material_control_port.control_board_audit
         qt_dialog_action = $launchPacket.ocean_material_control_port.qt_control_panel.qt_dialog_action
         render_pipeline_followup = $launchPacket.ocean_material_control_port.qt_control_panel.render_pipeline_followup
     }

@@ -638,6 +638,18 @@ if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_run_parity
 if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_field -ne "compose_run_parity_contract") {
     throw "Launch packet layer_render_plan_performance compose run parity contract field missing"
 }
+if ($launchPacket.layer_render_plan_performance.compose_run_parity_smoke_schema -ne "rrkal_displaytools.render_compose_parity_smoke.v1") {
+    throw "Launch packet layer_render_plan_performance compose parity smoke schema missing"
+}
+if ($launchPacket.layer_render_plan_performance.compose_run_parity_smoke_script -ne "scripts\render_compose_parity_smoke.ps1") {
+    throw "Launch packet layer_render_plan_performance compose parity smoke script missing"
+}
+if ($launchPacket.layer_render_plan_performance.compose_run_parity_smoke_manifest -ne "state/render_compose_parity_smoke_manifest.json") {
+    throw "Launch packet layer_render_plan_performance compose parity smoke manifest missing"
+}
+if ($launchPacket.layer_render_plan_performance.compose_run_parity_smoke_precommit_required -ne $false) {
+    throw "Launch packet layer_render_plan_performance compose parity smoke precommit flag mismatch"
+}
 if ($launchPacket.layer_render_plan_performance.compiled_plan_reuse_decision_field -ne "cache_reuse_decision") {
     throw "Launch packet layer_render_plan_performance reuse decision field missing"
 }
@@ -1018,6 +1030,15 @@ if ($launchPacket.ocean_material_control_port.qt_control_panel.control_board_but
 }
 if ($launchPacket.ocean_material_control_port.qt_control_panel.control_board_default_visible -ne $true) {
     throw "Launch packet Taichi ocean 3D control board visibility flag missing"
+}
+if ($launchPacket.ocean_material_control_port.qt_control_panel.control_board_status -ne "wired_default_visible") {
+    throw "Launch packet Taichi ocean 3D control board status missing"
+}
+if ($launchPacket.ocean_material_control_port.control_board_audit.schema -ne "rrkal_displaytools.taichi_ocean_3d_control_board_audit.v1") {
+    throw "Launch packet Taichi ocean 3D control board audit schema missing"
+}
+if ($launchPacket.ocean_material_control_port.control_board_audit.primary_surface -ne "Layers dock quick strip") {
+    throw "Launch packet Taichi ocean 3D control board audit primary surface missing"
 }
 if ($launchPacket.ocean_material_control_port.ocean_material_summary_contract.schema -ne "rrkal_displaytools.ocean_material_summary_contract.v1") {
     throw "Launch packet ocean material summary contract missing or invalid"
@@ -1882,6 +1903,18 @@ if ($capabilities.layer_render_plan_performance.compiled_plan_compose_run_parity
 if ($capabilities.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_field -ne "compose_run_parity_contract") {
     throw "Renderer layer_render_plan_performance compose run parity contract field missing"
 }
+if ($capabilities.layer_render_plan_performance.compose_run_parity_smoke_schema -ne "rrkal_displaytools.render_compose_parity_smoke.v1") {
+    throw "Renderer layer_render_plan_performance compose parity smoke schema missing"
+}
+if ($capabilities.layer_render_plan_performance.compose_run_parity_smoke_script -ne "scripts\render_compose_parity_smoke.ps1") {
+    throw "Renderer layer_render_plan_performance compose parity smoke script missing"
+}
+if ($capabilities.layer_render_plan_performance.compose_run_parity_smoke_manifest -ne "state/render_compose_parity_smoke_manifest.json") {
+    throw "Renderer layer_render_plan_performance compose parity smoke manifest missing"
+}
+if ($capabilities.layer_render_plan_performance.compose_run_parity_smoke_precommit_required -ne $false) {
+    throw "Renderer layer_render_plan_performance compose parity smoke precommit flag mismatch"
+}
 if ($capabilities.layer_render_plan_performance.compiled_plan_reuse_policy -ne "reuse_when_cache_key_matches_previous_compiled_plan") {
     throw "Renderer layer_render_plan_performance compiled plan reuse policy missing"
 }
@@ -2142,6 +2175,15 @@ if ($capabilities.ocean_material_control_port.qt_control_panel.control_board_lab
 }
 if ($capabilities.ocean_material_control_port.qt_control_panel.control_board_default_visible -ne $true) {
     throw "Renderer Taichi ocean 3D control board visibility flag missing"
+}
+if ($capabilities.ocean_material_control_port.qt_control_panel.control_board_status -ne "wired_default_visible") {
+    throw "Renderer Taichi ocean 3D control board status missing"
+}
+if ($capabilities.ocean_material_control_port.control_board_audit.schema -ne "rrkal_displaytools.taichi_ocean_3d_control_board_audit.v1") {
+    throw "Renderer Taichi ocean 3D control board audit schema missing"
+}
+if ($capabilities.ocean_material_control_port.control_board_audit.primary_surface -ne "Layers dock quick strip") {
+    throw "Renderer Taichi ocean 3D control board audit primary surface missing"
 }
 if ($capabilities.ocean_material_control_port.ocean_material_summary_contract.schema -ne "rrkal_displaytools.ocean_material_summary_contract.v1") {
     throw "Renderer ocean material summary contract missing or invalid"
@@ -2674,6 +2716,18 @@ if ($handoff.layer_render_plan_performance.compiled_plan_compose_run_parity_cont
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_field -ne "compose_run_parity_contract") {
     throw "Handoff inspection layer render plan performance compose run parity contract field missing"
+}
+if ($handoff.layer_render_plan_performance.compose_run_parity_smoke_schema -ne "rrkal_displaytools.render_compose_parity_smoke.v1") {
+    throw "Handoff inspection layer render plan performance compose parity smoke schema missing"
+}
+if ($handoff.layer_render_plan_performance.compose_run_parity_smoke_script -ne "scripts\render_compose_parity_smoke.ps1") {
+    throw "Handoff inspection layer render plan performance compose parity smoke script missing"
+}
+if ($handoff.layer_render_plan_performance.compose_run_parity_smoke_manifest -ne "state/render_compose_parity_smoke_manifest.json") {
+    throw "Handoff inspection layer render plan performance compose parity smoke manifest missing"
+}
+if ($handoff.layer_render_plan_performance.compose_run_parity_smoke_precommit_required -ne $false) {
+    throw "Handoff inspection layer render plan performance compose parity smoke precommit flag mismatch"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_reuse_decision_field -ne "cache_reuse_decision") {
     throw "Handoff inspection layer render plan performance reuse decision field missing"
@@ -3296,6 +3350,9 @@ if ($handoff.launch_packet_contracts.ocean_material_renderer_apply_contract -ne 
 if ($handoff.launch_packet_contracts.taichi_ocean_3d_control_panel -ne "rrkal_displaytools.taichi_ocean_3d_control_panel.v1") {
     throw "Handoff inspection Taichi ocean 3D control panel contract missing or invalid"
 }
+if ($handoff.launch_packet_contracts.taichi_ocean_3d_control_board_audit -ne "rrkal_displaytools.taichi_ocean_3d_control_board_audit.v1") {
+    throw "Handoff inspection Taichi ocean 3D control board audit contract missing or invalid"
+}
 if ($handoff.launch_packet_contracts.sea_state_scalar_sample -ne "rrkal_displaytools.sea_state_scalar_sample.v1") {
     throw "Handoff inspection sea-state scalar sample contract missing or invalid"
 }
@@ -3322,6 +3379,15 @@ if ($handoff.ocean_material_control_port.control_board_label_object -ne "ocean3D
 }
 if ($handoff.ocean_material_control_port.control_board_default_visible -ne $true) {
     throw "Handoff inspection Taichi ocean 3D control board visibility flag missing"
+}
+if ($handoff.ocean_material_control_port.control_board_status -ne "wired_default_visible") {
+    throw "Handoff inspection Taichi ocean 3D control board status missing"
+}
+if ($handoff.ocean_material_control_port.control_board_audit_schema -ne "rrkal_displaytools.taichi_ocean_3d_control_board_audit.v1") {
+    throw "Handoff inspection Taichi ocean 3D control board audit schema missing"
+}
+if ($handoff.ocean_material_control_port.control_board_audit.primary_surface -ne "Layers dock quick strip") {
+    throw "Handoff inspection Taichi ocean 3D control board primary surface missing"
 }
 if ($handoff.ocean_material_control_port.ocean_material_summary_contract_schema -ne "rrkal_displaytools.ocean_material_summary_contract.v1") {
     throw "Handoff inspection ocean material summary contract missing or invalid"
@@ -3685,6 +3751,15 @@ if ($qtPanelSource -notlike "*ocean3DControlBoardButton*") {
 if ($qtPanelSource -notlike "*control_board_default_visible*") {
     throw "Qt Taichi ocean 3D control board visibility contract is missing"
 }
+if ($qtPanelSource -notlike "*taichi_ocean_3d_control_board_audit.v1*") {
+    throw "Qt Taichi ocean 3D control board audit contract is missing"
+}
+if ($qtPanelSource -notlike "*control_board_status*") {
+    throw "Qt Taichi ocean 3D control board status field is missing"
+}
+if ($qtPanelSource -notlike "*board={panel.get('control_board_status'*") {
+    throw "Qt Taichi ocean 3D control board summary text is missing"
+}
 if ($qtPanelSource -notlike "*post_decoupling_precompute_layer_render_plan_then_single_render_pass*") {
     throw "Qt Taichi ocean 3D performance followup marker is missing"
 }
@@ -4017,6 +4092,9 @@ if ($qtPanelSource -notlike "*compose_run_parity_contract*") {
 }
 if ($qtPanelSource -notlike "*parity={parity_status}*") {
     throw "Qt render plan compose run parity summary text is missing"
+}
+if ($qtPanelSource -notlike "*parity_smoke={parity_smoke}*") {
+    throw "Qt render plan compose parity smoke summary text is missing"
 }
 if ($qtPanelSource -notlike "*refresh_layer_render_plan_cache_diagnostics_strip*") {
     throw "Qt render plan cache diagnostics strip refresh is missing"
@@ -4356,6 +4434,12 @@ if ($rendererSource -notlike "*sequential_compose_queue_vs_merged_candidate_rgba
 if ($rendererSource -notlike "*baseline_sequential_frame_rgba*") {
     throw "Renderer render plan compose run parity baseline artifact marker is missing"
 }
+if ($rendererSource -notlike "*render_compose_parity_smoke.ps1*") {
+    throw "Renderer render plan compose parity smoke script marker is missing"
+}
+if ($rendererSource -notlike "*rrkal_displaytools.render_compose_parity_smoke.v1*") {
+    throw "Renderer render plan compose parity smoke schema marker is missing"
+}
 if ($rendererSource -notlike "*adjacent_alpha_compose_overlays_can_be_collapsed_after_visual_parity_check*") {
     throw "Renderer render plan compose runs merge-safe marker is missing"
 }
@@ -4483,6 +4567,27 @@ if ($rendererSource -notlike "*layer_hover_affordance_packet*") {
 }
 if ($rendererSource -notlike "*layer_lock_affordance_packet*") {
     throw "Renderer capability layer lock affordance contract missing"
+}
+
+$composeParitySmokePath = Join-Path $RepoRoot "scripts\render_compose_parity_smoke.ps1"
+if (-not (Test-Path -LiteralPath $composeParitySmokePath)) {
+    throw "Compose parity smoke script is missing"
+}
+$composeParitySmokeSource = Get-Content -LiteralPath $composeParitySmokePath -Raw -Encoding UTF8
+if ($composeParitySmokeSource -notlike "*rrkal_displaytools.render_compose_parity_smoke.v1*") {
+    throw "Compose parity smoke schema marker is missing"
+}
+if ($composeParitySmokeSource -notlike "*sequential_compose_queue_vs_merged_candidate_rgba_diff*") {
+    throw "Compose parity smoke compare method marker is missing"
+}
+if ($composeParitySmokeSource -notlike "*ToleranceMaxAbsDiff*") {
+    throw "Compose parity smoke max diff tolerance parameter is missing"
+}
+if ($composeParitySmokeSource -notlike "*WriteManifest*") {
+    throw "Compose parity smoke manifest write switch is missing"
+}
+if ($composeParitySmokeSource -notlike "*contract_only_no_render_side_effect*") {
+    throw "Compose parity smoke side-effect boundary marker is missing"
 }
 
 $scripts = Get-ChildItem scripts -Filter *.ps1
