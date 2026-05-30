@@ -7162,6 +7162,9 @@ if ($preDecouplingSnapshotContract.included_fields -notcontains "decoupling_boun
 if ($preDecouplingSnapshotContract.included_fields -notcontains "render_plan_compose_work_order") {
     throw "Pre-decoupling snapshot render plan compose work order field missing"
 }
+if ($preDecouplingSnapshotContract.included_fields -notcontains "uiux_closure_readiness_check") {
+    throw "Pre-decoupling snapshot UIUX readiness field missing"
+}
 $preDecouplingSnapshotText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $preDecouplingSnapshotPath)
 $preDecouplingSnapshot = ($preDecouplingSnapshotText -join "`n") | ConvertFrom-Json
 if ($preDecouplingSnapshot.schema -ne "rrkal_displaytools.pre_decoupling_snapshot.v1") {
@@ -7172,6 +7175,9 @@ if ($preDecouplingSnapshot.decoupling_readiness.schema -ne "rrkal_displaytools.d
 }
 if ($preDecouplingSnapshot.pre_decoupling_gate.schema -ne "rrkal_displaytools.pre_decoupling_gate.v1") {
     throw "Pre-decoupling snapshot gate schema missing"
+}
+if ($preDecouplingSnapshot.uiux_closure_readiness_check.status -ne "pass") {
+    throw "Pre-decoupling snapshot UIUX readiness missing or not passing"
 }
 if ($preDecouplingSnapshot.decoupling_boundary_inspection.schema -ne "rrkal_displaytools.decoupling_boundary_inspection.v1") {
     throw "Pre-decoupling snapshot boundary inspection schema missing"

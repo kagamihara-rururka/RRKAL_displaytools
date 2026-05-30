@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Pre-decoupling snapshot includes UIUX readiness
+
+- Updated `scripts/export_pre_decoupling_snapshot.ps1` so one-file handoff snapshots include `uiux_closure_readiness_check`.
+- Smoke now gates the snapshot contract and normal snapshot output for the embedded UIUX pass result.
+- This keeps snapshot, readiness bundle, compact check and formal gate aligned before post-7 extraction.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Pre-decoupling bundle includes UIUX readiness
 
 - Updated `scripts/export_pre_decoupling_readiness_bundle.ps1` to embed the UIUX closure readiness check result.

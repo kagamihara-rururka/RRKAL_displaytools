@@ -83,6 +83,7 @@ if ($ContractOnly) {
         included_fields = @(
             "decoupling_readiness",
             "pre_decoupling_gate",
+            "uiux_closure_readiness_check",
             "decoupling_boundary_inspection",
             "render_plan_compose_work_order",
             "performance_smoke_telemetry",
@@ -101,6 +102,7 @@ $performanceContract = Invoke-JsonPython @("performance_telemetry.py", "--contra
 $rendererConfigGateway = Invoke-JsonPython @("renderer_config_gateway.py", "--sample-map-projection", "globe")
 $controlledInterception = Invoke-JsonPython @("controlled_interception.py", "--source", "pre_decoupling_snapshot")
 $preDecouplingGate = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\pre_decoupling_gate.ps1", "-ContractOnly")
+$uiuxReadiness = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\check_uiux_closure_readiness.ps1")
 $decouplingBoundaryInspection = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_decoupling_boundaries.ps1")
 $renderPlanComposeWorkOrder = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_render_plan_compose_work_order.ps1")
 
@@ -129,6 +131,7 @@ $snapshot = [ordered]@{
     }
     decoupling_readiness = $readiness
     pre_decoupling_gate = $preDecouplingGate
+    uiux_closure_readiness_check = $uiuxReadiness
     decoupling_boundary_inspection = $decouplingBoundaryInspection
     render_plan_compose_work_order = $renderPlanComposeWorkOrder
     performance_smoke_telemetry = $performanceContract
