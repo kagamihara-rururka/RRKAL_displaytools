@@ -6512,13 +6512,13 @@ if ($rendererSource -notlike "*slow_frame_threshold_ms*") {
 if ($rendererSource -notlike "*perf_counter_start*") {
     throw "Renderer render plan phase timing recommended start marker is missing"
 }
-if ($rendererSource -notlike "*prepare_batches*") {
+if ($renderPlanCombinedSource -notlike "*prepare_batches*") {
     throw "Renderer render plan prepare batches phase marker is missing"
 }
-if ($rendererSource -notlike "*compose_overlays*") {
+if ($renderPlanCombinedSource -notlike "*compose_overlays*") {
     throw "Renderer render plan compose overlays phase marker is missing"
 }
-if ($rendererSource -notlike "*future_single_pass_candidate*") {
+if ($renderPlanCombinedSource -notlike "*future_single_pass_candidate*") {
     throw "Renderer render plan future single-pass phase marker is missing"
 }
 if ($renderPlanCombinedSource -notlike "*centralized_overlay_composition*") {

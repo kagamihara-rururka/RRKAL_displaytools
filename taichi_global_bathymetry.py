@@ -26,6 +26,7 @@ from render_core.render_plan import (
     build_layer_render_plan_apply_path,
     build_layer_render_plan_compose_run_parity_contract,
     build_layer_render_plan_compose_runs,
+    build_layer_render_plan_execution_phases,
     build_layer_render_plan_execution_summary,
 )
 from pin_projection import pin_projection_contract_packet, project_pins_to_screen
@@ -14487,77 +14488,11 @@ class HybridRenderController:
         batch_decisions: list[dict[str, object]],
         execution_summary: dict[str, object],
     ) -> list[dict[str, object]]:
-        def phase_decisions(items: list[dict[str, object]]) -> list[str]:
-            values = sorted(
-                {
-                    str(item.get("decision") or "unknown_decision")
-                    for item in items
-                    if isinstance(item, dict)
-                }
-            )
-            return values or ["none"]
-
-        batch_items = [
-            item
-            for item in batch_decisions
-            if isinstance(item, dict) and item.get("scope") == "batch"
-        ]
-        layer_items = [
-            item
-            for item in batch_decisions
-            if isinstance(item, dict) and item.get("scope") == "layer"
-        ]
-        single_pass_items = [
-            item
-            for item in apply_path
-            if isinstance(item, dict) and item.get("single_pass_candidate")
-        ]
-        blockers_value = execution_summary.get("single_pass_blockers")
-        blockers = blockers_value if isinstance(blockers_value, list) else []
-        postprocess_count = sum(
-            1
-            for item in apply_path
-            if isinstance(item, dict) and item.get("kind") == "style_profile_postprocess"
+        return build_layer_render_plan_execution_phases(
+            apply_path,
+            batch_decisions,
+            execution_summary,
         )
-        return [
-            {
-                "id": "prepare_batches",
-                "order": 0,
-                "status": "planned_runtime_metadata",
-                "item_count": len(batch_items),
-                "decisions": phase_decisions(batch_items),
-                "current_runtime_path": "precomputed_overlay_buffers",
-                "future_single_pass_role": "prepare GPU-ready batch inputs",
-            },
-            {
-                "id": "compose_overlays",
-                "order": 1,
-                "status": "current_runtime_path",
-                "item_count": len(layer_items),
-                "decisions": phase_decisions(layer_items),
-                "current_runtime_path": "HybridRenderController.apply_layer_render_plan_composition",
-                "future_single_pass_role": "replace per-layer overlay composition with one Taichi composite pass",
-            },
-            {
-                "id": "postprocess",
-                "order": 2,
-                "status": "current_runtime_path",
-                "item_count": postprocess_count,
-                "decisions": ["postprocess_each_frame"],
-                "current_runtime_path": "apply_style_profile",
-                "future_single_pass_role": "remain final style pass unless folded into shader",
-            },
-            {
-                "id": "future_single_pass_candidate",
-                "order": 3,
-                "status": "queued_after_module_decoupling",
-                "item_count": len(single_pass_items),
-                "decisions": ["single_pass_candidate"],
-                "current_runtime_path": "metadata_only",
-                "future_single_pass_role": "candidate steps for unified Taichi render/composite pass",
-                "blockers": blockers,
-            },
-        ]
 
     def layer_render_plan_phase_timing_contract(
         self,

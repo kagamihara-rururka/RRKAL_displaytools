@@ -8,6 +8,7 @@ from .render_plan import (
     build_layer_render_plan_compose_run_parity_contract,
     build_layer_render_plan_compose_runs,
     build_layer_render_plan_execution_summary,
+    build_layer_render_plan_execution_phases,
 )
 
 __all__ = [
@@ -18,4 +19,5 @@ __all__ = [
     "build_layer_render_plan_compose_run_parity_contract",
     "build_layer_render_plan_compose_runs",
     "build_layer_render_plan_execution_summary",
+    "build_layer_render_plan_execution_phases",
 ]
