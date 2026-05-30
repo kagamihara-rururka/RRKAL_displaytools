@@ -3467,7 +3467,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (cursor_geo_button, "Research interaction: inspect mouse cursor latitude/longitude geodesy bridge JSON."),
             (copy_cursor_summary_button, "Cursor geodesy: copy source, hit state, latitude/longitude and renderer state/ack bridge summary."),
             (boundary_state_button, "Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON."),
-            (copy_boundary_summary_button, "Boundary emphasis: copy target, alignment, RGB/contrast/opacity/gamma/breathing and renderer bridge summary."),
+            (copy_boundary_summary_button, "Boundary emphasis: copy target, tuning values, identity warning and renderer ack summary."),
             (copy_research_summary_button, "Research interaction: copy selection, pin, cursor and boundary summaries as one portable handoff note."),
             (visual_readiness_button, "Visual review: inspect thumbnail/live preview readiness, frame status and missing-frame hints JSON."),
             (copy_visual_summary_button, "Visual review: copy compact thumbnail/live preview readiness summary to clipboard."),
@@ -4934,7 +4934,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"opacity={packet.get('opacity')}; "
             f"gamma={packet.get('gamma')}; "
             f"breathing={packet.get('breathing_enabled')}@{packet.get('breathing_period_s')}s; "
-            f"bridge={packet.get('renderer_bridge_contract')}"
+            f"bridge={packet.get('renderer_bridge_contract')}; "
+            f"identity_warning={self.boundary_identity_warning_text()}; "
+            f"renderer_ack={self.boundary_highlight_ack_summary_text()}"
         )
 
     def collect_cursor_geodesy_readout(self) -> dict[str, object]:
@@ -5685,6 +5687,28 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 "use RRKAL-governed polygon/EEZ source before authoritative boundary claims."
             )
         return "Boundary identity source reports no pending authoritative identity items."
+
+    def boundary_highlight_ack_summary_text(self, payload: dict[str, object] | None = None) -> str:
+        payload = payload if isinstance(payload, dict) else self.boundary_highlight_ack_payload
+        if not isinstance(payload, dict):
+            return f"waiting_for_renderer_ack:{BOUNDARY_HIGHLIGHT_ACK_PATH.name}"
+        updated_at = str(payload.get("updated_at_utc", "-"))
+        error = payload.get("error")
+        if error:
+            return f"error={error}; updated={updated_at}"
+        target_layers = payload.get("target_layers", [])
+        renderer_layers = payload.get("renderer_target_layers", [])
+        applies = payload.get("applies", [])
+        pending = payload.get("pending", [])
+        target_count = len(target_layers) if isinstance(target_layers, list) else "-"
+        renderer_count = len(renderer_layers) if isinstance(renderer_layers, list) else "-"
+        applies_count = len(applies) if isinstance(applies, list) else "-"
+        pending_count = len(pending) if isinstance(pending, list) else "-"
+        return (
+            f"enabled={payload.get('enabled', '-')}; targets={target_count}; "
+            f"renderer_targets={renderer_count}; live_scopes={applies_count}; "
+            f"pending={pending_count}; updated={updated_at}"
+        )
 
     def refresh_boundary_highlight_status(self) -> None:
         if self.boundary_highlight_label is not None:

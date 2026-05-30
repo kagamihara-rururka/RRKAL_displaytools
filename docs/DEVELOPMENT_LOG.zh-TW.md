@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Boundary summary identity and ack handoff
+
+Changes:
+- Added a compact Qt `boundary_highlight_ack_summary_text()` helper for the existing boundary renderer ack payload.
+- `Copy boundary summary` now includes the current boundary identity warning and renderer ack summary in addition to target/tuning values.
+- Smoke gates the Qt helper and copied identity/ack summary fields.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Boundary emphasis tuning summary
 
 Changes:

@@ -513,7 +513,7 @@
 ### 2026-05-30 Qt Boundary JSON action
 
 - Qt Actions now includes `Boundary JSON`, which displays Boundary highlight, Boundary emphasis controls, identity warning text, renderer ack payload and recent ack history.
-- This gives researchers a direct inspection path for country/territorial sea/EEZ emphasis state and the current non-authoritative identity warning.
+- This gives researchers a direct inspection path for country/territorial sea/EEZ emphasis state and the current non-authoritative identity warning. `Copy boundary summary` now also carries the identity warning plus compact renderer ack state for handoff notes.
 
 ### 2026-05-30 Qt inspector action naming
 

@@ -2629,6 +2629,15 @@ if ($qtPanelSource -notlike "*Boundary identity:*") {
 if ($qtPanelSource -notlike "*applied_text*") {
     throw "Qt boundary identity applied marker summary missing"
 }
+if ($qtPanelSource -notlike "*boundary_highlight_ack_summary_text*") {
+    throw "Qt boundary ack summary helper missing"
+}
+if ($qtPanelSource -notlike "*identity_warning={self.boundary_identity_warning_text()}*") {
+    throw "Qt boundary copy summary identity warning missing"
+}
+if ($qtPanelSource -notlike "*renderer_ack={self.boundary_highlight_ack_summary_text()}*") {
+    throw "Qt boundary copy summary renderer ack missing"
+}
 if ($qtPanelSource -notlike "*Boundary emphasis: UI ready, renderer bridge wired*") {
     throw "Qt boundary emphasis label missing renderer bridge wired status"
 }
