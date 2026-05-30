@@ -426,6 +426,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "ocean_material_control_port",
             "style_profile_renderer_routes",
             "module_boundary_registry",
+            "layer_render_plan_performance",
             "reviewer_packet_export",
         ],
         "launch_packet_field": "reviewer_packet_export",
@@ -951,14 +952,16 @@ def visual_feature_closure_matrix_packet(source: str) -> dict[str, object]:
         {"id": "ocean_material", "status": "ready", "evidence_fields": ["ocean_material_control_port", "timeline_ocean_material_interpolation"]},
         {"id": "style_profiles", "status": "ready", "evidence_fields": ["style_renderer_entries", "style_profile_renderer_routes"]},
         {"id": "module_boundaries", "status": "ready", "evidence_fields": ["module_boundary_registry.decoupling_boundary_contract"]},
+        {"id": "renderer_performance", "status": "queued", "evidence_fields": ["layer_render_plan_performance"]},
     ]
     feature_ids = [feature["id"] for feature in features]
+    ready_feature_count = sum(1 for feature in features if feature.get("status") == "ready")
     return {
         "schema": "rrkal_displaytools.visual_feature_closure_matrix.v1",
         "source": source,
-        "status": "ready",
+        "status": "ready_with_queued_performance_followup",
         "feature_count": len(features),
-        "ready_feature_count": len(features),
+        "ready_feature_count": ready_feature_count,
         "feature_ids": feature_ids,
         "features": features,
         "required_feature_ids": feature_ids,
@@ -1014,6 +1017,77 @@ def renderer_output_artifact_contract_packet(source: str) -> dict[str, object]:
         "handoff_field": "renderer_output_artifact_contract",
         "smoke_gate": "renderer_output_artifact_contract",
         "boundary": "Pre-commit smoke verifies the contract only; optional render_quick_smoke.ps1 verifies actual PNG/metadata artifacts when renderer runtime is needed.",
+    }
+
+
+def layer_render_plan_performance_packet(
+    source: str,
+    layer_capability_matrix: dict[str, object] | None = None,
+    module_boundaries: dict[str, object] | None = None,
+) -> dict[str, object]:
+    matrix = layer_capability_matrix if isinstance(layer_capability_matrix, dict) else {}
+    modules = module_boundaries if isinstance(module_boundaries, dict) else {}
+    live_counts = matrix.get("live_counts") if isinstance(matrix.get("live_counts"), dict) else {}
+    stage_order = [
+        "collect_qt_layer_state",
+        "resolve_renderer_targets_and_aliases",
+        "compile_visibility_opacity_blend_pick_state",
+        "freeze_static_geometry_batches",
+        "apply_dirty_flags",
+        "submit_single_taichi_render_pass",
+    ]
+    return {
+        "schema": "rrkal_displaytools.layer_render_plan_performance.v1",
+        "source": source,
+        "status": "queued_after_module_decoupling",
+        "post_decoupling_priority": 1,
+        "optimization_target": "precompute_layer_state_then_single_render_pass",
+        "current_runtime_claim": "contract_and_schedule_only",
+        "runtime_optimization_applied": False,
+        "deferred_until": "module_decoupling_boundary_contract_is_stable",
+        "module_boundary_schema": modules.get("schema"),
+        "stage_order": stage_order,
+        "precompute_inputs": [
+            "profile.layers",
+            "layer_stack_ui",
+            "layer_capability_matrix",
+            "boundary_highlight",
+            "pins",
+            "ocean_material_control_port",
+            "timeline_state",
+        ],
+        "dirty_flags": [
+            "camera",
+            "style_profile",
+            "ocean_material",
+            "layer_visibility",
+            "layer_opacity",
+            "layer_blend",
+            "timeline_step",
+            "data_manifest_ref",
+        ],
+        "batching_targets": [
+            "hydrology_polylines",
+            "boundary_and_maritime_lines",
+            "pin_markers",
+            "traffic_points",
+            "scale_grid_contours",
+        ],
+        "single_pass_outputs": ["globe_frame", "overlay_composite", "metadata_sidecar"],
+        "known_risk": "Independent layer render paths can make Taichi interaction feel sluggish when overlays grow.",
+        "performance_strategy": "Compile renderer-ready layer state once per dirty change, then let Taichi consume a unified render plan in one render/composite path.",
+        "live_control_counts": live_counts,
+        "requires_modules": [
+            "contracts/launch_packets.py",
+            "render_core/taichi_globe.py",
+            "overlays/vector_layers.py",
+            "diagnostics/handoff.py",
+        ],
+        "launch_packet_fields": ["layer_render_plan_performance", "layer_capability_matrix", "module_boundary_registry"],
+        "renderer_capability_field": "layer_render_plan_performance",
+        "handoff_field": "layer_render_plan_performance",
+        "smoke_gate": "layer_render_plan_performance",
+        "boundary": "This records the next renderer performance closure after module decoupling; it does not claim a measured FPS or rewritten Taichi render loop yet.",
     }
 
 
@@ -3569,6 +3643,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         copy_style_thumb_status_button = QtWidgets.QPushButton("Copy style thumb status")
         thumbnail_button = QtWidgets.QPushButton("Inspect: Renderer thumbnail")
         live_preview_button = QtWidgets.QPushButton("Inspect: Live preview")
+        render_plan_perf_button = QtWidgets.QPushButton("Inspect: Render plan perf")
         smoke_button = QtWidgets.QPushButton("Smoke check")
         launch_button = QtWidgets.QPushButton("啟動地球儀")
         restart_button = QtWidgets.QPushButton("套用並重啟")
@@ -3610,6 +3685,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (copy_style_thumb_status_button, "Visual review: copy local style thumbnail ready/missing status summary."),
             (thumbnail_button, "Visual review: inspect latest renderer thumbnail PNG."),
             (live_preview_button, "Visual review: inspect file-based live renderer preview frame."),
+            (render_plan_perf_button, "Renderer diagnostics: inspect queued layer render-plan precompute and single-pass performance contract."),
         ):
             button.setToolTip(tooltip)
             button.setAccessibleDescription(tooltip)
@@ -3660,6 +3736,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         copy_style_thumb_status_button.clicked.connect(self.copy_style_thumbnail_readiness_summary)
         thumbnail_button.clicked.connect(self.show_latest_renderer_thumbnail)
         live_preview_button.clicked.connect(self.show_live_renderer_preview)
+        render_plan_perf_button.clicked.connect(self.show_layer_render_plan_performance)
         smoke_button.clicked.connect(self.run_smoke_check)
         launch_button.clicked.connect(self.launch_renderer)
         restart_button.clicked.connect(self.restart_renderer)
@@ -3670,7 +3747,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, ocean_3d_controls_action_button, copy_ocean_summary_button, style_routes_button, copy_style_routes_summary_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
             ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, copy_style_thumb_status_button, thumbnail_button, live_preview_button)),
-            ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, smoke_button)),
+            ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, render_plan_perf_button, smoke_button)),
             ("Process", (launch_button, restart_button, stop_button)),
         )
         row = 0
@@ -4548,6 +4625,13 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def collect_renderer_output_artifact_contract(self) -> dict[str, object]:
         return renderer_output_artifact_contract_packet("rrkal_displaytools_qt_panel")
 
+    def collect_layer_render_plan_performance(self) -> dict[str, object]:
+        return layer_render_plan_performance_packet(
+            "rrkal_displaytools_qt_panel",
+            self.collect_layer_capability_matrix(),
+            self.collect_module_boundary_registry(),
+        )
+
     def collect_cross_machine_clone_readiness(self) -> dict[str, object]:
         return cross_machine_clone_readiness_packet(
             self.collect_profile_launch_readiness(),
@@ -4604,6 +4688,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "module_boundary_registry": self.collect_module_boundary_registry(),
             "visual_feature_closure_matrix": self.collect_visual_feature_closure_matrix(),
             "renderer_output_artifact_contract": self.collect_renderer_output_artifact_contract(),
+            "layer_render_plan_performance": self.collect_layer_render_plan_performance(),
             "launch_packet_snapshot": self.collect_launch_packet(),
         }
 
@@ -4633,6 +4718,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "visual_review_readiness": self.collect_visual_review_readiness(),
             "visual_feature_closure_matrix": self.collect_visual_feature_closure_matrix(),
             "renderer_output_artifact_contract": self.collect_renderer_output_artifact_contract(),
+            "layer_render_plan_performance": self.collect_layer_render_plan_performance(),
             "layer_operation_feedback": self.collect_layer_operation_feedback(),
             "layer_control_feedback_strip": self.collect_layer_control_feedback_strip(),
             "layer_filter": self.collect_layer_filter_state(),
@@ -8788,6 +8874,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             json.dumps(self.collect_layer_capability_matrix(), ensure_ascii=False, indent=2)
         )
         self.status.setText("已顯示 layer capability matrix JSON")
+
+    def show_layer_render_plan_performance(self) -> None:
+        self.command_text.setPlainText(
+            json.dumps(self.collect_layer_render_plan_performance(), ensure_ascii=False, indent=2)
+        )
+        self.status.setText("Displayed layer render-plan performance contract")
 
     def show_profile_ui_state_replay(self) -> None:
         self.command_text.setPlainText(

@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Layer render-plan performance queue
+
+Changes:
+- Added `rrkal_displaytools.layer_render_plan_performance.v1` to record the post-decoupling performance task: precompute layer state, dirty flags and batches before one Taichi render/composite pass.
+- Exposed the contract through Qt launch packets, No-GUI launch export, renderer capability discovery, handoff inspection and a Qt `Inspect: Render plan perf` action.
+- Updated reviewer packet fields and visual closure matrix so renderer performance is visible as queued work, not claimed as already optimized runtime behavior.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Qt Taichi 3D Ocean control panel
 
 Changes:

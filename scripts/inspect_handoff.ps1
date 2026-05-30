@@ -32,6 +32,8 @@ $visualFeatureClosureMatrix = $launchPacket.visual_feature_closure_matrix
 $visualFeatureClosureMatrixCapabilities = $capabilities.visual_feature_closure_matrix
 $rendererOutputArtifactContract = $launchPacket.renderer_output_artifact_contract
 $rendererOutputArtifactContractCapabilities = $capabilities.renderer_output_artifact_contract
+$layerRenderPlanPerformance = $launchPacket.layer_render_plan_performance
+$layerRenderPlanPerformanceCapabilities = $capabilities.layer_render_plan_performance
 
 $summary = [ordered]@{
     schema = "rrkal_displaytools.handoff_inspection.v1"
@@ -70,6 +72,7 @@ $summary = [ordered]@{
         profile_ui_state_replay = $launchPacket.profile_ui_state_replay.schema
         visual_feature_closure_matrix = $launchPacket.visual_feature_closure_matrix.schema
         renderer_output_artifact_contract = $launchPacket.renderer_output_artifact_contract.schema
+        layer_render_plan_performance = $launchPacket.layer_render_plan_performance.schema
         reviewer_packet_export = $launchPacket.reviewer_packet_export.schema
         layer_visual_presets = $launchPacket.layer_visual_presets.schema
         layer_visual_preset_runtime_feedback = $launchPacket.layer_visual_preset_runtime_feedback.schema
@@ -253,6 +256,18 @@ $summary = [ordered]@{
         quick_render_smoke_script = $rendererOutputArtifactContract.quick_render_smoke_script
         quick_render_smoke_validates = $rendererOutputArtifactContract.quick_render_smoke_validates
         runtime_artifact_scope = $rendererOutputArtifactContract.runtime_artifact_scope
+    }
+    layer_render_plan_performance = @{
+        schema = "rrkal_displaytools.layer_render_plan_performance.v1"
+        launch_packet_schema = $layerRenderPlanPerformance.schema
+        renderer_capabilities_schema = $layerRenderPlanPerformanceCapabilities.schema
+        status = $layerRenderPlanPerformance.status
+        post_decoupling_priority = $layerRenderPlanPerformance.post_decoupling_priority
+        optimization_target = $layerRenderPlanPerformance.optimization_target
+        runtime_optimization_applied = $layerRenderPlanPerformance.runtime_optimization_applied
+        deferred_until = $layerRenderPlanPerformance.deferred_until
+        stage_order = $layerRenderPlanPerformance.stage_order
+        smoke_gate = $layerRenderPlanPerformance.smoke_gate
     }
     cursor_geodesy_readout = @{
         launch_packet_schema = $launchPacket.cursor_geodesy_readout.schema

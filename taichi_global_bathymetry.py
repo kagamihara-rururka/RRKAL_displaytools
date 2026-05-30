@@ -18352,6 +18352,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "ocean_material_control_port",
             "style_profile_renderer_routes",
             "module_boundary_registry",
+            "layer_render_plan_performance",
             "reviewer_packet_export",
         ],
         "launch_packet_field": "reviewer_packet_export",
@@ -18877,14 +18878,16 @@ def visual_feature_closure_matrix_packet(source: str) -> dict[str, object]:
         {"id": "ocean_material", "status": "ready", "evidence_fields": ["ocean_material_control_port", "timeline_ocean_material_interpolation"]},
         {"id": "style_profiles", "status": "ready", "evidence_fields": ["style_renderer_entries", "style_profile_renderer_routes"]},
         {"id": "module_boundaries", "status": "ready", "evidence_fields": ["module_boundary_registry.decoupling_boundary_contract"]},
+        {"id": "renderer_performance", "status": "queued", "evidence_fields": ["layer_render_plan_performance"]},
     ]
     feature_ids = [feature["id"] for feature in features]
+    ready_feature_count = sum(1 for feature in features if feature.get("status") == "ready")
     return {
         "schema": "rrkal_displaytools.visual_feature_closure_matrix.v1",
         "source": source,
-        "status": "ready",
+        "status": "ready_with_queued_performance_followup",
         "feature_count": len(features),
-        "ready_feature_count": len(features),
+        "ready_feature_count": ready_feature_count,
         "feature_ids": feature_ids,
         "features": features,
         "required_feature_ids": feature_ids,
@@ -18940,6 +18943,77 @@ def renderer_output_artifact_contract_packet(source: str) -> dict[str, object]:
         "handoff_field": "renderer_output_artifact_contract",
         "smoke_gate": "renderer_output_artifact_contract",
         "boundary": "Pre-commit smoke verifies the contract only; optional render_quick_smoke.ps1 verifies actual PNG/metadata artifacts when renderer runtime is needed.",
+    }
+
+
+def layer_render_plan_performance_packet(
+    source: str,
+    layer_capability_matrix: dict[str, object] | None = None,
+    module_boundaries: dict[str, object] | None = None,
+) -> dict[str, object]:
+    matrix = layer_capability_matrix if isinstance(layer_capability_matrix, dict) else {}
+    modules = module_boundaries if isinstance(module_boundaries, dict) else {}
+    live_counts = matrix.get("live_counts") if isinstance(matrix.get("live_counts"), dict) else {}
+    stage_order = [
+        "collect_qt_layer_state",
+        "resolve_renderer_targets_and_aliases",
+        "compile_visibility_opacity_blend_pick_state",
+        "freeze_static_geometry_batches",
+        "apply_dirty_flags",
+        "submit_single_taichi_render_pass",
+    ]
+    return {
+        "schema": "rrkal_displaytools.layer_render_plan_performance.v1",
+        "source": source,
+        "status": "queued_after_module_decoupling",
+        "post_decoupling_priority": 1,
+        "optimization_target": "precompute_layer_state_then_single_render_pass",
+        "current_runtime_claim": "contract_and_schedule_only",
+        "runtime_optimization_applied": False,
+        "deferred_until": "module_decoupling_boundary_contract_is_stable",
+        "module_boundary_schema": modules.get("schema"),
+        "stage_order": stage_order,
+        "precompute_inputs": [
+            "profile.layers",
+            "layer_stack_ui",
+            "layer_capability_matrix",
+            "boundary_highlight",
+            "pins",
+            "ocean_material_control_port",
+            "timeline_state",
+        ],
+        "dirty_flags": [
+            "camera",
+            "style_profile",
+            "ocean_material",
+            "layer_visibility",
+            "layer_opacity",
+            "layer_blend",
+            "timeline_step",
+            "data_manifest_ref",
+        ],
+        "batching_targets": [
+            "hydrology_polylines",
+            "boundary_and_maritime_lines",
+            "pin_markers",
+            "traffic_points",
+            "scale_grid_contours",
+        ],
+        "single_pass_outputs": ["globe_frame", "overlay_composite", "metadata_sidecar"],
+        "known_risk": "Independent layer render paths can make Taichi interaction feel sluggish when overlays grow.",
+        "performance_strategy": "Compile renderer-ready layer state once per dirty change, then let Taichi consume a unified render plan in one render/composite path.",
+        "live_control_counts": live_counts,
+        "requires_modules": [
+            "contracts/launch_packets.py",
+            "render_core/taichi_globe.py",
+            "overlays/vector_layers.py",
+            "diagnostics/handoff.py",
+        ],
+        "launch_packet_fields": ["layer_render_plan_performance", "layer_capability_matrix", "module_boundary_registry"],
+        "renderer_capability_field": "layer_render_plan_performance",
+        "handoff_field": "layer_render_plan_performance",
+        "smoke_gate": "layer_render_plan_performance",
+        "boundary": "This records the next renderer performance closure after module decoupling; it does not claim a measured FPS or rewritten Taichi render loop yet.",
     }
 
 
@@ -20099,6 +20173,11 @@ def renderer_capabilities_packet() -> dict[str, object]:
         "visual_review_readiness": visual_review_readiness_packet("taichi_global_bathymetry.renderer_capabilities"),
         "visual_feature_closure_matrix": visual_feature_closure_matrix_packet("taichi_global_bathymetry.renderer_capabilities"),
         "renderer_output_artifact_contract": renderer_output_artifact_contract_packet("taichi_global_bathymetry.renderer_capabilities"),
+        "layer_render_plan_performance": layer_render_plan_performance_packet(
+            "taichi_global_bathymetry.renderer_capabilities",
+            layer_capability_matrix_packet(),
+            module_boundary_registry_packet("taichi_global_bathymetry.renderer_capabilities"),
+        ),
         "layer_visual_presets": layer_visual_presets_packet("taichi_global_bathymetry.renderer_capabilities"),
         "layer_visual_preset_runtime_feedback": layer_visual_preset_runtime_feedback_packet(layer_visual_presets_packet("taichi_global_bathymetry.renderer_capabilities"), None, "taichi_global_bathymetry.renderer_capabilities"),
         "hydrology_lod_readiness": hydrology_lod_readiness_packet("taichi_global_bathymetry.renderer_capabilities", layer_capability_matrix_packet()),

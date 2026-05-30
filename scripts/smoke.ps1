@@ -473,6 +473,9 @@ if ($launchPacket.visual_feature_closure_matrix.feature_ids -notcontains "pin_ov
 if ($launchPacket.visual_feature_closure_matrix.feature_ids -notcontains "hydrology_lod") {
     throw "Launch packet visual feature closure matrix missing Hydrology evidence"
 }
+if ($launchPacket.visual_feature_closure_matrix.feature_ids -notcontains "renderer_performance") {
+    throw "Launch packet visual feature closure matrix missing renderer performance queue"
+}
 if ($launchPacket.visual_feature_closure_matrix.smoke_gate -ne "visual_feature_closure_matrix") {
     throw "Launch packet visual feature closure matrix smoke gate mismatch"
 }
@@ -484,6 +487,21 @@ if ($launchPacket.renderer_output_artifact_contract.metadata_sidecar_schema -ne 
 }
 if ($launchPacket.renderer_output_artifact_contract.quick_render_smoke_validates -notcontains "preview_frame_png_nonempty") {
     throw "Launch packet renderer output artifact quick smoke preview check missing"
+}
+if ($launchPacket.layer_render_plan_performance.schema -ne "rrkal_displaytools.layer_render_plan_performance.v1") {
+    throw "Launch packet layer_render_plan_performance schema missing or invalid"
+}
+if ($launchPacket.layer_render_plan_performance.status -ne "queued_after_module_decoupling") {
+    throw "Launch packet layer_render_plan_performance status mismatch"
+}
+if ([int]$launchPacket.layer_render_plan_performance.post_decoupling_priority -ne 1) {
+    throw "Launch packet layer_render_plan_performance priority mismatch"
+}
+if ($launchPacket.layer_render_plan_performance.stage_order -notcontains "submit_single_taichi_render_pass") {
+    throw "Launch packet layer_render_plan_performance single-pass stage missing"
+}
+if ($launchPacket.layer_render_plan_performance.runtime_optimization_applied -ne $false) {
+    throw "Launch packet layer_render_plan_performance must not claim applied runtime optimization"
 }
 if ($launchPacket.module_boundary_registry.schema -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Launch packet module_boundary_registry schema missing or invalid"
@@ -718,6 +736,9 @@ if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "st
 }
 if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "module_boundary_registry") {
     throw "Launch packet reviewer packet module boundary packet field missing"
+}
+if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "layer_render_plan_performance") {
+    throw "Launch packet reviewer packet render plan performance packet field missing"
 }
 if (-not $launchPacket.reviewer_packet_export.portable) {
     throw "Launch packet reviewer packet portability flag missing"
@@ -1528,11 +1549,26 @@ if ($capabilities.visual_feature_closure_matrix.schema -ne "rrkal_displaytools.v
 if ($capabilities.visual_feature_closure_matrix.feature_ids -notcontains "ocean_material") {
     throw "Renderer visual feature closure matrix missing ocean material evidence"
 }
+if ($capabilities.visual_feature_closure_matrix.feature_ids -notcontains "renderer_performance") {
+    throw "Renderer visual feature closure matrix missing renderer performance queue"
+}
 if ($capabilities.renderer_output_artifact_contract.schema -ne "rrkal_displaytools.renderer_output_artifact_contract.v1") {
     throw "Renderer output artifact contract schema missing or invalid"
 }
 if ($capabilities.renderer_output_artifact_contract.image_output_control -ne "--output") {
     throw "Renderer output artifact contract output control mismatch"
+}
+if ($capabilities.layer_render_plan_performance.schema -ne "rrkal_displaytools.layer_render_plan_performance.v1") {
+    throw "Renderer layer_render_plan_performance schema missing or invalid"
+}
+if ($capabilities.layer_render_plan_performance.optimization_target -ne "precompute_layer_state_then_single_render_pass") {
+    throw "Renderer layer_render_plan_performance optimization target mismatch"
+}
+if ($capabilities.layer_render_plan_performance.stage_order -notcontains "submit_single_taichi_render_pass") {
+    throw "Renderer layer_render_plan_performance single-pass stage missing"
+}
+if ($capabilities.layer_render_plan_performance.runtime_optimization_applied -ne $false) {
+    throw "Renderer layer_render_plan_performance must not claim applied runtime optimization"
 }
 if ($capabilities.module_boundary_registry.schema -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Renderer module_boundary_registry schema missing or invalid"
@@ -1698,6 +1734,9 @@ if ($capabilities.reviewer_packet_export.included_packet_fields -notcontains "st
 }
 if ($capabilities.reviewer_packet_export.included_packet_fields -notcontains "module_boundary_registry") {
     throw "Renderer reviewer packet module boundary packet field missing"
+}
+if ($capabilities.reviewer_packet_export.included_packet_fields -notcontains "layer_render_plan_performance") {
+    throw "Renderer reviewer packet render plan performance packet field missing"
 }
 if ($capabilities.layer_visual_presets.schema -ne "rrkal_displaytools.layer_visual_presets.v1") {
     throw "Renderer layer_visual_presets schema missing or invalid"
@@ -2132,6 +2171,9 @@ if ($handoff.visual_feature_closure_matrix.renderer_capabilities_schema -ne "rrk
 if ($handoff.visual_feature_closure_matrix.feature_ids -notcontains "boundary_emphasis") {
     throw "Handoff inspection visual feature closure matrix missing boundary evidence"
 }
+if ($handoff.visual_feature_closure_matrix.feature_ids -notcontains "renderer_performance") {
+    throw "Handoff inspection visual feature closure matrix missing renderer performance queue"
+}
 if ($handoff.launch_packet_contracts.renderer_output_artifact_contract -ne "rrkal_displaytools.renderer_output_artifact_contract.v1") {
     throw "Handoff inspection renderer output artifact contract missing or invalid"
 }
@@ -2143,6 +2185,24 @@ if ($handoff.renderer_output_artifact_contract.renderer_capabilities_schema -ne 
 }
 if ($handoff.renderer_output_artifact_contract.quick_render_smoke_validates -notcontains "metadata_sidecar_schema") {
     throw "Handoff inspection renderer output artifact metadata quick smoke check missing"
+}
+if ($handoff.launch_packet_contracts.layer_render_plan_performance -ne "rrkal_displaytools.layer_render_plan_performance.v1") {
+    throw "Handoff inspection layer render plan performance launch contract missing or invalid"
+}
+if ($handoff.layer_render_plan_performance.launch_packet_schema -ne "rrkal_displaytools.layer_render_plan_performance.v1") {
+    throw "Handoff inspection layer render plan performance launch schema missing"
+}
+if ($handoff.layer_render_plan_performance.renderer_capabilities_schema -ne "rrkal_displaytools.layer_render_plan_performance.v1") {
+    throw "Handoff inspection layer render plan performance renderer schema missing"
+}
+if ($handoff.layer_render_plan_performance.status -ne "queued_after_module_decoupling") {
+    throw "Handoff inspection layer render plan performance status mismatch"
+}
+if ($handoff.layer_render_plan_performance.stage_order -notcontains "submit_single_taichi_render_pass") {
+    throw "Handoff inspection layer render plan performance single-pass stage missing"
+}
+if ($handoff.layer_render_plan_performance.runtime_optimization_applied -ne $false) {
+    throw "Handoff inspection layer render plan performance must not claim applied runtime optimization"
 }
 if ($handoff.launch_packet_contracts.layer_selection_tool -ne "rrkal_displaytools.layer_selection_tool.v1") {
     throw "Handoff inspection layer_selection_tool launch contract missing or invalid"
@@ -2645,6 +2705,9 @@ if ($handoff.reviewer_packet_export.included_packet_fields -notcontains "style_p
 if ($handoff.reviewer_packet_export.included_packet_fields -notcontains "module_boundary_registry") {
     throw "Handoff inspection reviewer packet module boundary packet field missing"
 }
+if ($handoff.reviewer_packet_export.included_packet_fields -notcontains "layer_render_plan_performance") {
+    throw "Handoff inspection reviewer packet render plan performance packet field missing"
+}
 if (-not $handoff.reviewer_packet_export.portable) {
     throw "Handoff inspection reviewer packet portability flag missing"
 }
@@ -3082,6 +3145,9 @@ if ($qtPanelSource -notlike '*"style_profile_renderer_routes": self.collect_styl
 if ($qtPanelSource -notlike '*"module_boundary_registry": self.collect_module_boundary_registry()*') {
     throw "Qt reviewer packet module boundary registry output is missing"
 }
+if ($qtPanelSource -notlike '*"layer_render_plan_performance": self.collect_layer_render_plan_performance()*') {
+    throw "Qt reviewer packet render plan performance output is missing"
+}
 if ($qtPanelSource -notlike "*show_ocean_material_control_port*") {
     throw "Qt ocean material control port JSON action is missing"
 }
@@ -3261,6 +3327,18 @@ if ($qtPanelSource -notlike "*Renderer ports: inspect scalar ocean material and 
 }
 if ($qtPanelSource -notlike "*Renderer ports: inspect layer capability matrix JSON*") {
     throw "Qt Layer matrix inspector tooltip is missing"
+}
+if ($qtPanelSource -notlike "*Inspect: Render plan perf*") {
+    throw "Qt render plan performance inspector button is missing"
+}
+if ($qtPanelSource -notlike "*show_layer_render_plan_performance*") {
+    throw "Qt render plan performance inspector handler is missing"
+}
+if ($qtPanelSource -notlike "*collect_layer_render_plan_performance*") {
+    throw "Qt render plan performance collector is missing"
+}
+if ($qtPanelSource -notlike "*submit_single_taichi_render_pass*") {
+    throw "Qt render plan performance single-pass marker is missing"
 }
 if ($qtPanelSource -notlike "*Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON*") {
     throw "Qt Research interaction inspector tooltip is missing"
