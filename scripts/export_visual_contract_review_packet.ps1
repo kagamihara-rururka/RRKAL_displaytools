@@ -50,6 +50,7 @@ if ($LASTEXITCODE -ne 0) {
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_renderer_config_gateway.ps1",
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_style_renderer_routes.ps1",
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_layer_workflow.ps1",
+        "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_qt_uiux_surface.ps1",
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_research_interaction.ps1",
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_hydrology_lod.ps1",
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_ocean_material.ps1"

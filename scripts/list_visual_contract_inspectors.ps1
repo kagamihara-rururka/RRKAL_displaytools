@@ -37,6 +37,14 @@ $entries = @(
         no_launch_side_effect = $true
     },
     [ordered]@{
+        id = "qt_uiux_surface"
+        category = "uiux"
+        schema = "rrkal_displaytools.qt_uiux_surface_inspector.v1"
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_qt_uiux_surface.ps1"
+        proves = @("Qt-first UI boundary", "Photoshop-like panel grouping", "research inspector groups", "cross-machine first-run order")
+        no_launch_side_effect = $true
+    },
+    [ordered]@{
         id = "research_interaction"
         category = "research_interaction"
         schema = "rrkal_displaytools.research_interaction_inspector.v1"
@@ -129,6 +137,7 @@ $entries = @(
         "renderer_config_gateway",
         "style_routes",
         "layer_workflow",
+        "qt_uiux_surface",
         "research_interaction",
         "hydrology_lod",
         "ocean_material",

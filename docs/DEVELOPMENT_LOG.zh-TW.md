@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Qt UIUX surface inspector
+
+- Added `scripts/inspect_qt_uiux_surface.ps1` as a no-GUI reviewer packet for Qt-first UI surface grouping, replay/contracts, renderer ports, research interaction actions, layer operator groups and clone first-run order.
+- Registered the inspector in the visual contract inspector index, cross-machine review packet and smoke gates.
+- Smoke now verifies the Qt-first boundary, Tk non-primary boundary, research cursor action, Ocean renderer-port action and layer operator group closure.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Boundary emphasis inspector controls
 
 - Expanded `scripts/inspect_research_interaction.ps1` to expose Boundary emphasis RGB, contrast, opacity, gamma, breathing and renderer-control mapping values.

@@ -1190,6 +1190,9 @@ if ($visualInspectorIndex.entry_ids -notcontains "hydrology_lod") {
 if ($visualInspectorIndex.entry_ids -notcontains "layer_workflow") {
     throw "Visual contract inspector index missing Layer workflow inspector"
 }
+if ($visualInspectorIndex.entry_ids -notcontains "qt_uiux_surface") {
+    throw "Visual contract inspector index missing Qt UIUX surface inspector"
+}
 if ($visualInspectorIndex.entry_ids -notcontains "research_interaction") {
     throw "Visual contract inspector index missing Research interaction inspector"
 }
@@ -1258,6 +1261,9 @@ if ($visualReviewPacket.inspector_entry_ids -notcontains "hydrology_lod") {
 if ($visualReviewPacket.inspector_entry_ids -notcontains "layer_workflow") {
     throw "Visual contract review packet missing Layer workflow inspector"
 }
+if ($visualReviewPacket.inspector_entry_ids -notcontains "qt_uiux_surface") {
+    throw "Visual contract review packet missing Qt UIUX surface inspector"
+}
 if ($visualReviewPacket.inspector_entry_ids -notcontains "research_interaction") {
     throw "Visual contract review packet missing Research interaction inspector"
 }
@@ -1272,6 +1278,9 @@ if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -Exec
 }
 if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_layer_workflow.ps1") {
     throw "Visual contract review packet missing Layer workflow first command"
+}
+if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_qt_uiux_surface.ps1") {
+    throw "Visual contract review packet missing Qt UIUX surface first command"
 }
 if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_research_interaction.ps1") {
     throw "Visual contract review packet missing Research interaction first command"
@@ -1502,6 +1511,50 @@ if ($layerWorkflowInspectorPacket.navigation_copy_action -ne "copy_layer_navigat
 }
 if (@("reveal_selected_layer", "select_first_filtered_layer", "clear_filter_or_expand_groups", "edit_selected_layer") -notcontains $layerWorkflowInspectorPacket.next_action) {
     throw "Layer workflow inspection next action invalid"
+}
+$qtUiuxSurfaceInspectorPath = Join-Path $RepoRoot "scripts\inspect_qt_uiux_surface.ps1"
+if (-not (Test-Path -LiteralPath $qtUiuxSurfaceInspectorPath)) {
+    throw "Qt UIUX surface inspector script is missing"
+}
+$qtUiuxSurfaceInspectorContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $qtUiuxSurfaceInspectorPath, "-ContractOnly")
+$qtUiuxSurfaceInspectorContract = ($qtUiuxSurfaceInspectorContractText -join "`n") | ConvertFrom-Json
+if ($qtUiuxSurfaceInspectorContract.schema -ne "rrkal_displaytools.qt_uiux_surface_inspector.v1") {
+    throw "Qt UIUX surface inspector contract schema missing"
+}
+if ($qtUiuxSurfaceInspectorContract.required_contracts -notcontains "rrkal_displaytools.profile_ui_state_replay.v1") {
+    throw "Qt UIUX surface inspector profile replay contract missing"
+}
+if ($qtUiuxSurfaceInspectorContract.required_contracts -notcontains "rrkal_displaytools.layer_operator_groups.v1") {
+    throw "Qt UIUX surface inspector layer operator contract missing"
+}
+if ($qtUiuxSurfaceInspectorContract.required_contracts -notcontains "rrkal_displaytools.cross_machine_clone_readiness.v1") {
+    throw "Qt UIUX surface inspector clone readiness contract missing"
+}
+$qtUiuxSurfaceInspectorText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $qtUiuxSurfaceInspectorPath)
+$qtUiuxSurfaceInspectorPacket = ($qtUiuxSurfaceInspectorText -join "`n") | ConvertFrom-Json
+if ($qtUiuxSurfaceInspectorPacket.schema -ne "rrkal_displaytools.qt_uiux_surface_inspection.v1") {
+    throw "Qt UIUX surface inspection schema missing"
+}
+if ($qtUiuxSurfaceInspectorPacket.profile_ui_state_replay_schema -ne "rrkal_displaytools.profile_ui_state_replay.v1") {
+    throw "Qt UIUX surface profile replay schema missing"
+}
+if ($qtUiuxSurfaceInspectorPacket.layer_operator_groups_schema -ne "rrkal_displaytools.layer_operator_groups.v1") {
+    throw "Qt UIUX surface layer operator schema missing"
+}
+if ($qtUiuxSurfaceInspectorPacket.qt_first -ne $true) {
+    throw "Qt UIUX surface must keep Qt as primary UI"
+}
+if ($qtUiuxSurfaceInspectorPacket.tk_primary_ui_allowed -ne $false) {
+    throw "Qt UIUX surface must reject Tk as primary UI"
+}
+if ($qtUiuxSurfaceInspectorPacket.research_interaction_action_ids -notcontains "cursor_geo") {
+    throw "Qt UIUX surface research cursor action missing"
+}
+if ($qtUiuxSurfaceInspectorPacket.renderer_port_action_ids -notcontains "ocean_port") {
+    throw "Qt UIUX surface renderer Ocean action missing"
+}
+if ($qtUiuxSurfaceInspectorPacket.layer_operator_complete_group_count -lt 5) {
+    throw "Qt UIUX surface layer operator group closure incomplete"
 }
 $researchInteractionInspectorPath = Join-Path $RepoRoot "scripts\inspect_research_interaction.ps1"
 if (-not (Test-Path -LiteralPath $researchInteractionInspectorPath)) {
