@@ -15,6 +15,7 @@ Last updated: 2026-05-30
 | Ocean material and sea-state port | In progress | Ocean material controls and sea-condition diagnostics exist as contract-oriented scaffolding. The Qt panel exposes wave strength, roughness, foam, Ocean 3D safe preview, and research-oriented performance budget presets. | Keep scalar controls stable until 7:00, then move render-plan merge / pass reduction into the decoupling phase. |
 | Style renderer entries | In progress | Scientific/nautical/tactical/parchment style concepts are selectable in the Qt panel and `--style-profile`. | Create explicit renderer entry points for style profiles. |
 | Module boundaries | In progress | Monolith contains diagnostics for extraction readiness and seam matrices. `decoupling_readiness.py` records the `2026-05-31T07:00:00+08:00` not-before gate and post-7 extraction order; Qt/no-GUI reviewer packets expose it; `scripts/pre_decoupling_gate.ps1` verifies the first extraction and clean worktree before code moves; `controlled_interception.py` defines bounded shim/hook policy for extraction smoke; `renderer_config_gateway.py` now appears in launch/reviewer/handoff packets and Qt Replay/contracts before touching renderer code. | Start with render-plan compose extraction after the 7:00 decoupling gate. |
+| Performance smoke and telemetry | In progress | `performance_telemetry.py` and `scripts/performance_smoke.ps1` produce lightweight displaytools timing outputs under `state/performance/`: structured performance summary, stage timing JSONL, and render telemetry schema for a headless tiny scene. | After decoupling, attach real render-plan stage timings and keep RRKAL crawler/download/import performance smoke in RRKAL. |
 | Cloud/local workflow | MVP | `docs/WORKFLOW.zh-TW.md` and `docs/CODEX_CLOUD_HANDOFF.zh-TW.md` define GitHub as sync truth, `L:\\RRKAL_displaytools` as the local cloud-drive working copy, Codex Cloud as the long-running code/docs/CI surface, and local Windows as Qt/Taichi visual validation authority. | Convert the conversation backup step into a reusable skill after the private transcript repo policy is confirmed. |
 
 ## Working rules
@@ -41,6 +42,7 @@ Last updated: 2026-05-30
 - 2026-05-31: Exposed renderer config gateway through Qt Replay/contracts, launch packets, reviewer packets and handoff inspection.
 - 2026-05-31: Added no-GUI renderer config gateway inspector for cross-machine clone/reviewer use.
 - 2026-05-31: Added Qt copyable layer controls guide for researcher workflow, including pin occlusion and cursor geodesy reminders.
+- 2026-05-31: Added displaytools performance smoke telemetry with JSON summary, JSONL stage timing and headless tiny render telemetry.
 - 2026-05-31: Added `compat/headless_import_shims.py` with a smoke-gated synthetic sys.modules interception self-test.
 - 2026-05-31: Added Qt `Inspect: Interception` and `Copy interception summary` for bounded shim/hook policy review.
 - 2026-05-30: Added controlled interception policy to launch/reviewer packet handoff for cross-machine review.

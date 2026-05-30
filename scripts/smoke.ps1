@@ -1165,6 +1165,73 @@ if ($configGatewayInspectorPacket.schema -ne "rrkal_displaytools.renderer_config
 if ($configGatewayInspectorPacket.boundary -notlike "*does not launch Qt, Taichi*") {
     throw "Renderer config gateway inspector boundary mismatch"
 }
+$performanceSmokePath = Join-Path $RepoRoot "scripts\performance_smoke.ps1"
+if (-not (Test-Path -LiteralPath $performanceSmokePath)) {
+    throw "Performance smoke script is missing"
+}
+$performanceContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $performanceSmokePath, "-ContractOnly")
+$performanceContract = ($performanceContractText -join "`n") | ConvertFrom-Json
+if ($performanceContract.schema -ne "rrkal_displaytools.performance_smoke.v1") {
+    throw "Performance smoke contract schema missing"
+}
+if ($performanceContract.stage_timing_schema -ne "rrkal_displaytools.stage_timing.v1") {
+    throw "Performance smoke stage timing schema missing"
+}
+if ($performanceContract.render_telemetry_schema -ne "rrkal_displaytools.render_telemetry.v1") {
+    throw "Performance smoke render telemetry schema missing"
+}
+if ($performanceContract.render_fields -notcontains "to_numpy_count") {
+    throw "Performance smoke render telemetry to_numpy_count field missing"
+}
+if ($performanceContract.boundary -notlike "*No live network*") {
+    throw "Performance smoke boundary missing no-live-network rule"
+}
+$performanceSmokeText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $performanceSmokePath)
+$performanceSmoke = ($performanceSmokeText -join "`n") | ConvertFrom-Json
+if ($performanceSmoke.schema -ne "rrkal_displaytools.performance_smoke.v1") {
+    throw "Performance smoke output schema missing"
+}
+if ($performanceSmoke.summary.ok -ne $true) {
+    throw "Performance smoke summary did not pass"
+}
+if ($performanceSmoke.summary.gpu_required -ne $false) {
+    throw "Performance smoke must not require GPU"
+}
+if ($performanceSmoke.stages.stage -notcontains "tiny_render_3_frame_headless") {
+    throw "Performance smoke tiny render stage missing"
+}
+if ($performanceSmoke.render_telemetry.schema -ne "rrkal_displaytools.render_telemetry.v1") {
+    throw "Performance smoke render telemetry schema missing in output"
+}
+if ($performanceSmoke.render_telemetry.no_sync_per_frame_log -ne $true) {
+    throw "Performance smoke render telemetry per-frame sync guard missing"
+}
+$performanceSmokeJsonPath = Join-Path $RepoRoot $performanceSmoke.output_paths.performance_smoke_json
+$stageTimingJsonlPath = Join-Path $RepoRoot $performanceSmoke.output_paths.stage_timing_jsonl
+$renderTelemetryJsonPath = Join-Path $RepoRoot $performanceSmoke.output_paths.render_telemetry_json
+foreach ($path in @($performanceSmokeJsonPath, $stageTimingJsonlPath, $renderTelemetryJsonPath)) {
+    if (-not (Test-Path -LiteralPath $path)) {
+        throw "Performance smoke output file missing: $path"
+    }
+}
+$stageTimingLines = Get-Content -LiteralPath $stageTimingJsonlPath -Encoding UTF8
+if (@($stageTimingLines).Count -lt 2) {
+    throw "Performance smoke JSONL should contain at least two stage timing rows"
+}
+foreach ($line in $stageTimingLines) {
+    $row = $line | ConvertFrom-Json
+    if ($row.schema -ne "rrkal_displaytools.stage_timing.v1") {
+        throw "Performance smoke JSONL row schema mismatch"
+    }
+}
+$thresholdGuardText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $performanceSmokePath, "-ThresholdGuardOnly")
+$thresholdGuard = ($thresholdGuardText -join "`n") | ConvertFrom-Json
+if ($thresholdGuard.performance_bucket -ne "slow") {
+    throw "Performance threshold guard slow bucket missing"
+}
+if (-not $thresholdGuard.next_action) {
+    throw "Performance threshold guard next_action missing"
+}
 if ($launchPacket.layer_visual_presets.schema -ne "rrkal_displaytools.layer_visual_presets.v1") {
     throw "Launch packet layer_visual_presets schema missing or invalid"
 }

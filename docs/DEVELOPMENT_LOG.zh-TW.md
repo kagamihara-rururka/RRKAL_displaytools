@@ -1,5 +1,17 @@
 # Development Log
 
+## 2026-05-31 - Displaytools performance smoke telemetry
+
+Changes:
+- Added `performance_telemetry.py` with lightweight `rrkal_displaytools.performance_smoke.v1`, `rrkal_displaytools.stage_timing.v1`, and `rrkal_displaytools.render_telemetry.v1` outputs.
+- Added `scripts/performance_smoke.ps1` as the no-GUI entrypoint; normal mode writes `state/performance/performance_smoke.json`, `state/performance/stage_timing.jsonl`, and `state/performance/render_telemetry.json`.
+- Added a headless 3-frame tiny render telemetry smoke that tracks frame timing, draw calls, vertices, numpy sync counts, queue depth and memory fields without GPU or live network.
+- Added a synthetic threshold guard proving `performance_bucket="slow"` produces `next_action` without making the regular smoke flaky.
+- Boundary: this covers displaytools renderer/config telemetry only; RRKAL crawler/download/import/cache performance smoke remains in the RRKAL repo.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit; one transient cloud-drive retry recovered).
+
 ## 2026-05-31 - Researcher layer controls guide
 
 Changes:

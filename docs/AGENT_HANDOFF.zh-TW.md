@@ -43,6 +43,7 @@
 - Confirm GitHub Actions smoke when practical.
 - After every push, report in Chinese what capabilities the program currently has, then add planned/next capabilities, overall maturity estimate, and current-stage maturity estimate.
 - For cross-machine reviewer handoff, call out `compose_performance_summary` when renderer performance, parity runner or compose budget work changed.
+- When performance work changes, run `scripts\performance_smoke.ps1` directly or via `scripts\smoke.ps1`; inspect `state\performance\performance_smoke.json`, `state\performance\stage_timing.jsonl`, and `state\performance\render_telemetry.json`. These files are generated local state and must not be committed.
 
 ## Current source of truth
 
@@ -62,4 +63,5 @@
 - Runtime data/cache artifacts are local-only.
 - Keep commits intentional and scoped.
 - Do not add crawler/provider/download logic here; keep those concerns in RRKAL.
+- Do not move RRKAL crawler/download/import/cache performance smoke into this repo; displaytools owns renderer/config/UI telemetry only.
 - Codex Cloud can work from GitHub and handoff docs, but local Qt/Taichi/GPU visual validation remains a local responsibility.
