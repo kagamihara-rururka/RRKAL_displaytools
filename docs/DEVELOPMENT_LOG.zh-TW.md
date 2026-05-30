@@ -1,5 +1,16 @@
 # Development Log
 
+## 2026-05-30 - Render-plan execution summary
+
+Changes:
+- Added `HybridRenderController.layer_render_plan_execution_summary()` to summarize the current render-plan execution mode.
+- Compiled render-plan metadata and Qt diagnostics now expose `rrkal_displaytools.layer_render_plan_execution_summary.v1`, including current apply helper, helper/decision counts, single-pass candidate count and blockers.
+- The Layers control-board render-plan strip now shows `exec=` and `sp=` next to cache, invalidation, batch and apply-path summaries.
+- Smoke gates now verify execution summary schema/helper/field, Qt summary text and renderer source markers for current mode, blockers and next refactor target.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Render-plan apply path metadata
 
 Changes:
