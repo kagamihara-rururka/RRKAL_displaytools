@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-31 - Headless import shim contract
+
+Changes:
+- Added `compat/headless_import_shims.py` with `rrkal_displaytools.headless_import_shim.v1`.
+- Implemented a synthetic `sys.modules` install/import/restore self-test that proves the interception mechanism without faking PyQt6, OpenGL, Taichi or visual runtime success.
+- Smoke now gates the contract, visual-runtime guard and restoration behavior.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-31 - Qt controlled interception Inspect actions
 
 Changes:

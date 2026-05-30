@@ -28,6 +28,7 @@ def controlled_interception_policy_packet(source: str = "controlled_interception
                 "id": "import_shim",
                 "allowed_contexts": ["smoke", "contract_only", "handoff", "pre_decoupling_gate"],
                 "purpose": "Replace optional GUI/GPU dependencies with contract-only stand-ins when verifying packets.",
+                "tool": "compat/headless_import_shims.py",
                 "required_guard": "must_not_claim_visual_runtime_success",
             },
             {
@@ -59,6 +60,7 @@ def controlled_interception_policy_packet(source: str = "controlled_interception
         "first_decoupling_use": {
             "target": "render_plan_compose",
             "allowed_hook": "runtime_ack_hook",
+            "allowed_import_shim_tool": "compat/headless_import_shims.py",
             "reason": "Keep smoke stable while extracting pure render-plan composition before renderer loop rewrites.",
             "must_preserve": [
                 "layer_render_plan_performance",

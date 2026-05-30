@@ -37,6 +37,7 @@ Last updated: 2026-05-30
 
 ## Done
 - 2026-05-30: Documented Cloud/local development workflow and handoff entrypoint, including private transcript backup policy and maturity reporting requirements.
+- 2026-05-31: Added `compat/headless_import_shims.py` with a smoke-gated synthetic sys.modules interception self-test.
 - 2026-05-31: Added Qt `Inspect: Interception` and `Copy interception summary` for bounded shim/hook policy review.
 - 2026-05-30: Added controlled interception policy to launch/reviewer packet handoff for cross-machine review.
 - 2026-05-30: Added `rrkal_displaytools.controlled_interception_policy.v1` for bounded import/output/runtime interception during smoke, handoff and module extraction.

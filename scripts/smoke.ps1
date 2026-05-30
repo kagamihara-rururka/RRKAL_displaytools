@@ -5624,6 +5624,10 @@ if ($controlledInterception.schema -ne "rrkal_displaytools.controlled_intercepti
 if ($controlledInterception.allowed_patterns.id -notcontains "import_shim") {
     throw "Controlled interception import shim pattern missing"
 }
+$importShimPattern = @($controlledInterception.allowed_patterns | Where-Object { $_.id -eq "import_shim" } | Select-Object -First 1)[0]
+if ($importShimPattern.tool -ne "compat/headless_import_shims.py") {
+    throw "Controlled interception import shim tool path missing"
+}
 if ($controlledInterception.allowed_patterns.id -notcontains "scoped_stdout_capture") {
     throw "Controlled interception scoped stdout capture pattern missing"
 }
@@ -5632,6 +5636,26 @@ if ($controlledInterception.allowed_patterns.id -notcontains "runtime_ack_hook")
 }
 if ($controlledInterception.blocked_patterns -notcontains "fake_visual_runtime_success_in_ci") {
     throw "Controlled interception fake visual runtime success guard missing"
+}
+
+$headlessShimContractText = Invoke-CapturedNative py @("-3", (Join-Path $RepoRoot "compat\headless_import_shims.py"), "--contract-only")
+$headlessShimContract = $headlessShimContractText | ConvertFrom-Json
+if ($headlessShimContract.schema -ne "rrkal_displaytools.headless_import_shim.v1") {
+    throw "Headless import shim contract schema mismatch"
+}
+if ($headlessShimContract.blocked_runtime_claims -notcontains "visual_render_success") {
+    throw "Headless import shim visual runtime guard missing"
+}
+$headlessShimSelfTestText = Invoke-CapturedNative py @("-3", (Join-Path $RepoRoot "compat\headless_import_shims.py"), "--self-test")
+$headlessShimSelfTest = $headlessShimSelfTestText | ConvertFrom-Json
+if (-not $headlessShimSelfTest.import_probe_ok) {
+    throw "Headless import shim self-test import probe failed"
+}
+if ($headlessShimSelfTest.runtime_available) {
+    throw "Headless import shim self-test must not claim runtime availability"
+}
+if (-not $headlessShimSelfTest.restored) {
+    throw "Headless import shim self-test did not restore sys.modules state"
 }
 
 $decouplingQtPanelSource = Get-Content -LiteralPath (Join-Path $RepoRoot "rrkal_displaytools_qt_panel.py") -Raw -Encoding UTF8
