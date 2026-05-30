@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Hydrology LOD copyable handoff summary
+
+Changes:
+- Added `rrkal_displaytools.hydrology_lod_summary_contract.v1` to Hydrology/LOD readiness packets for Qt, launch export and renderer capability discovery.
+- Added a Qt `Copy Hydro LOD summary` action that copies readiness, live layer count, renderer targets, LOD hook state, runtime evidence, ack file and pick-state file.
+- Handoff inspection and smoke now gate the Hydrology/LOD summary contract and runtime summary fields.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Boundary summary identity and ack handoff
 
 Changes:

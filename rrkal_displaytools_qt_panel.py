@@ -673,6 +673,16 @@ def hydrology_lod_readiness_packet(
             }
         )
     live_layer_count = sum(1 for layer in hydrology_layers if layer["visibility_live"])
+    summary_parameter_fields = [
+        "readiness",
+        "live_hydrology_layer_count",
+        "hydrology_layer_count",
+        "stable_renderer_targets",
+        "lod_hook_status",
+        "runtime_state_file",
+        "ack_file",
+        "pick_state_file",
+    ]
     return {
         "schema": "rrkal_displaytools.hydrology_lod_readiness.v1",
         "source": source,
@@ -684,6 +694,14 @@ def hydrology_lod_readiness_packet(
         "stable_renderer_targets": ["lakes", "rivers"],
         "lod_hook_status": "contract_ready",
         "lod_hook_fields": ["renderer_target", "visible", "opacity", "blend_mode", "selected_layer_pick"],
+        "hydrology_lod_summary_contract_schema": "rrkal_displaytools.hydrology_lod_summary_contract.v1",
+        "hydrology_lod_summary_contract": {
+            "schema": "rrkal_displaytools.hydrology_lod_summary_contract.v1",
+            "summary_format": "Hydrology/LOD: readiness={readiness}; live={live_hydrology_layer_count}/{hydrology_layer_count}; targets={stable_renderer_targets}; lod={lod_hook_status}; runtime={runtime_status}; hits={hydrology_runtime_hit_count}; pick={pick_matches_hydrology}; state={runtime_state_file}; ack={ack_file}; pick_state={pick_state_file}",
+            "summary_parameter_fields": summary_parameter_fields,
+            "qt_copy_action": "copy_hydrology_lod_summary",
+            "portable": True,
+        },
         "renderer_apply_contract_schema": "rrkal_displaytools.hydrology_lod_renderer_apply_contract.v1",
         "renderer_apply_contract": {
             "schema": "rrkal_displaytools.hydrology_lod_renderer_apply_contract.v1",
@@ -716,6 +734,7 @@ def hydrology_lod_readiness_packet(
             "boundary": "Renderer apply consumes existing hydrology layer runtime state and ack files only; authoritative hydrology datasets and cache governance remain RRKAL-owned.",
         },
         "deferred_context_layers": ["bathymetry_layer", "coastline_layer"],
+        "summary_parameter_fields": summary_parameter_fields,
         "qt_surface": "Layers dock Hydrology/LOD readiness label",
         "launch_packet_fields": ["hydrology_lod_readiness", "layer_capability_matrix", "layer_runtime_evidence"],
         "renderer_capability_field": "hydrology_lod_readiness",
@@ -766,6 +785,7 @@ def hydrology_lod_runtime_evidence_packet(
         "qt_surface": "Layers dock Hydrology runtime evidence label",
         "ack_file": "state/renderer_layer_runtime_ack.json",
         "pick_state_file": "state/renderer_layer_pick_state.json",
+        "summary_runtime_fields": ["status", "runtime_ack_available", "pick_state_available", "hydrology_runtime_hit_count", "pick_matches_hydrology"],
         "launch_packet_fields": ["hydrology_lod_runtime_evidence", "hydrology_lod_readiness", "layer_runtime_evidence"],
         "renderer_capability_field": "hydrology_lod_runtime_evidence",
         "boundary": "Runtime evidence summarizes existing renderer ack and selected-layer pick files; RRKAL data discovery/cache governance remain out of scope.",
@@ -3411,6 +3431,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         timeline_button = QtWidgets.QPushButton("Inspect: Timeline")
         ocean_port_button = QtWidgets.QPushButton("Inspect: Ocean port")
         hydro_lod_button = QtWidgets.QPushButton("Inspect: Hydro LOD")
+        copy_hydro_lod_summary_button = QtWidgets.QPushButton("Copy Hydro LOD summary")
         style_routes_button = QtWidgets.QPushButton("Inspect: Style routes")
         style_thumbnails_button = QtWidgets.QPushButton("Inspect: Style thumbs")
         module_seams_button = QtWidgets.QPushButton("Inspect: Module seams")
@@ -3449,6 +3470,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (timeline_button, "Replay/contracts: inspect Timeline keyframes, runtime state and export options JSON."),
             (ocean_port_button, "Renderer ports: inspect scalar ocean material and sea-state handoff JSON."),
             (hydro_lod_button, "Renderer ports: inspect hydrology layer and LOD hook readiness JSON."),
+            (copy_hydro_lod_summary_button, "Renderer ports: copy Hydrology/LOD readiness, runtime evidence and state/ack/pick file summary."),
             (style_routes_button, "Renderer ports: inspect parchment and tactical style renderer route JSON."),
             (style_thumbnails_button, "Visual review: inspect style template thumbnail slots and local renderer --output commands."),
             (layer_matrix_button, "Renderer ports: inspect layer capability matrix JSON."),
@@ -3492,6 +3514,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         timeline_button.clicked.connect(self.show_timeline_runtime_state)
         ocean_port_button.clicked.connect(self.show_ocean_material_control_port)
         hydro_lod_button.clicked.connect(self.show_hydrology_lod_status)
+        copy_hydro_lod_summary_button.clicked.connect(self.copy_hydrology_lod_summary)
         style_routes_button.clicked.connect(self.show_style_renderer_routes)
         style_thumbnails_button.clicked.connect(self.show_style_thumbnail_slots)
         module_seams_button.clicked.connect(self.show_module_boundary_registry)
@@ -3527,7 +3550,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         action_sections = (
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button, export_reviewer_packet_button)),
             ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, timeline_button, module_seams_button, clone_ready_button, copy_clone_summary_button)),
-            ("Inspect: Renderer ports", (hydro_lod_button, ocean_port_button, style_routes_button, layer_matrix_button, layer_runtime_button)),
+            ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, style_routes_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
             ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, copy_style_thumb_status_button, thumbnail_button, live_preview_button)),
             ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, smoke_button)),
@@ -4829,6 +4852,30 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             runtime_ack,
             pick_state,
             "rrkal_displaytools_qt_panel",
+        )
+
+    def hydrology_lod_summary_text(
+        self,
+        readiness: dict[str, object] | None = None,
+        evidence: dict[str, object] | None = None,
+    ) -> str:
+        readiness = readiness if isinstance(readiness, dict) else self.collect_hydrology_lod_readiness()
+        evidence = evidence if isinstance(evidence, dict) else self.collect_hydrology_lod_runtime_evidence()
+        targets = readiness.get("stable_renderer_targets", [])
+        targets_text = ",".join(str(target) for target in targets) if isinstance(targets, list) else str(targets)
+        return (
+            "Hydrology/LOD: "
+            f"readiness={readiness.get('readiness', 'unknown')}; "
+            f"live={readiness.get('live_hydrology_layer_count', 0)}/{readiness.get('hydrology_layer_count', 0)}; "
+            f"targets={targets_text or '-'}; "
+            f"lod={readiness.get('lod_hook_status', 'unknown')}; "
+            f"runtime={evidence.get('status', 'waiting_for_runtime_evidence')}; "
+            f"hits={evidence.get('hydrology_runtime_hit_count', 0)}; "
+            f"pick={evidence.get('pick_matches_hydrology', False)}; "
+            f"state={evidence.get('runtime_state_file', 'state/renderer_layer_runtime_state.json')}; "
+            f"ack={evidence.get('ack_file', 'state/renderer_layer_runtime_ack.json')}; "
+            f"pick_state={evidence.get('pick_state_file', 'state/renderer_layer_pick_state.json')}; "
+            "governance=RRKAL-owned data/cache"
         )
 
     def collect_layer_operator_groups(self) -> dict[str, object]:
@@ -8493,6 +8540,15 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             )
         )
         self.status.setText("已顯示 hydrology / LOD hook JSON")
+
+    def copy_hydrology_lod_summary(self) -> None:
+        readiness = self.collect_hydrology_lod_readiness()
+        evidence = self.collect_hydrology_lod_runtime_evidence()
+        summary = self.hydrology_lod_summary_text(readiness, evidence)
+        QtWidgets.QApplication.clipboard().setText(summary)
+        if hasattr(self, "hydrology_lod_readiness_label"):
+            self.hydrology_lod_readiness_label.setText(summary)
+        self.status.setText("已複製 hydrology / LOD 摘要")
 
     def show_style_renderer_routes(self) -> None:
         self.command_text.setPlainText(

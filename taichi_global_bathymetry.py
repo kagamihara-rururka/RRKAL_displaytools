@@ -18599,6 +18599,16 @@ def hydrology_lod_readiness_packet(
             }
         )
     live_layer_count = sum(1 for layer in hydrology_layers if layer["visibility_live"])
+    summary_parameter_fields = [
+        "readiness",
+        "live_hydrology_layer_count",
+        "hydrology_layer_count",
+        "stable_renderer_targets",
+        "lod_hook_status",
+        "runtime_state_file",
+        "ack_file",
+        "pick_state_file",
+    ]
     return {
         "schema": "rrkal_displaytools.hydrology_lod_readiness.v1",
         "source": source,
@@ -18610,6 +18620,14 @@ def hydrology_lod_readiness_packet(
         "stable_renderer_targets": ["lakes", "rivers"],
         "lod_hook_status": "contract_ready",
         "lod_hook_fields": ["renderer_target", "visible", "opacity", "blend_mode", "selected_layer_pick"],
+        "hydrology_lod_summary_contract_schema": "rrkal_displaytools.hydrology_lod_summary_contract.v1",
+        "hydrology_lod_summary_contract": {
+            "schema": "rrkal_displaytools.hydrology_lod_summary_contract.v1",
+            "summary_format": "Hydrology/LOD: readiness={readiness}; live={live_hydrology_layer_count}/{hydrology_layer_count}; targets={stable_renderer_targets}; lod={lod_hook_status}; runtime={runtime_status}; hits={hydrology_runtime_hit_count}; pick={pick_matches_hydrology}; state={runtime_state_file}; ack={ack_file}; pick_state={pick_state_file}",
+            "summary_parameter_fields": summary_parameter_fields,
+            "qt_copy_action": "copy_hydrology_lod_summary",
+            "portable": True,
+        },
         "renderer_apply_contract_schema": "rrkal_displaytools.hydrology_lod_renderer_apply_contract.v1",
         "renderer_apply_contract": {
             "schema": "rrkal_displaytools.hydrology_lod_renderer_apply_contract.v1",
@@ -18642,6 +18660,7 @@ def hydrology_lod_readiness_packet(
             "boundary": "Renderer apply consumes existing hydrology layer runtime state and ack files only; authoritative hydrology datasets and cache governance remain RRKAL-owned.",
         },
         "deferred_context_layers": ["bathymetry_layer", "coastline_layer"],
+        "summary_parameter_fields": summary_parameter_fields,
         "qt_surface": "Layers dock Hydrology/LOD readiness label",
         "launch_packet_fields": ["hydrology_lod_readiness", "layer_capability_matrix", "layer_runtime_evidence"],
         "renderer_capability_field": "hydrology_lod_readiness",
@@ -18692,6 +18711,7 @@ def hydrology_lod_runtime_evidence_packet(
         "qt_surface": "Layers dock Hydrology runtime evidence label",
         "ack_file": "state/renderer_layer_runtime_ack.json",
         "pick_state_file": "state/renderer_layer_pick_state.json",
+        "summary_runtime_fields": ["status", "runtime_ack_available", "pick_state_available", "hydrology_runtime_hit_count", "pick_matches_hydrology"],
         "launch_packet_fields": ["hydrology_lod_runtime_evidence", "hydrology_lod_readiness", "layer_runtime_evidence"],
         "renderer_capability_field": "hydrology_lod_runtime_evidence",
         "boundary": "Runtime evidence summarizes existing renderer ack and selected-layer pick files; RRKAL data discovery/cache governance remain out of scope.",
