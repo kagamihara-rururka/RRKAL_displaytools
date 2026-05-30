@@ -415,6 +415,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "ocean_material_summary",
             "style_routes_summary",
             "module_boundary_summary",
+            "compose_performance_summary",
         ],
         "included_packet_fields": [
             "launch_packet_snapshot",
@@ -5109,6 +5110,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "ocean_material_summary": self.ocean_material_summary_text(),
             "style_routes_summary": self.style_routes_summary_text(),
             "module_boundary_summary": self.module_boundary_summary_text(),
+            "compose_performance_summary": self.compose_performance_reviewer_summary_text(),
             "cross_machine_clone_readiness": self.collect_cross_machine_clone_readiness(),
             "profile_launch_readiness": self.collect_profile_launch_readiness(),
             "profile_ui_state_replay": self.collect_profile_ui_state_replay(),
@@ -9358,6 +9360,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         summary = self.compose_pass_budget_summary_text()
         QtWidgets.QApplication.clipboard().setText(summary)
         self.status.setText("Copied compose pass budget summary")
+
+    def compose_performance_reviewer_summary_text(self, packet: dict[str, object] | None = None) -> str:
+        packet = packet if isinstance(packet, dict) else self.collect_layer_render_plan_performance()
+        return (
+            self.compose_pass_budget_summary_text(packet)
+            + " | "
+            + self.compose_parity_runner_readiness_text(packet)
+        )
 
     def compose_parity_runner_readiness_text(self, packet: dict[str, object] | None = None) -> str:
         packet = packet if isinstance(packet, dict) else self.collect_layer_render_plan_performance()

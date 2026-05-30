@@ -19329,6 +19329,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "ocean_material_summary",
             "style_routes_summary",
             "module_boundary_summary",
+            "compose_performance_summary",
         ],
         "included_packet_fields": [
             "launch_packet_snapshot",

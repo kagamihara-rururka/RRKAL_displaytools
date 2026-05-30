@@ -1,5 +1,14 @@
 # Development Log
 
+## 2026-05-30 - Reviewer packet compose performance summary
+
+Changes:
+- Added `compose_performance_summary` to `reviewer_packet_export.included_summary_fields` across Qt, no-GUI launch packet export and renderer capabilities.
+- Qt reviewer packet export now writes a combined compose budget and parity runner readiness summary, so cross-machine review can see bottleneck advice and parity runner availability in one field.
+- Smoke gates launch packet, renderer capability, handoff and Qt reviewer packet source coverage.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
 ## 2026-05-30 - Copyable compose budget summary
 
 Changes:

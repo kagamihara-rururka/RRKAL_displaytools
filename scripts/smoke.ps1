@@ -974,6 +974,9 @@ if ($launchPacket.reviewer_packet_export.included_summary_fields -notcontains "s
 if ($launchPacket.reviewer_packet_export.included_summary_fields -notcontains "module_boundary_summary") {
     throw "Launch packet reviewer packet module boundary summary field missing"
 }
+if ($launchPacket.reviewer_packet_export.included_summary_fields -notcontains "compose_performance_summary") {
+    throw "Launch packet reviewer packet compose performance summary field missing"
+}
 if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "launch_packet_snapshot") {
     throw "Launch packet reviewer packet snapshot field missing"
 }
@@ -2215,6 +2218,9 @@ if ($capabilities.reviewer_packet_export.included_summary_fields -notcontains "s
 if ($capabilities.reviewer_packet_export.included_summary_fields -notcontains "module_boundary_summary") {
     throw "Renderer reviewer packet module boundary summary field missing"
 }
+if ($capabilities.reviewer_packet_export.included_summary_fields -notcontains "compose_performance_summary") {
+    throw "Renderer reviewer packet compose performance summary field missing"
+}
 if ($capabilities.reviewer_packet_export.included_packet_fields -notcontains "hydrology_lod_readiness") {
     throw "Renderer reviewer packet hydrology readiness packet field missing"
 }
@@ -3422,6 +3428,9 @@ if ($handoff.reviewer_packet_export.included_summary_fields -notcontains "style_
 if ($handoff.reviewer_packet_export.included_summary_fields -notcontains "module_boundary_summary") {
     throw "Handoff inspection reviewer packet module boundary summary field missing"
 }
+if ($handoff.reviewer_packet_export.included_summary_fields -notcontains "compose_performance_summary") {
+    throw "Handoff inspection reviewer packet compose performance summary field missing"
+}
 if ($handoff.reviewer_packet_export.included_packet_fields -notcontains "hydrology_lod_readiness") {
     throw "Handoff inspection reviewer packet hydrology readiness packet field missing"
 }
@@ -3879,6 +3888,12 @@ if ($qtPanelSource -notlike '*"style_routes_summary": self.style_routes_summary_
 }
 if ($qtPanelSource -notlike '*"module_boundary_summary": self.module_boundary_summary_text()*') {
     throw "Qt reviewer packet module boundary summary output is missing"
+}
+if ($qtPanelSource -notlike '*"compose_performance_summary": self.compose_performance_reviewer_summary_text()*') {
+    throw "Qt reviewer packet compose performance summary output is missing"
+}
+if ($qtPanelSource -notlike "*def compose_performance_reviewer_summary_text*") {
+    throw "Qt compose performance reviewer summary helper is missing"
 }
 if ($qtPanelSource -notlike '*"hydrology_lod_readiness": self.collect_hydrology_lod_readiness()*') {
     throw "Qt reviewer packet hydrology readiness output is missing"
