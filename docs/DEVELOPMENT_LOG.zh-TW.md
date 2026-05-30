@@ -1,5 +1,17 @@
 # Development Log
 
+## 2026-05-30 - Render-plan phase timing runtime evidence
+
+Changes:
+- Added `HybridRenderController.layer_render_plan_phase_timing_runtime_packet()` to write measured phase timings into compiled render-plan metadata.
+- `render_if_needed()` now records `prepare_batches`, `compose_overlays`, `postprocess` and `future_single_pass_candidate` phase timing evidence for each rendered frame.
+- `apply_layer_render_plan_composition()` now measures composition and style postprocess timing without changing visual output.
+- Qt diagnostics, launch packets and handoff inspection now expose `rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1`, including `phase_timing_ms`, `slowest_phase_id`, total milliseconds and slow-frame threshold status.
+- Smoke gates now verify runtime timing schema/helper/field, Qt summary text and renderer timing markers.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Render-plan phase timing probe contract
 
 Changes:

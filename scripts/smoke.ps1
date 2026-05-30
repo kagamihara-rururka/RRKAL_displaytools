@@ -587,6 +587,15 @@ if ($launchPacket.layer_render_plan_performance.compiled_plan_phase_timing_contr
 if ($launchPacket.layer_render_plan_performance.phase_timing_unit -ne "milliseconds") {
     throw "Launch packet layer_render_plan_performance phase timing unit missing"
 }
+if ($launchPacket.layer_render_plan_performance.compiled_plan_phase_timing_runtime_schema -ne "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1") {
+    throw "Launch packet layer_render_plan_performance phase timing runtime schema missing"
+}
+if ($launchPacket.layer_render_plan_performance.compiled_plan_phase_timing_runtime_helper -ne "HybridRenderController.layer_render_plan_phase_timing_runtime_packet") {
+    throw "Launch packet layer_render_plan_performance phase timing runtime helper missing"
+}
+if ($launchPacket.layer_render_plan_performance.compiled_plan_phase_timing_runtime_field -ne "phase_timing_runtime") {
+    throw "Launch packet layer_render_plan_performance phase timing runtime field missing"
+}
 if ($launchPacket.layer_render_plan_performance.compiled_plan_reuse_decision_field -ne "cache_reuse_decision") {
     throw "Launch packet layer_render_plan_performance reuse decision field missing"
 }
@@ -1780,6 +1789,15 @@ if ($capabilities.layer_render_plan_performance.compiled_plan_phase_timing_contr
 if ($capabilities.layer_render_plan_performance.phase_timing_unit -ne "milliseconds") {
     throw "Renderer layer_render_plan_performance phase timing unit missing"
 }
+if ($capabilities.layer_render_plan_performance.compiled_plan_phase_timing_runtime_schema -ne "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1") {
+    throw "Renderer layer_render_plan_performance phase timing runtime schema missing"
+}
+if ($capabilities.layer_render_plan_performance.compiled_plan_phase_timing_runtime_helper -ne "HybridRenderController.layer_render_plan_phase_timing_runtime_packet") {
+    throw "Renderer layer_render_plan_performance phase timing runtime helper missing"
+}
+if ($capabilities.layer_render_plan_performance.compiled_plan_phase_timing_runtime_field -ne "phase_timing_runtime") {
+    throw "Renderer layer_render_plan_performance phase timing runtime field missing"
+}
 if ($capabilities.layer_render_plan_performance.compiled_plan_reuse_policy -ne "reuse_when_cache_key_matches_previous_compiled_plan") {
     throw "Renderer layer_render_plan_performance compiled plan reuse policy missing"
 }
@@ -2521,6 +2539,15 @@ if ($handoff.layer_render_plan_performance.compiled_plan_phase_timing_contract_f
 }
 if ($handoff.layer_render_plan_performance.phase_timing_unit -ne "milliseconds") {
     throw "Handoff inspection layer render plan performance phase timing unit missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_phase_timing_runtime_schema -ne "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1") {
+    throw "Handoff inspection layer render plan performance phase timing runtime schema missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_phase_timing_runtime_helper -ne "HybridRenderController.layer_render_plan_phase_timing_runtime_packet") {
+    throw "Handoff inspection layer render plan performance phase timing runtime helper missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_phase_timing_runtime_field -ne "phase_timing_runtime") {
+    throw "Handoff inspection layer render plan performance phase timing runtime field missing"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_reuse_decision_field -ne "cache_reuse_decision") {
     throw "Handoff inspection layer render plan performance reuse decision field missing"
@@ -3811,6 +3838,18 @@ if ($qtPanelSource -notlike "*phase_timing_contract*") {
 if ($qtPanelSource -notlike "*timing={timing_status}*") {
     throw "Qt render plan phase timing summary text is missing"
 }
+if ($qtPanelSource -notlike "*layer_render_plan_phase_timing_runtime.v1*") {
+    throw "Qt render plan phase timing runtime schema is missing"
+}
+if ($qtPanelSource -notlike "*phase_timing_runtime*") {
+    throw "Qt render plan phase timing runtime diagnostics are missing"
+}
+if ($qtPanelSource -notlike "*runtime_timing={runtime_timing_status}*") {
+    throw "Qt render plan runtime timing summary text is missing"
+}
+if ($qtPanelSource -notlike "*slowest={slowest_phase}*") {
+    throw "Qt render plan slowest phase summary text is missing"
+}
 if ($qtPanelSource -notlike "*refresh_layer_render_plan_cache_diagnostics_strip*") {
     throw "Qt render plan cache diagnostics strip refresh is missing"
 }
@@ -4124,6 +4163,21 @@ if ($rendererSource -notlike "*def layer_render_plan_execution_phases*") {
 }
 if ($rendererSource -notlike "*def layer_render_plan_phase_timing_contract*") {
     throw "Renderer render plan phase timing helper is missing"
+}
+if ($rendererSource -notlike "*def layer_render_plan_phase_timing_runtime_packet*") {
+    throw "Renderer render plan phase timing runtime helper is missing"
+}
+if ($rendererSource -notlike "*phase_timing_ms*") {
+    throw "Renderer render plan phase timing runtime measurements marker is missing"
+}
+if ($rendererSource -notlike "*slowest_phase_id*") {
+    throw "Renderer render plan slowest phase marker is missing"
+}
+if ($rendererSource -notlike "*self.compiled_layer_render_plan[`"phase_timing_runtime`"]*") {
+    throw "Renderer render plan compiled metadata timing runtime write is missing"
+}
+if ($rendererSource -notlike "*time.perf_counter*") {
+    throw "Renderer render plan phase timing perf counter marker is missing"
 }
 if ($rendererSource -notlike "*phase_ms.*") {
     throw "Renderer render plan phase timing probe key marker is missing"

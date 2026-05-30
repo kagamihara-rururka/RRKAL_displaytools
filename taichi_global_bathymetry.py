@@ -14106,7 +14106,9 @@ class HybridRenderController:
     def apply_layer_render_plan_composition(self, steps: list[dict[str, object]] | None = None) -> np.ndarray:
         frame = self.globe_rgba
         plan_steps = steps if isinstance(steps, list) else self.layer_render_plan_composition_steps()
+        step_timing_ms: dict[str, float] = {}
         for step in plan_steps:
+            step_started_at = time.perf_counter()
             kind = str(step.get("kind"))
             layer_id = str(step.get("layer_id") or step.get("id") or "")
             overlay = None
@@ -14124,6 +14126,14 @@ class HybridRenderController:
                 frame = self.compose_runtime_overlay(frame, layer_id, overlay)
             elif kind == "style_profile_postprocess":
                 frame = apply_style_profile(frame, getattr(self.args, "style_profile", "scientific"))
+            phase_id = "postprocess" if kind == "style_profile_postprocess" else "compose_overlays"
+            step_timing_ms[phase_id] = step_timing_ms.get(phase_id, 0.0) + (
+                time.perf_counter() - step_started_at
+            ) * 1000.0
+        self.layer_render_step_timing_ms = {
+            phase_id: round(elapsed_ms, 3)
+            for phase_id, elapsed_ms in step_timing_ms.items()
+        }
         return frame
 
     def layer_render_plan_cache_key(
@@ -14458,6 +14468,40 @@ class HybridRenderController:
             "next_runtime_step": "wrap phase boundaries with perf_counter and write measured phase_timing_ms into renderer metadata",
         }
 
+    def layer_render_plan_phase_timing_runtime_packet(
+        self,
+        phase_timing_ms: dict[str, float],
+        frame_index: int,
+        total_ms: float,
+    ) -> dict[str, object]:
+        measured = {
+            str(phase_id): round(float(elapsed_ms), 3)
+            for phase_id, elapsed_ms in phase_timing_ms.items()
+            if isinstance(phase_id, str)
+        }
+        slowest_phase_id = None
+        slowest_phase_ms = 0.0
+        if measured:
+            slowest_phase_id = max(measured, key=lambda key: measured[key])
+            slowest_phase_ms = measured.get(slowest_phase_id, 0.0)
+        threshold_ms = 33.3
+        return {
+            "schema": "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1",
+            "source": "HybridRenderController.layer_render_plan_phase_timing_runtime_packet",
+            "status": "measured" if measured else "unavailable",
+            "runtime_measurements_available": bool(measured),
+            "timing_unit": "milliseconds",
+            "total_ms": round(float(total_ms), 3),
+            "phase_timing_ms": measured,
+            "measured_phase_ids": list(measured.keys()),
+            "slowest_phase_id": slowest_phase_id,
+            "slowest_phase_ms": round(float(slowest_phase_ms), 3),
+            "slow_frame": float(total_ms) > threshold_ms,
+            "slow_frame_threshold_ms": threshold_ms,
+            "frame_index": int(frame_index),
+            "next_optimization_use": "identify whether prepare_batches, compose_overlays or postprocess dominates before replacing the render loop",
+        }
+
     def compile_layer_render_plan(
         self,
         changed: bool | None = None,
@@ -14478,6 +14522,8 @@ class HybridRenderController:
         execution_summary = self.layer_render_plan_execution_summary(apply_path, batch_decisions)
         execution_phases = self.layer_render_plan_execution_phases(apply_path, batch_decisions, execution_summary)
         phase_timing_contract = self.layer_render_plan_phase_timing_contract(execution_phases)
+        phase_timing_runtime = getattr(self, "layer_render_plan_phase_timing_runtime", {})
+        phase_timing_runtime = phase_timing_runtime if isinstance(phase_timing_runtime, dict) else {}
         cached_plan = getattr(self, "compiled_layer_render_plan", None)
         if isinstance(cached_plan, dict) and getattr(self, "compiled_layer_render_plan_cache_key", None) == cache_key:
             plan = dict(cached_plan)
@@ -14495,6 +14541,8 @@ class HybridRenderController:
             plan["execution_phase_count"] = len(execution_phases)
             plan["phase_timing_contract"] = phase_timing_contract
             plan["phase_timing_contract_schema"] = "rrkal_displaytools.layer_render_plan_phase_timing_contract.v1"
+            plan["phase_timing_runtime"] = phase_timing_runtime
+            plan["phase_timing_runtime_schema"] = "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1"
             plan["reuse_policy"] = "reuse_when_cache_key_matches_previous_compiled_plan"
             plan["reuse_boundary"] = plan.get("reuse_boundary", "valid_until_dirty_flags_or_camera_change")
             plan["frame_index"] = int(getattr(self, "frame_index", 0))
@@ -14526,6 +14574,8 @@ class HybridRenderController:
             "execution_phase_count": len(execution_phases),
             "phase_timing_contract": phase_timing_contract,
             "phase_timing_contract_schema": "rrkal_displaytools.layer_render_plan_phase_timing_contract.v1",
+            "phase_timing_runtime": phase_timing_runtime,
+            "phase_timing_runtime_schema": "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1",
             "reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",
             "reuse_status_values": ["compiled", "reused"],
             "runtime_optimization_applied": False,
@@ -16217,6 +16267,8 @@ class HybridRenderController:
 
     def render_if_needed(self, force: bool = False) -> np.ndarray | None:
         start = time.time()
+        runtime_phase_started_at = time.perf_counter()
+        phase_timing_ms: dict[str, float] = {}
         self.refresh_layer_runtime_state()
         if self.advance_timeline_step_playback_if_due():
             force = True
@@ -16242,6 +16294,7 @@ class HybridRenderController:
         if not changed:
             return None
 
+        prepare_started_at = time.perf_counter()
         if force or self.globe_dirty:
             sun_x, sun_y, sun_z = compute_sun_direction()
             ocean_state = self.ocean_conditions.sample(self.basemap_lod)
@@ -16388,10 +16441,25 @@ class HybridRenderController:
             self.overlay_dirty = False
 
         self.compiled_layer_render_plan = self.compile_layer_render_plan(changed=changed, force=force)
+        phase_timing_ms["prepare_batches"] = (time.perf_counter() - prepare_started_at) * 1000.0
         self.layer_render_plan_snapshot = self.compiled_layer_render_plan.get("runtime_snapshot", {})
         composition_steps = self.compiled_layer_render_plan.get("composition_steps")
+        self.layer_render_step_timing_ms = {}
         self.frame_rgba = self.apply_layer_render_plan_composition(composition_steps if isinstance(composition_steps, list) else None)
+        composition_timing = getattr(self, "layer_render_step_timing_ms", {})
+        composition_timing = composition_timing if isinstance(composition_timing, dict) else {}
+        phase_timing_ms["compose_overlays"] = float(composition_timing.get("compose_overlays", 0.0))
+        phase_timing_ms["postprocess"] = float(composition_timing.get("postprocess", 0.0))
+        phase_timing_ms["future_single_pass_candidate"] = 0.0
         self.last_render_ms = (time.time() - start) * 1000.0
+        self.layer_render_plan_phase_timing_runtime = self.layer_render_plan_phase_timing_runtime_packet(
+            phase_timing_ms,
+            self.frame_index,
+            (time.perf_counter() - runtime_phase_started_at) * 1000.0,
+        )
+        if isinstance(self.compiled_layer_render_plan, dict):
+            self.compiled_layer_render_plan["phase_timing_runtime"] = self.layer_render_plan_phase_timing_runtime
+            self.compiled_layer_render_plan["phase_timing_runtime_schema"] = "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1"
         if self.output_path and (getattr(self.args, "once", False) or getattr(self.args, "headless", False)):
             from PIL import Image
 
@@ -19490,6 +19558,8 @@ def layer_render_plan_cache_diagnostics_packet(
         "execution_phase_count": plan.get("execution_phase_count", 0),
         "phase_timing_contract_schema": plan.get("phase_timing_contract_schema", "rrkal_displaytools.layer_render_plan_phase_timing_contract.v1"),
         "phase_timing_contract": plan.get("phase_timing_contract") if isinstance(plan.get("phase_timing_contract"), dict) else {},
+        "phase_timing_runtime_schema": plan.get("phase_timing_runtime_schema", "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1"),
+        "phase_timing_runtime": plan.get("phase_timing_runtime") if isinstance(plan.get("phase_timing_runtime"), dict) else {},
         "cache_key_available": bool(plan.get("cache_key")),
         "reuse_policy": plan.get("reuse_policy", "reuse_when_cache_key_matches_previous_compiled_plan") if available else "unavailable",
         "reuse_boundary": plan.get("reuse_boundary", "valid_until_dirty_flags_or_camera_change") if available else "unavailable",
@@ -19557,6 +19627,9 @@ def layer_render_plan_performance_packet(
         "compiled_plan_phase_timing_contract_schema": "rrkal_displaytools.layer_render_plan_phase_timing_contract.v1",
         "compiled_plan_phase_timing_contract_helper": "HybridRenderController.layer_render_plan_phase_timing_contract",
         "compiled_plan_phase_timing_contract_field": "phase_timing_contract",
+        "compiled_plan_phase_timing_runtime_schema": "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1",
+        "compiled_plan_phase_timing_runtime_helper": "HybridRenderController.layer_render_plan_phase_timing_runtime_packet",
+        "compiled_plan_phase_timing_runtime_field": "phase_timing_runtime",
         "phase_timing_unit": "milliseconds",
         "compiled_plan_reuse_decision_field": "cache_reuse_decision",
         "compiled_plan_reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",

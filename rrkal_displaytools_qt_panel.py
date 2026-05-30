@@ -1060,6 +1060,8 @@ def layer_render_plan_cache_diagnostics_packet(
         "execution_phase_count": plan.get("execution_phase_count", 0),
         "phase_timing_contract_schema": plan.get("phase_timing_contract_schema", "rrkal_displaytools.layer_render_plan_phase_timing_contract.v1"),
         "phase_timing_contract": plan.get("phase_timing_contract") if isinstance(plan.get("phase_timing_contract"), dict) else {},
+        "phase_timing_runtime_schema": plan.get("phase_timing_runtime_schema", "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1"),
+        "phase_timing_runtime": plan.get("phase_timing_runtime") if isinstance(plan.get("phase_timing_runtime"), dict) else {},
         "cache_key_available": bool(plan.get("cache_key")),
         "reuse_policy": plan.get("reuse_policy", "reuse_when_cache_key_matches_previous_compiled_plan") if available else "unavailable",
         "reuse_boundary": plan.get("reuse_boundary", "valid_until_dirty_flags_or_camera_change") if available else "unavailable",
@@ -1127,6 +1129,9 @@ def layer_render_plan_performance_packet(
         "compiled_plan_phase_timing_contract_schema": "rrkal_displaytools.layer_render_plan_phase_timing_contract.v1",
         "compiled_plan_phase_timing_contract_helper": "HybridRenderController.layer_render_plan_phase_timing_contract",
         "compiled_plan_phase_timing_contract_field": "phase_timing_contract",
+        "compiled_plan_phase_timing_runtime_schema": "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1",
+        "compiled_plan_phase_timing_runtime_helper": "HybridRenderController.layer_render_plan_phase_timing_runtime_packet",
+        "compiled_plan_phase_timing_runtime_field": "phase_timing_runtime",
         "phase_timing_unit": "milliseconds",
         "compiled_plan_reuse_decision_field": "cache_reuse_decision",
         "compiled_plan_reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",
@@ -4839,6 +4844,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             phase_text = "-"
         phase_timing = diagnostics.get("phase_timing_contract") if isinstance(diagnostics.get("phase_timing_contract"), dict) else {}
         timing_status = phase_timing.get("status", "unavailable")
+        timing_runtime = diagnostics.get("phase_timing_runtime") if isinstance(diagnostics.get("phase_timing_runtime"), dict) else {}
+        runtime_timing_status = timing_runtime.get("status", "unavailable")
+        slowest_phase = timing_runtime.get("slowest_phase_id", "-")
+        total_ms = timing_runtime.get("total_ms", "-")
         return (
             "Render plan cache: "
             f"status={diagnostics.get('status', 'unavailable')}; "
@@ -4852,6 +4861,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"sp={execution_summary.get('single_pass_candidate_count', 0)}; "
             f"phases={execution_phase_count}:{phase_text}; "
             f"timing={timing_status}; "
+            f"runtime_timing={runtime_timing_status}; "
+            f"slowest={slowest_phase}; "
+            f"total_ms={total_ms}; "
             f"key={key_state}; "
             f"reuse={diagnostics.get('reuse_boundary', 'unavailable')}; "
             f"steps={diagnostics.get('composition_step_count', '-')}; "
