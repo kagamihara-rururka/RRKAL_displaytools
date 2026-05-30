@@ -1773,6 +1773,54 @@ def layer_operation_feedback_packet(
     }
 
 
+def layer_control_feedback_strip_packet(
+    source: str,
+    selected_layer: str | None = None,
+    layer_stack: dict[str, dict[str, object]] | None = None,
+    active_summary: str | None = None,
+    last_operation: str | None = None,
+) -> dict[str, object]:
+    layer_stack = layer_stack if isinstance(layer_stack, dict) else {}
+    selected_state = layer_stack.get(selected_layer) if isinstance(selected_layer, str) else None
+    selected_state = selected_state if isinstance(selected_state, dict) else {}
+    visible = selected_state.get("visible")
+    locked = selected_state.get("locked")
+    opacity = selected_state.get("opacity")
+    blend_mode = selected_state.get("blend_mode") or "unknown"
+    renderer_sync = selected_state.get("renderer_sync") or "unknown"
+    visible_text = "on" if visible is True else "off" if visible is False else "unknown"
+    locked_text = "locked" if locked is True else "editable" if locked is False else "unknown"
+    opacity_text = f"{opacity}%" if isinstance(opacity, int) else "unknown"
+    summary_text = (
+        f"Layer control strip: selected={selected_layer or 'none'}; "
+        f"visible={visible_text}; lock={locked_text}; opacity={opacity_text}; "
+        f"blend={blend_mode}; renderer={renderer_sync}"
+    )
+    return {
+        "schema": "rrkal_displaytools.layer_control_feedback_strip.v1",
+        "source": source,
+        "status": "ready" if selected_layer else "no_selection",
+        "selected_layer": selected_layer,
+        "selected_layer_state_available": bool(selected_state),
+        "visible": visible,
+        "locked": locked,
+        "opacity": opacity,
+        "blend_mode": blend_mode,
+        "renderer_sync": renderer_sync,
+        "active_layer_operation_summary": active_summary,
+        "last_layer_operation": last_operation,
+        "summary_text": summary_text,
+        "qt_surface": "Layers dock layerControlFeedbackStrip label",
+        "qt_label_object": "layerControlFeedbackStrip",
+        "visible_fields": ["selected_layer", "visible", "locked", "opacity", "blend_mode", "renderer_sync"],
+        "launch_packet_fields": ["layer_control_feedback_strip", "layer_stack_ui", "layer_operation_feedback"],
+        "renderer_capability_field": "layer_control_feedback_strip",
+        "handoff_field": "layer_control_feedback_strip",
+        "smoke_gate": "layer_control_feedback_strip",
+        "boundary": "Qt layer control feedback only; renderer runtime state and RRKAL data governance are not mutated by this strip.",
+    }
+
+
 def layer_operator_shortcuts_packet(
     source: str,
     selected_layer: str | None = None,
@@ -2990,6 +3038,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_research_workflow_label = QtWidgets.QLabel("Layer research workflow: pending")
         self.layer_research_workflow_label.setWordWrap(True)
         layers_layout.addWidget(self.layer_research_workflow_label)
+        self.layer_control_feedback_strip_label = QtWidgets.QLabel(
+            "Layer control strip: selected=none; visible=unknown; lock=unknown; opacity=unknown; blend=unknown; renderer=unknown"
+        )
+        self.layer_control_feedback_strip_label.setObjectName("layerControlFeedbackStrip")
+        self.layer_control_feedback_strip_label.setWordWrap(True)
+        layers_layout.addWidget(self.layer_control_feedback_strip_label)
         self.boundary_emphasis_button = QtWidgets.QPushButton("Boundary emphasis controls...")
         self.boundary_emphasis_button.clicked.connect(self.open_boundary_emphasis_dialog)
         layers_layout.addWidget(self.boundary_emphasis_button)
@@ -3298,6 +3352,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             QLabel#layerWorkflowHint { color: #405466; background: #eef5f8; border: 1px solid #b7c9d6; border-radius: 8px; padding: 6px 8px; }
             QLabel#profileUiStateReplay { color: #2f4f42; background: #edf7f1; border: 1px solid #9fc7ad; border-radius: 8px; padding: 6px 8px; }
             QLabel#visualReviewReadiness { color: #5b3d18; background: #fff5dd; border: 1px solid #d8b165; border-radius: 8px; padding: 6px 8px; }
+            QLabel#layerControlFeedbackStrip { color: #18384a; background: #e8f3ff; border: 1px solid #8fb7d8; border-radius: 8px; padding: 6px 8px; font-weight: 600; }
             QWidget#layerRow { border-bottom: 1px solid #d6e0ea; }
             QWidget#layerRow[selected="true"] { background: #dceeff; border: 1px solid #5b8db8; }
             QLabel#selectedLayer { color: #23435f; font-weight: 700; padding-top: 6px; }
@@ -4064,6 +4119,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "visual_feature_closure_matrix": self.collect_visual_feature_closure_matrix(),
             "renderer_output_artifact_contract": self.collect_renderer_output_artifact_contract(),
             "layer_operation_feedback": self.collect_layer_operation_feedback(),
+            "layer_control_feedback_strip": self.collect_layer_control_feedback_strip(),
             "layer_filter": self.collect_layer_filter_state(),
             "layer_group_view": self.collect_layer_group_view_state(),
             "layer_operator_shortcuts": self.collect_layer_operator_shortcuts(),
@@ -4396,6 +4452,20 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.collect_layer_operator_groups(),
             self.collect_layer_undo_state(),
         )
+
+    def collect_layer_control_feedback_strip(self) -> dict[str, object]:
+        return layer_control_feedback_strip_packet(
+            "rrkal_displaytools_qt_panel",
+            self.selected_layer_key,
+            self.collect_layer_stack_ui(),
+            self.active_layer_operation_summary_text(),
+            self.layer_operation_event_text(),
+        )
+
+    def refresh_layer_control_feedback_strip(self) -> None:
+        label = getattr(self, "layer_control_feedback_strip_label", None)
+        if label is not None:
+            label.setText(str(self.collect_layer_control_feedback_strip().get("summary_text")))
 
     def collect_layer_visual_presets(self) -> dict[str, object]:
         return layer_visual_presets_packet(
@@ -6995,6 +7065,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             for label in self.layer_property_labels.values():
                 label.setText("-")
             self.layer_property_labels["name"].setText("尚未選取")
+            self.refresh_layer_control_feedback_strip()
             return
         label = next((text for layer_key, text in LAYER_LABELS if layer_key == key), key)
         self.layer_property_labels["name"].setText(f"{label} / {key}")
@@ -7048,6 +7119,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         summary_label = getattr(self, "layer_operation_summary_label", None)
         if summary_label is not None:
             summary_label.setText(self.active_layer_operation_summary_text())
+        self.refresh_layer_control_feedback_strip()
         self.refresh_boundary_highlight_status()
 
     def layer_operation_event_text(self) -> str:

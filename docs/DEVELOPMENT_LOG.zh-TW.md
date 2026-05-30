@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Qt Layer control feedback strip
+
+Changes:
+- Added `rrkal_displaytools.layer_control_feedback_strip.v1` for Qt launch packets, no-GUI launch packets, renderer capability discovery and handoff inspection.
+- Qt Layers dock now exposes `layerControlFeedbackStrip`, a compact active-layer strip for selected layer, visibility, lock, opacity, blend mode and renderer sync.
+- Smoke now verifies the strip schema, Qt label object, visible fields, renderer capability field and handoff summary.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Clickable Style template preview cards
 
 Changes:

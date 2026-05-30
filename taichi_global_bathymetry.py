@@ -19035,6 +19035,54 @@ def layer_operation_feedback_packet(
     }
 
 
+def layer_control_feedback_strip_packet(
+    source: str,
+    selected_layer: str | None = None,
+    layer_stack: dict[str, dict[str, object]] | None = None,
+    active_summary: str | None = None,
+    last_operation: str | None = None,
+) -> dict[str, object]:
+    layer_stack = layer_stack if isinstance(layer_stack, dict) else {}
+    selected_state = layer_stack.get(selected_layer) if isinstance(selected_layer, str) else None
+    selected_state = selected_state if isinstance(selected_state, dict) else {}
+    visible = selected_state.get("visible")
+    locked = selected_state.get("locked")
+    opacity = selected_state.get("opacity")
+    blend_mode = selected_state.get("blend_mode") or "unknown"
+    renderer_sync = selected_state.get("renderer_sync") or "unknown"
+    visible_text = "on" if visible is True else "off" if visible is False else "unknown"
+    locked_text = "locked" if locked is True else "editable" if locked is False else "unknown"
+    opacity_text = f"{opacity}%" if isinstance(opacity, int) else "unknown"
+    summary_text = (
+        f"Layer control strip: selected={selected_layer or 'none'}; "
+        f"visible={visible_text}; lock={locked_text}; opacity={opacity_text}; "
+        f"blend={blend_mode}; renderer={renderer_sync}"
+    )
+    return {
+        "schema": "rrkal_displaytools.layer_control_feedback_strip.v1",
+        "source": source,
+        "status": "ready" if selected_layer else "no_selection",
+        "selected_layer": selected_layer,
+        "selected_layer_state_available": bool(selected_state),
+        "visible": visible,
+        "locked": locked,
+        "opacity": opacity,
+        "blend_mode": blend_mode,
+        "renderer_sync": renderer_sync,
+        "active_layer_operation_summary": active_summary,
+        "last_layer_operation": last_operation,
+        "summary_text": summary_text,
+        "qt_surface": "Layers dock layerControlFeedbackStrip label",
+        "qt_label_object": "layerControlFeedbackStrip",
+        "visible_fields": ["selected_layer", "visible", "locked", "opacity", "blend_mode", "renderer_sync"],
+        "launch_packet_fields": ["layer_control_feedback_strip", "layer_stack_ui", "layer_operation_feedback"],
+        "renderer_capability_field": "layer_control_feedback_strip",
+        "handoff_field": "layer_control_feedback_strip",
+        "smoke_gate": "layer_control_feedback_strip",
+        "boundary": "Qt layer control feedback only; renderer runtime state and RRKAL data governance are not mutated by this strip.",
+    }
+
+
 def layer_operator_shortcuts_packet(
     source: str,
     selected_layer: str | None = None,
@@ -19752,6 +19800,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
         "layer_operator_shortcuts": layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"),
         "layer_operator_groups": layer_operator_groups_packet(layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"), "taichi_global_bathymetry.renderer_capabilities"),
         "layer_operation_feedback": layer_operation_feedback_packet("taichi_global_bathymetry.renderer_capabilities", None, None, None, layer_operator_groups_packet(layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"), "taichi_global_bathymetry.renderer_capabilities"), {"depth": 0}),
+        "layer_control_feedback_strip": layer_control_feedback_strip_packet("taichi_global_bathymetry.renderer_capabilities"),
         "layer_selection_tool": layer_selection_tool_packet("taichi_global_bathymetry.renderer_capabilities"),
         "layer_research_workflow": layer_research_workflow_packet(None, None, layer_operator_groups_packet(layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"), "taichi_global_bathymetry.renderer_capabilities"), layer_capability_matrix_packet(), "taichi_global_bathymetry.renderer_capabilities"),
         "boundary_emphasis_control": boundary_emphasis_control_packet(None, None, "taichi_global_bathymetry.renderer_capabilities"),

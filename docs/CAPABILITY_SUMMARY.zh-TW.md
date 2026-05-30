@@ -24,6 +24,7 @@
 - Qt layer stack metadata 會在 profile / launch packet / runtime bridge 中寫入每個 layer 的 `renderer_sync` 摘要，區分 visibility / opacity / blend live 狀態；runtime bridge 另會寫出 selected renderer target 供 renderer ack/provenance 追蹤。
 - `rrkal_displaytools.layer_operator_shortcuts.v1` documents Qt-first Photoshop-like layer operations: select, visibility, lock, opacity, blend, solo, restore, undo, reset and diagnostics actions. The contract is exposed through Qt launch/provenance packets, No-GUI launch packets, renderer capabilities and handoff inspection, and smoke gates verify solo/restore/undo actions plus keyboard shortcut metadata. Qt installs `Ctrl+Alt+V/L/S/R/Z/0/D` shortcuts for selected-layer visibility, lock, solo, restore, undo, reset and diagnostics.
 - `rrkal_displaytools.layer_operator_groups.v1` groups those operations into Selection, Edit state, Isolation, History and Diagnostics workflows. Qt Layers dock shows the group summary; Qt launch/provenance packets, No-GUI launch packets, renderer capabilities, handoff inspection, closed-loop evidence and smoke gates all expose the same grouping contract.
+- `rrkal_displaytools.layer_control_feedback_strip.v1` adds a compact Qt Layers dock `layerControlFeedbackStrip` label for active layer visibility, lock, opacity, blend mode and renderer sync. It is exposed through launch packets, renderer capabilities, handoff inspection and smoke, giving researchers one visible status strip for layer control without mutating renderer state or RRKAL data governance.
 - `rrkal_displaytools.layer_selection_tool.v1` unifies Qt row selection, first-filtered selection, reveal-selected-row and renderer `state/renderer_layer_pick_state.json` inspection into a smoke-gated scientific selection tool contract; brush/mask scope is explicitly excluded.
 - `rrkal_displaytools.layer_research_workflow.v1` turns filter/group/selected-layer/runtime-warning/remediation state into a researcher-facing workflow contract and a Qt Layers dock status label, so dense layer stacks have a verifiable path from filtering to reproducible diagnostics.
 - `rrkal_displaytools.boundary_emphasis_control.v1` adds the Qt-first territory/boundary emphasis control surface requested for country boundaries, territorial seas, EEZs and maritime boundaries. The dialog exposes RGB, contrast, opacity, gamma and breathing controls; launch packets, renderer capabilities, handoff and smoke track the UI contract, including boundary-layer row double-click entry and renderer bridge mapping through `rrkal_displaytools.boundary_highlight_mask.v1`; full polygon fill mask remains a backend refinement.
@@ -393,6 +394,11 @@
 - Qt Looks/templates now exposes a `styleTemplateVisualPreview` surface and `rrkal_displaytools.style_template_visual_preview.v1`.
 - Launch packets, renderer capabilities, handoff inspection and smoke verify scientific, nautical, parchment and tactical preview card IDs, swatches and route linkage.
 - The Qt cards are clickable through `apply_style_template_preview_card`, updating `style_combo` from the primary Qt UI.
+
+### 2026-05-30 Qt Layer control feedback strip
+
+- Qt Layers dock now exposes `layerControlFeedbackStrip`, a compact active-layer status strip for visibility, lock, opacity, blend mode and renderer sync.
+- Launch packets, renderer capabilities, handoff inspection and smoke verify `rrkal_displaytools.layer_control_feedback_strip.v1`.
 
 ### 2026-05-30 Qt Module seams JSON action
 

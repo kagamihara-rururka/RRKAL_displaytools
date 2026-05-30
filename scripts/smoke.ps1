@@ -479,6 +479,18 @@ if ($launchPacket.profile_ui_state_replay.qt_inspector_action_groups.id -notcont
 if ($launchPacket.layer_operation_feedback.schema -ne "rrkal_displaytools.layer_operation_feedback.v1") {
     throw "Launch packet layer_operation_feedback schema missing or invalid"
 }
+if ($launchPacket.layer_control_feedback_strip.schema -ne "rrkal_displaytools.layer_control_feedback_strip.v1") {
+    throw "Launch packet layer_control_feedback_strip schema missing or invalid"
+}
+if ($launchPacket.layer_control_feedback_strip.qt_label_object -ne "layerControlFeedbackStrip") {
+    throw "Launch packet layer_control_feedback_strip label object missing"
+}
+if ($launchPacket.layer_control_feedback_strip.visible_fields -notcontains "opacity") {
+    throw "Launch packet layer_control_feedback_strip opacity field missing"
+}
+if ($launchPacket.layer_control_feedback_strip.visible_fields -notcontains "renderer_sync") {
+    throw "Launch packet layer_control_feedback_strip renderer sync field missing"
+}
 if ($launchPacket.profile_ui_state_replay.qt_inspector_action_groups.id -notcontains "visual_review") {
     throw "Launch packet profile_ui_state_replay visual review group missing"
 }
@@ -1297,6 +1309,12 @@ if ($capabilities.profile_ui_state_replay.qt_inspector_action_groups.id -notcont
 if ($capabilities.layer_operation_feedback.schema -ne "rrkal_displaytools.layer_operation_feedback.v1") {
     throw "Renderer layer_operation_feedback capability missing or invalid"
 }
+if ($capabilities.layer_control_feedback_strip.schema -ne "rrkal_displaytools.layer_control_feedback_strip.v1") {
+    throw "Renderer layer_control_feedback_strip capability missing or invalid"
+}
+if ($capabilities.layer_control_feedback_strip.qt_surface -ne "Layers dock layerControlFeedbackStrip label") {
+    throw "Renderer layer_control_feedback_strip Qt surface missing"
+}
 if ($capabilities.profile_ui_state_replay.qt_inspector_action_groups.id -notcontains "visual_review") {
     throw "Renderer profile_ui_state_replay visual review group missing"
 }
@@ -1614,6 +1632,15 @@ if ($handoff.layer_operation_feedback.launch_packet_schema -ne "rrkal_displaytoo
 }
 if ($handoff.layer_operation_feedback.renderer_capabilities_schema -ne "rrkal_displaytools.layer_operation_feedback.v1") {
     throw "Handoff inspection layer_operation_feedback renderer capability schema missing or invalid"
+}
+if ($handoff.launch_packet_contracts.layer_control_feedback_strip -ne "rrkal_displaytools.layer_control_feedback_strip.v1") {
+    throw "Handoff inspection launch packet layer_control_feedback_strip schema missing or invalid"
+}
+if ($handoff.layer_control_feedback_strip.launch_packet_schema -ne "rrkal_displaytools.layer_control_feedback_strip.v1") {
+    throw "Handoff inspection layer_control_feedback_strip launch packet schema missing or invalid"
+}
+if ($handoff.layer_control_feedback_strip.qt_label_object -ne "layerControlFeedbackStrip") {
+    throw "Handoff inspection layer_control_feedback_strip label object missing"
 }
 if ($handoff.profile_visual_quick_review.launch_packet_schema -ne "rrkal_displaytools.profile_ui_state_replay.v1") {
     throw "Handoff inspection profile visual quick review schema missing or invalid"
@@ -2380,6 +2407,15 @@ if ($qtPanelSource -notlike "*layer_operation_feedback*") {
 if ($qtPanelSource -notlike "*rrkal_displaytools.layer_operation_feedback.v1*") {
     throw "Qt layer operation feedback schema is missing"
 }
+if ($qtPanelSource -notlike "*layerControlFeedbackStrip*") {
+    throw "Qt layer control feedback strip label is missing"
+}
+if ($qtPanelSource -notlike "*collect_layer_control_feedback_strip*") {
+    throw "Qt layer control feedback strip collector is missing"
+}
+if ($qtPanelSource -notlike "*rrkal_displaytools.layer_control_feedback_strip.v1*") {
+    throw "Qt layer control feedback strip schema is missing"
+}
 if ($qtPanelSource -notlike "*click a row to select the active research layer*") {
     throw "Qt Layers workflow row-selection hint is missing"
 }
@@ -2712,6 +2748,9 @@ if ($rendererSource -notlike "*visual_review*") {
 if ($rendererSource -notlike "*layer_operation_feedback_packet*") {
     throw "Renderer capability layer operation feedback contract missing"
 }
+if ($rendererSource -notlike "*layer_control_feedback_strip_packet*") {
+    throw "Renderer capability layer control feedback strip contract missing"
+}
 
 $scripts = Get-ChildItem scripts -Filter *.ps1
 foreach ($script in $scripts) {
@@ -2815,11 +2854,17 @@ if ($launchPacketSource -notmatch 'visual_review') {
 if ($launchPacketSource -notmatch 'layer_operation_feedback') {
     throw "Launch packet layer operation feedback field missing"
 }
+if ($launchPacketSource -notmatch 'layer_control_feedback_strip') {
+    throw "Launch packet layer control feedback strip field missing"
+}
 if ($handoffInspectorSource -notmatch 'profile_ui_state_replay') {
     throw "Handoff inspection profile UI state replay output is missing"
 }
 if ($handoffInspectorSource -notmatch 'layer_operation_feedback') {
     throw "Handoff inspection layer operation feedback output is missing"
+}
+if ($handoffInspectorSource -notmatch 'layer_control_feedback_strip') {
+    throw "Handoff inspection layer control feedback strip output is missing"
 }
 if ($handoffInspectorSource -notmatch 'profile_visual_quick_review') {
     throw "Handoff inspection profile visual quick review output is missing"

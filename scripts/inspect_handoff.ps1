@@ -51,6 +51,7 @@ $summary = [ordered]@{
         layer_operator_groups = $launchPacket.layer_operator_groups.schema
         layer_selection_tool = $launchPacket.layer_selection_tool.schema
         layer_research_workflow = $launchPacket.layer_research_workflow.schema
+        layer_control_feedback_strip = $launchPacket.layer_control_feedback_strip.schema
         boundary_emphasis_control = $launchPacket.boundary_emphasis_control.schema
         cursor_geodesy_readout = $launchPacket.cursor_geodesy_readout.schema
         pin_overlay = $launchPacket.pin_overlay.schema
@@ -118,6 +119,15 @@ $summary = [ordered]@{
         last_layer_operation = $launchPacket.layer_operation_feedback.last_layer_operation
         operator_group_summary = $launchPacket.layer_operation_feedback.operator_group_summary
         undo_depth = $launchPacket.layer_operation_feedback.undo_depth
+    }
+    layer_control_feedback_strip = @{
+        launch_packet_schema = $launchPacket.layer_control_feedback_strip.schema
+        renderer_capabilities_schema = $capabilities.layer_control_feedback_strip.schema
+        status = $launchPacket.layer_control_feedback_strip.status
+        selected_layer = $launchPacket.layer_control_feedback_strip.selected_layer
+        qt_label_object = $launchPacket.layer_control_feedback_strip.qt_label_object
+        visible_fields = $launchPacket.layer_control_feedback_strip.visible_fields
+        summary_text = $launchPacket.layer_control_feedback_strip.summary_text
     }
     layer_selection_tool = @{
         launch_packet_schema = $launchPacket.layer_selection_tool.schema
