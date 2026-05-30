@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Qt copy pre-7 closure summary
+
+- Added `Copy pre-7 closure` to Qt Replay/contracts for checkpoint handoff.
+- The copy action summarizes status, no-code-move state, smoke gate, checker script, checked surfaces and next formal gate action.
+- Smoke now gates the button, action method and tooltip.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Capability summary includes pre-7 closure
 
 - Added `pre7_closure_readiness` to `scripts/export_capability_summary.ps1`.

@@ -6049,11 +6049,20 @@ if ($qtPanelSource -notlike "*Replay/contracts: inspect no-code-move render-plan
 if ($qtPanelSource -notlike "*Inspect: Pre-7 closure*") {
     throw "Qt Actions pre-7 closure button is missing"
 }
+if ($qtPanelSource -notlike "*Copy pre-7 closure*") {
+    throw "Qt Actions copy pre-7 closure button is missing"
+}
 if ($qtPanelSource -notlike "*show_pre7_closure_readiness*") {
     throw "Qt pre-7 closure action is missing"
 }
+if ($qtPanelSource -notlike "*copy_pre7_closure_readiness_summary*") {
+    throw "Qt copy pre-7 closure action is missing"
+}
 if ($qtPanelSource -notlike "*Replay/contracts: inspect pre-7 closure readiness before the formal post-7 decoupling gate*") {
     throw "Qt pre-7 closure tooltip is missing"
+}
+if ($qtPanelSource -notlike "*Replay/contracts: copy pre-7 closure status, script and next gate action for checkpoint handoff*") {
+    throw "Qt copy pre-7 closure tooltip is missing"
 }
 if ($qtPanelSource -notlike "*Inspect: Research interaction*") {
     throw "Qt Actions Research interaction section is missing"

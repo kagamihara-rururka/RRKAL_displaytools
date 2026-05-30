@@ -4336,6 +4336,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         decoupling_readiness_button = QtWidgets.QPushButton("Inspect: Decoupling")
         extraction_dry_run_button = QtWidgets.QPushButton("Inspect: Extraction dry-run")
         pre7_closure_button = QtWidgets.QPushButton("Inspect: Pre-7 closure")
+        copy_pre7_closure_summary_button = QtWidgets.QPushButton("Copy pre-7 closure")
         copy_decoupling_summary_button = QtWidgets.QPushButton("Copy decoupling summary")
         controlled_interception_button = QtWidgets.QPushButton("Inspect: Interception")
         copy_interception_summary_button = QtWidgets.QPushButton("Copy interception summary")
@@ -4412,6 +4413,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (decoupling_readiness_button, "Replay/contracts: inspect the pre-7 UI closure policy and post-7 module extraction order."),
             (extraction_dry_run_button, "Replay/contracts: inspect no-code-move render-plan extraction dry-run checklist JSON."),
             (pre7_closure_button, "Replay/contracts: inspect pre-7 closure readiness before the formal post-7 decoupling gate."),
+            (copy_pre7_closure_summary_button, "Replay/contracts: copy pre-7 closure status, script and next gate action for checkpoint handoff."),
             (copy_decoupling_summary_button, "Replay/contracts: copy the decoupling not-before gate, first extraction and gate command."),
             (controlled_interception_button, "Replay/contracts: inspect bounded import/output/runtime interception policy."),
             (copy_interception_summary_button, "Replay/contracts: copy the controlled interception summary and guardrail counts."),
@@ -4487,6 +4489,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         decoupling_readiness_button.clicked.connect(self.show_decoupling_readiness)
         extraction_dry_run_button.clicked.connect(self.show_render_plan_extraction_dry_run)
         pre7_closure_button.clicked.connect(self.show_pre7_closure_readiness)
+        copy_pre7_closure_summary_button.clicked.connect(self.copy_pre7_closure_readiness_summary)
         copy_decoupling_summary_button.clicked.connect(self.copy_decoupling_readiness_summary)
         controlled_interception_button.clicked.connect(self.show_controlled_interception_policy)
         copy_interception_summary_button.clicked.connect(self.copy_controlled_interception_summary)
@@ -4539,7 +4542,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         stop_button.clicked.connect(self.stop_renderer)
         action_sections = (
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button, export_reviewer_packet_button)),
-            ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, copy_reviewer_fields_button, copy_goal_scorecard_button, timeline_button, reviewer_route_button, capability_summary_button, module_seams_button, decoupling_readiness_button, extraction_dry_run_button, pre7_closure_button, copy_decoupling_summary_button, controlled_interception_button, copy_interception_summary_button, renderer_config_gateway_button, copy_renderer_config_summary_button, performance_telemetry_button, copy_performance_smoke_summary_button, pre_decoupling_snapshot_button, copy_pre_decoupling_snapshot_command_button, spatial_compression_roadmap_button, copy_spatial_compression_summary_button, copy_module_summary_button, clone_ready_button, copy_clone_summary_button)),
+            ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, copy_reviewer_fields_button, copy_goal_scorecard_button, timeline_button, reviewer_route_button, capability_summary_button, module_seams_button, decoupling_readiness_button, extraction_dry_run_button, pre7_closure_button, copy_pre7_closure_summary_button, copy_decoupling_summary_button, controlled_interception_button, copy_interception_summary_button, renderer_config_gateway_button, copy_renderer_config_summary_button, performance_telemetry_button, copy_performance_smoke_summary_button, pre_decoupling_snapshot_button, copy_pre_decoupling_snapshot_command_button, spatial_compression_roadmap_button, copy_spatial_compression_summary_button, copy_module_summary_button, clone_ready_button, copy_clone_summary_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, ocean_3d_controls_action_button, copy_ocean_summary_button, copy_ocean_guard_summary_button, ocean_3d_board_audit_button, copy_ocean_3d_board_audit_button, style_routes_button, copy_style_routes_summary_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, copy_layer_controls_guide_button, copy_layer_navigation_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
             ("Inspect: Visual review", (visual_readiness_button, uiux_closure_status_button, workspace_map_button, copy_visual_summary_button, copy_visual_closure_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, copy_style_thumb_status_button, thumbnail_button, live_preview_button)),
@@ -10742,6 +10745,23 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def show_pre7_closure_readiness(self) -> None:
         self.command_text.setPlainText(json.dumps(self.collect_pre7_closure_readiness(), ensure_ascii=False, indent=2))
         self.status.setText("Displayed pre-7 closure readiness JSON")
+
+    def pre7_closure_readiness_summary_text(self) -> str:
+        data = self.collect_pre7_closure_readiness()
+        surfaces = ", ".join(str(item) for item in data.get("surfaces", []))
+        return (
+            f"pre7_closure={data.get('status')}; "
+            f"no_code_move={data.get('no_code_move')}; "
+            f"smoke_gated={data.get('smoke_gated')}; "
+            f"script={data.get('script')}; "
+            f"surfaces={surfaces}; "
+            f"next={data.get('next_action')}"
+        )
+
+    def copy_pre7_closure_readiness_summary(self) -> None:
+        summary = self.pre7_closure_readiness_summary_text()
+        QtWidgets.QApplication.clipboard().setText(summary)
+        self.status.setText("Copied pre-7 closure readiness summary to clipboard.")
 
     def copy_decoupling_readiness_summary(self) -> None:
         summary = self.decoupling_readiness_summary_text()
