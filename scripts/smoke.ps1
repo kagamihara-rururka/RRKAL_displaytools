@@ -335,6 +335,18 @@ if ($launchPacket.style_profile_renderer_routes.renderer_entry_contract_schema -
 if ($launchPacket.style_profile_renderer_routes.required_route_contract_ids -notcontains "parchment") {
     throw "Launch packet style_profile_renderer_routes missing parchment route contract"
 }
+if ($launchPacket.visual_feature_closure_matrix.schema -ne "rrkal_displaytools.visual_feature_closure_matrix.v1") {
+    throw "Launch packet visual feature closure matrix schema missing or invalid"
+}
+if ($launchPacket.visual_feature_closure_matrix.feature_ids -notcontains "pin_overlay") {
+    throw "Launch packet visual feature closure matrix missing Pin evidence"
+}
+if ($launchPacket.visual_feature_closure_matrix.feature_ids -notcontains "hydrology_lod") {
+    throw "Launch packet visual feature closure matrix missing Hydrology evidence"
+}
+if ($launchPacket.visual_feature_closure_matrix.smoke_gate -ne "visual_feature_closure_matrix") {
+    throw "Launch packet visual feature closure matrix smoke gate mismatch"
+}
 if ($launchPacket.module_boundary_registry.schema -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Launch packet module_boundary_registry schema missing or invalid"
 }
@@ -1156,6 +1168,12 @@ if ($capabilities.style_profile_renderer_routes.route_ids -notcontains "tactical
 if ($capabilities.style_profile_renderer_routes.renderer_entry_contract_schema -ne "rrkal_displaytools.style_renderer_entry_contract.v1") {
     throw "Renderer style_profile_renderer_routes entry contract schema missing"
 }
+if ($capabilities.visual_feature_closure_matrix.schema -ne "rrkal_displaytools.visual_feature_closure_matrix.v1") {
+    throw "Renderer visual feature closure matrix schema missing or invalid"
+}
+if ($capabilities.visual_feature_closure_matrix.feature_ids -notcontains "ocean_material") {
+    throw "Renderer visual feature closure matrix missing ocean material evidence"
+}
 if ($capabilities.module_boundary_registry.schema -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Renderer module_boundary_registry schema missing or invalid"
 }
@@ -1654,6 +1672,18 @@ if ($visualReviewGuidance -notmatch 'Inspect: Renderer thumbnail') {
 }
 if ($visualReviewGuidance -notmatch 'Inspect: Live preview') {
     throw "Handoff inspection visual review readiness missing live preview guidance"
+}
+if ($handoff.launch_packet_contracts.visual_feature_closure_matrix -ne "rrkal_displaytools.visual_feature_closure_matrix.v1") {
+    throw "Handoff inspection visual feature closure matrix launch contract missing or invalid"
+}
+if ($handoff.visual_feature_closure_matrix.launch_packet_schema -ne "rrkal_displaytools.visual_feature_closure_matrix.v1") {
+    throw "Handoff inspection visual feature closure matrix launch schema missing"
+}
+if ($handoff.visual_feature_closure_matrix.renderer_capabilities_schema -ne "rrkal_displaytools.visual_feature_closure_matrix.v1") {
+    throw "Handoff inspection visual feature closure matrix renderer schema missing"
+}
+if ($handoff.visual_feature_closure_matrix.feature_ids -notcontains "boundary_emphasis") {
+    throw "Handoff inspection visual feature closure matrix missing boundary evidence"
 }
 if ($handoff.launch_packet_contracts.layer_selection_tool -ne "rrkal_displaytools.layer_selection_tool.v1") {
     throw "Handoff inspection layer_selection_tool launch contract missing or invalid"

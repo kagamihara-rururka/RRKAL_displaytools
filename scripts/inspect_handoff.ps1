@@ -28,6 +28,8 @@ $researchInteractionActions = @(($profileUiGroups | Where-Object { $_.id -eq "re
 $visualReviewActions = @(($profileUiGroups | Where-Object { $_.id -eq "visual_review" } | Select-Object -First 1).action_ids)
 $visualReviewReadiness = $launchPacket.visual_review_readiness
 $visualReviewReadinessCapabilities = $capabilities.visual_review_readiness
+$visualFeatureClosureMatrix = $launchPacket.visual_feature_closure_matrix
+$visualFeatureClosureMatrixCapabilities = $capabilities.visual_feature_closure_matrix
 
 $summary = [ordered]@{
     schema = "rrkal_displaytools.handoff_inspection.v1"
@@ -59,6 +61,7 @@ $summary = [ordered]@{
         profile_launch_readiness = $launchPacket.profile_launch_readiness.schema
         profile_launch_readiness_ui = $launchPacket.profile_launch_readiness_ui.schema
         profile_ui_state_replay = $launchPacket.profile_ui_state_replay.schema
+        visual_feature_closure_matrix = $launchPacket.visual_feature_closure_matrix.schema
         reviewer_packet_export = $launchPacket.reviewer_packet_export.schema
         layer_visual_presets = $launchPacket.layer_visual_presets.schema
         layer_visual_preset_runtime_feedback = $launchPacket.layer_visual_preset_runtime_feedback.schema
@@ -184,6 +187,16 @@ $summary = [ordered]@{
         copy_summary_contract = $visualReviewReadiness.copy_summary_contract
         recommended_sequence = $visualReviewReadiness.recommended_sequence
         missing_frame_guidance = $visualReviewReadiness.missing_frame_guidance
+    }
+    visual_feature_closure_matrix = @{
+        schema = "rrkal_displaytools.visual_feature_closure_matrix.v1"
+        launch_packet_schema = $visualFeatureClosureMatrix.schema
+        renderer_capabilities_schema = $visualFeatureClosureMatrixCapabilities.schema
+        status = $visualFeatureClosureMatrix.status
+        feature_count = $visualFeatureClosureMatrix.feature_count
+        ready_feature_count = $visualFeatureClosureMatrix.ready_feature_count
+        feature_ids = $visualFeatureClosureMatrix.feature_ids
+        smoke_gate = $visualFeatureClosureMatrix.smoke_gate
     }
     cursor_geodesy_readout = @{
         launch_packet_schema = $launchPacket.cursor_geodesy_readout.schema

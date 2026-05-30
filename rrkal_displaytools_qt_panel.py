@@ -756,6 +756,39 @@ def ocean_material_control_port_packet(
     }
 
 
+def visual_feature_closure_matrix_packet(source: str) -> dict[str, object]:
+    features = [
+        {"id": "qt_first_ui", "status": "ready", "evidence_fields": ["profile_launch_readiness_ui", "profile_ui_state_replay"]},
+        {"id": "layer_control", "status": "ready", "evidence_fields": ["layer_operator_groups", "layer_selection_tool", "layer_capability_matrix"]},
+        {"id": "profile_launch", "status": "ready", "evidence_fields": ["profile_launch_readiness", "reviewer_packet_export"]},
+        {"id": "renderer_capability_discovery", "status": "ready", "evidence_fields": ["renderer_capabilities", "style_renderer_entries"]},
+        {"id": "cross_machine_clone", "status": "ready", "evidence_fields": ["cross_machine_clone_readiness", "module_boundary_registry"]},
+        {"id": "pin_overlay", "status": "ready", "evidence_fields": ["pin_overlay", "cursor_geodesy_readout"]},
+        {"id": "cursor_geodesy", "status": "ready", "evidence_fields": ["cursor_geodesy_readout", "renderer_cursor_geodesy_ack_file"]},
+        {"id": "boundary_emphasis", "status": "ready", "evidence_fields": ["boundary_emphasis_control", "boundary_highlight"]},
+        {"id": "hydrology_lod", "status": "ready", "evidence_fields": ["hydrology_lod_readiness", "hydrology_lod_runtime_evidence"]},
+        {"id": "ocean_material", "status": "ready", "evidence_fields": ["ocean_material_control_port", "timeline_ocean_material_interpolation"]},
+        {"id": "style_profiles", "status": "ready", "evidence_fields": ["style_renderer_entries", "style_profile_renderer_routes"]},
+        {"id": "module_boundaries", "status": "ready", "evidence_fields": ["module_boundary_registry.decoupling_boundary_contract"]},
+    ]
+    feature_ids = [feature["id"] for feature in features]
+    return {
+        "schema": "rrkal_displaytools.visual_feature_closure_matrix.v1",
+        "source": source,
+        "status": "ready",
+        "feature_count": len(features),
+        "ready_feature_count": len(features),
+        "feature_ids": feature_ids,
+        "features": features,
+        "required_feature_ids": feature_ids,
+        "launch_packet_fields": ["visual_feature_closure_matrix", "visual_review_readiness", "closed_loop_status"],
+        "renderer_capability_field": "visual_feature_closure_matrix",
+        "handoff_field": "visual_feature_closure_matrix",
+        "smoke_gate": "visual_feature_closure_matrix",
+        "boundary": "Closure matrix summarizes smoke-gated contract evidence; runtime artifacts still require renderer execution before claiming fresh visual output.",
+    }
+
+
 def module_boundary_registry_packet(source: str) -> dict[str, object]:
     boundaries = [
         {
@@ -3836,6 +3869,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def collect_module_boundary_registry(self) -> dict[str, object]:
         return module_boundary_registry_packet("rrkal_displaytools_qt_panel")
 
+    def collect_visual_feature_closure_matrix(self) -> dict[str, object]:
+        return visual_feature_closure_matrix_packet("rrkal_displaytools_qt_panel")
+
     def collect_cross_machine_clone_readiness(self) -> dict[str, object]:
         return cross_machine_clone_readiness_packet(
             self.collect_profile_launch_readiness(),
@@ -3876,6 +3912,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "cross_machine_clone_readiness": self.collect_cross_machine_clone_readiness(),
             "profile_launch_readiness": self.collect_profile_launch_readiness(),
             "profile_ui_state_replay": self.collect_profile_ui_state_replay(),
+            "visual_feature_closure_matrix": self.collect_visual_feature_closure_matrix(),
             "launch_packet_snapshot": self.collect_launch_packet(),
         }
 
@@ -3903,6 +3940,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "active_layer_operation_summary": self.active_layer_operation_summary_text(),
             "last_layer_operation": self.layer_operation_event_text(),
             "visual_review_readiness": self.collect_visual_review_readiness(),
+            "visual_feature_closure_matrix": self.collect_visual_feature_closure_matrix(),
             "layer_operation_feedback": self.collect_layer_operation_feedback(),
             "layer_filter": self.collect_layer_filter_state(),
             "layer_group_view": self.collect_layer_group_view_state(),

@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Visual feature closure matrix
+
+Changes:
+- Added `rrkal_displaytools.visual_feature_closure_matrix.v1` for Qt, no-GUI launch packets, renderer capability discovery and handoff inspection.
+- The matrix lists smoke-gated evidence for Qt UI, layer control, profile/launch, renderer capability discovery, cross-machine clone, Pin, cursor, Boundary emphasis, Hydrology/LOD, Ocean material, style profiles and module boundaries.
+- Smoke now verifies the matrix across launch packets, renderer capabilities and handoff inspection without claiming fresh runtime PNG output.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Module decoupling boundary contract
 
 Changes:
