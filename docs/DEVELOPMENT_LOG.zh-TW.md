@@ -229,6 +229,18 @@ Positioning:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+## 2026-05-30 - Visual readiness copy summary contract
+
+Changes:
+- Added `visual_review_copy_summary_contract` to visual readiness packets in renderer capabilities, launch packets and Qt panel packets.
+- Handoff output now exposes the copy-summary contract.
+- Qt summary formatting now reads the contract label so visible and copied summaries stay aligned.
+- Smoke gates the contract schema, Qt label object, Qt copy action and portability flag.
+- Updated clone quickstart, capability summary and GTD.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-30 - Qt Visual readiness copy summary
 
 Changes:

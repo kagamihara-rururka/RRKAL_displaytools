@@ -418,3 +418,15 @@ Done:
 
 Next:
 - Continue tightening visual review by aligning the copy summary with profile/launch packet handoff labels.
+
+
+## 2026-05-30 - Visual readiness copy summary contract
+
+Done:
+- Added `visual_review_copy_summary_contract` to visual readiness packets.
+- Handoff now exports the copy-summary contract.
+- Qt summary formatting now reads the contract label.
+- Smoke gates the contract schema, label object, copy action and portability flag.
+
+Next:
+- Continue aligning profile/launch/handoff labels for layer selection and boundary emphasis controls.

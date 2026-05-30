@@ -18293,6 +18293,16 @@ def visual_review_readiness_packet(source: str) -> dict[str, object]:
             "module_boundary": "rrkal_displaytools_qt_panel.py owns current Qt dispatch; future split target is qt_ui/main_window.py.",
             "fallback_user_message": "Visual readiness metadata remains available through handoff, launch packet and renderer capabilities for non-Qt review.",
         },
+        "copy_summary_contract_schema": "rrkal_displaytools.visual_review_copy_summary_contract.v1",
+        "copy_summary_contract": {
+            "label": "Visual readiness",
+            "summary_format": "Visual readiness: thumbnail={renderer_thumbnail_status} ({renderer_thumbnail_artifact_path}); live={live_preview_status} ({live_preview_artifact_path})",
+            "qt_label_object": "visualReviewReadiness",
+            "qt_copy_action": "copy_visual_review_readiness_summary",
+            "launch_packet_field": "visual_review_readiness.copy_summary_contract",
+            "handoff_field": "visual_review_readiness.copy_summary_contract",
+            "portable": True,
+        },
         "recommended_sequence": ["Inspect: Visual readiness", "Inspect: Renderer thumbnail", "Inspect: Live preview"],
         "missing_frame_guidance": [
             "Run Inspect: Renderer thumbnail to confirm cached preview-frame availability.",

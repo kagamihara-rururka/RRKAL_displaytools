@@ -159,6 +159,8 @@ $summary = [ordered]@{
         inspector_view = $visualReviewReadiness.inspector_view
         qt_command_contract_schema = $visualReviewReadiness.qt_command_contract_schema
         qt_command_contract = $visualReviewReadiness.qt_command_contract
+        copy_summary_contract_schema = $visualReviewReadiness.copy_summary_contract_schema
+        copy_summary_contract = $visualReviewReadiness.copy_summary_contract
         recommended_sequence = $visualReviewReadiness.recommended_sequence
         missing_frame_guidance = $visualReviewReadiness.missing_frame_guidance
     }

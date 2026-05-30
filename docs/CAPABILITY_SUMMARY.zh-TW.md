@@ -567,3 +567,9 @@
 - The Visual review group now includes `Copy visual summary`.
 - `copy_visual_review_readiness_summary()` copies the compact readiness summary to the clipboard and refreshes the visible label.
 - Smoke gates the copy button and copy action.
+
+## Visual readiness copy summary contract
+
+- `visual_review_readiness.copy_summary_contract_schema` now advertises `rrkal_displaytools.visual_review_copy_summary_contract.v1`.
+- The contract defines the summary label, format, Qt label object, Qt copy action, launch packet field and handoff field.
+- Smoke gates the contract schema, label object, copy action and portability flag through handoff output.

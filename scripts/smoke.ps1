@@ -1381,6 +1381,18 @@ if ($handoff.visual_review_readiness.qt_command_contract.dispatch_status -ne "co
 if ($handoff.visual_review_readiness.qt_command_contract.implementation_status -ne "wired_in_qt_panel") {
     throw "Handoff inspection visual review readiness Qt command contract implementation status missing or invalid"
 }
+if ($handoff.visual_review_readiness.copy_summary_contract_schema -ne "rrkal_displaytools.visual_review_copy_summary_contract.v1") {
+    throw "Handoff inspection visual review readiness copy summary contract schema missing or invalid"
+}
+if ($handoff.visual_review_readiness.copy_summary_contract.qt_label_object -ne "visualReviewReadiness") {
+    throw "Handoff inspection visual review readiness copy summary label object missing or invalid"
+}
+if ($handoff.visual_review_readiness.copy_summary_contract.qt_copy_action -ne "copy_visual_review_readiness_summary") {
+    throw "Handoff inspection visual review readiness copy summary action missing or invalid"
+}
+if (-not $handoff.visual_review_readiness.copy_summary_contract.portable) {
+    throw "Handoff inspection visual review readiness copy summary portability flag missing"
+}
 $visualReviewGuidance = ($handoff.visual_review_readiness.missing_frame_guidance -join " ")
 if ($visualReviewGuidance -notmatch 'Inspect: Renderer thumbnail') {
     throw "Handoff inspection visual review readiness missing renderer thumbnail guidance"
@@ -2058,6 +2070,9 @@ if ($qtPanelSource -notlike "*copy_visual_summary_button*") {
 }
 if ($qtPanelSource -notlike "*copy_visual_review_readiness_summary*") {
     throw "Qt panel Visual readiness copy summary action missing"
+}
+if ($qtPanelSource -notlike "*copy_summary_contract*") {
+    throw "Qt panel Visual readiness copy summary contract missing"
 }
 if ($qtPanelSource -notlike "*show_boundary_state*") {
     throw "Qt Boundary JSON action is missing"

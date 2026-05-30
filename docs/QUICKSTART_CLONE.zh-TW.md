@@ -248,3 +248,9 @@ Displaytools 不負責：
 - The Visual review group now includes `Copy visual summary`.
 - It copies the compact thumbnail/live-preview readiness summary to the clipboard.
 - Use this when recording renderer-preview state in lab notes, issues or cross-machine handoff.
+
+## Visual readiness copy summary contract
+
+- `visual_review_readiness.copy_summary_contract` now documents the portable summary label, format, Qt label object and copy action.
+- The same contract appears in launch packets and handoff output.
+- Use it to keep Qt-visible summaries, copied notes and cross-machine handoff language aligned.

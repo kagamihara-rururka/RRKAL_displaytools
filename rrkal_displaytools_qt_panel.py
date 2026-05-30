@@ -367,6 +367,16 @@ def visual_review_readiness_packet(source: str) -> dict[str, object]:
             "module_boundary": "rrkal_displaytools_qt_panel.py owns current Qt dispatch; future split target is qt_ui/main_window.py.",
             "fallback_user_message": "Visual readiness metadata remains available through handoff, launch packet and renderer capabilities for non-Qt review.",
         },
+        "copy_summary_contract_schema": "rrkal_displaytools.visual_review_copy_summary_contract.v1",
+        "copy_summary_contract": {
+            "label": "Visual readiness",
+            "summary_format": "Visual readiness: thumbnail={renderer_thumbnail_status} ({renderer_thumbnail_artifact_path}); live={live_preview_status} ({live_preview_artifact_path})",
+            "qt_label_object": "visualReviewReadiness",
+            "qt_copy_action": "copy_visual_review_readiness_summary",
+            "launch_packet_field": "visual_review_readiness.copy_summary_contract",
+            "handoff_field": "visual_review_readiness.copy_summary_contract",
+            "portable": True,
+        },
         "recommended_sequence": ["Inspect: Visual readiness", "Inspect: Renderer thumbnail", "Inspect: Live preview"],
         "missing_frame_guidance": [
             "Run Inspect: Renderer thumbnail to confirm cached preview-frame availability.",
@@ -3793,14 +3803,18 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def visual_review_readiness_summary_text(self, packet: dict[str, object] | None = None) -> str:
         packet = packet or self.collect_visual_review_readiness()
         summary = packet.get("runtime_artifact_summary", {})
+        contract = packet.get("copy_summary_contract", {})
         if not isinstance(summary, dict):
             return "Visual readiness: runtime artifact summary unavailable."
+        label = "Visual readiness"
+        if isinstance(contract, dict):
+            label = str(contract.get("label") or label)
         thumbnail_status = summary.get("renderer_thumbnail_status", "unknown")
         thumbnail_path = summary.get("renderer_thumbnail_artifact_path") or "no frame yet"
         live_status = summary.get("live_preview_status", "unknown")
         live_path = summary.get("live_preview_artifact_path") or "no frame yet"
         return (
-            "Visual readiness: "
+            f"{label}: "
             f"thumbnail={thumbnail_status} ({thumbnail_path}); "
             f"live={live_status} ({live_path})"
         )
