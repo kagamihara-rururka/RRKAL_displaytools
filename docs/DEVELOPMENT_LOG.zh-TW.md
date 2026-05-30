@@ -3721,3 +3721,14 @@ Changes:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Layer operation feedback Inspect packet
+
+Changes:
+- Added `rrkal_displaytools.layer_operation_feedback.v1` for active layer operation summary, last operation, operator groups and undo depth.
+- Added Qt `Inspect: Layer ops` in Research interaction.
+- Exposed `layer_operation_feedback` in Qt launch/provenance packets, No-GUI launch packets and renderer capability discovery.
+- Updated smoke/docs/closed-loop evidence for the layer operation feedback packet.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

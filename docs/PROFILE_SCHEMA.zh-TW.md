@@ -344,3 +344,10 @@ Timeline playback plan 目前把 style、layer visibility/blend、pins、boundar
 - `profile_ui_state_replay.qt_inspector_action_ids` now includes `selection_state`.
 - `Inspect: Selection state` is a researcher-facing alias for the existing layer pick state output, focused on active Qt layer selection, pick history, and renderer target review.
 - It is part of the `research_interaction` inspector group and does not perform authoritative polygon/EEZ identity resolution.
+
+## Qt Inspect layer operation feedback
+
+- `profile_ui_state_replay.qt_inspector_action_ids` now includes `layer_ops`.
+- `Inspect: Layer ops` opens `rrkal_displaytools.layer_operation_feedback.v1`, combining active layer operation summary, last layer operation, layer operator groups and undo depth.
+- The packet is exposed as `layer_operation_feedback` in Qt launch/provenance packets, No-GUI launch packets and renderer capability discovery.
+- This is replay/provenance metadata only; it does not mutate renderer state or RRKAL data governance.

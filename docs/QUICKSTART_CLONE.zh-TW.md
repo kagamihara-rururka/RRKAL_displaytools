@@ -182,3 +182,8 @@ Displaytools 不負責：
 - The same compact status is exported in Qt launch/provenance packets as `last_layer_operation`.
 - Solo selected layer, restore pre-solo visibility and layer undo also update this label, making isolation/history actions reviewable after clone.
 - Group toggles and layer visual presets also update the same label, so clone users can see the latest high-level layer visibility workflow.
+
+## Qt Inspect: Layer ops
+
+- Use `Inspect: Layer ops` to review active layer operation summary, `Last layer operation`, operator group readiness and undo depth from one JSON packet.
+- The same packet is exported as `layer_operation_feedback`, so cross-machine reviewers can inspect layer-operation provenance even without reproducing every click.

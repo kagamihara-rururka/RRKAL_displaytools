@@ -285,3 +285,14 @@ Done:
 
 Next:
 - Continue UIUX closure on layer operation provenance and profile replay discoverability.
+
+
+## 2026-05-30 - Layer operation feedback Inspect packet
+
+Done:
+- Added `rrkal_displaytools.layer_operation_feedback.v1`.
+- Added Qt `Inspect: Layer ops` for active layer operation summary, last operation, operator groups and undo depth.
+- Exposed `layer_operation_feedback` in Qt launch/provenance, No-GUI launch packet and renderer capability discovery.
+
+Next:
+- Continue UIUX closure on profile replay discoverability and cross-machine review flows.

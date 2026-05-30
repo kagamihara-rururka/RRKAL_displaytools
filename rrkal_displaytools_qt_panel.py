@@ -243,6 +243,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         "renderer_config",
         "selected_layer",
         "layer_stack_ui",
+        "layer_operation_feedback",
         "pins",
         "boundary_highlight",
         "boundary_emphasis_control",
@@ -270,6 +271,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         ("layer_runtime", "Inspect: Layer runtime"),
         ("layer_pick", "Inspect: Layer pick"),
         ("selection_state", "Inspect: Selection state"),
+        ("layer_ops", "Inspect: Layer ops"),
         ("canvas_state", "Inspect: Canvas state"),
         ("pin_pick", "Inspect: Pin pick"),
         ("cursor_geo", "Inspect: Cursor geo"),
@@ -280,7 +282,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
     qt_inspector_groups = [
         {"id": "replay_contracts", "label": "Replay/contracts", "action_ids": ["profile_replay", "timeline", "clone_ready", "module_seams"]},
         {"id": "renderer_ports", "label": "Renderer ports", "action_ids": ["hydro_lod", "ocean_port", "style_routes", "layer_matrix", "layer_runtime"]},
-        {"id": "research_interaction", "label": "Research interaction", "action_ids": ["layer_pick", "selection_state", "canvas_state", "pin_pick", "cursor_geo", "boundary_json"]},
+        {"id": "research_interaction", "label": "Research interaction", "action_ids": ["layer_pick", "selection_state", "layer_ops", "canvas_state", "pin_pick", "cursor_geo", "boundary_json"]},
         {"id": "visual_review", "label": "Visual review", "action_ids": ["renderer_thumbnail", "live_preview"]},
     ]
     return {
@@ -1301,6 +1303,46 @@ def layer_renderer_diagnostics_remediation_packet(
         "summary_text": "; ".join(f"{hint.get('bridge')}:{hint.get('status')}" for hint in hints[:5]),
         "copyable_provenance": True,
         "boundary": "Read-only remediation hints; renderer state and RRKAL data governance are not mutated.",
+    }
+
+
+
+def layer_operation_feedback_packet(
+    source: str,
+    selected_layer: str | None = None,
+    active_summary: str | None = None,
+    last_operation: str | None = None,
+    operator_groups: dict[str, object] | None = None,
+    undo_state: dict[str, object] | None = None,
+) -> dict[str, object]:
+    operator_groups = operator_groups if isinstance(operator_groups, dict) else {}
+    undo_state = undo_state if isinstance(undo_state, dict) else {}
+    active_summary_text = active_summary or "Layer operation summary unavailable in static export."
+    last_operation_text = last_operation or "Last layer operation: unavailable in static export"
+    return {
+        "schema": "rrkal_displaytools.layer_operation_feedback.v1",
+        "source": source,
+        "selected_layer": selected_layer,
+        "active_layer_operation_summary": active_summary_text,
+        "last_layer_operation": last_operation_text,
+        "operator_group_summary": operator_groups.get("summary_text"),
+        "operator_group_count": int(operator_groups.get("group_count") or 0),
+        "operator_group_complete_count": int(operator_groups.get("complete_group_count") or 0),
+        "undo_depth": int(undo_state.get("depth") or 0),
+        "qt_surface": "Layers dock Layer operation summary / Last layer operation labels",
+        "profile_state_fields": ["selected_layer", "layer_stack_ui"],
+        "launch_packet_fields": [
+            "layer_operation_feedback",
+            "active_layer_operation_summary",
+            "last_layer_operation",
+            "layer_operator_groups",
+            "layer_undo",
+        ],
+        "renderer_capability_field": "layer_operation_feedback",
+        "profile_ui_state_replay_action_id": "layer_ops",
+        "summary_text": "Active layer operation summary and last operation status are reviewable without reconstructing the Qt UI.",
+        "copyable_provenance": True,
+        "boundary": "Qt layer operation feedback/replay metadata only; renderer state and RRKAL data governance are not mutated.",
     }
 
 
@@ -2629,6 +2671,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         layer_runtime_button = QtWidgets.QPushButton("Inspect: Layer runtime")
         layer_pick_button = QtWidgets.QPushButton("Inspect: Layer pick")
         selection_state_button = QtWidgets.QPushButton("Inspect: Selection state")
+        layer_ops_button = QtWidgets.QPushButton("Inspect: Layer ops")
         pin_pick_button = QtWidgets.QPushButton("Inspect: Pin pick")
         cursor_geo_button = QtWidgets.QPushButton("Inspect: Cursor geo")
         boundary_state_button = QtWidgets.QPushButton("Inspect: Boundary JSON")
@@ -2654,6 +2697,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (clone_ready_button, "Replay/contracts: inspect cross-machine clone readiness JSON."),
             (layer_pick_button, "Research interaction: inspect selected-layer renderer pick JSON."),
             (selection_state_button, "Selection state: inspect active Qt layer selection, pick history and renderer target JSON."),
+            (layer_ops_button, "Layer ops: inspect active layer operation summary, last operation and replay metadata JSON."),
             (canvas_state_button, "Research interaction: inspect Qt Canvas state, preview metadata and provenance summary."),
             (pin_pick_button, "Research interaction: inspect renderer Pin hover/click pick bridge JSON."),
             (cursor_geo_button, "Research interaction: inspect mouse cursor latitude/longitude geodesy bridge JSON."),
@@ -2682,6 +2726,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         layer_runtime_button.clicked.connect(self.show_layer_runtime_state)
         layer_pick_button.clicked.connect(self.show_layer_pick_state)
         selection_state_button.clicked.connect(self.show_layer_pick_state)
+        layer_ops_button.clicked.connect(self.show_layer_operation_feedback)
         pin_pick_button.clicked.connect(self.show_pin_pick_state)
         cursor_geo_button.clicked.connect(self.show_cursor_geodesy_state)
         boundary_state_button.clicked.connect(self.show_boundary_state)
@@ -2699,7 +2744,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button)),
             ("Inspect: Replay/contracts", (profile_replay_button, timeline_button, module_seams_button, clone_ready_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, ocean_port_button, style_routes_button, layer_matrix_button, layer_runtime_button)),
-            ("Inspect: Research interaction", (layer_pick_button, selection_state_button, canvas_state_button, pin_pick_button, cursor_geo_button, boundary_state_button)),
+            ("Inspect: Research interaction", (layer_pick_button, selection_state_button, layer_ops_button, canvas_state_button, pin_pick_button, cursor_geo_button, boundary_state_button)),
             ("Inspect: Visual review", (thumbnail_button, live_preview_button)),
             ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, smoke_button)),
             ("Process", (launch_button, restart_button, stop_button)),
@@ -3443,6 +3488,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "rrkal_data_manifest_ref": self.rrkal_manifest_ref_edit.text().strip(),
             "rrkal_data_manifest_ref_boundary": "Reference-only handoff field; displaytools does not discover, download, validate, import, or govern this manifest.",
             "selected_layer": self.selected_layer_key,
+            "active_layer_operation_summary": self.active_layer_operation_summary_text(),
+            "last_layer_operation": self.layer_operation_event_text(),
+            "layer_operation_feedback": self.collect_layer_operation_feedback(),
             "layer_filter": self.collect_layer_filter_state(),
             "layer_group_view": self.collect_layer_group_view_state(),
             "layer_operator_shortcuts": self.collect_layer_operator_shortcuts(),
@@ -3599,6 +3647,16 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
 
     def collect_profile_ui_state_replay(self) -> dict[str, object]:
         return profile_ui_state_replay_packet("rrkal_displaytools_qt_panel")
+
+    def collect_layer_operation_feedback(self) -> dict[str, object]:
+        return layer_operation_feedback_packet(
+            "rrkal_displaytools_qt_panel",
+            self.selected_layer_key,
+            self.active_layer_operation_summary_text(),
+            self.layer_operation_event_text(),
+            self.collect_layer_operator_groups(),
+            self.collect_layer_undo_state(),
+        )
 
     def collect_layer_visual_presets(self) -> dict[str, object]:
         return layer_visual_presets_packet(
@@ -6877,6 +6935,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "active_layer": self.selected_layer_key,
             "active_layer_operation_summary": self.active_layer_operation_summary_text(),
             "last_layer_operation": self.layer_operation_event_text(),
+            "layer_operation_feedback": self.collect_layer_operation_feedback(),
             "layer_filter": self.collect_layer_filter_state(),
             "layer_group_view": self.collect_layer_group_view_state(),
             "layer_operator_shortcuts": self.collect_layer_operator_shortcuts(),
@@ -6990,6 +7049,13 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         QtWidgets.QApplication.clipboard().setText(self.build_research_provenance())
         if hasattr(self, "status"):
             self.status.setText("已複製科研可重現性摘要")
+
+
+    def show_layer_operation_feedback(self) -> None:
+        self.command_text.setPlainText(
+            json.dumps(self.collect_layer_operation_feedback(), ensure_ascii=False, indent=2)
+        )
+        self.status.setText("Shown layer operation feedback JSON")
 
     def show_layer_runtime_state(self) -> None:
         self.write_layer_runtime_state()

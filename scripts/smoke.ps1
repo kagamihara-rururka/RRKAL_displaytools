@@ -332,7 +332,7 @@ if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "
 if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "live_preview") {
     throw "Launch packet profile_ui_state_replay Live preview inspector action missing"
 }
-if ([int]$launchPacket.profile_ui_state_replay.qt_inspector_action_count -lt 17) {
+if ([int]$launchPacket.profile_ui_state_replay.qt_inspector_action_count -lt 18) {
     throw "Launch packet profile_ui_state_replay inspector action count missing"
 }
 if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "canvas_state") {
@@ -350,11 +350,17 @@ if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "
 if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "selection_state") {
     throw "Launch packet profile_ui_state_replay selection state inspector action missing"
 }
+if ($launchPacket.profile_ui_state_replay.qt_inspector_action_ids -notcontains "layer_ops") {
+    throw "Launch packet profile_ui_state_replay layer ops inspector action missing"
+}
 if ([int]$launchPacket.profile_ui_state_replay.qt_inspector_group_count -lt 4) {
     throw "Launch packet profile_ui_state_replay inspector group count missing"
 }
 if ($launchPacket.profile_ui_state_replay.qt_inspector_action_groups.id -notcontains "research_interaction") {
     throw "Launch packet profile_ui_state_replay research interaction group missing"
+}
+if ($launchPacket.layer_operation_feedback.schema -ne "rrkal_displaytools.layer_operation_feedback.v1") {
+    throw "Launch packet layer_operation_feedback schema missing or invalid"
 }
 if ($launchPacket.profile_ui_state_replay.qt_inspector_action_groups.id -notcontains "visual_review") {
     throw "Launch packet profile_ui_state_replay visual review group missing"
@@ -988,6 +994,9 @@ if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontain
 if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontains "Inspect: Selection state") {
     throw "Renderer profile_ui_state_replay Selection state inspector label missing"
 }
+if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontains "Inspect: Layer ops") {
+    throw "Renderer profile_ui_state_replay Layer ops inspector label missing"
+}
 if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontains "Inspect: Renderer thumbnail") {
     throw "Renderer profile_ui_state_replay Renderer thumbnail inspector label missing"
 }
@@ -996,6 +1005,9 @@ if ($capabilities.profile_ui_state_replay.qt_inspector_action_labels -notcontain
 }
 if ($capabilities.profile_ui_state_replay.qt_inspector_action_groups.id -notcontains "renderer_ports") {
     throw "Renderer profile_ui_state_replay renderer ports group missing"
+}
+if ($capabilities.layer_operation_feedback.schema -ne "rrkal_displaytools.layer_operation_feedback.v1") {
+    throw "Renderer layer_operation_feedback capability missing or invalid"
 }
 if ($capabilities.profile_ui_state_replay.qt_inspector_action_groups.id -notcontains "visual_review") {
     throw "Renderer profile_ui_state_replay visual review group missing"
@@ -1743,6 +1755,12 @@ if ($qtPanelSource -notlike '*self.set_layer_operation_status(f"Applied layer pr
 if ($qtPanelSource -notlike "*last_layer_operation*") {
     throw "Qt launch packet last layer operation field is missing"
 }
+if ($qtPanelSource -notlike "*layer_operation_feedback*") {
+    throw "Qt layer operation feedback packet field is missing"
+}
+if ($qtPanelSource -notlike "*rrkal_displaytools.layer_operation_feedback.v1*") {
+    throw "Qt layer operation feedback schema is missing"
+}
 if ($qtPanelSource -notlike "*click a row to select the active research layer*") {
     throw "Qt Layers workflow row-selection hint is missing"
 }
@@ -1826,6 +1844,12 @@ if ($qtPanelSource -notlike "*Inspect: Layer pick*") {
 }
 if ($qtPanelSource -notlike "*Inspect: Selection state*") {
     throw "Qt Selection state inspector button is missing"
+}
+if ($qtPanelSource -notlike "*Inspect: Layer ops*") {
+    throw "Qt Layer ops inspector button is missing"
+}
+if ($qtPanelSource -notlike "*show_layer_operation_feedback*") {
+    throw "Qt Layer operation feedback Inspect handler is missing"
 }
 if ($qtPanelSource -notlike "*setAccessibleDescription*") {
     throw "Qt contract inspector accessible descriptions are missing"
@@ -1943,6 +1967,9 @@ if ($rendererSource -notlike "*research_interaction*") {
 if ($rendererSource -notlike "*visual_review*") {
     throw "Renderer capability profile UI state replay visual review group missing"
 }
+if ($rendererSource -notlike "*layer_operation_feedback_packet*") {
+    throw "Renderer capability layer operation feedback contract missing"
+}
 
 $scripts = Get-ChildItem scripts -Filter *.ps1
 foreach ($script in $scripts) {
@@ -2043,6 +2070,9 @@ if ($launchPacketSource -notmatch 'qt_inspector_action_groups') {
 if ($launchPacketSource -notmatch 'visual_review') {
     throw "Launch packet profile UI state replay visual review group missing"
 }
+if ($launchPacketSource -notmatch 'layer_operation_feedback') {
+    throw "Launch packet layer operation feedback field missing"
+}
 if ($handoffInspectorSource -notmatch 'profile_ui_state_replay') {
     throw "Handoff inspection profile UI state replay output is missing"
 }
@@ -2110,6 +2140,9 @@ if ($profileSchemaDoc -notmatch 'renderer_thumbnail') {
 if ($profileSchemaDoc -notmatch 'selection_state') {
     throw "Profile schema docs missing selection state inspector action"
 }
+if ($profileSchemaDoc -notmatch 'layer_operation_feedback') {
+    throw "Profile schema docs missing layer operation feedback inspector action"
+}
 
 $cloneQuickstartDoc = Get-Content -LiteralPath (Join-Path $BoundaryIdentityRoot "docs\QUICKSTART_CLONE.zh-TW.md") -Raw -Encoding UTF8
 if ($cloneQuickstartDoc -notmatch 'Inspect: Clone ready') {
@@ -2123,6 +2156,9 @@ if ($cloneQuickstartDoc -notmatch 'Inspect: Live preview') {
 }
 if ($cloneQuickstartDoc -notmatch 'Inspect: Selection state') {
     throw "Clone quickstart missing Qt Inspect Selection state guidance"
+}
+if ($cloneQuickstartDoc -notmatch 'Inspect: Layer ops') {
+    throw "Clone quickstart missing Qt Inspect Layer ops guidance"
 }
 if ($cloneQuickstartDoc -notmatch 'Replay/contracts') {
     throw "Clone quickstart missing Qt Inspect Replay/contracts group guidance"

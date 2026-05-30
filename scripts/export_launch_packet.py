@@ -1049,6 +1049,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         "renderer_config",
         "selected_layer",
         "layer_stack_ui",
+        "layer_operation_feedback",
         "pins",
         "boundary_highlight",
         "boundary_emphasis_control",
@@ -1076,6 +1077,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         ("layer_runtime", "Inspect: Layer runtime"),
         ("layer_pick", "Inspect: Layer pick"),
         ("selection_state", "Inspect: Selection state"),
+        ("layer_ops", "Inspect: Layer ops"),
         ("canvas_state", "Inspect: Canvas state"),
         ("pin_pick", "Inspect: Pin pick"),
         ("cursor_geo", "Inspect: Cursor geo"),
@@ -1086,7 +1088,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
     qt_inspector_groups = [
         {"id": "replay_contracts", "label": "Replay/contracts", "action_ids": ["profile_replay", "timeline", "clone_ready", "module_seams"]},
         {"id": "renderer_ports", "label": "Renderer ports", "action_ids": ["hydro_lod", "ocean_port", "style_routes", "layer_matrix", "layer_runtime"]},
-        {"id": "research_interaction", "label": "Research interaction", "action_ids": ["layer_pick", "selection_state", "canvas_state", "pin_pick", "cursor_geo", "boundary_json"]},
+        {"id": "research_interaction", "label": "Research interaction", "action_ids": ["layer_pick", "selection_state", "layer_ops", "canvas_state", "pin_pick", "cursor_geo", "boundary_json"]},
         {"id": "visual_review", "label": "Visual review", "action_ids": ["renderer_thumbnail", "live_preview"]},
     ]
     return {
@@ -1443,6 +1445,46 @@ def cross_machine_clone_readiness_packet(
         "launch_packet_fields": ["cross_machine_clone_readiness", "profile_launch_readiness", "module_boundary_registry", "portable_command"],
         "renderer_capability_field": "cross_machine_clone_readiness",
         "boundary": "Cross-machine readiness covers clone/setup/smoke/run handoff only; data discovery, download, import and cache governance remain RRKAL-owned.",
+    }
+
+
+
+def layer_operation_feedback_packet(
+    source: str,
+    selected_layer: str | None = None,
+    active_summary: str | None = None,
+    last_operation: str | None = None,
+    operator_groups: dict[str, object] | None = None,
+    undo_state: dict[str, object] | None = None,
+) -> dict[str, object]:
+    operator_groups = operator_groups if isinstance(operator_groups, dict) else {}
+    undo_state = undo_state if isinstance(undo_state, dict) else {}
+    active_summary_text = active_summary or "Layer operation summary unavailable in static export."
+    last_operation_text = last_operation or "Last layer operation: unavailable in static export"
+    return {
+        "schema": "rrkal_displaytools.layer_operation_feedback.v1",
+        "source": source,
+        "selected_layer": selected_layer,
+        "active_layer_operation_summary": active_summary_text,
+        "last_layer_operation": last_operation_text,
+        "operator_group_summary": operator_groups.get("summary_text"),
+        "operator_group_count": int(operator_groups.get("group_count") or 0),
+        "operator_group_complete_count": int(operator_groups.get("complete_group_count") or 0),
+        "undo_depth": int(undo_state.get("depth") or 0),
+        "qt_surface": "Layers dock Layer operation summary / Last layer operation labels",
+        "profile_state_fields": ["selected_layer", "layer_stack_ui"],
+        "launch_packet_fields": [
+            "layer_operation_feedback",
+            "active_layer_operation_summary",
+            "last_layer_operation",
+            "layer_operator_groups",
+            "layer_undo",
+        ],
+        "renderer_capability_field": "layer_operation_feedback",
+        "profile_ui_state_replay_action_id": "layer_ops",
+        "summary_text": "Active layer operation summary and last operation status are reviewable without reconstructing the Qt UI.",
+        "copyable_provenance": True,
+        "boundary": "Qt layer operation feedback/replay metadata only; renderer state and RRKAL data governance are not mutated.",
     }
 
 
@@ -2705,6 +2747,7 @@ def launch_packet(
         "boundary_highlight": boundary_highlight_packet(profile),
         "active_layer_diagnostics": active_layer_diagnostics_packet(profile, rrkal_data_manifest_ref),
         "layer_undo": layer_undo_packet(),
+        "layer_operation_feedback": layer_operation_feedback_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None, None, None, layer_operator_groups_packet(layer_operator_shortcuts_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None), "scripts.export_launch_packet"), layer_undo_packet()),
         "session_journal": session_journal_packet(),
         "document_undo": document_undo_packet(),
         "timeline_state": timeline_state,

@@ -500,3 +500,9 @@
 - Qt launch/provenance packets include `last_layer_operation`, giving clone/review workflows a compact record of the last layer operation message.
 - Solo selected layer, restore pre-solo visibility and layer undo now use the same operation feedback path, so isolation/history actions leave visible researcher-facing status in the Layers dock.
 - Group toggles and layer visual preset application now also update `Last layer operation`, closing feedback for high-level layer visibility workflows.
+
+## Qt Inspect layer operation feedback
+
+- Qt Actions now exposes `Inspect: Layer ops` inside Research interaction.
+- `rrkal_displaytools.layer_operation_feedback.v1` combines active layer summary, last layer operation, operator groups and undo depth into one copyable packet.
+- Qt launch/provenance packets, No-GUI launch packets and renderer capabilities advertise `layer_operation_feedback`.
