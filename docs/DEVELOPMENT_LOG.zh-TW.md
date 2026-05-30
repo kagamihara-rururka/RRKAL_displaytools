@@ -3711,3 +3711,13 @@ Changes:
 
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
+## 2026-05-30 - Layer group/preset operation feedback
+
+Changes:
+- Routed layer group toggles through `set_layer_operation_status()` with changed/skipped counts.
+- Routed layer visual preset application through the same `Last layer operation` feedback path.
+- Added smoke/docs coverage for group toggle and layer preset operation messages.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.

@@ -1734,6 +1734,12 @@ if ($qtPanelSource -notlike '*self.set_layer_operation_status("已還原 Solo �
 if ($qtPanelSource -notlike '*self.set_layer_operation_status("已回復上一個 layer undo snapshot"*') {
     throw "Qt layer undo operation feedback is missing"
 }
+if ($qtPanelSource -notlike "*Layer group toggle:*") {
+    throw "Qt layer group toggle operation feedback is missing"
+}
+if ($qtPanelSource -notlike '*self.set_layer_operation_status(f"Applied layer preset:*') {
+    throw "Qt layer preset operation feedback is missing"
+}
 if ($qtPanelSource -notlike "*last_layer_operation*") {
     throw "Qt launch packet last layer operation field is missing"
 }

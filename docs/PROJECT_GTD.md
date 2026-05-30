@@ -274,3 +274,14 @@ Done:
 
 Next:
 - Continue closing layer operation feedback for group toggles and preset application.
+
+
+## 2026-05-30 - Layer group/preset operation feedback
+
+Done:
+- Routed layer group toggles through `set_layer_operation_status()` with changed/skipped counts.
+- Routed layer visual preset application through the same operation feedback path.
+- Added smoke/docs gates for group toggle and layer preset operation messages.
+
+Next:
+- Continue UIUX closure on layer operation provenance and profile replay discoverability.

@@ -7038,9 +7038,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.refresh_layer_stack_status()
         label = str(preset.get("label", preset_id))
         if skipped_locked:
-            self.status.setText(f"Applied layer preset: {label}; skipped locked layers: {len(skipped_locked)}")
+            self.set_layer_operation_status(f"Applied layer preset: {label}; skipped locked layers: {len(skipped_locked)}")
         else:
-            self.status.setText(f"Applied layer preset: {label}")
+            self.set_layer_operation_status(f"Applied layer preset: {label}")
 
     def show_layer_capability_matrix(self) -> None:
         self.command_text.setPlainText(
@@ -7455,8 +7455,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 continue
             self.checks[key].setChecked(target)
         self.refresh_command_preview()
+        self.refresh_layer_stack_status()
+        state = "visible" if target else "hidden"
         if skipped_locked:
-            self.status.setText(f"已切換未鎖定圖層；跳過 locked layers：{skipped_locked}")
+            self.set_layer_operation_status(
+                f"Layer group toggle: {len(keys) - skipped_locked}/{len(keys)} layer(s) -> {state}; skipped locked={skipped_locked}"
+            )
+        else:
+            self.set_layer_operation_status(f"Layer group toggle: {len(keys)}/{len(keys)} layer(s) -> {state}")
 
     @QtCore.pyqtSlot()
     def toggle_hydrology_layers(self) -> None:

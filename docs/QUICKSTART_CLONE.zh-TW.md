@@ -181,3 +181,4 @@ Displaytools 不負責：
 - Read `Last layer operation` in the Layers dock after visibility, lock or reset actions.
 - The same compact status is exported in Qt launch/provenance packets as `last_layer_operation`.
 - Solo selected layer, restore pre-solo visibility and layer undo also update this label, making isolation/history actions reviewable after clone.
+- Group toggles and layer visual presets also update the same label, so clone users can see the latest high-level layer visibility workflow.
