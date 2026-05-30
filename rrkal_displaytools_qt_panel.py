@@ -422,6 +422,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
                 {"id": "layer_control", "fields": ["layer_selection_tool.selection_summary_contract.quick_actions_summary_contract", "layer_selection_affordance.active_quick_actions"]},
                 {"id": "ocean_guard", "fields": ["ocean_material_control_port.qt_control_panel.performance_guard_summary_contract"]},
                 {"id": "visual_review", "fields": ["visual_review_summary", "visual_feature_closure_matrix"]},
+                {"id": "goal_closure", "fields": ["goal_closure_scorecard", "goal_closure_scorecard.copy_summary_contract"]},
                 {"id": "compose_performance", "fields": ["compose_performance_summary", "layer_render_plan_performance.compose_pass_budget"]},
             ],
             "portable": True,
@@ -433,6 +434,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "layer_render_plan_performance.compose_pass_budget",
             "layer_render_plan_performance.compose_run_parity_artifact_workflow",
             "visual_feature_closure_matrix",
+            "goal_closure_scorecard.copy_summary_contract",
         ],
         "included_summary_fields": [
             "clone_reviewer_summary",
@@ -458,6 +460,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "style_profile_renderer_routes",
             "module_boundary_registry",
             "layer_render_plan_performance",
+            "goal_closure_scorecard",
             "reviewer_packet_export",
         ],
         "launch_packet_field": "reviewer_packet_export",
@@ -1051,6 +1054,65 @@ def visual_feature_closure_matrix_packet(source: str) -> dict[str, object]:
         "boundary": "Closure matrix summarizes smoke-gated contract evidence; runtime artifacts still require renderer execution before claiming fresh visual output.",
     }
 
+def goal_closure_scorecard_packet(
+    visual_matrix: dict[str, object] | None,
+    reviewer_export: dict[str, object] | None,
+    source: str,
+) -> dict[str, object]:
+    visual_matrix = visual_matrix if isinstance(visual_matrix, dict) else visual_feature_closure_matrix_packet(source)
+    reviewer_export = reviewer_export if isinstance(reviewer_export, dict) else reviewer_packet_export_packet(source)
+    features = visual_matrix.get("features") if isinstance(visual_matrix, dict) else []
+    features = features if isinstance(features, list) else []
+    feature_status = {
+        str(feature.get("id")): str(feature.get("status") or "unknown")
+        for feature in features
+        if isinstance(feature, dict)
+    }
+    categories = [
+        {"id": "qt_first_ui", "status": feature_status.get("qt_first_ui", "ready"), "evidence_fields": ["profile_launch_readiness_ui", "profile_ui_state_replay"], "reviewer_path": "profile_ui_state_replay"},
+        {"id": "layer_control", "status": feature_status.get("layer_control", "ready"), "evidence_fields": ["layer_selection_tool", "layer_selection_affordance", "layer_capability_matrix"], "reviewer_path": "layer_selection_tool.selection_summary_contract.quick_actions_summary_contract"},
+        {"id": "profile_launch_packet", "status": feature_status.get("profile_launch", "ready"), "evidence_fields": ["profile_launch_readiness", "reviewer_packet_export"], "reviewer_path": "launch_reviewer_summary"},
+        {"id": "renderer_capability_discovery", "status": feature_status.get("renderer_capability_discovery", "ready"), "evidence_fields": ["renderer_capabilities", "style_renderer_entries"], "reviewer_path": "renderer_capabilities"},
+        {"id": "cross_machine_use", "status": feature_status.get("cross_machine_clone", "ready"), "evidence_fields": ["cross_machine_clone_readiness", "reviewer_packet_export.field_guide"], "reviewer_path": "clone_reviewer_summary"},
+        {"id": "visual_features", "status": visual_matrix.get("status", "ready_with_queued_performance_followup"), "evidence_fields": ["visual_feature_closure_matrix", "visual_review_readiness"], "reviewer_path": "visual_feature_closure_matrix.copy_summary_contract"},
+        {"id": "renderer_performance", "status": feature_status.get("renderer_performance", "queued"), "evidence_fields": ["layer_render_plan_performance", "compose_performance_summary"], "reviewer_path": "layer_render_plan_performance.compose_pass_budget"},
+    ]
+    ready_count = sum(1 for category in categories if category.get("status") == "ready")
+    queued_count = sum(1 for category in categories if category.get("status") == "queued")
+    return {
+        "schema": "rrkal_displaytools.goal_closure_scorecard.v1",
+        "source": source,
+        "status": "ready_with_queued_performance_followup",
+        "objective_scope": [
+            "Qt-first UI",
+            "layer control",
+            "profile/launch packet",
+            "renderer capability discovery",
+            "cross-machine use",
+            "requested visualization features",
+            "renderer performance follow-up",
+        ],
+        "category_count": len(categories),
+        "ready_category_count": ready_count,
+        "queued_category_count": queued_count,
+        "categories": categories,
+        "reviewer_packet_field_guide_schema": (reviewer_export.get("field_guide") or {}).get("schema") if isinstance(reviewer_export.get("field_guide"), dict) else None,
+        "copy_summary_contract_schema": "rrkal_displaytools.goal_closure_scorecard_summary_contract.v1",
+        "copy_summary_contract": {
+            "schema": "rrkal_displaytools.goal_closure_scorecard_summary_contract.v1",
+            "summary_format": "Goal closure scorecard: status={status}; ready={ready_category_count}/{category_count}; queued={queued_category_count}; categories={category_ids}; performance=queued_until_render_plan_merge",
+            "qt_copy_action": "copy_goal_closure_scorecard_summary",
+            "launch_packet_field": "goal_closure_scorecard.copy_summary_contract",
+            "renderer_capability_field": "goal_closure_scorecard.copy_summary_contract",
+            "handoff_field": "goal_closure_scorecard.copy_summary_contract",
+            "portable": True,
+        },
+        "launch_packet_fields": ["goal_closure_scorecard", "visual_feature_closure_matrix", "reviewer_packet_export"],
+        "renderer_capability_field": "goal_closure_scorecard",
+        "handoff_field": "goal_closure_scorecard",
+        "smoke_gate": "goal_closure_scorecard",
+        "boundary": "Scorecard summarizes smoke-gated closure evidence; renderer performance remains queued until render-plan merge and runtime parity evidence land.",
+    }
 
 def renderer_output_artifact_contract_packet(source: str) -> dict[str, object]:
     return {
@@ -4018,6 +4080,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         export_reviewer_packet_button = QtWidgets.QPushButton("Export reviewer packet")
         profile_replay_button = QtWidgets.QPushButton("Inspect: Profile replay")
         copy_launch_summary_button = QtWidgets.QPushButton("Copy launch summary")
+        copy_reviewer_fields_button = QtWidgets.QPushButton("Copy reviewer fields")
+        copy_goal_scorecard_button = QtWidgets.QPushButton("Copy goal scorecard")
         timeline_button = QtWidgets.QPushButton("Inspect: Timeline")
         ocean_port_button = QtWidgets.QPushButton("Inspect: Ocean port")
         ocean_3d_controls_action_button = QtWidgets.QPushButton("Open: Ocean 3D controls")
@@ -4066,6 +4130,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         for button, tooltip in (
             (profile_replay_button, "Replay/contracts: inspect portable UI/profile replay coverage JSON."),
             (copy_launch_summary_button, "Replay/contracts: copy profile, portable command and launch packet reviewer summary."),
+            (copy_reviewer_fields_button, "Replay/contracts: copy reviewer packet field guide with primary, recommended and grouped review paths."),
+            (copy_goal_scorecard_button, "Replay/contracts: copy objective-level closure scorecard across UI, layers, launch, renderer capability and cross-machine use."),
             (timeline_button, "Replay/contracts: inspect Timeline keyframes, runtime state and export options JSON."),
             (ocean_port_button, "Renderer ports: inspect scalar ocean material and sea-state handoff JSON."),
             (ocean_3d_controls_action_button, "Renderer ports: open Taichi 3D Ocean Water scalar controls from the Qt control board."),
@@ -4119,6 +4185,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         export_reviewer_packet_button.clicked.connect(self.export_reviewer_packet_dialog)
         profile_replay_button.clicked.connect(self.show_profile_ui_state_replay)
         copy_launch_summary_button.clicked.connect(self.copy_launch_reviewer_summary)
+        copy_reviewer_fields_button.clicked.connect(self.copy_reviewer_packet_field_guide)
+        copy_goal_scorecard_button.clicked.connect(self.copy_goal_closure_scorecard_summary)
         timeline_button.clicked.connect(self.show_timeline_runtime_state)
         ocean_port_button.clicked.connect(self.show_ocean_material_control_port)
         ocean_3d_controls_action_button.clicked.connect(self.open_taichi_ocean_3d_controls)
@@ -4166,7 +4234,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         stop_button.clicked.connect(self.stop_renderer)
         action_sections = (
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button, export_reviewer_packet_button)),
-            ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, timeline_button, module_seams_button, copy_module_summary_button, clone_ready_button, copy_clone_summary_button)),
+            ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, copy_reviewer_fields_button, copy_goal_scorecard_button, timeline_button, module_seams_button, copy_module_summary_button, clone_ready_button, copy_clone_summary_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, ocean_3d_controls_action_button, copy_ocean_summary_button, copy_ocean_guard_summary_button, style_routes_button, copy_style_routes_summary_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
             ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, copy_visual_closure_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, copy_style_thumb_status_button, thumbnail_button, live_preview_button)),
@@ -5248,6 +5316,35 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def collect_reviewer_packet_export(self) -> dict[str, object]:
         return reviewer_packet_export_packet("rrkal_displaytools_qt_panel")
 
+    def collect_goal_closure_scorecard(self) -> dict[str, object]:
+        return goal_closure_scorecard_packet(
+            self.collect_visual_feature_closure_matrix(),
+            self.collect_reviewer_packet_export(),
+            "rrkal_displaytools_qt_panel",
+        )
+
+    def goal_closure_scorecard_summary_text(self, packet: dict[str, object] | None = None) -> str:
+        packet = packet or self.collect_goal_closure_scorecard()
+        categories = packet.get("categories") if isinstance(packet, dict) else []
+        categories = categories if isinstance(categories, list) else []
+        category_parts = []
+        for category in categories:
+            if isinstance(category, dict):
+                category_parts.append(f"{category.get('id')}={category.get('status')}")
+        return (
+            "Goal closure scorecard: "
+            f"status={packet.get('status')}; "
+            f"ready={packet.get('ready_category_count')}/{packet.get('category_count')}; "
+            f"queued={packet.get('queued_category_count')}; "
+            f"categories={','.join(category_parts)}; "
+            "performance=queued_until_render_plan_merge"
+        )
+
+    def copy_goal_closure_scorecard_summary(self) -> None:
+        summary = self.goal_closure_scorecard_summary_text()
+        QtWidgets.QApplication.clipboard().setText(summary)
+        self.status.setText("Copied goal closure scorecard summary to clipboard.")
+
     def reviewer_packet_field_guide_summary_text(self) -> str:
         packet = self.collect_reviewer_packet_export()
         guide = packet.get("field_guide", {})
@@ -5291,6 +5388,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "style_routes_summary": self.style_routes_summary_text(),
             "module_boundary_summary": self.module_boundary_summary_text(),
             "compose_performance_summary": self.compose_performance_reviewer_summary_text(),
+            "goal_closure_scorecard": self.collect_goal_closure_scorecard(),
             "cross_machine_clone_readiness": self.collect_cross_machine_clone_readiness(),
             "profile_launch_readiness": self.collect_profile_launch_readiness(),
             "profile_ui_state_replay": self.collect_profile_ui_state_replay(),
@@ -5300,6 +5398,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "style_profile_renderer_routes": self.collect_style_profile_renderer_routes(),
             "module_boundary_registry": self.collect_module_boundary_registry(),
             "visual_feature_closure_matrix": self.collect_visual_feature_closure_matrix(),
+            "goal_closure_scorecard": self.collect_goal_closure_scorecard(),
             "renderer_output_artifact_contract": self.collect_renderer_output_artifact_contract(),
             "layer_render_plan_performance": self.collect_layer_render_plan_performance(),
             "launch_packet_snapshot": self.collect_launch_packet(),
@@ -5330,6 +5429,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "last_layer_operation": self.layer_operation_event_text(),
             "visual_review_readiness": self.collect_visual_review_readiness(),
             "visual_feature_closure_matrix": self.collect_visual_feature_closure_matrix(),
+            "goal_closure_scorecard": self.collect_goal_closure_scorecard(),
             "renderer_output_artifact_contract": self.collect_renderer_output_artifact_contract(),
             "layer_render_plan_performance": self.collect_layer_render_plan_performance(),
             "layer_operation_feedback": self.collect_layer_operation_feedback(),

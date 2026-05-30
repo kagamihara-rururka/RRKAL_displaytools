@@ -1,5 +1,14 @@
 # Development Log
 
+## 2026-05-30 - Goal closure scorecard
+
+Changes:
+- Added `rrkal_displaytools.goal_closure_scorecard.v1` to summarize the active objective categories: Qt-first UI, layer control, profile/launch packets, renderer capability discovery, cross-machine use, requested visualization features and queued renderer performance.
+- Added Qt `Copy goal scorecard` so reviewers can copy objective-level ready/queued status without opening JSON first; the scorecard is also included in reviewer packet fields.
+- Smoke now gates launch packet, renderer capability, handoff inspection and Qt source markers for the scorecard and copy summary contract.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
 ## 2026-05-30 - Visual closure matrix copy summary
 
 Changes:

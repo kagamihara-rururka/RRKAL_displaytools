@@ -71,6 +71,7 @@ $summary = [ordered]@{
         profile_launch_readiness_ui = $launchPacket.profile_launch_readiness_ui.schema
         profile_ui_state_replay = $launchPacket.profile_ui_state_replay.schema
         visual_feature_closure_matrix = $launchPacket.visual_feature_closure_matrix.schema
+        goal_closure_scorecard = $launchPacket.goal_closure_scorecard.schema
         renderer_output_artifact_contract = $launchPacket.renderer_output_artifact_contract.schema
         layer_render_plan_performance = $launchPacket.layer_render_plan_performance.schema
         reviewer_packet_export = $launchPacket.reviewer_packet_export.schema
@@ -254,6 +255,16 @@ $summary = [ordered]@{
         feature_ids = $visualFeatureClosureMatrix.feature_ids
         copy_summary_contract = $visualFeatureClosureMatrix.copy_summary_contract
         smoke_gate = $visualFeatureClosureMatrix.smoke_gate
+    }
+    goal_closure_scorecard = @{
+        schema = "rrkal_displaytools.goal_closure_scorecard.v1"
+        launch_packet_schema = $launchPacket.goal_closure_scorecard.schema
+        renderer_capabilities_schema = $capabilities.goal_closure_scorecard.schema
+        status = $launchPacket.goal_closure_scorecard.status
+        category_count = $launchPacket.goal_closure_scorecard.category_count
+        ready_category_count = $launchPacket.goal_closure_scorecard.ready_category_count
+        queued_category_count = $launchPacket.goal_closure_scorecard.queued_category_count
+        copy_summary_contract = $launchPacket.goal_closure_scorecard.copy_summary_contract
     }
     renderer_output_artifact_contract = @{
         schema = "rrkal_displaytools.renderer_output_artifact_contract.v1"

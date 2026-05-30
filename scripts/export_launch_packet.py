@@ -1238,6 +1238,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
                 {"id": "layer_control", "fields": ["layer_selection_tool.selection_summary_contract.quick_actions_summary_contract", "layer_selection_affordance.active_quick_actions"]},
                 {"id": "ocean_guard", "fields": ["ocean_material_control_port.qt_control_panel.performance_guard_summary_contract"]},
                 {"id": "visual_review", "fields": ["visual_review_summary", "visual_feature_closure_matrix"]},
+                {"id": "goal_closure", "fields": ["goal_closure_scorecard", "goal_closure_scorecard.copy_summary_contract"]},
                 {"id": "compose_performance", "fields": ["compose_performance_summary", "layer_render_plan_performance.compose_pass_budget"]},
             ],
             "portable": True,
@@ -1249,6 +1250,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "layer_render_plan_performance.compose_pass_budget",
             "layer_render_plan_performance.compose_run_parity_artifact_workflow",
             "visual_feature_closure_matrix",
+            "goal_closure_scorecard.copy_summary_contract",
         ],
         "included_summary_fields": [
             "clone_reviewer_summary",
@@ -1274,6 +1276,7 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
             "style_profile_renderer_routes",
             "module_boundary_registry",
             "layer_render_plan_performance",
+            "goal_closure_scorecard",
             "reviewer_packet_export",
         ],
         "launch_packet_field": "reviewer_packet_export",
@@ -1867,6 +1870,65 @@ def visual_feature_closure_matrix_packet(source: str) -> dict[str, object]:
         "boundary": "Closure matrix summarizes smoke-gated contract evidence; runtime artifacts still require renderer execution before claiming fresh visual output.",
     }
 
+def goal_closure_scorecard_packet(
+    visual_matrix: dict[str, object] | None,
+    reviewer_export: dict[str, object] | None,
+    source: str,
+) -> dict[str, object]:
+    visual_matrix = visual_matrix if isinstance(visual_matrix, dict) else visual_feature_closure_matrix_packet(source)
+    reviewer_export = reviewer_export if isinstance(reviewer_export, dict) else reviewer_packet_export_packet(source)
+    features = visual_matrix.get("features") if isinstance(visual_matrix, dict) else []
+    features = features if isinstance(features, list) else []
+    feature_status = {
+        str(feature.get("id")): str(feature.get("status") or "unknown")
+        for feature in features
+        if isinstance(feature, dict)
+    }
+    categories = [
+        {"id": "qt_first_ui", "status": feature_status.get("qt_first_ui", "ready"), "evidence_fields": ["profile_launch_readiness_ui", "profile_ui_state_replay"], "reviewer_path": "profile_ui_state_replay"},
+        {"id": "layer_control", "status": feature_status.get("layer_control", "ready"), "evidence_fields": ["layer_selection_tool", "layer_selection_affordance", "layer_capability_matrix"], "reviewer_path": "layer_selection_tool.selection_summary_contract.quick_actions_summary_contract"},
+        {"id": "profile_launch_packet", "status": feature_status.get("profile_launch", "ready"), "evidence_fields": ["profile_launch_readiness", "reviewer_packet_export"], "reviewer_path": "launch_reviewer_summary"},
+        {"id": "renderer_capability_discovery", "status": feature_status.get("renderer_capability_discovery", "ready"), "evidence_fields": ["renderer_capabilities", "style_renderer_entries"], "reviewer_path": "renderer_capabilities"},
+        {"id": "cross_machine_use", "status": feature_status.get("cross_machine_clone", "ready"), "evidence_fields": ["cross_machine_clone_readiness", "reviewer_packet_export.field_guide"], "reviewer_path": "clone_reviewer_summary"},
+        {"id": "visual_features", "status": visual_matrix.get("status", "ready_with_queued_performance_followup"), "evidence_fields": ["visual_feature_closure_matrix", "visual_review_readiness"], "reviewer_path": "visual_feature_closure_matrix.copy_summary_contract"},
+        {"id": "renderer_performance", "status": feature_status.get("renderer_performance", "queued"), "evidence_fields": ["layer_render_plan_performance", "compose_performance_summary"], "reviewer_path": "layer_render_plan_performance.compose_pass_budget"},
+    ]
+    ready_count = sum(1 for category in categories if category.get("status") == "ready")
+    queued_count = sum(1 for category in categories if category.get("status") == "queued")
+    return {
+        "schema": "rrkal_displaytools.goal_closure_scorecard.v1",
+        "source": source,
+        "status": "ready_with_queued_performance_followup",
+        "objective_scope": [
+            "Qt-first UI",
+            "layer control",
+            "profile/launch packet",
+            "renderer capability discovery",
+            "cross-machine use",
+            "requested visualization features",
+            "renderer performance follow-up",
+        ],
+        "category_count": len(categories),
+        "ready_category_count": ready_count,
+        "queued_category_count": queued_count,
+        "categories": categories,
+        "reviewer_packet_field_guide_schema": (reviewer_export.get("field_guide") or {}).get("schema") if isinstance(reviewer_export.get("field_guide"), dict) else None,
+        "copy_summary_contract_schema": "rrkal_displaytools.goal_closure_scorecard_summary_contract.v1",
+        "copy_summary_contract": {
+            "schema": "rrkal_displaytools.goal_closure_scorecard_summary_contract.v1",
+            "summary_format": "Goal closure scorecard: status={status}; ready={ready_category_count}/{category_count}; queued={queued_category_count}; categories={category_ids}; performance=queued_until_render_plan_merge",
+            "qt_copy_action": "copy_goal_closure_scorecard_summary",
+            "launch_packet_field": "goal_closure_scorecard.copy_summary_contract",
+            "renderer_capability_field": "goal_closure_scorecard.copy_summary_contract",
+            "handoff_field": "goal_closure_scorecard.copy_summary_contract",
+            "portable": True,
+        },
+        "launch_packet_fields": ["goal_closure_scorecard", "visual_feature_closure_matrix", "reviewer_packet_export"],
+        "renderer_capability_field": "goal_closure_scorecard",
+        "handoff_field": "goal_closure_scorecard",
+        "smoke_gate": "goal_closure_scorecard",
+        "boundary": "Scorecard summarizes smoke-gated closure evidence; renderer performance remains queued until render-plan merge and runtime parity evidence land.",
+    }
 
 def renderer_output_artifact_contract_packet(source: str) -> dict[str, object]:
     return {
@@ -3940,6 +4002,7 @@ def launch_packet(
         "reviewer_packet_export": reviewer_packet_export_packet("scripts.export_launch_packet"),
         "visual_review_readiness": visual_review_readiness_packet("scripts.export_launch_packet"),
         "visual_feature_closure_matrix": visual_feature_closure_matrix_packet("scripts.export_launch_packet"),
+        "goal_closure_scorecard": goal_closure_scorecard_packet(visual_feature_closure_matrix_packet("scripts.export_launch_packet"), reviewer_packet_export_packet("scripts.export_launch_packet"), "scripts.export_launch_packet"),
         "renderer_output_artifact_contract": renderer_output_artifact_contract_packet("scripts.export_launch_packet"),
         "layer_render_plan_performance": layer_render_plan_performance_packet(
             "scripts.export_launch_packet",

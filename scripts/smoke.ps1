@@ -491,6 +491,21 @@ if ($launchPacket.visual_feature_closure_matrix.copy_summary_contract.schema -ne
 if ($launchPacket.visual_feature_closure_matrix.copy_summary_contract.qt_copy_action -ne "copy_visual_feature_closure_summary") {
     throw "Launch packet visual feature closure matrix copy action missing"
 }
+if ($launchPacket.goal_closure_scorecard.schema -ne "rrkal_displaytools.goal_closure_scorecard.v1") {
+    throw "Launch packet goal closure scorecard schema missing"
+}
+if ($launchPacket.goal_closure_scorecard.categories.id -notcontains "layer_control") {
+    throw "Launch packet goal closure scorecard layer control category missing"
+}
+if ($launchPacket.goal_closure_scorecard.copy_summary_contract.schema -ne "rrkal_displaytools.goal_closure_scorecard_summary_contract.v1") {
+    throw "Launch packet goal closure scorecard summary contract missing"
+}
+if ($launchPacket.reviewer_packet_export.recommended_review_fields -notcontains "goal_closure_scorecard.copy_summary_contract") {
+    throw "Launch packet reviewer packet goal scorecard recommended field missing"
+}
+if ($launchPacket.reviewer_packet_export.included_packet_fields -notcontains "goal_closure_scorecard") {
+    throw "Launch packet reviewer packet goal scorecard packet field missing"
+}
 if ($launchPacket.renderer_output_artifact_contract.schema -ne "rrkal_displaytools.renderer_output_artifact_contract.v1") {
     throw "Launch packet renderer output artifact contract schema missing or invalid"
 }
@@ -1894,6 +1909,15 @@ if ($capabilities.visual_feature_closure_matrix.copy_summary_contract.schema -ne
 if ($capabilities.visual_feature_closure_matrix.copy_summary_contract.reviewer_field_guide_group -ne "visual_review") {
     throw "Renderer visual feature closure matrix reviewer field guide group missing"
 }
+if ($capabilities.goal_closure_scorecard.schema -ne "rrkal_displaytools.goal_closure_scorecard.v1") {
+    throw "Renderer goal closure scorecard schema missing"
+}
+if ($capabilities.goal_closure_scorecard.categories.id -notcontains "cross_machine_use") {
+    throw "Renderer goal closure scorecard cross-machine category missing"
+}
+if ($capabilities.goal_closure_scorecard.copy_summary_contract.qt_copy_action -ne "copy_goal_closure_scorecard_summary") {
+    throw "Renderer goal closure scorecard copy action missing"
+}
 if ($capabilities.renderer_output_artifact_contract.schema -ne "rrkal_displaytools.renderer_output_artifact_contract.v1") {
     throw "Renderer output artifact contract schema missing or invalid"
 }
@@ -2794,6 +2818,18 @@ if ($handoff.visual_feature_closure_matrix.copy_summary_contract.schema -ne "rrk
 }
 if ($handoff.visual_feature_closure_matrix.copy_summary_contract.qt_copy_action -ne "copy_visual_feature_closure_summary") {
     throw "Handoff inspection visual feature closure matrix copy action missing"
+}
+if ($handoff.launch_packet_contracts.goal_closure_scorecard -ne "rrkal_displaytools.goal_closure_scorecard.v1") {
+    throw "Handoff inspection goal closure scorecard launch contract missing"
+}
+if ($handoff.goal_closure_scorecard.launch_packet_schema -ne "rrkal_displaytools.goal_closure_scorecard.v1") {
+    throw "Handoff inspection goal closure scorecard launch schema missing"
+}
+if ($handoff.goal_closure_scorecard.renderer_capabilities_schema -ne "rrkal_displaytools.goal_closure_scorecard.v1") {
+    throw "Handoff inspection goal closure scorecard renderer schema missing"
+}
+if ($handoff.goal_closure_scorecard.copy_summary_contract.qt_copy_action -ne "copy_goal_closure_scorecard_summary") {
+    throw "Handoff inspection goal closure scorecard copy action missing"
 }
 if ($handoff.launch_packet_contracts.renderer_output_artifact_contract -ne "rrkal_displaytools.renderer_output_artifact_contract.v1") {
     throw "Handoff inspection renderer output artifact contract missing or invalid"
@@ -4713,6 +4749,21 @@ if ($qtPanelSource -notlike "*visual_feature_closure_summary_text*") {
 }
 if ($qtPanelSource -notlike "*copy_visual_feature_closure_summary*") {
     throw "Qt panel Visual closure matrix copy action missing"
+}
+if ($qtPanelSource -notlike "*rrkal_displaytools.goal_closure_scorecard.v1*") {
+    throw "Qt panel goal closure scorecard schema missing"
+}
+if ($qtPanelSource -notlike "*Copy goal scorecard*") {
+    throw "Qt panel goal closure scorecard copy button missing"
+}
+if ($qtPanelSource -notlike "*collect_goal_closure_scorecard*") {
+    throw "Qt panel goal closure scorecard collector missing"
+}
+if ($qtPanelSource -notlike "*goal_closure_scorecard_summary_text*") {
+    throw "Qt panel goal closure scorecard summary helper missing"
+}
+if ($qtPanelSource -notlike "*copy_goal_closure_scorecard_summary*") {
+    throw "Qt panel goal closure scorecard copy action missing"
 }
 if ($qtPanelSource -notlike "*copy_summary_contract*") {
     throw "Qt panel Visual readiness copy summary contract missing"
