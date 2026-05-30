@@ -6887,6 +6887,9 @@ if ($cloneQuickstartDoc -notmatch 'Inspect: Capability summary') {
 if ($cloneQuickstartDoc -notmatch 'Inspect: Extraction dry-run') {
     throw "Clone quickstart missing Qt extraction dry-run guidance"
 }
+if ($cloneQuickstartDoc -notmatch 'Inspect: Pre-7 closure') {
+    throw "Clone quickstart missing Qt pre-7 closure guidance"
+}
 if ($cloneQuickstartDoc -notmatch 'Research interaction') {
     throw "Clone quickstart missing Qt Inspect Research interaction group guidance"
 }

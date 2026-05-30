@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Clone quickstart pre-7 closure path
+
+- Updated `docs/QUICKSTART_CLONE.zh-TW.md` so cloned-machine reviewers see `Inspect: Pre-7 closure` in the Replay/contracts path.
+- Smoke now gates the clone quickstart for the pre-7 closure guidance.
+- This keeps cross-machine review aligned with the Qt pre-7 closure action before post-7 decoupling starts.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Qt pre-7 closure entry
 
 - Added `Inspect: Pre-7 closure` to Qt Replay/contracts so researchers can see the compact pre-7 closure readiness handoff from the panel.
