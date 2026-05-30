@@ -1330,6 +1330,21 @@ if (-not $handoff.visual_review_readiness.renderer_thumbnail_ready) {
 if (-not $handoff.visual_review_readiness.live_preview_ready) {
     throw "Handoff inspection visual review readiness missing live preview readiness"
 }
+if ($handoff.visual_review_readiness.frame_status_schema -ne "rrkal_displaytools.visual_review_frame_status.v1") {
+    throw "Handoff inspection visual review readiness frame status schema missing or invalid"
+}
+if ($handoff.visual_review_readiness.frame_status.renderer_thumbnail.status -ne "inspect_action_available") {
+    throw "Handoff inspection visual review readiness renderer thumbnail frame status missing or invalid"
+}
+if ($handoff.visual_review_readiness.frame_status.live_preview.status -ne "inspect_action_available") {
+    throw "Handoff inspection visual review readiness live preview frame status missing or invalid"
+}
+if ($handoff.visual_review_readiness.frame_status.renderer_thumbnail.artifact_state -ne "runtime_dependent") {
+    throw "Handoff inspection visual review readiness renderer thumbnail artifact state missing or invalid"
+}
+if ($handoff.visual_review_readiness.frame_status.live_preview.artifact_state -ne "runtime_dependent") {
+    throw "Handoff inspection visual review readiness live preview artifact state missing or invalid"
+}
 $visualReviewGuidance = ($handoff.visual_review_readiness.missing_frame_guidance -join " ")
 if ($visualReviewGuidance -notmatch 'Inspect: Renderer thumbnail') {
     throw "Handoff inspection visual review readiness missing renderer thumbnail guidance"

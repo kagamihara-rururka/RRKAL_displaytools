@@ -525,3 +525,9 @@
 - `rrkal_displaytools.visual_review_readiness.v1` is now emitted by no-GUI launch packets and renderer capability discovery.
 - Profile UI replay advertises `Inspect: Visual readiness` in the Visual review group.
 - Smoke gates the launch packet schema, renderer capability schema and Qt action id through handoff output.
+
+## Visual review frame status
+
+- `visual_review_readiness.frame_status_schema` now advertises `rrkal_displaytools.visual_review_frame_status.v1`.
+- The packet reports renderer thumbnail and live preview frame status separately.
+- Smoke gates both statuses as `inspect_action_available` and both artifact states as `runtime_dependent`.

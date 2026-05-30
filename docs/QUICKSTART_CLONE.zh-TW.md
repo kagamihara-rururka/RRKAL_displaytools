@@ -206,3 +206,9 @@ Displaytools 不負責：
 - Visual review now includes `Inspect: Visual readiness` before `Inspect: Renderer thumbnail` and `Inspect: Live preview`.
 - The same `visual_review_readiness` packet is exported by no-GUI launch packets and renderer capability discovery.
 - Use this first when a cloned machine opens Qt but the preview frame path is unclear.
+
+## Visual review frame status
+
+- `visual_review_readiness.frame_status` now reports separate status for renderer thumbnail and live preview.
+- Both entries are marked `inspect_action_available` and `runtime_dependent`, meaning the UI route exists while the actual frame depends on runtime capture/cache state.
+- Use this to distinguish a missing frame artifact from a missing Qt Inspect entry.

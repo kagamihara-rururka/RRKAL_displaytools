@@ -340,3 +340,14 @@ Done:
 
 Next:
 - Continue closing Qt visual review by surfacing thumbnail/live preview frame status in the user-facing payload.
+
+
+## 2026-05-30 - Visual review frame status
+
+Done:
+- Added `visual_review_frame_status` metadata to `visual_review_readiness`.
+- Renderer thumbnail and live preview now report separate `inspect_action_available` / `runtime_dependent` status.
+- Handoff and smoke gate both frame-status entries.
+
+Next:
+- Continue wiring UI labels so Qt can show readiness, frame status and missing-frame hints in one inspector view.

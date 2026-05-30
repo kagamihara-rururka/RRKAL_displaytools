@@ -229,6 +229,17 @@ Positioning:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+## 2026-05-30 - Visual review frame status
+
+Changes:
+- Added `visual_review_frame_status` metadata to `visual_review_readiness` packets.
+- Renderer thumbnail and live preview now expose separate frame-status entries.
+- Handoff output includes frame status, and smoke gates status plus artifact-state values.
+- Updated clone quickstart, capability summary and GTD for frame-status interpretation.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-30 - Qt visual readiness capability
 
 Changes:

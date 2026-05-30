@@ -1125,6 +1125,21 @@ def visual_review_readiness_packet(source: str) -> dict[str, object]:
         "qt_inspector_action_label": "Inspect: Visual readiness",
         "renderer_thumbnail_ready": True,
         "live_preview_ready": True,
+        "frame_status_schema": "rrkal_displaytools.visual_review_frame_status.v1",
+        "frame_status": {
+            "renderer_thumbnail": {
+                "status": "inspect_action_available",
+                "artifact_state": "runtime_dependent",
+                "inspect_action_id": "renderer_thumbnail",
+                "missing_frame_hint": "Use Inspect: Renderer thumbnail to check whether a cached preview frame exists.",
+            },
+            "live_preview": {
+                "status": "inspect_action_available",
+                "artifact_state": "runtime_dependent",
+                "inspect_action_id": "live_preview",
+                "missing_frame_hint": "Use Inspect: Live preview to check whether the renderer frame-capture route is active.",
+            },
+        },
         "recommended_sequence": ["Inspect: Visual readiness", "Inspect: Renderer thumbnail", "Inspect: Live preview"],
         "missing_frame_guidance": [
             "Run Inspect: Renderer thumbnail to confirm cached preview-frame availability.",
@@ -2857,5 +2872,4 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
 

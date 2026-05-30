@@ -153,6 +153,8 @@ $summary = [ordered]@{
         qt_inspector_action_id = $visualReviewReadiness.qt_inspector_action_id
         renderer_thumbnail_ready = $visualReviewReadiness.renderer_thumbnail_ready
         live_preview_ready = $visualReviewReadiness.live_preview_ready
+        frame_status_schema = $visualReviewReadiness.frame_status_schema
+        frame_status = $visualReviewReadiness.frame_status
         recommended_sequence = $visualReviewReadiness.recommended_sequence
         missing_frame_guidance = $visualReviewReadiness.missing_frame_guidance
     }
