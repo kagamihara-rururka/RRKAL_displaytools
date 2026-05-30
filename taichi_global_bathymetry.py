@@ -20094,6 +20094,8 @@ def layer_render_plan_performance_packet(
             "compose_run_parity_smoke_precommit_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\render_compose_parity_smoke.ps1 -ContractOnly",
             "compose_run_parity_smoke_validates": ["png_dimensions_match", "max_abs_diff", "changed_pixel_count"],
             "compose_run_parity_smoke_pass_fields": ["passed", "max_abs_diff", "changed_pixel_count", "diff_status"],
+            "compose_run_parity_artifact_runner_schema": "rrkal_displaytools.compose_run_parity_artifact_runner.v1",
+            "compose_run_parity_artifact_runner_script": "scripts\\render_compose_parity_artifacts.ps1",
             "compose_run_parity_artifact_workflow_schema": "rrkal_displaytools.compose_run_parity_artifact_workflow.v1",
             "compose_run_parity_artifact_workflow": {
                 "schema": "rrkal_displaytools.compose_run_parity_artifact_workflow.v1",
@@ -20107,6 +20109,9 @@ def layer_render_plan_performance_packet(
                 "precommit_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\render_compose_parity_smoke.ps1 -ContractOnly",
                 "manual_diff_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\render_compose_parity_smoke.ps1",
                 "producer_command": "py -3 taichi_global_bathymetry.py --once --output state/compose_parity/renderer_frame.png --compose-parity-artifact-dir state/compose_parity",
+                "runner_script": "scripts\\render_compose_parity_artifacts.ps1",
+                "runner_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\render_compose_parity_artifacts.ps1",
+                "runner_manifest": "state/compose_parity/compose_parity_artifact_runner.json",
                 "producer_status": "baseline_and_candidate_artifact_producer_available_runtime_merge_disabled",
                 "candidate_schema": "rrkal_displaytools.compose_run_parity_candidate.v1",
                 "artifacts_schema": "rrkal_displaytools.compose_run_parity_artifacts.v1",
@@ -20116,7 +20121,7 @@ def layer_render_plan_performance_packet(
             "compose_run_parity_summary_contract_schema": "rrkal_displaytools.compose_run_parity_summary_contract.v1",
             "compose_run_parity_summary_contract": {
                 "schema": "rrkal_displaytools.compose_run_parity_summary_contract.v1",
-                "summary_format": "Compose parity: status={status}; producer={producer_status}; dir={artifact_dir}; baseline={baseline_artifact}; candidate={candidate_artifact}; produce={producer_command}; diff={manual_diff_command}; precommit={precommit_command}; runtime_merge=false",
+                "summary_format": "Compose parity: status={status}; producer={producer_status}; dir={artifact_dir}; baseline={baseline_artifact}; candidate={candidate_artifact}; produce={producer_command}; run={runner_command}; diff={manual_diff_command}; precommit={precommit_command}; runtime_merge=false",
                 "summary_parameter_fields": [
                     "status",
                     "producer_status",
@@ -20124,6 +20129,7 @@ def layer_render_plan_performance_packet(
                     "baseline_artifact",
                     "candidate_artifact",
                     "producer_command",
+                    "runner_command",
                     "manual_diff_command",
                     "precommit_command",
                 ],

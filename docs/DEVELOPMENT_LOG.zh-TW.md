@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Compose parity artifact runner
+
+Changes:
+- Added `scripts/render_compose_parity_artifacts.ps1` as a cross-machine manual runner for the compose parity loop: render synthetic/headless artifacts, then optionally call `scripts/render_compose_parity_smoke.ps1` on the generated baseline/candidate PNGs.
+- `layer_render_plan_performance` now exposes `rrkal_displaytools.compose_run_parity_artifact_runner.v1`, runner script, runner command and runner manifest across Qt, launch packets, renderer capabilities and handoff inspection.
+- Qt `Copy compose parity` summary now includes the single runner command in addition to separate producer/diff/precommit commands.
+- Pre-commit smoke gates the runner contract and source markers only; it still uses contract-only parity smoke and does not run the heavier renderer artifact loop.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
 ## 2026-05-30 - Compose parity copyable workflow summary
 
 Changes:

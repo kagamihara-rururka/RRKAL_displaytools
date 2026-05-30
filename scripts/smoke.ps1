@@ -659,6 +659,12 @@ if ($launchPacket.layer_render_plan_performance.compose_run_parity_smoke_validat
 if ($launchPacket.layer_render_plan_performance.compose_run_parity_smoke_pass_fields -notcontains "changed_pixel_count") {
     throw "Launch packet layer_render_plan_performance compose parity smoke pass fields missing"
 }
+if ($launchPacket.layer_render_plan_performance.compose_run_parity_artifact_runner_schema -ne "rrkal_displaytools.compose_run_parity_artifact_runner.v1") {
+    throw "Launch packet layer_render_plan_performance compose parity artifact runner schema missing"
+}
+if ($launchPacket.layer_render_plan_performance.compose_run_parity_artifact_runner_script -ne "scripts\render_compose_parity_artifacts.ps1") {
+    throw "Launch packet layer_render_plan_performance compose parity artifact runner script missing"
+}
 if ($launchPacket.layer_render_plan_performance.compose_run_parity_artifact_workflow.schema -ne "rrkal_displaytools.compose_run_parity_artifact_workflow.v1") {
     throw "Launch packet layer_render_plan_performance compose parity artifact workflow schema missing"
 }
@@ -677,6 +683,12 @@ if ($launchPacket.layer_render_plan_performance.compose_run_parity_artifact_work
 if ($launchPacket.layer_render_plan_performance.compose_run_parity_artifact_workflow.producer_command -notlike "*--compose-parity-artifact-dir state/compose_parity*") {
     throw "Launch packet layer_render_plan_performance compose parity producer command missing"
 }
+if ($launchPacket.layer_render_plan_performance.compose_run_parity_artifact_workflow.runner_command -notlike "*render_compose_parity_artifacts.ps1*") {
+    throw "Launch packet layer_render_plan_performance compose parity runner command missing"
+}
+if ($launchPacket.layer_render_plan_performance.compose_run_parity_artifact_workflow.runner_manifest -ne "state/compose_parity/compose_parity_artifact_runner.json") {
+    throw "Launch packet layer_render_plan_performance compose parity runner manifest missing"
+}
 if ($launchPacket.layer_render_plan_performance.compose_run_parity_artifact_workflow.candidate_schema -ne "rrkal_displaytools.compose_run_parity_candidate.v1") {
     throw "Launch packet layer_render_plan_performance compose parity candidate schema missing"
 }
@@ -688,6 +700,9 @@ if ($launchPacket.layer_render_plan_performance.compose_run_parity_summary_contr
 }
 if ($launchPacket.layer_render_plan_performance.compose_run_parity_summary_contract.summary_parameter_fields -notcontains "producer_command") {
     throw "Launch packet layer_render_plan_performance compose parity summary fields missing"
+}
+if ($launchPacket.layer_render_plan_performance.compose_run_parity_summary_contract.summary_parameter_fields -notcontains "runner_command") {
+    throw "Launch packet layer_render_plan_performance compose parity runner summary field missing"
 }
 if ($launchPacket.layer_render_plan_performance.compiled_plan_reuse_decision_field -ne "cache_reuse_decision") {
     throw "Launch packet layer_render_plan_performance reuse decision field missing"
@@ -1963,6 +1978,12 @@ if ($capabilities.layer_render_plan_performance.compose_run_parity_smoke_validat
 if ($capabilities.layer_render_plan_performance.compose_run_parity_smoke_pass_fields -notcontains "diff_status") {
     throw "Renderer layer_render_plan_performance compose parity smoke pass fields missing"
 }
+if ($capabilities.layer_render_plan_performance.compose_run_parity_artifact_runner_schema -ne "rrkal_displaytools.compose_run_parity_artifact_runner.v1") {
+    throw "Renderer layer_render_plan_performance compose parity artifact runner schema missing"
+}
+if ($capabilities.layer_render_plan_performance.compose_run_parity_artifact_runner_script -ne "scripts\render_compose_parity_artifacts.ps1") {
+    throw "Renderer layer_render_plan_performance compose parity artifact runner script missing"
+}
 if ($capabilities.layer_render_plan_performance.compose_run_parity_artifact_workflow.schema -ne "rrkal_displaytools.compose_run_parity_artifact_workflow.v1") {
     throw "Renderer layer_render_plan_performance compose parity artifact workflow schema missing"
 }
@@ -1974,6 +1995,9 @@ if ($capabilities.layer_render_plan_performance.compose_run_parity_artifact_work
 }
 if ($capabilities.layer_render_plan_performance.compose_run_parity_artifact_workflow.artifacts_schema -ne "rrkal_displaytools.compose_run_parity_artifacts.v1") {
     throw "Renderer layer_render_plan_performance compose parity artifacts schema missing"
+}
+if ($capabilities.layer_render_plan_performance.compose_run_parity_artifact_workflow.runner_script -ne "scripts\render_compose_parity_artifacts.ps1") {
+    throw "Renderer layer_render_plan_performance compose parity runner script missing"
 }
 if ($capabilities.layer_render_plan_performance.compose_run_parity_summary_contract.schema -ne "rrkal_displaytools.compose_run_parity_summary_contract.v1") {
     throw "Renderer layer_render_plan_performance compose parity summary contract missing"
@@ -2804,6 +2828,12 @@ if ($handoff.layer_render_plan_performance.compose_run_parity_smoke_validates -n
 if ($handoff.layer_render_plan_performance.compose_run_parity_smoke_pass_fields -notcontains "max_abs_diff") {
     throw "Handoff inspection layer render plan performance compose parity smoke pass fields missing"
 }
+if ($handoff.layer_render_plan_performance.compose_run_parity_artifact_runner_schema -ne "rrkal_displaytools.compose_run_parity_artifact_runner.v1") {
+    throw "Handoff inspection layer render plan performance compose parity artifact runner schema missing"
+}
+if ($handoff.layer_render_plan_performance.compose_run_parity_artifact_runner_script -ne "scripts\render_compose_parity_artifacts.ps1") {
+    throw "Handoff inspection layer render plan performance compose parity artifact runner script missing"
+}
 if ($handoff.layer_render_plan_performance.compose_run_parity_artifact_workflow_schema -ne "rrkal_displaytools.compose_run_parity_artifact_workflow.v1") {
     throw "Handoff inspection layer render plan performance compose parity artifact workflow schema missing"
 }
@@ -2815,6 +2845,9 @@ if ($handoff.layer_render_plan_performance.compose_run_parity_artifact_workflow.
 }
 if ($handoff.layer_render_plan_performance.compose_run_parity_artifact_workflow.producer_status -ne "baseline_and_candidate_artifact_producer_available_runtime_merge_disabled") {
     throw "Handoff inspection layer render plan performance compose parity producer status missing"
+}
+if ($handoff.layer_render_plan_performance.compose_run_parity_artifact_workflow.runner_manifest -ne "state/compose_parity/compose_parity_artifact_runner.json") {
+    throw "Handoff inspection layer render plan performance compose parity runner manifest missing"
 }
 if ($handoff.layer_render_plan_performance.compose_run_parity_summary_contract_schema -ne "rrkal_displaytools.compose_run_parity_summary_contract.v1") {
     throw "Handoff inspection layer render plan performance compose parity summary contract missing"
@@ -4213,6 +4246,12 @@ if ($qtPanelSource -notlike "*compose_parity_workflow_summary_text*") {
 if ($qtPanelSource -notlike "*compose_run_parity_summary_contract.v1*") {
     throw "Qt compose parity summary contract is missing"
 }
+if ($qtPanelSource -notlike "*render_compose_parity_artifacts.ps1*") {
+    throw "Qt compose parity artifact runner script is missing"
+}
+if ($qtPanelSource -notlike "*run={workflow.get('runner_command', '-')}*") {
+    throw "Qt compose parity runner summary text is missing"
+}
 if ($qtPanelSource -notlike "*refresh_layer_render_plan_cache_diagnostics_strip*") {
     throw "Qt render plan cache diagnostics strip refresh is missing"
 }
@@ -4578,6 +4617,12 @@ if ($rendererSource -notlike "*rrkal_displaytools.compose_run_parity_artifacts.v
 if ($rendererSource -notlike "*rrkal_displaytools.compose_run_parity_summary_contract.v1*") {
     throw "Renderer compose parity summary contract marker is missing"
 }
+if ($rendererSource -notlike "*rrkal_displaytools.compose_run_parity_artifact_runner.v1*") {
+    throw "Renderer compose parity artifact runner schema marker is missing"
+}
+if ($rendererSource -notlike "*render_compose_parity_artifacts.ps1*") {
+    throw "Renderer compose parity artifact runner script marker is missing"
+}
 if ($rendererSource -notlike "*adjacent_alpha_compose_overlays_can_be_collapsed_after_visual_parity_check*") {
     throw "Renderer render plan compose runs merge-safe marker is missing"
 }
@@ -4749,6 +4794,29 @@ if ($composeParitySmoke.schema -ne "rrkal_displaytools.render_compose_parity_smo
 }
 if ($composeParitySmoke.status -ne "contract_only_forced") {
     throw "Compose parity smoke forced contract mode status mismatch"
+}
+$composeParityArtifactRunnerPath = Join-Path $RepoRoot "scripts\render_compose_parity_artifacts.ps1"
+if (-not (Test-Path -LiteralPath $composeParityArtifactRunnerPath)) {
+    throw "Compose parity artifact runner script is missing"
+}
+$composeParityArtifactRunnerSource = Get-Content -LiteralPath $composeParityArtifactRunnerPath -Raw -Encoding UTF8
+if ($composeParityArtifactRunnerSource -notlike "*rrkal_displaytools.compose_run_parity_artifact_runner.v1*") {
+    throw "Compose parity artifact runner schema marker is missing"
+}
+if ($composeParityArtifactRunnerSource -notlike "*--compose-parity-artifact-dir*") {
+    throw "Compose parity artifact runner renderer arg is missing"
+}
+if ($composeParityArtifactRunnerSource -notlike "*render_compose_parity_smoke.ps1*") {
+    throw "Compose parity artifact runner diff handoff is missing"
+}
+if ($composeParityArtifactRunnerSource -notlike "*SkipDiff*") {
+    throw "Compose parity artifact runner skip-diff option is missing"
+}
+if ($composeParityArtifactRunnerSource -notlike "*state/compose_parity*") {
+    throw "Compose parity artifact runner artifact dir default is missing"
+}
+if ($composeParityArtifactRunnerSource -notlike "*compose_parity_artifact_runner.json*") {
+    throw "Compose parity artifact runner manifest path is missing"
 }
 if ($composeParitySmoke.mode -ne "contract_only_no_render_side_effect") {
     throw "Compose parity smoke contract mode mismatch"
