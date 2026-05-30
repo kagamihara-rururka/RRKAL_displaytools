@@ -10,25 +10,57 @@ Set-Location $RepoRoot
 Write-Host "RRKAL_displaytools smoke"
 Write-Host "Repo: $RepoRoot"
 
+function Invoke-NativeWithRetry {
+    param(
+        [string]$FilePath,
+        [string[]]$ArgumentList,
+        [switch]$CaptureOutput
+    )
+
+    $maxAttempts = 4
+    for ($attempt = 1; $attempt -le $maxAttempts; $attempt += 1) {
+        if ($CaptureOutput) {
+            $output = & $FilePath @ArgumentList
+        } else {
+            & $FilePath @ArgumentList
+            $output = $null
+        }
+        if ($LASTEXITCODE -eq 0) {
+            if ($CaptureOutput) {
+                return $output
+            }
+            return
+        }
+        if ($attempt -lt $maxAttempts) {
+            Write-Warning "Command failed, retrying after transient file-access backoff ($attempt/$maxAttempts): $FilePath $($ArgumentList -join ' ')"
+            Start-Sleep -Milliseconds (400 * $attempt)
+        }
+    }
+    throw "Command failed: $FilePath $($ArgumentList -join ' ')"
+}
+
 function Invoke-CheckedNative {
     param(
         [string]$FilePath,
         [string[]]$ArgumentList
     )
 
-    & $FilePath @ArgumentList
-    if ($LASTEXITCODE -ne 0) {
-        throw "Command failed: $FilePath $($ArgumentList -join ' ')"
-    }
+    Invoke-NativeWithRetry $FilePath $ArgumentList
+}
+
+function Invoke-CapturedNative {
+    param(
+        [string]$FilePath,
+        [string[]]$ArgumentList
+    )
+
+    return Invoke-NativeWithRetry $FilePath $ArgumentList -CaptureOutput
 }
 
 Invoke-CheckedNative py @("-3", "-m", "py_compile", "rrkal_displaytools_qt_panel.py", "taichi_global_bathymetry.py", "pin_projection.py", "closed_loop_status.py")
 Invoke-CheckedNative py @("-3", "profile_schema.py") | Out-Null
 Invoke-CheckedNative py @("-3", "scripts\validate_profiles.py")
-$launchPacketText = & py -3 scripts\export_launch_packet.py --template fast_synthetic
-if ($LASTEXITCODE -ne 0) {
-    throw "Command failed: py -3 scripts\export_launch_packet.py --template fast_synthetic"
-}
+$launchPacketText = Invoke-CapturedNative py @("-3", "scripts\export_launch_packet.py", "--template", "fast_synthetic")
 $launchPacket = $launchPacketText | ConvertFrom-Json
 if ($launchPacket.canvas_preview.schema -ne "rrkal_displaytools.canvas_preview.v1") {
     throw "Launch packet canvas_preview schema missing or invalid"
@@ -1495,7 +1527,7 @@ if (-not $launchPacket.pin_overlay.pin_summary_contract.portable) {
 $timelineExportDir = Join-Path $env:TEMP "rrkal_displaytools_smoke_timeline_export"
 $timelineExportGif = Join-Path $timelineExportDir "smoke.gif"
 $timelineExportMp4 = Join-Path $timelineExportDir "smoke.mp4"
-$timelineExportPacketText = & py -3 scripts\export_launch_packet.py --template fast_synthetic --timeline-export-dir $timelineExportDir --timeline-export-frames 3 --timeline-export-fps 12 --timeline-export-gif $timelineExportGif --timeline-export-mp4 $timelineExportMp4
+$timelineExportPacketText = Invoke-CapturedNative py @("-3", "scripts\export_launch_packet.py", "--template", "fast_synthetic", "--timeline-export-dir", $timelineExportDir, "--timeline-export-frames", "3", "--timeline-export-fps", "12", "--timeline-export-gif", $timelineExportGif, "--timeline-export-mp4", $timelineExportMp4)
 if ($LASTEXITCODE -ne 0) {
     throw "Command failed: py -3 scripts\export_launch_packet.py --template fast_synthetic --timeline-export-dir"
 }
@@ -1516,7 +1548,7 @@ $timelineStateOut = Join-Path $env:TEMP "rrkal_displaytools_smoke_timeline_state
 if (Test-Path $timelineStateOut) {
     Remove-Item -LiteralPath $timelineStateOut -Force
 }
-$timelinePacketText = & py -3 scripts\export_launch_packet.py --template fast_synthetic --timeline-state-out $timelineStateOut
+$timelinePacketText = Invoke-CapturedNative py @("-3", "scripts\export_launch_packet.py", "--template", "fast_synthetic", "--timeline-state-out", $timelineStateOut)
 if ($LASTEXITCODE -ne 0) {
     throw "Command failed: py -3 scripts\export_launch_packet.py --template fast_synthetic --timeline-state-out"
 }
@@ -1538,7 +1570,7 @@ $timelineAckOut = Join-Path $env:TEMP "rrkal_displaytools_smoke_timeline_ack.jso
 if (Test-Path $timelineAckOut) {
     Remove-Item -LiteralPath $timelineAckOut -Force
 }
-$timelineAckText = & py -3 taichi_global_bathymetry.py --ack-timeline-state-and-exit --timeline-state-file $timelineStateOut --timeline-ack-file $timelineAckOut
+$timelineAckText = Invoke-CapturedNative py @("-3", "taichi_global_bathymetry.py", "--ack-timeline-state-and-exit", "--timeline-state-file", $timelineStateOut, "--timeline-ack-file", $timelineAckOut)
 if ($LASTEXITCODE -ne 0) {
     throw "Command failed: py -3 taichi_global_bathymetry.py --ack-timeline-state-and-exit"
 }
@@ -1622,7 +1654,7 @@ if ($null -eq $timelineAck.first_keyframe_apply.changed.camera) {
 }
 Remove-Item -LiteralPath $timelineAckOut -Force
 Remove-Item -LiteralPath $timelineStateOut -Force
-$capabilitiesText = & py -3 taichi_global_bathymetry.py --print-renderer-capabilities
+$capabilitiesText = Invoke-CapturedNative py @("-3", "taichi_global_bathymetry.py", "--print-renderer-capabilities")
 if ($LASTEXITCODE -ne 0) {
     throw "Command failed: py -3 taichi_global_bathymetry.py --print-renderer-capabilities"
 }
@@ -2610,7 +2642,7 @@ if ($capabilities.boundary_highlight.ack_history_contract -ne "boundary_highligh
 if ($capabilities.boundary_highlight.ack_history_provenance_field -ne "boundary_highlight_ack_history") {
     throw "Renderer boundary_highlight ack history provenance field missing"
 }
-$closedLoopText = & py -3 taichi_global_bathymetry.py --print-closed-loop-status
+$closedLoopText = Invoke-CapturedNative py @("-3", "taichi_global_bathymetry.py", "--print-closed-loop-status")
 if ($LASTEXITCODE -ne 0) {
     throw "Command failed: py -3 taichi_global_bathymetry.py --print-closed-loop-status"
 }
@@ -2641,10 +2673,8 @@ $timelineApplies = @($timelinePartial.applies)
 if ($timelineApplies -notcontains "UI-only playback controls") {
     throw "Closed-loop qt_timeline_panel UI-only playback controls missing"
 }
-$handoffText = & powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_handoff.ps1
-if ($LASTEXITCODE -ne 0) {
-    throw "Command failed: powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_handoff.ps1"
-}
+$handoffScriptPath = Join-Path $RepoRoot "scripts\inspect_handoff.ps1"
+$handoffText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $handoffScriptPath)
 $handoff = ($handoffText -join "`n") | ConvertFrom-Json
 if ($handoff.schema -ne "rrkal_displaytools.handoff_inspection.v1") {
     throw "Handoff inspection schema missing or invalid"
@@ -5179,7 +5209,7 @@ if ($composeParitySmokeSource -notlike "*notification_suppressed*") {
 if ($composeParitySmokeSource -notlike "*changed_pixel_count*") {
     throw "Compose parity smoke changed pixel count marker is missing"
 }
-$composeParitySmokeText = & powershell -NoProfile -ExecutionPolicy Bypass -File $composeParitySmokePath -ContractOnly
+$composeParitySmokeText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $composeParitySmokePath, "-ContractOnly")
 if ($LASTEXITCODE -ne 0) {
     throw "Compose parity smoke contract mode failed"
 }
@@ -5245,7 +5275,7 @@ if ($reviewerPacketExporterSource -notlike "*compose_performance_summary*") {
 if ($reviewerPacketExporterSource -notlike "*export_launch_packet.py*") {
     throw "No-GUI reviewer packet exporter launch packet bridge missing"
 }
-$reviewerPacketContractText = & powershell -NoProfile -ExecutionPolicy Bypass -File $reviewerPacketExporterPath -ContractOnly
+$reviewerPacketContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $reviewerPacketExporterPath, "-ContractOnly")
 if ($LASTEXITCODE -ne 0) {
     throw "No-GUI reviewer packet exporter contract mode failed"
 }
@@ -5508,6 +5538,24 @@ if ($githubSmokeWorkflowSource -notlike "*PYTHONUTF8*") {
 }
 if ($githubSmokeWorkflowSource -notlike "*PYTHONIOENCODING*") {
     throw "GitHub smoke workflow UTF-8 stdio encoding is missing"
+}
+
+$decouplingReadinessJson = Invoke-CapturedNative py @("-3", (Join-Path $RepoRoot "decoupling_readiness.py"), "--phase", "post_07_decoupling")
+$decouplingReadiness = $decouplingReadinessJson | ConvertFrom-Json
+if ($decouplingReadiness.schema -ne "rrkal_displaytools.decoupling_readiness.v1") {
+    throw "Decoupling readiness schema mismatch"
+}
+if ($decouplingReadiness.phase -ne "post_07_decoupling") {
+    throw "Decoupling readiness post-7 phase mismatch"
+}
+if ($decouplingReadiness.first_extraction_order.Count -lt 5) {
+    throw "Decoupling readiness first extraction order is incomplete"
+}
+if (($decouplingReadiness.first_extraction_order | Select-Object -First 1).id -ne "render_plan_compose") {
+    throw "Decoupling readiness first extraction must start with render_plan_compose"
+}
+if ($decouplingReadiness.rrkal_boundary.rule -notmatch "Do not move discovery/download/import/cache lifecycle") {
+    throw "Decoupling readiness RRKAL boundary guard is missing"
 }
 
 Write-Host "Smoke passed."

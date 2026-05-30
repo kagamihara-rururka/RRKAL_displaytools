@@ -7,9 +7,18 @@ function Invoke-JsonPythonCommand {
         [string[]]$ArgumentList
     )
 
-    $text = & py -3 @ArgumentList
-    if ($LASTEXITCODE -ne 0) {
-        throw "Command failed: py -3 $($ArgumentList -join ' ')"
+    $maxAttempts = 4
+    for ($attempt = 1; $attempt -le $maxAttempts; $attempt += 1) {
+        $text = & py -3 @ArgumentList
+        if ($LASTEXITCODE -eq 0) {
+            break
+        }
+        if ($attempt -lt $maxAttempts) {
+            Write-Warning "Command failed, retrying after transient file-access backoff ($attempt/$maxAttempts): py -3 $($ArgumentList -join ' ')"
+            Start-Sleep -Milliseconds (400 * $attempt)
+        } else {
+            throw "Command failed: py -3 $($ArgumentList -join ' ')"
+        }
     }
     $raw = $text -join "`n"
     $jsonStart = $raw.IndexOf("{")

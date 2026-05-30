@@ -1,5 +1,25 @@
 # Development Log
 
+## 2026-05-30 - Smoke transient file-access retry
+
+Changes:
+- Added bounded native-command retry/backoff to `scripts/smoke.ps1` for Python commands that can be hit by transient cloud-drive file-access denial.
+- Routed captured smoke JSON commands through the same retry path and added matching retry behavior to `scripts/inspect_handoff.ps1`.
+- This addresses intermittent `Errno 13 Permission denied` failures from the shared cloud drive without weakening final smoke failure behavior.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
+## 2026-05-30 - Smoke gate decoupling readiness
+
+Changes:
+- Added `decoupling_readiness.py --phase post_07_decoupling` to `scripts/smoke.ps1`.
+- Smoke now gates the decoupling schema, post-7 phase, first extraction order, render-plan-first rule and RRKAL data/cache boundary guard.
+- This keeps the seven-o'clock decoupling start aligned with a checked contract instead of relying only on prose.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Decoupling readiness packet
 
 Changes:
