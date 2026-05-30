@@ -1145,6 +1145,26 @@ if ($launchPacket.renderer_config_gateway.schema -ne "rrkal_displaytools.rendere
 if ($launchPacket.renderer_config_gateway.next_integration_target -notlike "*renderer argument normalization*") {
     throw "Launch packet renderer config gateway integration target missing"
 }
+$configGatewayInspectorPath = Join-Path $RepoRoot "scripts\inspect_renderer_config_gateway.ps1"
+if (-not (Test-Path -LiteralPath $configGatewayInspectorPath)) {
+    throw "Renderer config gateway inspector script is missing"
+}
+$configGatewayInspectorContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $configGatewayInspectorPath, "-ContractOnly")
+$configGatewayInspectorContract = ($configGatewayInspectorContractText -join "`n") | ConvertFrom-Json
+if ($configGatewayInspectorContract.schema -ne "rrkal_displaytools.config_gateway_inspector.v1") {
+    throw "Renderer config gateway inspector contract schema missing"
+}
+if ($configGatewayInspectorContract.launch_packet_field -ne "renderer_config_gateway") {
+    throw "Renderer config gateway inspector launch packet field mismatch"
+}
+$configGatewayInspectorText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $configGatewayInspectorPath)
+$configGatewayInspectorPacket = ($configGatewayInspectorText -join "`n") | ConvertFrom-Json
+if ($configGatewayInspectorPacket.schema -ne "rrkal_displaytools.renderer_config_gateway.v1") {
+    throw "Renderer config gateway inspector output schema missing"
+}
+if ($configGatewayInspectorPacket.boundary -notlike "*does not launch Qt, Taichi*") {
+    throw "Renderer config gateway inspector boundary mismatch"
+}
 if ($launchPacket.layer_visual_presets.schema -ne "rrkal_displaytools.layer_visual_presets.v1") {
     throw "Launch packet layer_visual_presets schema missing or invalid"
 }

@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-31 - Renderer config gateway no-GUI inspector
+
+Changes:
+- Added `scripts/inspect_renderer_config_gateway.ps1` for clone-side inspection of `renderer_config_gateway` without opening Qt.
+- Smoke now verifies inspector contract-only mode and normal launch-packet field extraction.
+- Boundary: the inspector reads launch-packet evidence only; it does not launch Qt/Taichi or touch RRKAL discovery/import/cache governance.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit; first run exposed a PowerShell `py` invocation issue, then passed after explicit invocation fix).
+
 ## 2026-05-31 - Renderer config gateway UI/reviewer hook
 
 Changes:

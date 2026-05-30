@@ -39,6 +39,7 @@ Last updated: 2026-05-30
 - 2026-05-30: Documented Cloud/local development workflow and handoff entrypoint, including private transcript backup policy and maturity reporting requirements.
 - 2026-05-31: Added `renderer_config_gateway.py` as a typed pre-decoupling contract for replacing scattered `getattr(args, ...)` access.
 - 2026-05-31: Exposed renderer config gateway through Qt Replay/contracts, launch packets, reviewer packets and handoff inspection.
+- 2026-05-31: Added no-GUI renderer config gateway inspector for cross-machine clone/reviewer use.
 - 2026-05-31: Added `compat/headless_import_shims.py` with a smoke-gated synthetic sys.modules interception self-test.
 - 2026-05-31: Added Qt `Inspect: Interception` and `Copy interception summary` for bounded shim/hook policy review.
 - 2026-05-30: Added controlled interception policy to launch/reviewer packet handoff for cross-machine review.
