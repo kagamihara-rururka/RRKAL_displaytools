@@ -130,9 +130,9 @@ Add-Check $checks "post0700_decoupling_runbook" "Post-07 decoupling runbook docu
     ((Test-RepoFileContains "docs/POST_0700_DECOUPLING_RUNBOOK.zh-TW.md" "render_plan_compose") -and (Test-RepoFileContains "docs/POST_0700_DECOUPLING_RUNBOOK.zh-TW.md" "runtime_merge=false")) `
     "docs/POST_0700_DECOUPLING_RUNBOOK.zh-TW.md contains render_plan_compose and runtime_merge=false"
 
-Add-Check $checks "first_extraction_target_documented" "GTD points the first post-7 extraction to render-plan compose." `
-    (Test-RepoFileContains "docs/PROJECT_GTD.md" "Start with render-plan compose extraction after the 7:00 decoupling gate.") `
-    "docs/PROJECT_GTD.md documents render-plan compose as first extraction"
+Add-Check $checks "first_extraction_target_documented" "GTD points extraction work to render-plan compose and render_core/render_plan.py." `
+    ((Test-RepoFileContains "docs/PROJECT_GTD.md" "render-plan compose") -and (Test-RepoFileContains "docs/PROJECT_GTD.md" "render_core/render_plan.py")) `
+    "docs/PROJECT_GTD.md documents render-plan compose and render_core/render_plan.py"
 
 $failed = @($checks | Where-Object { -not $_.passed })
 $status = if ($failed.Count -eq 0) { "pass" } else { "fail" }

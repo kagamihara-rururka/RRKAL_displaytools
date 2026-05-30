@@ -1,5 +1,13 @@
 # Development Log
 
+## 2026-05-31 - Extract alpha compose helpers
+
+- Moved `alpha_compose`, `alpha_blend_compose` and `alpha_compose_transparent` into `render_core/render_plan.py`.
+- Added `render_core/__init__.py` and updated `taichi_global_bathymetry.py` to import the helpers from the extracted module.
+- Updated source-map logic so moved alpha helpers are tracked in `render_core/render_plan.py` while the remaining render-plan helpers stay mapped to the monolith.
+- Updated `scripts/check_pre7_closure_readiness.ps1` to check the stable extraction target instead of the old pre-move GTD wording.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; first run exposed stale GTD wording in pre-7 checker, fixed and reran successfully).
+
 ## 2026-05-31 - Clone quickstart source-map path
 
 - Updated `docs/QUICKSTART_CLONE.zh-TW.md` so cloned-machine reviewers see `Inspect: Source map` in the Replay/contracts path.
