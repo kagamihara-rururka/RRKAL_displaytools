@@ -23,6 +23,7 @@
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_pre7_closure_readiness.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts\pre_decoupling_gate.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_render_plan_compose_source_map.ps1
 ```
 
 若任一指令失敗，停止 code move，只修該 gate 或更新 handoff。
@@ -52,11 +53,12 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\pre_decoupling_gate.
 3. 跑 `scripts\smoke.ps1`。
 4. 跑 `scripts\check_pre7_closure_readiness.ps1`。
 5. 跑 `scripts\pre_decoupling_gate.ps1`。
-6. 建立 `render_core` 模組。
-7. 只搬第一批 render-plan compose helper。
-8. 更新 smoke、GTD、development log。
-9. 跑 smoke。
-10. commit / push，並回報已有功能與預計功能。
+6. 跑 `scripts\inspect_render_plan_compose_source_map.ps1`，確認 helper line map。
+7. 建立 `render_core` 模組。
+8. 只搬第一批 render-plan compose helper。
+9. 更新 smoke、GTD、development log。
+10. 跑 smoke。
+11. commit / push，並回報已有功能與預計功能。
 
 ## 停止條件
 

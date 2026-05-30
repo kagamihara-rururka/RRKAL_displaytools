@@ -1979,6 +1979,9 @@ if ($post0700Runbook -notlike "*render_plan_compose*") {
 if ($post0700Runbook -notlike "*scripts\pre_decoupling_gate.ps1*") {
     throw "Post-07 decoupling runbook missing formal gate command"
 }
+if ($post0700Runbook -notlike "*scripts\inspect_render_plan_compose_source_map.ps1*") {
+    throw "Post-07 decoupling runbook missing source-map command"
+}
 if ($post0700Runbook -notlike "*runtime_merge=false*") {
     throw "Post-07 decoupling runbook missing runtime merge non-goal"
 }

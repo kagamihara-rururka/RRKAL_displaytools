@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Runbook source-map entry command
+
+- Updated `docs/POST_0700_DECOUPLING_RUNBOOK.zh-TW.md` so the post-7 entry sequence runs `scripts\inspect_render_plan_compose_source_map.ps1`.
+- The runbook now puts the source-map check after the formal gate and before creating `render_core`.
+- Smoke now gates the runbook for the source-map command.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Capability summary includes source map
 
 - Added `render_plan_compose_source_map` to `scripts/export_capability_summary.ps1`.
