@@ -2589,6 +2589,14 @@ def layer_selection_affordance_packet(
         "selected_layer_state_available": bool(selected_state),
         "qt_surface": "Layers dock selected row highlight / layerSelectionAffordance label",
         "qt_label_object": "layerSelectionAffordance",
+        "active_action_guide_schema": "rrkal_displaytools.active_layer_action_guide.v1",
+        "active_action_guide_label_object": "activeLayerActionGuideStrip",
+        "active_action_guide_steps": [
+            "Select or click a layer row",
+            "Operate visibility, lock, solo or diagnostics on the active layer",
+            "Use renderer pick/runtime evidence to confirm the selected scientific target",
+        ],
+        "brush_mask_scope": "excluded",
         "row_object_name": "layerRow",
         "selected_row_property": "selected",
         "selected_row_stylesheet_selector": 'QWidget#layerRow[selected="true"]',
@@ -2596,6 +2604,7 @@ def layer_selection_affordance_packet(
             "selected row highlight",
             "selectedLayer label",
             "layerControlFeedbackStrip",
+            "activeLayerActionGuideStrip",
             "Reveal selected action",
         ],
         "visible": visible,
@@ -3673,6 +3682,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_selection_affordance_label.setObjectName("layerSelectionAffordance")
         self.layer_selection_affordance_label.setWordWrap(True)
         layers_layout.addWidget(self.layer_selection_affordance_label)
+        self.active_layer_action_guide_label = QtWidgets.QLabel(
+            "Active layer guide: selected=none; next=Select/click row -> visibility/lock/solo/diagnostics; brush_mask=excluded"
+        )
+        self.active_layer_action_guide_label.setObjectName("activeLayerActionGuideStrip")
+        self.active_layer_action_guide_label.setWordWrap(True)
+        layers_layout.addWidget(self.active_layer_action_guide_label)
         self.layer_hover_affordance_label = QtWidgets.QLabel("Layer hover: target=none; renderer=none")
         self.layer_hover_affordance_label.setObjectName("layerHoverAffordance")
         self.layer_hover_affordance_label.setWordWrap(True)
@@ -4085,6 +4100,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             QLabel#visualReviewReadiness { color: #5b3d18; background: #fff5dd; border: 1px solid #d8b165; border-radius: 8px; padding: 6px 8px; }
             QLabel#layerControlFeedbackStrip { color: #18384a; background: #e8f3ff; border: 1px solid #8fb7d8; border-radius: 8px; padding: 6px 8px; font-weight: 600; }
             QLabel#layerSelectionAffordance { color: #2f4167; background: #edf1ff; border: 1px solid #98a8d8; border-radius: 8px; padding: 6px 8px; font-weight: 600; }
+            QLabel#activeLayerActionGuideStrip { color: #4d3320; background: #fff0e5; border: 1px solid #c58b62; border-radius: 8px; padding: 6px 8px; font-weight: 700; }
             QLabel#layerHoverAffordance { color: #3d4a24; background: #f4f8e8; border: 1px solid #b5c77f; border-radius: 8px; padding: 6px 8px; font-weight: 600; }
             QLabel#pinOcclusionLegend { color: #4d2f16; background: #fff3dc; border: 1px solid #d7a45d; border-radius: 8px; padding: 6px 8px; font-weight: 600; }
             QWidget#layerRow { border-bottom: 1px solid #d6e0ea; }
@@ -5712,6 +5728,25 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if label is not None:
             label.setText(str(self.collect_layer_selection_affordance().get("summary_text")))
 
+    def active_layer_action_guide_text(self) -> str:
+        key = self.selected_layer_key
+        if not key:
+            return "Active layer guide: selected=none; next=Select/click row -> visibility/lock/solo/diagnostics; brush_mask=excluded"
+        label = next((text for layer_key, text in LAYER_LABELS if layer_key == key), key)
+        renderer_target = LAYER_RUNTIME_ID_ALIASES.get(key, "not live")
+        return (
+            "Active layer guide: "
+            f"selected={key} ({label}); "
+            "next=visibility/lock/solo/diagnostics; "
+            f"renderer={renderer_target}; "
+            "brush_mask=excluded"
+        )
+
+    def refresh_active_layer_action_guide(self) -> None:
+        label = getattr(self, "active_layer_action_guide_label", None)
+        if label is not None:
+            label.setText(self.active_layer_action_guide_text())
+
     def collect_layer_hover_affordance(self, hovered_layer: str | None = None) -> dict[str, object]:
         if hovered_layer is None:
             hovered_layer = self.layer_hover_layer_key
@@ -7031,6 +7066,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 f"warnings={research_workflow.get('runtime_warning_count', 0)}, "
                 f"hints={research_workflow.get('remediation_hint_count', 0)})"
             )
+        self.refresh_active_layer_action_guide()
         boundary_emphasis = self.collect_boundary_emphasis_control()
         if hasattr(self, "boundary_emphasis_label"):
             self.boundary_emphasis_label.setText(
@@ -8346,6 +8382,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
                 label.setText("-")
             self.layer_property_labels["name"].setText("尚未選取")
             self.refresh_layer_selection_affordance()
+            self.refresh_active_layer_action_guide()
             self.refresh_layer_control_feedback_strip()
             return
         label = next((text for layer_key, text in LAYER_LABELS if layer_key == key), key)

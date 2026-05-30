@@ -3778,6 +3778,18 @@ if ($qtPanelSource -notlike "*Layer operation summary:*") {
 if ($qtPanelSource -notlike "*active_layer_operation_summary_text*") {
     throw "Qt active layer operation summary helper is missing"
 }
+if ($qtPanelSource -notlike "*activeLayerActionGuideStrip*") {
+    throw "Qt active layer action guide strip is missing"
+}
+if ($qtPanelSource -notlike "*active_layer_action_guide_text*") {
+    throw "Qt active layer action guide helper is missing"
+}
+if ($qtPanelSource -notlike "*refresh_active_layer_action_guide*") {
+    throw "Qt active layer action guide refresh is missing"
+}
+if ($qtPanelSource -notlike "*brush_mask=excluded*") {
+    throw "Qt active layer action guide brush/mask boundary is missing"
+}
 if ($qtPanelSource -notlike "*active_layer_operation_summary*") {
     throw "Qt launch packet active layer operation summary field is missing"
 }
@@ -4891,6 +4903,15 @@ if ($rendererSource -notlike "*layer_control_feedback_strip_packet*") {
 }
 if ($rendererSource -notlike "*layer_selection_affordance_packet*") {
     throw "Renderer capability layer selection affordance contract missing"
+}
+if ($rendererSource -notlike "*rrkal_displaytools.active_layer_action_guide.v1*") {
+    throw "Renderer capability active layer action guide contract missing"
+}
+if ($rendererSource -notlike "*activeLayerActionGuideStrip*") {
+    throw "Renderer capability active layer action guide surface missing"
+}
+if ($rendererSource -notlike "*active_action_guide_steps*") {
+    throw "Renderer capability active layer action guide steps missing"
 }
 if ($rendererSource -notlike "*layer_hover_affordance_packet*") {
     throw "Renderer capability layer hover affordance contract missing"

@@ -1,5 +1,14 @@
 # Development Log
 
+## 2026-05-30 - Active layer action guide strip
+
+Changes:
+- Added Qt Layers dock `activeLayerActionGuideStrip` so researchers can see the selected layer, next valid actions and the explicit Brush/Mask exclusion in one visible strip.
+- Extended `layer_selection_affordance` packets with `rrkal_displaytools.active_layer_action_guide.v1`, action steps and the active guide surface for launch packet / no-GUI export / renderer capability discovery alignment.
+- Smoke now gates the Qt strip, helper refresh path, Brush/Mask boundary text and renderer capability contract markers.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
 ## 2026-05-30 - Reviewer packet no-GUI review fields
 
 Changes:
