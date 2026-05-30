@@ -2751,8 +2751,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         renderer_menu.addAction("Capabilities JSON", self.show_renderer_capabilities)
         renderer_menu.addAction("Closed-loop Status JSON", self.show_closed_loop_status)
         renderer_menu.addAction("Layer Manifest JSON", self.show_layer_manifest)
-        renderer_menu.addAction("Latest Output Thumbnail", self.show_latest_renderer_thumbnail)
-        renderer_menu.addAction("Live Preview Stream", self.show_live_renderer_preview)
+        renderer_menu.addAction("Inspect: Renderer thumbnail", self.show_latest_renderer_thumbnail)
+        renderer_menu.addAction("Inspect: Live preview", self.show_live_renderer_preview)
 
         window_menu = self.menuBar().addMenu("Window")
         window_menu.addAction("Open Template Folder", self.open_template_dir)

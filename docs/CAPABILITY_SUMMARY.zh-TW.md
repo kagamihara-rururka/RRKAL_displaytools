@@ -476,3 +476,8 @@
 - `Inspect: Renderer thumbnail` provides a static renderer pixel checkpoint for clone/readback review.
 - `Inspect: Live preview` provides the file-based live preview frame path for renderer pixel review.
 - Launch packets and renderer capabilities advertise the `visual_review` group through `profile_ui_state_replay`.
+
+## Qt Renderer menu Inspect alignment
+
+- Renderer menu visual preview entries now use `Inspect: Renderer thumbnail` and `Inspect: Live preview`.
+- This keeps the menu bar, Actions panel, launch packet inspector labels, and smoke gates aligned around one inspection vocabulary.

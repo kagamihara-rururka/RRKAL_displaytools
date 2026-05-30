@@ -1818,6 +1818,12 @@ if ($qtPanelSource -notlike "*Inspect: Renderer thumbnail*") {
 if ($qtPanelSource -notlike "*Inspect: Live preview*") {
     throw "Qt Live preview inspector button is missing"
 }
+if ($qtPanelSource -notlike '*renderer_menu.addAction("Inspect: Renderer thumbnail"*') {
+    throw "Qt Renderer menu thumbnail Inspect action is missing"
+}
+if ($qtPanelSource -notlike '*renderer_menu.addAction("Inspect: Live preview"*') {
+    throw "Qt Renderer menu live preview Inspect action is missing"
+}
 if ($qtPanelSource -notlike "*show_timeline_runtime_state*") {
     throw "Qt Timeline runtime state action is missing"
 }

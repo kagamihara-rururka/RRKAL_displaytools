@@ -221,3 +221,13 @@ Done:
 
 Next:
 - Continue closing UIUX loops before backend closure, especially layer selection feedback and scientific annotation review.
+
+
+## 2026-05-30 - Renderer menu Inspect label alignment
+
+Done:
+- Renamed Renderer menu thumbnail/live preview entries to the same `Inspect:` labels used by the Actions panel.
+- Added smoke coverage so menu labels cannot drift from visual review actions.
+
+Next:
+- Continue UIUX closure on selection/layer operation feedback for research workflows.

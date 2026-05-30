@@ -159,3 +159,8 @@ Displaytools 不負責：
 - After cloning on another machine, open `Inspect: Renderer thumbnail` to inspect the latest renderer PNG if the renderer has produced one.
 - Open `Inspect: Live preview` to switch Canvas Preview to the file-based live preview frame.
 - These actions sit under `Inspect: Visual review`, separate from renderer diagnostics, so researchers can distinguish pixel inspection from capability/remediation metadata.
+
+## Renderer menu Inspect alignment
+
+- The Renderer menu mirrors the Actions panel labels for visual review: `Inspect: Renderer thumbnail` and `Inspect: Live preview`.
+- Use either the menu or the `Inspect: Visual review` Actions section; both call the same Qt preview handlers.

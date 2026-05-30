@@ -3659,3 +3659,13 @@ Changes:
 Validation:
 - Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
 
+## 2026-05-30 - Renderer menu Inspect label alignment
+
+Changes:
+- Renamed Renderer menu visual preview entries to `Inspect: Renderer thumbnail` and `Inspect: Live preview`.
+- Added smoke gates for Renderer menu Inspect labels.
+- Documented the menu/action vocabulary alignment for clone users and capability summary.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
