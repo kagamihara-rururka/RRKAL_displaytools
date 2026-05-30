@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-31 - Qt controlled interception Inspect actions
+
+Changes:
+- Added Qt `Inspect: Interception` to show `rrkal_displaytools.controlled_interception_policy.v1` from the Replay/contracts action group.
+- Added Qt `Copy interception summary` for a compact allowed/blocked/first-use handoff line.
+- Smoke now gates both action labels and handlers.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Reviewer packet controlled interception handoff
 
 Changes:

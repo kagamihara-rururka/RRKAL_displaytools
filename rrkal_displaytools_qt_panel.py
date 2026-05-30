@@ -4206,6 +4206,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         module_seams_button = QtWidgets.QPushButton("Inspect: Module seams")
         decoupling_readiness_button = QtWidgets.QPushButton("Inspect: Decoupling")
         copy_decoupling_summary_button = QtWidgets.QPushButton("Copy decoupling summary")
+        controlled_interception_button = QtWidgets.QPushButton("Inspect: Interception")
+        copy_interception_summary_button = QtWidgets.QPushButton("Copy interception summary")
         copy_module_summary_button = QtWidgets.QPushButton("Copy module summary")
         clone_ready_button = QtWidgets.QPushButton("Inspect: Clone ready")
         copy_clone_summary_button = QtWidgets.QPushButton("Copy clone summary")
@@ -4261,6 +4263,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (module_seams_button, "Replay/contracts: inspect future module extraction seam registry JSON."),
             (decoupling_readiness_button, "Replay/contracts: inspect the pre-7 UI closure policy and post-7 module extraction order."),
             (copy_decoupling_summary_button, "Replay/contracts: copy the decoupling not-before gate, first extraction and gate command."),
+            (controlled_interception_button, "Replay/contracts: inspect bounded import/output/runtime interception policy."),
+            (copy_interception_summary_button, "Replay/contracts: copy the controlled interception summary and guardrail counts."),
             (copy_module_summary_button, "Replay/contracts: copy module extraction order, stable contracts, Tk boundary and RRKAL governance summary."),
             (clone_ready_button, "Replay/contracts: inspect cross-machine clone readiness JSON."),
             (copy_clone_summary_button, "Replay/contracts: copy clone/setup/profile launch reviewer summary for cross-machine handoff."),
@@ -4315,6 +4319,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         module_seams_button.clicked.connect(self.show_module_boundary_registry)
         decoupling_readiness_button.clicked.connect(self.show_decoupling_readiness)
         copy_decoupling_summary_button.clicked.connect(self.copy_decoupling_readiness_summary)
+        controlled_interception_button.clicked.connect(self.show_controlled_interception_policy)
+        copy_interception_summary_button.clicked.connect(self.copy_controlled_interception_summary)
         copy_module_summary_button.clicked.connect(self.copy_module_boundary_summary)
         clone_ready_button.clicked.connect(self.show_cross_machine_clone_readiness)
         copy_clone_summary_button.clicked.connect(self.copy_clone_reviewer_summary)
@@ -4351,7 +4357,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         stop_button.clicked.connect(self.stop_renderer)
         action_sections = (
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button, export_reviewer_packet_button)),
-            ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, copy_reviewer_fields_button, copy_goal_scorecard_button, timeline_button, module_seams_button, decoupling_readiness_button, copy_decoupling_summary_button, copy_module_summary_button, clone_ready_button, copy_clone_summary_button)),
+            ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, copy_reviewer_fields_button, copy_goal_scorecard_button, timeline_button, module_seams_button, decoupling_readiness_button, copy_decoupling_summary_button, controlled_interception_button, copy_interception_summary_button, copy_module_summary_button, clone_ready_button, copy_clone_summary_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, ocean_3d_controls_action_button, copy_ocean_summary_button, copy_ocean_guard_summary_button, style_routes_button, copy_style_routes_summary_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
             ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, copy_visual_closure_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, copy_style_thumb_status_button, thumbnail_button, live_preview_button)),
@@ -10161,6 +10167,17 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         summary = self.decoupling_readiness_summary_text()
         QtWidgets.QApplication.clipboard().setText(summary)
         self.status.setText("Copied decoupling readiness summary to clipboard.")
+
+    def show_controlled_interception_policy(self) -> None:
+        self.command_text.setPlainText(
+            json.dumps(self.collect_controlled_interception_policy(), ensure_ascii=False, indent=2)
+        )
+        self.status.setText("已顯示 controlled interception policy JSON")
+
+    def copy_controlled_interception_summary(self) -> None:
+        summary = self.controlled_interception_summary_text()
+        QtWidgets.QApplication.clipboard().setText(summary)
+        self.status.setText("Copied controlled interception summary to clipboard.")
 
     def show_cross_machine_clone_readiness(self) -> None:
         self.command_text.setPlainText(
