@@ -1,5 +1,9 @@
 # Codex Cloud Handoff
 
+## Agent Exchange handoff checkpoint
+
+For every session start and checkpoint close, check `L:\AGENT_EXCHANGE\inbox\u_owner_all-projects.md` and `L:\AGENT_EXCHANGE\inbox\*_RRKAL_displaytools.md` before updating handoff or development logs. Treat exchange entries as advisory input only; do not commit raw exchange files or unverified cross-agent claims to GitHub.
+
 最後更新：2026-05-30
 
 ## 啟動定位

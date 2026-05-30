@@ -1,5 +1,12 @@
 # RRKAL_displaytools GTD
 
+## Agent Exchange 工作流規則
+
+- 新 session / 新 thread 開始時，先快速讀 `L:\AGENT_EXCHANGE\inbox\u_owner_all-projects.md` 與 `L:\AGENT_EXCHANGE\inbox\*_RRKAL_displaytools.md`。
+- 每個 checkpoint 結束、更新 handoff / development log 前，再快速檢查一次 displaytools 收信檔。
+- 大改、資料夾搬遷、OpenSpec、跨專案整合前，也要先讀交換區。
+- `L:\AGENT_EXCHANGE` 不進 GitHub；只把驗證後的決策或工程結果消化進本 repo 的 GTD / handoff / docs / OpenSpec / code。
+
 Last updated: 2026-05-30
 
 ## Current focus

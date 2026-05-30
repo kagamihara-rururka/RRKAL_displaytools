@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Agent Exchange workflow adoption
+
+- Adopted `L:\AGENT_EXCHANGE` as an advisory cross-agent read-check in the displaytools workflow.
+- Added session-start, checkpoint-close, and pre-large-change read points for `u_owner_all-projects.md` and `*_RRKAL_displaytools.md`.
+- Kept the boundary explicit: raw exchange inbox/archive/template content is not committed to GitHub; only validated decisions or engineering outcomes enter repo docs/code.
+- Smoke: PASS via `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-31 - Visual contract review packet exporter
 
 - Added `scripts/export_visual_contract_review_packet.ps1` to emit one no-GUI JSON review packet for cloned-machine visual contract checks.

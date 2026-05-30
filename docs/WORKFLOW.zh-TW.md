@@ -1,5 +1,16 @@
 # RRKAL_displaytools 開發工作流
 
+## Agent Exchange read-check
+
+`L:\AGENT_EXCHANGE` is a local/cloud cross-agent forum, not a product repository, release artifact, or source of truth. Do not copy inbox, archive, template, or raw exchange content into this repo.
+
+At session start, checkpoint close, and before large refactors, folder moves, OpenSpec work, or cross-project integration, quickly check:
+
+- `L:\AGENT_EXCHANGE\inbox\u_owner_all-projects.md`
+- `L:\AGENT_EXCHANGE\inbox\*_RRKAL_displaytools.md`
+
+Only validated decisions or engineering outcomes should be converted into this repo's GTD, handoff, docs, OpenSpec, code, smoke logs, commits, or CI notes.
+
 最後更新：2026-05-30
 
 ## 核心原則
