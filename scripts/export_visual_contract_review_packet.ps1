@@ -49,6 +49,7 @@ if ($LASTEXITCODE -ne 0) {
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\list_visual_contract_inspectors.ps1",
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_renderer_config_gateway.ps1",
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_style_renderer_routes.ps1",
+        "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_layer_workflow.ps1",
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_hydrology_lod.ps1",
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_ocean_material.ps1"
     )

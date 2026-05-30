@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - No-GUI Layer workflow inspector
+
+- Added `scripts/inspect_layer_workflow.ps1` for no-GUI inspection of layer research workflow, selection summary, operator groups and navigation copy contract.
+- Registered `layer_workflow` in the visual contract inspector index and review packet first commands so cloned machines can inspect layer UIUX state without launching Qt.
+- Kept the inspector contract-only/read-only; it does not launch Qt, Taichi, provider IO, dataset discovery, import or cache governance.
+- Smoke: PASS via `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; cloud-drive transient file-access retries occurred and recovered.
+
 ## 2026-05-31 - Copyable layer navigation summary
 
 - Added `rrkal_displaytools.layer_navigation_summary_contract.v1` under `layer_research_workflow.navigation_hint` across the Qt launch packet, no-GUI launch packet and renderer capability discovery.

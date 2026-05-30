@@ -1187,6 +1187,9 @@ if ($visualInspectorIndex.schema -ne "rrkal_displaytools.visual_contract_inspect
 if ($visualInspectorIndex.entry_ids -notcontains "hydrology_lod") {
     throw "Visual contract inspector index missing Hydrology/LOD inspector"
 }
+if ($visualInspectorIndex.entry_ids -notcontains "layer_workflow") {
+    throw "Visual contract inspector index missing Layer workflow inspector"
+}
 if ($visualInspectorIndex.entry_ids -notcontains "ocean_material") {
     throw "Visual contract inspector index missing Ocean material inspector"
 }
@@ -1237,6 +1240,9 @@ if ($visualReviewPacket.inspector_index_schema -ne "rrkal_displaytools.visual_co
 if ($visualReviewPacket.inspector_entry_ids -notcontains "hydrology_lod") {
     throw "Visual contract review packet missing Hydrology/LOD inspector"
 }
+if ($visualReviewPacket.inspector_entry_ids -notcontains "layer_workflow") {
+    throw "Visual contract review packet missing Layer workflow inspector"
+}
 if ($visualReviewPacket.inspector_entry_ids -notcontains "ocean_material") {
     throw "Visual contract review packet missing Ocean material inspector"
 }
@@ -1245,6 +1251,9 @@ if ($visualReviewPacket.inspector_entry_ids -notcontains "style_routes") {
 }
 if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_ocean_material.ps1") {
     throw "Visual contract review packet missing Ocean material first command"
+}
+if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_layer_workflow.ps1") {
+    throw "Visual contract review packet missing Layer workflow first command"
 }
 if ($visualReviewPacket.pre_decoupling_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\pre_decoupling_gate.ps1 -ContractOnly") {
     throw "Visual contract review packet missing pre-decoupling gate command"
@@ -1306,6 +1315,35 @@ if ($styleRoutesInspectorPacket.portable_route_commands.parchment -notlike "*--s
 }
 if ($styleRoutesInspectorPacket.portable_route_commands.tactical -notlike "*--style-profile tactical*") {
     throw "Style routes inspector tactical command missing"
+}
+$layerWorkflowInspectorPath = Join-Path $RepoRoot "scripts\inspect_layer_workflow.ps1"
+if (-not (Test-Path -LiteralPath $layerWorkflowInspectorPath)) {
+    throw "Layer workflow inspector script is missing"
+}
+$layerWorkflowInspectorContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $layerWorkflowInspectorPath, "-ContractOnly")
+$layerWorkflowInspectorContract = ($layerWorkflowInspectorContractText -join "`n") | ConvertFrom-Json
+if ($layerWorkflowInspectorContract.schema -ne "rrkal_displaytools.layer_workflow_inspector.v1") {
+    throw "Layer workflow inspector contract schema missing"
+}
+if ($layerWorkflowInspectorContract.required_contracts -notcontains "rrkal_displaytools.layer_navigation_summary_contract.v1") {
+    throw "Layer workflow inspector navigation summary contract missing"
+}
+if ($layerWorkflowInspectorContract.boundary -notlike "*does not launch Qt, Taichi*") {
+    throw "Layer workflow inspector boundary mismatch"
+}
+$layerWorkflowInspectorText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $layerWorkflowInspectorPath)
+$layerWorkflowInspectorPacket = ($layerWorkflowInspectorText -join "`n") | ConvertFrom-Json
+if ($layerWorkflowInspectorPacket.schema -ne "rrkal_displaytools.layer_workflow_inspection.v1") {
+    throw "Layer workflow inspection schema missing"
+}
+if ($layerWorkflowInspectorPacket.navigation_summary_contract_schema -ne "rrkal_displaytools.layer_navigation_summary_contract.v1") {
+    throw "Layer workflow inspection navigation summary contract schema mismatch"
+}
+if ($layerWorkflowInspectorPacket.navigation_copy_action -ne "copy_layer_navigation_summary") {
+    throw "Layer workflow inspection copy action mismatch"
+}
+if (@("reveal_selected_layer", "select_first_filtered_layer", "clear_filter_or_expand_groups", "edit_selected_layer") -notcontains $layerWorkflowInspectorPacket.next_action) {
+    throw "Layer workflow inspection next action invalid"
 }
 $hydrologyLodInspectorPath = Join-Path $RepoRoot "scripts\inspect_hydrology_lod.ps1"
 if (-not (Test-Path -LiteralPath $hydrologyLodInspectorPath)) {

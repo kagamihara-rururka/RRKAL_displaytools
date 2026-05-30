@@ -29,6 +29,14 @@ $entries = @(
         no_launch_side_effect = $true
     },
     [ordered]@{
+        id = "layer_workflow"
+        category = "research_interaction"
+        schema = "rrkal_displaytools.layer_workflow_inspector.v1"
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_layer_workflow.ps1"
+        proves = @("layer research workflow", "selection summary contract", "navigation hint", "copyable navigation handoff")
+        no_launch_side_effect = $true
+    },
+    [ordered]@{
         id = "ocean_material"
         category = "renderer_ports"
         schema = "rrkal_displaytools.ocean_material_inspector.v1"
@@ -80,6 +88,7 @@ $entries = @(
     recommended_cross_machine_sequence = @(
         "renderer_config_gateway",
         "style_routes",
+        "layer_workflow",
         "hydrology_lod",
         "ocean_material",
         "performance_smoke",
