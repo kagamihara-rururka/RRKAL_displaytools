@@ -19325,6 +19325,21 @@ def reviewer_packet_export_packet(source: str) -> dict[str, object]:
         "no_gui_contract_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\export_reviewer_packet.ps1 -ContractOnly",
         "no_gui_export_schema": "rrkal_displaytools.no_gui_reviewer_packet_export.v1",
         "no_gui_primary_summary_field": "compose_performance_summary",
+        "field_guide_schema": "rrkal_displaytools.reviewer_packet_field_guide.v1",
+        "field_guide": {
+            "schema": "rrkal_displaytools.reviewer_packet_field_guide.v1",
+            "qt_copy_action": "copy_reviewer_packet_field_guide",
+            "qt_action_label": "Copy reviewer fields",
+            "summary_format": "Reviewer fields: primary={no_gui_primary_summary_field}; recommended={recommended_review_fields}; groups={ordered_review_groups}; no_gui={no_gui_export_command}",
+            "ordered_review_groups": [
+                {"id": "clone_launch", "fields": ["clone_reviewer_summary", "launch_reviewer_summary", "profile_launch_readiness"]},
+                {"id": "layer_control", "fields": ["layer_selection_tool.selection_summary_contract.quick_actions_summary_contract", "layer_selection_affordance.active_quick_actions"]},
+                {"id": "ocean_guard", "fields": ["ocean_material_control_port.qt_control_panel.performance_guard_summary_contract"]},
+                {"id": "visual_review", "fields": ["visual_review_summary", "visual_feature_closure_matrix"]},
+                {"id": "compose_performance", "fields": ["compose_performance_summary", "layer_render_plan_performance.compose_pass_budget"]},
+            ],
+            "portable": True,
+        },
         "recommended_review_fields": [
             "compose_performance_summary",
             "layer_selection_tool.selection_summary_contract.quick_actions_summary_contract",

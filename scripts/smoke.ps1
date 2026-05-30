@@ -971,6 +971,15 @@ if ($launchPacket.reviewer_packet_export.no_gui_export_schema -ne "rrkal_display
 if ($launchPacket.reviewer_packet_export.no_gui_primary_summary_field -ne "compose_performance_summary") {
     throw "Launch packet reviewer no-GUI primary summary field missing"
 }
+if ($launchPacket.reviewer_packet_export.field_guide.schema -ne "rrkal_displaytools.reviewer_packet_field_guide.v1") {
+    throw "Launch packet reviewer packet field guide schema missing"
+}
+if ($launchPacket.reviewer_packet_export.field_guide.qt_copy_action -ne "copy_reviewer_packet_field_guide") {
+    throw "Launch packet reviewer packet field guide copy action missing"
+}
+if ($launchPacket.reviewer_packet_export.field_guide.ordered_review_groups.id -notcontains "layer_control") {
+    throw "Launch packet reviewer packet field guide layer group missing"
+}
 if ($launchPacket.reviewer_packet_export.recommended_review_fields -notcontains "layer_render_plan_performance.compose_pass_budget") {
     throw "Launch packet reviewer recommended compose budget field missing"
 }
@@ -2251,6 +2260,12 @@ if ($capabilities.reviewer_packet_export.qt_action -ne "export_reviewer_packet_d
 if ($capabilities.reviewer_packet_export.no_gui_contract_command -notlike "*-ContractOnly*") {
     throw "Renderer reviewer no-GUI contract command missing"
 }
+if ($capabilities.reviewer_packet_export.field_guide.schema -ne "rrkal_displaytools.reviewer_packet_field_guide.v1") {
+    throw "Renderer reviewer packet field guide schema missing"
+}
+if ($capabilities.reviewer_packet_export.field_guide.ordered_review_groups.id -notcontains "compose_performance") {
+    throw "Renderer reviewer packet field guide compose group missing"
+}
 if ($capabilities.reviewer_packet_export.recommended_review_fields -notcontains "layer_render_plan_performance.compose_run_parity_artifact_workflow") {
     throw "Renderer reviewer recommended parity workflow field missing"
 }
@@ -3494,6 +3509,12 @@ if ($handoff.reviewer_packet_export.no_gui_export_script -ne "scripts\export_rev
 if ($handoff.reviewer_packet_export.no_gui_primary_summary_field -ne "compose_performance_summary") {
     throw "Handoff inspection reviewer no-GUI primary summary field missing"
 }
+if ($handoff.reviewer_packet_export.field_guide.schema -ne "rrkal_displaytools.reviewer_packet_field_guide.v1") {
+    throw "Handoff inspection reviewer packet field guide schema missing"
+}
+if ($handoff.reviewer_packet_export.field_guide.qt_copy_action -ne "copy_reviewer_packet_field_guide") {
+    throw "Handoff inspection reviewer packet field guide copy action missing"
+}
 if ($handoff.reviewer_packet_export.recommended_review_fields -notcontains "compose_performance_summary") {
     throw "Handoff inspection reviewer recommended compose summary field missing"
 }
@@ -3999,6 +4020,15 @@ if ($qtPanelSource -notlike '*"hydrology_lod_summary": self.hydrology_lod_summar
 }
 if ($qtPanelSource -notlike '*"ocean_material_summary": self.ocean_material_summary_text()*') {
     throw "Qt reviewer packet ocean summary output is missing"
+}
+if ($qtPanelSource -notlike "*Copy reviewer fields*") {
+    throw "Qt reviewer packet field guide copy button is missing"
+}
+if ($qtPanelSource -notlike "*reviewer_packet_field_guide_summary_text*") {
+    throw "Qt reviewer packet field guide summary helper is missing"
+}
+if ($qtPanelSource -notlike "*copy_reviewer_packet_field_guide*") {
+    throw "Qt reviewer packet field guide copy action is missing"
 }
 if ($qtPanelSource -notlike '*"style_routes_summary": self.style_routes_summary_text()*') {
     throw "Qt reviewer packet style routes summary output is missing"

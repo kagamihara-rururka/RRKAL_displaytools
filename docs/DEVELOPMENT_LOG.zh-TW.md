@@ -1,5 +1,14 @@
 # Development Log
 
+## 2026-05-30 - Reviewer packet field guide copy action
+
+Changes:
+- Added `rrkal_displaytools.reviewer_packet_field_guide.v1` to reviewer packet export metadata, grouping clone/launch, layer control, ocean guard, visual review and compose performance fields.
+- Added Qt `Copy reviewer fields` so cross-machine reviewers can copy the primary field, recommended review paths, grouped field guide and no-GUI export command without opening JSON first.
+- Smoke now gates launch packet, renderer capability, handoff inspection and Qt source markers for the field guide.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
 ## 2026-05-30 - Reviewer packet layer quick actions fields
 
 Changes:
