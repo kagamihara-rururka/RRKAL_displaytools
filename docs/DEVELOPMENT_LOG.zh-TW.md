@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Pre-7 closure in reviewer packet
+
+- Added `pre7_closure_readiness_check` to the no-GUI visual contract inspector index.
+- Added `scripts\check_pre7_closure_readiness.ps1` to the reviewer packet first commands.
+- Smoke now gates inspector index and reviewer packet inclusion for the pre-7 closure check.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; transient cloud-drive file-access backoff warnings observed, final retry passed).
+
 ## 2026-05-31 - Clone quickstart pre-7 closure path
 
 - Updated `docs/QUICKSTART_CLONE.zh-TW.md` so cloned-machine reviewers see `Inspect: Pre-7 closure` in the Replay/contracts path.

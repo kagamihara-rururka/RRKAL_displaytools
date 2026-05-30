@@ -69,6 +69,14 @@ $entries = @(
         no_launch_side_effect = $true
     },
     [ordered]@{
+        id = "pre7_closure_readiness_check"
+        category = "uiux"
+        schema = "rrkal_displaytools.pre7_closure_readiness_check.contract.v1"
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_pre7_closure_readiness.ps1"
+        proves = @("pre-7 closure pass/fail", "reviewer route", "capability summary", "extraction dry-run", "formal gate presence")
+        no_launch_side_effect = $true
+    },
+    [ordered]@{
         id = "cross_machine_review_readiness_check"
         category = "cross_machine"
         schema = "rrkal_displaytools.cross_machine_review_readiness_check.v1"
@@ -221,6 +229,7 @@ $entries = @(
         "uiux_closure_status",
         "timeline_uiux",
         "uiux_closure_readiness_check",
+        "pre7_closure_readiness_check",
         "cross_machine_review_readiness_check",
         "reviewer_first_run_route",
         "capability_summary",

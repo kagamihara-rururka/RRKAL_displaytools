@@ -1202,6 +1202,9 @@ if ($visualInspectorIndex.entry_ids -notcontains "timeline_uiux") {
 if ($visualInspectorIndex.entry_ids -notcontains "uiux_closure_readiness_check") {
     throw "Visual contract inspector index missing UIUX closure readiness check"
 }
+if ($visualInspectorIndex.entry_ids -notcontains "pre7_closure_readiness_check") {
+    throw "Visual contract inspector index missing pre-7 closure readiness check"
+}
 if ($visualInspectorIndex.entry_ids -notcontains "cross_machine_review_readiness_check") {
     throw "Visual contract inspector index missing cross-machine review readiness check"
 }
@@ -1303,6 +1306,9 @@ if ($visualReviewPacket.inspector_entry_ids -notcontains "timeline_uiux") {
 if ($visualReviewPacket.inspector_entry_ids -notcontains "uiux_closure_readiness_check") {
     throw "Visual contract review packet missing UIUX closure readiness check"
 }
+if ($visualReviewPacket.inspector_entry_ids -notcontains "pre7_closure_readiness_check") {
+    throw "Visual contract review packet missing pre-7 closure readiness check"
+}
 if ($visualReviewPacket.inspector_entry_ids -notcontains "cross_machine_review_readiness_check") {
     throw "Visual contract review packet missing cross-machine review readiness check"
 }
@@ -1344,6 +1350,9 @@ if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -Exec
 }
 if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_uiux_closure_readiness.ps1") {
     throw "Visual contract review packet missing UIUX closure readiness check first command"
+}
+if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_pre7_closure_readiness.ps1") {
+    throw "Visual contract review packet missing pre-7 closure readiness check first command"
 }
 if ($visualReviewPacket.first_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_cross_machine_review_readiness.ps1") {
     throw "Visual contract review packet missing cross-machine review readiness check first command"
