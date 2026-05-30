@@ -1740,6 +1740,12 @@ if ($uiuxClosureReadinessCheckContract.output_schema -ne "rrkal_displaytools.uiu
 if ($uiuxClosureReadinessCheckContract.checks -notcontains "render_plan_runtime_merge_blocked") {
     throw "UIUX closure readiness check runtime merge guard missing"
 }
+if ($uiuxClosureReadinessCheckContract.checks -notcontains "reviewer_route_and_capability_summary_ready") {
+    throw "UIUX closure readiness check reviewer route/capability guard missing"
+}
+if ($uiuxClosureReadinessCheckContract.checks -notcontains "qt_workspace_review_path_ready") {
+    throw "UIUX closure readiness check Qt workspace review path guard missing"
+}
 $uiuxClosureReadinessCheckText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $uiuxClosureReadinessCheckPath)
 $uiuxClosureReadinessCheck = ($uiuxClosureReadinessCheckText -join "`n") | ConvertFrom-Json
 if ($uiuxClosureReadinessCheck.schema -ne "rrkal_displaytools.uiux_closure_readiness_check_result.v1") {

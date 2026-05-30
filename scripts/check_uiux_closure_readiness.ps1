@@ -52,6 +52,8 @@ if ($ContractOnly) {
             "layer_shortcuts_ready",
             "research_interaction_ready",
             "renderer_ports_ready",
+            "reviewer_route_and_capability_summary_ready",
+            "qt_workspace_review_path_ready",
             "render_plan_runtime_merge_blocked"
         )
         command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_uiux_closure_readiness.ps1"
@@ -70,7 +72,11 @@ $layerShortcuts = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Byp
 $research = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_research_interaction.ps1")
 $hydrology = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_hydrology_lod.ps1")
 $ocean = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_ocean_material.ps1")
+$reviewerRoute = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_reviewer_first_run_route.ps1")
+$capabilitySummary = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\export_capability_summary.ps1")
 $renderPlan = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_layer_render_plan_performance.ps1")
+$qtPanelSource = Get-Content -Raw -Encoding UTF8 "rrkal_displaytools_qt_panel.py"
+$cloneQuickstartDoc = Get-Content -Raw -Encoding UTF8 "docs\QUICKSTART_CLONE.zh-TW.md"
 
 $requiredInspectorIds = @(
     "qt_uiux_surface",
@@ -79,6 +85,8 @@ $requiredInspectorIds = @(
     "layer_visual_presets",
     "layer_operator_shortcuts",
     "research_interaction",
+    "reviewer_first_run_route",
+    "capability_summary",
     "hydrology_lod",
     "ocean_material",
     "layer_render_plan_performance"
@@ -117,6 +125,23 @@ $checks = [ordered]@{
     renderer_ports_ready = (
         $hydrology.schema -eq "rrkal_displaytools.hydrology_lod_inspection.v1" -and
         $ocean.schema -eq "rrkal_displaytools.ocean_material_inspection.v1"
+    )
+    reviewer_route_and_capability_summary_ready = (
+        $reviewerRoute.schema -eq "rrkal_displaytools.reviewer_first_run_route.v1" -and
+        $reviewerRoute.status -eq "ready" -and
+        @($reviewerRoute.next_commands) -contains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_cross_machine_review_readiness.ps1" -and
+        $capabilitySummary.schema -eq "rrkal_displaytools.capability_summary.v1" -and
+        $capabilitySummary.status -eq "ready" -and
+        @($capabilitySummary.boundaries) -match "RRKAL owns dataset discovery"
+    )
+    qt_workspace_review_path_ready = (
+        $qtPanelSource -like "*Review path: Clone ready -> Reviewer route -> Capability summary -> UIUX closure -> Workspace map*" -and
+        $qtPanelSource -like "*Inspect: UIUX closure*" -and
+        $qtPanelSource -like "*Inspect: Workspace map*" -and
+        $cloneQuickstartDoc -match "Inspect: Reviewer route" -and
+        $cloneQuickstartDoc -match "Inspect: Capability summary" -and
+        $cloneQuickstartDoc -match "Inspect: UIUX closure" -and
+        $cloneQuickstartDoc -match "Inspect: Workspace map"
     )
     render_plan_runtime_merge_blocked = (
         $renderPlan.optimization_target -eq "precompute_layer_state_then_single_render_pass" -and

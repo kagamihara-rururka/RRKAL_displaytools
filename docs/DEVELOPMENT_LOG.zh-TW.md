@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - UIUX readiness includes Qt reviewer path
+
+- Expanded `scripts/check_uiux_closure_readiness.ps1` to include Reviewer route, Capability summary, Qt reviewer path hint, UIUX closure, Workspace map and clone quickstart alignment.
+- Smoke now gates the new readiness checks in contract-only mode and normal pass/fail mode.
+- This makes the pre-7 UIUX gate cover the latest Qt reviewer workflow before renderer decoupling starts.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; transient cloud-drive file-access backoff warning observed, final retry passed).
+
 ## 2026-05-31 - Qt reviewer path hint
 
 - Added a visible reviewer path hint above the Qt Actions section.
