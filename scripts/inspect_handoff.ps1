@@ -341,6 +341,10 @@ $summary = [ordered]@{
         qt_interaction = $launchPacket.style_template_visual_preview.qt_interaction
         card_click_action = $launchPacket.style_template_visual_preview.card_click_action
         qt_card_object_prefix = $launchPacket.style_template_visual_preview.qt_card_object_prefix
+        thumbnail_slots_enabled = $launchPacket.style_template_visual_preview.thumbnail_slots_enabled
+        thumbnail_slot_count = $launchPacket.style_template_visual_preview.thumbnail_slot_count
+        thumbnail_artifact_dir = $launchPacket.style_template_visual_preview.thumbnail_artifact_dir
+        thumbnail_source_contract = $launchPacket.style_template_visual_preview.thumbnail_source_contract
     }
     module_boundary_registry = @{
         launch_packet_schema = $launchPacket.module_boundary_registry.schema

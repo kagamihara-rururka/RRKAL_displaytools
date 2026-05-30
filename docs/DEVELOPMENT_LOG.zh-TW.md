@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Style preview thumbnail slots
+
+Changes:
+- Added thumbnail slots to `rrkal_displaytools.style_template_visual_preview.v1` for scientific, nautical, parchment and tactical cards.
+- Qt style cards now display `state/style_previews/<style>.png` slot hints, and packets expose local renderer `--output` review commands tied to `rrkal_displaytools.renderer_output_artifact_contract.v1`.
+- Smoke verifies thumbnail slot metadata without requiring runtime PNG generation during pre-commit validation.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Qt Layer selection affordance
 
 Changes:

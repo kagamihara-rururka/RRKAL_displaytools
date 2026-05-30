@@ -1006,11 +1006,17 @@ def style_template_visual_preview_packet(
         style_id = str(entry.get("id", ""))
         if style_id not in swatches:
             continue
+        thumbnail_path = f"state/style_previews/{style_id}.png"
         preview_cards.append(
             {
                 "id": style_id,
                 "label": str(entry.get("label", style_id.title())),
                 "swatches": swatches[style_id],
+                "thumbnail_path": thumbnail_path,
+                "thumbnail_slot": True,
+                "thumbnail_status": "slot_ready_runtime_artifact_optional",
+                "thumbnail_source_contract": "rrkal_displaytools.renderer_output_artifact_contract.v1",
+                "thumbnail_review_command": ["py", "-3", "taichi_global_bathymetry.py", "--style-profile", style_id, "--output", thumbnail_path],
                 "qt_surface": "Looks/templates visual preview cards",
                 "selection_control": "style_combo",
                 "renderer_route_field": "style_profile_renderer_routes.routes",
@@ -1034,6 +1040,12 @@ def style_template_visual_preview_packet(
         "preview_cards": preview_cards,
         "required_preview_ids": required_preview_ids,
         "missing_preview_ids": missing_preview_ids,
+        "thumbnail_slots_enabled": True,
+        "thumbnail_slot_count": len(preview_cards),
+        "thumbnail_artifact_dir": "state/style_previews",
+        "thumbnail_source_contract": "rrkal_displaytools.renderer_output_artifact_contract.v1",
+        "thumbnail_optional_runtime_artifact": True,
+        "thumbnail_missing_guidance": "Run the thumbnail_review_command for a style profile to populate its local PNG slot; thumbnail PNGs are runtime artifacts, not required for pre-commit smoke.",
         "qt_interaction": "clickable_preview_cards_select_style_profile",
         "card_click_action": "apply_style_template_preview_card",
         "qt_card_object_prefix": "styleTemplateCard_",

@@ -190,11 +190,17 @@ def style_template_visual_preview_packet(
         style_id = str(entry.get("id", ""))
         if style_id not in swatches:
             continue
+        thumbnail_path = f"state/style_previews/{style_id}.png"
         preview_cards.append(
             {
                 "id": style_id,
                 "label": str(entry.get("label", style_id.title())),
                 "swatches": swatches[style_id],
+                "thumbnail_path": thumbnail_path,
+                "thumbnail_slot": True,
+                "thumbnail_status": "slot_ready_runtime_artifact_optional",
+                "thumbnail_source_contract": "rrkal_displaytools.renderer_output_artifact_contract.v1",
+                "thumbnail_review_command": ["py", "-3", "taichi_global_bathymetry.py", "--style-profile", style_id, "--output", thumbnail_path],
                 "qt_surface": "Looks/templates visual preview cards",
                 "selection_control": "style_combo",
                 "renderer_route_field": "style_profile_renderer_routes.routes",
@@ -218,6 +224,12 @@ def style_template_visual_preview_packet(
         "preview_cards": preview_cards,
         "required_preview_ids": required_preview_ids,
         "missing_preview_ids": missing_preview_ids,
+        "thumbnail_slots_enabled": True,
+        "thumbnail_slot_count": len(preview_cards),
+        "thumbnail_artifact_dir": "state/style_previews",
+        "thumbnail_source_contract": "rrkal_displaytools.renderer_output_artifact_contract.v1",
+        "thumbnail_optional_runtime_artifact": True,
+        "thumbnail_missing_guidance": "Run the thumbnail_review_command for a style profile to populate its local PNG slot; thumbnail PNGs are runtime artifacts, not required for pre-commit smoke.",
         "qt_interaction": "clickable_preview_cards_select_style_profile",
         "card_click_action": "apply_style_template_preview_card",
         "qt_card_object_prefix": "styleTemplateCard_",
@@ -4339,11 +4351,12 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             style_id = str(card.get("id", ""))
             label = str(card.get("label", style_id.title()))
             swatches = card.get("swatches") if isinstance(card.get("swatches"), list) else []
-            button = QtWidgets.QPushButton(f"{label}\n{'  '.join(str(color) for color in swatches)}")
+            thumbnail_path = str(card.get("thumbnail_path", f"state/style_previews/{style_id}.png"))
+            button = QtWidgets.QPushButton(f"{label}\n{'  '.join(str(color) for color in swatches)}\nthumb: {thumbnail_path}")
             button.setObjectName(f"styleTemplateCard_{style_id}")
             button.setCheckable(True)
             button.setMinimumHeight(54)
-            button.setToolTip(f"Apply {label} style template to the renderer launch profile")
+            button.setToolTip(f"Apply {label} style template to the renderer launch profile. Thumbnail slot: {thumbnail_path}")
             button.clicked.connect(lambda _checked=False, value=style_id: self.apply_style_template_preview_card(value))
             grid.addWidget(button, index // 2, index % 2)
             self.style_template_preview_buttons[style_id] = button
@@ -4376,7 +4389,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             button.setStyleSheet(self._style_template_preview_card_stylesheet(swatches, selected))
         if hasattr(self, "style_template_preview_label"):
             self.style_template_preview_label.setText(
-                f"Style previews: {packet.get('preview_count')} cards; selected={current_style}; click a card to update Style profile."
+                f"Style previews: {packet.get('preview_count')} cards; thumbnails={packet.get('thumbnail_artifact_dir')}; selected={current_style}; click a card to update Style profile."
             )
 
     def apply_style_template_preview_card(self, style_id: str) -> None:
