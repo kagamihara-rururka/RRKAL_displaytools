@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Qt Layer row hover affordance
+
+Changes:
+- Added `rrkal_displaytools.layer_hover_affordance.v1` for Qt launch packets, no-GUI launch packets, renderer capability discovery and handoff inspection.
+- Qt Layers dock now exposes `layerHoverAffordance`, updated through row hover enter/leave event filters and `layer_hover_layer_key` for layer key, renderer target, visibility, lock state and renderer sync.
+- Smoke now verifies the hover label, event target map, packet schema, renderer capability field and handoff output.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Style preview batch renderer script
 
 Changes:

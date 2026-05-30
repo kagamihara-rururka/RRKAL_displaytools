@@ -51,6 +51,7 @@ $summary = [ordered]@{
         layer_operator_groups = $launchPacket.layer_operator_groups.schema
         layer_selection_tool = $launchPacket.layer_selection_tool.schema
         layer_selection_affordance = $launchPacket.layer_selection_affordance.schema
+        layer_hover_affordance = $launchPacket.layer_hover_affordance.schema
         layer_research_workflow = $launchPacket.layer_research_workflow.schema
         layer_control_feedback_strip = $launchPacket.layer_control_feedback_strip.schema
         boundary_emphasis_control = $launchPacket.boundary_emphasis_control.schema
@@ -149,6 +150,14 @@ $summary = [ordered]@{
         selected_row_property = $launchPacket.layer_selection_affordance.selected_row_property
         focus_aids = $launchPacket.layer_selection_affordance.focus_aids
         summary_text = $launchPacket.layer_selection_affordance.summary_text
+    }
+    layer_hover_affordance = @{
+        launch_packet_schema = $launchPacket.layer_hover_affordance.schema
+        renderer_capabilities_schema = $capabilities.layer_hover_affordance.schema
+        qt_label_object = $launchPacket.layer_hover_affordance.qt_label_object
+        event_filter = $launchPacket.layer_hover_affordance.event_filter
+        hover_events = $launchPacket.layer_hover_affordance.hover_events
+        summary_text = $launchPacket.layer_hover_affordance.summary_text
     }
     layer_research_workflow = @{
         launch_packet_schema = $launchPacket.layer_research_workflow.schema

@@ -239,6 +239,15 @@ if ($launchPacket.layer_selection_affordance.selected_row_property -ne "selected
 if ($launchPacket.layer_selection_affordance.focus_aids -notcontains "layerControlFeedbackStrip") {
     throw "Launch packet layer_selection_affordance feedback strip focus aid missing"
 }
+if ($launchPacket.layer_hover_affordance.schema -ne "rrkal_displaytools.layer_hover_affordance.v1") {
+    throw "Launch packet layer_hover_affordance schema missing or invalid"
+}
+if ($launchPacket.layer_hover_affordance.qt_label_object -ne "layerHoverAffordance") {
+    throw "Launch packet layer_hover_affordance label object missing"
+}
+if ($launchPacket.layer_hover_affordance.event_filter -ne "layer_hover_event_targets") {
+    throw "Launch packet layer_hover_affordance event filter mismatch"
+}
 if ($launchPacket.layer_research_workflow.schema -ne "rrkal_displaytools.layer_research_workflow.v1") {
     throw "Launch packet layer_research_workflow schema missing or invalid"
 }
@@ -1138,6 +1147,12 @@ if ($capabilities.layer_selection_affordance.qt_surface -ne "Layers dock selecte
 if ($capabilities.layer_selection_affordance.selected_row_property -ne "selected") {
     throw "Renderer layer_selection_affordance selected row property mismatch"
 }
+if ($capabilities.layer_hover_affordance.schema -ne "rrkal_displaytools.layer_hover_affordance.v1") {
+    throw "Renderer layer_hover_affordance schema missing or invalid"
+}
+if ($capabilities.layer_hover_affordance.hover_events -notcontains "QEvent.Enter") {
+    throw "Renderer layer_hover_affordance enter event missing"
+}
 if ($capabilities.layer_research_workflow.schema -ne "rrkal_displaytools.layer_research_workflow.v1") {
     throw "Renderer layer_research_workflow schema missing or invalid"
 }
@@ -1883,6 +1898,15 @@ if ($handoff.layer_selection_affordance.renderer_capabilities_schema -ne "rrkal_
 if ($handoff.layer_selection_affordance.qt_label_object -ne "layerSelectionAffordance") {
     throw "Handoff inspection layer_selection_affordance label object missing"
 }
+if ($handoff.launch_packet_contracts.layer_hover_affordance -ne "rrkal_displaytools.layer_hover_affordance.v1") {
+    throw "Handoff inspection layer_hover_affordance launch contract missing or invalid"
+}
+if ($handoff.layer_hover_affordance.launch_packet_schema -ne "rrkal_displaytools.layer_hover_affordance.v1") {
+    throw "Handoff inspection layer_hover_affordance launch schema missing or invalid"
+}
+if ($handoff.layer_hover_affordance.qt_label_object -ne "layerHoverAffordance") {
+    throw "Handoff inspection layer_hover_affordance label object missing"
+}
 if ($handoff.layer_research_workflow.launch_packet_schema -ne "rrkal_displaytools.layer_research_workflow.v1") {
     throw "Handoff inspection layer_research_workflow launch schema missing or invalid"
 }
@@ -2521,6 +2545,21 @@ if ($qtPanelSource -notlike "*collect_layer_selection_affordance*") {
 if ($qtPanelSource -notlike "*rrkal_displaytools.layer_selection_affordance.v1*") {
     throw "Qt layer selection affordance schema is missing"
 }
+if ($qtPanelSource -notlike "*layerHoverAffordance*") {
+    throw "Qt layer hover affordance label is missing"
+}
+if ($qtPanelSource -notlike "*layer_hover_event_targets*") {
+    throw "Qt layer hover event target map is missing"
+}
+if ($qtPanelSource -notlike "*layer_hover_layer_key*") {
+    throw "Qt layer hover state key is missing"
+}
+if ($qtPanelSource -notlike "*set_layer_hover_affordance*") {
+    throw "Qt layer hover affordance handler is missing"
+}
+if ($qtPanelSource -notlike "*rrkal_displaytools.layer_hover_affordance.v1*") {
+    throw "Qt layer hover affordance schema is missing"
+}
 if ($qtPanelSource -notlike "*click a row to select the active research layer*") {
     throw "Qt Layers workflow row-selection hint is missing"
 }
@@ -2889,6 +2928,9 @@ if ($rendererSource -notlike "*layer_control_feedback_strip_packet*") {
 if ($rendererSource -notlike "*layer_selection_affordance_packet*") {
     throw "Renderer capability layer selection affordance contract missing"
 }
+if ($rendererSource -notlike "*layer_hover_affordance_packet*") {
+    throw "Renderer capability layer hover affordance contract missing"
+}
 
 $scripts = Get-ChildItem scripts -Filter *.ps1
 foreach ($script in $scripts) {
@@ -2998,6 +3040,9 @@ if ($launchPacketSource -notmatch 'layer_control_feedback_strip') {
 if ($launchPacketSource -notmatch 'layer_selection_affordance') {
     throw "Launch packet layer selection affordance field missing"
 }
+if ($launchPacketSource -notmatch 'layer_hover_affordance') {
+    throw "Launch packet layer hover affordance field missing"
+}
 if ($handoffInspectorSource -notmatch 'profile_ui_state_replay') {
     throw "Handoff inspection profile UI state replay output is missing"
 }
@@ -3009,6 +3054,9 @@ if ($handoffInspectorSource -notmatch 'layer_control_feedback_strip') {
 }
 if ($handoffInspectorSource -notmatch 'layer_selection_affordance') {
     throw "Handoff inspection layer selection affordance output is missing"
+}
+if ($handoffInspectorSource -notmatch 'layer_hover_affordance') {
+    throw "Handoff inspection layer hover affordance output is missing"
 }
 if ($handoffInspectorSource -notmatch 'profile_visual_quick_review') {
     throw "Handoff inspection profile visual quick review output is missing"

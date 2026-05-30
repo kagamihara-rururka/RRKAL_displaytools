@@ -19420,6 +19420,46 @@ def layer_selection_affordance_packet(
     }
 
 
+def layer_hover_affordance_packet(
+    source: str,
+    hovered_layer: str | None = None,
+    layer_stack: dict[str, dict[str, object]] | None = None,
+) -> dict[str, object]:
+    layer_stack = layer_stack if isinstance(layer_stack, dict) else {}
+    hovered_state = layer_stack.get(hovered_layer) if isinstance(hovered_layer, str) else None
+    hovered_state = hovered_state if isinstance(hovered_state, dict) else {}
+    renderer_target = globals().get("LAYER_RUNTIME_ID_ALIASES", {}).get(hovered_layer, hovered_layer) if hovered_layer else None
+    visible = hovered_state.get("visible")
+    locked = hovered_state.get("locked")
+    renderer_sync = hovered_state.get("renderer_sync") or "unknown"
+    summary_text = (
+        f"Layer hover: target={hovered_layer or 'none'}; renderer={renderer_target or 'none'}; "
+        f"visible={visible}; locked={locked}; sync={renderer_sync}"
+    )
+    return {
+        "schema": "rrkal_displaytools.layer_hover_affordance.v1",
+        "source": source,
+        "status": "ready",
+        "hovered_layer": hovered_layer,
+        "hovered_layer_state_available": bool(hovered_state),
+        "renderer_target": renderer_target,
+        "visible": visible,
+        "locked": locked,
+        "renderer_sync": renderer_sync,
+        "summary_text": summary_text,
+        "qt_surface": "Layers dock layerHoverAffordance label / row hover event filter",
+        "qt_label_object": "layerHoverAffordance",
+        "row_object_name": "layerRow",
+        "event_filter": "layer_hover_event_targets",
+        "hover_events": ["QEvent.Enter", "QEvent.Leave"],
+        "launch_packet_fields": ["layer_hover_affordance", "layer_stack_ui", "layer_selection_affordance"],
+        "renderer_capability_field": "layer_hover_affordance",
+        "handoff_field": "layer_hover_affordance",
+        "smoke_gate": "layer_hover_affordance",
+        "boundary": "Qt hover feedback only; it does not change selected layer, renderer state, or RRKAL data governance.",
+    }
+
+
 def layer_research_workflow_packet(
     layer_filter: dict[str, object] | None,
     layer_group_view: dict[str, object] | None,
@@ -19875,6 +19915,7 @@ def renderer_capabilities_packet() -> dict[str, object]:
         "layer_control_feedback_strip": layer_control_feedback_strip_packet("taichi_global_bathymetry.renderer_capabilities"),
         "layer_selection_tool": layer_selection_tool_packet("taichi_global_bathymetry.renderer_capabilities"),
         "layer_selection_affordance": layer_selection_affordance_packet("taichi_global_bathymetry.renderer_capabilities"),
+        "layer_hover_affordance": layer_hover_affordance_packet("taichi_global_bathymetry.renderer_capabilities"),
         "layer_research_workflow": layer_research_workflow_packet(None, None, layer_operator_groups_packet(layer_operator_shortcuts_packet("taichi_global_bathymetry.renderer_capabilities"), "taichi_global_bathymetry.renderer_capabilities"), layer_capability_matrix_packet(), "taichi_global_bathymetry.renderer_capabilities"),
         "boundary_emphasis_control": boundary_emphasis_control_packet(None, None, "taichi_global_bathymetry.renderer_capabilities"),
         "cursor_geodesy_readout": cursor_geodesy_readout_packet("taichi_global_bathymetry.renderer_capabilities"),

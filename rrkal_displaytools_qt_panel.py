@@ -2158,6 +2158,46 @@ def layer_selection_affordance_packet(
     }
 
 
+def layer_hover_affordance_packet(
+    source: str,
+    hovered_layer: str | None = None,
+    layer_stack: dict[str, dict[str, object]] | None = None,
+) -> dict[str, object]:
+    layer_stack = layer_stack if isinstance(layer_stack, dict) else {}
+    hovered_state = layer_stack.get(hovered_layer) if isinstance(hovered_layer, str) else None
+    hovered_state = hovered_state if isinstance(hovered_state, dict) else {}
+    renderer_target = globals().get("LAYER_RUNTIME_ID_ALIASES", {}).get(hovered_layer, hovered_layer) if hovered_layer else None
+    visible = hovered_state.get("visible")
+    locked = hovered_state.get("locked")
+    renderer_sync = hovered_state.get("renderer_sync") or "unknown"
+    summary_text = (
+        f"Layer hover: target={hovered_layer or 'none'}; renderer={renderer_target or 'none'}; "
+        f"visible={visible}; locked={locked}; sync={renderer_sync}"
+    )
+    return {
+        "schema": "rrkal_displaytools.layer_hover_affordance.v1",
+        "source": source,
+        "status": "ready",
+        "hovered_layer": hovered_layer,
+        "hovered_layer_state_available": bool(hovered_state),
+        "renderer_target": renderer_target,
+        "visible": visible,
+        "locked": locked,
+        "renderer_sync": renderer_sync,
+        "summary_text": summary_text,
+        "qt_surface": "Layers dock layerHoverAffordance label / row hover event filter",
+        "qt_label_object": "layerHoverAffordance",
+        "row_object_name": "layerRow",
+        "event_filter": "layer_hover_event_targets",
+        "hover_events": ["QEvent.Enter", "QEvent.Leave"],
+        "launch_packet_fields": ["layer_hover_affordance", "layer_stack_ui", "layer_selection_affordance"],
+        "renderer_capability_field": "layer_hover_affordance",
+        "handoff_field": "layer_hover_affordance",
+        "smoke_gate": "layer_hover_affordance",
+        "boundary": "Qt hover feedback only; it does not change selected layer, renderer state, or RRKAL data governance.",
+    }
+
+
 def layer_research_workflow_packet(
     layer_filter: dict[str, object] | None,
     layer_group_view: dict[str, object] | None,
@@ -2604,6 +2644,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_opacity: dict[str, QtWidgets.QSlider] = {}
         self.layer_blends: dict[str, QtWidgets.QComboBox] = {}
         self.layer_rows: dict[str, QtWidgets.QWidget] = {}
+        self.layer_hover_event_targets: dict[int, str] = {}
+        self.layer_hover_layer_key: str | None = None
         self.layer_property_labels: dict[str, QtWidgets.QLabel] = {}
         self.layer_operator_shortcut_handles: list[QtGui.QShortcut] = []
         self.layer_visibility_snapshot: dict[str, bool] | None = None
@@ -3033,10 +3075,13 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             row = QtWidgets.QWidget()
             row.setObjectName("layerRow")
             row.setProperty("selected", False)
+            row.setMouseTracking(True)
+            row.installEventFilter(self)
             row_layout = QtWidgets.QGridLayout(row)
             row_layout.setContentsMargins(4, 2, 4, 2)
             row_layout.setHorizontalSpacing(8)
             self.layer_rows[key] = row
+            self.layer_hover_event_targets[id(row)] = key
 
             select_button = QtWidgets.QToolButton()
             select_button.setText("選取")
@@ -3050,6 +3095,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.checks[key] = check
 
             layer_label = QtWidgets.QLabel(label)
+            layer_label.setMouseTracking(True)
+            layer_label.installEventFilter(self)
+            self.layer_hover_event_targets[id(layer_label)] = key
 
             lock = QtWidgets.QCheckBox()
             lock.setToolTip("Lock is honored by renderer runtime sync for visibility, opacity, and blend updates.")
@@ -3075,6 +3123,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.layer_runtime_badges[key] = runtime_badge
             action_badge = QtWidgets.QLabel("Emphasis" if key in BOUNDARY_HIGHLIGHT_LAYER_KEYS else "-")
             action_badge.setObjectName("layerActionBadge")
+            action_badge.setMouseTracking(True)
+            action_badge.installEventFilter(self)
+            self.layer_hover_event_targets[id(action_badge)] = key
             if key in BOUNDARY_HIGHLIGHT_LAYER_KEYS:
                 boundary_tooltip = "雙擊開啟疆域/領海/EEZ/公海強調遮罩控制。"
                 row.setToolTip(boundary_tooltip)
@@ -3105,6 +3156,10 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.layer_selection_affordance_label.setObjectName("layerSelectionAffordance")
         self.layer_selection_affordance_label.setWordWrap(True)
         layers_layout.addWidget(self.layer_selection_affordance_label)
+        self.layer_hover_affordance_label = QtWidgets.QLabel("Layer hover: target=none; renderer=none")
+        self.layer_hover_affordance_label.setObjectName("layerHoverAffordance")
+        self.layer_hover_affordance_label.setWordWrap(True)
+        layers_layout.addWidget(self.layer_hover_affordance_label)
         self.layer_stack_note = QtWidgets.QLabel("Lock / Opacity / Blend 已接 renderer runtime；未支援圖層會在 renderer_sync 標示。")
         self.layer_stack_note.setWordWrap(True)
         layers_layout.addWidget(self.layer_stack_note)
@@ -3438,6 +3493,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             QLabel#visualReviewReadiness { color: #5b3d18; background: #fff5dd; border: 1px solid #d8b165; border-radius: 8px; padding: 6px 8px; }
             QLabel#layerControlFeedbackStrip { color: #18384a; background: #e8f3ff; border: 1px solid #8fb7d8; border-radius: 8px; padding: 6px 8px; font-weight: 600; }
             QLabel#layerSelectionAffordance { color: #2f4167; background: #edf1ff; border: 1px solid #98a8d8; border-radius: 8px; padding: 6px 8px; font-weight: 600; }
+            QLabel#layerHoverAffordance { color: #3d4a24; background: #f4f8e8; border: 1px solid #b5c77f; border-radius: 8px; padding: 6px 8px; font-weight: 600; }
             QWidget#layerRow { border-bottom: 1px solid #d6e0ea; }
             QWidget#layerRow[selected="true"] { background: #dceeff; border: 1px solid #5b8db8; }
             QLabel#selectedLayer { color: #23435f; font-weight: 700; padding-top: 6px; }
@@ -3934,6 +3990,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             edit.textChanged.connect(self.refresh_command_preview)
 
     def eventFilter(self, watched: QtCore.QObject, event: QtCore.QEvent) -> bool:
+        if event.type() in (QtCore.QEvent.Type.Enter, QtCore.QEvent.Type.Leave):
+            layer_key = self.layer_hover_event_targets.get(id(watched))
+            if layer_key is not None:
+                if event.type() == QtCore.QEvent.Type.Enter:
+                    self.set_layer_hover_affordance(layer_key)
+                else:
+                    self.clear_layer_hover_affordance(layer_key)
+                return super().eventFilter(watched, event)
         if event.type() == QtCore.QEvent.Type.MouseButtonDblClick:
             layer_key = self.boundary_layer_event_targets.get(id(watched))
             if layer_key is not None:
@@ -4211,6 +4275,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "layer_operator_groups": self.collect_layer_operator_groups(),
             "layer_selection_tool": self.collect_layer_selection_tool(),
             "layer_selection_affordance": self.collect_layer_selection_affordance(),
+            "layer_hover_affordance": self.collect_layer_hover_affordance(),
             "layer_research_workflow": self.collect_layer_research_workflow(),
             "boundary_emphasis_control": self.collect_boundary_emphasis_control(),
             "cursor_geodesy_readout": self.collect_cursor_geodesy_readout(),
@@ -4623,6 +4688,29 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         label = getattr(self, "layer_selection_affordance_label", None)
         if label is not None:
             label.setText(str(self.collect_layer_selection_affordance().get("summary_text")))
+
+    def collect_layer_hover_affordance(self, hovered_layer: str | None = None) -> dict[str, object]:
+        if hovered_layer is None:
+            hovered_layer = self.layer_hover_layer_key
+        return layer_hover_affordance_packet(
+            "rrkal_displaytools_qt_panel",
+            hovered_layer,
+            self.collect_layer_stack_ui(),
+        )
+
+    def set_layer_hover_affordance(self, layer_key: str) -> None:
+        self.layer_hover_layer_key = layer_key
+        label = getattr(self, "layer_hover_affordance_label", None)
+        if label is not None:
+            label.setText(str(self.collect_layer_hover_affordance(layer_key).get("summary_text")))
+
+    def clear_layer_hover_affordance(self, layer_key: str | None = None) -> None:
+        if layer_key is not None and self.layer_hover_layer_key != layer_key:
+            return
+        self.layer_hover_layer_key = None
+        label = getattr(self, "layer_hover_affordance_label", None)
+        if label is not None:
+            label.setText(str(self.collect_layer_hover_affordance(None).get("summary_text")))
 
     def layer_selection_summary_text(self, packet: dict[str, object] | None = None) -> str:
         packet = packet or self.collect_layer_selection_tool()
