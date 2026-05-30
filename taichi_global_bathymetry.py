@@ -14426,6 +14426,38 @@ class HybridRenderController:
             },
         ]
 
+    def layer_render_plan_phase_timing_contract(
+        self,
+        execution_phases: list[dict[str, object]],
+    ) -> dict[str, object]:
+        phase_probe_points = []
+        for phase in execution_phases:
+            if not isinstance(phase, dict):
+                continue
+            phase_id = str(phase.get("id") or "unknown_phase")
+            phase_probe_points.append(
+                {
+                    "phase_id": phase_id,
+                    "order": phase.get("order"),
+                    "probe_key": f"phase_ms.{phase_id}",
+                    "recommended_start": f"{phase_id}.perf_counter_start",
+                    "recommended_end": f"{phase_id}.perf_counter_end",
+                    "metadata_field": f"phase_timing_ms.{phase_id}",
+                }
+            )
+        return {
+            "schema": "rrkal_displaytools.layer_render_plan_phase_timing_contract.v1",
+            "source": "HybridRenderController.layer_render_plan_phase_timing_contract",
+            "status": "probe_contract_ready",
+            "runtime_measurements_available": False,
+            "timing_unit": "milliseconds",
+            "slow_frame_threshold_ms": 33.3,
+            "phase_probe_count": len(phase_probe_points),
+            "phase_probe_points": phase_probe_points,
+            "summary_fields": ["total_ms", "phase_timing_ms", "slowest_phase_id", "frame_index"],
+            "next_runtime_step": "wrap phase boundaries with perf_counter and write measured phase_timing_ms into renderer metadata",
+        }
+
     def compile_layer_render_plan(
         self,
         changed: bool | None = None,
@@ -14445,6 +14477,7 @@ class HybridRenderController:
         apply_path = self.layer_render_plan_apply_path(composition_steps, batch_decisions)
         execution_summary = self.layer_render_plan_execution_summary(apply_path, batch_decisions)
         execution_phases = self.layer_render_plan_execution_phases(apply_path, batch_decisions, execution_summary)
+        phase_timing_contract = self.layer_render_plan_phase_timing_contract(execution_phases)
         cached_plan = getattr(self, "compiled_layer_render_plan", None)
         if isinstance(cached_plan, dict) and getattr(self, "compiled_layer_render_plan_cache_key", None) == cache_key:
             plan = dict(cached_plan)
@@ -14460,6 +14493,8 @@ class HybridRenderController:
             plan["execution_phases"] = execution_phases
             plan["execution_phases_schema"] = plan.get("execution_phases_schema", "rrkal_displaytools.layer_render_plan_execution_phases.v1")
             plan["execution_phase_count"] = len(execution_phases)
+            plan["phase_timing_contract"] = phase_timing_contract
+            plan["phase_timing_contract_schema"] = "rrkal_displaytools.layer_render_plan_phase_timing_contract.v1"
             plan["reuse_policy"] = "reuse_when_cache_key_matches_previous_compiled_plan"
             plan["reuse_boundary"] = plan.get("reuse_boundary", "valid_until_dirty_flags_or_camera_change")
             plan["frame_index"] = int(getattr(self, "frame_index", 0))
@@ -14489,6 +14524,8 @@ class HybridRenderController:
             "execution_phases": execution_phases,
             "execution_phases_schema": "rrkal_displaytools.layer_render_plan_execution_phases.v1",
             "execution_phase_count": len(execution_phases),
+            "phase_timing_contract": phase_timing_contract,
+            "phase_timing_contract_schema": "rrkal_displaytools.layer_render_plan_phase_timing_contract.v1",
             "reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",
             "reuse_status_values": ["compiled", "reused"],
             "runtime_optimization_applied": False,
@@ -19451,6 +19488,8 @@ def layer_render_plan_cache_diagnostics_packet(
         "execution_phases_schema": plan.get("execution_phases_schema", "rrkal_displaytools.layer_render_plan_execution_phases.v1"),
         "execution_phases": plan.get("execution_phases") if isinstance(plan.get("execution_phases"), list) else [],
         "execution_phase_count": plan.get("execution_phase_count", 0),
+        "phase_timing_contract_schema": plan.get("phase_timing_contract_schema", "rrkal_displaytools.layer_render_plan_phase_timing_contract.v1"),
+        "phase_timing_contract": plan.get("phase_timing_contract") if isinstance(plan.get("phase_timing_contract"), dict) else {},
         "cache_key_available": bool(plan.get("cache_key")),
         "reuse_policy": plan.get("reuse_policy", "reuse_when_cache_key_matches_previous_compiled_plan") if available else "unavailable",
         "reuse_boundary": plan.get("reuse_boundary", "valid_until_dirty_flags_or_camera_change") if available else "unavailable",
@@ -19515,6 +19554,10 @@ def layer_render_plan_performance_packet(
         "compiled_plan_execution_phases_schema": "rrkal_displaytools.layer_render_plan_execution_phases.v1",
         "compiled_plan_execution_phases_helper": "HybridRenderController.layer_render_plan_execution_phases",
         "compiled_plan_execution_phases_field": "execution_phases",
+        "compiled_plan_phase_timing_contract_schema": "rrkal_displaytools.layer_render_plan_phase_timing_contract.v1",
+        "compiled_plan_phase_timing_contract_helper": "HybridRenderController.layer_render_plan_phase_timing_contract",
+        "compiled_plan_phase_timing_contract_field": "phase_timing_contract",
+        "phase_timing_unit": "milliseconds",
         "compiled_plan_reuse_decision_field": "cache_reuse_decision",
         "compiled_plan_reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",
         "compiled_plan_reuse_status_values": ["compiled", "reused"],

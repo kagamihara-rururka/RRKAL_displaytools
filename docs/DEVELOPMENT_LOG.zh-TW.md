@@ -1,5 +1,17 @@
 # Development Log
 
+## 2026-05-30 - Render-plan phase timing probe contract
+
+Changes:
+- Added `HybridRenderController.layer_render_plan_phase_timing_contract()` so each render-plan phase has a stable probe key before the runtime timing wrapper is added.
+- Compiled render-plan metadata and Qt diagnostics now expose `rrkal_displaytools.layer_render_plan_phase_timing_contract.v1` and `phase_timing_contract`.
+- The contract defines millisecond timing units, per-phase `phase_ms.*` probe keys, `slow_frame_threshold_ms=33.3` and the next runtime step for writing measured `phase_timing_ms`.
+- The Layers control-board render-plan strip now shows `timing=probe_contract_ready` when metadata is available.
+- Smoke gates now verify timing contract schema/helper/field, Qt summary text and renderer source markers.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Render-plan execution phases
 
 Changes:
