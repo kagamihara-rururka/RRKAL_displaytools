@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-31 - Researcher layer controls guide
+
+Changes:
+- Added a Qt `Copy layer controls guide` action under Research interaction.
+- The copied guide summarizes the intended research workflow: layer selection, visible/lock/solo diagnostics, Pin/cursor/boundary tools, and brush/mask exclusion.
+- Smoke now verifies the button, formatter, copy action and pin occlusion wording.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-31 - Renderer config gateway no-GUI inspector
 
 Changes:

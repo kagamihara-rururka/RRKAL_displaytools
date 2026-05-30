@@ -518,6 +518,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         ("layer_runtime", "Inspect: Layer runtime"),
         ("layer_pick", "Inspect: Layer pick"),
         ("selection_state", "Inspect: Selection state"),
+        ("layer_controls_guide", "Copy layer controls guide"),
         ("layer_ops", "Inspect: Layer ops"),
         ("canvas_state", "Inspect: Canvas state"),
         ("pin_pick", "Inspect: Pin pick"),
@@ -531,7 +532,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
     qt_inspector_groups = [
         {"id": "replay_contracts", "label": "Replay/contracts", "action_ids": ["profile_replay", "launch_summary", "timeline", "clone_ready", "clone_summary", "module_seams"]},
         {"id": "renderer_ports", "label": "Renderer ports", "action_ids": ["hydro_lod", "ocean_port", "style_routes", "layer_matrix", "layer_runtime"]},
-        {"id": "research_interaction", "label": "Research interaction", "action_ids": ["layer_pick", "selection_state", "layer_ops", "canvas_state", "pin_pick", "cursor_geo", "boundary_json", "research_summary"]},
+        {"id": "research_interaction", "label": "Research interaction", "action_ids": ["layer_pick", "selection_state", "layer_controls_guide", "layer_ops", "canvas_state", "pin_pick", "cursor_geo", "boundary_json", "research_summary"]},
         {"id": "visual_review", "label": "Visual review", "action_ids": ["visual_readiness", "renderer_thumbnail", "live_preview"]},
     ]
     return {
@@ -4222,6 +4223,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         layer_pick_button = QtWidgets.QPushButton("Inspect: Layer pick")
         selection_state_button = QtWidgets.QPushButton("Inspect: Selection state")
         copy_selection_summary_button = QtWidgets.QPushButton("Copy selection summary")
+        copy_layer_controls_guide_button = QtWidgets.QPushButton("Copy layer controls guide")
         layer_ops_button = QtWidgets.QPushButton("Inspect: Layer ops")
         pin_pick_button = QtWidgets.QPushButton("Inspect: Pin pick")
         copy_pin_summary_action_button = QtWidgets.QPushButton("Copy pin summary")
@@ -4279,6 +4281,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (layer_pick_button, "Research interaction: inspect selected-layer renderer pick JSON."),
             (selection_state_button, "Selection state: inspect active Qt layer selection, pick history and renderer target JSON."),
             (copy_selection_summary_button, "Selection state: copy active layer, pick bridge and brush/mask scope summary."),
+            (copy_layer_controls_guide_button, "Selection state: copy researcher-facing layer control order: select, visible/lock/solo, pins, cursor geo, boundary emphasis."),
             (layer_ops_button, "Layer ops: inspect active layer operation summary, last operation and replay metadata JSON."),
             (canvas_state_button, "Research interaction: inspect Qt Canvas state, preview metadata and provenance summary."),
             (pin_pick_button, "Research interaction: inspect renderer Pin hover/click pick bridge JSON."),
@@ -4339,6 +4342,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         layer_pick_button.clicked.connect(self.show_layer_pick_state)
         selection_state_button.clicked.connect(self.show_layer_pick_state)
         copy_selection_summary_button.clicked.connect(self.copy_layer_selection_summary)
+        copy_layer_controls_guide_button.clicked.connect(self.copy_layer_controls_guide)
         layer_ops_button.clicked.connect(self.show_layer_operation_feedback)
         pin_pick_button.clicked.connect(self.show_pin_pick_state)
         copy_pin_summary_action_button.clicked.connect(self.copy_pin_overlay_summary)
@@ -4369,7 +4373,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button, export_reviewer_packet_button)),
             ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, copy_reviewer_fields_button, copy_goal_scorecard_button, timeline_button, module_seams_button, decoupling_readiness_button, copy_decoupling_summary_button, controlled_interception_button, copy_interception_summary_button, renderer_config_gateway_button, copy_renderer_config_summary_button, copy_module_summary_button, clone_ready_button, copy_clone_summary_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, ocean_3d_controls_action_button, copy_ocean_summary_button, copy_ocean_guard_summary_button, style_routes_button, copy_style_routes_summary_button, layer_matrix_button, layer_runtime_button)),
-            ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
+            ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, copy_layer_controls_guide_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
             ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, copy_visual_closure_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, copy_style_thumb_status_button, thumbnail_button, live_preview_button)),
             ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, render_plan_perf_button, copy_compose_budget_button, copy_compose_parity_button, smoke_button)),
             ("Process", (launch_button, restart_button, stop_button)),
@@ -6386,6 +6390,22 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             f"{label}: selected={selected_layer} ({selected_label}); "
             f"pick_state={pick_state_file}; quick_actions={quick_actions_text}; "
             f"brush_mask={brush_mask_scope}"
+        )
+
+    def layer_controls_guide_text(self) -> str:
+        selected_layer = self.selected_layer_key or "none"
+        selected_label = next(
+            (text for key, text in LAYER_LABELS if key == self.selected_layer_key),
+            selected_layer,
+        )
+        return (
+            "Layer controls guide: "
+            f"selected={selected_layer} ({selected_label}); "
+            "order=select_row_or_renderer_pick -> visibility/lock/solo/diagnostics -> pin/cursor_geo/boundary_emphasis; "
+            "pins=rotate_with_globe_and_occlude_by_horizon; "
+            "cursor_geo=mouse_position_to_lat_lon_bridge; "
+            "brush_mask=excluded; "
+            "provenance=copy_research_summary_or_export_reviewer_packet"
         )
 
     def collect_layer_research_workflow(self) -> dict[str, object]:
@@ -10322,6 +10342,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         summary = self.layer_selection_summary_text()
         QtWidgets.QApplication.clipboard().setText(summary)
         self.status.setText("已複製 layer selection 摘要")
+
+    def copy_layer_controls_guide(self) -> None:
+        summary = self.layer_controls_guide_text()
+        QtWidgets.QApplication.clipboard().setText(summary)
+        self.status.setText("Copied layer controls guide to clipboard.")
 
     def toggle_selected_layer_visibility(self) -> None:
         key = self.selected_layer_key

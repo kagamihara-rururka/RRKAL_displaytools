@@ -4710,6 +4710,9 @@ if ($qtPanelSource -notlike "*rrkal_displaytools.layer_render_plan_cache_control
 if ($qtPanelSource -notlike "*Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON*") {
     throw "Qt Research interaction inspector tooltip is missing"
 }
+if ($qtPanelSource -notlike "*pins=rotate_with_globe_and_occlude_by_horizon*") {
+    throw "Qt Layer controls guide pin occlusion wording missing"
+}
 if ($qtPanelSource -notlike "*Visual review: inspect latest renderer thumbnail PNG*") {
     throw "Qt Visual review renderer thumbnail tooltip is missing"
 }
@@ -4899,11 +4902,20 @@ if ($qtPanelSource -notlike "*copy_summary_contract*") {
 if ($qtPanelSource -notlike "*copy_selection_summary_button*") {
     throw "Qt panel Layer selection copy summary button missing"
 }
+if ($qtPanelSource -notlike "*Copy layer controls guide*") {
+    throw "Qt panel Layer controls guide copy button missing"
+}
 if ($qtPanelSource -notlike "*layer_selection_summary_text*") {
     throw "Qt panel Layer selection summary formatter missing"
 }
+if ($qtPanelSource -notlike "*layer_controls_guide_text*") {
+    throw "Qt panel Layer controls guide formatter missing"
+}
 if ($qtPanelSource -notlike "*copy_layer_selection_summary*") {
     throw "Qt panel Layer selection copy summary action missing"
+}
+if ($qtPanelSource -notlike "*copy_layer_controls_guide*") {
+    throw "Qt panel Layer controls guide copy action missing"
 }
 if ($qtPanelSource -notlike "*quick_actions={quick_actions_text}*") {
     throw "Qt panel Layer selection quick actions summary text missing"
