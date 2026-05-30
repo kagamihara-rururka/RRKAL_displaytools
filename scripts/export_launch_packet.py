@@ -1863,6 +1863,8 @@ def layer_render_plan_performance_packet(
         "runtime_optimization_applied": False,
         "runtime_snapshot_schema": "rrkal_displaytools.layer_render_plan_runtime_snapshot.v1",
         "runtime_snapshot_helper": "HybridRenderController.layer_render_plan_runtime_snapshot",
+        "composition_steps_helper": "HybridRenderController.layer_render_plan_composition_steps",
+        "composition_apply_helper": "HybridRenderController.apply_layer_render_plan_composition",
         "metadata_sidecar_field": "layer_render_plan",
         "runtime_snapshot_wired": True,
         "deferred_until": "module_decoupling_boundary_contract_is_stable",

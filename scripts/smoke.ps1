@@ -512,6 +512,9 @@ if ($launchPacket.layer_render_plan_performance.runtime_snapshot_schema -ne "rrk
 if ($launchPacket.layer_render_plan_performance.metadata_sidecar_field -ne "layer_render_plan") {
     throw "Launch packet layer_render_plan_performance metadata sidecar field missing"
 }
+if ($launchPacket.layer_render_plan_performance.composition_apply_helper -ne "HybridRenderController.apply_layer_render_plan_composition") {
+    throw "Launch packet layer_render_plan_performance composition apply helper missing"
+}
 if ($launchPacket.module_boundary_registry.schema -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Launch packet module_boundary_registry schema missing or invalid"
 }
@@ -1588,6 +1591,9 @@ if ($capabilities.layer_render_plan_performance.runtime_snapshot_schema -ne "rrk
 if ($capabilities.layer_render_plan_performance.runtime_snapshot_helper -ne "HybridRenderController.layer_render_plan_runtime_snapshot") {
     throw "Renderer layer_render_plan_performance runtime snapshot helper missing"
 }
+if ($capabilities.layer_render_plan_performance.composition_apply_helper -ne "HybridRenderController.apply_layer_render_plan_composition") {
+    throw "Renderer layer_render_plan_performance composition apply helper missing"
+}
 if ($capabilities.module_boundary_registry.schema -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Renderer module_boundary_registry schema missing or invalid"
 }
@@ -2230,6 +2236,9 @@ if ($handoff.layer_render_plan_performance.runtime_snapshot_schema -ne "rrkal_di
 }
 if ($handoff.layer_render_plan_performance.runtime_snapshot_helper -ne "HybridRenderController.layer_render_plan_runtime_snapshot") {
     throw "Handoff inspection layer render plan performance runtime snapshot helper missing"
+}
+if ($handoff.layer_render_plan_performance.composition_apply_helper -ne "HybridRenderController.apply_layer_render_plan_composition") {
+    throw "Handoff inspection layer render plan performance composition apply helper missing"
 }
 if ($handoff.launch_packet_contracts.layer_selection_tool -ne "rrkal_displaytools.layer_selection_tool.v1") {
     throw "Handoff inspection layer_selection_tool launch contract missing or invalid"
@@ -3373,6 +3382,9 @@ if ($qtPanelSource -notlike "*layer_render_plan_runtime_snapshot*") {
 if ($qtPanelSource -notlike "*metadata_sidecar_field*: *layer_render_plan*") {
     throw "Qt render plan performance metadata sidecar contract is missing"
 }
+if ($qtPanelSource -notlike "*apply_layer_render_plan_composition*") {
+    throw "Qt render plan performance composition helper contract is missing"
+}
 if ($qtPanelSource -notlike "*Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON*") {
     throw "Qt Research interaction inspector tooltip is missing"
 }
@@ -3585,11 +3597,20 @@ $rendererSource = Get-Content -Raw -Encoding UTF8 taichi_global_bathymetry.py
 if ($rendererSource -notlike "*def layer_render_plan_runtime_snapshot*") {
     throw "Renderer layer render plan runtime snapshot helper is missing"
 }
+if ($rendererSource -notlike "*def layer_render_plan_composition_steps*") {
+    throw "Renderer layer render plan composition steps helper is missing"
+}
+if ($rendererSource -notlike "*def apply_layer_render_plan_composition*") {
+    throw "Renderer layer render plan composition apply helper is missing"
+}
 if ($rendererSource -notlike '*"layer_render_plan": getattr(self, "layer_render_plan_snapshot"*') {
     throw "Renderer metadata layer render plan sidecar field is missing"
 }
 if ($rendererSource -notlike "*self.layer_render_plan_snapshot = self.layer_render_plan_runtime_snapshot*") {
     throw "Renderer render_if_needed does not update the layer render plan snapshot"
+}
+if ($rendererSource -notlike "*self.frame_rgba = self.apply_layer_render_plan_composition(composition_steps)*") {
+    throw "Renderer render_if_needed is not using the layer render plan composition helper"
 }
 if ($rendererSource -notlike "*last_layer_pick_screen*") {
     throw "Renderer layer pick screen position state missing"

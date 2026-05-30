@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Renderer render-plan composition helper
+
+Changes:
+- Added `layer_render_plan_composition_steps()` and `apply_layer_render_plan_composition()` to centralize the existing overlay compose sequence behind a replaceable render-plan helper.
+- Updated runtime snapshots to report composition helper, step count and current helper-backed compose path.
+- Extended launch/capability/handoff smoke gates so the next single-pass optimization has a concrete apply boundary instead of scattered hard-coded compose calls.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Renderer layer render-plan runtime snapshot
 
 Changes:

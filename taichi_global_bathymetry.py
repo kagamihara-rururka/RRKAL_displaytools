@@ -14067,23 +14067,64 @@ class HybridRenderController:
                 {"id": "research_pins", "source": "pin_overlay_rgba", "dirty_flag": "overlay_dirty"},
                 {"id": "vehicle_icons", "source": "vehicle_icon_overlay_rgba", "dirty_flag": "overlay_dirty"},
             ],
-            "compose_order": [
-                "globe_rgba",
-                "lakes",
-                "rivers",
-                "borders",
-                "territorial_sea",
-                "eez",
-                "high_seas",
-                "ais_overlay",
-                "aircraft",
-                "vehicle_icons",
-                "pins",
-                "style_profile_postprocess",
-            ],
+            "compose_order": ["globe_rgba", *[str(step.get("id")) for step in self.layer_render_plan_composition_steps()]],
+            "composition_step_count": len(self.layer_render_plan_composition_steps()),
+            "composition_helper": "HybridRenderController.apply_layer_render_plan_composition",
             "single_pass_target": "future_unified_taichi_render_plan",
-            "current_path": "existing_sequential_overlay_composition",
+            "current_path": "centralized_plan_helper_with_existing_overlay_composition",
         }
+
+    def layer_render_plan_composition_steps(self) -> list[dict[str, object]]:
+        steps: list[dict[str, object]] = [
+            {"id": "lakes", "kind": "runtime_blend", "layer_id": "lakes", "overlay_attr": "lake_overlay_rgba"},
+            {"id": "rivers", "kind": "runtime_blend", "layer_id": "rivers", "overlay_attr": "river_overlay_rgba"},
+        ]
+        if self.boundary_layer_rgba:
+            for layer_id in ("borders", "territorial_sea", "eez", "high_seas"):
+                if self.boundary_layer_rgba.get(layer_id) is not None:
+                    steps.append({"id": layer_id, "kind": "runtime_blend", "layer_id": layer_id, "overlay_source": "boundary_layer_rgba"})
+        else:
+            steps.append(
+                {
+                    "id": "boundary_aggregate",
+                    "kind": "alpha_blend",
+                    "overlay_attr": "boundary_overlay_rgba",
+                    "blend_mode": self.boundary_aggregate_blend_mode(),
+                }
+            )
+        steps.extend(
+            [
+                {"id": "ais_overlay", "kind": "alpha_compose", "overlay_attr": "overlay_rgba"},
+                {"id": "aircraft", "kind": "runtime_overlay", "layer_id": "aircraft", "overlay_attr": "aircraft_overlay_rgba"},
+                {"id": "vehicle_icons", "kind": "runtime_overlay", "layer_id": "vehicle_icons", "overlay_attr": "vehicle_icon_overlay_rgba"},
+                {"id": "pins", "kind": "runtime_overlay", "layer_id": "pins", "overlay_attr": "pin_overlay_rgba"},
+                {"id": "style_profile_postprocess", "kind": "style_profile_postprocess"},
+            ]
+        )
+        return steps
+
+    def apply_layer_render_plan_composition(self, steps: list[dict[str, object]] | None = None) -> np.ndarray:
+        frame = self.globe_rgba
+        plan_steps = steps if isinstance(steps, list) else self.layer_render_plan_composition_steps()
+        for step in plan_steps:
+            kind = str(step.get("kind"))
+            layer_id = str(step.get("layer_id") or step.get("id") or "")
+            overlay = None
+            if step.get("overlay_source") == "boundary_layer_rgba":
+                overlay = self.boundary_layer_rgba.get(layer_id)
+            elif step.get("overlay_attr"):
+                overlay = getattr(self, str(step.get("overlay_attr")), None)
+            if kind == "runtime_blend" and overlay is not None:
+                frame = self.compose_runtime_blend(frame, layer_id, overlay)
+            elif kind == "alpha_blend" and overlay is not None:
+                frame = alpha_blend_compose(frame, overlay, str(step.get("blend_mode") or "Normal"))
+            elif kind == "alpha_compose" and overlay is not None:
+                frame = alpha_compose(frame, overlay)
+            elif kind == "runtime_overlay" and overlay is not None:
+                frame = self.compose_runtime_overlay(frame, layer_id, overlay)
+            elif kind == "style_profile_postprocess":
+                frame = apply_style_profile(frame, getattr(self.args, "style_profile", "scientific"))
+        return frame
 
     def output_metadata_path(self) -> Path | None:
         if self.output_path is None:
@@ -15930,24 +15971,9 @@ class HybridRenderController:
                 self._render_boundaries_if_needed(force=force)
             self.overlay_dirty = False
 
-        self.frame_rgba = self.compose_runtime_blend(self.globe_rgba, "lakes", self.lake_overlay_rgba)
-        self.frame_rgba = self.compose_runtime_blend(self.frame_rgba, "rivers", self.river_overlay_rgba)
-        if self.boundary_layer_rgba:
-            for layer_id in ("borders", "territorial_sea", "eez", "high_seas"):
-                rendered_boundary = self.boundary_layer_rgba.get(layer_id)
-                if rendered_boundary is not None:
-                    self.frame_rgba = self.compose_runtime_blend(self.frame_rgba, layer_id, rendered_boundary)
-        else:
-            self.frame_rgba = alpha_blend_compose(
-                self.frame_rgba,
-                self.boundary_overlay_rgba,
-                self.boundary_aggregate_blend_mode(),
-            )
-        self.frame_rgba = alpha_compose(self.frame_rgba, self.overlay_rgba)
-        self.frame_rgba = self.compose_runtime_overlay(self.frame_rgba, "aircraft", self.aircraft_overlay_rgba)
-        self.frame_rgba = self.compose_runtime_overlay(self.frame_rgba, "vehicle_icons", self.vehicle_icon_overlay_rgba)
-        self.frame_rgba = self.compose_runtime_overlay(self.frame_rgba, "pins", self.pin_overlay_rgba)
-        self.frame_rgba = apply_style_profile(self.frame_rgba, getattr(self.args, "style_profile", "scientific"))
+        composition_steps = self.layer_render_plan_composition_steps()
+        self.layer_render_plan_snapshot = self.layer_render_plan_runtime_snapshot(changed=changed, force=force)
+        self.frame_rgba = self.apply_layer_render_plan_composition(composition_steps)
         self.last_render_ms = (time.time() - start) * 1000.0
         if self.output_path and (getattr(self.args, "once", False) or getattr(self.args, "headless", False)):
             from PIL import Image
@@ -19034,6 +19060,8 @@ def layer_render_plan_performance_packet(
         "runtime_optimization_applied": False,
         "runtime_snapshot_schema": "rrkal_displaytools.layer_render_plan_runtime_snapshot.v1",
         "runtime_snapshot_helper": "HybridRenderController.layer_render_plan_runtime_snapshot",
+        "composition_steps_helper": "HybridRenderController.layer_render_plan_composition_steps",
+        "composition_apply_helper": "HybridRenderController.apply_layer_render_plan_composition",
         "metadata_sidecar_field": "layer_render_plan",
         "runtime_snapshot_wired": True,
         "deferred_until": "module_decoupling_boundary_contract_is_stable",
