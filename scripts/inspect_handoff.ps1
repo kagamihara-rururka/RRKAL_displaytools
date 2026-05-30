@@ -282,6 +282,8 @@ $summary = [ordered]@{
         handoff_first_command = $launchPacket.cross_machine_clone_readiness.handoff_first_command
         smoke_required_before_push = $launchPacket.cross_machine_clone_readiness.smoke_required_before_push
         qt_first = $launchPacket.cross_machine_clone_readiness.qt_first
+        clone_reviewer_summary_contract_schema = $launchPacket.cross_machine_clone_readiness.clone_reviewer_summary_contract_schema
+        clone_reviewer_summary_contract = $launchPacket.cross_machine_clone_readiness.clone_reviewer_summary_contract
     }
     profile_launch_readiness = @{
         launch_packet_schema = $launchPacket.profile_launch_readiness.schema

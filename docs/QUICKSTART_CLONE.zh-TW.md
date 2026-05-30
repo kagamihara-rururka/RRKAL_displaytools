@@ -38,7 +38,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_handoff.ps1
 "schema": "rrkal_displaytools.handoff_inspection.v1"
 "session_journal": "rrkal_displaytools.session_journal.v1"
 "layer_capability_matrix": "rrkal_displaytools.layer_capability_matrix.v1"
+"clone_reviewer_summary_contract_schema": "rrkal_displaytools.clone_reviewer_summary_contract.v1"
 ```
+
+Qt 開啟後也可以在 Replay/contracts 使用 `Copy clone summary`，把 repo、setup doc、profile readiness、Qt-first、smoke-required 與 handoff-first 指令整理成可貼到交接紀錄的摘要。
 
 ## 4. 跑提交級 smoke
 

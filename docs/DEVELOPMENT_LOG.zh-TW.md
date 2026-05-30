@@ -1,5 +1,17 @@
 # Development Log
 
+## 2026-05-30 - Clone reviewer summary contract
+
+Changes:
+- Added `clone_reviewer_summary_contract` to `cross_machine_clone_readiness` in Qt, launch packet and renderer capability emitters.
+- Added `copy_clone_reviewer_summary()` and `Copy clone summary` to the Qt Replay/contracts group.
+- Handoff output now exposes the clone reviewer summary contract.
+- Smoke gates launch packet, renderer capability, handoff and Qt source coverage.
+- Updated clone quickstart, capability summary and GTD.
+
+Validation:
+- Smoke passed before commit: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`.
+
 ## 2026-05-30 - Research interaction summary bundle
 
 Changes:

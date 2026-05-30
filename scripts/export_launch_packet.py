@@ -1083,6 +1083,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         ("style_routes", "Inspect: Style routes"),
         ("module_seams", "Inspect: Module seams"),
         ("clone_ready", "Inspect: Clone ready"),
+        ("clone_summary", "Copy clone summary"),
         ("layer_matrix", "Inspect: Layer matrix"),
         ("layer_runtime", "Inspect: Layer runtime"),
         ("layer_pick", "Inspect: Layer pick"),
@@ -1098,7 +1099,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         ("live_preview", "Inspect: Live preview"),
     ]
     qt_inspector_groups = [
-        {"id": "replay_contracts", "label": "Replay/contracts", "action_ids": ["profile_replay", "timeline", "clone_ready", "module_seams"]},
+        {"id": "replay_contracts", "label": "Replay/contracts", "action_ids": ["profile_replay", "timeline", "clone_ready", "clone_summary", "module_seams"]},
         {"id": "renderer_ports", "label": "Renderer ports", "action_ids": ["hydro_lod", "ocean_port", "style_routes", "layer_matrix", "layer_runtime"]},
         {"id": "research_interaction", "label": "Research interaction", "action_ids": ["layer_pick", "selection_state", "layer_ops", "canvas_state", "pin_pick", "cursor_geo", "boundary_json", "research_summary"]},
         {"id": "visual_review", "label": "Visual review", "action_ids": ["visual_readiness", "renderer_thumbnail", "live_preview"]},
@@ -1536,6 +1537,22 @@ def cross_machine_clone_readiness_packet(
         "clone_after_setup_verification": ["smoke", "handoff inspection", "renderer capability discovery", "Qt panel launch", "handoff-first Qt launch"],
         "launch_packet_fields": ["cross_machine_clone_readiness", "profile_launch_readiness", "module_boundary_registry", "portable_command"],
         "renderer_capability_field": "cross_machine_clone_readiness",
+        "clone_reviewer_summary_contract_schema": "rrkal_displaytools.clone_reviewer_summary_contract.v1",
+        "clone_reviewer_summary_contract": {
+            "label": "Clone reviewer",
+            "summary_format": "Clone reviewer: status={status}; repo={repo_url}; setup={setup_doc}; profile={profile_launch_readiness}; qt_first={qt_first}; smoke_required={smoke_required_before_push}; handoff_first={handoff_first_command}",
+            "qt_inspector_group": "replay_contracts",
+            "qt_copy_action": "copy_clone_reviewer_summary",
+            "component_contract_fields": [
+                "cross_machine_clone_readiness",
+                "profile_launch_readiness",
+                "profile_ui_state_replay",
+                "module_boundary_registry",
+            ],
+            "launch_packet_field": "cross_machine_clone_readiness.clone_reviewer_summary_contract",
+            "handoff_field": "cross_machine_clone_readiness.clone_reviewer_summary_contract",
+            "portable": True,
+        },
         "boundary": "Cross-machine readiness covers clone/setup/smoke/run handoff only; data discovery, download, import and cache governance remain RRKAL-owned.",
     }
 

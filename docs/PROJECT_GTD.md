@@ -485,3 +485,14 @@ Done:
 
 Next:
 - Continue tightening clone/handoff reviewer flow around profile and launch packet review.
+
+
+## 2026-05-30 - Clone reviewer summary contract
+
+Done:
+- Added `clone_reviewer_summary_contract` to `cross_machine_clone_readiness`.
+- Added `Copy clone summary` to the Qt Replay/contracts group.
+- Handoff and smoke gate the clone reviewer summary contract.
+
+Next:
+- Continue tightening profile/launch packet reviewer actions and one-click export flow.

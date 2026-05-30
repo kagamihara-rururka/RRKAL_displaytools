@@ -267,6 +267,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         ("style_routes", "Inspect: Style routes"),
         ("module_seams", "Inspect: Module seams"),
         ("clone_ready", "Inspect: Clone ready"),
+        ("clone_summary", "Copy clone summary"),
         ("layer_matrix", "Inspect: Layer matrix"),
         ("layer_runtime", "Inspect: Layer runtime"),
         ("layer_pick", "Inspect: Layer pick"),
@@ -282,7 +283,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         ("live_preview", "Inspect: Live preview"),
     ]
     qt_inspector_groups = [
-        {"id": "replay_contracts", "label": "Replay/contracts", "action_ids": ["profile_replay", "timeline", "clone_ready", "module_seams"]},
+        {"id": "replay_contracts", "label": "Replay/contracts", "action_ids": ["profile_replay", "timeline", "clone_ready", "clone_summary", "module_seams"]},
         {"id": "renderer_ports", "label": "Renderer ports", "action_ids": ["hydro_lod", "ocean_port", "style_routes", "layer_matrix", "layer_runtime"]},
         {"id": "research_interaction", "label": "Research interaction", "action_ids": ["layer_pick", "selection_state", "layer_ops", "canvas_state", "pin_pick", "cursor_geo", "boundary_json", "research_summary"]},
         {"id": "visual_review", "label": "Visual review", "action_ids": ["visual_readiness", "renderer_thumbnail", "live_preview"]},
@@ -720,6 +721,22 @@ def cross_machine_clone_readiness_packet(
         "clone_after_setup_verification": ["smoke", "handoff inspection", "renderer capability discovery", "Qt panel launch", "handoff-first Qt launch"],
         "launch_packet_fields": ["cross_machine_clone_readiness", "profile_launch_readiness", "module_boundary_registry", "portable_command"],
         "renderer_capability_field": "cross_machine_clone_readiness",
+        "clone_reviewer_summary_contract_schema": "rrkal_displaytools.clone_reviewer_summary_contract.v1",
+        "clone_reviewer_summary_contract": {
+            "label": "Clone reviewer",
+            "summary_format": "Clone reviewer: status={status}; repo={repo_url}; setup={setup_doc}; profile={profile_launch_readiness}; qt_first={qt_first}; smoke_required={smoke_required_before_push}; handoff_first={handoff_first_command}",
+            "qt_inspector_group": "replay_contracts",
+            "qt_copy_action": "copy_clone_reviewer_summary",
+            "component_contract_fields": [
+                "cross_machine_clone_readiness",
+                "profile_launch_readiness",
+                "profile_ui_state_replay",
+                "module_boundary_registry",
+            ],
+            "launch_packet_field": "cross_machine_clone_readiness.clone_reviewer_summary_contract",
+            "handoff_field": "cross_machine_clone_readiness.clone_reviewer_summary_contract",
+            "portable": True,
+        },
         "boundary": "Cross-machine readiness covers clone/setup/smoke/run handoff only; data discovery, download, import and cache governance remain RRKAL-owned.",
     }
 
@@ -2801,6 +2818,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         style_routes_button = QtWidgets.QPushButton("Inspect: Style routes")
         module_seams_button = QtWidgets.QPushButton("Inspect: Module seams")
         clone_ready_button = QtWidgets.QPushButton("Inspect: Clone ready")
+        copy_clone_summary_button = QtWidgets.QPushButton("Copy clone summary")
         layer_matrix_button = QtWidgets.QPushButton("Inspect: Layer matrix")
         layer_runtime_button = QtWidgets.QPushButton("Inspect: Layer runtime")
         layer_pick_button = QtWidgets.QPushButton("Inspect: Layer pick")
@@ -2836,6 +2854,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (layer_runtime_button, "Renderer ports: inspect layer runtime state and renderer ack JSON."),
             (module_seams_button, "Replay/contracts: inspect future module extraction seam registry JSON."),
             (clone_ready_button, "Replay/contracts: inspect cross-machine clone readiness JSON."),
+            (copy_clone_summary_button, "Replay/contracts: copy clone/setup/profile launch reviewer summary for cross-machine handoff."),
             (layer_pick_button, "Research interaction: inspect selected-layer renderer pick JSON."),
             (selection_state_button, "Selection state: inspect active Qt layer selection, pick history and renderer target JSON."),
             (copy_selection_summary_button, "Selection state: copy active layer, pick bridge and brush/mask scope summary."),
@@ -2870,6 +2889,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         style_routes_button.clicked.connect(self.show_style_renderer_routes)
         module_seams_button.clicked.connect(self.show_module_boundary_registry)
         clone_ready_button.clicked.connect(self.show_cross_machine_clone_readiness)
+        copy_clone_summary_button.clicked.connect(self.copy_clone_reviewer_summary)
         layer_matrix_button.clicked.connect(self.show_layer_capability_matrix)
         layer_runtime_button.clicked.connect(self.show_layer_runtime_state)
         layer_pick_button.clicked.connect(self.show_layer_pick_state)
@@ -2897,7 +2917,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         stop_button.clicked.connect(self.stop_renderer)
         action_sections = (
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button)),
-            ("Inspect: Replay/contracts", (profile_replay_button, timeline_button, module_seams_button, clone_ready_button)),
+            ("Inspect: Replay/contracts", (profile_replay_button, timeline_button, module_seams_button, clone_ready_button, copy_clone_summary_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, ocean_port_button, style_routes_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
             ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, thumbnail_button, live_preview_button)),
@@ -3626,6 +3646,23 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             self.collect_profile_launch_readiness(),
             self.collect_module_boundary_registry(),
             "rrkal_displaytools_qt_panel",
+        )
+
+    def clone_reviewer_summary_text(self) -> str:
+        packet = self.collect_cross_machine_clone_readiness()
+        contract = packet.get("clone_reviewer_summary_contract", {})
+        label = "Clone reviewer"
+        if isinstance(contract, dict):
+            label = str(contract.get("label") or label)
+        return (
+            f"{label}: "
+            f"status={packet.get('status')}; "
+            f"repo={packet.get('repo_url')}; "
+            f"setup={packet.get('setup_doc')}; "
+            f"profile={packet.get('profile_launch_readiness')}; "
+            f"qt_first={packet.get('qt_first')}; "
+            f"smoke_required={packet.get('smoke_required_before_push')}; "
+            f"handoff_first={packet.get('handoff_first_command')}"
         )
 
     def collect_launch_packet(self) -> dict[str, object]:
@@ -7523,6 +7560,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             json.dumps(self.collect_cross_machine_clone_readiness(), ensure_ascii=False, indent=2)
         )
         self.status.setText("已顯示 cross-machine clone readiness JSON")
+
+    def copy_clone_reviewer_summary(self) -> None:
+        summary = self.clone_reviewer_summary_text()
+        QtWidgets.QApplication.clipboard().setText(summary)
+        self.status.setText("已複製 clone reviewer 摘要")
 
     def show_cursor_geodesy_state(self) -> None:
         self.command_text.setPlainText(
