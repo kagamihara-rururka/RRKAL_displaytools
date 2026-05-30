@@ -2591,6 +2591,15 @@ def layer_selection_affordance_packet(
         "qt_label_object": "layerSelectionAffordance",
         "active_action_guide_schema": "rrkal_displaytools.active_layer_action_guide.v1",
         "active_action_guide_label_object": "activeLayerActionGuideStrip",
+        "active_quick_actions_schema": "rrkal_displaytools.active_layer_quick_actions.v1",
+        "active_quick_actions_layout_object": "activeLayerQuickActions",
+        "active_quick_action_button_objects": [
+            "activeLayerQuickAction_toggle_visibility",
+            "activeLayerQuickAction_toggle_lock",
+            "activeLayerQuickAction_solo",
+            "activeLayerQuickAction_diagnostics",
+        ],
+        "active_quick_actions": ["toggle_visibility", "toggle_lock", "solo", "diagnostics"],
         "active_action_guide_steps": [
             "Select or click a layer row",
             "Operate visibility, lock, solo or diagnostics on the active layer",
@@ -2605,6 +2614,7 @@ def layer_selection_affordance_packet(
             "selectedLayer label",
             "layerControlFeedbackStrip",
             "activeLayerActionGuideStrip",
+            "activeLayerQuickActions",
             "Reveal selected action",
         ],
         "visible": visible,
@@ -3688,6 +3698,22 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         self.active_layer_action_guide_label.setObjectName("activeLayerActionGuideStrip")
         self.active_layer_action_guide_label.setWordWrap(True)
         layers_layout.addWidget(self.active_layer_action_guide_label)
+        active_quick_actions = QtWidgets.QHBoxLayout()
+        active_quick_actions.setObjectName("activeLayerQuickActions")
+        for action_id, action_label in (
+            ("toggle_visibility", "Visible"),
+            ("toggle_lock", "Lock"),
+            ("solo", "Solo"),
+            ("diagnostics", "Diagnostics"),
+        ):
+            button = QtWidgets.QPushButton(action_label)
+            button.setObjectName(f"activeLayerQuickAction_{action_id}")
+            button.setToolTip(f"Run active layer quick action: {action_id}")
+            button.clicked.connect(
+                lambda _checked=False, action_id=action_id: self.invoke_active_layer_quick_action(action_id)
+            )
+            active_quick_actions.addWidget(button)
+        layers_layout.addLayout(active_quick_actions)
         self.layer_hover_affordance_label = QtWidgets.QLabel("Layer hover: target=none; renderer=none")
         self.layer_hover_affordance_label.setObjectName("layerHoverAffordance")
         self.layer_hover_affordance_label.setWordWrap(True)
@@ -5746,6 +5772,47 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         label = getattr(self, "active_layer_action_guide_label", None)
         if label is not None:
             label.setText(self.active_layer_action_guide_text())
+
+    def invoke_active_layer_quick_action(self, action_id: str) -> None:
+        key = self.selected_layer_key
+        if not key or key not in self.checks:
+            self.set_layer_operation_status(
+                f"Active layer quick action skipped: {action_id}; no active layer selected"
+            )
+            self.refresh_active_layer_action_guide()
+            return
+        if action_id == "toggle_visibility":
+            visible_widget = self.checks.get(key)
+            if visible_widget is None or not visible_widget.isEnabled():
+                self.set_layer_operation_status(
+                    f"Active layer quick action skipped: visibility locked or unavailable for {key}"
+                )
+                return
+            visible_widget.setChecked(not visible_widget.isChecked())
+            self.set_layer_operation_status(
+                f"Active layer quick action: visibility {key}={'on' if visible_widget.isChecked() else 'off'}"
+            )
+        elif action_id == "toggle_lock":
+            lock_widget = self.layer_locks.get(key)
+            if lock_widget is None:
+                self.set_layer_operation_status(f"Active layer quick action skipped: lock unavailable for {key}")
+                return
+            lock_widget.setChecked(not lock_widget.isChecked())
+            self.set_layer_operation_status(
+                f"Active layer quick action: lock {key}={'locked' if lock_widget.isChecked() else 'unlocked'}"
+            )
+        elif action_id == "solo":
+            self.solo_selected_layer_visibility()
+            return
+        elif action_id == "diagnostics":
+            self.show_layer_capability_matrix()
+            self.set_layer_operation_status(f"Active layer quick action: diagnostics {key}")
+        else:
+            self.set_layer_operation_status(f"Active layer quick action skipped: unknown action {action_id}")
+            return
+        self.refresh_layer_stack_status()
+        self.refresh_layer_properties()
+        self.refresh_command_preview()
 
     def collect_layer_hover_affordance(self, hovered_layer: str | None = None) -> dict[str, object]:
         if hovered_layer is None:

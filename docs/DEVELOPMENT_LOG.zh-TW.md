@@ -1,5 +1,14 @@
 # Development Log
 
+## 2026-05-30 - Active layer quick actions row
+
+Changes:
+- Added Qt Layers dock `activeLayerQuickActions` with active-layer Visible, Lock, Solo and Diagnostics buttons directly under the active layer guide.
+- Added `rrkal_displaytools.active_layer_quick_actions.v1` metadata to `layer_selection_affordance` packets for launch packet / no-GUI export / renderer capability discovery alignment.
+- Smoke now gates the quick-action row, button IDs, handler feedback and renderer capability markers.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
 ## 2026-05-30 - Active layer action guide strip
 
 Changes:

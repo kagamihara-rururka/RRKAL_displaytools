@@ -3787,6 +3787,18 @@ if ($qtPanelSource -notlike "*active_layer_action_guide_text*") {
 if ($qtPanelSource -notlike "*refresh_active_layer_action_guide*") {
     throw "Qt active layer action guide refresh is missing"
 }
+if ($qtPanelSource -notlike "*activeLayerQuickActions*") {
+    throw "Qt active layer quick actions row is missing"
+}
+if ($qtPanelSource -notlike "*activeLayerQuickAction_toggle_visibility*") {
+    throw "Qt active layer visibility quick action is missing"
+}
+if ($qtPanelSource -notlike "*invoke_active_layer_quick_action*") {
+    throw "Qt active layer quick action handler is missing"
+}
+if ($qtPanelSource -notlike "*Active layer quick action:*") {
+    throw "Qt active layer quick action feedback is missing"
+}
 if ($qtPanelSource -notlike "*brush_mask=excluded*") {
     throw "Qt active layer action guide brush/mask boundary is missing"
 }
@@ -4912,6 +4924,15 @@ if ($rendererSource -notlike "*activeLayerActionGuideStrip*") {
 }
 if ($rendererSource -notlike "*active_action_guide_steps*") {
     throw "Renderer capability active layer action guide steps missing"
+}
+if ($rendererSource -notlike "*rrkal_displaytools.active_layer_quick_actions.v1*") {
+    throw "Renderer capability active layer quick actions contract missing"
+}
+if ($rendererSource -notlike "*active_quick_action_button_objects*") {
+    throw "Renderer capability active layer quick action buttons missing"
+}
+if ($rendererSource -notlike "*toggle_visibility*") {
+    throw "Renderer capability active layer visibility quick action missing"
 }
 if ($rendererSource -notlike "*layer_hover_affordance_packet*") {
     throw "Renderer capability layer hover affordance contract missing"

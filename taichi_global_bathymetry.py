@@ -20841,6 +20841,15 @@ def layer_selection_affordance_packet(
         "qt_label_object": "layerSelectionAffordance",
         "active_action_guide_schema": "rrkal_displaytools.active_layer_action_guide.v1",
         "active_action_guide_label_object": "activeLayerActionGuideStrip",
+        "active_quick_actions_schema": "rrkal_displaytools.active_layer_quick_actions.v1",
+        "active_quick_actions_layout_object": "activeLayerQuickActions",
+        "active_quick_action_button_objects": [
+            "activeLayerQuickAction_toggle_visibility",
+            "activeLayerQuickAction_toggle_lock",
+            "activeLayerQuickAction_solo",
+            "activeLayerQuickAction_diagnostics",
+        ],
+        "active_quick_actions": ["toggle_visibility", "toggle_lock", "solo", "diagnostics"],
         "active_action_guide_steps": [
             "Select or click a layer row",
             "Operate visibility, lock, solo or diagnostics on the active layer",
@@ -20855,6 +20864,7 @@ def layer_selection_affordance_packet(
             "selectedLayer label",
             "layerControlFeedbackStrip",
             "activeLayerActionGuideStrip",
+            "activeLayerQuickActions",
             "Reveal selected action",
         ],
         "visible": visible,
