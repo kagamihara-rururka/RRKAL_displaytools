@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - No-GUI Hydrology/LOD inspector
+
+- Added `scripts/inspect_hydrology_lod.ps1` for no-GUI inspection of Hydrology/LOD readiness and runtime evidence.
+- Smoke now verifies the inspector contract, stable lake/river renderer targets, `contract_ready` LOD hook status, and runtime state/ack/pick bridge paths.
+- This keeps Hydrology/LOD cross-machine review in displaytools while leaving dataset discovery/download/cache governance in RRKAL.
+- Smoke: PASS (`scripts\smoke.ps1`).
+
 ## 2026-05-31 - No-GUI style renderer routes inspector
 
 - Added `scripts/inspect_style_renderer_routes.ps1` for no-GUI inspection of scientific, nautical, parchment and tactical renderer route contracts.

@@ -1215,6 +1215,50 @@ if ($styleRoutesInspectorPacket.portable_route_commands.parchment -notlike "*--s
 if ($styleRoutesInspectorPacket.portable_route_commands.tactical -notlike "*--style-profile tactical*") {
     throw "Style routes inspector tactical command missing"
 }
+$hydrologyLodInspectorPath = Join-Path $RepoRoot "scripts\inspect_hydrology_lod.ps1"
+if (-not (Test-Path -LiteralPath $hydrologyLodInspectorPath)) {
+    throw "Hydrology/LOD inspector script is missing"
+}
+$hydrologyLodInspectorContractText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $hydrologyLodInspectorPath, "-ContractOnly")
+$hydrologyLodInspectorContract = ($hydrologyLodInspectorContractText -join "`n") | ConvertFrom-Json
+if ($hydrologyLodInspectorContract.schema -ne "rrkal_displaytools.hydrology_lod_inspector.v1") {
+    throw "Hydrology/LOD inspector contract schema missing"
+}
+if ($hydrologyLodInspectorContract.readiness_field -ne "hydrology_lod_readiness") {
+    throw "Hydrology/LOD inspector readiness field mismatch"
+}
+if ($hydrologyLodInspectorContract.runtime_evidence_field -ne "hydrology_lod_runtime_evidence") {
+    throw "Hydrology/LOD inspector runtime evidence field mismatch"
+}
+if ($hydrologyLodInspectorContract.stable_renderer_targets -notcontains "lakes") {
+    throw "Hydrology/LOD inspector missing lakes target"
+}
+if ($hydrologyLodInspectorContract.stable_renderer_targets -notcontains "rivers") {
+    throw "Hydrology/LOD inspector missing rivers target"
+}
+$hydrologyLodInspectorText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $hydrologyLodInspectorPath)
+$hydrologyLodInspectorPacket = ($hydrologyLodInspectorText -join "`n") | ConvertFrom-Json
+if ($hydrologyLodInspectorPacket.schema -ne "rrkal_displaytools.hydrology_lod_inspection.v1") {
+    throw "Hydrology/LOD inspector output schema missing"
+}
+if ($hydrologyLodInspectorPacket.readiness.schema -ne "rrkal_displaytools.hydrology_lod_readiness.v1") {
+    throw "Hydrology/LOD inspector readiness schema missing"
+}
+if ($hydrologyLodInspectorPacket.runtime_evidence.schema -ne "rrkal_displaytools.hydrology_lod_runtime_evidence.v1") {
+    throw "Hydrology/LOD inspector runtime evidence schema missing"
+}
+if ($hydrologyLodInspectorPacket.stable_renderer_targets -notcontains "lakes") {
+    throw "Hydrology/LOD inspector output missing lakes target"
+}
+if ($hydrologyLodInspectorPacket.stable_renderer_targets -notcontains "rivers") {
+    throw "Hydrology/LOD inspector output missing rivers target"
+}
+if ($hydrologyLodInspectorPacket.lod_hook_status -ne "contract_ready") {
+    throw "Hydrology/LOD inspector output LOD hook mismatch"
+}
+if ($hydrologyLodInspectorPacket.ack_file -ne "state/renderer_layer_runtime_ack.json") {
+    throw "Hydrology/LOD inspector output ack file mismatch"
+}
 $performanceSmokePath = Join-Path $RepoRoot "scripts\performance_smoke.ps1"
 if (-not (Test-Path -LiteralPath $performanceSmokePath)) {
     throw "Performance smoke script is missing"
