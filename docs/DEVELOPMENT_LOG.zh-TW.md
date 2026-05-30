@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Decoupling schedule gate metadata
+
+Changes:
+- Added explicit Asia/Taipei schedule metadata to `rrkal_displaytools.decoupling_readiness.v1`.
+- Recorded `2026-05-31T07:00:00+08:00` as the decoupling not-before gate and linked the pre-decoupling gate command.
+- Smoke now gates the schedule marker and pre-gate command so handoff agents do not start module moves before the agreed gate.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Pre-decoupling gate script
 
 Changes:

@@ -22,6 +22,14 @@ def decoupling_readiness_packet(phase: str = "pre_07_ui_closure") -> dict[str, o
         "schema": SCHEMA,
         "generated_at_utc": datetime.now(UTC).isoformat(timespec="seconds"),
         "phase": phase,
+        "operation_schedule": {
+            "timezone": "Asia/Taipei",
+            "ui_contract_handoff_until": "2026-05-31T07:00:00+08:00",
+            "decoupling_not_before": "2026-05-31T07:00:00+08:00",
+            "pre_decoupling_gate_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/pre_decoupling_gate.ps1",
+            "contract_only_gate_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/pre_decoupling_gate.ps1 -ContractOnly",
+            "note": "Before the gate, continue UI/contract/handoff closure only; after the gate, start with render_plan_compose extraction.",
+        },
         "phase_policy": {
             "pre_07_ui_closure": {
                 "allowed": [

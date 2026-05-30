@@ -5568,6 +5568,12 @@ if ($decouplingReadiness.schema -ne "rrkal_displaytools.decoupling_readiness.v1"
 if ($decouplingReadiness.phase -ne "post_07_decoupling") {
     throw "Decoupling readiness post-7 phase mismatch"
 }
+if ($decouplingReadiness.operation_schedule.decoupling_not_before -ne "2026-05-31T07:00:00+08:00") {
+    throw "Decoupling readiness schedule gate mismatch"
+}
+if ($decouplingReadiness.operation_schedule.pre_decoupling_gate_command -notlike "*scripts/pre_decoupling_gate.ps1*") {
+    throw "Decoupling readiness pre-gate command missing"
+}
 if ($decouplingReadiness.first_extraction_order.Count -lt 5) {
     throw "Decoupling readiness first extraction order is incomplete"
 }
