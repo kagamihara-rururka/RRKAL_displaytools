@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Style thumbnail readiness copy action
+
+Changes:
+- Added `Copy style thumb status` to the Qt Visual review action group.
+- Added `copy_style_thumbnail_readiness_summary()` and `style_thumbnail_readiness_summary_text()` for portable ready/missing thumbnail status notes.
+- Style preview packets, handoff inspection and smoke now expose the thumbnail readiness copy action and label.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Style thumbnail readiness label
 
 Changes:

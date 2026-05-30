@@ -381,6 +381,8 @@ $summary = [ordered]@{
         thumbnail_readiness_label_object = $launchPacket.style_template_visual_preview.thumbnail_readiness_label_object
         thumbnail_readiness_fields = $launchPacket.style_template_visual_preview.thumbnail_readiness_fields
         thumbnail_readiness_summary_format = $launchPacket.style_template_visual_preview.thumbnail_readiness_summary_format
+        thumbnail_readiness_copy_action = $launchPacket.style_template_visual_preview.thumbnail_readiness_copy_action
+        thumbnail_readiness_copy_label = $launchPacket.style_template_visual_preview.thumbnail_readiness_copy_label
     }
     module_boundary_registry = @{
         launch_packet_schema = $launchPacket.module_boundary_registry.schema

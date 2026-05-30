@@ -434,6 +434,9 @@ if ($launchPacket.style_template_visual_preview.thumbnail_readiness_label_object
 if ($launchPacket.style_template_visual_preview.thumbnail_readiness_fields -notcontains "missing_ids") {
     throw "Launch packet style_template_visual_preview thumbnail readiness missing_ids field missing"
 }
+if ($launchPacket.style_template_visual_preview.thumbnail_readiness_copy_action -ne "copy_style_thumbnail_readiness_summary") {
+    throw "Launch packet style_template_visual_preview thumbnail readiness copy action missing"
+}
 if ($launchPacket.visual_feature_closure_matrix.schema -ne "rrkal_displaytools.visual_feature_closure_matrix.v1") {
     throw "Launch packet visual feature closure matrix schema missing or invalid"
 }
@@ -1399,6 +1402,9 @@ if ($capabilities.style_template_visual_preview.thumbnail_readiness_schema -ne "
 if ($capabilities.style_template_visual_preview.thumbnail_readiness_summary_format -notlike "*ready={ready_count}*") {
     throw "Renderer style_template_visual_preview thumbnail readiness summary format missing"
 }
+if ($capabilities.style_template_visual_preview.thumbnail_readiness_copy_label -ne "Copy style thumb status") {
+    throw "Renderer style_template_visual_preview thumbnail readiness copy label missing"
+}
 if ($capabilities.visual_feature_closure_matrix.schema -ne "rrkal_displaytools.visual_feature_closure_matrix.v1") {
     throw "Renderer visual feature closure matrix schema missing or invalid"
 }
@@ -2291,6 +2297,9 @@ if ($handoff.style_template_visual_preview.thumbnail_readiness_schema -ne "rrkal
 if ($handoff.style_template_visual_preview.thumbnail_readiness_label_object -ne "styleThumbnailReadiness") {
     throw "Handoff inspection style_template_visual_preview thumbnail readiness label object missing"
 }
+if ($handoff.style_template_visual_preview.thumbnail_readiness_copy_action -ne "copy_style_thumbnail_readiness_summary") {
+    throw "Handoff inspection style_template_visual_preview thumbnail readiness copy action missing"
+}
 if ($handoff.launch_packet_contracts.module_boundary_registry -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Handoff inspection module_boundary_registry launch contract missing or invalid"
 }
@@ -2841,6 +2850,15 @@ if ($qtPanelSource -notlike "*Style thumbnails: ready=*") {
 }
 if ($qtPanelSource -notlike "*thumbnail_readiness_schema*") {
     throw "Qt style thumbnail readiness contract is missing"
+}
+if ($qtPanelSource -notlike "*Copy style thumb status*") {
+    throw "Qt style thumbnail readiness copy button is missing"
+}
+if ($qtPanelSource -notlike "*copy_style_thumbnail_readiness_summary*") {
+    throw "Qt style thumbnail readiness copy handler is missing"
+}
+if ($qtPanelSource -notlike "*style_thumbnail_readiness_summary_text*") {
+    throw "Qt style thumbnail readiness summary formatter is missing"
 }
 if ($qtPanelSource -notlike "*show_module_boundary_registry*") {
     throw "Qt module boundary registry JSON action is missing"

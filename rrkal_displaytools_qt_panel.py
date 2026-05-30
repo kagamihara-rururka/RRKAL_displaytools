@@ -249,6 +249,8 @@ def style_template_visual_preview_packet(
         "thumbnail_readiness_label_object": "styleThumbnailReadiness",
         "thumbnail_readiness_fields": ["ready_count", "missing_count", "missing_ids", "thumbnail_batch_command"],
         "thumbnail_readiness_summary_format": "Style thumbnails: ready={ready_count}/{required_count}; missing={missing_ids}; action={thumbnail_batch_script}",
+        "thumbnail_readiness_copy_action": "copy_style_thumbnail_readiness_summary",
+        "thumbnail_readiness_copy_label": "Copy style thumb status",
         "qt_interaction": "clickable_preview_cards_select_style_profile",
         "card_click_action": "apply_style_template_preview_card",
         "qt_card_object_prefix": "styleTemplateCard_",
@@ -3428,6 +3430,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         visual_readiness_button = QtWidgets.QPushButton("Inspect: Visual readiness")
         copy_visual_summary_button = QtWidgets.QPushButton("Copy visual summary")
         copy_style_thumbs_command_button = QtWidgets.QPushButton("Copy style thumbs command")
+        copy_style_thumb_status_button = QtWidgets.QPushButton("Copy style thumb status")
         thumbnail_button = QtWidgets.QPushButton("Inspect: Renderer thumbnail")
         live_preview_button = QtWidgets.QPushButton("Inspect: Live preview")
         smoke_button = QtWidgets.QPushButton("Smoke check")
@@ -3463,6 +3466,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (visual_readiness_button, "Visual review: inspect thumbnail/live preview readiness, frame status and missing-frame hints JSON."),
             (copy_visual_summary_button, "Visual review: copy compact thumbnail/live preview readiness summary to clipboard."),
             (copy_style_thumbs_command_button, "Visual review: copy portable command for generating scientific/nautical/parchment/tactical style thumbnails."),
+            (copy_style_thumb_status_button, "Visual review: copy local style thumbnail ready/missing status summary."),
             (thumbnail_button, "Visual review: inspect latest renderer thumbnail PNG."),
             (live_preview_button, "Visual review: inspect file-based live renderer preview frame."),
         ):
@@ -3507,6 +3511,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         visual_readiness_button.clicked.connect(self.show_visual_review_readiness)
         copy_visual_summary_button.clicked.connect(self.copy_visual_review_readiness_summary)
         copy_style_thumbs_command_button.clicked.connect(self.copy_style_thumbnail_batch_command)
+        copy_style_thumb_status_button.clicked.connect(self.copy_style_thumbnail_readiness_summary)
         thumbnail_button.clicked.connect(self.show_latest_renderer_thumbnail)
         live_preview_button.clicked.connect(self.show_live_renderer_preview)
         smoke_button.clicked.connect(self.run_smoke_check)
@@ -3518,7 +3523,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, timeline_button, module_seams_button, clone_ready_button, copy_clone_summary_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, ocean_port_button, style_routes_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
-            ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, thumbnail_button, live_preview_button)),
+            ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, copy_style_thumb_status_button, thumbnail_button, live_preview_button)),
             ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, smoke_button)),
             ("Process", (launch_button, restart_button, stop_button)),
         )
@@ -4570,9 +4575,43 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         if readiness_label is not None:
             missing_text = ", ".join(missing_ids) if missing_ids else "none"
             readiness_label.setText(
-                f"Style thumbnails: ready={ready_count}/{len(card_by_id)}; "
-                f"missing={missing_text}; action=Copy style thumbs command"
+                self.style_thumbnail_readiness_summary_text(ready_count, len(card_by_id), missing_ids)
             )
+
+    def style_thumbnail_readiness_summary_text(
+        self,
+        ready_count: int | None = None,
+        required_count: int | None = None,
+        missing_ids: list[str] | None = None,
+    ) -> str:
+        packet = self.collect_style_template_visual_preview()
+        cards = packet.get("preview_cards", [])
+        if ready_count is None or required_count is None or missing_ids is None:
+            ready_count = 0
+            missing_ids = []
+            if isinstance(cards, list):
+                for card in cards:
+                    if not isinstance(card, dict):
+                        continue
+                    style_id = str(card.get("id", ""))
+                    thumbnail_path = str(card.get("thumbnail_path", f"state/style_previews/{style_id}.png"))
+                    if self.local_style_thumbnail_path(thumbnail_path).exists():
+                        ready_count += 1
+                    else:
+                        missing_ids.append(style_id)
+                required_count = len(cards)
+            else:
+                required_count = 0
+        missing_text = ", ".join(missing_ids) if missing_ids else "none"
+        return (
+            f"Style thumbnails: ready={ready_count}/{required_count}; "
+            f"missing={missing_text}; action=Copy style thumbs command"
+        )
+
+    def copy_style_thumbnail_readiness_summary(self) -> None:
+        summary = self.style_thumbnail_readiness_summary_text()
+        QtWidgets.QApplication.clipboard().setText(summary)
+        self.status.setText("已複製 style thumbnail readiness 摘要")
         if hasattr(self, "style_template_preview_label"):
             self.style_template_preview_label.setText(
                 f"Style previews: {packet.get('preview_count')} cards; thumbnails={packet.get('thumbnail_artifact_dir')}; selected={current_style}; click a card to update Style profile."

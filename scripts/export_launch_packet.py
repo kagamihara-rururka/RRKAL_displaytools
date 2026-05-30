@@ -1065,6 +1065,8 @@ def style_template_visual_preview_packet(
         "thumbnail_readiness_label_object": "styleThumbnailReadiness",
         "thumbnail_readiness_fields": ["ready_count", "missing_count", "missing_ids", "thumbnail_batch_command"],
         "thumbnail_readiness_summary_format": "Style thumbnails: ready={ready_count}/{required_count}; missing={missing_ids}; action={thumbnail_batch_script}",
+        "thumbnail_readiness_copy_action": "copy_style_thumbnail_readiness_summary",
+        "thumbnail_readiness_copy_label": "Copy style thumb status",
         "qt_interaction": "clickable_preview_cards_select_style_profile",
         "card_click_action": "apply_style_template_preview_card",
         "qt_card_object_prefix": "styleTemplateCard_",
