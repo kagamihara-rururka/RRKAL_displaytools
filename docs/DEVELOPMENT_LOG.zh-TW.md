@@ -1,5 +1,14 @@
 # Development Log
 
+## 2026-05-30 - Cross-machine compose parity runner docs
+
+Changes:
+- Updated clone quickstart with the optional `scripts/render_compose_parity_artifacts.ps1` runner command, produced `state/compose_parity` artifacts and `-SkipDiff` mode.
+- Added RRKAL handoff language that keeps compose parity artifact runner ownership inside displaytools and out of RRKAL discovery/download/cache governance.
+- Corrected the agent handoff working directory to `L:\RRKAL_displaytools`.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
 ## 2026-05-30 - Compose parity artifact runner
 
 Changes:

@@ -113,4 +113,5 @@ rrkal_displaytools.launch_packet.v1
 - RRKAL 可以產生 profile 或 launch packet，但不要直接修改 renderer loop internals。
 - displaytools 可以讀 RRKAL 產出的 manifest/cache/tile path，但不負責下載或資料授權判斷。
 - Renderer bridge asset 若需要被登錄，應由 RRKAL install registry / manifest governance 擁有。
+- `compose_run_parity_artifact_runner_schema` / `compose_run_parity_artifact_runner_script` 是跨機器 parity review 的手動入口；它只能產生本機 `state/compose_parity` artifacts，不應由 RRKAL 負責資料 discovery/download/cache governance。
 - 若新增 layer flag 或 material control，必須同步更新 capabilities、profile schema、templates、smoke。

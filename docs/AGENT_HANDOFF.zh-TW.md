@@ -1,4 +1,4 @@
-﻿# Agent Handoff
+# Agent Handoff
 
 ## Project identity
 
@@ -18,7 +18,7 @@
 
 ## Start-of-round checklist
 
-- Work from `C:\Users\lyn59\Documents\Codex\RRKAL_displaytools`.
+- Work from `L:\RRKAL_displaytools`.
 - Inspect Git state before edits.
 - Read `docs/DOCS_INDEX.zh-TW.md`, `docs/PRODUCT_POSITIONING.zh-TW.md`, `docs/PROJECT_GTD.md`, and this handoff.
 - Pick one small, reversible visualization slice.

@@ -1,6 +1,6 @@
 # 跨機器 Clone 快速啟動
 
-最後更新：2026-05-29
+最後更新：2026-05-30
 
 Repo:
 
@@ -66,6 +66,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts\render_quick_smoke.p
 ```
 
 這會產生 `state/showcase/quick_smoke.png`、`state/showcase/quick_smoke.png.metadata.json` 與 `state/showcase/quick_smoke_preview_frame.png`，用來確認 renderer output 與 live preview frame 寫檔。這些都是本機 runtime artifacts，不提交 Git。
+
+可選的 compose parity artifact runner（較重，會啟動 renderer 並產生本機 artifacts）：
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\render_compose_parity_artifacts.ps1
+```
+
+這會產生 `state/compose_parity/baseline_sequential_frame_rgba.png`、`state/compose_parity/merged_candidate_frame_rgba.png`、`state/compose_parity/renderer_output_metadata.json`、`state/compose_parity/render_compose_parity_smoke_manifest.json` 與 `state/compose_parity/compose_parity_artifact_runner.json`。這些都是本機 runtime artifacts，不提交 Git。若只要產生 artifacts、暫不跑 RGBA diff，可加 `-SkipDiff`。
 
 ## 5. 啟動 Qt 控制面板
 
