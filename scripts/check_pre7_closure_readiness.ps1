@@ -64,6 +64,7 @@ $contract = [ordered]@{
         "Qt UIUX closure",
         "Qt workspace map",
         "Qt extraction dry-run",
+        "render-plan compose source map",
         "clone quickstart reviewer path",
         "post-07 decoupling runbook",
         "formal pre-decoupling gate presence"
@@ -112,6 +113,10 @@ Add-Check $checks "uiux_readiness_gate_exists" "UIUX readiness check exists befo
 Add-Check $checks "extraction_dry_run_exists" "Render-plan extraction dry-run inspector exists." `
     (Test-Path -LiteralPath (Join-Path $RepoRoot "scripts/inspect_render_plan_extraction_dry_run.ps1")) `
     "scripts/inspect_render_plan_extraction_dry_run.ps1 exists"
+
+Add-Check $checks "render_plan_compose_source_map_exists" "Render-plan compose source-map inspector exists before code move." `
+    (Test-Path -LiteralPath (Join-Path $RepoRoot "scripts/inspect_render_plan_compose_source_map.ps1")) `
+    "scripts/inspect_render_plan_compose_source_map.ps1 exists"
 
 Add-Check $checks "formal_pre_decoupling_gate_exists" "Formal pre-decoupling gate exists and remains the post-7 entry." `
     (Test-Path -LiteralPath (Join-Path $RepoRoot "scripts/pre_decoupling_gate.ps1")) `

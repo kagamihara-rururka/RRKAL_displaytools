@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Pre-7 closure includes source map
+
+- Updated `scripts/check_pre7_closure_readiness.ps1` so the compact pre-7 checker also verifies the render-plan compose source-map inspector exists.
+- The checker now covers dry-run, post-07 runbook and source-map readiness before the first code move.
+- Smoke now gates the new `render_plan_compose_source_map_exists` check id.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Qt render-plan source map entry
 
 - Added `Inspect: Source map` to Qt Replay/contracts.

@@ -7360,6 +7360,9 @@ if ($pre7Closure.status -ne "pass") {
 if ($pre7Closure.checks.id -notcontains "post0700_decoupling_runbook") {
     throw "Pre-7 closure readiness missing post-07 runbook check"
 }
+if ($pre7Closure.checks.id -notcontains "render_plan_compose_source_map_exists") {
+    throw "Pre-7 closure readiness missing render-plan source-map check"
+}
 if (-not $pre7Closure.ready_for_post7_gate) {
     throw "Pre-7 closure readiness did not report post-7 gate readiness"
 }
