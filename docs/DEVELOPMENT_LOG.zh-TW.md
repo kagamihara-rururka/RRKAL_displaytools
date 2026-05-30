@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Renderer output artifact contract
+
+Changes:
+- Added `rrkal_displaytools.renderer_output_artifact_contract.v1` for Qt launch packets, no-GUI launch packets, renderer capability discovery and handoff inspection.
+- The contract exposes the existing headless/once `--output` PNG path, `.metadata.json` sidecar schema, preview frame controls, optional `scripts/render_quick_smoke.ps1` runtime verification and RRKAL manifest reference boundary.
+- Smoke now verifies the contract without making quick render smoke part of mandatory pre-commit validation.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Visual feature closure matrix
 
 Changes:

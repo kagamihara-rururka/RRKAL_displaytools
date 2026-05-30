@@ -789,6 +789,53 @@ def visual_feature_closure_matrix_packet(source: str) -> dict[str, object]:
     }
 
 
+def renderer_output_artifact_contract_packet(source: str) -> dict[str, object]:
+    return {
+        "schema": "rrkal_displaytools.renderer_output_artifact_contract.v1",
+        "source": source,
+        "status": "contract_ready",
+        "image_output_control": "--output",
+        "headless_controls": ["--headless", "--once"],
+        "preview_frame_controls": ["--preview-frame-file", "--preview-frame-interval"],
+        "quick_render_smoke_script": "scripts/render_quick_smoke.ps1",
+        "quick_render_smoke_outputs": [
+            "state/showcase/quick_smoke.png",
+            "state/showcase/quick_smoke.png.metadata.json",
+            "state/showcase/quick_smoke_preview_frame.png",
+        ],
+        "quick_render_smoke_validates": [
+            "output_png_exists",
+            "preview_frame_png_nonempty",
+            "metadata_sidecar_schema",
+        ],
+        "metadata_sidecar_schema": "rrkal_displaytools.renderer_output_metadata.v1",
+        "metadata_sidecar_suffix": ".metadata.json",
+        "metadata_fields": [
+            "style_profile",
+            "topography_source",
+            "data_mode",
+            "visible_layers",
+            "layer_visible",
+            "layer_opacity",
+            "layer_blend_mode",
+            "selected_layer_semantic_target",
+            "last_layer_pick_result",
+            "boundary_highlight",
+            "closed_loop_status",
+            "rrkal_data_manifest_ref",
+            "rrkal_boundary",
+        ],
+        "rrkal_data_manifest_ref_field": "rrkal_data_manifest_ref",
+        "rrkal_data_manifest_ref_boundary": "reference_only; displaytools records the value, RRKAL owns manifest validation/ingest/cache governance",
+        "runtime_artifact_scope": "runtime_local_state_not_committed",
+        "launch_packet_fields": ["renderer_output_artifact_contract", "visual_review_readiness", "canvas_preview"],
+        "renderer_capability_field": "renderer_output_artifact_contract",
+        "handoff_field": "renderer_output_artifact_contract",
+        "smoke_gate": "renderer_output_artifact_contract",
+        "boundary": "Pre-commit smoke verifies the contract only; optional render_quick_smoke.ps1 verifies actual PNG/metadata artifacts when renderer runtime is needed.",
+    }
+
+
 def module_boundary_registry_packet(source: str) -> dict[str, object]:
     boundaries = [
         {
@@ -3872,6 +3919,9 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def collect_visual_feature_closure_matrix(self) -> dict[str, object]:
         return visual_feature_closure_matrix_packet("rrkal_displaytools_qt_panel")
 
+    def collect_renderer_output_artifact_contract(self) -> dict[str, object]:
+        return renderer_output_artifact_contract_packet("rrkal_displaytools_qt_panel")
+
     def collect_cross_machine_clone_readiness(self) -> dict[str, object]:
         return cross_machine_clone_readiness_packet(
             self.collect_profile_launch_readiness(),
@@ -3913,6 +3963,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "profile_launch_readiness": self.collect_profile_launch_readiness(),
             "profile_ui_state_replay": self.collect_profile_ui_state_replay(),
             "visual_feature_closure_matrix": self.collect_visual_feature_closure_matrix(),
+            "renderer_output_artifact_contract": self.collect_renderer_output_artifact_contract(),
             "launch_packet_snapshot": self.collect_launch_packet(),
         }
 
@@ -3941,6 +3992,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "last_layer_operation": self.layer_operation_event_text(),
             "visual_review_readiness": self.collect_visual_review_readiness(),
             "visual_feature_closure_matrix": self.collect_visual_feature_closure_matrix(),
+            "renderer_output_artifact_contract": self.collect_renderer_output_artifact_contract(),
             "layer_operation_feedback": self.collect_layer_operation_feedback(),
             "layer_filter": self.collect_layer_filter_state(),
             "layer_group_view": self.collect_layer_group_view_state(),

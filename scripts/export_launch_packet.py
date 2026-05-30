@@ -1605,6 +1605,53 @@ def visual_feature_closure_matrix_packet(source: str) -> dict[str, object]:
     }
 
 
+def renderer_output_artifact_contract_packet(source: str) -> dict[str, object]:
+    return {
+        "schema": "rrkal_displaytools.renderer_output_artifact_contract.v1",
+        "source": source,
+        "status": "contract_ready",
+        "image_output_control": "--output",
+        "headless_controls": ["--headless", "--once"],
+        "preview_frame_controls": ["--preview-frame-file", "--preview-frame-interval"],
+        "quick_render_smoke_script": "scripts/render_quick_smoke.ps1",
+        "quick_render_smoke_outputs": [
+            "state/showcase/quick_smoke.png",
+            "state/showcase/quick_smoke.png.metadata.json",
+            "state/showcase/quick_smoke_preview_frame.png",
+        ],
+        "quick_render_smoke_validates": [
+            "output_png_exists",
+            "preview_frame_png_nonempty",
+            "metadata_sidecar_schema",
+        ],
+        "metadata_sidecar_schema": "rrkal_displaytools.renderer_output_metadata.v1",
+        "metadata_sidecar_suffix": ".metadata.json",
+        "metadata_fields": [
+            "style_profile",
+            "topography_source",
+            "data_mode",
+            "visible_layers",
+            "layer_visible",
+            "layer_opacity",
+            "layer_blend_mode",
+            "selected_layer_semantic_target",
+            "last_layer_pick_result",
+            "boundary_highlight",
+            "closed_loop_status",
+            "rrkal_data_manifest_ref",
+            "rrkal_boundary",
+        ],
+        "rrkal_data_manifest_ref_field": "rrkal_data_manifest_ref",
+        "rrkal_data_manifest_ref_boundary": "reference_only; displaytools records the value, RRKAL owns manifest validation/ingest/cache governance",
+        "runtime_artifact_scope": "runtime_local_state_not_committed",
+        "launch_packet_fields": ["renderer_output_artifact_contract", "visual_review_readiness", "canvas_preview"],
+        "renderer_capability_field": "renderer_output_artifact_contract",
+        "handoff_field": "renderer_output_artifact_contract",
+        "smoke_gate": "renderer_output_artifact_contract",
+        "boundary": "Pre-commit smoke verifies the contract only; optional render_quick_smoke.ps1 verifies actual PNG/metadata artifacts when renderer runtime is needed.",
+    }
+
+
 def module_boundary_registry_packet(source: str) -> dict[str, object]:
     boundaries = [
         {
@@ -3105,6 +3152,7 @@ def launch_packet(
         "reviewer_packet_export": reviewer_packet_export_packet("scripts.export_launch_packet"),
         "visual_review_readiness": visual_review_readiness_packet("scripts.export_launch_packet"),
         "visual_feature_closure_matrix": visual_feature_closure_matrix_packet("scripts.export_launch_packet"),
+        "renderer_output_artifact_contract": renderer_output_artifact_contract_packet("scripts.export_launch_packet"),
         "layer_visual_presets": layer_visual_presets_packet("scripts.export_launch_packet"),
         "layer_visual_preset_runtime_feedback": layer_visual_preset_runtime_feedback_packet(layer_visual_presets_packet("scripts.export_launch_packet"), None, "scripts.export_launch_packet"),
         "hydrology_lod_readiness": hydrology_lod_readiness_packet("scripts.export_launch_packet", layer_capability_matrix_packet("scripts.export_launch_packet", profile.get("selected_layer") if isinstance(profile.get("selected_layer"), str) else None, rrkal_data_manifest_ref)),

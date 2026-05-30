@@ -347,6 +347,15 @@ if ($launchPacket.visual_feature_closure_matrix.feature_ids -notcontains "hydrol
 if ($launchPacket.visual_feature_closure_matrix.smoke_gate -ne "visual_feature_closure_matrix") {
     throw "Launch packet visual feature closure matrix smoke gate mismatch"
 }
+if ($launchPacket.renderer_output_artifact_contract.schema -ne "rrkal_displaytools.renderer_output_artifact_contract.v1") {
+    throw "Launch packet renderer output artifact contract schema missing or invalid"
+}
+if ($launchPacket.renderer_output_artifact_contract.metadata_sidecar_schema -ne "rrkal_displaytools.renderer_output_metadata.v1") {
+    throw "Launch packet renderer output artifact metadata schema missing"
+}
+if ($launchPacket.renderer_output_artifact_contract.quick_render_smoke_validates -notcontains "preview_frame_png_nonempty") {
+    throw "Launch packet renderer output artifact quick smoke preview check missing"
+}
 if ($launchPacket.module_boundary_registry.schema -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Launch packet module_boundary_registry schema missing or invalid"
 }
@@ -1174,6 +1183,12 @@ if ($capabilities.visual_feature_closure_matrix.schema -ne "rrkal_displaytools.v
 if ($capabilities.visual_feature_closure_matrix.feature_ids -notcontains "ocean_material") {
     throw "Renderer visual feature closure matrix missing ocean material evidence"
 }
+if ($capabilities.renderer_output_artifact_contract.schema -ne "rrkal_displaytools.renderer_output_artifact_contract.v1") {
+    throw "Renderer output artifact contract schema missing or invalid"
+}
+if ($capabilities.renderer_output_artifact_contract.image_output_control -ne "--output") {
+    throw "Renderer output artifact contract output control mismatch"
+}
 if ($capabilities.module_boundary_registry.schema -ne "rrkal_displaytools.module_boundary_registry.v1") {
     throw "Renderer module_boundary_registry schema missing or invalid"
 }
@@ -1684,6 +1699,18 @@ if ($handoff.visual_feature_closure_matrix.renderer_capabilities_schema -ne "rrk
 }
 if ($handoff.visual_feature_closure_matrix.feature_ids -notcontains "boundary_emphasis") {
     throw "Handoff inspection visual feature closure matrix missing boundary evidence"
+}
+if ($handoff.launch_packet_contracts.renderer_output_artifact_contract -ne "rrkal_displaytools.renderer_output_artifact_contract.v1") {
+    throw "Handoff inspection renderer output artifact contract missing or invalid"
+}
+if ($handoff.renderer_output_artifact_contract.launch_packet_schema -ne "rrkal_displaytools.renderer_output_artifact_contract.v1") {
+    throw "Handoff inspection renderer output artifact launch schema missing"
+}
+if ($handoff.renderer_output_artifact_contract.renderer_capabilities_schema -ne "rrkal_displaytools.renderer_output_artifact_contract.v1") {
+    throw "Handoff inspection renderer output artifact renderer schema missing"
+}
+if ($handoff.renderer_output_artifact_contract.quick_render_smoke_validates -notcontains "metadata_sidecar_schema") {
+    throw "Handoff inspection renderer output artifact metadata quick smoke check missing"
 }
 if ($handoff.launch_packet_contracts.layer_selection_tool -ne "rrkal_displaytools.layer_selection_tool.v1") {
     throw "Handoff inspection layer_selection_tool launch contract missing or invalid"

@@ -30,6 +30,8 @@ $visualReviewReadiness = $launchPacket.visual_review_readiness
 $visualReviewReadinessCapabilities = $capabilities.visual_review_readiness
 $visualFeatureClosureMatrix = $launchPacket.visual_feature_closure_matrix
 $visualFeatureClosureMatrixCapabilities = $capabilities.visual_feature_closure_matrix
+$rendererOutputArtifactContract = $launchPacket.renderer_output_artifact_contract
+$rendererOutputArtifactContractCapabilities = $capabilities.renderer_output_artifact_contract
 
 $summary = [ordered]@{
     schema = "rrkal_displaytools.handoff_inspection.v1"
@@ -62,6 +64,7 @@ $summary = [ordered]@{
         profile_launch_readiness_ui = $launchPacket.profile_launch_readiness_ui.schema
         profile_ui_state_replay = $launchPacket.profile_ui_state_replay.schema
         visual_feature_closure_matrix = $launchPacket.visual_feature_closure_matrix.schema
+        renderer_output_artifact_contract = $launchPacket.renderer_output_artifact_contract.schema
         reviewer_packet_export = $launchPacket.reviewer_packet_export.schema
         layer_visual_presets = $launchPacket.layer_visual_presets.schema
         layer_visual_preset_runtime_feedback = $launchPacket.layer_visual_preset_runtime_feedback.schema
@@ -197,6 +200,17 @@ $summary = [ordered]@{
         ready_feature_count = $visualFeatureClosureMatrix.ready_feature_count
         feature_ids = $visualFeatureClosureMatrix.feature_ids
         smoke_gate = $visualFeatureClosureMatrix.smoke_gate
+    }
+    renderer_output_artifact_contract = @{
+        schema = "rrkal_displaytools.renderer_output_artifact_contract.v1"
+        launch_packet_schema = $rendererOutputArtifactContract.schema
+        renderer_capabilities_schema = $rendererOutputArtifactContractCapabilities.schema
+        status = $rendererOutputArtifactContract.status
+        image_output_control = $rendererOutputArtifactContract.image_output_control
+        metadata_sidecar_schema = $rendererOutputArtifactContract.metadata_sidecar_schema
+        quick_render_smoke_script = $rendererOutputArtifactContract.quick_render_smoke_script
+        quick_render_smoke_validates = $rendererOutputArtifactContract.quick_render_smoke_validates
+        runtime_artifact_scope = $rendererOutputArtifactContract.runtime_artifact_scope
     }
     cursor_geodesy_readout = @{
         launch_packet_schema = $launchPacket.cursor_geodesy_readout.schema
