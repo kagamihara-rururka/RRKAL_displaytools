@@ -2675,7 +2675,12 @@ if ($timelineApplies -notcontains "UI-only playback controls") {
 }
 $handoffScriptPath = Join-Path $RepoRoot "scripts\inspect_handoff.ps1"
 $handoffText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $handoffScriptPath)
-$handoff = ($handoffText -join "`n") | ConvertFrom-Json
+$handoffRaw = $handoffText -join "`n"
+$handoffJsonStart = $handoffRaw.IndexOf("{")
+if ($handoffJsonStart -lt 0) {
+    throw "Handoff inspection JSON payload not found"
+}
+$handoff = $handoffRaw.Substring($handoffJsonStart) | ConvertFrom-Json
 if ($handoff.schema -ne "rrkal_displaytools.handoff_inspection.v1") {
     throw "Handoff inspection schema missing or invalid"
 }
@@ -5556,6 +5561,17 @@ if (($decouplingReadiness.first_extraction_order | Select-Object -First 1).id -n
 }
 if ($decouplingReadiness.rrkal_boundary.rule -notmatch "Do not move discovery/download/import/cache lifecycle") {
     throw "Decoupling readiness RRKAL boundary guard is missing"
+}
+
+$decouplingQtPanelSource = Get-Content -LiteralPath (Join-Path $RepoRoot "rrkal_displaytools_qt_panel.py") -Raw -Encoding UTF8
+if ($decouplingQtPanelSource -notmatch "Inspect: Decoupling") {
+    throw "Qt panel decoupling Inspect action is missing"
+}
+if ($decouplingQtPanelSource -notmatch "show_decoupling_readiness") {
+    throw "Qt panel decoupling readiness handler is missing"
+}
+if ($decouplingQtPanelSource -notmatch "post_07_decoupling") {
+    throw "Qt panel decoupling readiness post-7 phase marker is missing"
 }
 
 Write-Host "Smoke passed."

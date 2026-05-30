@@ -14,7 +14,7 @@ function Invoke-JsonPythonCommand {
             break
         }
         if ($attempt -lt $maxAttempts) {
-            Write-Warning "Command failed, retrying after transient file-access backoff ($attempt/$maxAttempts): py -3 $($ArgumentList -join ' ')"
+            [Console]::Error.WriteLine("WARNING: Command failed, retrying after transient file-access backoff ($attempt/$maxAttempts): py -3 $($ArgumentList -join ' ')")
             Start-Sleep -Milliseconds (400 * $attempt)
         } else {
             throw "Command failed: py -3 $($ArgumentList -join ' ')"

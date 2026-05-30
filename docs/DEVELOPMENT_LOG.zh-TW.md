@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Qt decoupling readiness Inspect action
+
+Changes:
+- Added Qt `Inspect: Decoupling` in the Replay/contracts action group.
+- The action opens `rrkal_displaytools.decoupling_readiness.v1` for the post-7 decoupling phase without touching the renderer monolith.
+- Smoke now gates the Qt action label, handler and post-7 readiness marker, and keeps transient retry warnings out of handoff JSON parsing.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Smoke transient file-access retry
 
 Changes:
