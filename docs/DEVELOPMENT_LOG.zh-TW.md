@@ -1,5 +1,16 @@
 # Development Log
 
+## 2026-05-30 - Compose parity artifact workflow contract
+
+Changes:
+- Added `rrkal_displaytools.compose_run_parity_artifact_workflow.v1` to `layer_render_plan_performance`.
+- Launch packets, renderer capabilities, Qt render-plan inspector and handoff inspection now expose the parity artifact directory, baseline/candidate PNG paths, metadata path, precommit command and manual diff command.
+- The workflow explicitly records the current blocker: baseline sequential renderer output is available, while the opt-in merged compose candidate path still needs to be added before runtime merging can be enabled.
+- Smoke gates now verify artifact workflow schema, paths, producer status and next-step guidance.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Compose parity smoke precommit contract-only mode
 
 Changes:

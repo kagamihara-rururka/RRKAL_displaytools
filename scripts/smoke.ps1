@@ -659,6 +659,18 @@ if ($launchPacket.layer_render_plan_performance.compose_run_parity_smoke_validat
 if ($launchPacket.layer_render_plan_performance.compose_run_parity_smoke_pass_fields -notcontains "changed_pixel_count") {
     throw "Launch packet layer_render_plan_performance compose parity smoke pass fields missing"
 }
+if ($launchPacket.layer_render_plan_performance.compose_run_parity_artifact_workflow.schema -ne "rrkal_displaytools.compose_run_parity_artifact_workflow.v1") {
+    throw "Launch packet layer_render_plan_performance compose parity artifact workflow schema missing"
+}
+if ($launchPacket.layer_render_plan_performance.compose_run_parity_artifact_workflow.artifact_dir -ne "state/compose_parity") {
+    throw "Launch packet layer_render_plan_performance compose parity artifact dir missing"
+}
+if ($launchPacket.layer_render_plan_performance.compose_run_parity_artifact_workflow.candidate_artifact -ne "state/compose_parity/merged_candidate_frame_rgba.png") {
+    throw "Launch packet layer_render_plan_performance compose parity candidate artifact missing"
+}
+if ($launchPacket.layer_render_plan_performance.compose_run_parity_artifact_workflow.manual_diff_command -notlike "*render_compose_parity_smoke.ps1*") {
+    throw "Launch packet layer_render_plan_performance compose parity manual diff command missing"
+}
 if ($launchPacket.layer_render_plan_performance.compiled_plan_reuse_decision_field -ne "cache_reuse_decision") {
     throw "Launch packet layer_render_plan_performance reuse decision field missing"
 }
@@ -1933,6 +1945,15 @@ if ($capabilities.layer_render_plan_performance.compose_run_parity_smoke_validat
 if ($capabilities.layer_render_plan_performance.compose_run_parity_smoke_pass_fields -notcontains "diff_status") {
     throw "Renderer layer_render_plan_performance compose parity smoke pass fields missing"
 }
+if ($capabilities.layer_render_plan_performance.compose_run_parity_artifact_workflow.schema -ne "rrkal_displaytools.compose_run_parity_artifact_workflow.v1") {
+    throw "Renderer layer_render_plan_performance compose parity artifact workflow schema missing"
+}
+if ($capabilities.layer_render_plan_performance.compose_run_parity_artifact_workflow.baseline_artifact -ne "state/compose_parity/baseline_sequential_frame_rgba.png") {
+    throw "Renderer layer_render_plan_performance compose parity baseline artifact missing"
+}
+if ($capabilities.layer_render_plan_performance.compose_run_parity_artifact_workflow.producer_status -ne "baseline_renderer_output_available_candidate_merge_path_pending") {
+    throw "Renderer layer_render_plan_performance compose parity producer status missing"
+}
 if ($capabilities.layer_render_plan_performance.compiled_plan_reuse_policy -ne "reuse_when_cache_key_matches_previous_compiled_plan") {
     throw "Renderer layer_render_plan_performance compiled plan reuse policy missing"
 }
@@ -2755,6 +2776,15 @@ if ($handoff.layer_render_plan_performance.compose_run_parity_smoke_validates -n
 }
 if ($handoff.layer_render_plan_performance.compose_run_parity_smoke_pass_fields -notcontains "max_abs_diff") {
     throw "Handoff inspection layer render plan performance compose parity smoke pass fields missing"
+}
+if ($handoff.layer_render_plan_performance.compose_run_parity_artifact_workflow_schema -ne "rrkal_displaytools.compose_run_parity_artifact_workflow.v1") {
+    throw "Handoff inspection layer render plan performance compose parity artifact workflow schema missing"
+}
+if ($handoff.layer_render_plan_performance.compose_run_parity_artifact_workflow.metadata_artifact -ne "state/compose_parity/renderer_output_metadata.json") {
+    throw "Handoff inspection layer render plan performance compose parity metadata artifact missing"
+}
+if ($handoff.layer_render_plan_performance.compose_run_parity_artifact_workflow.next_step -notlike "*merged compose candidate*") {
+    throw "Handoff inspection layer render plan performance compose parity next step missing"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_reuse_decision_field -ne "cache_reuse_decision") {
     throw "Handoff inspection layer render plan performance reuse decision field missing"
@@ -4123,6 +4153,12 @@ if ($qtPanelSource -notlike "*parity={parity_status}*") {
 if ($qtPanelSource -notlike "*parity_smoke={parity_smoke}*") {
     throw "Qt render plan compose parity smoke summary text is missing"
 }
+if ($qtPanelSource -notlike "*compose_run_parity_artifact_workflow.v1*") {
+    throw "Qt render plan compose parity artifact workflow contract is missing"
+}
+if ($qtPanelSource -notlike "*state/compose_parity/merged_candidate_frame_rgba.png*") {
+    throw "Qt render plan compose parity candidate artifact path is missing"
+}
 if ($qtPanelSource -notlike "*refresh_layer_render_plan_cache_diagnostics_strip*") {
     throw "Qt render plan cache diagnostics strip refresh is missing"
 }
@@ -4466,6 +4502,12 @@ if ($rendererSource -notlike "*render_compose_parity_smoke.ps1*") {
 }
 if ($rendererSource -notlike "*rrkal_displaytools.render_compose_parity_smoke.v1*") {
     throw "Renderer render plan compose parity smoke schema marker is missing"
+}
+if ($rendererSource -notlike "*compose_run_parity_artifact_workflow.v1*") {
+    throw "Renderer render plan compose parity artifact workflow marker is missing"
+}
+if ($rendererSource -notlike "*state/compose_parity/baseline_sequential_frame_rgba.png*") {
+    throw "Renderer render plan compose parity baseline artifact path is missing"
 }
 if ($rendererSource -notlike "*adjacent_alpha_compose_overlays_can_be_collapsed_after_visual_parity_check*") {
     throw "Renderer render plan compose runs merge-safe marker is missing"
