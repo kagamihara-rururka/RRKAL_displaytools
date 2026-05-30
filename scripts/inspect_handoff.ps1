@@ -403,6 +403,9 @@ $summary = [ordered]@{
         decoupling_status = $launchPacket.module_boundary_registry.decoupling_boundary_contract.status
         extraction_order = $launchPacket.module_boundary_registry.decoupling_boundary_contract.extraction_order
         forbidden_cross_imports = $launchPacket.module_boundary_registry.decoupling_boundary_contract.forbidden_cross_imports
+        module_boundary_summary_contract_schema = $launchPacket.module_boundary_registry.module_boundary_summary_contract.schema
+        module_boundary_summary_contract = $launchPacket.module_boundary_registry.module_boundary_summary_contract
+        summary_parameter_fields = $launchPacket.module_boundary_registry.summary_parameter_fields
         rrkal_data_governance_boundary = $launchPacket.module_boundary_registry.rrkal_data_governance_boundary
     }
     cross_machine_clone_readiness = @{

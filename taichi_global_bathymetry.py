@@ -1,4 +1,4 @@
-﻿import argparse
+import argparse
 import datetime
 import gzip
 import io
@@ -18970,6 +18970,41 @@ def module_boundary_registry_packet(source: str) -> dict[str, object]:
             "forbidden": ["mutating renderer state", "provider downloads"],
         },
     ]
+    extraction_order = [
+        "contracts/launch_packets.py",
+        "qt_ui/main_window.py",
+        "render_core/taichi_globe.py",
+        "render_core/ocean_material.py",
+        "style_profiles.py",
+        "overlays/vector_layers.py",
+        "diagnostics/handoff.py",
+    ]
+    stable_contracts_before_move = [
+        "launch_packet",
+        "renderer_capabilities",
+        "handoff_inspection",
+        "smoke_gates",
+    ]
+    displaytools_owns = [
+        "renderer launch/profile contracts",
+        "Qt-first operator UI",
+        "Taichi visualization/render apply paths",
+        "visual diagnostics and handoff summaries",
+    ]
+    rrkal_owns = [
+        "dataset discovery",
+        "provider download/import",
+        "manifest/cache governance",
+        "authoritative source registry",
+    ]
+    summary_parameter_fields = [
+        "module_count",
+        "target_modules",
+        "extraction_order",
+        "stable_contracts_before_move",
+        "tk_primary_ui_allowed",
+        "rrkal_owns",
+    ]
     return {
         "schema": "rrkal_displaytools.module_boundary_registry.v1",
         "source": source,
@@ -18982,44 +19017,30 @@ def module_boundary_registry_packet(source: str) -> dict[str, object]:
         "decoupling_boundary_contract": {
             "schema": "rrkal_displaytools.module_decoupling_boundary_contract.v1",
             "status": "ready",
-            "extraction_order": [
-                "contracts/launch_packets.py",
-                "qt_ui/main_window.py",
-                "render_core/taichi_globe.py",
-                "render_core/ocean_material.py",
-                "style_profiles.py",
-                "overlays/vector_layers.py",
-                "diagnostics/handoff.py",
-            ],
-            "stable_contracts_before_move": [
-                "launch_packet",
-                "renderer_capabilities",
-                "handoff_inspection",
-                "smoke_gates",
-            ],
+            "extraction_order": extraction_order,
+            "stable_contracts_before_move": stable_contracts_before_move,
             "forbidden_cross_imports": [
                 {"module": "contracts/launch_packets.py", "must_not_import": ["PyQt6", "taichi", "datashader", "data_sources/*"]},
                 {"module": "qt_ui/main_window.py", "must_not_import": ["data_sources/*", "downloaders/*", "cache_governance/*"]},
                 {"module": "render_core/*", "must_not_import": ["PyQt6 widgets", "RRKAL provider discovery"]},
                 {"module": "data_sources/*", "must_not_live_in_repo": True},
             ],
-            "displaytools_owns": [
-                "renderer launch/profile contracts",
-                "Qt-first operator UI",
-                "Taichi visualization/render apply paths",
-                "visual diagnostics and handoff summaries",
-            ],
-            "rrkal_owns": [
-                "dataset discovery",
-                "provider download/import",
-                "manifest/cache governance",
-                "authoritative source registry",
-            ],
+            "displaytools_owns": displaytools_owns,
+            "rrkal_owns": rrkal_owns,
             "qt_first": True,
             "tk_primary_ui_allowed": False,
             "smoke_gate": "module_decoupling_boundary_contract",
             "portable": True,
         },
+        "module_boundary_summary_contract_schema": "rrkal_displaytools.module_boundary_summary_contract.v1",
+        "module_boundary_summary_contract": {
+            "schema": "rrkal_displaytools.module_boundary_summary_contract.v1",
+            "summary_format": "Module seams: modules={module_count}; first={first_extraction}; render={render_core}; tk_primary={tk_primary_ui_allowed}; stable={stable_contracts_before_move}; rrkal={rrkal_owns}; boundary=RRKAL-owned data/cache",
+            "summary_parameter_fields": summary_parameter_fields,
+            "qt_copy_action": "copy_module_boundary_summary",
+            "portable": True,
+        },
+        "summary_parameter_fields": summary_parameter_fields,
         "rrkal_data_governance_boundary": "RRKAL owns dataset discovery, download, import, manifest, cache lifecycle and repair; displaytools consumes governed references and renderer-ready contracts.",
         "displaytools_scope": "visualization UI, renderer contracts, launch packets, style/ocean/layer controls, diagnostics and handoff evidence.",
         "launch_packet_fields": ["module_boundary_registry"],

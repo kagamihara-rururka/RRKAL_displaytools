@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Module boundary copyable handoff summary
+
+Changes:
+- Added `rrkal_displaytools.module_boundary_summary_contract.v1` to module boundary registry packets for Qt, launch export and renderer capability discovery.
+- Added a Qt `Copy module summary` action that copies extraction order, first module, render-core target, stable contract gate, Tk-primary boundary and RRKAL governance ownership.
+- Handoff inspection and smoke now gate the module boundary summary contract before future module extraction work.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Style routes copyable handoff summary
 
 Changes:

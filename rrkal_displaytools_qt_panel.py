@@ -1,4 +1,4 @@
-﻿"""Qt operator panel for RRKAL_displaytools layer/UI launch.
+"""Qt operator panel for RRKAL_displaytools layer/UI launch.
 
 This panel intentionally stays outside the renderer loop. It collects operator
 choices, builds command-line flags, and starts taichi_global_bathymetry.py.
@@ -1044,6 +1044,41 @@ def module_boundary_registry_packet(source: str) -> dict[str, object]:
             "forbidden": ["mutating renderer state", "provider downloads"],
         },
     ]
+    extraction_order = [
+        "contracts/launch_packets.py",
+        "qt_ui/main_window.py",
+        "render_core/taichi_globe.py",
+        "render_core/ocean_material.py",
+        "style_profiles.py",
+        "overlays/vector_layers.py",
+        "diagnostics/handoff.py",
+    ]
+    stable_contracts_before_move = [
+        "launch_packet",
+        "renderer_capabilities",
+        "handoff_inspection",
+        "smoke_gates",
+    ]
+    displaytools_owns = [
+        "renderer launch/profile contracts",
+        "Qt-first operator UI",
+        "Taichi visualization/render apply paths",
+        "visual diagnostics and handoff summaries",
+    ]
+    rrkal_owns = [
+        "dataset discovery",
+        "provider download/import",
+        "manifest/cache governance",
+        "authoritative source registry",
+    ]
+    summary_parameter_fields = [
+        "module_count",
+        "target_modules",
+        "extraction_order",
+        "stable_contracts_before_move",
+        "tk_primary_ui_allowed",
+        "rrkal_owns",
+    ]
     return {
         "schema": "rrkal_displaytools.module_boundary_registry.v1",
         "source": source,
@@ -1056,44 +1091,30 @@ def module_boundary_registry_packet(source: str) -> dict[str, object]:
         "decoupling_boundary_contract": {
             "schema": "rrkal_displaytools.module_decoupling_boundary_contract.v1",
             "status": "ready",
-            "extraction_order": [
-                "contracts/launch_packets.py",
-                "qt_ui/main_window.py",
-                "render_core/taichi_globe.py",
-                "render_core/ocean_material.py",
-                "style_profiles.py",
-                "overlays/vector_layers.py",
-                "diagnostics/handoff.py",
-            ],
-            "stable_contracts_before_move": [
-                "launch_packet",
-                "renderer_capabilities",
-                "handoff_inspection",
-                "smoke_gates",
-            ],
+            "extraction_order": extraction_order,
+            "stable_contracts_before_move": stable_contracts_before_move,
             "forbidden_cross_imports": [
                 {"module": "contracts/launch_packets.py", "must_not_import": ["PyQt6", "taichi", "datashader", "data_sources/*"]},
                 {"module": "qt_ui/main_window.py", "must_not_import": ["data_sources/*", "downloaders/*", "cache_governance/*"]},
                 {"module": "render_core/*", "must_not_import": ["PyQt6 widgets", "RRKAL provider discovery"]},
                 {"module": "data_sources/*", "must_not_live_in_repo": True},
             ],
-            "displaytools_owns": [
-                "renderer launch/profile contracts",
-                "Qt-first operator UI",
-                "Taichi visualization/render apply paths",
-                "visual diagnostics and handoff summaries",
-            ],
-            "rrkal_owns": [
-                "dataset discovery",
-                "provider download/import",
-                "manifest/cache governance",
-                "authoritative source registry",
-            ],
+            "displaytools_owns": displaytools_owns,
+            "rrkal_owns": rrkal_owns,
             "qt_first": True,
             "tk_primary_ui_allowed": False,
             "smoke_gate": "module_decoupling_boundary_contract",
             "portable": True,
         },
+        "module_boundary_summary_contract_schema": "rrkal_displaytools.module_boundary_summary_contract.v1",
+        "module_boundary_summary_contract": {
+            "schema": "rrkal_displaytools.module_boundary_summary_contract.v1",
+            "summary_format": "Module seams: modules={module_count}; first={first_extraction}; render={render_core}; tk_primary={tk_primary_ui_allowed}; stable={stable_contracts_before_move}; rrkal={rrkal_owns}; boundary=RRKAL-owned data/cache",
+            "summary_parameter_fields": summary_parameter_fields,
+            "qt_copy_action": "copy_module_boundary_summary",
+            "portable": True,
+        },
+        "summary_parameter_fields": summary_parameter_fields,
         "rrkal_data_governance_boundary": "RRKAL owns dataset discovery, download, import, manifest, cache lifecycle and repair; displaytools consumes governed references and renderer-ready contracts.",
         "displaytools_scope": "visualization UI, renderer contracts, launch packets, style/ocean/layer controls, diagnostics and handoff evidence.",
         "launch_packet_fields": ["module_boundary_registry"],
@@ -3479,6 +3500,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         copy_style_routes_summary_button = QtWidgets.QPushButton("Copy Style routes summary")
         style_thumbnails_button = QtWidgets.QPushButton("Inspect: Style thumbs")
         module_seams_button = QtWidgets.QPushButton("Inspect: Module seams")
+        copy_module_summary_button = QtWidgets.QPushButton("Copy module summary")
         clone_ready_button = QtWidgets.QPushButton("Inspect: Clone ready")
         copy_clone_summary_button = QtWidgets.QPushButton("Copy clone summary")
         layer_matrix_button = QtWidgets.QPushButton("Inspect: Layer matrix")
@@ -3523,6 +3545,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (layer_runtime_button, "Renderer ports: inspect layer runtime state and renderer ack JSON."),
             (export_reviewer_packet_button, "Run/profile: export one JSON reviewer packet with clone, launch, research and visual summaries."),
             (module_seams_button, "Replay/contracts: inspect future module extraction seam registry JSON."),
+            (copy_module_summary_button, "Replay/contracts: copy module extraction order, stable contracts, Tk boundary and RRKAL governance summary."),
             (clone_ready_button, "Replay/contracts: inspect cross-machine clone readiness JSON."),
             (copy_clone_summary_button, "Replay/contracts: copy clone/setup/profile launch reviewer summary for cross-machine handoff."),
             (layer_pick_button, "Research interaction: inspect selected-layer renderer pick JSON."),
@@ -3566,6 +3589,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         copy_style_routes_summary_button.clicked.connect(self.copy_style_routes_summary)
         style_thumbnails_button.clicked.connect(self.show_style_thumbnail_slots)
         module_seams_button.clicked.connect(self.show_module_boundary_registry)
+        copy_module_summary_button.clicked.connect(self.copy_module_boundary_summary)
         clone_ready_button.clicked.connect(self.show_cross_machine_clone_readiness)
         copy_clone_summary_button.clicked.connect(self.copy_clone_reviewer_summary)
         layer_matrix_button.clicked.connect(self.show_layer_capability_matrix)
@@ -3597,7 +3621,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         stop_button.clicked.connect(self.stop_renderer)
         action_sections = (
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button, export_reviewer_packet_button)),
-            ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, timeline_button, module_seams_button, clone_ready_button, copy_clone_summary_button)),
+            ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, timeline_button, module_seams_button, copy_module_summary_button, clone_ready_button, copy_clone_summary_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, copy_ocean_summary_button, style_routes_button, copy_style_routes_summary_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
             ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, copy_style_thumb_status_button, thumbnail_button, live_preview_button)),
@@ -4361,6 +4385,25 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
 
     def collect_module_boundary_registry(self) -> dict[str, object]:
         return module_boundary_registry_packet("rrkal_displaytools_qt_panel")
+
+    def module_boundary_summary_text(self, registry: dict[str, object] | None = None) -> str:
+        registry = registry if isinstance(registry, dict) else self.collect_module_boundary_registry()
+        contract = registry.get("decoupling_boundary_contract") if isinstance(registry.get("decoupling_boundary_contract"), dict) else {}
+        extraction_order = contract.get("extraction_order") if isinstance(contract.get("extraction_order"), list) else []
+        stable_contracts = contract.get("stable_contracts_before_move") if isinstance(contract.get("stable_contracts_before_move"), list) else []
+        rrkal_owns = contract.get("rrkal_owns") if isinstance(contract.get("rrkal_owns"), list) else []
+        first_extraction = str(extraction_order[0]) if extraction_order else "-"
+        render_core = next((str(item) for item in extraction_order if str(item).startswith("render_core/")), "-")
+        return (
+            "Module seams: "
+            f"modules={registry.get('module_count', 0)}; "
+            f"first={first_extraction}; "
+            f"render={render_core}; "
+            f"tk_primary={registry.get('tk_primary_ui_allowed', False)}; "
+            f"stable={','.join(str(item) for item in stable_contracts) or '-'}; "
+            f"rrkal={','.join(str(item) for item in rrkal_owns) or '-'}; "
+            "boundary=RRKAL-owned data/cache"
+        )
 
     def collect_visual_feature_closure_matrix(self) -> dict[str, object]:
         return visual_feature_closure_matrix_packet("rrkal_displaytools_qt_panel")
@@ -8693,6 +8736,11 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             json.dumps(self.collect_module_boundary_registry(), ensure_ascii=False, indent=2)
         )
         self.status.setText("已顯示 module boundary registry JSON")
+
+    def copy_module_boundary_summary(self) -> None:
+        summary = self.module_boundary_summary_text()
+        QtWidgets.QApplication.clipboard().setText(summary)
+        self.status.setText("已複製 module boundary 摘要")
 
     def show_cross_machine_clone_readiness(self) -> None:
         self.command_text.setPlainText(

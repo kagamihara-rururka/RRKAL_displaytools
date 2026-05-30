@@ -509,6 +509,18 @@ if ($launchPacket.module_boundary_registry.decoupling_boundary_contract.rrkal_ow
 if ($launchPacket.module_boundary_registry.decoupling_boundary_contract.tk_primary_ui_allowed -ne $false) {
     throw "Launch packet module decoupling boundary must keep Tk out of primary UI"
 }
+if ($launchPacket.module_boundary_registry.module_boundary_summary_contract.schema -ne "rrkal_displaytools.module_boundary_summary_contract.v1") {
+    throw "Launch packet module boundary summary contract missing or invalid"
+}
+if ($launchPacket.module_boundary_registry.module_boundary_summary_contract.qt_copy_action -ne "copy_module_boundary_summary") {
+    throw "Launch packet module boundary summary copy action missing"
+}
+if ($launchPacket.module_boundary_registry.module_boundary_summary_contract.summary_format -notlike "*first={first_extraction}*tk_primary={tk_primary_ui_allowed}*boundary=RRKAL-owned data/cache*") {
+    throw "Launch packet module boundary summary format missing extraction/governance fields"
+}
+if ($launchPacket.module_boundary_registry.summary_parameter_fields -notcontains "rrkal_owns") {
+    throw "Launch packet module boundary summary parameter fields missing"
+}
 if ($launchPacket.cross_machine_clone_readiness.schema -ne "rrkal_displaytools.cross_machine_clone_readiness.v1") {
     throw "Launch packet cross_machine_clone_readiness schema missing or invalid"
 }
@@ -1498,6 +1510,12 @@ if ($capabilities.module_boundary_registry.decoupling_boundary_contract.schema -
 if ($capabilities.module_boundary_registry.decoupling_boundary_contract.stable_contracts_before_move -notcontains "smoke_gates") {
     throw "Renderer module decoupling boundary stable contract list incomplete"
 }
+if ($capabilities.module_boundary_registry.module_boundary_summary_contract.schema -ne "rrkal_displaytools.module_boundary_summary_contract.v1") {
+    throw "Renderer module boundary summary contract missing or invalid"
+}
+if ($capabilities.module_boundary_registry.module_boundary_summary_contract.qt_copy_action -ne "copy_module_boundary_summary") {
+    throw "Renderer module boundary summary copy action missing"
+}
 if ($capabilities.cross_machine_clone_readiness.schema -ne "rrkal_displaytools.cross_machine_clone_readiness.v1") {
     throw "Renderer cross_machine_clone_readiness schema missing or invalid"
 }
@@ -2426,6 +2444,15 @@ if ($handoff.module_boundary_registry.decoupling_boundary_contract_schema -ne "r
 if ($handoff.module_boundary_registry.extraction_order -notcontains "contracts/launch_packets.py") {
     throw "Handoff inspection module decoupling extraction order missing contracts first step"
 }
+if ($handoff.module_boundary_registry.module_boundary_summary_contract_schema -ne "rrkal_displaytools.module_boundary_summary_contract.v1") {
+    throw "Handoff inspection module boundary summary contract missing or invalid"
+}
+if ($handoff.module_boundary_registry.module_boundary_summary_contract.qt_copy_action -ne "copy_module_boundary_summary") {
+    throw "Handoff inspection module boundary summary copy action missing"
+}
+if ($handoff.module_boundary_registry.summary_parameter_fields -notcontains "tk_primary_ui_allowed") {
+    throw "Handoff inspection module boundary summary parameter fields missing"
+}
 if ($handoff.launch_packet_contracts.cross_machine_clone_readiness -ne "rrkal_displaytools.cross_machine_clone_readiness.v1") {
     throw "Handoff inspection cross_machine_clone_readiness launch contract missing or invalid"
 }
@@ -3030,6 +3057,12 @@ if ($qtPanelSource -like "*selected={current_style}*") {
 }
 if ($qtPanelSource -notlike "*show_module_boundary_registry*") {
     throw "Qt module boundary registry JSON action is missing"
+}
+if ($qtPanelSource -notlike "*copy_module_boundary_summary*") {
+    throw "Qt module boundary copy summary action is missing"
+}
+if ($qtPanelSource -notlike "*Module seams: *boundary=RRKAL-owned data/cache*") {
+    throw "Qt module boundary portable summary text missing"
 }
 if ($qtPanelSource -notlike "*Module seams*") {
     throw "Qt Module seams action button is missing"
