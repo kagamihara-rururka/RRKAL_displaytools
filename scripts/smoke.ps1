@@ -1250,6 +1250,9 @@ if ($visualInspectorIndex.entry_ids -notcontains "render_plan_compose_work_order
 if ($visualInspectorIndex.entry_ids -notcontains "render_plan_extraction_dry_run") {
     throw "Visual contract inspector index missing render plan extraction dry-run inspector"
 }
+if ($visualInspectorIndex.entry_ids -notcontains "render_plan_compose_source_map") {
+    throw "Visual contract inspector index missing render plan compose source map inspector"
+}
 if ($visualInspectorIndex.entry_ids -notcontains "pre_decoupling_readiness_bundle") {
     throw "Visual contract inspector index missing pre-decoupling readiness bundle"
 }
@@ -1386,6 +1389,9 @@ if ($visualReviewPacket.pre_decoupling_commands -notcontains "powershell -NoProf
 }
 if ($visualReviewPacket.pre_decoupling_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_render_plan_extraction_dry_run.ps1") {
     throw "Visual contract review packet missing render plan extraction dry-run command"
+}
+if ($visualReviewPacket.pre_decoupling_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_render_plan_compose_source_map.ps1") {
+    throw "Visual contract review packet missing render plan compose source map command"
 }
 if ($visualReviewPacket.pre_decoupling_commands -notcontains "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\export_pre_decoupling_readiness_bundle.ps1") {
     throw "Visual contract review packet missing pre-decoupling readiness bundle command"

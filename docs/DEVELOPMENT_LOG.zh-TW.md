@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Source map in reviewer packet
+
+- Added `render_plan_compose_source_map` to the no-GUI visual contract inspector index.
+- Added `scripts\inspect_render_plan_compose_source_map.ps1` to reviewer packet pre-decoupling commands.
+- Smoke now gates inspector index and reviewer packet inclusion for the source-map inspector.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Render plan compose source map
 
 - Added `scripts/inspect_render_plan_compose_source_map.ps1` to map the monolith helper lines for the first post-7 `render_plan_compose` extraction.

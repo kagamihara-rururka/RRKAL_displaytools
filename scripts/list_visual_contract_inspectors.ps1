@@ -189,6 +189,14 @@ $entries = @(
         no_launch_side_effect = $true
     },
     [ordered]@{
+        id = "render_plan_compose_source_map"
+        category = "decoupling"
+        schema = "rrkal_displaytools.render_plan_compose_source_map_inspector.v1"
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_render_plan_compose_source_map.ps1"
+        proves = @("monolith helper line map", "compile_layer_render_plan location", "apply_layer_render_plan_composition location", "no code move")
+        no_launch_side_effect = $true
+    },
+    [ordered]@{
         id = "pre_decoupling_readiness_bundle"
         category = "decoupling"
         schema = "rrkal_displaytools.pre_decoupling_readiness_bundle_export.v1"
@@ -243,6 +251,7 @@ $entries = @(
         "decoupling_boundaries",
         "render_plan_compose_work_order",
         "render_plan_extraction_dry_run",
+        "render_plan_compose_source_map",
         "pre_decoupling_readiness_bundle",
         "pre_decoupling_readiness_check",
         "pre_decoupling_snapshot",
