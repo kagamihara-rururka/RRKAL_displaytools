@@ -1,5 +1,14 @@
 # Development Log
 
+## 2026-05-30 - Compose pass budget readiness strip
+
+Changes:
+- Added `rrkal_displaytools.layer_render_plan_compose_pass_budget.v1` to `layer_render_plan_performance` across launch packets, renderer capabilities, Qt and handoff inspection.
+- Added Qt `composePassBudgetStrip` in the Layers control board to show compose run count, merge-candidate count, target pass model, parity evidence dependency and `runtime_merge=false`.
+- Smoke gates the compose pass budget schema, target model, required evidence, Qt strip and renderer marker.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
 ## 2026-05-30 - Qt compose parity runner readiness strip
 
 Changes:

@@ -1180,6 +1180,26 @@ def layer_render_plan_performance_packet(
             "compose_run_parity_smoke_precommit_command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\render_compose_parity_smoke.ps1 -ContractOnly",
             "compose_run_parity_smoke_validates": ["png_dimensions_match", "max_abs_diff", "changed_pixel_count"],
             "compose_run_parity_smoke_pass_fields": ["passed", "max_abs_diff", "changed_pixel_count", "diff_status"],
+            "compose_pass_budget_schema": "rrkal_displaytools.layer_render_plan_compose_pass_budget.v1",
+            "compose_pass_budget": {
+                "schema": "rrkal_displaytools.layer_render_plan_compose_pass_budget.v1",
+                "status": "planning_ready_runtime_merge_blocked",
+                "current_pass_model": "sequential_overlay_composition",
+                "target_pass_model": "collapsed_overlay_runs_then_single_taichi_composite_pass",
+                "first_safe_optimization": "collapse_adjacent_alpha_compose_runs_after_zero_diff_parity",
+                "compose_run_count_field": "compose_run_count",
+                "merge_candidate_run_count_field": "compose_merge_candidate_run_count",
+                "required_evidence": [
+                    "render_compose_parity_smoke.visual_parity_passed",
+                    "max_abs_diff=0",
+                    "changed_pixel_count=0",
+                ],
+                "ui_summary_format": "Compose budget: runs={compose_run_count}; merge_candidates={compose_merge_candidate_run_count}; evidence=compose_parity_runner; runtime_merge=false",
+                "qt_label_object": "composePassBudgetStrip",
+                "qt_refresh": "refresh_layer_render_plan_cache_diagnostics_strip",
+                "runtime_merge_enabled": False,
+                "boundary": "Budget metadata only; renderer keeps the existing sequential compose path until parity evidence proves the collapsed path.",
+            },
             "compose_run_parity_artifact_runner_schema": "rrkal_displaytools.compose_run_parity_artifact_runner.v1",
             "compose_run_parity_artifact_runner_script": "scripts\\render_compose_parity_artifacts.ps1",
             "compose_run_parity_artifact_workflow_schema": "rrkal_displaytools.compose_run_parity_artifact_workflow.v1",
@@ -3664,6 +3684,14 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             "border:1px solid #a8bd65; border-radius:8px; padding:6px 8px; font-weight:600; }"
         )
         layers_layout.addWidget(self.render_plan_cache_label)
+        self.compose_pass_budget_label = QtWidgets.QLabel("Compose budget: runs=-; merge=-; runtime_merge=false")
+        self.compose_pass_budget_label.setObjectName("composePassBudgetStrip")
+        self.compose_pass_budget_label.setWordWrap(True)
+        self.compose_pass_budget_label.setStyleSheet(
+            "QLabel#composePassBudgetStrip { color:#382817; background:#fff2df; "
+            "border:1px solid #c89855; border-radius:8px; padding:6px 8px; font-weight:600; }"
+        )
+        layers_layout.addWidget(self.compose_pass_budget_label)
         self.compose_parity_runner_label = QtWidgets.QLabel("Compose parity runner: ready=unknown")
         self.compose_parity_runner_label.setObjectName("composeParityRunnerReadinessStrip")
         self.compose_parity_runner_label.setWordWrap(True)
@@ -4996,6 +5024,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
     def refresh_layer_render_plan_cache_diagnostics_strip(self) -> None:
         if hasattr(self, "render_plan_cache_label"):
             self.render_plan_cache_label.setText(self.layer_render_plan_cache_summary_text())
+        if hasattr(self, "compose_pass_budget_label"):
+            self.compose_pass_budget_label.setText(self.compose_pass_budget_summary_text())
         if hasattr(self, "compose_parity_runner_label"):
             self.compose_parity_runner_label.setText(self.compose_parity_runner_readiness_text())
 
@@ -9256,6 +9286,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         diagnostics = performance.get("cache_diagnostics") if isinstance(performance.get("cache_diagnostics"), dict) else {}
         if hasattr(self, "render_plan_cache_label"):
             self.render_plan_cache_label.setText(self.layer_render_plan_cache_summary_text(diagnostics))
+        if hasattr(self, "compose_pass_budget_label"):
+            self.compose_pass_budget_label.setText(self.compose_pass_budget_summary_text(performance))
         if hasattr(self, "compose_parity_runner_label"):
             self.compose_parity_runner_label.setText(self.compose_parity_runner_readiness_text(performance))
         self.command_text.setPlainText(
@@ -9269,6 +9301,25 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             )
         )
         self.status.setText("Displayed layer render-plan performance and cache diagnostics")
+
+    def compose_pass_budget_summary_text(self, packet: dict[str, object] | None = None) -> str:
+        packet = packet if isinstance(packet, dict) else self.collect_layer_render_plan_performance()
+        budget = packet.get("compose_pass_budget")
+        budget = budget if isinstance(budget, dict) else {}
+        diagnostics = packet.get("cache_diagnostics") if isinstance(packet.get("cache_diagnostics"), dict) else {}
+        compose_runs = diagnostics.get("compose_run_count", "-")
+        merge_candidates = diagnostics.get("compose_merge_candidate_run_count", "-")
+        target = budget.get("target_pass_model", "-")
+        status = budget.get("status", "unknown")
+        return (
+            "Compose budget: "
+            f"status={status}; "
+            f"runs={compose_runs}; "
+            f"merge={merge_candidates}; "
+            f"target={target}; "
+            "evidence=compose_parity_runner; "
+            "runtime_merge=false"
+        )
 
     def compose_parity_runner_readiness_text(self, packet: dict[str, object] | None = None) -> str:
         packet = packet if isinstance(packet, dict) else self.collect_layer_render_plan_performance()
