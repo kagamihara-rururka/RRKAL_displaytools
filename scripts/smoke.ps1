@@ -5573,6 +5573,12 @@ if ($qtPanelSource -notlike "*Replay/contracts: inspect portable UI/profile repl
 if ($qtPanelSource -notlike "*Replay/contracts: inspect Timeline keyframes, runtime state and export options JSON*") {
     throw "Qt Timeline inspector tooltip is missing"
 }
+if ($qtPanelSource -notlike "*Replay/contracts: inspect researcher first-run route JSON*") {
+    throw "Qt reviewer first-run route tooltip is missing"
+}
+if ($qtPanelSource -notlike "*Replay/contracts: inspect current and planned capability summary JSON*") {
+    throw "Qt capability summary tooltip is missing"
+}
 if ($qtPanelSource -notlike "*Renderer ports: inspect scalar ocean material and sea-state handoff JSON*") {
     throw "Qt Renderer ports inspector tooltip is missing"
 }
@@ -5959,6 +5965,12 @@ if ($qtPanelSource -notlike "*actionSectionHeader*") {
 }
 if ($qtPanelSource -notlike "*Inspect: Replay/contracts*") {
     throw "Qt Actions Replay/contracts section is missing"
+}
+if ($qtPanelSource -notlike "*Inspect: Reviewer route*") {
+    throw "Qt Actions reviewer route button is missing"
+}
+if ($qtPanelSource -notlike "*Inspect: Capability summary*") {
+    throw "Qt Actions capability summary button is missing"
 }
 if ($qtPanelSource -notlike "*Inspect: Research interaction*") {
     throw "Qt Actions Research interaction section is missing"

@@ -512,6 +512,8 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         ("profile_replay", "Inspect: Profile replay"),
         ("launch_summary", "Copy launch summary"),
         ("timeline", "Inspect: Timeline"),
+        ("reviewer_route", "Inspect: Reviewer route"),
+        ("capability_summary", "Inspect: Capability summary"),
         ("ocean_port", "Inspect: Ocean port"),
         ("hydro_lod", "Inspect: Hydro LOD"),
         ("style_routes", "Inspect: Style routes"),
@@ -534,7 +536,7 @@ def profile_ui_state_replay_packet(source: str) -> dict[str, object]:
         ("live_preview", "Inspect: Live preview"),
     ]
     qt_inspector_groups = [
-        {"id": "replay_contracts", "label": "Replay/contracts", "action_ids": ["profile_replay", "launch_summary", "timeline", "clone_ready", "clone_summary", "module_seams"]},
+        {"id": "replay_contracts", "label": "Replay/contracts", "action_ids": ["profile_replay", "launch_summary", "timeline", "reviewer_route", "capability_summary", "clone_ready", "clone_summary", "module_seams"]},
         {"id": "renderer_ports", "label": "Renderer ports", "action_ids": ["hydro_lod", "ocean_port", "style_routes", "layer_matrix", "layer_runtime"]},
         {"id": "research_interaction", "label": "Research interaction", "action_ids": ["layer_pick", "selection_state", "layer_controls_guide", "layer_ops", "canvas_state", "pin_pick", "cursor_geo", "boundary_json", "research_summary"]},
         {"id": "visual_review", "label": "Visual review", "action_ids": ["visual_readiness", "renderer_thumbnail", "live_preview"]},
@@ -4317,6 +4319,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         copy_reviewer_fields_button = QtWidgets.QPushButton("Copy reviewer fields")
         copy_goal_scorecard_button = QtWidgets.QPushButton("Copy goal scorecard")
         timeline_button = QtWidgets.QPushButton("Inspect: Timeline")
+        reviewer_route_button = QtWidgets.QPushButton("Inspect: Reviewer route")
+        capability_summary_button = QtWidgets.QPushButton("Inspect: Capability summary")
         ocean_port_button = QtWidgets.QPushButton("Inspect: Ocean port")
         ocean_3d_controls_action_button = QtWidgets.QPushButton("Open: Ocean 3D controls")
         copy_ocean_summary_button = QtWidgets.QPushButton("Copy Ocean summary")
@@ -4384,6 +4388,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (copy_reviewer_fields_button, "Replay/contracts: copy reviewer packet field guide with primary, recommended and grouped review paths."),
             (copy_goal_scorecard_button, "Replay/contracts: copy objective-level closure scorecard across UI, layers, launch, renderer capability and cross-machine use."),
             (timeline_button, "Replay/contracts: inspect Timeline keyframes, runtime state and export options JSON."),
+            (reviewer_route_button, "Replay/contracts: inspect researcher first-run route JSON for clone/setup/smoke/handoff/Qt review."),
+            (capability_summary_button, "Replay/contracts: inspect current and planned capability summary JSON for post-push reporting."),
             (ocean_port_button, "Renderer ports: inspect scalar ocean material and sea-state handoff JSON."),
             (ocean_3d_controls_action_button, "Renderer ports: open Taichi 3D Ocean Water scalar controls from the Qt control board."),
             (copy_ocean_summary_button, "Renderer ports: copy Ocean material controls, apply status, sea-state scalar sample and RRKAL governance summary."),
@@ -4456,6 +4462,8 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         copy_reviewer_fields_button.clicked.connect(self.copy_reviewer_packet_field_guide)
         copy_goal_scorecard_button.clicked.connect(self.copy_goal_closure_scorecard_summary)
         timeline_button.clicked.connect(self.show_timeline_runtime_state)
+        reviewer_route_button.clicked.connect(self.show_reviewer_first_run_route)
+        capability_summary_button.clicked.connect(self.show_capability_summary)
         ocean_port_button.clicked.connect(self.show_ocean_material_control_port)
         ocean_3d_controls_action_button.clicked.connect(self.open_taichi_ocean_3d_controls)
         copy_ocean_summary_button.clicked.connect(self.copy_ocean_material_summary)
@@ -4519,7 +4527,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         stop_button.clicked.connect(self.stop_renderer)
         action_sections = (
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button, export_reviewer_packet_button)),
-            ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, copy_reviewer_fields_button, copy_goal_scorecard_button, timeline_button, module_seams_button, decoupling_readiness_button, copy_decoupling_summary_button, controlled_interception_button, copy_interception_summary_button, renderer_config_gateway_button, copy_renderer_config_summary_button, performance_telemetry_button, copy_performance_smoke_summary_button, pre_decoupling_snapshot_button, copy_pre_decoupling_snapshot_command_button, spatial_compression_roadmap_button, copy_spatial_compression_summary_button, copy_module_summary_button, clone_ready_button, copy_clone_summary_button)),
+            ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, copy_reviewer_fields_button, copy_goal_scorecard_button, timeline_button, reviewer_route_button, capability_summary_button, module_seams_button, decoupling_readiness_button, copy_decoupling_summary_button, controlled_interception_button, copy_interception_summary_button, renderer_config_gateway_button, copy_renderer_config_summary_button, performance_telemetry_button, copy_performance_smoke_summary_button, pre_decoupling_snapshot_button, copy_pre_decoupling_snapshot_command_button, spatial_compression_roadmap_button, copy_spatial_compression_summary_button, copy_module_summary_button, clone_ready_button, copy_clone_summary_button)),
             ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, ocean_3d_controls_action_button, copy_ocean_summary_button, copy_ocean_guard_summary_button, ocean_3d_board_audit_button, copy_ocean_3d_board_audit_button, style_routes_button, copy_style_routes_summary_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, copy_layer_controls_guide_button, copy_layer_navigation_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
             ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, copy_visual_closure_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, copy_style_thumb_status_button, thumbnail_button, live_preview_button)),
@@ -10668,6 +10676,85 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         summary = self.performance_smoke_summary_text()
         QtWidgets.QApplication.clipboard().setText(summary)
         self.status.setText("Copied performance smoke telemetry summary to clipboard.")
+
+    def collect_reviewer_first_run_route(self) -> dict[str, object]:
+        return {
+            "schema": "rrkal_displaytools.reviewer_first_run_route.v1",
+            "status": "ready",
+            "route_id": "clone_to_scientific_ui_review",
+            "qt_first": True,
+            "tk_primary_ui_allowed": False,
+            "no_data_governance": True,
+            "phases": [
+                {
+                    "id": "clone_setup",
+                    "command": "git clone https://github.com/Kagamihara-Ruruka/RRKAL_displaytools.git",
+                    "next": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\setup_windows.ps1",
+                },
+                {
+                    "id": "smoke",
+                    "command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\smoke.ps1",
+                },
+                {
+                    "id": "handoff",
+                    "command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\inspect_handoff.ps1",
+                },
+                {
+                    "id": "qt_review",
+                    "command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\run_qt_panel.ps1",
+                    "surfaces": ["Layers", "Renderer diagnostics", "Replay/contracts", "Ocean 3D", "Timeline"],
+                },
+                {
+                    "id": "research_interaction",
+                    "command": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\inspect_research_interaction.ps1",
+                    "tools": ["select_layer", "cursor_geodesy", "pin_pick_with_occlusion", "boundary_emphasis"],
+                },
+            ],
+            "visible_pending_items": [
+                "blend crossfade",
+                "visibility fade",
+                "authoritative territory/EEZ identity from RRKAL_project data contract",
+                "render-plan compose optimization after post-07 decoupling gate",
+            ],
+            "script": "scripts\\inspect_reviewer_first_run_route.ps1",
+        }
+
+    def show_reviewer_first_run_route(self) -> None:
+        self.command_text.setPlainText(json.dumps(self.collect_reviewer_first_run_route(), ensure_ascii=False, indent=2))
+        self.status.setText("Displayed reviewer first-run route JSON")
+
+    def collect_capability_summary(self) -> dict[str, object]:
+        return {
+            "schema": "rrkal_displaytools.capability_summary.v1",
+            "status": "ready",
+            "summary_role": "post_push_user_report_source",
+            "current_capabilities": [
+                "Qt-first control panel",
+                "layer selection and shortcuts",
+                "Pin/cursor geodesy/Boundary emphasis research interactions",
+                "Ocean 3D material controls and safe preview",
+                "Timeline playback/export readiness",
+                "cross-machine reviewer route",
+                "pre-07 decoupling gate",
+            ],
+            "planned_capabilities": [
+                "dockable Photoshop-like panels",
+                "render-plan compose decoupling",
+                "precomputed layer state then single render pass",
+                "Timeline blend/visibility fade runtime closure",
+                "RRKAL-provided authoritative boundary/EEZ identity contract",
+            ],
+            "boundaries": [
+                "Qt/PyQt6 is primary; Tk is not primary.",
+                "RRKAL owns dataset discovery, download, import, registry, cache lifecycle and repair.",
+                "Displaytools owns renderer/UI contracts, material controls, visual review packets and no-GUI smoke evidence.",
+            ],
+            "script": "scripts\\export_capability_summary.ps1",
+        }
+
+    def show_capability_summary(self) -> None:
+        self.command_text.setPlainText(json.dumps(self.collect_capability_summary(), ensure_ascii=False, indent=2))
+        self.status.setText("Displayed capability summary JSON")
 
     def show_cross_machine_clone_readiness(self) -> None:
         self.command_text.setPlainText(

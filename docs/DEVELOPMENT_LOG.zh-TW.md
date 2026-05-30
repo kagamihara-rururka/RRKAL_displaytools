@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Qt reviewer route and capability summary buttons
+
+- Added Replay/contracts buttons in `rrkal_displaytools_qt_panel.py` for `Inspect: Reviewer route` and `Inspect: Capability summary`.
+- The buttons expose clone/setup/smoke/handoff/Qt review guidance and current/planned capability reporting directly in the Qt command review pane.
+- Smoke now gates the new Qt button labels and tooltips without launching Qt.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`; transient cloud-drive file-access backoff warnings observed, final retry passed).
+
 ## 2026-05-31 - Capability summary export
 
 - Added `scripts/export_capability_summary.ps1` as a no-GUI source for post-push current/planned capability reporting.
