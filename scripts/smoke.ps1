@@ -5868,6 +5868,30 @@ if (-not $headlessShimSelfTest.restored) {
     throw "Headless import shim self-test did not restore sys.modules state"
 }
 
+$spatialCompressionRoadmapText = Invoke-CapturedNative py @("-3", (Join-Path $RepoRoot "spatial_compression_roadmap.py"))
+$spatialCompressionRoadmap = ($spatialCompressionRoadmapText -join "`n") | ConvertFrom-Json
+if ($spatialCompressionRoadmap.schema -ne "rrkal_displaytools.spatial_compression_roadmap.v1") {
+    throw "Spatial compression roadmap schema mismatch"
+}
+if ($spatialCompressionRoadmap.status -ne "research_contract_only") {
+    throw "Spatial compression roadmap must remain contract-only"
+}
+if ($spatialCompressionRoadmap.strategy_options.id -notcontains "spherical_harmonics") {
+    throw "Spatial compression roadmap missing spherical harmonics option"
+}
+if ($spatialCompressionRoadmap.strategy_options.id -notcontains "two_dimensional_dwt") {
+    throw "Spatial compression roadmap missing 2D DWT option"
+}
+if ($spatialCompressionRoadmap.strategy_options.id -notcontains "neural_field") {
+    throw "Spatial compression roadmap missing neural field option"
+}
+if ($spatialCompressionRoadmap.explicit_non_goals -notcontains "no_dataset_download") {
+    throw "Spatial compression roadmap data-governance boundary missing"
+}
+if ($spatialCompressionRoadmap.explicit_non_goals -notcontains "no_training_loop") {
+    throw "Spatial compression roadmap training boundary missing"
+}
+
 $rendererConfigGatewayText = Invoke-CapturedNative py @("-3", (Join-Path $RepoRoot "renderer_config_gateway.py"), "--sample-width", "2048", "--sample-map-projection", "globe")
 $rendererConfigGateway = $rendererConfigGatewayText | ConvertFrom-Json
 if ($rendererConfigGateway.schema -ne "rrkal_displaytools.renderer_config_gateway.v1") {
@@ -5917,6 +5941,12 @@ if ($decouplingQtPanelSource -notmatch "Inspect: Decoupling snapshot") {
 if ($decouplingQtPanelSource -notmatch "Copy snapshot command") {
     throw "Qt panel missing copy pre-decoupling snapshot command action"
 }
+if ($decouplingQtPanelSource -notmatch "Inspect: Compression roadmap") {
+    throw "Qt panel missing spatial compression roadmap inspect action"
+}
+if ($decouplingQtPanelSource -notmatch "Copy compression roadmap") {
+    throw "Qt panel missing copy spatial compression roadmap action"
+}
 if ($decouplingQtPanelSource -notmatch "show_decoupling_readiness") {
     throw "Qt panel decoupling readiness handler is missing"
 }
@@ -5949,6 +5979,15 @@ if ($decouplingQtPanelSource -notmatch "copy_pre_decoupling_snapshot_command") {
 }
 if ($decouplingQtPanelSource -notmatch "pre_decoupling_snapshot_qt_entry.v1") {
     throw "Qt panel missing pre-decoupling snapshot schema reference"
+}
+if ($decouplingQtPanelSource -notmatch "show_spatial_compression_roadmap") {
+    throw "Qt panel missing spatial compression roadmap inspect handler"
+}
+if ($decouplingQtPanelSource -notmatch "copy_spatial_compression_roadmap_summary") {
+    throw "Qt panel missing spatial compression roadmap copy handler"
+}
+if ($decouplingQtPanelSource -notmatch "spatial_compression_roadmap.v1") {
+    throw "Qt panel missing spatial compression roadmap schema reference"
 }
 if ($decouplingQtPanelSource -notmatch "collect_decoupling_readiness") {
     throw "Qt panel decoupling readiness collector is missing"

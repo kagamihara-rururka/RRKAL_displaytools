@@ -16,6 +16,7 @@ Last updated: 2026-05-30
 | Style renderer entries | In progress | Scientific/nautical/tactical/parchment style concepts are selectable in the Qt panel and `--style-profile`. | Create explicit renderer entry points for style profiles. |
 | Module boundaries | In progress | Monolith contains diagnostics for extraction readiness and seam matrices. `decoupling_readiness.py` records the `2026-05-31T07:00:00+08:00` not-before gate, post-7 extraction order, controlled interception policy, observability baseline and snapshot command; Qt/no-GUI reviewer packets expose it; Qt Replay/contracts exposes the snapshot command; `scripts/pre_decoupling_gate.ps1` verifies the first extraction, clean worktree and performance telemetry contract before code moves. | Start with render-plan compose extraction after the 7:00 decoupling gate. |
 | Performance smoke and telemetry | In progress | `performance_telemetry.py` and `scripts/performance_smoke.ps1` produce lightweight displaytools timing outputs under `state/performance/`: structured performance summary, stage timing JSONL, and render telemetry schema for a headless tiny scene. Launch/reviewer/handoff packets and Qt Replay/contracts now expose the contract and output paths; Qt Renderer diagnostics can copy the queued render-plan work order. | After decoupling, attach real render-plan stage timings and keep RRKAL crawler/download/import performance smoke in RRKAL. |
+| Spatial compression roadmap | Planned | `spatial_compression_roadmap.py` records DWT, spherical harmonics and neural-field options as contract-only strategy, with Qt Replay/contracts inspect/copy actions. | After render-plan decoupling, prototype spherical-harmonics LOD and DWT residual contracts with `rrkal-visual-compressor`; keep neural fields research-only until parity evidence exists. |
 | Cloud/local workflow | MVP | `docs/WORKFLOW.zh-TW.md` and `docs/CODEX_CLOUD_HANDOFF.zh-TW.md` define GitHub as sync truth, `L:\\RRKAL_displaytools` as the local cloud-drive working copy, Codex Cloud as the long-running code/docs/CI surface, and local Windows as Qt/Taichi visual validation authority. | Convert the conversation backup step into a reusable skill after the private transcript repo policy is confirmed. |
 
 ## Working rules
@@ -49,6 +50,7 @@ Last updated: 2026-05-30
 - 2026-05-31: Added Qt Replay/contracts controls for inspecting and copying the pre-decoupling snapshot command.
 - 2026-05-31: Added Qt Ocean 3D board audit inspect/copy actions so control-board visibility evidence is directly reviewable.
 - 2026-05-31: Added Qt copyable render-plan work order summary for the post-decoupling single-pass optimization path.
+- 2026-05-31: Added contract-only spatial compression roadmap and Qt inspect/copy actions for DWT, spherical harmonics and neural-field strategy boundaries.
 - 2026-05-31: Added `compat/headless_import_shims.py` with a smoke-gated synthetic sys.modules interception self-test.
 - 2026-05-31: Added Qt `Inspect: Interception` and `Copy interception summary` for bounded shim/hook policy review.
 - 2026-05-30: Added controlled interception policy to launch/reviewer packet handoff for cross-machine review.

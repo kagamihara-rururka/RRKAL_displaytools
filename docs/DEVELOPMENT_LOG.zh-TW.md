@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Spatial compression roadmap contract
+
+- Added `spatial_compression_roadmap.py` as a contract-only handoff for 3D bathymetry compression strategy.
+- The roadmap records DWT, spherical harmonics and neural-field options, plus explicit non-goals for dataset download, cache governance, training loops and runtime codec switching before parity evidence.
+- Added Qt Replay/contracts inspect/copy actions for the roadmap.
+- Smoke: PASS (`scripts\smoke.ps1`).
+
 ## 2026-05-31 - Qt render-plan work order summary
 
 - Added `Copy render-plan work order` to the Qt Renderer diagnostics actions.
