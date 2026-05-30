@@ -1,5 +1,15 @@
 # Development Log
 
+## 2026-05-30 - Qt Taichi 3D Ocean control panel
+
+Changes:
+- Added an explicit `Taichi 3D Ocean controls` entry in the Qt Properties dock and Renderer ports action group.
+- Added `rrkal_displaytools.taichi_ocean_3d_control_panel.v1` under `ocean_material_control_port` for launch packets, renderer capabilities and handoff inspection.
+- Recorded the next performance follow-up as post-decoupling layer render-plan precompute followed by a single renderer pass, instead of treating each layer as an independent render path.
+
+Smoke:
+- PASS (`scripts/smoke.ps1`, before commit).
+
 ## 2026-05-30 - Reviewer packet visual handoff summaries
 
 Changes:

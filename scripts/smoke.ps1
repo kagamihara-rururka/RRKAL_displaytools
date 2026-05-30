@@ -812,6 +812,15 @@ if ($launchPacket.ocean_material_control_port.schema -ne "rrkal_displaytools.oce
 if ($launchPacket.ocean_material_control_port.renderer_flags -notcontains "--ocean-wave-strength") {
     throw "Launch packet ocean_material_control_port missing wave flag"
 }
+if ($launchPacket.ocean_material_control_port.qt_control_panel.schema -ne "rrkal_displaytools.taichi_ocean_3d_control_panel.v1") {
+    throw "Launch packet Taichi ocean 3D control panel schema missing or invalid"
+}
+if ($launchPacket.ocean_material_control_port.qt_control_panel.qt_dialog_action -ne "open_taichi_ocean_3d_controls") {
+    throw "Launch packet Taichi ocean 3D control panel dialog action missing"
+}
+if ($launchPacket.ocean_material_control_port.qt_control_panel.render_pipeline_followup -ne "post_decoupling_precompute_layer_render_plan_then_single_render_pass") {
+    throw "Launch packet Taichi ocean 3D control panel performance followup missing"
+}
 if ($launchPacket.ocean_material_control_port.ocean_material_summary_contract.schema -ne "rrkal_displaytools.ocean_material_summary_contract.v1") {
     throw "Launch packet ocean material summary contract missing or invalid"
 }
@@ -1746,6 +1755,15 @@ if ($capabilities.ocean_material_control_port.schema -ne "rrkal_displaytools.oce
 }
 if ($capabilities.ocean_material_control_port.taichi_uniforms -notcontains "wave_strength") {
     throw "Renderer ocean_material_control_port Taichi uniforms missing"
+}
+if ($capabilities.ocean_material_control_port.qt_control_panel.schema -ne "rrkal_displaytools.taichi_ocean_3d_control_panel.v1") {
+    throw "Renderer Taichi ocean 3D control panel schema missing or invalid"
+}
+if ($capabilities.ocean_material_control_port.qt_control_panel.qt_dialog_action -ne "open_taichi_ocean_3d_controls") {
+    throw "Renderer Taichi ocean 3D control panel dialog action missing"
+}
+if ($capabilities.ocean_material_control_port.qt_control_panel.render_pipeline_followup -ne "post_decoupling_precompute_layer_render_plan_then_single_render_pass") {
+    throw "Renderer Taichi ocean 3D control panel performance followup missing"
 }
 if ($capabilities.ocean_material_control_port.ocean_material_summary_contract.schema -ne "rrkal_displaytools.ocean_material_summary_contract.v1") {
     throw "Renderer ocean material summary contract missing or invalid"
@@ -2714,6 +2732,9 @@ if ($handoff.launch_packet_contracts.ocean_material_control_port -ne "rrkal_disp
 if ($handoff.launch_packet_contracts.ocean_material_renderer_apply_contract -ne "rrkal_displaytools.ocean_material_renderer_apply_contract.v1") {
     throw "Handoff inspection ocean material renderer apply contract missing or invalid"
 }
+if ($handoff.launch_packet_contracts.taichi_ocean_3d_control_panel -ne "rrkal_displaytools.taichi_ocean_3d_control_panel.v1") {
+    throw "Handoff inspection Taichi ocean 3D control panel contract missing or invalid"
+}
 if ($handoff.launch_packet_contracts.sea_state_scalar_sample -ne "rrkal_displaytools.sea_state_scalar_sample.v1") {
     throw "Handoff inspection sea-state scalar sample contract missing or invalid"
 }
@@ -2725,6 +2746,15 @@ if ($handoff.ocean_material_control_port.renderer_capabilities_schema -ne "rrkal
 }
 if ($handoff.ocean_material_control_port.renderer_flags -notcontains "--ocean-foam") {
     throw "Handoff inspection ocean_material_control_port renderer flags missing"
+}
+if ($handoff.ocean_material_control_port.qt_control_panel_schema -ne "rrkal_displaytools.taichi_ocean_3d_control_panel.v1") {
+    throw "Handoff inspection Taichi ocean 3D control panel schema missing or invalid"
+}
+if ($handoff.ocean_material_control_port.qt_dialog_action -ne "open_taichi_ocean_3d_controls") {
+    throw "Handoff inspection Taichi ocean 3D control panel dialog action missing"
+}
+if ($handoff.ocean_material_control_port.render_pipeline_followup -ne "post_decoupling_precompute_layer_render_plan_then_single_render_pass") {
+    throw "Handoff inspection Taichi ocean 3D control panel performance followup missing"
 }
 if ($handoff.ocean_material_control_port.ocean_material_summary_contract_schema -ne "rrkal_displaytools.ocean_material_summary_contract.v1") {
     throw "Handoff inspection ocean material summary contract missing or invalid"
@@ -3063,6 +3093,21 @@ if ($qtPanelSource -notlike "*Ocean material: *governance=RRKAL-owned provider/c
 }
 if ($qtPanelSource -notlike "*Ocean port*") {
     throw "Qt Ocean port action button is missing"
+}
+if ($qtPanelSource -notlike "*Taichi 3D Ocean controls*") {
+    throw "Qt Taichi 3D Ocean controls button is missing"
+}
+if ($qtPanelSource -notlike "*Open: Ocean 3D controls*") {
+    throw "Qt Ocean 3D action button is missing"
+}
+if ($qtPanelSource -notlike "*open_taichi_ocean_3d_controls*") {
+    throw "Qt Taichi ocean 3D control dialog handler is missing"
+}
+if ($qtPanelSource -notlike "*taichiOcean3DControlPanel*") {
+    throw "Qt Taichi ocean 3D control panel label is missing"
+}
+if ($qtPanelSource -notlike "*post_decoupling_precompute_layer_render_plan_then_single_render_pass*") {
+    throw "Qt Taichi ocean 3D performance followup marker is missing"
 }
 if ($qtPanelSource -notlike "*show_hydrology_lod_status*") {
     throw "Qt hydrology LOD JSON action is missing"

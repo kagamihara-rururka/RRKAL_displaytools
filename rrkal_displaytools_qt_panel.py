@@ -870,6 +870,21 @@ def ocean_material_control_port_packet(
             "portable": True,
         },
         "summary_parameter_fields": summary_parameter_fields,
+        "qt_control_panel_schema": "rrkal_displaytools.taichi_ocean_3d_control_panel.v1",
+        "qt_control_panel": {
+            "schema": "rrkal_displaytools.taichi_ocean_3d_control_panel.v1",
+            "surface": "Properties dock + Taichi 3D Ocean controls dialog",
+            "dock_object": "propertiesDock",
+            "label_object": "taichiOcean3DControlPanel",
+            "button_object": "taichiOcean3DControlButton",
+            "qt_dialog_action": "open_taichi_ocean_3d_controls",
+            "button_label": "Taichi 3D Ocean controls",
+            "fields": ["wave_strength", "roughness", "foam"],
+            "writes_profile_field": "profile.ocean_material",
+            "writes_renderer_flags": renderer_flags,
+            "render_pipeline_followup": "post_decoupling_precompute_layer_render_plan_then_single_render_pass",
+            "performance_note": "Ocean scalars are UI/apply controls here; layer batching and render-plan precompute are scheduled after module decoupling.",
+        },
         "renderer_apply_contract_schema": "rrkal_displaytools.ocean_material_renderer_apply_contract.v1",
         "renderer_apply_contract": {
             "schema": "rrkal_displaytools.ocean_material_renderer_apply_contract.v1",
@@ -915,7 +930,7 @@ def ocean_material_control_port_packet(
                 "portable": True,
             },
         },
-        "qt_surface": "Properties dock ocean material controls",
+        "qt_surface": "Properties dock ocean material controls + Taichi 3D Ocean controls dialog",
         "launch_packet_fields": ["ocean_material_control_port", "profile.ocean_material", "command"],
         "renderer_capability_field": "ocean_material_control_port",
         "boundary": "Displaytools passes scalar ocean material controls and sea-state handoff fields only; RRKAL/provider modules own discovery, download, import and cache governance.",
@@ -3063,6 +3078,24 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         material_form.addRow("Wave strength", self.wave_edit)
         material_form.addRow("Roughness", self.roughness_edit)
         material_form.addRow("Foam", self.foam_edit)
+        self.ocean_3d_control_label = QtWidgets.QLabel("Taichi 3D Ocean: initializing")
+        self.ocean_3d_control_label.setObjectName("taichiOcean3DControlPanel")
+        self.ocean_3d_control_label.setWordWrap(True)
+        self.ocean_3d_control_label.setStyleSheet(
+            "QLabel#taichiOcean3DControlPanel { color:#12384f; background:#e7f5ff; "
+            "border:1px solid #79abc7; border-radius:8px; padding:6px 8px; font-weight:600; }"
+        )
+        ocean_3d_control_button = QtWidgets.QPushButton("Taichi 3D Ocean controls")
+        ocean_3d_control_button.setObjectName("taichiOcean3DControlButton")
+        ocean_3d_control_button.setToolTip(
+            "Open the Taichi 3D Ocean Water scalar control window for wave, roughness and foam."
+        )
+        ocean_3d_control_button.clicked.connect(self.open_taichi_ocean_3d_controls)
+        for ocean_edit in (self.wave_edit, self.roughness_edit, self.foam_edit):
+            ocean_edit.textChanged.connect(self.refresh_ocean_3d_control_summary)
+        self.refresh_ocean_3d_control_summary()
+        material_form.addRow("Taichi ocean", self.ocean_3d_control_label)
+        material_form.addRow(ocean_3d_control_button)
         layer_inspector_note = QtWidgets.QLabel("Active layer inspector：已同步 layer runtime；renderer pick state 會回寫選取結果。")
         layer_inspector_note.setWordWrap(True)
         self.layer_property_labels = {
@@ -3502,6 +3535,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         copy_launch_summary_button = QtWidgets.QPushButton("Copy launch summary")
         timeline_button = QtWidgets.QPushButton("Inspect: Timeline")
         ocean_port_button = QtWidgets.QPushButton("Inspect: Ocean port")
+        ocean_3d_controls_action_button = QtWidgets.QPushButton("Open: Ocean 3D controls")
         copy_ocean_summary_button = QtWidgets.QPushButton("Copy Ocean summary")
         hydro_lod_button = QtWidgets.QPushButton("Inspect: Hydro LOD")
         copy_hydro_lod_summary_button = QtWidgets.QPushButton("Copy Hydro LOD summary")
@@ -3544,6 +3578,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
             (copy_launch_summary_button, "Replay/contracts: copy profile, portable command and launch packet reviewer summary."),
             (timeline_button, "Replay/contracts: inspect Timeline keyframes, runtime state and export options JSON."),
             (ocean_port_button, "Renderer ports: inspect scalar ocean material and sea-state handoff JSON."),
+            (ocean_3d_controls_action_button, "Renderer ports: open Taichi 3D Ocean Water scalar controls from the Qt control board."),
             (copy_ocean_summary_button, "Renderer ports: copy Ocean material controls, apply status, sea-state scalar sample and RRKAL governance summary."),
             (hydro_lod_button, "Renderer ports: inspect hydrology layer and LOD hook readiness JSON."),
             (copy_hydro_lod_summary_button, "Renderer ports: copy Hydrology/LOD readiness, runtime evidence and state/ack/pick file summary."),
@@ -3591,6 +3626,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         copy_launch_summary_button.clicked.connect(self.copy_launch_reviewer_summary)
         timeline_button.clicked.connect(self.show_timeline_runtime_state)
         ocean_port_button.clicked.connect(self.show_ocean_material_control_port)
+        ocean_3d_controls_action_button.clicked.connect(self.open_taichi_ocean_3d_controls)
         copy_ocean_summary_button.clicked.connect(self.copy_ocean_material_summary)
         hydro_lod_button.clicked.connect(self.show_hydrology_lod_status)
         copy_hydro_lod_summary_button.clicked.connect(self.copy_hydrology_lod_summary)
@@ -3631,7 +3667,7 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
         action_sections = (
             ("Run / profile", (refresh_button, copy_button, copy_portable_button, save_button, load_button, open_templates_button, open_local_profiles_button, export_packet_button, export_reviewer_packet_button)),
             ("Inspect: Replay/contracts", (profile_replay_button, copy_launch_summary_button, timeline_button, module_seams_button, copy_module_summary_button, clone_ready_button, copy_clone_summary_button)),
-            ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, copy_ocean_summary_button, style_routes_button, copy_style_routes_summary_button, layer_matrix_button, layer_runtime_button)),
+            ("Inspect: Renderer ports", (hydro_lod_button, copy_hydro_lod_summary_button, ocean_port_button, ocean_3d_controls_action_button, copy_ocean_summary_button, style_routes_button, copy_style_routes_summary_button, layer_matrix_button, layer_runtime_button)),
             ("Inspect: Research interaction", (layer_pick_button, selection_state_button, copy_selection_summary_button, layer_ops_button, canvas_state_button, pin_pick_button, copy_pin_summary_action_button, cursor_geo_button, copy_cursor_summary_button, boundary_state_button, copy_boundary_summary_button, copy_research_summary_button)),
             ("Inspect: Visual review", (visual_readiness_button, copy_visual_summary_button, style_thumbnails_button, copy_style_thumbs_command_button, copy_style_thumb_status_button, thumbnail_button, live_preview_button)),
             ("Renderer diagnostics", (capabilities_button, closed_loop_button, layer_manifest_button, smoke_button)),
@@ -4363,9 +4399,101 @@ class DisplayToolsQtPanel(QtWidgets.QMainWindow):
 
     def collect_ocean_material_control_port(self) -> dict[str, object]:
         return ocean_material_control_port_packet(
-            self.collect_profile().get("ocean_material"),
+            {
+                "wave_strength": self.wave_edit.text().strip(),
+                "roughness": self.roughness_edit.text().strip(),
+                "foam": self.foam_edit.text().strip(),
+            },
             "rrkal_displaytools_qt_panel",
         )
+
+    def ocean_3d_control_summary_text(self) -> str:
+        packet = self.collect_ocean_material_control_port()
+        controls = packet.get("material_controls") if isinstance(packet.get("material_controls"), dict) else {}
+        panel = packet.get("qt_control_panel") if isinstance(packet.get("qt_control_panel"), dict) else {}
+        return (
+            "Taichi 3D Ocean: "
+            f"wave={controls.get('wave_strength')}; "
+            f"roughness={controls.get('roughness')}; "
+            f"foam={controls.get('foam')}; "
+            f"dialog={panel.get('qt_dialog_action', 'open_taichi_ocean_3d_controls')}; "
+            f"followup={panel.get('render_pipeline_followup', 'post_decoupling_precompute_layer_render_plan_then_single_render_pass')}"
+        )
+
+    def refresh_ocean_3d_control_summary(self) -> None:
+        if hasattr(self, "ocean_3d_control_label"):
+            self.ocean_3d_control_label.setText(self.ocean_3d_control_summary_text())
+
+    def open_taichi_ocean_3d_controls(self) -> None:
+        def bounded(value: object, default: float, lower: float, upper: float) -> float:
+            try:
+                number = float(value)
+            except (TypeError, ValueError):
+                number = default
+            return max(lower, min(number, upper))
+
+        def scalar_text(value: float) -> str:
+            text = f"{value:.3f}".rstrip("0").rstrip(".")
+            return text or "0"
+
+        dialog = QtWidgets.QDialog(self)
+        dialog.setWindowTitle("Taichi 3D Ocean Water")
+        layout = QtWidgets.QVBoxLayout(dialog)
+        intro = QtWidgets.QLabel(
+            "Taichi 3D Ocean Water controls write scalar ocean material values into the Qt profile, launch packet and renderer CLI flags."
+        )
+        intro.setWordWrap(True)
+        layout.addWidget(intro)
+        summary = QtWidgets.QLabel(self.ocean_3d_control_summary_text())
+        summary.setObjectName("taichiOcean3DControlDialogSummary")
+        summary.setWordWrap(True)
+        layout.addWidget(summary)
+        form = QtWidgets.QFormLayout()
+        wave_spin = QtWidgets.QDoubleSpinBox()
+        wave_spin.setRange(0.0, 1.0)
+        wave_spin.setDecimals(3)
+        wave_spin.setSingleStep(0.01)
+        wave_spin.setValue(bounded(self.wave_edit.text(), 0.22, 0.0, 1.0))
+        roughness_spin = QtWidgets.QDoubleSpinBox()
+        roughness_spin.setRange(0.02, 1.0)
+        roughness_spin.setDecimals(3)
+        roughness_spin.setSingleStep(0.01)
+        roughness_spin.setValue(bounded(self.roughness_edit.text(), 0.28, 0.02, 1.0))
+        foam_spin = QtWidgets.QDoubleSpinBox()
+        foam_spin.setRange(0.0, 1.0)
+        foam_spin.setDecimals(3)
+        foam_spin.setSingleStep(0.01)
+        foam_spin.setValue(bounded(self.foam_edit.text(), 0.12, 0.0, 1.0))
+        form.addRow("Wave strength", wave_spin)
+        form.addRow("Roughness", roughness_spin)
+        form.addRow("Foam", foam_spin)
+        layout.addLayout(form)
+        performance_note = QtWidgets.QLabel(
+            "Performance queue: after module decoupling, precompute a layer render plan and feed one combined render pass instead of independent layer renders."
+        )
+        performance_note.setWordWrap(True)
+        layout.addWidget(performance_note)
+        button_row = QtWidgets.QHBoxLayout()
+        apply_button = QtWidgets.QPushButton("Apply to Qt profile")
+        close_button = QtWidgets.QPushButton("Close")
+        button_row.addStretch(1)
+        button_row.addWidget(apply_button)
+        button_row.addWidget(close_button)
+        layout.addLayout(button_row)
+
+        def apply_values() -> None:
+            self.wave_edit.setText(scalar_text(wave_spin.value()))
+            self.roughness_edit.setText(scalar_text(roughness_spin.value()))
+            self.foam_edit.setText(scalar_text(foam_spin.value()))
+            self.refresh_command_preview()
+            self.refresh_canvas_preview()
+            self.refresh_ocean_3d_control_summary()
+            summary.setText(self.ocean_3d_control_summary_text())
+            self.status.setText("Applied Taichi 3D Ocean Water controls")
+
+        apply_button.clicked.connect(apply_values)
+        close_button.clicked.connect(dialog.accept)
+        dialog.exec()
 
     def ocean_material_summary_text(self, packet: dict[str, object] | None = None) -> str:
         packet = packet if isinstance(packet, dict) else self.collect_ocean_material_control_port()
