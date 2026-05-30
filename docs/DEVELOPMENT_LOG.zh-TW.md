@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Qt extraction dry-run entry
+
+- Added `Inspect: Extraction dry-run` to Qt Replay/contracts.
+- The Qt action displays the no-code-move render-plan extraction checklist, planned target files, required gates and stop conditions.
+- Smoke now gates the button label and tooltip without launching Qt.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Render plan extraction dry-run inspector
 
 - Added `scripts/inspect_render_plan_extraction_dry_run.ps1` as a no-code-move checklist for the first post-7 render-plan compose extraction.

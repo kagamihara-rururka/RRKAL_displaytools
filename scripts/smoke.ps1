@@ -6028,6 +6028,12 @@ if ($qtPanelSource -notlike "*Inspect: Reviewer route*") {
 if ($qtPanelSource -notlike "*Inspect: Capability summary*") {
     throw "Qt Actions capability summary button is missing"
 }
+if ($qtPanelSource -notlike "*Inspect: Extraction dry-run*") {
+    throw "Qt Actions extraction dry-run button is missing"
+}
+if ($qtPanelSource -notlike "*Replay/contracts: inspect no-code-move render-plan extraction dry-run checklist JSON*") {
+    throw "Qt extraction dry-run tooltip is missing"
+}
 if ($qtPanelSource -notlike "*Inspect: Research interaction*") {
     throw "Qt Actions Research interaction section is missing"
 }
