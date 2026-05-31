@@ -46,6 +46,7 @@ from render_core.render_plan import (
     build_layer_render_plan_runtime_snapshot,
     build_reused_compiled_layer_render_plan_packet,
     build_reused_compiled_layer_render_plan_packet_from_adapter_payload,
+    build_layer_render_plan_step_runtime_state,
 )
 from pin_projection import pin_projection_contract_packet, project_pins_to_screen
 try:
@@ -14067,27 +14068,40 @@ class HybridRenderController:
         step_runtime_states: list[dict[str, object]] = []
         for index, step in enumerate(composition_steps):
             if not isinstance(step, dict):
-                step_runtime_states.append({"source_order": index, "malformed": True})
+                step_runtime_states.append(
+                    build_layer_render_plan_step_runtime_state(index, step)
+                )
                 continue
             kind = str(step.get("kind") or "")
             if kind == "style_profile_postprocess":
-                step_runtime_states.append({"source_order": index, "kind": kind})
+                step_runtime_states.append(
+                    build_layer_render_plan_step_runtime_state(index, step)
+                )
                 continue
             if not self.layer_render_plan_step_visible(step):
-                step_runtime_states.append({"source_order": index, "kind": kind, "visible": False})
+                step_runtime_states.append(
+                    build_layer_render_plan_step_runtime_state(index, step, visible=False)
+                )
                 continue
             overlay = self.layer_render_plan_step_overlay(step)
             if overlay is None:
-                step_runtime_states.append({"source_order": index, "kind": kind, "visible": True, "overlay_present": False})
+                step_runtime_states.append(
+                    build_layer_render_plan_step_runtime_state(
+                        index,
+                        step,
+                        visible=True,
+                        overlay_present=False,
+                    )
+                )
                 continue
             step_runtime_states.append(
-                {
-                    "source_order": index,
-                    "kind": kind,
-                    "visible": True,
-                    "overlay_present": True,
-                    "overlay_transparent": self.layer_render_plan_overlay_is_transparent(overlay),
-                }
+                build_layer_render_plan_step_runtime_state(
+                    index,
+                    step,
+                    visible=True,
+                    overlay_present=True,
+                    overlay_transparent=self.layer_render_plan_overlay_is_transparent(overlay),
+                )
             )
         queue, skipped_steps = build_layer_render_plan_compose_queue_entries(
             composition_steps,

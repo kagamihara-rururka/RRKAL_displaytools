@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Extract render-plan step runtime state builder
+
+- Added `build_layer_render_plan_step_runtime_state` to `render_core/render_plan.py`.
+- Updated `HybridRenderController.layer_render_plan_compose_queue` to use the core builder for malformed, postprocess, hidden, missing-overlay and transparent-overlay runtime state packets.
+- Kept controller ownership of overlay lookup and transparency probing; `render_core` receives scalar runtime facts only.
+- Smoke: PASS after transient file-access backoff retries (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Extract shared render-plan performance packet
 
 - Added `render_core/render_plan_performance.py` as the single source for `layer_render_plan_performance_packet`.

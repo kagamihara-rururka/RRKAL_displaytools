@@ -62,7 +62,7 @@ function Invoke-CapturedNative {
     return Invoke-NativeWithRetry $FilePath $ArgumentList -CaptureOutput
 }
 
-Invoke-CheckedNative py @("-3", "-m", "py_compile", "rrkal_displaytools_qt_panel.py", "taichi_global_bathymetry.py", "pin_projection.py", "closed_loop_status.py", "render_core\render_plan_performance.py")
+Invoke-CheckedNative py @("-3", "-m", "py_compile", "rrkal_displaytools_qt_panel.py", "taichi_global_bathymetry.py", "pin_projection.py", "closed_loop_status.py", "render_core\render_plan.py", "render_core\render_plan_performance.py")
 Invoke-CheckedNative py @("-3", "profile_schema.py") | Out-Null
 Invoke-CheckedNative py @("-3", "scripts\validate_profiles.py")
 $launchPacketText = Invoke-CapturedNative py @("-3", "scripts\export_launch_packet.py", "--template", "fast_synthetic")
@@ -6520,6 +6520,12 @@ if ($renderPlanCombinedSource -notlike "*skip_hidden_missing_or_transparent_over
 }
 if ($renderPlanCombinedSource -notlike "*transparent_overlay*") {
     throw "Renderer render plan compose queue transparent skip marker is missing"
+}
+if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_step_runtime_state*") {
+    throw "Renderer render plan step runtime state core builder is missing"
+}
+if ($rendererSource -notlike "*build_layer_render_plan_step_runtime_state(*") {
+    throw "Renderer render plan compose queue does not use the core step runtime state builder"
 }
 if ($rendererSource -notlike "*self.compiled_layer_render_plan.get(`"compose_queue`")*") {
     throw "Renderer render plan render path does not use compose queue"

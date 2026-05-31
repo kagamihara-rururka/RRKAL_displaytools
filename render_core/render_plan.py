@@ -211,6 +211,37 @@ def build_layer_render_plan_compose_queue_entries(
     return queue, skipped_steps
 
 
+def build_layer_render_plan_step_runtime_state(
+    source_order: int,
+    step: dict[str, object] | object,
+    *,
+    visible: bool | None = True,
+    overlay_present: bool | None = None,
+    overlay_transparent: bool | None = False,
+) -> dict[str, object]:
+    if not isinstance(step, dict):
+        return {"source_order": source_order, "malformed": True}
+    kind = str(step.get("kind") or "")
+    if kind == "style_profile_postprocess":
+        return {"source_order": source_order, "kind": kind}
+    if visible is False:
+        return {"source_order": source_order, "kind": kind, "visible": False}
+    if overlay_present is not True:
+        return {
+            "source_order": source_order,
+            "kind": kind,
+            "visible": True,
+            "overlay_present": False,
+        }
+    return {
+        "source_order": source_order,
+        "kind": kind,
+        "visible": True,
+        "overlay_present": True,
+        "overlay_transparent": bool(overlay_transparent),
+    }
+
+
 def build_layer_render_plan_compose_runs(
     compose_queue: list[dict[str, object]],
     *,
