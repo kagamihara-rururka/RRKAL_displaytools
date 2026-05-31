@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Surface adapter payload status in review packet
+
+- Updated `scripts/inspect_render_plan_metadata_summary.ps1` to verify the adapter payload summary schema and `adapter_payload_status` field.
+- Updated `scripts/inspect_render_plan_review_packet.ps1` to expose adapter payload summary readiness through the no-GUI review packet.
+- Wired smoke to require adapter payload status visibility in both inspectors.
+- Smoke: PASS on rerun after an initial timeout and one transient file-access backoff (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add render plan adapter payload summary
 
 - Added `build_layer_render_plan_adapter_payload_summary` to `render_core/render_plan.py`.
