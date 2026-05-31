@@ -489,3 +489,23 @@ def build_layer_render_plan_cache_key(
         "layer_blend": {str(layer_id): layer_blend.get(layer_id) for layer_id in visible_layer_ids},
     }
     return json.dumps(payload, sort_keys=True, default=str)
+
+
+def build_layer_render_plan_cache_invalidation_reasons(
+    runtime_snapshot: dict[str, object],
+    cache_key: str,
+    cached_plan: object,
+    previous_key: object,
+) -> list[str]:
+    reasons: list[str] = []
+    dirty_flags = runtime_snapshot.get("dirty_flags") if isinstance(runtime_snapshot.get("dirty_flags"), dict) else {}
+    for flag, value in dirty_flags.items():
+        if value is True:
+            reasons.append(f"dirty_flag:{flag}")
+    if not isinstance(cached_plan, dict):
+        reasons.append("no_previous_compiled_plan")
+    elif previous_key != cache_key:
+        reasons.append("cache_key_changed")
+    if not reasons:
+        reasons.append("cache_key_match")
+    return reasons

@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Extract cache invalidation reasons builder
+
+- Added `build_layer_render_plan_cache_invalidation_reasons` to `render_core/render_plan.py`.
+- Updated `HybridRenderController.layer_render_plan_cache_invalidation_reasons` to pass cached-plan state into the extracted helper.
+- Updated source-map and module boundary docs for cache invalidation reason extraction.
+- Smoke: PASS after transient file-access backoff retries (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Extract render plan cache key builder
 
 - Added `build_layer_render_plan_cache_key` to `render_core/render_plan.py`.

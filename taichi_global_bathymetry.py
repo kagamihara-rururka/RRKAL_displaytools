@@ -25,6 +25,7 @@ from render_core.render_plan import (
     alpha_compose_transparent,
     build_layer_render_plan_bottleneck_recommendation,
     build_layer_render_plan_apply_path,
+    build_layer_render_plan_cache_invalidation_reasons,
     build_layer_render_plan_cache_key,
     build_layer_render_plan_compose_run_parity_contract,
     build_layer_render_plan_compose_runs,
@@ -14349,20 +14350,12 @@ class HybridRenderController:
         runtime_snapshot: dict[str, object],
         cache_key: str,
     ) -> list[str]:
-        reasons: list[str] = []
-        dirty_flags = runtime_snapshot.get("dirty_flags") if isinstance(runtime_snapshot.get("dirty_flags"), dict) else {}
-        for flag, value in dirty_flags.items():
-            if value is True:
-                reasons.append(f"dirty_flag:{flag}")
-        cached_plan = getattr(self, "compiled_layer_render_plan", None)
-        previous_key = getattr(self, "compiled_layer_render_plan_cache_key", None)
-        if not isinstance(cached_plan, dict):
-            reasons.append("no_previous_compiled_plan")
-        elif previous_key != cache_key:
-            reasons.append("cache_key_changed")
-        if not reasons:
-            reasons.append("cache_key_match")
-        return reasons
+        return build_layer_render_plan_cache_invalidation_reasons(
+            runtime_snapshot,
+            cache_key,
+            cached_plan=getattr(self, "compiled_layer_render_plan", None),
+            previous_key=getattr(self, "compiled_layer_render_plan_cache_key", None),
+        )
 
     def layer_render_plan_cache_invalidation_scope(
         self,
