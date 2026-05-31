@@ -6575,6 +6575,16 @@ if ($renderPlanMetadataSummaryInspector.status -ne "ready") {
 if ($renderPlanMetadataSummaryInspector.summary_field -ne "layer_render_plan_summary") {
     throw "Renderer render plan metadata summary inspector sidecar field missing"
 }
+$renderPlanReviewPacket = powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_render_plan_review_packet.ps1 | ConvertFrom-Json
+if ($renderPlanReviewPacket.schema -ne "rrkal_displaytools.render_plan_review_packet.v1") {
+    throw "Renderer render plan review packet schema missing"
+}
+if ($renderPlanReviewPacket.status -ne "ready") {
+    throw "Renderer render plan review packet is not ready"
+}
+if ($renderPlanReviewPacket.runtime_single_pass_enabled -ne $false) {
+    throw "Renderer render plan review packet must keep runtime single-pass disabled"
+}
 if ($rendererSource -notlike "*self.layer_render_plan_snapshot = self.layer_render_plan_runtime_snapshot*") {
     throw "Renderer render_if_needed does not update the layer render plan snapshot"
 }

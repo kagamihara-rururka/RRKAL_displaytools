@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Add render plan review packet inspector
+
+- Added `scripts/inspect_render_plan_review_packet.ps1` as a single no-GUI review entrypoint.
+- Aggregated metadata summary readiness and single-pass preflight readiness into one clone-first packet.
+- Wired smoke to require the review packet schema, ready status and disabled runtime single-pass gate.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add render plan metadata summary inspector
 
 - Added `scripts/inspect_render_plan_metadata_summary.ps1` for no-GUI metadata sidecar review.
