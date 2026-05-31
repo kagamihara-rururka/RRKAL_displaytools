@@ -6482,13 +6482,13 @@ if ($rendererSource -notlike "*transparent_overlay*") {
 if ($rendererSource -notlike "*self.compiled_layer_render_plan.get(`"compose_queue`")*") {
     throw "Renderer render plan render path does not use compose queue"
 }
-if ($rendererSource -notlike "*collapse_overlay_composition_passes*") {
+if ($renderPlanCombinedSource -notlike "*collapse_overlay_composition_passes*") {
     throw "Renderer render plan overlay bottleneck recommendation marker is missing"
 }
-if ($rendererSource -notlike "*reuse_static_geometry_batches*") {
+if ($renderPlanCombinedSource -notlike "*reuse_static_geometry_batches*") {
     throw "Renderer render plan static batch bottleneck recommendation marker is missing"
 }
-if ($rendererSource -notlike "*prototype_single_taichi_composite_pass*") {
+if ($renderPlanCombinedSource -notlike "*prototype_single_taichi_composite_pass*") {
     throw "Renderer render plan single pass bottleneck recommendation marker is missing"
 }
 if ($rendererSource -notlike "*phase_timing_ms*") {

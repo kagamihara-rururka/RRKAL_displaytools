@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Extract bottleneck recommendation builder
+
+- Added `build_layer_render_plan_bottleneck_recommendation` to `render_core/render_plan.py`.
+- Updated `HybridRenderController.layer_render_plan_bottleneck_recommendation` to delegate to the extracted pure helper.
+- Updated source-map and smoke gates for bottleneck recommendation markers in render-core.
+- Smoke: PASS after one transient file-access backoff retry (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Extract phase timing contract builder
 
 - Added `build_layer_render_plan_phase_timing_contract` to `render_core/render_plan.py`.

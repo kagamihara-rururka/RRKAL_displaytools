@@ -373,3 +373,56 @@ def build_layer_render_plan_phase_timing_contract(
         "summary_fields": ["total_ms", "phase_timing_ms", "slowest_phase_id", "frame_index"],
         "next_runtime_step": "wrap phase boundaries with perf_counter and write measured phase_timing_ms into renderer metadata",
     }
+
+
+def build_layer_render_plan_bottleneck_recommendation(
+    phase_timing_runtime: dict[str, object],
+) -> dict[str, object]:
+    timing = phase_timing_runtime if isinstance(phase_timing_runtime, dict) else {}
+    slowest_phase_id = str(timing.get("slowest_phase_id") or "unavailable")
+    measured = bool(timing.get("runtime_measurements_available"))
+    phase_plan = {
+        "prepare_batches": {
+            "recommended_next_action": "reuse_static_geometry_batches",
+            "target_helper": "HybridRenderController.compile_layer_render_plan",
+            "optimization_boundary": "cache renderer-ready hydrology, boundary, traffic and pin batches before composition",
+        },
+        "compose_overlays": {
+            "recommended_next_action": "collapse_overlay_composition_passes",
+            "target_helper": "HybridRenderController.apply_layer_render_plan_composition",
+            "optimization_boundary": "replace per-layer alpha/runtime helper sequence with fewer unified composite passes",
+        },
+        "postprocess": {
+            "recommended_next_action": "fold_or_defer_style_profile_postprocess",
+            "target_helper": "apply_style_profile",
+            "optimization_boundary": "avoid repeated full-frame tone/style work when style profile is unchanged",
+        },
+        "future_single_pass_candidate": {
+            "recommended_next_action": "prototype_single_taichi_composite_pass",
+            "target_helper": "HybridRenderController.apply_layer_render_plan_composition",
+            "optimization_boundary": "consume compiled layer state in one Taichi render/composite path",
+        },
+    }
+    selected = phase_plan.get(
+        slowest_phase_id,
+        {
+            "recommended_next_action": "collect_more_runtime_phase_timing",
+            "target_helper": "HybridRenderController.layer_render_plan_phase_timing_runtime_packet",
+            "optimization_boundary": "wait for measured phase_timing_ms before changing render behavior",
+        },
+    )
+    return {
+        "schema": "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1",
+        "source": "HybridRenderController.layer_render_plan_bottleneck_recommendation",
+        "status": "ready" if measured else "waiting_for_runtime_metadata",
+        "basis_schema": timing.get("schema", "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1"),
+        "slowest_phase_id": slowest_phase_id,
+        "slowest_phase_ms": timing.get("slowest_phase_ms", 0.0),
+        "total_ms": timing.get("total_ms", 0.0),
+        "slow_frame": bool(timing.get("slow_frame", False)),
+        "recommended_next_action": selected["recommended_next_action"],
+        "target_helper": selected["target_helper"],
+        "optimization_boundary": selected["optimization_boundary"],
+        "runtime_optimization_applied": False,
+        "next_commit_scope": "implement the recommended action only after smoke-gated phase timing confirms the bottleneck",
+    }
