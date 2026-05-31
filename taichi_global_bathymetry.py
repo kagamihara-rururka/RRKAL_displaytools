@@ -27,6 +27,7 @@ from render_core.render_plan import (
     build_layer_render_plan_apply_path,
     build_layer_render_plan_batch_decisions,
     build_layer_render_plan_composition_steps,
+    build_layer_render_plan_compose_queue_entries,
     build_layer_render_plan_compose_queue_packet,
     build_layer_render_plan_cache_invalidation_reasons,
     build_layer_render_plan_cache_invalidation_scope,
@@ -14056,36 +14057,35 @@ class HybridRenderController:
         self,
         composition_steps: list[dict[str, object]],
     ) -> dict[str, object]:
-        queue: list[dict[str, object]] = []
-        skipped_steps: list[dict[str, object]] = []
+        step_runtime_states: list[dict[str, object]] = []
         for index, step in enumerate(composition_steps):
             if not isinstance(step, dict):
-                skipped_steps.append({"source_order": index, "id": "unknown_step", "reason": "malformed_step"})
+                step_runtime_states.append({"source_order": index, "malformed": True})
                 continue
-            step_id = str(step.get("id") or step.get("layer_id") or f"step_{index}")
             kind = str(step.get("kind") or "")
             if kind == "style_profile_postprocess":
-                queued = dict(step)
-                queued["source_order"] = index
-                queued["queue_order"] = len(queue)
-                queued["compose_queue_reason"] = "postprocess_required"
-                queue.append(queued)
+                step_runtime_states.append({"source_order": index, "kind": kind})
                 continue
             if not self.layer_render_plan_step_visible(step):
-                skipped_steps.append({"source_order": index, "id": step_id, "kind": kind, "reason": "hidden_layer"})
+                step_runtime_states.append({"source_order": index, "kind": kind, "visible": False})
                 continue
             overlay = self.layer_render_plan_step_overlay(step)
             if overlay is None:
-                skipped_steps.append({"source_order": index, "id": step_id, "kind": kind, "reason": "missing_overlay"})
+                step_runtime_states.append({"source_order": index, "kind": kind, "visible": True, "overlay_present": False})
                 continue
-            if self.layer_render_plan_overlay_is_transparent(overlay):
-                skipped_steps.append({"source_order": index, "id": step_id, "kind": kind, "reason": "transparent_overlay"})
-                continue
-            queued = dict(step)
-            queued["source_order"] = index
-            queued["queue_order"] = len(queue)
-            queued["compose_queue_reason"] = "executable_overlay"
-            queue.append(queued)
+            step_runtime_states.append(
+                {
+                    "source_order": index,
+                    "kind": kind,
+                    "visible": True,
+                    "overlay_present": True,
+                    "overlay_transparent": self.layer_render_plan_overlay_is_transparent(overlay),
+                }
+            )
+        queue, skipped_steps = build_layer_render_plan_compose_queue_entries(
+            composition_steps,
+            step_runtime_states,
+        )
         compose_runs_packet = self.layer_render_plan_compose_runs(queue)
         compose_run_parity_contract = self.layer_render_plan_compose_run_parity_contract(
             compose_runs_packet.get("runs", [])

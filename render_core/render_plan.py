@@ -174,6 +174,43 @@ def build_layer_render_plan_compose_queue_packet(
     }
 
 
+def build_layer_render_plan_compose_queue_entries(
+    composition_steps: list[dict[str, object]],
+    step_runtime_states: list[dict[str, object]],
+) -> tuple[list[dict[str, object]], list[dict[str, object]]]:
+    queue: list[dict[str, object]] = []
+    skipped_steps: list[dict[str, object]] = []
+    for index, step in enumerate(composition_steps):
+        state = step_runtime_states[index] if index < len(step_runtime_states) and isinstance(step_runtime_states[index], dict) else {}
+        if not isinstance(step, dict):
+            skipped_steps.append({"source_order": index, "id": "unknown_step", "reason": "malformed_step"})
+            continue
+        step_id = str(step.get("id") or step.get("layer_id") or f"step_{index}")
+        kind = str(step.get("kind") or "")
+        if kind == "style_profile_postprocess":
+            queued = dict(step)
+            queued["source_order"] = index
+            queued["queue_order"] = len(queue)
+            queued["compose_queue_reason"] = "postprocess_required"
+            queue.append(queued)
+            continue
+        if state.get("visible") is False:
+            skipped_steps.append({"source_order": index, "id": step_id, "kind": kind, "reason": "hidden_layer"})
+            continue
+        if state.get("overlay_present") is not True:
+            skipped_steps.append({"source_order": index, "id": step_id, "kind": kind, "reason": "missing_overlay"})
+            continue
+        if state.get("overlay_transparent") is True:
+            skipped_steps.append({"source_order": index, "id": step_id, "kind": kind, "reason": "transparent_overlay"})
+            continue
+        queued = dict(step)
+        queued["source_order"] = index
+        queued["queue_order"] = len(queue)
+        queued["compose_queue_reason"] = "executable_overlay"
+        queue.append(queued)
+    return queue, skipped_steps
+
+
 def build_layer_render_plan_compose_runs(
     compose_queue: list[dict[str, object]],
     *,

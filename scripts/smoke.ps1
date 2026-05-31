@@ -6476,7 +6476,7 @@ if ($renderPlanCombinedSource -notlike "*compose_merge_candidate_run_count*") {
 if ($renderPlanCombinedSource -notlike "*skip_hidden_missing_or_transparent_overlays_before_composition*") {
     throw "Renderer render plan compose queue optimization marker is missing"
 }
-if ($rendererSource -notlike "*transparent_overlay*") {
+if ($renderPlanCombinedSource -notlike "*transparent_overlay*") {
     throw "Renderer render plan compose queue transparent skip marker is missing"
 }
 if ($rendererSource -notlike "*self.compiled_layer_render_plan.get(`"compose_queue`")*") {

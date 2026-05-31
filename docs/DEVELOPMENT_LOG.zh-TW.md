@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Extract compose queue classifier helper
+
+- Added `build_layer_render_plan_compose_queue_entries` to `render_core/render_plan.py`.
+- Kept overlay object lookup and transparency checks in the controller, but moved queue/skipped-step classification into render-core.
+- Updated source-map and smoke gate for relocated `transparent_overlay` marker.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Extract runtime snapshot builder
 
 - Added `build_layer_render_plan_runtime_snapshot` to `render_core/render_plan.py`.
