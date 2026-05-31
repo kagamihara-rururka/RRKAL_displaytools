@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-31 - Update capability summary display runtime section
+
+- Updated `docs/CAPABILITY_SUMMARY.zh-TW.md` to include the new DisplayShell / Canvas / Render Matrix and display runtime contract capabilities.
+- Added the no-GUI review commands for display shell, runtime contracts and runtime handoff to the human-readable capability summary.
+- Smoke: PASS after transient file-access backoff retries (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add display shell docs index entry
 
 - Added `DISPLAY_SHELL_RENDER_MATRIX.zh-TW.md` to `docs/DOCS_INDEX.zh-TW.md`.

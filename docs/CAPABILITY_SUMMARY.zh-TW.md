@@ -10,9 +10,17 @@
 - `scripts/render_compose_parity_smoke.ps1` now separates `precommit_gate_passed` from `visual_parity_passed`, so contract-only checks do not trigger failed-smoke notifications while parity artifacts are still pending.
 - Real artifact diff failures still return `passed=false` and `notification_level=error`; runtime compose merge remains disabled until zero-diff evidence exists.
 
-最後更新：2026-05-30
+最後更新：2026-05-31
 
 ## 目前已有功能
+
+### Display shell / runtime contracts
+
+- `display_core/` 已建立 renderer-package-free 的 DisplayShell / Canvas / Layer / Render Matrix 合約。
+- `display_core.render_matrix` 目前提供 EarthCanvas、TimeSeriesCanvas、sample ViewModels、metadata-only ViewModel render plans、renderer registry sample adapters 與 display shell capability packet。
+- `display_runtime/` 已建立 EarthCanvas 與 TimeSeriesCanvas 的 runtime landing-zone skeleton，目前只提供 contract packet、runtime request/result protocol 與 sample runtime requests，不搬動 Taichi runtime，也不引入 chart backend。
+- No-GUI review commands: `py -3 scripts\export_display_shell_render_matrix.py`、`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_display_shell_render_matrix.ps1`、`py -3 scripts\export_display_runtime_contracts.py`、`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_display_runtime_contracts.ps1`、`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_display_runtime_handoff.ps1`。
+- Smoke 會驗證 display shell exporter/check、display_core/display_runtime import boundary、runtime contracts、sample runtime requests、runtime handoff inspector 與 capability summary 對齊。
 
 ### Qt-first operator UI
 
