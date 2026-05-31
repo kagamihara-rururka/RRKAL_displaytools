@@ -8,7 +8,7 @@ $RepoRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 Set-Location $RepoRoot
 
 $scriptName = "scripts/export_visual_contract_review_packet.ps1"
-$indexScript = "scripts/list_visual_contract_inspectors.ps1"
+$indexScript = Join-Path $RepoRoot "scripts\list_visual_contract_inspectors.ps1"
 
 if ($ContractOnly) {
     [ordered]@{
@@ -24,7 +24,7 @@ if ($ContractOnly) {
     exit 0
 }
 
-$indexText = & powershell -NoProfile -ExecutionPolicy Bypass -File $indexScript
+$indexText = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $indexScript
 if ($LASTEXITCODE -ne 0) {
     throw "Visual contract inspector index export failed"
 }

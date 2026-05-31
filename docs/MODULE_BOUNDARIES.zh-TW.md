@@ -73,7 +73,7 @@
 
 ## 已落地的 render-plan seam
 
-目前實際落地的第一個 renderer seam 是 `render_core/render_plan.py`。
+目前實際落地的第一個 renderer seam 是 `render_core/render_plan.py`，並新增 `render_core/render_plan_performance.py` 收斂 clone-first performance handoff contract。
 
 `render_core/render_plan.py` 負責：
 
@@ -89,6 +89,7 @@
 - adapter payload completeness contract；payload 轉成 primary implementation 前必須先通過 required-fields gate。
 - from-payload compiled/reused builder wrapper；controller 開始以 normalized payload 作為主要 contract，舊長參數 builder 暫留相容。
 - compose queue classifier：只根據 controller 提供的 step runtime state 分類 queue / skipped steps。
+- `layer_render_plan_performance_packet` 由 `render_core/render_plan_performance.py` 單一提供；renderer monolith、Qt panel、no-GUI launch exporter 只 import，不再維護本地鏡像。
 
 `HybridRenderController` 仍負責：
 

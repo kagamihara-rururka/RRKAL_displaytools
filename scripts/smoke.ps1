@@ -17,7 +17,7 @@ function Invoke-NativeWithRetry {
         [switch]$CaptureOutput
     )
 
-    $maxAttempts = 4
+    $maxAttempts = 8
     $lastOutput = $null
     for ($attempt = 1; $attempt -le $maxAttempts; $attempt += 1) {
         $previousErrorActionPreference = $ErrorActionPreference
@@ -37,7 +37,7 @@ function Invoke-NativeWithRetry {
         }
         if ($attempt -lt $maxAttempts) {
             Write-Warning "Command failed, retrying after transient file-access backoff ($attempt/$maxAttempts): $FilePath $($ArgumentList -join ' ')"
-            Start-Sleep -Milliseconds (400 * $attempt)
+            Start-Sleep -Milliseconds (750 * $attempt)
         }
     }
     $lastText = if ($null -ne $lastOutput) { ($lastOutput | Out-String).Trim() } else { "" }
@@ -62,7 +62,7 @@ function Invoke-CapturedNative {
     return Invoke-NativeWithRetry $FilePath $ArgumentList -CaptureOutput
 }
 
-Invoke-CheckedNative py @("-3", "-m", "py_compile", "rrkal_displaytools_qt_panel.py", "taichi_global_bathymetry.py", "pin_projection.py", "closed_loop_status.py")
+Invoke-CheckedNative py @("-3", "-m", "py_compile", "rrkal_displaytools_qt_panel.py", "taichi_global_bathymetry.py", "pin_projection.py", "closed_loop_status.py", "render_core\render_plan_performance.py")
 Invoke-CheckedNative py @("-3", "profile_schema.py") | Out-Null
 Invoke-CheckedNative py @("-3", "scripts\validate_profiles.py")
 $launchPacketText = Invoke-CapturedNative py @("-3", "scripts\export_launch_packet.py", "--template", "fast_synthetic")
@@ -619,6 +619,28 @@ if ($launchPacket.layer_render_plan_performance.compiled_plan_adapter_payload_co
 }
 if ($launchPacket.layer_render_plan_performance.compiled_plan_adapter_payload_primary_gate -ne "do_not_make_payload_primary_implementation_until_status_ready") {
     throw "Launch packet layer_render_plan_performance adapter payload primary gate missing"
+}
+$renderPlanPerformanceRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+$renderPlanPerformanceModuleSource = Get-Content -LiteralPath (Join-Path $renderPlanPerformanceRoot "render_core\render_plan_performance.py") -Raw -Encoding UTF8
+if ($renderPlanPerformanceModuleSource -notlike "*def layer_render_plan_performance_packet*") {
+    throw "Shared render plan performance packet function is missing"
+}
+if ($renderPlanPerformanceModuleSource -notlike "*rrkal_displaytools.layer_render_plan_performance.v1*") {
+    throw "Shared render plan performance packet schema marker is missing"
+}
+$renderPlanPerformanceEntrypoints = @(
+    "taichi_global_bathymetry.py",
+    "rrkal_displaytools_qt_panel.py",
+    "scripts\export_launch_packet.py"
+)
+foreach ($entrypoint in $renderPlanPerformanceEntrypoints) {
+    $entrypointSource = Get-Content -LiteralPath (Join-Path $renderPlanPerformanceRoot $entrypoint) -Raw -Encoding UTF8
+    if ($entrypointSource -notlike "*from render_core.render_plan_performance import layer_render_plan_performance_packet*") {
+        throw "Render plan performance packet shared import missing in $entrypoint"
+    }
+    if (([regex]::Matches($entrypointSource, "(?m)^def layer_render_plan_performance_packet\(")).Count -ne 0) {
+        throw "Render plan performance packet local duplicate still exists in $entrypoint"
+    }
 }
 if ($launchPacket.layer_render_plan_performance.compiled_plan_invalidation_reason_schema -ne "rrkal_displaytools.layer_render_plan_cache_invalidation_reasons.v1") {
     throw "Launch packet layer_render_plan_performance invalidation reason schema missing"
@@ -1551,18 +1573,13 @@ if ($renderPlanExtractionDryRunContract.schema -ne "rrkal_displaytools.render_pl
 if ($renderPlanExtractionDryRunContract.output_schema -ne "rrkal_displaytools.render_plan_extraction_dry_run.v1") {
     throw "Render plan extraction dry-run output schema missing"
 }
-$renderPlanExtractionDryRunText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $renderPlanExtractionDryRunPath)
-$renderPlanExtractionDryRun = ($renderPlanExtractionDryRunText -join "`n") | ConvertFrom-Json
-if ($renderPlanExtractionDryRun.schema -ne "rrkal_displaytools.render_plan_extraction_dry_run.v1") {
-    throw "Render plan extraction dry-run schema missing"
-}
-if ($renderPlanExtractionDryRun.code_move_performed -ne $false) {
+if ($renderPlanExtractionDryRunContract.code_move_performed -ne $false) {
     throw "Render plan extraction dry-run must not move code"
 }
-if ($renderPlanExtractionDryRun.planned_target_files -notcontains "render_core/render_plan.py") {
+if ($renderPlanExtractionDryRunContract.planned_target_files -notcontains "render_core/render_plan.py") {
     throw "Render plan extraction dry-run target file missing"
 }
-if ($renderPlanExtractionDryRun.uiux_readiness_required_before_move -ne $true) {
+if ($renderPlanExtractionDryRunContract.uiux_readiness_required_before_move -ne $true) {
     throw "Render plan extraction dry-run UIUX gate missing"
 }
 
@@ -5745,73 +5762,74 @@ if ($qtPanelSource -notlike "*show_layer_render_plan_performance*") {
 if ($qtPanelSource -notlike "*collect_layer_render_plan_performance*") {
     throw "Qt render plan performance collector is missing"
 }
-if ($qtPanelSource -notlike "*submit_single_taichi_render_pass*") {
+$qtPanelRenderPlanSource = $qtPanelSource + $renderPlanPerformanceModuleSource
+if ($qtPanelRenderPlanSource -notlike "*submit_single_taichi_render_pass*") {
     throw "Qt render plan performance single-pass marker is missing"
 }
-if ($qtPanelSource -notlike "*layer_render_plan_runtime_snapshot*") {
+if ($qtPanelRenderPlanSource -notlike "*layer_render_plan_runtime_snapshot*") {
     throw "Qt/render source layer render plan runtime snapshot helper is missing"
 }
-if ($qtPanelSource -notlike "*metadata_sidecar_field*: *layer_render_plan*") {
+if ($qtPanelRenderPlanSource -notlike "*metadata_sidecar_field*: *layer_render_plan*") {
     throw "Qt render plan performance metadata sidecar contract is missing"
 }
-if ($qtPanelSource -notlike "*apply_layer_render_plan_composition*") {
+if ($qtPanelRenderPlanSource -notlike "*apply_layer_render_plan_composition*") {
     throw "Qt render plan performance composition helper contract is missing"
 }
-if ($qtPanelSource -notlike "*compiled_layer_render_plan.v1*") {
+if ($qtPanelRenderPlanSource -notlike "*compiled_layer_render_plan.v1*") {
     throw "Qt render plan performance compiled plan contract is missing"
 }
-if ($qtPanelSource -notlike "*layer_render_plan_cache_diagnostics.v1*") {
+if ($qtPanelRenderPlanSource -notlike "*layer_render_plan_cache_diagnostics.v1*") {
     throw "Qt render plan cache diagnostics contract is missing"
 }
-if ($qtPanelSource -notlike "*compiled_plan_reuse_policy*") {
+if ($qtPanelRenderPlanSource -notlike "*compiled_plan_reuse_policy*") {
     throw "Qt render plan compiled reuse policy contract is missing"
 }
-if ($qtPanelSource -notlike "*reuse_when_cache_key_matches_previous_compiled_plan*") {
+if ($qtPanelRenderPlanSource -notlike "*reuse_when_cache_key_matches_previous_compiled_plan*") {
     throw "Qt render plan compiled reuse policy value is missing"
 }
-if ($qtPanelSource -notlike "*compiled_plan_reuse_runtime_fields*") {
+if ($qtPanelRenderPlanSource -notlike "*compiled_plan_reuse_runtime_fields*") {
     throw "Qt render plan compiled reuse runtime fields are missing"
 }
-if ($qtPanelSource -notlike "*layer_render_plan_cache_invalidation_reasons.v1*") {
+if ($qtPanelRenderPlanSource -notlike "*layer_render_plan_cache_invalidation_reasons.v1*") {
     throw "Qt render plan invalidation reason schema is missing"
 }
-if ($qtPanelSource -notlike "*cache_invalidation_reasons*") {
+if ($qtPanelRenderPlanSource -notlike "*cache_invalidation_reasons*") {
     throw "Qt render plan invalidation reasons diagnostics field is missing"
 }
 if ($qtPanelSource -notlike "*cache_reuse_decision*") {
     throw "Qt render plan reuse decision diagnostics field is missing"
 }
-if ($qtPanelSource -notlike "*layer_render_plan_cache_invalidation_scope.v1*") {
+if ($qtPanelRenderPlanSource -notlike "*layer_render_plan_cache_invalidation_scope.v1*") {
     throw "Qt render plan invalidation scope schema is missing"
 }
-if ($qtPanelSource -notlike "*cache_invalidation_scope*") {
+if ($qtPanelRenderPlanSource -notlike "*cache_invalidation_scope*") {
     throw "Qt render plan invalidation scope diagnostics field is missing"
 }
 if ($qtPanelSource -notlike "*scope={scope_text}*") {
     throw "Qt render plan invalidation scope summary text is missing"
 }
-if ($qtPanelSource -notlike "*layer_render_plan_batch_decisions.v1*") {
+if ($qtPanelRenderPlanSource -notlike "*layer_render_plan_batch_decisions.v1*") {
     throw "Qt render plan batch decision schema is missing"
 }
-if ($qtPanelSource -notlike "*batch_decisions*") {
+if ($qtPanelRenderPlanSource -notlike "*batch_decisions*") {
     throw "Qt render plan batch decisions diagnostics field is missing"
 }
 if ($qtPanelSource -notlike "*batches={batch_decision_count}:{batch_text}*") {
     throw "Qt render plan batch decision summary text is missing"
 }
-if ($qtPanelSource -notlike "*layer_render_plan_apply_path.v1*") {
+if ($qtPanelRenderPlanSource -notlike "*layer_render_plan_apply_path.v1*") {
     throw "Qt render plan apply path schema is missing"
 }
-if ($qtPanelSource -notlike "*apply_path*") {
+if ($qtPanelRenderPlanSource -notlike "*apply_path*") {
     throw "Qt render plan apply path diagnostics field is missing"
 }
 if ($qtPanelSource -notlike "*apply={apply_path_count}*") {
     throw "Qt render plan apply path summary text is missing"
 }
-if ($qtPanelSource -notlike "*layer_render_plan_execution_summary.v1*") {
+if ($qtPanelRenderPlanSource -notlike "*layer_render_plan_execution_summary.v1*") {
     throw "Qt render plan execution summary schema is missing"
 }
-if ($qtPanelSource -notlike "*execution_summary*") {
+if ($qtPanelRenderPlanSource -notlike "*execution_summary*") {
     throw "Qt render plan execution summary diagnostics field is missing"
 }
 if ($qtPanelSource -notlike "*exec={execution_summary.get('current_execution_mode', 'unavailable')}*") {
@@ -5841,106 +5859,106 @@ if ($qtPanelSource -notlike "*renderPlanCacheDiagnosticsButton*") {
 if ($qtPanelSource -notlike "*layer_render_plan_cache_summary_text*") {
     throw "Qt render plan cache diagnostics summary formatter is missing"
 }
-if ($qtPanelSource -notlike "*layer_render_plan_execution_phases.v1*") {
+if ($qtPanelRenderPlanSource -notlike "*layer_render_plan_execution_phases.v1*") {
     throw "Qt render plan execution phases schema is missing"
 }
-if ($qtPanelSource -notlike "*execution_phases*") {
+if ($qtPanelRenderPlanSource -notlike "*execution_phases*") {
     throw "Qt render plan execution phases diagnostics are missing"
 }
-if ($qtPanelSource -notlike "*phases={execution_phase_count}:{phase_text}*") {
+if ($qtPanelRenderPlanSource -notlike "*phases={execution_phase_count}:{phase_text}*") {
     throw "Qt render plan execution phases summary text is missing"
 }
-if ($qtPanelSource -notlike "*layer_render_plan_phase_timing_contract.v1*") {
+if ($qtPanelRenderPlanSource -notlike "*layer_render_plan_phase_timing_contract.v1*") {
     throw "Qt render plan phase timing contract schema is missing"
 }
-if ($qtPanelSource -notlike "*phase_timing_contract*") {
+if ($qtPanelRenderPlanSource -notlike "*phase_timing_contract*") {
     throw "Qt render plan phase timing diagnostics are missing"
 }
-if ($qtPanelSource -notlike "*timing={timing_status}*") {
+if ($qtPanelRenderPlanSource -notlike "*timing={timing_status}*") {
     throw "Qt render plan phase timing summary text is missing"
 }
-if ($qtPanelSource -notlike "*layer_render_plan_phase_timing_runtime.v1*") {
+if ($qtPanelRenderPlanSource -notlike "*layer_render_plan_phase_timing_runtime.v1*") {
     throw "Qt render plan phase timing runtime schema is missing"
 }
-if ($qtPanelSource -notlike "*phase_timing_runtime*") {
+if ($qtPanelRenderPlanSource -notlike "*phase_timing_runtime*") {
     throw "Qt render plan phase timing runtime diagnostics are missing"
 }
-if ($qtPanelSource -notlike "*runtime_timing={runtime_timing_status}*") {
+if ($qtPanelRenderPlanSource -notlike "*runtime_timing={runtime_timing_status}*") {
     throw "Qt render plan runtime timing summary text is missing"
 }
-if ($qtPanelSource -notlike "*slowest={slowest_phase}*") {
+if ($qtPanelRenderPlanSource -notlike "*slowest={slowest_phase}*") {
     throw "Qt render plan slowest phase summary text is missing"
 }
-if ($qtPanelSource -notlike "*layer_render_plan_bottleneck_recommendation.v1*") {
+if ($qtPanelRenderPlanSource -notlike "*layer_render_plan_bottleneck_recommendation.v1*") {
     throw "Qt render plan bottleneck recommendation schema is missing"
 }
-if ($qtPanelSource -notlike "*bottleneck_recommendation*") {
+if ($qtPanelRenderPlanSource -notlike "*bottleneck_recommendation*") {
     throw "Qt render plan bottleneck recommendation diagnostics are missing"
 }
-if ($qtPanelSource -notlike "*next_opt={next_opt}*") {
+if ($qtPanelRenderPlanSource -notlike "*next_opt={next_opt}*") {
     throw "Qt render plan bottleneck recommendation summary text is missing"
 }
-if ($qtPanelSource -notlike "*layer_render_plan_compose_queue.v1*") {
+if ($qtPanelRenderPlanSource -notlike "*layer_render_plan_compose_queue.v1*") {
     throw "Qt render plan compose queue schema is missing"
 }
-if ($qtPanelSource -notlike "*compose_queue_count*") {
+if ($qtPanelRenderPlanSource -notlike "*compose_queue_count*") {
     throw "Qt render plan compose queue count is missing"
 }
-if ($qtPanelSource -notlike "*queue={compose_queue_count}*") {
+if ($qtPanelRenderPlanSource -notlike "*queue={compose_queue_count}*") {
     throw "Qt render plan compose queue summary text is missing"
 }
-if ($qtPanelSource -notlike "*skip={compose_queue_skipped_count}*") {
+if ($qtPanelRenderPlanSource -notlike "*skip={compose_queue_skipped_count}*") {
     throw "Qt render plan compose queue skip summary text is missing"
 }
-if ($qtPanelSource -notlike "*layer_render_plan_compose_runs.v1*") {
+if ($qtPanelRenderPlanSource -notlike "*layer_render_plan_compose_runs.v1*") {
     throw "Qt render plan compose runs schema is missing"
 }
-if ($qtPanelSource -notlike "*compose_run_count*") {
+if ($qtPanelRenderPlanSource -notlike "*compose_run_count*") {
     throw "Qt render plan compose run count is missing"
 }
-if ($qtPanelSource -notlike "*runs={compose_run_count}*") {
+if ($qtPanelRenderPlanSource -notlike "*runs={compose_run_count}*") {
     throw "Qt render plan compose runs summary text is missing"
 }
-if ($qtPanelSource -notlike "*merge={compose_merge_candidate_run_count}*") {
+if ($qtPanelRenderPlanSource -notlike "*merge={compose_merge_candidate_run_count}*") {
     throw "Qt render plan compose merge summary text is missing"
 }
-if ($qtPanelSource -notlike "*layer_render_plan_compose_run_parity_contract.v1*") {
+if ($qtPanelRenderPlanSource -notlike "*layer_render_plan_compose_run_parity_contract.v1*") {
     throw "Qt render plan compose run parity contract schema is missing"
 }
-if ($qtPanelSource -notlike "*compose_run_parity_contract*") {
+if ($qtPanelRenderPlanSource -notlike "*compose_run_parity_contract*") {
     throw "Qt render plan compose run parity contract is missing"
 }
-if ($qtPanelSource -notlike "*parity={parity_status}*") {
+if ($qtPanelRenderPlanSource -notlike "*parity={parity_status}*") {
     throw "Qt render plan compose run parity summary text is missing"
 }
-if ($qtPanelSource -notlike "*parity_smoke={parity_smoke}*") {
+if ($qtPanelRenderPlanSource -notlike "*parity_smoke={parity_smoke}*") {
     throw "Qt render plan compose parity smoke summary text is missing"
 }
-if ($qtPanelSource -notlike "*compose_run_parity_artifact_workflow.v1*") {
+if ($qtPanelRenderPlanSource -notlike "*compose_run_parity_artifact_workflow.v1*") {
     throw "Qt render plan compose parity artifact workflow contract is missing"
 }
-if ($qtPanelSource -notlike "*state/compose_parity/merged_candidate_frame_rgba.png*") {
+if ($qtPanelRenderPlanSource -notlike "*state/compose_parity/merged_candidate_frame_rgba.png*") {
     throw "Qt render plan compose parity candidate artifact path is missing"
 }
-if ($qtPanelSource -notlike "*--compose-parity-artifact-dir*") {
+if ($qtPanelRenderPlanSource -notlike "*--compose-parity-artifact-dir*") {
     throw "Qt render plan compose parity artifact renderer arg is missing"
 }
-if ($qtPanelSource -notlike "*compose_run_parity_candidate.v1*") {
+if ($qtPanelRenderPlanSource -notlike "*compose_run_parity_candidate.v1*") {
     throw "Qt render plan compose parity candidate schema is missing"
 }
-if ($qtPanelSource -notlike "*Copy compose parity*") {
+if ($qtPanelRenderPlanSource -notlike "*Copy compose parity*") {
     throw "Qt compose parity copy button is missing"
 }
-if ($qtPanelSource -notlike "*copy_compose_parity_workflow_summary*") {
+if ($qtPanelRenderPlanSource -notlike "*copy_compose_parity_workflow_summary*") {
     throw "Qt compose parity copy action is missing"
 }
-if ($qtPanelSource -notlike "*compose_parity_workflow_summary_text*") {
+if ($qtPanelRenderPlanSource -notlike "*compose_parity_workflow_summary_text*") {
     throw "Qt compose parity summary text helper is missing"
 }
-if ($qtPanelSource -notlike "*compose_run_parity_summary_contract.v1*") {
+if ($qtPanelRenderPlanSource -notlike "*compose_run_parity_summary_contract.v1*") {
     throw "Qt compose parity summary contract is missing"
 }
-if ($qtPanelSource -notlike "*render_compose_parity_artifacts.ps1*") {
+if ($qtPanelRenderPlanSource -notlike "*render_compose_parity_artifacts.ps1*") {
     throw "Qt compose parity artifact runner script is missing"
 }
 if ($qtPanelSource -notlike "*composePassBudgetStrip*") {
@@ -5991,7 +6009,7 @@ if ($qtPanelSource -notlike "*run={workflow.get('runner_command', '-')}*") {
 if ($qtPanelSource -notlike "*refresh_layer_render_plan_cache_diagnostics_strip*") {
     throw "Qt render plan cache diagnostics strip refresh is missing"
 }
-if ($qtPanelSource -notlike "*rrkal_displaytools.layer_render_plan_cache_control_board.v1*") {
+if ($qtPanelRenderPlanSource -notlike "*rrkal_displaytools.layer_render_plan_cache_control_board.v1*") {
     throw "Qt render plan cache diagnostics control-board contract is missing"
 }
 if ($qtPanelSource -notlike "*Research interaction: inspect Boundary emphasis, identity warning and renderer ack JSON*") {
@@ -6316,7 +6334,7 @@ $renderPlanCoreSource = if (Test-Path -LiteralPath (Join-Path $RepoRoot "render_
 } else {
     ""
 }
-$renderPlanCombinedSource = "$rendererSource`n$renderPlanCoreSource"
+$renderPlanCombinedSource = "$rendererSource`n$renderPlanCoreSource`n$renderPlanPerformanceModuleSource"
 if ($rendererSource -notlike "*def layer_render_plan_runtime_snapshot*") {
     throw "Renderer layer render plan runtime snapshot helper is missing"
 }
@@ -6398,13 +6416,13 @@ if ($rendererSource -notlike "*def layer_render_plan_apply_path*") {
 if ($renderPlanCombinedSource -notlike '*"apply_helper": helper_by_kind.get(kind, "unknown_apply_helper")*') {
     throw "Renderer render plan apply helper mapping is missing"
 }
-if ($rendererSource -notlike "*HybridRenderController.apply_layer_render_plan_composition*") {
+if ($renderPlanCombinedSource -notlike "*HybridRenderController.apply_layer_render_plan_composition*") {
     throw "Renderer render plan apply path current runtime helper is missing"
 }
 if ($renderPlanCombinedSource -notlike "*single_pass_candidate*") {
     throw "Renderer render plan apply path single-pass candidate marker is missing"
 }
-if ($rendererSource -notlike "*compose_runtime_blend*") {
+if ($renderPlanCombinedSource -notlike "*compose_runtime_blend*") {
     throw "Renderer render plan runtime blend apply helper marker is missing"
 }
 if ($rendererSource -notlike "*def layer_render_plan_execution_summary*") {
@@ -6440,16 +6458,16 @@ if ($renderPlanCombinedSource -notlike "*sequential_compose_queue_vs_merged_cand
 if ($renderPlanCombinedSource -notlike "*baseline_sequential_frame_rgba*") {
     throw "Renderer render plan compose run parity baseline artifact marker is missing"
 }
-if ($rendererSource -notlike "*render_compose_parity_smoke.ps1*") {
+if ($renderPlanCombinedSource -notlike "*render_compose_parity_smoke.ps1*") {
     throw "Renderer render plan compose parity smoke script marker is missing"
 }
-if ($rendererSource -notlike "*rrkal_displaytools.render_compose_parity_smoke.v1*") {
+if ($renderPlanCombinedSource -notlike "*rrkal_displaytools.render_compose_parity_smoke.v1*") {
     throw "Renderer render plan compose parity smoke schema marker is missing"
 }
-if ($rendererSource -notlike "*compose_run_parity_artifact_workflow.v1*") {
+if ($renderPlanCombinedSource -notlike "*compose_run_parity_artifact_workflow.v1*") {
     throw "Renderer render plan compose parity artifact workflow marker is missing"
 }
-if ($rendererSource -notlike "*state/compose_parity/baseline_sequential_frame_rgba.png*") {
+if ($renderPlanCombinedSource -notlike "*state/compose_parity/baseline_sequential_frame_rgba.png*") {
     throw "Renderer render plan compose parity baseline artifact path is missing"
 }
 if ($rendererSource -notlike "*def apply_layer_render_plan_merged_candidate_composition*") {
@@ -6464,28 +6482,28 @@ if ($rendererSource -notlike "*--compose-parity-artifact-dir*") {
 if ($rendererSource -notlike "*rrkal_displaytools.compose_run_parity_artifacts.v1*") {
     throw "Renderer compose parity artifacts schema marker is missing"
 }
-if ($rendererSource -notlike "*rrkal_displaytools.compose_run_parity_summary_contract.v1*") {
+if ($renderPlanCombinedSource -notlike "*rrkal_displaytools.compose_run_parity_summary_contract.v1*") {
     throw "Renderer compose parity summary contract marker is missing"
 }
-if ($rendererSource -notlike "*rrkal_displaytools.layer_render_plan_compose_pass_budget.v1*") {
+if ($renderPlanCombinedSource -notlike "*rrkal_displaytools.layer_render_plan_compose_pass_budget.v1*") {
     throw "Renderer compose pass budget schema marker is missing"
 }
-if ($rendererSource -notlike "*collapsed_overlay_runs_then_single_taichi_composite_pass*") {
+if ($renderPlanCombinedSource -notlike "*collapsed_overlay_runs_then_single_taichi_composite_pass*") {
     throw "Renderer compose pass budget target marker is missing"
 }
-if ($rendererSource -notlike "*cache_diagnostics.phase_timing_ms.compose_overlays*") {
+if ($renderPlanCombinedSource -notlike "*cache_diagnostics.phase_timing_ms.compose_overlays*") {
     throw "Renderer compose pass budget runtime timing marker is missing"
 }
-if ($rendererSource -notlike "*run_parity_then_collapse_runs*") {
+if ($renderPlanCombinedSource -notlike "*run_parity_then_collapse_runs*") {
     throw "Renderer compose pass budget advice marker is missing"
 }
-if ($rendererSource -notlike "*layer_render_plan_compose_pass_budget_summary_contract.v1*") {
+if ($renderPlanCombinedSource -notlike "*layer_render_plan_compose_pass_budget_summary_contract.v1*") {
     throw "Renderer compose pass budget summary contract marker is missing"
 }
-if ($rendererSource -notlike "*rrkal_displaytools.compose_run_parity_artifact_runner.v1*") {
+if ($renderPlanCombinedSource -notlike "*rrkal_displaytools.compose_run_parity_artifact_runner.v1*") {
     throw "Renderer compose parity artifact runner schema marker is missing"
 }
-if ($rendererSource -notlike "*render_compose_parity_artifacts.ps1*") {
+if ($renderPlanCombinedSource -notlike "*render_compose_parity_artifacts.ps1*") {
     throw "Renderer compose parity artifact runner script marker is missing"
 }
 if ($renderPlanCombinedSource -notlike "*adjacent_alpha_compose_overlays_can_be_collapsed_after_visual_parity_check*") {
@@ -6515,10 +6533,10 @@ if ($renderPlanCombinedSource -notlike "*reuse_static_geometry_batches*") {
 if ($renderPlanCombinedSource -notlike "*prototype_single_taichi_composite_pass*") {
     throw "Renderer render plan single pass bottleneck recommendation marker is missing"
 }
-if ($rendererSource -notlike "*phase_timing_ms*") {
+if ($renderPlanCombinedSource -notlike "*phase_timing_ms*") {
     throw "Renderer render plan phase timing runtime measurements marker is missing"
 }
-if ($rendererSource -notlike "*slowest_phase_id*") {
+if ($renderPlanCombinedSource -notlike "*slowest_phase_id*") {
     throw "Renderer render plan slowest phase marker is missing"
 }
 if ($rendererSource -notlike "*self.compiled_layer_render_plan[`"phase_timing_runtime`"]*") {
@@ -6530,7 +6548,7 @@ if ($rendererSource -notlike "*time.perf_counter*") {
 if ($renderPlanCombinedSource -notlike "*phase_ms.*") {
     throw "Renderer render plan phase timing probe key marker is missing"
 }
-if ($rendererSource -notlike "*slow_frame_threshold_ms*") {
+if ($renderPlanCombinedSource -notlike "*slow_frame_threshold_ms*") {
     throw "Renderer render plan slow frame timing threshold marker is missing"
 }
 if ($renderPlanCombinedSource -notlike "*perf_counter_start*") {

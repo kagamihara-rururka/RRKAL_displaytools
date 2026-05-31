@@ -11,9 +11,45 @@ Set-Location $RepoRoot
 function Invoke-JsonPowerShell {
     param([string[]]$ArgumentList)
 
-    $text = & powershell @ArgumentList 2>&1
+    $text = $null
+    $lastOutput = $null
+    for ($attempt = 1; $attempt -le 8; $attempt++) {
+        $fileIndex = [Array]::IndexOf($ArgumentList, "-File")
+        if ($fileIndex -ge 0 -and $ArgumentList.Count -gt ($fileIndex + 1)) {
+            $scriptPath = $ArgumentList[$fileIndex + 1]
+            $scriptArgs = @()
+            if ($ArgumentList.Count -gt ($fileIndex + 2)) {
+                $scriptArgs = $ArgumentList[($fileIndex + 2)..($ArgumentList.Count - 1)]
+            }
+            $quotedScript = "'" + $scriptPath.Replace("'", "''") + "'"
+            $quotedArgs = @($scriptArgs | ForEach-Object {
+                if ($_.StartsWith("-")) {
+                    $_
+                }
+                else {
+                    "'" + $_.Replace("'", "''") + "'"
+                }
+            })
+            $command = "& $quotedScript"
+            if ($quotedArgs.Count -gt 0) {
+                $command = "$command $($quotedArgs -join ' ')"
+            }
+            $text = & powershell.exe -NoProfile -ExecutionPolicy Bypass -Command $command 2>&1
+        }
+        else {
+            $text = & powershell.exe @ArgumentList 2>&1
+        }
+        if ($LASTEXITCODE -eq 0) {
+            $lastOutput = $text
+            break
+        }
+        $lastOutput = $text
+        if ($attempt -lt 4) {
+            Start-Sleep -Milliseconds ([int](750 * $attempt))
+        }
+    }
     if ($LASTEXITCODE -ne 0) {
-        throw "Command failed: powershell $($ArgumentList -join ' ')`n$($text -join "`n")"
+        throw "Command failed: powershell $($ArgumentList -join ' ')`n$($lastOutput -join "`n")"
     }
     $raw = $text -join "`n"
     $jsonStart = $raw.IndexOf("{")
@@ -28,17 +64,27 @@ if ($ContractOnly) {
         schema = "rrkal_displaytools.render_plan_extraction_dry_run_inspector.v1"
         output_schema = "rrkal_displaytools.render_plan_extraction_dry_run.v1"
         command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_render_plan_extraction_dry_run.ps1"
-        writes = @()
         dry_run_only = $true
+        code_move_performed = $false
+        planned_target_files = @(
+            "render_core/render_plan.py",
+            "render_core/__init__.py"
+        )
+        uiux_readiness_required_before_move = $true
+        writes = @()
         boundary = "Dry-run checklist only; it does not move renderer code, create modules, launch Qt/Taichi, or touch RRKAL discovery/download/import/cache governance."
         portable = $true
     } | ConvertTo-Json -Depth 8
     exit 0
 }
 
-$gate = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\pre_decoupling_gate.ps1", "-ContractOnly")
-$readiness = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\check_pre_decoupling_readiness.ps1")
-$workOrder = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_render_plan_compose_work_order.ps1")
+$gateScript = Join-Path $RepoRoot "scripts\pre_decoupling_gate.ps1"
+$readinessScript = Join-Path $RepoRoot "scripts\check_pre_decoupling_readiness.ps1"
+$workOrderScript = Join-Path $RepoRoot "scripts\inspect_render_plan_compose_work_order.ps1"
+
+$gate = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $gateScript, "-ContractOnly")
+$readiness = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $readinessScript)
+$workOrder = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $workOrderScript)
 
 [ordered]@{
     schema = "rrkal_displaytools.render_plan_extraction_dry_run.v1"

@@ -14,15 +14,39 @@ function Invoke-JsonPowerShell {
 
     $text = $null
     $lastOutput = $null
-    for ($attempt = 1; $attempt -le 4; $attempt++) {
-        $text = & powershell @ArgumentList 2>&1
+    for ($attempt = 1; $attempt -le 8; $attempt++) {
+        $fileIndex = [Array]::IndexOf($ArgumentList, "-File")
+        if ($fileIndex -ge 0 -and $ArgumentList.Count -gt ($fileIndex + 1)) {
+            $scriptPath = $ArgumentList[$fileIndex + 1]
+            $scriptArgs = @()
+            if ($ArgumentList.Count -gt ($fileIndex + 2)) {
+                $scriptArgs = $ArgumentList[($fileIndex + 2)..($ArgumentList.Count - 1)]
+            }
+            $quotedScript = "'" + $scriptPath.Replace("'", "''") + "'"
+            $quotedArgs = @($scriptArgs | ForEach-Object {
+                if ($_.StartsWith("-")) {
+                    $_
+                }
+                else {
+                    "'" + $_.Replace("'", "''") + "'"
+                }
+            })
+            $command = "& $quotedScript"
+            if ($quotedArgs.Count -gt 0) {
+                $command = "$command $($quotedArgs -join ' ')"
+            }
+            $text = & powershell.exe -NoProfile -ExecutionPolicy Bypass -Command $command 2>&1
+        }
+        else {
+            $text = & powershell.exe @ArgumentList 2>&1
+        }
         if ($LASTEXITCODE -eq 0) {
             $lastOutput = $text
             break
         }
         $lastOutput = $text
         if ($attempt -lt 4) {
-            Start-Sleep -Milliseconds ([int](250 * $attempt))
+            Start-Sleep -Milliseconds ([int](750 * $attempt))
         }
     }
     if ($LASTEXITCODE -ne 0) {
@@ -63,18 +87,31 @@ if ($ContractOnly) {
     exit 0
 }
 
-$reviewPacket = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\export_visual_contract_review_packet.ps1")
-$qtUiux = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_qt_uiux_surface.ps1")
-$uiuxClosure = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_uiux_closure_status.ps1")
-$timeline = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_timeline_uiux.ps1")
-$layerPresets = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_layer_visual_presets.ps1")
-$layerShortcuts = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_layer_operator_shortcuts.ps1")
-$research = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_research_interaction.ps1")
-$hydrology = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_hydrology_lod.ps1")
-$ocean = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_ocean_material.ps1")
-$reviewerRoute = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_reviewer_first_run_route.ps1")
-$capabilitySummary = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\export_capability_summary.ps1")
-$renderPlan = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_layer_render_plan_performance.ps1")
+$reviewPacketScript = Join-Path $RepoRoot "scripts\export_visual_contract_review_packet.ps1"
+$qtUiuxScript = Join-Path $RepoRoot "scripts\inspect_qt_uiux_surface.ps1"
+$uiuxClosureScript = Join-Path $RepoRoot "scripts\inspect_uiux_closure_status.ps1"
+$timelineScript = Join-Path $RepoRoot "scripts\inspect_timeline_uiux.ps1"
+$layerPresetsScript = Join-Path $RepoRoot "scripts\inspect_layer_visual_presets.ps1"
+$layerShortcutsScript = Join-Path $RepoRoot "scripts\inspect_layer_operator_shortcuts.ps1"
+$researchScript = Join-Path $RepoRoot "scripts\inspect_research_interaction.ps1"
+$hydrologyScript = Join-Path $RepoRoot "scripts\inspect_hydrology_lod.ps1"
+$oceanScript = Join-Path $RepoRoot "scripts\inspect_ocean_material.ps1"
+$reviewerRouteScript = Join-Path $RepoRoot "scripts\inspect_reviewer_first_run_route.ps1"
+$capabilitySummaryScript = Join-Path $RepoRoot "scripts\export_capability_summary.ps1"
+$renderPlanScript = Join-Path $RepoRoot "scripts\inspect_layer_render_plan_performance.ps1"
+
+$reviewPacket = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $reviewPacketScript)
+$qtUiux = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $qtUiuxScript)
+$uiuxClosure = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $uiuxClosureScript)
+$timeline = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $timelineScript)
+$layerPresets = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $layerPresetsScript)
+$layerShortcuts = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $layerShortcutsScript)
+$research = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $researchScript)
+$hydrology = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $hydrologyScript)
+$ocean = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $oceanScript)
+$reviewerRoute = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $reviewerRouteScript)
+$capabilitySummary = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $capabilitySummaryScript)
+$renderPlan = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $renderPlanScript)
 $qtPanelSource = Get-Content -Raw -Encoding UTF8 "rrkal_displaytools_qt_panel.py"
 $cloneQuickstartDoc = Get-Content -Raw -Encoding UTF8 "docs\QUICKSTART_CLONE.zh-TW.md"
 

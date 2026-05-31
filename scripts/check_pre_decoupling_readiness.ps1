@@ -14,15 +14,39 @@ function Invoke-JsonPowerShell {
 
     $text = $null
     $lastOutput = $null
-    for ($attempt = 1; $attempt -le 4; $attempt++) {
-        $text = & powershell @ArgumentList 2>&1
+    for ($attempt = 1; $attempt -le 8; $attempt++) {
+        $fileIndex = [Array]::IndexOf($ArgumentList, "-File")
+        if ($fileIndex -ge 0 -and $ArgumentList.Count -gt ($fileIndex + 1)) {
+            $scriptPath = $ArgumentList[$fileIndex + 1]
+            $scriptArgs = @()
+            if ($ArgumentList.Count -gt ($fileIndex + 2)) {
+                $scriptArgs = $ArgumentList[($fileIndex + 2)..($ArgumentList.Count - 1)]
+            }
+            $quotedScript = "'" + $scriptPath.Replace("'", "''") + "'"
+            $quotedArgs = @($scriptArgs | ForEach-Object {
+                if ($_.StartsWith("-")) {
+                    $_
+                }
+                else {
+                    "'" + $_.Replace("'", "''") + "'"
+                }
+            })
+            $command = "& $quotedScript"
+            if ($quotedArgs.Count -gt 0) {
+                $command = "$command $($quotedArgs -join ' ')"
+            }
+            $text = & powershell.exe -NoProfile -ExecutionPolicy Bypass -Command $command 2>&1
+        }
+        else {
+            $text = & powershell.exe @ArgumentList 2>&1
+        }
         if ($LASTEXITCODE -eq 0) {
             $lastOutput = $text
             break
         }
         $lastOutput = $text
         if ($attempt -lt 4) {
-            Start-Sleep -Milliseconds ([int](250 * $attempt))
+            Start-Sleep -Milliseconds ([int](750 * $attempt))
         }
     }
     if ($LASTEXITCODE -ne 0) {
@@ -61,7 +85,8 @@ if ($ContractOnly) {
     exit 0
 }
 
-$bundle = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\export_pre_decoupling_readiness_bundle.ps1")
+$bundleScript = Join-Path $RepoRoot "scripts\export_pre_decoupling_readiness_bundle.ps1"
+$bundle = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $bundleScript)
 
 $requiredBeforeMove = @($bundle.required_before_move)
 $inspectorIds = @($bundle.visual_contract_inspector_index.entry_ids)

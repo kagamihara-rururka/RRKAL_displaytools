@@ -14,15 +14,39 @@ function Invoke-JsonPowerShell {
 
     $text = $null
     $lastOutput = $null
-    for ($attempt = 1; $attempt -le 4; $attempt++) {
-        $text = & powershell @ArgumentList 2>&1
+    for ($attempt = 1; $attempt -le 8; $attempt++) {
+        $fileIndex = [Array]::IndexOf($ArgumentList, "-File")
+        if ($fileIndex -ge 0 -and $ArgumentList.Count -gt ($fileIndex + 1)) {
+            $scriptPath = $ArgumentList[$fileIndex + 1]
+            $scriptArgs = @()
+            if ($ArgumentList.Count -gt ($fileIndex + 2)) {
+                $scriptArgs = $ArgumentList[($fileIndex + 2)..($ArgumentList.Count - 1)]
+            }
+            $quotedScript = "'" + $scriptPath.Replace("'", "''") + "'"
+            $quotedArgs = @($scriptArgs | ForEach-Object {
+                if ($_.StartsWith("-")) {
+                    $_
+                }
+                else {
+                    "'" + $_.Replace("'", "''") + "'"
+                }
+            })
+            $command = "& $quotedScript"
+            if ($quotedArgs.Count -gt 0) {
+                $command = "$command $($quotedArgs -join ' ')"
+            }
+            $text = & powershell.exe -NoProfile -ExecutionPolicy Bypass -Command $command 2>&1
+        }
+        else {
+            $text = & powershell.exe @ArgumentList 2>&1
+        }
         if ($LASTEXITCODE -eq 0) {
             $lastOutput = $text
             break
         }
         $lastOutput = $text
         if ($attempt -lt 4) {
-            Start-Sleep -Milliseconds ([int](250 * $attempt))
+            Start-Sleep -Milliseconds ([int](750 * $attempt))
         }
     }
     if ($LASTEXITCODE -ne 0) {
@@ -58,13 +82,21 @@ if ($ContractOnly) {
     exit 0
 }
 
-$visualInspectorIndex = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\list_visual_contract_inspectors.ps1")
-$visualReviewPacket = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\export_visual_contract_review_packet.ps1")
-$uiuxReadiness = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\check_uiux_closure_readiness.ps1")
-$preDecouplingGate = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\pre_decoupling_gate.ps1", "-ContractOnly")
-$decouplingBoundaryInspection = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_decoupling_boundaries.ps1")
-$renderPlanComposeWorkOrder = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_render_plan_compose_work_order.ps1")
-$preDecouplingSnapshotExport = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\export_pre_decoupling_snapshot.ps1", "-ContractOnly")
+$visualInspectorIndexScript = Join-Path $RepoRoot "scripts\list_visual_contract_inspectors.ps1"
+$visualReviewPacketScript = Join-Path $RepoRoot "scripts\export_visual_contract_review_packet.ps1"
+$uiuxReadinessScript = Join-Path $RepoRoot "scripts\check_uiux_closure_readiness.ps1"
+$preDecouplingGateScript = Join-Path $RepoRoot "scripts\pre_decoupling_gate.ps1"
+$decouplingBoundaryInspectionScript = Join-Path $RepoRoot "scripts\inspect_decoupling_boundaries.ps1"
+$renderPlanComposeWorkOrderScript = Join-Path $RepoRoot "scripts\inspect_render_plan_compose_work_order.ps1"
+$preDecouplingSnapshotExportScript = Join-Path $RepoRoot "scripts\export_pre_decoupling_snapshot.ps1"
+
+$visualInspectorIndex = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $visualInspectorIndexScript)
+$visualReviewPacket = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $visualReviewPacketScript)
+$uiuxReadiness = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $uiuxReadinessScript)
+$preDecouplingGate = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $preDecouplingGateScript, "-ContractOnly")
+$decouplingBoundaryInspection = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $decouplingBoundaryInspectionScript)
+$renderPlanComposeWorkOrder = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $renderPlanComposeWorkOrderScript)
+$preDecouplingSnapshotExport = Invoke-JsonPowerShell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $preDecouplingSnapshotExportScript, "-ContractOnly")
 
 $gitHead = (& git rev-parse --short HEAD 2>$null)
 if ($LASTEXITCODE -ne 0) {

@@ -1,5 +1,13 @@
 # Development Log
 
+## 2026-05-31 - Extract shared render-plan performance packet
+
+- Added `render_core/render_plan_performance.py` as the single source for `layer_render_plan_performance_packet`.
+- Updated the renderer monolith, Qt panel and no-GUI launch exporter to import the shared packet instead of keeping local mirrors.
+- Added smoke gates that compile the shared module, require the three entrypoints to import it, and reject local duplicate definitions.
+- Stabilized nested pre-decoupling PowerShell JSON wrappers with absolute script paths, command-call execution and longer retry/backoff for cloud-drive transient file access.
+- Smoke: PASS after transient file-access backoff retries (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Surface adapter payload contract in performance handoff
 
 - Added adapter payload schema, summary field, completeness contract status field and primary-gate markers to `layer_render_plan_performance`.
