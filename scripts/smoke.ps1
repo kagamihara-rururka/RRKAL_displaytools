@@ -1,4 +1,4 @@
-$ErrorActionPreference = "Stop"
+﻿$ErrorActionPreference = "Stop"
 
 $env:PYTHONUTF8 = "1"
 $env:PYTHONIOENCODING = "utf-8"
@@ -645,7 +645,7 @@ foreach ($entrypoint in $renderPlanPerformanceEntrypoints) {
 if ($launchPacket.layer_render_plan_performance.compiled_plan_invalidation_reason_schema -ne "rrkal_displaytools.layer_render_plan_cache_invalidation_reasons.v1") {
     throw "Launch packet layer_render_plan_performance invalidation reason schema missing"
 }
-if ($launchPacket.layer_render_plan_performance.compiled_plan_invalidation_helper -ne "HybridRenderController.layer_render_plan_cache_invalidation_reasons") {
+if ($launchPacket.layer_render_plan_performance.compiled_plan_invalidation_helper -ne "render_core.render_plan.build_layer_render_plan_cache_invalidation_reasons") {
     throw "Launch packet layer_render_plan_performance invalidation helper missing"
 }
 if ($launchPacket.layer_render_plan_performance.compiled_plan_invalidation_reasons_field -ne "cache_invalidation_reasons") {
@@ -654,7 +654,7 @@ if ($launchPacket.layer_render_plan_performance.compiled_plan_invalidation_reaso
 if ($launchPacket.layer_render_plan_performance.compiled_plan_invalidation_scope_schema -ne "rrkal_displaytools.layer_render_plan_cache_invalidation_scope.v1") {
     throw "Launch packet layer_render_plan_performance invalidation scope schema missing"
 }
-if ($launchPacket.layer_render_plan_performance.compiled_plan_invalidation_scope_helper -ne "HybridRenderController.layer_render_plan_cache_invalidation_scope") {
+if ($launchPacket.layer_render_plan_performance.compiled_plan_invalidation_scope_helper -ne "render_core.render_plan.build_layer_render_plan_cache_invalidation_scope") {
     throw "Launch packet layer_render_plan_performance invalidation scope helper missing"
 }
 if ($launchPacket.layer_render_plan_performance.compiled_plan_invalidation_scope_field -ne "cache_invalidation_scope") {
@@ -663,7 +663,7 @@ if ($launchPacket.layer_render_plan_performance.compiled_plan_invalidation_scope
 if ($launchPacket.layer_render_plan_performance.compiled_plan_batch_decision_schema -ne "rrkal_displaytools.layer_render_plan_batch_decisions.v1") {
     throw "Launch packet layer_render_plan_performance batch decision schema missing"
 }
-if ($launchPacket.layer_render_plan_performance.compiled_plan_batch_decision_helper -ne "HybridRenderController.layer_render_plan_batch_decisions") {
+if ($launchPacket.layer_render_plan_performance.compiled_plan_batch_decision_helper -ne "render_core.render_plan.build_layer_render_plan_batch_decisions") {
     throw "Launch packet layer_render_plan_performance batch decision helper missing"
 }
 if ($launchPacket.layer_render_plan_performance.compiled_plan_batch_decision_field -ne "batch_decisions") {
@@ -672,7 +672,7 @@ if ($launchPacket.layer_render_plan_performance.compiled_plan_batch_decision_fie
 if ($launchPacket.layer_render_plan_performance.compiled_plan_apply_path_schema -ne "rrkal_displaytools.layer_render_plan_apply_path.v1") {
     throw "Launch packet layer_render_plan_performance apply path schema missing"
 }
-if ($launchPacket.layer_render_plan_performance.compiled_plan_apply_path_helper -ne "HybridRenderController.layer_render_plan_apply_path") {
+if ($launchPacket.layer_render_plan_performance.compiled_plan_apply_path_helper -ne "render_core.render_plan.build_layer_render_plan_apply_path") {
     throw "Launch packet layer_render_plan_performance apply path helper missing"
 }
 if ($launchPacket.layer_render_plan_performance.compiled_plan_apply_path_field -ne "apply_path") {
@@ -681,7 +681,7 @@ if ($launchPacket.layer_render_plan_performance.compiled_plan_apply_path_field -
 if ($launchPacket.layer_render_plan_performance.compiled_plan_execution_summary_schema -ne "rrkal_displaytools.layer_render_plan_execution_summary.v1") {
     throw "Launch packet layer_render_plan_performance execution summary schema missing"
 }
-if ($launchPacket.layer_render_plan_performance.compiled_plan_execution_summary_helper -ne "HybridRenderController.layer_render_plan_execution_summary") {
+if ($launchPacket.layer_render_plan_performance.compiled_plan_execution_summary_helper -ne "render_core.render_plan.build_layer_render_plan_execution_summary") {
     throw "Launch packet layer_render_plan_performance execution summary helper missing"
 }
 if ($launchPacket.layer_render_plan_performance.compiled_plan_execution_summary_field -ne "execution_summary") {
@@ -690,7 +690,7 @@ if ($launchPacket.layer_render_plan_performance.compiled_plan_execution_summary_
 if ($launchPacket.layer_render_plan_performance.compiled_plan_execution_phases_schema -ne "rrkal_displaytools.layer_render_plan_execution_phases.v1") {
     throw "Launch packet layer_render_plan_performance execution phases schema missing"
 }
-if ($launchPacket.layer_render_plan_performance.compiled_plan_execution_phases_helper -ne "HybridRenderController.layer_render_plan_execution_phases") {
+if ($launchPacket.layer_render_plan_performance.compiled_plan_execution_phases_helper -ne "render_core.render_plan.build_layer_render_plan_execution_phases") {
     throw "Launch packet layer_render_plan_performance execution phases helper missing"
 }
 if ($launchPacket.layer_render_plan_performance.compiled_plan_execution_phases_field -ne "execution_phases") {
@@ -699,7 +699,7 @@ if ($launchPacket.layer_render_plan_performance.compiled_plan_execution_phases_f
 if ($launchPacket.layer_render_plan_performance.compiled_plan_phase_timing_contract_schema -ne "rrkal_displaytools.layer_render_plan_phase_timing_contract.v1") {
     throw "Launch packet layer_render_plan_performance phase timing contract schema missing"
 }
-if ($launchPacket.layer_render_plan_performance.compiled_plan_phase_timing_contract_helper -ne "HybridRenderController.layer_render_plan_phase_timing_contract") {
+if ($launchPacket.layer_render_plan_performance.compiled_plan_phase_timing_contract_helper -ne "render_core.render_plan.build_layer_render_plan_phase_timing_contract") {
     throw "Launch packet layer_render_plan_performance phase timing contract helper missing"
 }
 if ($launchPacket.layer_render_plan_performance.compiled_plan_phase_timing_contract_field -ne "phase_timing_contract") {
@@ -720,7 +720,7 @@ if ($launchPacket.layer_render_plan_performance.compiled_plan_phase_timing_runti
 if ($launchPacket.layer_render_plan_performance.compiled_plan_bottleneck_recommendation_schema -ne "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1") {
     throw "Launch packet layer_render_plan_performance bottleneck recommendation schema missing"
 }
-if ($launchPacket.layer_render_plan_performance.compiled_plan_bottleneck_recommendation_helper -ne "HybridRenderController.layer_render_plan_bottleneck_recommendation") {
+if ($launchPacket.layer_render_plan_performance.compiled_plan_bottleneck_recommendation_helper -ne "render_core.render_plan.build_layer_render_plan_bottleneck_recommendation") {
     throw "Launch packet layer_render_plan_performance bottleneck recommendation helper missing"
 }
 if ($launchPacket.layer_render_plan_performance.compiled_plan_bottleneck_recommendation_field -ne "bottleneck_recommendation") {
@@ -3296,13 +3296,13 @@ if ($capabilities.layer_render_plan_performance.composition_apply_helper -ne "Hy
 if ($capabilities.layer_render_plan_performance.compiled_plan_helper -ne "HybridRenderController.compile_layer_render_plan") {
     throw "Renderer layer_render_plan_performance compiled plan helper missing"
 }
-if ($capabilities.layer_render_plan_performance.compiled_plan_cache_key_helper -ne "HybridRenderController.layer_render_plan_cache_key") {
+if ($capabilities.layer_render_plan_performance.compiled_plan_cache_key_helper -ne "render_core.render_plan.build_layer_render_plan_cache_key") {
     throw "Renderer layer_render_plan_performance cache key helper missing"
 }
 if ($capabilities.layer_render_plan_performance.compiled_plan_invalidation_reason_schema -ne "rrkal_displaytools.layer_render_plan_cache_invalidation_reasons.v1") {
     throw "Renderer layer_render_plan_performance invalidation reason schema missing"
 }
-if ($capabilities.layer_render_plan_performance.compiled_plan_invalidation_helper -ne "HybridRenderController.layer_render_plan_cache_invalidation_reasons") {
+if ($capabilities.layer_render_plan_performance.compiled_plan_invalidation_helper -ne "render_core.render_plan.build_layer_render_plan_cache_invalidation_reasons") {
     throw "Renderer layer_render_plan_performance invalidation helper missing"
 }
 if ($capabilities.layer_render_plan_performance.compiled_plan_invalidation_reasons_field -ne "cache_invalidation_reasons") {
@@ -3311,7 +3311,7 @@ if ($capabilities.layer_render_plan_performance.compiled_plan_invalidation_reaso
 if ($capabilities.layer_render_plan_performance.compiled_plan_invalidation_scope_schema -ne "rrkal_displaytools.layer_render_plan_cache_invalidation_scope.v1") {
     throw "Renderer layer_render_plan_performance invalidation scope schema missing"
 }
-if ($capabilities.layer_render_plan_performance.compiled_plan_invalidation_scope_helper -ne "HybridRenderController.layer_render_plan_cache_invalidation_scope") {
+if ($capabilities.layer_render_plan_performance.compiled_plan_invalidation_scope_helper -ne "render_core.render_plan.build_layer_render_plan_cache_invalidation_scope") {
     throw "Renderer layer_render_plan_performance invalidation scope helper missing"
 }
 if ($capabilities.layer_render_plan_performance.compiled_plan_invalidation_scope_field -ne "cache_invalidation_scope") {
@@ -3320,7 +3320,7 @@ if ($capabilities.layer_render_plan_performance.compiled_plan_invalidation_scope
 if ($capabilities.layer_render_plan_performance.compiled_plan_batch_decision_schema -ne "rrkal_displaytools.layer_render_plan_batch_decisions.v1") {
     throw "Renderer layer_render_plan_performance batch decision schema missing"
 }
-if ($capabilities.layer_render_plan_performance.compiled_plan_batch_decision_helper -ne "HybridRenderController.layer_render_plan_batch_decisions") {
+if ($capabilities.layer_render_plan_performance.compiled_plan_batch_decision_helper -ne "render_core.render_plan.build_layer_render_plan_batch_decisions") {
     throw "Renderer layer_render_plan_performance batch decision helper missing"
 }
 if ($capabilities.layer_render_plan_performance.compiled_plan_batch_decision_field -ne "batch_decisions") {
@@ -3329,7 +3329,7 @@ if ($capabilities.layer_render_plan_performance.compiled_plan_batch_decision_fie
 if ($capabilities.layer_render_plan_performance.compiled_plan_apply_path_schema -ne "rrkal_displaytools.layer_render_plan_apply_path.v1") {
     throw "Renderer layer_render_plan_performance apply path schema missing"
 }
-if ($capabilities.layer_render_plan_performance.compiled_plan_apply_path_helper -ne "HybridRenderController.layer_render_plan_apply_path") {
+if ($capabilities.layer_render_plan_performance.compiled_plan_apply_path_helper -ne "render_core.render_plan.build_layer_render_plan_apply_path") {
     throw "Renderer layer_render_plan_performance apply path helper missing"
 }
 if ($capabilities.layer_render_plan_performance.compiled_plan_apply_path_field -ne "apply_path") {
@@ -3338,7 +3338,7 @@ if ($capabilities.layer_render_plan_performance.compiled_plan_apply_path_field -
 if ($capabilities.layer_render_plan_performance.compiled_plan_execution_summary_schema -ne "rrkal_displaytools.layer_render_plan_execution_summary.v1") {
     throw "Renderer layer_render_plan_performance execution summary schema missing"
 }
-if ($capabilities.layer_render_plan_performance.compiled_plan_execution_summary_helper -ne "HybridRenderController.layer_render_plan_execution_summary") {
+if ($capabilities.layer_render_plan_performance.compiled_plan_execution_summary_helper -ne "render_core.render_plan.build_layer_render_plan_execution_summary") {
     throw "Renderer layer_render_plan_performance execution summary helper missing"
 }
 if ($capabilities.layer_render_plan_performance.compiled_plan_execution_summary_field -ne "execution_summary") {
@@ -3347,7 +3347,7 @@ if ($capabilities.layer_render_plan_performance.compiled_plan_execution_summary_
 if ($capabilities.layer_render_plan_performance.compiled_plan_execution_phases_schema -ne "rrkal_displaytools.layer_render_plan_execution_phases.v1") {
     throw "Renderer layer_render_plan_performance execution phases schema missing"
 }
-if ($capabilities.layer_render_plan_performance.compiled_plan_execution_phases_helper -ne "HybridRenderController.layer_render_plan_execution_phases") {
+if ($capabilities.layer_render_plan_performance.compiled_plan_execution_phases_helper -ne "render_core.render_plan.build_layer_render_plan_execution_phases") {
     throw "Renderer layer_render_plan_performance execution phases helper missing"
 }
 if ($capabilities.layer_render_plan_performance.compiled_plan_execution_phases_field -ne "execution_phases") {
@@ -3356,7 +3356,7 @@ if ($capabilities.layer_render_plan_performance.compiled_plan_execution_phases_f
 if ($capabilities.layer_render_plan_performance.compiled_plan_phase_timing_contract_schema -ne "rrkal_displaytools.layer_render_plan_phase_timing_contract.v1") {
     throw "Renderer layer_render_plan_performance phase timing contract schema missing"
 }
-if ($capabilities.layer_render_plan_performance.compiled_plan_phase_timing_contract_helper -ne "HybridRenderController.layer_render_plan_phase_timing_contract") {
+if ($capabilities.layer_render_plan_performance.compiled_plan_phase_timing_contract_helper -ne "render_core.render_plan.build_layer_render_plan_phase_timing_contract") {
     throw "Renderer layer_render_plan_performance phase timing contract helper missing"
 }
 if ($capabilities.layer_render_plan_performance.compiled_plan_phase_timing_contract_field -ne "phase_timing_contract") {
@@ -3377,7 +3377,7 @@ if ($capabilities.layer_render_plan_performance.compiled_plan_phase_timing_runti
 if ($capabilities.layer_render_plan_performance.compiled_plan_bottleneck_recommendation_schema -ne "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1") {
     throw "Renderer layer_render_plan_performance bottleneck recommendation schema missing"
 }
-if ($capabilities.layer_render_plan_performance.compiled_plan_bottleneck_recommendation_helper -ne "HybridRenderController.layer_render_plan_bottleneck_recommendation") {
+if ($capabilities.layer_render_plan_performance.compiled_plan_bottleneck_recommendation_helper -ne "render_core.render_plan.build_layer_render_plan_bottleneck_recommendation") {
     throw "Renderer layer_render_plan_performance bottleneck recommendation helper missing"
 }
 if ($capabilities.layer_render_plan_performance.compiled_plan_bottleneck_recommendation_field -ne "bottleneck_recommendation") {
@@ -4254,19 +4254,19 @@ if ($handoff.layer_render_plan_performance.composition_apply_helper -ne "HybridR
 if ($handoff.layer_render_plan_performance.compiled_plan_schema -ne "rrkal_displaytools.compiled_layer_render_plan.v1") {
     throw "Handoff inspection layer render plan performance compiled plan schema missing"
 }
-if ($handoff.layer_render_plan_performance.compiled_plan_cache_key_helper -ne "HybridRenderController.layer_render_plan_cache_key") {
+if ($handoff.layer_render_plan_performance.compiled_plan_cache_key_helper -ne "render_core.render_plan.build_layer_render_plan_cache_key") {
     throw "Handoff inspection layer render plan performance cache key helper missing"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_invalidation_reason_schema -ne "rrkal_displaytools.layer_render_plan_cache_invalidation_reasons.v1") {
     throw "Handoff inspection layer render plan performance invalidation reason schema missing"
 }
-if ($handoff.layer_render_plan_performance.compiled_plan_invalidation_helper -ne "HybridRenderController.layer_render_plan_cache_invalidation_reasons") {
+if ($handoff.layer_render_plan_performance.compiled_plan_invalidation_helper -ne "render_core.render_plan.build_layer_render_plan_cache_invalidation_reasons") {
     throw "Handoff inspection layer render plan performance invalidation helper missing"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_invalidation_scope_schema -ne "rrkal_displaytools.layer_render_plan_cache_invalidation_scope.v1") {
     throw "Handoff inspection layer render plan performance invalidation scope schema missing"
 }
-if ($handoff.layer_render_plan_performance.compiled_plan_invalidation_scope_helper -ne "HybridRenderController.layer_render_plan_cache_invalidation_scope") {
+if ($handoff.layer_render_plan_performance.compiled_plan_invalidation_scope_helper -ne "render_core.render_plan.build_layer_render_plan_cache_invalidation_scope") {
     throw "Handoff inspection layer render plan performance invalidation scope helper missing"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_invalidation_scope_field -ne "cache_invalidation_scope") {
@@ -4275,7 +4275,7 @@ if ($handoff.layer_render_plan_performance.compiled_plan_invalidation_scope_fiel
 if ($handoff.layer_render_plan_performance.compiled_plan_batch_decision_schema -ne "rrkal_displaytools.layer_render_plan_batch_decisions.v1") {
     throw "Handoff inspection layer render plan performance batch decision schema missing"
 }
-if ($handoff.layer_render_plan_performance.compiled_plan_batch_decision_helper -ne "HybridRenderController.layer_render_plan_batch_decisions") {
+if ($handoff.layer_render_plan_performance.compiled_plan_batch_decision_helper -ne "render_core.render_plan.build_layer_render_plan_batch_decisions") {
     throw "Handoff inspection layer render plan performance batch decision helper missing"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_batch_decision_field -ne "batch_decisions") {
@@ -4284,7 +4284,7 @@ if ($handoff.layer_render_plan_performance.compiled_plan_batch_decision_field -n
 if ($handoff.layer_render_plan_performance.compiled_plan_apply_path_schema -ne "rrkal_displaytools.layer_render_plan_apply_path.v1") {
     throw "Handoff inspection layer render plan performance apply path schema missing"
 }
-if ($handoff.layer_render_plan_performance.compiled_plan_apply_path_helper -ne "HybridRenderController.layer_render_plan_apply_path") {
+if ($handoff.layer_render_plan_performance.compiled_plan_apply_path_helper -ne "render_core.render_plan.build_layer_render_plan_apply_path") {
     throw "Handoff inspection layer render plan performance apply path helper missing"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_apply_path_field -ne "apply_path") {
@@ -4293,7 +4293,7 @@ if ($handoff.layer_render_plan_performance.compiled_plan_apply_path_field -ne "a
 if ($handoff.layer_render_plan_performance.compiled_plan_execution_summary_schema -ne "rrkal_displaytools.layer_render_plan_execution_summary.v1") {
     throw "Handoff inspection layer render plan performance execution summary schema missing"
 }
-if ($handoff.layer_render_plan_performance.compiled_plan_execution_summary_helper -ne "HybridRenderController.layer_render_plan_execution_summary") {
+if ($handoff.layer_render_plan_performance.compiled_plan_execution_summary_helper -ne "render_core.render_plan.build_layer_render_plan_execution_summary") {
     throw "Handoff inspection layer render plan performance execution summary helper missing"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_execution_summary_field -ne "execution_summary") {
@@ -4302,7 +4302,7 @@ if ($handoff.layer_render_plan_performance.compiled_plan_execution_summary_field
 if ($handoff.layer_render_plan_performance.compiled_plan_execution_phases_schema -ne "rrkal_displaytools.layer_render_plan_execution_phases.v1") {
     throw "Handoff inspection layer render plan performance execution phases schema missing"
 }
-if ($handoff.layer_render_plan_performance.compiled_plan_execution_phases_helper -ne "HybridRenderController.layer_render_plan_execution_phases") {
+if ($handoff.layer_render_plan_performance.compiled_plan_execution_phases_helper -ne "render_core.render_plan.build_layer_render_plan_execution_phases") {
     throw "Handoff inspection layer render plan performance execution phases helper missing"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_execution_phases_field -ne "execution_phases") {
@@ -4311,7 +4311,7 @@ if ($handoff.layer_render_plan_performance.compiled_plan_execution_phases_field 
 if ($handoff.layer_render_plan_performance.compiled_plan_phase_timing_contract_schema -ne "rrkal_displaytools.layer_render_plan_phase_timing_contract.v1") {
     throw "Handoff inspection layer render plan performance phase timing contract schema missing"
 }
-if ($handoff.layer_render_plan_performance.compiled_plan_phase_timing_contract_helper -ne "HybridRenderController.layer_render_plan_phase_timing_contract") {
+if ($handoff.layer_render_plan_performance.compiled_plan_phase_timing_contract_helper -ne "render_core.render_plan.build_layer_render_plan_phase_timing_contract") {
     throw "Handoff inspection layer render plan performance phase timing contract helper missing"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_phase_timing_contract_field -ne "phase_timing_contract") {
@@ -4332,7 +4332,7 @@ if ($handoff.layer_render_plan_performance.compiled_plan_phase_timing_runtime_fi
 if ($handoff.layer_render_plan_performance.compiled_plan_bottleneck_recommendation_schema -ne "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1") {
     throw "Handoff inspection layer render plan performance bottleneck recommendation schema missing"
 }
-if ($handoff.layer_render_plan_performance.compiled_plan_bottleneck_recommendation_helper -ne "HybridRenderController.layer_render_plan_bottleneck_recommendation") {
+if ($handoff.layer_render_plan_performance.compiled_plan_bottleneck_recommendation_helper -ne "render_core.render_plan.build_layer_render_plan_bottleneck_recommendation") {
     throw "Handoff inspection layer render plan performance bottleneck recommendation helper missing"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_bottleneck_recommendation_field -ne "bottleneck_recommendation") {
@@ -6347,7 +6347,7 @@ if ($rendererSource -notlike "*def apply_layer_render_plan_composition*") {
 if ($rendererSource -notlike "*def compile_layer_render_plan*") {
     throw "Renderer compiled layer render plan helper is missing"
 }
-if ($rendererSource -notlike "*def layer_render_plan_cache_key*") {
+if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_cache_key*") {
     throw "Renderer layer render plan cache key helper is missing"
 }
 if ($renderPlanCombinedSource -notlike '*"cache_status": "compiled"*') {
@@ -6356,16 +6356,16 @@ if ($renderPlanCombinedSource -notlike '*"cache_status": "compiled"*') {
 if ($renderPlanCombinedSource -notlike '*cache_status*reused*') {
     throw "Renderer compiled layer render plan reuse branch is missing"
 }
-if ($rendererSource -notlike '*reuse_when_cache_key_matches_previous_compiled_plan*') {
+if ($renderPlanCombinedSource -notlike '*reuse_when_cache_key_matches_previous_compiled_plan*') {
     throw "Renderer compiled render plan reuse policy is missing"
 }
-if ($rendererSource -notlike '*reuse_boundary*valid_until_dirty_flags_or_camera_change*') {
+if ($renderPlanCombinedSource -notlike '*reuse_boundary*valid_until_dirty_flags_or_camera_change*') {
     throw "Renderer compiled render plan reuse boundary is missing"
 }
 if ($rendererSource -notlike '*getattr(self, "compiled_layer_render_plan_cache_key", None) == cache_key*') {
     throw "Renderer compiled render plan cache-key reuse guard is missing"
 }
-if ($rendererSource -notlike "*def layer_render_plan_cache_invalidation_reasons*") {
+if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_cache_invalidation_reasons*") {
     throw "Renderer render plan cache invalidation helper is missing"
 }
 if ($renderPlanCombinedSource -notlike "*dirty_flag:*") {
@@ -6380,7 +6380,7 @@ if ($renderPlanCombinedSource -notlike "*cache_key_changed*") {
 if ($renderPlanCombinedSource -notlike "*cache_key_match*") {
     throw "Renderer render plan cache-key-match reuse marker is missing"
 }
-if ($rendererSource -notlike "*def layer_render_plan_cache_invalidation_scope*") {
+if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_cache_invalidation_scope*") {
     throw "Renderer render plan cache invalidation scope helper is missing"
 }
 if ($renderPlanCombinedSource -notlike '*"scope": "batch"*') {
@@ -6395,7 +6395,7 @@ if ($renderPlanCombinedSource -notlike '*"scope": "plan"*') {
 if ($renderPlanCombinedSource -notlike '*"scope": "reuse"*') {
     throw "Renderer render plan reuse scope marker is missing"
 }
-if ($rendererSource -notlike "*def layer_render_plan_batch_decisions*") {
+if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_batch_decisions*") {
     throw "Renderer render plan batch decisions helper is missing"
 }
 if ($renderPlanCombinedSource -notlike '*"decision": "rebuild_batch"*') {
@@ -6410,7 +6410,7 @@ if ($renderPlanCombinedSource -notlike '*"compose_dirty_overlay"*') {
 if ($renderPlanCombinedSource -notlike '*"compose_cached_overlay"*') {
     throw "Renderer render plan cached overlay compose decision marker is missing"
 }
-if ($rendererSource -notlike "*def layer_render_plan_apply_path*") {
+if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_apply_path*") {
     throw "Renderer render plan apply path helper is missing"
 }
 if ($renderPlanCombinedSource -notlike '*"apply_helper": helper_by_kind.get(kind, "unknown_apply_helper")*') {
@@ -6425,19 +6425,19 @@ if ($renderPlanCombinedSource -notlike "*single_pass_candidate*") {
 if ($renderPlanCombinedSource -notlike "*compose_runtime_blend*") {
     throw "Renderer render plan runtime blend apply helper marker is missing"
 }
-if ($rendererSource -notlike "*def layer_render_plan_execution_summary*") {
+if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_execution_summary*") {
     throw "Renderer render plan execution summary helper is missing"
 }
-if ($rendererSource -notlike "*def layer_render_plan_execution_phases*") {
+if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_execution_phases*") {
     throw "Renderer render plan execution phases helper is missing"
 }
-if ($rendererSource -notlike "*def layer_render_plan_phase_timing_contract*") {
+if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_phase_timing_contract*") {
     throw "Renderer render plan phase timing helper is missing"
 }
 if ($rendererSource -notlike "*def layer_render_plan_phase_timing_runtime_packet*") {
     throw "Renderer render plan phase timing runtime helper is missing"
 }
-if ($rendererSource -notlike "*def layer_render_plan_bottleneck_recommendation*") {
+if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_bottleneck_recommendation*") {
     throw "Renderer render plan bottleneck recommendation helper is missing"
 }
 if ($rendererSource -notlike "*def layer_render_plan_compose_queue*") {

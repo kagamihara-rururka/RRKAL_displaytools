@@ -1,5 +1,13 @@
 # Development Log
 
+## 2026-05-31 - Route pure render-plan decisions directly to core
+
+- Removed residual controller wrappers for cache key, invalidation reasons/scope, batch decisions, apply path, execution summary/phases, phase timing contract and bottleneck recommendation.
+- Updated `HybridRenderController.compile_layer_render_plan` to gather controller-owned scalar inputs, then call `render_core.render_plan` helpers directly.
+- Updated performance handoff/source-map contracts so these pure decision helpers are reported as render-core ownership.
+- Normalized remaining phase-timing and bottleneck `source` labels to the render-core helper names.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Retire compose run controller wrappers
 
 - Removed the residual `HybridRenderController.layer_render_plan_compose_runs` and `HybridRenderController.layer_render_plan_compose_run_parity_contract` wrappers.

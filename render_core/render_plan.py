@@ -1,4 +1,4 @@
-"""Render-plan composition helpers.
+﻿"""Render-plan composition helpers.
 
 This module is the first post-07 extraction seam from
 ``taichi_global_bathymetry.py``. It intentionally keeps the existing
@@ -560,7 +560,7 @@ def build_layer_render_plan_phase_timing_contract(
         )
     return {
         "schema": "rrkal_displaytools.layer_render_plan_phase_timing_contract.v1",
-        "source": "HybridRenderController.layer_render_plan_phase_timing_contract",
+        "source": "render_core.render_plan.build_layer_render_plan_phase_timing_contract",
         "status": "probe_contract_ready",
         "runtime_measurements_available": False,
         "timing_unit": "milliseconds",
@@ -610,7 +610,7 @@ def build_layer_render_plan_bottleneck_recommendation(
     )
     return {
         "schema": "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1",
-        "source": "HybridRenderController.layer_render_plan_bottleneck_recommendation",
+        "source": "render_core.render_plan.build_layer_render_plan_bottleneck_recommendation",
         "status": "ready" if measured else "waiting_for_runtime_metadata",
         "basis_schema": timing.get("schema", "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1"),
         "slowest_phase_id": slowest_phase_id,

@@ -14276,98 +14276,6 @@ class HybridRenderController:
             }
             print(f"Unable to write compose parity artifacts: {exc}")
 
-    def layer_render_plan_cache_key(
-        self,
-        runtime_snapshot: dict[str, object],
-        composition_steps: list[dict[str, object]],
-    ) -> str:
-        visible_layers = runtime_snapshot.get("visible_layers") if isinstance(runtime_snapshot.get("visible_layers"), list) else []
-        visible_layer_ids = [str(layer_id) for layer_id in visible_layers]
-        return build_layer_render_plan_cache_key(
-            runtime_snapshot,
-            composition_steps,
-            style_profile=getattr(self.args, "style_profile", "scientific"),
-            boundary_layer_ids=sorted(str(layer_id) for layer_id in self.boundary_layer_rgba),
-            layer_opacity={layer_id: self.layer_opacity_percent(layer_id) for layer_id in visible_layer_ids},
-            layer_blend={layer_id: self.layer_blend_mode(layer_id) for layer_id in visible_layer_ids},
-        )
-
-    def layer_render_plan_cache_invalidation_reasons(
-        self,
-        runtime_snapshot: dict[str, object],
-        cache_key: str,
-    ) -> list[str]:
-        return build_layer_render_plan_cache_invalidation_reasons(
-            runtime_snapshot,
-            cache_key,
-            cached_plan=getattr(self, "compiled_layer_render_plan", None),
-            previous_key=getattr(self, "compiled_layer_render_plan_cache_key", None),
-        )
-
-    def layer_render_plan_cache_invalidation_scope(
-        self,
-        runtime_snapshot: dict[str, object],
-        invalidation_reasons: list[str],
-    ) -> list[dict[str, object]]:
-        return build_layer_render_plan_cache_invalidation_scope(
-            runtime_snapshot,
-            invalidation_reasons,
-        )
-
-    def layer_render_plan_batch_decisions(
-        self,
-        runtime_snapshot: dict[str, object],
-        composition_steps: list[dict[str, object]],
-        invalidation_scope: list[dict[str, object]],
-    ) -> list[dict[str, object]]:
-        return build_layer_render_plan_batch_decisions(
-            runtime_snapshot,
-            composition_steps,
-            invalidation_scope,
-        )
-
-    def layer_render_plan_apply_path(
-        self,
-        composition_steps: list[dict[str, object]],
-        batch_decisions: list[dict[str, object]],
-    ) -> list[dict[str, object]]:
-        return build_layer_render_plan_apply_path(composition_steps, batch_decisions)
-
-    def layer_render_plan_execution_summary(
-        self,
-        apply_path: list[dict[str, object]],
-        batch_decisions: list[dict[str, object]],
-    ) -> dict[str, object]:
-        return build_layer_render_plan_execution_summary(
-            apply_path,
-            batch_decisions,
-            source="HybridRenderController.layer_render_plan_execution_summary",
-        )
-
-    def layer_render_plan_execution_phases(
-        self,
-        apply_path: list[dict[str, object]],
-        batch_decisions: list[dict[str, object]],
-        execution_summary: dict[str, object],
-    ) -> list[dict[str, object]]:
-        return build_layer_render_plan_execution_phases(
-            apply_path,
-            batch_decisions,
-            execution_summary,
-        )
-
-    def layer_render_plan_phase_timing_contract(
-        self,
-        execution_phases: list[dict[str, object]],
-    ) -> dict[str, object]:
-        return build_layer_render_plan_phase_timing_contract(execution_phases)
-
-    def layer_render_plan_bottleneck_recommendation(
-        self,
-        phase_timing_runtime: dict[str, object],
-    ) -> dict[str, object]:
-        return build_layer_render_plan_bottleneck_recommendation(phase_timing_runtime)
-
     def layer_render_plan_phase_timing_runtime_packet(
         self,
         phase_timing_ms: dict[str, float],
@@ -14393,17 +14301,31 @@ class HybridRenderController:
             defer_vector_overlays=defer_vector_overlays,
         )
         compose_queue_packet = self.layer_render_plan_compose_queue(composition_steps)
-        cache_key = self.layer_render_plan_cache_key(runtime_snapshot, composition_steps)
-        invalidation_reasons = self.layer_render_plan_cache_invalidation_reasons(runtime_snapshot, cache_key)
-        invalidation_scope = self.layer_render_plan_cache_invalidation_scope(runtime_snapshot, invalidation_reasons)
-        batch_decisions = self.layer_render_plan_batch_decisions(runtime_snapshot, composition_steps, invalidation_scope)
-        apply_path = self.layer_render_plan_apply_path(composition_steps, batch_decisions)
-        execution_summary = self.layer_render_plan_execution_summary(apply_path, batch_decisions)
-        execution_phases = self.layer_render_plan_execution_phases(apply_path, batch_decisions, execution_summary)
-        phase_timing_contract = self.layer_render_plan_phase_timing_contract(execution_phases)
+        visible_layers = runtime_snapshot.get("visible_layers") if isinstance(runtime_snapshot.get("visible_layers"), list) else []
+        visible_layer_ids = [str(layer_id) for layer_id in visible_layers]
+        cache_key = build_layer_render_plan_cache_key(
+            runtime_snapshot,
+            composition_steps,
+            style_profile=getattr(self.args, "style_profile", "scientific"),
+            boundary_layer_ids=sorted(str(layer_id) for layer_id in self.boundary_layer_rgba),
+            layer_opacity={layer_id: self.layer_opacity_percent(layer_id) for layer_id in visible_layer_ids},
+            layer_blend={layer_id: self.layer_blend_mode(layer_id) for layer_id in visible_layer_ids},
+        )
+        invalidation_reasons = build_layer_render_plan_cache_invalidation_reasons(
+            runtime_snapshot,
+            cache_key,
+            cached_plan=getattr(self, "compiled_layer_render_plan", None),
+            previous_key=getattr(self, "compiled_layer_render_plan_cache_key", None),
+        )
+        invalidation_scope = build_layer_render_plan_cache_invalidation_scope(runtime_snapshot, invalidation_reasons)
+        batch_decisions = build_layer_render_plan_batch_decisions(runtime_snapshot, composition_steps, invalidation_scope)
+        apply_path = build_layer_render_plan_apply_path(composition_steps, batch_decisions)
+        execution_summary = build_layer_render_plan_execution_summary(apply_path, batch_decisions)
+        execution_phases = build_layer_render_plan_execution_phases(apply_path, batch_decisions, execution_summary)
+        phase_timing_contract = build_layer_render_plan_phase_timing_contract(execution_phases)
         phase_timing_runtime = getattr(self, "layer_render_plan_phase_timing_runtime", {})
         phase_timing_runtime = phase_timing_runtime if isinstance(phase_timing_runtime, dict) else {}
-        bottleneck_recommendation = phase_timing_runtime.get("bottleneck_recommendation") if isinstance(phase_timing_runtime.get("bottleneck_recommendation"), dict) else self.layer_render_plan_bottleneck_recommendation(phase_timing_runtime)
+        bottleneck_recommendation = phase_timing_runtime.get("bottleneck_recommendation") if isinstance(phase_timing_runtime.get("bottleneck_recommendation"), dict) else build_layer_render_plan_bottleneck_recommendation(phase_timing_runtime)
         adapter_payload = build_layer_render_plan_adapter_payload(
             runtime_snapshot,
             composition_steps,

@@ -51,15 +51,6 @@ $targets = @(
     [ordered]@{ id = "apply_layer_render_plan_composition"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def apply_layer_render_plan_composition\(" },
     [ordered]@{ id = "merge_alpha_compose_overlay_run"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def merge_alpha_compose_overlay_run\(" },
     [ordered]@{ id = "apply_layer_render_plan_merged_candidate_composition"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def apply_layer_render_plan_merged_candidate_composition\(" },
-    [ordered]@{ id = "layer_render_plan_cache_key"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def layer_render_plan_cache_key\(" },
-    [ordered]@{ id = "layer_render_plan_cache_invalidation_reasons"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def layer_render_plan_cache_invalidation_reasons\(" },
-    [ordered]@{ id = "layer_render_plan_cache_invalidation_scope"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def layer_render_plan_cache_invalidation_scope\(" },
-    [ordered]@{ id = "layer_render_plan_batch_decisions"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def layer_render_plan_batch_decisions\(" },
-    [ordered]@{ id = "layer_render_plan_apply_path"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def layer_render_plan_apply_path\(" },
-    [ordered]@{ id = "layer_render_plan_execution_summary"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def layer_render_plan_execution_summary\(" },
-    [ordered]@{ id = "layer_render_plan_execution_phases"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def layer_render_plan_execution_phases\(" },
-    [ordered]@{ id = "layer_render_plan_phase_timing_contract"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def layer_render_plan_phase_timing_contract\(" },
-    [ordered]@{ id = "layer_render_plan_bottleneck_recommendation"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def layer_render_plan_bottleneck_recommendation\(" },
     [ordered]@{ id = "layer_render_plan_phase_timing_runtime_packet"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def layer_render_plan_phase_timing_runtime_packet\(" },
     [ordered]@{ id = "compile_layer_render_plan"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def compile_layer_render_plan\(" }
 )
