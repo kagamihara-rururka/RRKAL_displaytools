@@ -32,6 +32,7 @@ $targets = @(
     [ordered]@{ id = "build_layer_render_plan_single_pass_preflight_contract"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_single_pass_preflight_contract\(" },
     [ordered]@{ id = "build_layer_render_plan_adapter_boundary_contract"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_adapter_boundary_contract\(" },
     [ordered]@{ id = "build_layer_render_plan_adapter_payload"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_adapter_payload\(" },
+    [ordered]@{ id = "build_layer_render_plan_adapter_payload_contract"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_adapter_payload_contract\(" },
     [ordered]@{ id = "build_layer_render_plan_adapter_payload_summary"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_adapter_payload_summary\(" },
     [ordered]@{ id = "build_layer_render_plan_cache_key"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_cache_key\(" },
     [ordered]@{ id = "build_layer_render_plan_cache_invalidation_reasons"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_cache_invalidation_reasons\(" },

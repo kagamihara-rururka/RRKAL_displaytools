@@ -6570,6 +6570,15 @@ if ($renderPlanCombinedSource -notlike "*rrkal_displaytools.layer_render_plan_ad
 if ($renderPlanCombinedSource -notlike "*rrkal_displaytools.layer_render_plan_adapter_payload.v1*") {
     throw "Renderer render plan adapter payload schema marker is missing"
 }
+if ($renderPlanCombinedSource -notlike "*rrkal_displaytools.layer_render_plan_adapter_payload_contract.v1*") {
+    throw "Renderer render plan adapter payload contract schema marker is missing"
+}
+if ($renderPlanCombinedSource -notlike "*adapter_payload_contract_status*") {
+    throw "Renderer render plan adapter payload contract metadata summary marker is missing"
+}
+if ($renderPlanCombinedSource -notlike "*do_not_make_payload_primary_implementation_until_status_ready*") {
+    throw "Renderer render plan adapter payload contract extraction gate marker is missing"
+}
 if ($renderPlanCombinedSource -notlike "*serializable_controller_to_core_payload_no_overlay_arrays*") {
     throw "Renderer render plan adapter payload no-array contract marker is missing"
 }

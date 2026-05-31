@@ -86,6 +86,7 @@
 - adapter boundary contract 組包；先明確 controller-to-core payload 與 forbidden responsibilities，再移動 overlay runtime state。
 - adapter payload summary 組包；只輸出可序列化摘要，不持有 overlay ndarray。
 - adapter payload 組包；`HybridRenderController.compile_layer_render_plan` 先建立 normalized controller-to-core payload，再交給 compiled/reused plan packet builder。
+- adapter payload completeness contract；payload 轉成 primary implementation 前必須先通過 required-fields gate。
 - from-payload compiled/reused builder wrapper；controller 開始以 normalized payload 作為主要 contract，舊長參數 builder 暫留相容。
 - compose queue classifier：只根據 controller 提供的 step runtime state 分類 queue / skipped steps。
 

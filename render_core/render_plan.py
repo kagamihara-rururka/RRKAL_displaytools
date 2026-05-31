@@ -630,6 +630,9 @@ def build_layer_render_plan_metadata_summary(plan: dict[str, object]) -> dict[st
     adapter_payload = compiled_plan.get("adapter_payload_summary")
     if not isinstance(adapter_payload, dict):
         adapter_payload = {}
+    adapter_payload_contract = compiled_plan.get("adapter_payload_contract")
+    if not isinstance(adapter_payload_contract, dict):
+        adapter_payload_contract = {}
     available = bool(compiled_plan)
     return {
         "schema": "rrkal_displaytools.layer_render_plan_metadata_summary.v1",
@@ -650,6 +653,7 @@ def build_layer_render_plan_metadata_summary(plan: dict[str, object]) -> dict[st
         "single_pass_ready": bool(compiled_plan.get("single_pass_ready", False)) if available else False,
         "single_pass_preflight_status": single_pass_preflight.get("status", "unavailable"),
         "adapter_payload_status": adapter_payload.get("status", "unavailable"),
+        "adapter_payload_contract_status": adapter_payload_contract.get("status", "unavailable"),
         "runtime_optimization_applied": bool(compiled_plan.get("runtime_optimization_applied", False)) if available else False,
         "current_execution_mode": execution_summary.get("current_execution_mode", "unavailable"),
         "phase_timing_status": phase_timing_runtime.get("status", "unavailable"),
@@ -847,6 +851,50 @@ def build_layer_render_plan_adapter_payload(
     }
 
 
+def build_layer_render_plan_adapter_payload_contract(
+    adapter_payload: dict[str, object],
+) -> dict[str, object]:
+    payload = adapter_payload if isinstance(adapter_payload, dict) else {}
+    required_fields = [
+        "schema",
+        "status",
+        "contract_role",
+        "payload_boundary",
+        "cache_key",
+        "runtime_snapshot",
+        "composition_steps",
+        "compose_queue_packet",
+        "invalidation_reasons",
+        "invalidation_scope",
+        "batch_decisions",
+        "apply_path",
+        "execution_summary",
+        "execution_phases",
+        "phase_timing_contract",
+        "phase_timing_runtime",
+        "bottleneck_recommendation",
+        "summary",
+    ]
+    present_fields = [field for field in required_fields if field in payload]
+    missing_fields = [field for field in required_fields if field not in payload]
+    return {
+        "schema": "rrkal_displaytools.layer_render_plan_adapter_payload_contract.v1",
+        "source": "render_core.render_plan.build_layer_render_plan_adapter_payload_contract",
+        "status": "ready" if not missing_fields else "incomplete",
+        "required_field_count": len(required_fields),
+        "present_field_count": len(present_fields),
+        "missing_field_count": len(missing_fields),
+        "required_fields": required_fields,
+        "missing_fields": missing_fields,
+        "payload_schema": payload.get("schema", "unavailable"),
+        "payload_status": payload.get("status", "unavailable"),
+        "payload_contract_role": payload.get("contract_role", "unavailable"),
+        "payload_boundary": payload.get("payload_boundary", "unavailable"),
+        "runtime_path_unchanged": bool(payload.get("runtime_path_unchanged", False)),
+        "next_extraction_gate": "do_not_make_payload_primary_implementation_until_status_ready",
+    }
+
+
 def _payload_list(adapter_payload: dict[str, object], key: str) -> list[dict[str, object]]:
     value = adapter_payload.get(key)
     return value if isinstance(value, list) else []
@@ -943,6 +991,7 @@ def build_compiled_layer_render_plan_packet(
             phase_timing_runtime,
             bottleneck_recommendation,
         )
+    adapter_payload_contract = build_layer_render_plan_adapter_payload_contract(adapter_payload)
     single_pass_preflight_contract = build_layer_render_plan_single_pass_preflight_contract(
         compose_queue_packet.get("compose_runs", []),
         execution_summary,
@@ -993,6 +1042,8 @@ def build_compiled_layer_render_plan_packet(
         "adapter_boundary_contract_schema": "rrkal_displaytools.layer_render_plan_adapter_boundary.v1",
         "adapter_payload": adapter_payload,
         "adapter_payload_schema": "rrkal_displaytools.layer_render_plan_adapter_payload.v1",
+        "adapter_payload_contract": adapter_payload_contract,
+        "adapter_payload_contract_schema": "rrkal_displaytools.layer_render_plan_adapter_payload_contract.v1",
         "adapter_payload_summary": adapter_payload_summary,
         "adapter_payload_summary_schema": "rrkal_displaytools.layer_render_plan_adapter_payload_summary.v1",
         "reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",
@@ -1083,6 +1134,7 @@ def build_reused_compiled_layer_render_plan_packet(
             phase_timing_runtime,
             bottleneck_recommendation,
         )
+    adapter_payload_contract = build_layer_render_plan_adapter_payload_contract(adapter_payload)
     plan["adapter_boundary_contract"] = build_layer_render_plan_adapter_boundary_contract(
         runtime_snapshot,
         composition_steps,
@@ -1097,6 +1149,8 @@ def build_reused_compiled_layer_render_plan_packet(
         )
     plan["adapter_payload"] = adapter_payload
     plan["adapter_payload_schema"] = "rrkal_displaytools.layer_render_plan_adapter_payload.v1"
+    plan["adapter_payload_contract"] = adapter_payload_contract
+    plan["adapter_payload_contract_schema"] = "rrkal_displaytools.layer_render_plan_adapter_payload_contract.v1"
     plan["adapter_payload_summary"] = adapter_payload_summary
     plan["adapter_payload_summary_schema"] = "rrkal_displaytools.layer_render_plan_adapter_payload_summary.v1"
     plan["reuse_policy"] = "reuse_when_cache_key_matches_previous_compiled_plan"

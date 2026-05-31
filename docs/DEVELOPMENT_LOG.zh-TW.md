@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Add render plan adapter payload completeness contract
+
+- Added `build_layer_render_plan_adapter_payload_contract` to `render_core/render_plan.py`.
+- Embedded adapter payload completeness status into compiled/reused render plans and metadata summary.
+- Added a gate that blocks treating payload as the primary implementation unless required fields are present.
+- Smoke: PASS after one transient file-access backoff retry (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Route render plan builders through adapter payload
 
 - Added compiled/reused render-plan packet builder wrappers that consume `layer_render_plan_adapter_payload.v1`.
