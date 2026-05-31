@@ -313,6 +313,7 @@ $summary = [ordered]@{
         runtime_optimization_applied = $layerRenderPlanPerformance.runtime_optimization_applied
         runtime_snapshot_schema = $layerRenderPlanPerformance.runtime_snapshot_schema
         runtime_snapshot_helper = $layerRenderPlanPerformance.runtime_snapshot_helper
+        runtime_snapshot_input_collector = $layerRenderPlanPerformance.runtime_snapshot_input_collector
         composition_steps_helper = $layerRenderPlanPerformance.composition_steps_helper
         composition_steps_input_collector = $layerRenderPlanPerformance.composition_steps_input_collector
         composition_apply_helper = $layerRenderPlanPerformance.composition_apply_helper

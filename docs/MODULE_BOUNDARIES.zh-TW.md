@@ -79,6 +79,7 @@
 
 - alpha compose / alpha blend / transparent compose 這類無 UI 狀態的像素合成 helper。
 - render-plan 資料契約組包：runtime snapshot、composition steps、compose queue packet、compiled plan packet、reused compiled plan refresh。
+- runtime snapshot builder ownership 已指向 `render_core.render_plan.build_layer_render_plan_runtime_snapshot`；controller wrapper 只保留為 visible layers / dirty flags / selected target 的 runtime fact collector。
 - composition step builder ownership 已指向 `render_core.render_plan.build_layer_render_plan_composition_steps`；controller wrapper 只保留為 boundary scalar input collector。
 - compile path 會先建立 composition steps，再把同一份 steps 傳入 runtime snapshot，避免在同一次 plan compilation 中重算 step list。
 - render-plan 純決策：cache key、cache invalidation reasons/scope、batch decisions、apply path、execution summary、execution phases。

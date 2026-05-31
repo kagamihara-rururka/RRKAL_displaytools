@@ -104,6 +104,8 @@ if ($renderPlan.compiled_plan_compose_run_parity_contract_schema -ne "rrkal_disp
     target_module = $boundaryInspection.first_extraction_target
     source_owner = "HybridRenderController runtime facts plus render_core/render_plan.py pure helpers"
     source_helpers = @(
+        $renderPlan.runtime_snapshot_helper,
+        $renderPlan.runtime_snapshot_input_collector,
         $renderPlan.compiled_plan_helper,
         $renderPlan.compiled_plan_cache_key_helper,
         $renderPlan.composition_steps_helper,

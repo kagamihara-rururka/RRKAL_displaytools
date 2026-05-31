@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Surface runtime snapshot builder ownership
+
+- Updated `layer_render_plan_performance` so `runtime_snapshot_helper` points to `render_core.render_plan.build_layer_render_plan_runtime_snapshot`.
+- Added `runtime_snapshot_input_collector` to keep controller-owned visible-layer, dirty-flag and selected-target collection explicit.
+- Mirrored the new field through handoff/work-order/smoke contracts so clone-first review can distinguish core snapshot assembly from controller runtime fact collection.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Surface composition step builder ownership
 
 - Updated `layer_render_plan_performance` so `composition_steps_helper` points to `render_core.render_plan.build_layer_render_plan_composition_steps`.

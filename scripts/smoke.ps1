@@ -593,6 +593,12 @@ if ($launchPacket.layer_render_plan_performance.runtime_optimization_applied -ne
 if ($launchPacket.layer_render_plan_performance.runtime_snapshot_schema -ne "rrkal_displaytools.layer_render_plan_runtime_snapshot.v1") {
     throw "Launch packet layer_render_plan_performance runtime snapshot schema missing"
 }
+if ($launchPacket.layer_render_plan_performance.runtime_snapshot_helper -ne "render_core.render_plan.build_layer_render_plan_runtime_snapshot") {
+    throw "Launch packet layer_render_plan_performance runtime snapshot helper missing"
+}
+if ($launchPacket.layer_render_plan_performance.runtime_snapshot_input_collector -ne "HybridRenderController.layer_render_plan_runtime_snapshot") {
+    throw "Launch packet layer_render_plan_performance runtime snapshot input collector missing"
+}
 if ($launchPacket.layer_render_plan_performance.composition_steps_helper -ne "render_core.render_plan.build_layer_render_plan_composition_steps") {
     throw "Launch packet layer_render_plan_performance composition steps helper missing"
 }
@@ -3293,8 +3299,11 @@ if ($capabilities.layer_render_plan_performance.runtime_optimization_applied -ne
 if ($capabilities.layer_render_plan_performance.runtime_snapshot_schema -ne "rrkal_displaytools.layer_render_plan_runtime_snapshot.v1") {
     throw "Renderer layer_render_plan_performance runtime snapshot schema missing"
 }
-if ($capabilities.layer_render_plan_performance.runtime_snapshot_helper -ne "HybridRenderController.layer_render_plan_runtime_snapshot") {
+if ($capabilities.layer_render_plan_performance.runtime_snapshot_helper -ne "render_core.render_plan.build_layer_render_plan_runtime_snapshot") {
     throw "Renderer layer_render_plan_performance runtime snapshot helper missing"
+}
+if ($capabilities.layer_render_plan_performance.runtime_snapshot_input_collector -ne "HybridRenderController.layer_render_plan_runtime_snapshot") {
+    throw "Renderer layer_render_plan_performance runtime snapshot input collector missing"
 }
 if ($capabilities.layer_render_plan_performance.composition_steps_helper -ne "render_core.render_plan.build_layer_render_plan_composition_steps") {
     throw "Renderer layer_render_plan_performance composition steps helper missing"
@@ -4257,8 +4266,11 @@ if ($handoff.layer_render_plan_performance.runtime_optimization_applied -ne $fal
 if ($handoff.layer_render_plan_performance.runtime_snapshot_schema -ne "rrkal_displaytools.layer_render_plan_runtime_snapshot.v1") {
     throw "Handoff inspection layer render plan performance runtime snapshot schema missing"
 }
-if ($handoff.layer_render_plan_performance.runtime_snapshot_helper -ne "HybridRenderController.layer_render_plan_runtime_snapshot") {
+if ($handoff.layer_render_plan_performance.runtime_snapshot_helper -ne "render_core.render_plan.build_layer_render_plan_runtime_snapshot") {
     throw "Handoff inspection layer render plan performance runtime snapshot helper missing"
+}
+if ($handoff.layer_render_plan_performance.runtime_snapshot_input_collector -ne "HybridRenderController.layer_render_plan_runtime_snapshot") {
+    throw "Handoff inspection layer render plan performance runtime snapshot input collector missing"
 }
 if ($handoff.layer_render_plan_performance.composition_steps_helper -ne "render_core.render_plan.build_layer_render_plan_composition_steps") {
     throw "Handoff inspection layer render plan performance composition steps helper missing"
@@ -6353,8 +6365,11 @@ $renderPlanCoreSource = if (Test-Path -LiteralPath (Join-Path $RepoRoot "render_
     ""
 }
 $renderPlanCombinedSource = "$rendererSource`n$renderPlanCoreSource`n$renderPlanPerformanceModuleSource"
+if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_runtime_snapshot*") {
+    throw "Render core layer render plan runtime snapshot helper is missing"
+}
 if ($rendererSource -notlike "*def layer_render_plan_runtime_snapshot*") {
-    throw "Renderer layer render plan runtime snapshot helper is missing"
+    throw "Renderer layer render plan runtime snapshot input collector is missing"
 }
 if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_composition_steps*") {
     throw "Render core layer render plan composition steps helper is missing"
