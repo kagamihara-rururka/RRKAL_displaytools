@@ -75,6 +75,8 @@
 
 目前實際落地的第一個 renderer seam 是 `render_core/render_plan.py`，並新增 `render_core/render_plan_performance.py` 收斂 clone-first performance handoff contract。
 
+第二個架構方向是 `display_core/`：它只定義 DisplayShell / Canvas / Layer / Render Matrix 合約，不取代現有 globe runtime，也不 import 具體 renderer 套件。
+
 `render_core/render_plan.py` 負責：
 
 - alpha compose / alpha blend / transparent compose 這類無 UI 狀態的像素合成 helper。

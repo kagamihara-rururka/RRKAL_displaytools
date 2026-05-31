@@ -1,5 +1,13 @@
 # Development Log
 
+## 2026-05-31 - Seed display shell render matrix contracts
+
+- Added `display_core` as a renderer-package-free contract package for DisplayShell / Canvas / Layer / Render Matrix routing.
+- Added `LayerModel`, `ViewModel`, `RendererEntry`, `register_renderer`, `lookup_renderers` and `build_display_shell_capability_packet`.
+- Added `scripts/inspect_display_shell_render_matrix.ps1` for clone-first review of the new display shell direction without replacing the current globe runtime.
+- Documented the phase-1 boundary in `docs/DISPLAY_SHELL_RENDER_MATRIX.zh-TW.md`: keep Earth/globe runtime primary, then prove a minimal TimeSeriesCanvas contract before broad chart support.
+- Smoke: PASS after transient file-access backoff retries (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Extract composition timing packet
 
 - Added `build_layer_render_plan_composition_timing_packet` to `render_core/render_plan.py` for composition phase timing normalization.

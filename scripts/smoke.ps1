@@ -6436,7 +6436,36 @@ $renderPlanCoreSource = if (Test-Path -LiteralPath (Join-Path $RepoRoot "render_
 } else {
     ""
 }
+$displayCoreSource = @(
+    (Get-Content -Raw -Encoding UTF8 display_core\__init__.py),
+    (Get-Content -Raw -Encoding UTF8 display_core\render_matrix.py)
+) -join "`n"
 $renderPlanCombinedSource = "$rendererSource`n$renderPlanCoreSource`n$renderPlanPerformanceModuleSource"
+if ($displayCoreSource -notlike "*rrkal_displaytools.display_shell_render_matrix.v1*") {
+    throw "Display shell render matrix capability schema is missing"
+}
+if ($displayCoreSource -notlike "*class LayerModel*") {
+    throw "Display shell LayerModel contract is missing"
+}
+if ($displayCoreSource -notlike "*class ViewModel*") {
+    throw "Display shell ViewModel contract is missing"
+}
+if ($displayCoreSource -notlike "*def register_renderer*") {
+    throw "Display shell render matrix decorator registry is missing"
+}
+if ($displayCoreSource -notlike "*def lookup_renderers*") {
+    throw "Display shell render matrix lookup is missing"
+}
+$displayShellMatrix = powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\inspect_display_shell_render_matrix.ps1 | ConvertFrom-Json
+if ($displayShellMatrix.schema -ne "rrkal_displaytools.display_shell_render_matrix_review.v1") {
+    throw "Display shell render matrix inspector schema missing"
+}
+if ($displayShellMatrix.required_canvases -notcontains "earth") {
+    throw "Display shell render matrix EarthCanvas contract missing"
+}
+if ($displayShellMatrix.required_canvases -notcontains "time_series") {
+    throw "Display shell render matrix TimeSeriesCanvas contract missing"
+}
 if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_runtime_snapshot*") {
     throw "Render core layer render plan runtime snapshot helper is missing"
 }
