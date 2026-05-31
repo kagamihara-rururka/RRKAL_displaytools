@@ -21,11 +21,13 @@ $packet = [ordered]@{
     )
     has_layer_model = $coreSource -like "*class LayerModel*"
     has_view_model = $coreSource -like "*class ViewModel*"
+    has_canvas_descriptor = $coreSource -like "*class CanvasDescriptor*"
     has_renderer_entry = $coreSource -like "*class RendererEntry*"
+    has_canvas_registry = $coreSource -like "*rrkal_displaytools.canvas_registry.v1*"
     has_register_renderer = $coreSource -like "*def register_renderer*"
     has_lookup_renderers = $coreSource -like "*def lookup_renderers*"
     has_capability_packet = $coreSource -like "*rrkal_displaytools.display_shell_render_matrix.v1*"
-    exports_contracts = $initSource -like "*build_display_shell_capability_packet*"
+    exports_contracts = ($initSource -like "*build_display_shell_capability_packet*") -and ($initSource -like "*build_canvas_registry_packet*")
     runtime_canvas_switching_enabled = $false
     next_step = "Extract EarthCanvas boundary and add a minimal TimeSeriesCanvas adapter after render-plan composition seams are stable."
 }

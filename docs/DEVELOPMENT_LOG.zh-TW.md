@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Add canvas registry contract
+
+- Added `CanvasDescriptor` and `build_canvas_registry_packet` to `display_core/render_matrix.py`.
+- Registered phase-1 `EarthCanvas` and `TimeSeriesCanvas` descriptors without replacing the current globe runtime or importing chart renderer packages.
+- Updated the display shell inspector, smoke gates and roadmap docs to verify `rrkal_displaytools.canvas_registry.v1`.
+- Smoke: PASS after transient file-access backoff retries (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Seed display shell render matrix contracts
 
 - Added `display_core` as a renderer-package-free contract package for DisplayShell / Canvas / Layer / Render Matrix routing.

@@ -18,6 +18,26 @@ LAYER_TIME_SERIES = "time_series_layer"
 
 
 @dataclass(frozen=True)
+class CanvasDescriptor:
+    canvas_type: str
+    label: str
+    coordinate_model: str
+    interaction_model: str
+    supported_layer_types: tuple[str, ...]
+    runtime_status: str
+
+    def to_packet(self) -> dict[str, Any]:
+        return {
+            "canvas_type": self.canvas_type,
+            "label": self.label,
+            "coordinate_model": self.coordinate_model,
+            "interaction_model": self.interaction_model,
+            "supported_layer_types": list(self.supported_layer_types),
+            "runtime_status": self.runtime_status,
+        }
+
+
+@dataclass(frozen=True)
 class LayerModel:
     id: str
     type: str
@@ -103,6 +123,38 @@ class RendererEntry:
 
 _RENDERERS: list[RendererEntry] = []
 
+_CANVASES: tuple[CanvasDescriptor, ...] = (
+    CanvasDescriptor(
+        canvas_type=CANVAS_EARTH,
+        label="EarthCanvas",
+        coordinate_model="globe_lat_lon_altitude",
+        interaction_model="camera_orbit_pick_pin_layer_select",
+        supported_layer_types=(LAYER_GEO,),
+        runtime_status="existing_globe_runtime_primary",
+    ),
+    CanvasDescriptor(
+        canvas_type=CANVAS_TIME_SERIES,
+        label="TimeSeriesCanvas",
+        coordinate_model="time_x_numeric_y",
+        interaction_model="zoom_pan_crosshair_range_select",
+        supported_layer_types=(LAYER_TIME_SERIES,),
+        runtime_status="phase1_contract_only",
+    ),
+)
+
+
+def build_canvas_registry_packet() -> dict[str, Any]:
+    return {
+        "schema": "rrkal_displaytools.canvas_registry.v1",
+        "source": "display_core.render_matrix.build_canvas_registry_packet",
+        "status": "phase1_contract_ready",
+        "runtime_canvas_switching_enabled": False,
+        "canvas_count": len(_CANVASES),
+        "canvases": [canvas.to_packet() for canvas in _CANVASES],
+        "earth_canvas_boundary": "Existing globe renderer remains primary runtime until extracted behind EarthCanvas.",
+        "time_series_canvas_boundary": "TimeSeriesCanvas is contract-only until a minimal renderer adapter is added.",
+    }
+
 
 def register_renderer(
     *,
@@ -149,6 +201,7 @@ def lookup_renderers(
 
 
 def build_display_shell_capability_packet() -> dict[str, Any]:
+    canvas_registry = build_canvas_registry_packet()
     return {
         "schema": "rrkal_displaytools.display_shell_render_matrix.v1",
         "source": "display_core.render_matrix.build_display_shell_capability_packet",
@@ -156,6 +209,8 @@ def build_display_shell_capability_packet() -> dict[str, Any]:
         "positioning": "DisplayShell + Canvas System + Layer System + Render Matrix",
         "earth_renderer_status": "existing_renderer_remains_primary_runtime",
         "runtime_canvas_switching_enabled": False,
+        "canvas_registry_schema": canvas_registry["schema"],
+        "canvas_registry": canvas_registry,
         "phase1_goal": "extract EarthCanvas boundary and add minimal TimeSeriesCanvas contract before supporting broad chart families",
         "core_imports_renderer_packages": False,
         "canvas_types": [CANVAS_EARTH, CANVAS_TIME_SERIES],

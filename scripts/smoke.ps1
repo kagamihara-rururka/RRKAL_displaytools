@@ -6444,6 +6444,12 @@ $renderPlanCombinedSource = "$rendererSource`n$renderPlanCoreSource`n$renderPlan
 if ($displayCoreSource -notlike "*rrkal_displaytools.display_shell_render_matrix.v1*") {
     throw "Display shell render matrix capability schema is missing"
 }
+if ($displayCoreSource -notlike "*rrkal_displaytools.canvas_registry.v1*") {
+    throw "Display shell canvas registry schema is missing"
+}
+if ($displayCoreSource -notlike "*class CanvasDescriptor*") {
+    throw "Display shell CanvasDescriptor contract is missing"
+}
 if ($displayCoreSource -notlike "*class LayerModel*") {
     throw "Display shell LayerModel contract is missing"
 }
@@ -6459,6 +6465,9 @@ if ($displayCoreSource -notlike "*def lookup_renderers*") {
 $displayShellMatrix = powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\inspect_display_shell_render_matrix.ps1 | ConvertFrom-Json
 if ($displayShellMatrix.schema -ne "rrkal_displaytools.display_shell_render_matrix_review.v1") {
     throw "Display shell render matrix inspector schema missing"
+}
+if ($displayShellMatrix.has_canvas_registry -ne $true) {
+    throw "Display shell render matrix inspector canvas registry evidence missing"
 }
 if ($displayShellMatrix.required_canvases -notcontains "earth") {
     throw "Display shell render matrix EarthCanvas contract missing"

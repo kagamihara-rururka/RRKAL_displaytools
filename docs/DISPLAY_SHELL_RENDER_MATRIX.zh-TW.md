@@ -30,10 +30,17 @@ DisplayShell
 
 - `LayerModel`
 - `ViewModel`
+- `CanvasDescriptor`
+- `build_canvas_registry_packet`
 - `RendererEntry`
 - `register_renderer`
 - `lookup_renderers`
 - `build_display_shell_capability_packet`
+
+## 目前 canvas registry
+
+- `EarthCanvas`: 現有 globe runtime 的未來邊界，座標模型是 globe / latitude / longitude / altitude。
+- `TimeSeriesCanvas`: 第一個非地球 contract，座標模型是 time x numeric y，目前不啟用 runtime renderer。
 
 ## 後續執行順序
 
