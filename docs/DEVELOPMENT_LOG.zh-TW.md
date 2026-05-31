@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Add display shell JSON exporter
+
+- Added `scripts/export_display_shell_render_matrix.py` as a headless clone-first exporter for the DisplayShell / Canvas / Render Matrix capability packet.
+- Smoke now py-compiles the exporter and verifies the exported schema, sample render plan schema and `runtime_render_invoked=false` guard.
+- Updated the display shell roadmap and GTD to expose this exporter as the no-GUI review entrypoint.
+- Smoke: PASS after transient file-access backoff retries (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add ViewModel render plan contract
 
 - Added `build_view_model_render_plan_packet` to resolve ViewModel layers into renderer selections through Render Matrix metadata only.

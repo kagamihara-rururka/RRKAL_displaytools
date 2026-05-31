@@ -62,7 +62,7 @@ function Invoke-CapturedNative {
     return Invoke-NativeWithRetry $FilePath $ArgumentList -CaptureOutput
 }
 
-Invoke-CheckedNative py @("-3", "-m", "py_compile", "rrkal_displaytools_qt_panel.py", "taichi_global_bathymetry.py", "pin_projection.py", "closed_loop_status.py", "render_core\render_plan.py", "render_core\render_plan_performance.py")
+Invoke-CheckedNative py @("-3", "-m", "py_compile", "rrkal_displaytools_qt_panel.py", "taichi_global_bathymetry.py", "pin_projection.py", "closed_loop_status.py", "render_core\render_plan.py", "render_core\render_plan_performance.py", "scripts\export_display_shell_render_matrix.py")
 Invoke-CheckedNative py @("-3", "profile_schema.py") | Out-Null
 Invoke-CheckedNative py @("-3", "scripts\validate_profiles.py")
 $launchPacketText = Invoke-CapturedNative py @("-3", "scripts\export_launch_packet.py", "--template", "fast_synthetic")
@@ -6483,6 +6483,17 @@ if ($displayCoreSource -notlike "*def build_view_model_render_plan_packet*") {
 $displayShellMatrix = powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\inspect_display_shell_render_matrix.ps1 | ConvertFrom-Json
 if ($displayShellMatrix.schema -ne "rrkal_displaytools.display_shell_render_matrix_review.v1") {
     throw "Display shell render matrix inspector schema missing"
+}
+$displayShellPacketText = Invoke-CapturedNative py @("-3", "scripts\export_display_shell_render_matrix.py")
+$displayShellPacket = $displayShellPacketText | ConvertFrom-Json
+if ($displayShellPacket.schema -ne "rrkal_displaytools.display_shell_render_matrix.v1") {
+    throw "Display shell JSON exporter schema missing"
+}
+if ($displayShellPacket.sample_view_model_render_plans_schema -ne "rrkal_displaytools.sample_view_model_render_plans.v1") {
+    throw "Display shell JSON exporter sample render plans schema missing"
+}
+if ($displayShellPacket.sample_view_model_render_plans.runtime_render_invoked -ne $false) {
+    throw "Display shell JSON exporter should not invoke runtime render"
 }
 if ($displayShellMatrix.has_canvas_registry -ne $true) {
     throw "Display shell render matrix inspector canvas registry evidence missing"

@@ -65,6 +65,12 @@ DisplayShell
 - `build_sample_view_model_render_plans_packet`: 對 Earth / TimeSeries sample ViewModel 產生 `rrkal_displaytools.sample_view_model_render_plans.v1`，作為 clone-first dispatch plan 證據。
 - 這一層不呼叫 adapter `render()`，因此不 import Qt、Taichi、Matplotlib、Plotly 或其他具體 renderer package。
 
+## Clone-first JSON exporter
+
+- `scripts/export_display_shell_render_matrix.py`: 匯出 `rrkal_displaytools.display_shell_render_matrix.v1` capability packet。
+- exporter 只 import `display_core`，用來證明 DisplayShell / Canvas / Layer / Render Matrix contract 可在無 GUI、無 renderer package 的 cloned machine 上檢查。
+- smoke 會驗證 exporter schema、sample render plan schema，以及 `runtime_render_invoked=false`。
+
 ## 後續執行順序
 
 1. 先穩住目前 render-plan composition seams。
