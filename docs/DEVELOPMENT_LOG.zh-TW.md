@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Surface display runtime in capability summary
+
+- Added `display_shell_render_matrix` and `display_runtime_handoff` to `scripts/export_capability_summary.ps1` current capabilities.
+- Added planned EarthCanvas runtime wrapper and minimal TimeSeriesCanvas adapter entries to keep post-push reports aligned with the new runtime contracts.
+- Smoke now verifies the capability summary includes both display shell/runtime handoff capability ids.
+- Smoke: PASS after transient file-access backoff retry (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add display runtime handoff inspector
 
 - Added `scripts/inspect_display_runtime_handoff.ps1` to aggregate display shell render plans with display runtime contracts and sample runtime requests.

@@ -6617,6 +6617,15 @@ if ($displayRuntimeHandoff.status -ne "ready") {
 if ($visualInspectorIndex.entry_ids -notcontains "display_runtime_handoff") {
     throw "Visual contract inspector index missing display runtime handoff entry"
 }
+$capabilitySummaryText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\export_capability_summary.ps1")
+$capabilitySummary = $capabilitySummaryText | ConvertFrom-Json
+$capabilityIds = @($capabilitySummary.current_capabilities | ForEach-Object { $_.id })
+if ($capabilityIds -notcontains "display_shell_render_matrix") {
+    throw "Capability summary missing display_shell_render_matrix"
+}
+if ($capabilityIds -notcontains "display_runtime_handoff") {
+    throw "Capability summary missing display_runtime_handoff"
+}
 if ($displayShellMatrix.has_canvas_registry -ne $true) {
     throw "Display shell render matrix inspector canvas registry evidence missing"
 }

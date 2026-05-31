@@ -89,6 +89,18 @@ $summary = [ordered]@{
             status = "ready_no_code_move"
             description = "No-code-move source map lists the monolith helper seams for the first post-7 render-plan compose extraction."
             review_command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_render_plan_compose_source_map.ps1"
+        },
+        [ordered]@{
+            id = "display_shell_render_matrix"
+            status = "contract_ready"
+            description = "DisplayShell / Canvas / Layer / Render Matrix contracts expose EarthCanvas and TimeSeriesCanvas samples, renderer registry dispatch and no-GUI pass/fail gates."
+            review_command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_display_shell_render_matrix.ps1"
+        },
+        [ordered]@{
+            id = "display_runtime_handoff"
+            status = "contract_ready_no_runtime_render"
+            description = "display_runtime landing zones, adapter protocol, sample runtime requests and handoff inspector connect ViewModel render plans to runtime requests without launching renderer backends."
+            review_command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_display_runtime_handoff.ps1"
         }
     )
     planned_capabilities = @(
@@ -116,12 +128,23 @@ $summary = [ordered]@{
             id = "authoritative_boundary_identity"
             status = "deferred_to_data_contract"
             description = "Displaytools owns visual emphasis; authoritative territory/EEZ identity must come from a verified RRKAL/data contract."
+        },
+        [ordered]@{
+            id = "earth_canvas_runtime_wrapper"
+            status = "planned_after_runtime_parity_evidence"
+            description = "Wrap the current globe runtime behind EarthCanvas only after request/result parity and smoke gates remain stable."
+        },
+        [ordered]@{
+            id = "minimal_timeseries_canvas_adapter"
+            status = "planned_after_display_runtime_contracts_stabilize"
+            description = "Add the first non-Earth runtime adapter after display_runtime protocol and handoff checks stay green."
         }
     )
     boundaries = @(
         "Qt/PyQt6 is the primary UI path; Tk is not primary.",
         "RRKAL owns dataset discovery, download, import, install registry, cache lifecycle and asset repair.",
         "Displaytools owns renderer/UI contracts, material controls, visual review packets and no-GUI smoke evidence.",
+        "display_core and display_runtime skeletons stay renderer-package-free until adapter parity is explicit.",
         "Renderer code movement is blocked until the post-07 formal pre-decoupling gate."
     )
     recommended_next_stage = "Continue pre-07 UIUX reviewer closure, then start render-plan compose decoupling after the formal 07:00 +08:00 gate."
