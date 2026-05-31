@@ -15,12 +15,14 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from display_runtime import (  # noqa: E402
+    build_canvas_runtime_protocol_packet,
     build_earth_canvas_runtime_contract_packet,
     build_time_series_canvas_runtime_contract_packet,
 )
 
 
 def main() -> None:
+    protocol = build_canvas_runtime_protocol_packet()
     contracts = [
         build_earth_canvas_runtime_contract_packet(),
         build_time_series_canvas_runtime_contract_packet(),
@@ -29,6 +31,8 @@ def main() -> None:
         "schema": "rrkal_displaytools.display_runtime_contracts.v1",
         "source": "scripts.export_display_runtime_contracts",
         "status": "contract_ready",
+        "protocol_schema": protocol["schema"],
+        "protocol": protocol,
         "contract_count": len(contracts),
         "canvas_types": [contract["boundary"]["canvas_type"] for contract in contracts],
         "runtime_render_invoked": any(contract["runtime_render_invoked"] for contract in contracts),

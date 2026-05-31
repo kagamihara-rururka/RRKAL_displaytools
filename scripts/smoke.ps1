@@ -62,7 +62,7 @@ function Invoke-CapturedNative {
     return Invoke-NativeWithRetry $FilePath $ArgumentList -CaptureOutput
 }
 
-Invoke-CheckedNative py @("-3", "-m", "py_compile", "rrkal_displaytools_qt_panel.py", "taichi_global_bathymetry.py", "pin_projection.py", "closed_loop_status.py", "render_core\render_plan.py", "render_core\render_plan_performance.py", "display_runtime\__init__.py", "display_runtime\earth_canvas.py", "display_runtime\time_series_canvas.py", "scripts\export_display_shell_render_matrix.py", "scripts\export_display_runtime_contracts.py")
+Invoke-CheckedNative py @("-3", "-m", "py_compile", "rrkal_displaytools_qt_panel.py", "taichi_global_bathymetry.py", "pin_projection.py", "closed_loop_status.py", "render_core\render_plan.py", "render_core\render_plan_performance.py", "display_runtime\__init__.py", "display_runtime\earth_canvas.py", "display_runtime\protocols.py", "display_runtime\time_series_canvas.py", "scripts\export_display_shell_render_matrix.py", "scripts\export_display_runtime_contracts.py")
 Invoke-CheckedNative py @("-3", "profile_schema.py") | Out-Null
 Invoke-CheckedNative py @("-3", "scripts\validate_profiles.py")
 $launchPacketText = Invoke-CapturedNative py @("-3", "scripts\export_launch_packet.py", "--template", "fast_synthetic")
@@ -6562,6 +6562,9 @@ $displayRuntimeContractsText = Invoke-CapturedNative py @("-3", "scripts\export_
 $displayRuntimeContracts = $displayRuntimeContractsText | ConvertFrom-Json
 if ($displayRuntimeContracts.schema -ne "rrkal_displaytools.display_runtime_contracts.v1") {
     throw "Display runtime contracts exporter schema missing"
+}
+if ($displayRuntimeContracts.protocol_schema -ne "rrkal_displaytools.canvas_runtime_protocol.v1") {
+    throw "Display runtime contracts exporter protocol schema missing"
 }
 if ($displayRuntimeContracts.canvas_types -notcontains "earth") {
     throw "Display runtime contracts exporter missing EarthCanvas"

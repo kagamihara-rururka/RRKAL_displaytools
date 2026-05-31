@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Add display runtime adapter protocol
+
+- Added `display_runtime/protocols.py` with renderer-package-free runtime request/result dataclasses and `CanvasRuntimeAdapter` protocol.
+- Added `rrkal_displaytools.canvas_runtime_protocol.v1` to the display runtime contracts exporter.
+- Smoke now py-compiles the protocol module and verifies the aggregated runtime packet exposes the protocol schema.
+- Smoke: PASS after transient file-access backoff retry (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add display runtime contracts check
 
 - Added `scripts/check_display_runtime_contracts.ps1` to validate the aggregated display runtime contracts exporter as a pass/fail gate.
