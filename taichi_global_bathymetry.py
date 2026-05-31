@@ -33,6 +33,7 @@ from render_core.render_plan import (
     build_layer_render_plan_composition_apply_action,
     build_layer_render_plan_composition_dispatch_packet,
     build_layer_render_plan_composition_steps,
+    build_layer_render_plan_composition_timing_packet,
     build_layer_render_plan_compose_queue_packet_from_states,
     build_layer_render_plan_cache_invalidation_reasons,
     build_layer_render_plan_cache_invalidation_scope,
@@ -14141,10 +14142,9 @@ class HybridRenderController:
             step_timing_ms[phase_id] = step_timing_ms.get(phase_id, 0.0) + (
                 time.perf_counter() - step_started_at
             ) * 1000.0
-        self.layer_render_step_timing_ms = {
-            phase_id: round(elapsed_ms, 3)
-            for phase_id, elapsed_ms in step_timing_ms.items()
-        }
+        timing_packet = build_layer_render_plan_composition_timing_packet(step_timing_ms)
+        self.layer_render_step_timing_packet = timing_packet
+        self.layer_render_step_timing_ms = timing_packet.get("phase_timing_ms", {})
         return frame
 
     def merge_alpha_compose_overlay_run(self, overlays: list[np.ndarray]) -> np.ndarray | None:

@@ -620,6 +620,9 @@ if ($launchPacket.layer_render_plan_performance.composition_apply_action_helper 
 if ($launchPacket.layer_render_plan_performance.composition_dispatch_packet_helper -ne "render_core.render_plan.build_layer_render_plan_composition_dispatch_packet") {
     throw "Launch packet layer_render_plan_performance composition dispatch packet helper missing"
 }
+if ($launchPacket.layer_render_plan_performance.composition_timing_packet_helper -ne "render_core.render_plan.build_layer_render_plan_composition_timing_packet") {
+    throw "Launch packet layer_render_plan_performance composition timing packet helper missing"
+}
 if ($launchPacket.layer_render_plan_performance.style_postprocess_packet_helper -ne "render_core.render_plan.build_layer_render_plan_style_postprocess_packet") {
     throw "Launch packet layer_render_plan_performance style postprocess packet helper missing"
 }
@@ -3347,6 +3350,9 @@ if ($capabilities.layer_render_plan_performance.composition_apply_action_helper 
 if ($capabilities.layer_render_plan_performance.composition_dispatch_packet_helper -ne "render_core.render_plan.build_layer_render_plan_composition_dispatch_packet") {
     throw "Renderer layer_render_plan_performance composition dispatch packet helper missing"
 }
+if ($capabilities.layer_render_plan_performance.composition_timing_packet_helper -ne "render_core.render_plan.build_layer_render_plan_composition_timing_packet") {
+    throw "Renderer layer_render_plan_performance composition timing packet helper missing"
+}
 if ($capabilities.layer_render_plan_performance.style_postprocess_packet_helper -ne "render_core.render_plan.build_layer_render_plan_style_postprocess_packet") {
     throw "Renderer layer_render_plan_performance style postprocess packet helper missing"
 }
@@ -4334,6 +4340,9 @@ if ($handoff.layer_render_plan_performance.composition_apply_action_helper -ne "
 }
 if ($handoff.layer_render_plan_performance.composition_dispatch_packet_helper -ne "render_core.render_plan.build_layer_render_plan_composition_dispatch_packet") {
     throw "Handoff inspection layer render plan performance composition dispatch packet helper missing"
+}
+if ($handoff.layer_render_plan_performance.composition_timing_packet_helper -ne "render_core.render_plan.build_layer_render_plan_composition_timing_packet") {
+    throw "Handoff inspection layer render plan performance composition timing packet helper missing"
 }
 if ($handoff.layer_render_plan_performance.style_postprocess_packet_helper -ne "render_core.render_plan.build_layer_render_plan_style_postprocess_packet") {
     throw "Handoff inspection layer render plan performance style postprocess packet helper missing"
@@ -6451,6 +6460,12 @@ if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_composition
 }
 if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_composition_dispatch_packet*") {
     throw "Render core layer render plan composition dispatch packet helper is missing"
+}
+if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_composition_timing_packet*") {
+    throw "Render core layer render plan composition timing packet helper is missing"
+}
+if ($rendererSource -notlike "*build_layer_render_plan_composition_timing_packet(step_timing_ms)*") {
+    throw "Renderer layer render plan composition helper does not use the core timing packet helper"
 }
 if ($rendererSource -notlike "*build_layer_render_plan_composition_dispatch_packet(action*") {
     throw "Renderer layer render plan composition helper does not use the core dispatch packet helper"

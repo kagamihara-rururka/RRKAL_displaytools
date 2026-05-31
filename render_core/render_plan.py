@@ -200,6 +200,29 @@ def build_layer_render_plan_composition_dispatch_packet(
     }
 
 
+def build_layer_render_plan_composition_timing_packet(
+    step_timing_ms: dict[str, object],
+) -> dict[str, object]:
+    phase_timing_ms: dict[str, float] = {}
+    source_timings = step_timing_ms if isinstance(step_timing_ms, dict) else {}
+    for phase_id, elapsed_ms in source_timings.items():
+        try:
+            phase_timing_ms[str(phase_id)] = round(float(elapsed_ms), 3)
+        except (TypeError, ValueError):
+            continue
+    return {
+        "schema": "rrkal_displaytools.layer_render_plan_composition_timing.v1",
+        "source": "render_core.render_plan.build_layer_render_plan_composition_timing_packet",
+        "phase_timing_ms": phase_timing_ms,
+        "phase_ids": list(phase_timing_ms.keys()),
+        "measured_phase_count": len(phase_timing_ms),
+        "compose_overlays_ms": phase_timing_ms.get("compose_overlays", 0.0),
+        "postprocess_ms": phase_timing_ms.get("postprocess", 0.0),
+        "runtime_optimization_applied": False,
+        "boundary": "Controller measures perf_counter deltas; render_core only normalizes composition phase timing metadata.",
+    }
+
+
 def build_layer_render_plan_composition_steps(
     boundary_layers_available: bool,
     boundary_layer_ids: list[str],

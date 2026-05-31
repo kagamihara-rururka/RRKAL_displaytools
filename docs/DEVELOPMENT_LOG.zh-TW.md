@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Extract composition timing packet
+
+- Added `build_layer_render_plan_composition_timing_packet` to `render_core/render_plan.py` for composition phase timing normalization.
+- Updated `HybridRenderController.apply_layer_render_plan_composition` to store a timing packet while preserving `layer_render_step_timing_ms` as the existing phase timing dict used by the render path.
+- Added `composition_timing_packet_helper` to launch/capability/handoff/work-order smoke contracts.
+- Smoke: PASS after transient file-access backoff retry (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Extract composition dispatch packet
 
 - Added `build_layer_render_plan_composition_dispatch_packet` to `render_core/render_plan.py` for pure overlay-present, skip-reason and dispatch-branch selection.

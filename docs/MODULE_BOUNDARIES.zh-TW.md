@@ -84,6 +84,7 @@
 - composition apply input selector 已指向 `render_core.render_plan.select_layer_render_plan_composition_input`；core 只決定 `compose_queue` 優先、`composition_steps` fallback，實際 ndarray compose 仍由 controller 執行。
 - composition apply action descriptor 已指向 `render_core.render_plan.build_layer_render_plan_composition_apply_action`；core 統一 step kind / layer / blend / phase / helper label，controller 只執行現有 ndarray helper。
 - composition dispatch packet 已指向 `render_core.render_plan.build_layer_render_plan_composition_dispatch_packet`；core 只決定 overlay-present / skip-reason / dispatch branch，controller 仍執行實際 ndarray 合成。
+- composition timing packet 已指向 `render_core.render_plan.build_layer_render_plan_composition_timing_packet`；controller 仍量測 `perf_counter`，core 只正規化 phase timing metadata。
 - style postprocess packet 已指向 `render_core.render_plan.build_layer_render_plan_style_postprocess_packet`；core 只封裝 style-profile runtime input，像素後處理仍由 renderer helper 執行。
 - compile path 會先建立 composition steps，再把同一份 steps 傳入 runtime snapshot，避免在同一次 plan compilation 中重算 step list。
 - render-plan 純決策：cache key、cache invalidation reasons/scope、batch decisions、apply path、execution summary、execution phases。
