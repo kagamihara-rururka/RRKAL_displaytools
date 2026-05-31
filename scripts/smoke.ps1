@@ -741,8 +741,11 @@ if ($launchPacket.layer_render_plan_performance.compiled_plan_bottleneck_recomme
 if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_queue_schema -ne "rrkal_displaytools.layer_render_plan_compose_queue.v1") {
     throw "Launch packet layer_render_plan_performance compose queue schema missing"
 }
-if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_queue_helper -ne "HybridRenderController.layer_render_plan_compose_queue") {
-    throw "Launch packet layer_render_plan_performance compose queue helper missing"
+if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_queue_helper -ne "render_core.render_plan.build_layer_render_plan_compose_queue_packet_from_states") {
+    throw "Launch packet layer_render_plan_performance compose queue core helper missing"
+}
+if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_queue_input_collector -ne "HybridRenderController.layer_render_plan_compose_queue") {
+    throw "Launch packet layer_render_plan_performance compose queue input collector missing"
 }
 if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_queue_field -ne "compose_queue") {
     throw "Launch packet layer_render_plan_performance compose queue field missing"
@@ -3407,8 +3410,11 @@ if ($capabilities.layer_render_plan_performance.compiled_plan_bottleneck_recomme
 if ($capabilities.layer_render_plan_performance.compiled_plan_compose_queue_schema -ne "rrkal_displaytools.layer_render_plan_compose_queue.v1") {
     throw "Renderer layer_render_plan_performance compose queue schema missing"
 }
-if ($capabilities.layer_render_plan_performance.compiled_plan_compose_queue_helper -ne "HybridRenderController.layer_render_plan_compose_queue") {
-    throw "Renderer layer_render_plan_performance compose queue helper missing"
+if ($capabilities.layer_render_plan_performance.compiled_plan_compose_queue_helper -ne "render_core.render_plan.build_layer_render_plan_compose_queue_packet_from_states") {
+    throw "Renderer layer_render_plan_performance compose queue core helper missing"
+}
+if ($capabilities.layer_render_plan_performance.compiled_plan_compose_queue_input_collector -ne "HybridRenderController.layer_render_plan_compose_queue") {
+    throw "Renderer layer_render_plan_performance compose queue input collector missing"
 }
 if ($capabilities.layer_render_plan_performance.compiled_plan_compose_queue_field -ne "compose_queue") {
     throw "Renderer layer_render_plan_performance compose queue field missing"
@@ -4371,8 +4377,11 @@ if ($handoff.layer_render_plan_performance.compiled_plan_bottleneck_recommendati
 if ($handoff.layer_render_plan_performance.compiled_plan_compose_queue_schema -ne "rrkal_displaytools.layer_render_plan_compose_queue.v1") {
     throw "Handoff inspection layer render plan performance compose queue schema missing"
 }
-if ($handoff.layer_render_plan_performance.compiled_plan_compose_queue_helper -ne "HybridRenderController.layer_render_plan_compose_queue") {
-    throw "Handoff inspection layer render plan performance compose queue helper missing"
+if ($handoff.layer_render_plan_performance.compiled_plan_compose_queue_helper -ne "render_core.render_plan.build_layer_render_plan_compose_queue_packet_from_states") {
+    throw "Handoff inspection layer render plan performance compose queue core helper missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_compose_queue_input_collector -ne "HybridRenderController.layer_render_plan_compose_queue") {
+    throw "Handoff inspection layer render plan performance compose queue input collector missing"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_compose_queue_field -ne "compose_queue") {
     throw "Handoff inspection layer render plan performance compose queue field missing"
@@ -6477,7 +6486,7 @@ if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_bottleneck_
     throw "Renderer render plan bottleneck recommendation helper is missing"
 }
 if ($rendererSource -notlike "*def layer_render_plan_compose_queue*") {
-    throw "Renderer render plan compose queue helper is missing"
+    throw "Renderer render plan compose queue input collector is missing"
 }
 if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_compose_runs*") {
     throw "Render core render plan compose runs helper is missing"

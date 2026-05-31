@@ -386,6 +386,10 @@ $summary = [ordered]@{
 
 
 
+        compiled_plan_compose_queue_input_collector = $layerRenderPlanPerformance.compiled_plan_compose_queue_input_collector
+
+
+
         compiled_plan_compose_queue_field = $layerRenderPlanPerformance.compiled_plan_compose_queue_field
 
 

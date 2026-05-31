@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Surface compose queue builder ownership
+
+- Updated `layer_render_plan_performance` so `compiled_plan_compose_queue_helper` points to `render_core.render_plan.build_layer_render_plan_compose_queue_packet_from_states`.
+- Added `compiled_plan_compose_queue_input_collector` to keep controller-owned overlay lookup, visibility and transparency probing explicit.
+- Mirrored the new field through launch/capability/handoff/work-order smoke contracts so clone-first review can distinguish core queue packet orchestration from runtime fact collection.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Surface runtime snapshot builder ownership
 
 - Updated `layer_render_plan_performance` so `runtime_snapshot_helper` points to `render_core.render_plan.build_layer_render_plan_runtime_snapshot`.
