@@ -627,6 +627,9 @@ def build_layer_render_plan_metadata_summary(plan: dict[str, object]) -> dict[st
     single_pass_preflight = compiled_plan.get("single_pass_preflight_contract")
     if not isinstance(single_pass_preflight, dict):
         single_pass_preflight = {}
+    adapter_payload = compiled_plan.get("adapter_payload_summary")
+    if not isinstance(adapter_payload, dict):
+        adapter_payload = {}
     available = bool(compiled_plan)
     return {
         "schema": "rrkal_displaytools.layer_render_plan_metadata_summary.v1",
@@ -646,6 +649,7 @@ def build_layer_render_plan_metadata_summary(plan: dict[str, object]) -> dict[st
         "execution_phase_count": _render_plan_count(compiled_plan.get("execution_phase_count")),
         "single_pass_ready": bool(compiled_plan.get("single_pass_ready", False)) if available else False,
         "single_pass_preflight_status": single_pass_preflight.get("status", "unavailable"),
+        "adapter_payload_status": adapter_payload.get("status", "unavailable"),
         "runtime_optimization_applied": bool(compiled_plan.get("runtime_optimization_applied", False)) if available else False,
         "current_execution_mode": execution_summary.get("current_execution_mode", "unavailable"),
         "phase_timing_status": phase_timing_runtime.get("status", "unavailable"),
@@ -749,6 +753,54 @@ def build_layer_render_plan_adapter_boundary_contract(
     }
 
 
+def build_layer_render_plan_adapter_payload_summary(
+    runtime_snapshot: dict[str, object],
+    composition_steps: list[dict[str, object]],
+    compose_queue_packet: dict[str, object],
+) -> dict[str, object]:
+    visible_layers = runtime_snapshot.get("visible_layers") if isinstance(runtime_snapshot.get("visible_layers"), list) else []
+    dirty_flags = runtime_snapshot.get("dirty_flags") if isinstance(runtime_snapshot.get("dirty_flags"), dict) else {}
+    compose_queue = compose_queue_packet.get("queue") if isinstance(compose_queue_packet.get("queue"), list) else []
+    skipped_steps = compose_queue_packet.get("skipped_steps") if isinstance(compose_queue_packet.get("skipped_steps"), list) else []
+    compose_runs = compose_queue_packet.get("compose_runs") if isinstance(compose_queue_packet.get("compose_runs"), list) else []
+    return {
+        "schema": "rrkal_displaytools.layer_render_plan_adapter_payload_summary.v1",
+        "source": "render_core.render_plan.build_layer_render_plan_adapter_payload_summary",
+        "status": "normalized_summary",
+        "runtime_path_unchanged": True,
+        "payload_boundary": "serializable_summary_only_no_overlay_arrays",
+        "visible_layer_ids": [str(layer_id) for layer_id in visible_layers],
+        "dirty_flag_ids": sorted(str(key) for key in dirty_flags.keys()),
+        "composition_step_ids": [
+            str(step.get("id") or step.get("layer_id") or "unknown_step")
+            for step in composition_steps
+            if isinstance(step, dict)
+        ],
+        "compose_queue_ids": [
+            str(step.get("id") or step.get("layer_id") or "unknown_step")
+            for step in compose_queue
+            if isinstance(step, dict)
+        ],
+        "skipped_step_ids": [
+            str(step.get("id") or step.get("layer_id") or "unknown_step")
+            for step in skipped_steps
+            if isinstance(step, dict)
+        ],
+        "compose_run_ids": [
+            str(run.get("id") or "unknown_run")
+            for run in compose_runs
+            if isinstance(run, dict)
+        ],
+        "visible_layer_count": len(visible_layers),
+        "dirty_flag_count": len(dirty_flags),
+        "composition_step_count": len(composition_steps),
+        "compose_queue_count": len(compose_queue),
+        "skipped_step_count": len(skipped_steps),
+        "compose_run_count": len(compose_runs),
+        "next_extraction_target": "replace ad-hoc controller method arguments with this normalized serializable adapter payload shape",
+    }
+
+
 def build_compiled_layer_render_plan_packet(
     cache_key: str,
     invalidation_reasons: list[str],
@@ -775,6 +827,11 @@ def build_compiled_layer_render_plan_packet(
     adapter_boundary_contract = build_layer_render_plan_adapter_boundary_contract(
         runtime_snapshot,
         composition_steps,
+    )
+    adapter_payload_summary = build_layer_render_plan_adapter_payload_summary(
+        runtime_snapshot,
+        composition_steps,
+        compose_queue_packet,
     )
     return {
         "schema": "rrkal_displaytools.compiled_layer_render_plan.v1",
@@ -808,6 +865,8 @@ def build_compiled_layer_render_plan_packet(
         "single_pass_preflight_contract_schema": "rrkal_displaytools.layer_render_plan_single_pass_preflight_contract.v1",
         "adapter_boundary_contract": adapter_boundary_contract,
         "adapter_boundary_contract_schema": "rrkal_displaytools.layer_render_plan_adapter_boundary.v1",
+        "adapter_payload_summary": adapter_payload_summary,
+        "adapter_payload_summary_schema": "rrkal_displaytools.layer_render_plan_adapter_payload_summary.v1",
         "reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",
         "reuse_status_values": ["compiled", "reused"],
         "runtime_optimization_applied": False,
@@ -884,6 +943,12 @@ def build_reused_compiled_layer_render_plan_packet(
         composition_steps,
     )
     plan["adapter_boundary_contract_schema"] = "rrkal_displaytools.layer_render_plan_adapter_boundary.v1"
+    plan["adapter_payload_summary"] = build_layer_render_plan_adapter_payload_summary(
+        runtime_snapshot,
+        composition_steps,
+        compose_queue_packet,
+    )
+    plan["adapter_payload_summary_schema"] = "rrkal_displaytools.layer_render_plan_adapter_payload_summary.v1"
     plan["reuse_policy"] = "reuse_when_cache_key_matches_previous_compiled_plan"
     plan["reuse_boundary"] = plan.get("reuse_boundary", "valid_until_dirty_flags_or_camera_change")
     plan["frame_index"] = int(frame_index)

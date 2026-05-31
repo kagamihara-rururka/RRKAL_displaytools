@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Add render plan adapter payload summary
+
+- Added `build_layer_render_plan_adapter_payload_summary` to `render_core/render_plan.py`.
+- Embedded a serializable adapter payload summary into compiled and reused render plans without moving overlay arrays.
+- Extended metadata summary with `adapter_payload_status` so clone-first review can see whether the normalized payload is present.
+- Smoke: PASS after one transient file-access backoff retry (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add render plan adapter boundary contract
 
 - Added `build_layer_render_plan_adapter_boundary_contract` to `render_core/render_plan.py`.

@@ -6564,6 +6564,15 @@ if ($renderPlanCombinedSource -notlike "*forbidden_in_render_core*") {
 if ($renderPlanCombinedSource -notlike "*normalize controller-to-core adapter payload*") {
     throw "Renderer render plan adapter boundary next extraction marker is missing"
 }
+if ($renderPlanCombinedSource -notlike "*rrkal_displaytools.layer_render_plan_adapter_payload_summary.v1*") {
+    throw "Renderer render plan adapter payload summary schema marker is missing"
+}
+if ($renderPlanCombinedSource -notlike "*serializable_summary_only_no_overlay_arrays*") {
+    throw "Renderer render plan adapter payload no-array boundary marker is missing"
+}
+if ($renderPlanCombinedSource -notlike "*adapter_payload_status*") {
+    throw "Renderer render plan adapter payload metadata summary marker is missing"
+}
 $singlePassPreflightInspector = powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_render_plan_single_pass_preflight.ps1 | ConvertFrom-Json
 if ($singlePassPreflightInspector.schema -ne "rrkal_displaytools.render_plan_single_pass_preflight_inspector.v1") {
     throw "Renderer render plan single-pass preflight inspector schema missing"
