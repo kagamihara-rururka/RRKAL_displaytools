@@ -27,6 +27,7 @@ DisplayShell
 - `display_runtime/earth_canvas.py` 是現有 globe runtime 的未來落點，目前只提供 `rrkal_displaytools.earth_canvas_runtime_contract.v1`，不搬動 Taichi runtime。
 - `display_runtime/time_series_canvas.py` 是第一個非地球 canvas 的未來落點，目前只提供 `rrkal_displaytools.time_series_canvas_runtime_contract.v1`，不引入 chart backend。
 - `display_runtime/protocols.py` 定義 renderer-package-free `CanvasRuntimeAdapter`、request 與 result 邊界。
+- `display_runtime/samples.py` 將 sample ViewModel render plans 包成 `rrkal_displaytools.sample_canvas_runtime_requests.v1`，只證明 request handoff，不執行 renderer。
 - Layer 是語意模型，不是 Plotly trace、Matplotlib artist 或 Taichi buffer。
 - Renderer adapter 才擁有具體繪圖套件與輸出格式。
 - EarthCanvas 抽出前，現有 monolith globe path 不被替換。

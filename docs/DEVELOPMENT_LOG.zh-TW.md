@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Add sample canvas runtime requests
+
+- Added `display_runtime/samples.py` to bridge display_core sample ViewModel render plans into display_runtime request packets.
+- Added `rrkal_displaytools.sample_canvas_runtime_requests.v1` to the display runtime contracts exporter.
+- Smoke now py-compiles the sample module and verifies the exporter exposes sample runtime requests without invoking renderer backends.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add display runtime adapter protocol
 
 - Added `display_runtime/protocols.py` with renderer-package-free runtime request/result dataclasses and `CanvasRuntimeAdapter` protocol.
