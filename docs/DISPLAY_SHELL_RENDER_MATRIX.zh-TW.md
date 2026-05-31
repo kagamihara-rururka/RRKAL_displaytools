@@ -22,6 +22,7 @@ DisplayShell
 ## 邊界
 
 - `display_core` 不 import Matplotlib、Plotly、Graphviz、PyVista、Qt 或 Taichi。
+- `scripts/check_display_core_import_boundary.ps1` 會檢查 `display_core/*.py` 沒有引入 Qt、Taichi、Matplotlib、Plotly、VisPy 或 VTK。
 - Layer 是語意模型，不是 Plotly trace、Matplotlib artist 或 Taichi buffer。
 - Renderer adapter 才擁有具體繪圖套件與輸出格式。
 - EarthCanvas 抽出前，現有 monolith globe path 不被替換。

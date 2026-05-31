@@ -117,6 +117,14 @@ $entries = @(
         no_launch_side_effect = $true
     },
     [ordered]@{
+        id = "display_core_import_boundary"
+        category = "display_shell"
+        schema = "rrkal_displaytools.display_core_import_boundary_check.v1"
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_display_core_import_boundary.ps1"
+        proves = @("display_core renderer-package-free boundary", "banned GUI/render imports absent", "adapter dependency ownership")
+        no_launch_side_effect = $true
+    },
+    [ordered]@{
         id = "layer_visual_presets"
         category = "layer_control"
         schema = "rrkal_displaytools.layer_visual_presets_inspector.v1"
@@ -259,6 +267,7 @@ $entries = @(
         "capability_summary",
         "display_shell_render_matrix",
         "display_shell_render_matrix_check",
+        "display_core_import_boundary",
         "layer_visual_presets",
         "layer_operator_shortcuts",
         "research_interaction",

@@ -6514,6 +6514,17 @@ if ($displayShellCheck.status -ne "pass") {
 if ($visualInspectorIndex.entry_ids -notcontains "display_shell_render_matrix_check") {
     throw "Visual contract inspector index missing display shell render matrix check entry"
 }
+$displayCoreImportBoundaryText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\check_display_core_import_boundary.ps1")
+$displayCoreImportBoundary = $displayCoreImportBoundaryText | ConvertFrom-Json
+if ($displayCoreImportBoundary.schema -ne "rrkal_displaytools.display_core_import_boundary_check.v1") {
+    throw "Display core import boundary check schema missing"
+}
+if ($displayCoreImportBoundary.status -ne "pass") {
+    throw "Display core import boundary check did not pass"
+}
+if ($visualInspectorIndex.entry_ids -notcontains "display_core_import_boundary") {
+    throw "Visual contract inspector index missing display core import boundary entry"
+}
 if ($displayShellMatrix.has_canvas_registry -ne $true) {
     throw "Display shell render matrix inspector canvas registry evidence missing"
 }
