@@ -62,7 +62,7 @@ function Invoke-CapturedNative {
     return Invoke-NativeWithRetry $FilePath $ArgumentList -CaptureOutput
 }
 
-Invoke-CheckedNative py @("-3", "-m", "py_compile", "rrkal_displaytools_qt_panel.py", "taichi_global_bathymetry.py", "pin_projection.py", "closed_loop_status.py", "render_core\render_plan.py", "render_core\render_plan_performance.py", "display_runtime\__init__.py", "display_runtime\earth_canvas.py", "display_runtime\time_series_canvas.py", "scripts\export_display_shell_render_matrix.py")
+Invoke-CheckedNative py @("-3", "-m", "py_compile", "rrkal_displaytools_qt_panel.py", "taichi_global_bathymetry.py", "pin_projection.py", "closed_loop_status.py", "render_core\render_plan.py", "render_core\render_plan_performance.py", "display_runtime\__init__.py", "display_runtime\earth_canvas.py", "display_runtime\time_series_canvas.py", "scripts\export_display_shell_render_matrix.py", "scripts\export_display_runtime_contracts.py")
 Invoke-CheckedNative py @("-3", "profile_schema.py") | Out-Null
 Invoke-CheckedNative py @("-3", "scripts\validate_profiles.py")
 $launchPacketText = Invoke-CapturedNative py @("-3", "scripts\export_launch_packet.py", "--template", "fast_synthetic")
@@ -6557,6 +6557,23 @@ if ($timeSeriesCanvasRuntime.schema -ne "rrkal_displaytools.time_series_canvas_r
 }
 if ($timeSeriesCanvasRuntime.runtime_render_invoked -ne $false) {
     throw "TimeSeriesCanvas runtime contract should not invoke runtime render"
+}
+$displayRuntimeContractsText = Invoke-CapturedNative py @("-3", "scripts\export_display_runtime_contracts.py")
+$displayRuntimeContracts = $displayRuntimeContractsText | ConvertFrom-Json
+if ($displayRuntimeContracts.schema -ne "rrkal_displaytools.display_runtime_contracts.v1") {
+    throw "Display runtime contracts exporter schema missing"
+}
+if ($displayRuntimeContracts.canvas_types -notcontains "earth") {
+    throw "Display runtime contracts exporter missing EarthCanvas"
+}
+if ($displayRuntimeContracts.canvas_types -notcontains "time_series") {
+    throw "Display runtime contracts exporter missing TimeSeriesCanvas"
+}
+if ($displayRuntimeContracts.runtime_render_invoked -ne $false) {
+    throw "Display runtime contracts exporter should not invoke runtime render"
+}
+if ($visualInspectorIndex.entry_ids -notcontains "display_runtime_contracts") {
+    throw "Visual contract inspector index missing display runtime contracts entry"
 }
 if ($displayShellMatrix.has_canvas_registry -ne $true) {
     throw "Display shell render matrix inspector canvas registry evidence missing"

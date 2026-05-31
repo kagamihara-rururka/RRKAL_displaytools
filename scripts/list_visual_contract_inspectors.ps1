@@ -133,6 +133,14 @@ $entries = @(
         no_launch_side_effect = $true
     },
     [ordered]@{
+        id = "display_runtime_contracts"
+        category = "display_shell"
+        schema = "rrkal_displaytools.display_runtime_contracts.v1"
+        command = "py -3 scripts\export_display_runtime_contracts.py"
+        proves = @("runtime landing zones", "EarthCanvas runtime contract", "TimeSeriesCanvas runtime contract", "no runtime render invocation")
+        no_launch_side_effect = $true
+    },
+    [ordered]@{
         id = "layer_visual_presets"
         category = "layer_control"
         schema = "rrkal_displaytools.layer_visual_presets_inspector.v1"
@@ -277,6 +285,7 @@ $entries = @(
         "display_shell_render_matrix_check",
         "display_core_import_boundary",
         "earth_canvas_runtime_boundary",
+        "display_runtime_contracts",
         "layer_visual_presets",
         "layer_operator_shortcuts",
         "research_interaction",

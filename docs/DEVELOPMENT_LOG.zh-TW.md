@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Add display runtime contracts exporter
+
+- Added `scripts/export_display_runtime_contracts.py` to export EarthCanvas and TimeSeriesCanvas runtime landing-zone contracts in one headless packet.
+- Added `display_runtime_contracts` to the no-GUI visual contract inspector index and review packet first-command list.
+- Smoke now py-compiles the exporter and verifies schema, Earth/TimeSeries coverage and `runtime_render_invoked=false`.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add TimeSeriesCanvas runtime contract skeleton
 
 - Added `display_runtime/time_series_canvas.py` as the future non-Earth canvas runtime landing zone without importing chart packages.
