@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Reuse composition steps in runtime snapshot
+
+- Updated `HybridRenderController.layer_render_plan_runtime_snapshot` to accept precomputed composition steps.
+- Updated `compile_layer_render_plan` to pass its already-built composition steps into the runtime snapshot instead of rebuilding the same step list.
+- Kept controller ownership of visible-layer, dirty-flag and selected-target runtime facts; `render_core` still receives a serializable snapshot packet.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Route runtime phase timing packet to core
 
 - Removed the residual `HybridRenderController.layer_render_plan_phase_timing_runtime_packet` wrapper.

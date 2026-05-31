@@ -14004,6 +14004,7 @@ class HybridRenderController:
         changed: bool | None = None,
         force: bool = False,
         defer_vector_overlays: bool | None = None,
+        composition_steps: list[dict[str, object]] | None = None,
     ) -> dict[str, object]:
         visible_layers = [layer_id for layer_id, visible in self.layer_visible.items() if visible]
         dirty_flags = {
@@ -14015,14 +14016,14 @@ class HybridRenderController:
             "boundary_dirty": bool(getattr(self, "boundary_dirty", False)),
             "boundary_hover_dirty": bool(getattr(self, "boundary_hover_dirty", False)),
         }
-        composition_steps = self.layer_render_plan_composition_steps()
+        plan_steps = composition_steps if isinstance(composition_steps, list) else self.layer_render_plan_composition_steps()
         return build_layer_render_plan_runtime_snapshot(
             int(getattr(self, "frame_index", 0)),
             visible_layers,
             getattr(self, "selected_layer_semantic_target", None),
             dirty_flags,
             defer_vector_overlays,
-            composition_steps,
+            plan_steps,
             source="HybridRenderController.layer_render_plan_runtime_snapshot",
         )
 
@@ -14287,6 +14288,7 @@ class HybridRenderController:
             changed=changed,
             force=force,
             defer_vector_overlays=defer_vector_overlays,
+            composition_steps=composition_steps,
         )
         compose_queue_packet = self.layer_render_plan_compose_queue(composition_steps)
         visible_layers = runtime_snapshot.get("visible_layers") if isinstance(runtime_snapshot.get("visible_layers"), list) else []
