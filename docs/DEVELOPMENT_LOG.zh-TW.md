@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Add render plan single-pass preflight contract
+
+- Added `build_layer_render_plan_single_pass_preflight_contract` to `render_core/render_plan.py`.
+- Embedded a disabled-by-default `single_pass_preflight_contract` into compiled and reused render plans.
+- Kept runtime composition unchanged until parity smoke, measured phase timing and manual review gates pass.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Extract render plan metadata summary builder
 
 - Added `build_layer_render_plan_metadata_summary` to `render_core/render_plan.py`.

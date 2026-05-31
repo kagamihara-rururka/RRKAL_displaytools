@@ -624,6 +624,9 @@ def build_layer_render_plan_metadata_summary(plan: dict[str, object]) -> dict[st
     phase_timing_runtime = compiled_plan.get("phase_timing_runtime")
     if not isinstance(phase_timing_runtime, dict):
         phase_timing_runtime = {}
+    single_pass_preflight = compiled_plan.get("single_pass_preflight_contract")
+    if not isinstance(single_pass_preflight, dict):
+        single_pass_preflight = {}
     available = bool(compiled_plan)
     return {
         "schema": "rrkal_displaytools.layer_render_plan_metadata_summary.v1",
@@ -642,6 +645,7 @@ def build_layer_render_plan_metadata_summary(plan: dict[str, object]) -> dict[st
         "compose_merge_candidate_run_count": _render_plan_count(compiled_plan.get("compose_merge_candidate_run_count")),
         "execution_phase_count": _render_plan_count(compiled_plan.get("execution_phase_count")),
         "single_pass_ready": bool(compiled_plan.get("single_pass_ready", False)) if available else False,
+        "single_pass_preflight_status": single_pass_preflight.get("status", "unavailable"),
         "runtime_optimization_applied": bool(compiled_plan.get("runtime_optimization_applied", False)) if available else False,
         "current_execution_mode": execution_summary.get("current_execution_mode", "unavailable"),
         "phase_timing_status": phase_timing_runtime.get("status", "unavailable"),
@@ -650,6 +654,47 @@ def build_layer_render_plan_metadata_summary(plan: dict[str, object]) -> dict[st
         "reuse_policy": compiled_plan.get("reuse_policy", "unavailable") if available else "unavailable",
         "reuse_boundary": compiled_plan.get("reuse_boundary", "unavailable") if available else "unavailable",
         "boundary": "Summary only; full layer_render_plan remains the renderer parity/debugging contract.",
+    }
+
+
+def build_layer_render_plan_single_pass_preflight_contract(
+    compose_runs: list[dict[str, object]],
+    execution_summary: dict[str, object],
+    phase_timing_runtime: dict[str, object],
+) -> dict[str, object]:
+    merge_candidates = [
+        run
+        for run in compose_runs
+        if isinstance(run, dict) and run.get("merge_safe") is True
+    ]
+    measured = bool(phase_timing_runtime.get("runtime_measurements_available")) if isinstance(phase_timing_runtime, dict) else False
+    single_pass_candidate_count = _render_plan_count(execution_summary.get("single_pass_candidate_count"))
+    candidate_count = len(merge_candidates) + single_pass_candidate_count
+    if candidate_count <= 0:
+        status = "no_candidates"
+    elif measured:
+        status = "ready_for_parity_smoke"
+    else:
+        status = "waiting_for_runtime_timing"
+    return {
+        "schema": "rrkal_displaytools.layer_render_plan_single_pass_preflight_contract.v1",
+        "source": "render_core.render_plan.build_layer_render_plan_single_pass_preflight_contract",
+        "status": status,
+        "runtime_single_pass_enabled": False,
+        "runtime_path_unchanged": True,
+        "merge_candidate_run_count": len(merge_candidates),
+        "candidate_run_ids": [str(run.get("id")) for run in merge_candidates],
+        "single_pass_candidate_count": single_pass_candidate_count,
+        "runtime_measurements_available": measured,
+        "required_before_enable": [
+            "compose_run_parity_smoke",
+            "phase_timing_runtime_metadata",
+            "manual_visual_review",
+        ],
+        "parity_gate": "zero_diff_against_sequential_compose_queue",
+        "timing_gate": "measured_compose_overlays_bottleneck_before_runtime_replacement",
+        "review_gate": "manual_qt_or_renderer_output_review_before_default_enable",
+        "next_runtime_step": "prototype opt-in single-pass composition only after parity and timing gates pass",
     }
 
 
@@ -671,6 +716,11 @@ def build_compiled_layer_render_plan_packet(
     *,
     source: str,
 ) -> dict[str, object]:
+    single_pass_preflight_contract = build_layer_render_plan_single_pass_preflight_contract(
+        compose_queue_packet.get("compose_runs", []),
+        execution_summary,
+        phase_timing_runtime,
+    )
     return {
         "schema": "rrkal_displaytools.compiled_layer_render_plan.v1",
         "source": source,
@@ -699,6 +749,8 @@ def build_compiled_layer_render_plan_packet(
         "phase_timing_runtime_schema": "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1",
         "bottleneck_recommendation": bottleneck_recommendation,
         "bottleneck_recommendation_schema": "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1",
+        "single_pass_preflight_contract": single_pass_preflight_contract,
+        "single_pass_preflight_contract_schema": "rrkal_displaytools.layer_render_plan_single_pass_preflight_contract.v1",
         "reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",
         "reuse_status_values": ["compiled", "reused"],
         "runtime_optimization_applied": False,
@@ -761,6 +813,12 @@ def build_reused_compiled_layer_render_plan_packet(
     plan["phase_timing_runtime_schema"] = "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1"
     plan["bottleneck_recommendation"] = bottleneck_recommendation
     plan["bottleneck_recommendation_schema"] = "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1"
+    plan["single_pass_preflight_contract"] = build_layer_render_plan_single_pass_preflight_contract(
+        compose_queue_packet.get("compose_runs", []),
+        execution_summary,
+        phase_timing_runtime,
+    )
+    plan["single_pass_preflight_contract_schema"] = "rrkal_displaytools.layer_render_plan_single_pass_preflight_contract.v1"
     plan["reuse_policy"] = "reuse_when_cache_key_matches_previous_compiled_plan"
     plan["reuse_boundary"] = plan.get("reuse_boundary", "valid_until_dirty_flags_or_camera_change")
     plan["frame_index"] = int(frame_index)

@@ -27,6 +27,7 @@ $targets = @(
     [ordered]@{ id = "build_layer_render_plan_bottleneck_recommendation"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_bottleneck_recommendation\(" },
     [ordered]@{ id = "build_layer_render_plan_phase_timing_runtime_packet"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_phase_timing_runtime_packet\(" },
     [ordered]@{ id = "build_layer_render_plan_metadata_summary"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_metadata_summary\(" },
+    [ordered]@{ id = "build_layer_render_plan_single_pass_preflight_contract"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_single_pass_preflight_contract\(" },
     [ordered]@{ id = "build_layer_render_plan_cache_key"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_cache_key\(" },
     [ordered]@{ id = "build_layer_render_plan_cache_invalidation_reasons"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_cache_invalidation_reasons\(" },
     [ordered]@{ id = "build_layer_render_plan_cache_invalidation_scope"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_cache_invalidation_scope\(" },

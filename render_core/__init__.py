@@ -22,6 +22,7 @@ from .render_plan import (
     build_layer_render_plan_phase_timing_contract,
     build_layer_render_plan_phase_timing_runtime_packet,
     build_layer_render_plan_runtime_snapshot,
+    build_layer_render_plan_single_pass_preflight_contract,
     build_reused_compiled_layer_render_plan_packet,
 )
 
@@ -47,5 +48,6 @@ __all__ = [
     "build_layer_render_plan_phase_timing_contract",
     "build_layer_render_plan_phase_timing_runtime_packet",
     "build_layer_render_plan_runtime_snapshot",
+    "build_layer_render_plan_single_pass_preflight_contract",
     "build_reused_compiled_layer_render_plan_packet",
 ]

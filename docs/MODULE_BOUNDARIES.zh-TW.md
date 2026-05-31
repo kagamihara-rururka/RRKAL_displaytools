@@ -82,6 +82,7 @@
 - render-plan 純決策：cache key、cache invalidation reasons/scope、batch decisions、apply path、execution summary、execution phases。
 - phase timing 與 bottleneck recommendation 的資料包組裝。
 - output metadata 的 `layer_render_plan_summary` 摘要契約組包；實際 metadata 寫檔仍留在 controller。
+- single-pass preflight contract 組包；在 parity smoke、實測 phase timing、人工視覺審查通過前，不啟用 runtime single-pass。
 - compose queue classifier：只根據 controller 提供的 step runtime state 分類 queue / skipped steps。
 
 `HybridRenderController` 仍負責：

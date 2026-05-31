@@ -6546,6 +6546,15 @@ if ($rendererSource -notlike '*"layer_render_plan_summary": build_layer_render_p
 if ($renderPlanCombinedSource -notlike "*rrkal_displaytools.layer_render_plan_metadata_summary.v1*") {
     throw "Renderer render plan metadata summary schema marker is missing"
 }
+if ($renderPlanCombinedSource -notlike "*rrkal_displaytools.layer_render_plan_single_pass_preflight_contract.v1*") {
+    throw "Renderer render plan single-pass preflight contract schema marker is missing"
+}
+if ($renderPlanCombinedSource -notlike "*runtime_single_pass_enabled*") {
+    throw "Renderer render plan single-pass disabled gate marker is missing"
+}
+if ($renderPlanCombinedSource -notlike "*compose_run_parity_smoke*") {
+    throw "Renderer render plan single-pass parity smoke gate marker is missing"
+}
 if ($rendererSource -notlike "*self.layer_render_plan_snapshot = self.layer_render_plan_runtime_snapshot*") {
     throw "Renderer render_if_needed does not update the layer render plan snapshot"
 }
