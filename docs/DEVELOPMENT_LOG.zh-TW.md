@@ -1,5 +1,13 @@
 # Development Log
 
+## 2026-05-31 - Add display runtime import boundary check
+
+- Added `scripts/check_display_runtime_import_boundary.ps1` to prevent display runtime skeletons from importing Qt, Taichi or chart backends before adapter parity work.
+- Added `display_runtime_import_boundary` to the no-GUI visual contract inspector index and review packet first-command list.
+- Tightened display core/runtime import boundary checks to scan only import/from statements, avoiding docstring false positives.
+- Smoke now verifies the runtime import boundary schema, pass status and reviewer index entry.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add display runtime contracts exporter
 
 - Added `scripts/export_display_runtime_contracts.py` to export EarthCanvas and TimeSeriesCanvas runtime landing-zone contracts in one headless packet.

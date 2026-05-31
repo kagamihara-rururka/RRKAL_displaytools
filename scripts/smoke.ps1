@@ -6575,6 +6575,17 @@ if ($displayRuntimeContracts.runtime_render_invoked -ne $false) {
 if ($visualInspectorIndex.entry_ids -notcontains "display_runtime_contracts") {
     throw "Visual contract inspector index missing display runtime contracts entry"
 }
+$displayRuntimeImportBoundaryText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\check_display_runtime_import_boundary.ps1")
+$displayRuntimeImportBoundary = $displayRuntimeImportBoundaryText | ConvertFrom-Json
+if ($displayRuntimeImportBoundary.schema -ne "rrkal_displaytools.display_runtime_import_boundary_check.v1") {
+    throw "Display runtime import boundary check schema missing"
+}
+if ($displayRuntimeImportBoundary.status -ne "pass") {
+    throw "Display runtime import boundary check did not pass"
+}
+if ($visualInspectorIndex.entry_ids -notcontains "display_runtime_import_boundary") {
+    throw "Visual contract inspector index missing display runtime import boundary entry"
+}
 if ($displayShellMatrix.has_canvas_registry -ne $true) {
     throw "Display shell render matrix inspector canvas registry evidence missing"
 }

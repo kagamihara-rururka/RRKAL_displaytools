@@ -141,6 +141,14 @@ $entries = @(
         no_launch_side_effect = $true
     },
     [ordered]@{
+        id = "display_runtime_import_boundary"
+        category = "display_shell"
+        schema = "rrkal_displaytools.display_runtime_import_boundary_check.v1"
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_display_runtime_import_boundary.ps1"
+        proves = @("display_runtime skeleton import boundary", "renderer package imports absent", "adapter parity before backend imports")
+        no_launch_side_effect = $true
+    },
+    [ordered]@{
         id = "layer_visual_presets"
         category = "layer_control"
         schema = "rrkal_displaytools.layer_visual_presets_inspector.v1"
@@ -286,6 +294,7 @@ $entries = @(
         "display_core_import_boundary",
         "earth_canvas_runtime_boundary",
         "display_runtime_contracts",
+        "display_runtime_import_boundary",
         "layer_visual_presets",
         "layer_operator_shortcuts",
         "research_interaction",
