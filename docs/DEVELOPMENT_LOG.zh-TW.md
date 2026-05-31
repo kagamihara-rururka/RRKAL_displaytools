@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Gate sample canvas runtime requests
+
+- Extended `scripts/check_display_runtime_contracts.ps1` so the pass/fail gate also validates `rrkal_displaytools.sample_canvas_runtime_requests.v1`.
+- The checker now verifies Earth/TimeSeries sample request coverage and keeps `runtime_render_invoked=false`.
+- Smoke continues to run the display runtime contracts checker as part of the full project gate.
+- Smoke: PASS after transient file-access backoff retries (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add sample canvas runtime requests
 
 - Added `display_runtime/samples.py` to bridge display_core sample ViewModel render plans into display_runtime request packets.

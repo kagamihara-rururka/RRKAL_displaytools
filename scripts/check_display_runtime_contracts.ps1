@@ -47,6 +47,21 @@ if ($packet.runtime_render_invoked -ne $false) {
 if ($packet.imports_renderer_packages -ne $false) {
     $failures += "renderer packages should not be imported"
 }
+if ($packet.sample_runtime_requests_schema -ne "rrkal_displaytools.sample_canvas_runtime_requests.v1") {
+    $failures += "sample runtime requests schema missing"
+}
+if ([int]$packet.sample_runtime_requests.request_count -lt 2) {
+    $failures += "expected at least two sample runtime requests"
+}
+if (@($packet.sample_runtime_requests.canvas_types) -notcontains "earth") {
+    $failures += "sample runtime requests missing EarthCanvas"
+}
+if (@($packet.sample_runtime_requests.canvas_types) -notcontains "time_series") {
+    $failures += "sample runtime requests missing TimeSeriesCanvas"
+}
+if ($packet.sample_runtime_requests.runtime_render_invoked -ne $false) {
+    $failures += "sample runtime requests should not invoke runtime render"
+}
 
 $status = "pass"
 if ($failures.Count -gt 0) {
@@ -62,6 +77,8 @@ $result = [ordered]@{
     canvas_types = @($packet.canvas_types)
     runtime_render_invoked = [bool]$packet.runtime_render_invoked
     imports_renderer_packages = [bool]$packet.imports_renderer_packages
+    sample_runtime_requests_schema = $packet.sample_runtime_requests_schema
+    sample_runtime_request_count = [int]$packet.sample_runtime_requests.request_count
     failures = $failures
     boundary = "Pass/fail check validates runtime contract landing zones only."
 }
