@@ -72,6 +72,44 @@ def alpha_compose_transparent(background: np.ndarray, overlay: np.ndarray) -> np
     return out
 
 
+def build_layer_render_plan_runtime_snapshot(
+    frame_index: int,
+    visible_layers: list[object],
+    selected_layer_semantic_target: object,
+    dirty_flags: dict[str, object],
+    defer_vector_overlays: object,
+    composition_steps: list[dict[str, object]],
+    *,
+    source: str,
+) -> dict[str, object]:
+    return {
+        "schema": "rrkal_displaytools.layer_render_plan_runtime_snapshot.v1",
+        "source": source,
+        "frame_index": int(frame_index),
+        "status": "snapshot_only",
+        "runtime_optimization_applied": False,
+        "optimization_target": "precompute_layer_state_then_single_render_pass",
+        "visible_layers": visible_layers,
+        "visible_layer_count": len(visible_layers),
+        "selected_layer_semantic_target": selected_layer_semantic_target,
+        "dirty_flags": dirty_flags,
+        "defer_vector_overlays": defer_vector_overlays,
+        "batch_targets": [
+            {"id": "globe_material", "source": "TaichiGlobe.render", "dirty_flag": "globe_dirty"},
+            {"id": "hydrology_polylines", "source": "lake_overlay_rgba/river_overlay_rgba", "dirty_flag": "hydrology_dirty"},
+            {"id": "boundary_and_maritime_lines", "source": "boundary_layer_rgba/boundary_overlay_rgba", "dirty_flag": "boundary_dirty"},
+            {"id": "traffic_points", "source": "overlay_rgba/aircraft_overlay_rgba", "dirty_flag": "overlay_dirty"},
+            {"id": "research_pins", "source": "pin_overlay_rgba", "dirty_flag": "overlay_dirty"},
+            {"id": "vehicle_icons", "source": "vehicle_icon_overlay_rgba", "dirty_flag": "overlay_dirty"},
+        ],
+        "compose_order": ["globe_rgba", *[str(step.get("id")) for step in composition_steps]],
+        "composition_step_count": len(composition_steps),
+        "composition_helper": "HybridRenderController.apply_layer_render_plan_composition",
+        "single_pass_target": "future_unified_taichi_render_plan",
+        "current_path": "centralized_plan_helper_with_existing_overlay_composition",
+    }
+
+
 def build_layer_render_plan_composition_steps(
     boundary_layers_available: bool,
     boundary_layer_ids: list[str],

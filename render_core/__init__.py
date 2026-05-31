@@ -18,6 +18,7 @@ from .render_plan import (
     build_layer_render_plan_execution_phases,
     build_layer_render_plan_phase_timing_contract,
     build_layer_render_plan_phase_timing_runtime_packet,
+    build_layer_render_plan_runtime_snapshot,
 )
 
 __all__ = [
@@ -38,4 +39,5 @@ __all__ = [
     "build_layer_render_plan_execution_phases",
     "build_layer_render_plan_phase_timing_contract",
     "build_layer_render_plan_phase_timing_runtime_packet",
+    "build_layer_render_plan_runtime_snapshot",
 ]

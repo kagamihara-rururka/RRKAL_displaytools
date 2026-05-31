@@ -37,6 +37,7 @@ from render_core.render_plan import (
     build_layer_render_plan_execution_summary,
     build_layer_render_plan_phase_timing_contract,
     build_layer_render_plan_phase_timing_runtime_packet,
+    build_layer_render_plan_runtime_snapshot,
 )
 from pin_projection import pin_projection_contract_packet, project_pins_to_screen
 try:
@@ -14008,32 +14009,16 @@ class HybridRenderController:
             "boundary_dirty": bool(getattr(self, "boundary_dirty", False)),
             "boundary_hover_dirty": bool(getattr(self, "boundary_hover_dirty", False)),
         }
-        return {
-            "schema": "rrkal_displaytools.layer_render_plan_runtime_snapshot.v1",
-            "source": "HybridRenderController.layer_render_plan_runtime_snapshot",
-            "frame_index": int(getattr(self, "frame_index", 0)),
-            "status": "snapshot_only",
-            "runtime_optimization_applied": False,
-            "optimization_target": "precompute_layer_state_then_single_render_pass",
-            "visible_layers": visible_layers,
-            "visible_layer_count": len(visible_layers),
-            "selected_layer_semantic_target": getattr(self, "selected_layer_semantic_target", None),
-            "dirty_flags": dirty_flags,
-            "defer_vector_overlays": defer_vector_overlays,
-            "batch_targets": [
-                {"id": "globe_material", "source": "TaichiGlobe.render", "dirty_flag": "globe_dirty"},
-                {"id": "hydrology_polylines", "source": "lake_overlay_rgba/river_overlay_rgba", "dirty_flag": "hydrology_dirty"},
-                {"id": "boundary_and_maritime_lines", "source": "boundary_layer_rgba/boundary_overlay_rgba", "dirty_flag": "boundary_dirty"},
-                {"id": "traffic_points", "source": "overlay_rgba/aircraft_overlay_rgba", "dirty_flag": "overlay_dirty"},
-                {"id": "research_pins", "source": "pin_overlay_rgba", "dirty_flag": "overlay_dirty"},
-                {"id": "vehicle_icons", "source": "vehicle_icon_overlay_rgba", "dirty_flag": "overlay_dirty"},
-            ],
-            "compose_order": ["globe_rgba", *[str(step.get("id")) for step in self.layer_render_plan_composition_steps()]],
-            "composition_step_count": len(self.layer_render_plan_composition_steps()),
-            "composition_helper": "HybridRenderController.apply_layer_render_plan_composition",
-            "single_pass_target": "future_unified_taichi_render_plan",
-            "current_path": "centralized_plan_helper_with_existing_overlay_composition",
-        }
+        composition_steps = self.layer_render_plan_composition_steps()
+        return build_layer_render_plan_runtime_snapshot(
+            int(getattr(self, "frame_index", 0)),
+            visible_layers,
+            getattr(self, "selected_layer_semantic_target", None),
+            dirty_flags,
+            defer_vector_overlays,
+            composition_steps,
+            source="HybridRenderController.layer_render_plan_runtime_snapshot",
+        )
 
     def layer_render_plan_composition_steps(self) -> list[dict[str, object]]:
         return build_layer_render_plan_composition_steps(

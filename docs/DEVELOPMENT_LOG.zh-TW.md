@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Extract runtime snapshot builder
+
+- Added `build_layer_render_plan_runtime_snapshot` to `render_core/render_plan.py`.
+- Kept renderer state collection in `HybridRenderController.layer_render_plan_runtime_snapshot` and moved packet assembly to render-core.
+- Reduced repeated composition-step construction by collecting steps once before building the snapshot packet.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Extract compose queue packet builder
 
 - Added `build_layer_render_plan_compose_queue_packet` to `render_core/render_plan.py`.
