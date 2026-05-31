@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Add TimeSeriesCanvas runtime contract skeleton
+
+- Added `display_runtime/time_series_canvas.py` as the future non-Earth canvas runtime landing zone without importing chart packages.
+- Added `rrkal_displaytools.time_series_canvas_runtime_contract.v1` to mirror the EarthCanvas runtime contract shape for contract-only TimeSeriesCanvas work.
+- Smoke now py-compiles the TimeSeries runtime module and verifies its schema plus `runtime_render_invoked=false` guard.
+- Smoke: PASS after transient file-access backoff retries (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add EarthCanvas runtime contract skeleton
 
 - Added `display_runtime/earth_canvas.py` as the future EarthCanvas runtime wrapper landing zone without importing Taichi or Qt.
