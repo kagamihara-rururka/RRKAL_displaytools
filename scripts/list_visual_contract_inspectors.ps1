@@ -125,6 +125,14 @@ $entries = @(
         no_launch_side_effect = $true
     },
     [ordered]@{
+        id = "earth_canvas_runtime_boundary"
+        category = "display_shell"
+        schema = "rrkal_displaytools.earth_canvas_runtime_boundary_inspector.v1"
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_earth_canvas_runtime_boundary.ps1"
+        proves = @("EarthCanvas extraction seam", "current globe runtime owner", "future module boundary", "no-code-move stop conditions")
+        no_launch_side_effect = $true
+    },
+    [ordered]@{
         id = "layer_visual_presets"
         category = "layer_control"
         schema = "rrkal_displaytools.layer_visual_presets_inspector.v1"
@@ -268,6 +276,7 @@ $entries = @(
         "display_shell_render_matrix",
         "display_shell_render_matrix_check",
         "display_core_import_boundary",
+        "earth_canvas_runtime_boundary",
         "layer_visual_presets",
         "layer_operator_shortcuts",
         "research_interaction",

@@ -6525,6 +6525,20 @@ if ($displayCoreImportBoundary.status -ne "pass") {
 if ($visualInspectorIndex.entry_ids -notcontains "display_core_import_boundary") {
     throw "Visual contract inspector index missing display core import boundary entry"
 }
+$earthCanvasBoundaryText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_earth_canvas_runtime_boundary.ps1")
+$earthCanvasBoundary = $earthCanvasBoundaryText | ConvertFrom-Json
+if ($earthCanvasBoundary.schema -ne "rrkal_displaytools.earth_canvas_runtime_boundary_inspector.v1") {
+    throw "EarthCanvas runtime boundary inspector schema missing"
+}
+if ($earthCanvasBoundary.status -ne "ready") {
+    throw "EarthCanvas runtime boundary inspector is not ready"
+}
+if ($earthCanvasBoundary.evidence.has_earth_canvas_descriptor -ne $true) {
+    throw "EarthCanvas runtime boundary inspector missing EarthCanvas descriptor evidence"
+}
+if ($visualInspectorIndex.entry_ids -notcontains "earth_canvas_runtime_boundary") {
+    throw "Visual contract inspector index missing EarthCanvas runtime boundary entry"
+}
 if ($displayShellMatrix.has_canvas_registry -ne $true) {
     throw "Display shell render matrix inspector canvas registry evidence missing"
 }

@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Add EarthCanvas runtime boundary map
+
+- Added `scripts/inspect_earth_canvas_runtime_boundary.ps1` to map the current globe runtime owner and future EarthCanvas extraction seam without moving code.
+- Added the inspector to the visual contract index and review packet first-command list.
+- Smoke now verifies the EarthCanvas boundary schema, ready status, descriptor evidence and reviewer index entry.
+- Smoke: PASS after transient file-access backoff retry (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add display core import boundary check
 
 - Added `scripts/check_display_core_import_boundary.ps1` to keep `display_core` renderer-package-free.
