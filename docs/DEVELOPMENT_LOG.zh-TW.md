@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Extract reused compiled plan refresh helper
+
+- Added `build_reused_compiled_layer_render_plan_packet` to `render_core/render_plan.py`.
+- Kept cache-key match detection in `HybridRenderController.compile_layer_render_plan`.
+- Moved reused plan field refresh into render-core and updated the relocated reuse source gate.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Extract compiled plan packet builder
 
 - Added `build_compiled_layer_render_plan_packet` to `render_core/render_plan.py`.

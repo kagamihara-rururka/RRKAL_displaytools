@@ -680,6 +680,59 @@ def build_compiled_layer_render_plan_packet(
     }
 
 
+def build_reused_compiled_layer_render_plan_packet(
+    cached_plan: dict[str, object],
+    invalidation_reasons: list[str],
+    invalidation_scope: list[dict[str, object]],
+    batch_decisions: list[dict[str, object]],
+    apply_path: list[dict[str, object]],
+    execution_summary: dict[str, object],
+    execution_phases: list[dict[str, object]],
+    phase_timing_contract: dict[str, object],
+    phase_timing_runtime: dict[str, object],
+    bottleneck_recommendation: dict[str, object],
+    frame_index: int,
+    runtime_snapshot: dict[str, object],
+    compose_queue_packet: dict[str, object],
+) -> dict[str, object]:
+    plan = dict(cached_plan)
+    plan["cache_status"] = "reused"
+    plan["cache_reuse_decision"] = "reused"
+    plan["cache_invalidation_reasons"] = invalidation_reasons
+    plan["cache_invalidation_scope"] = invalidation_scope
+    plan["batch_decisions"] = batch_decisions
+    plan["batch_decision_count"] = len(batch_decisions)
+    plan["apply_path"] = apply_path
+    plan["apply_path_count"] = len(apply_path)
+    plan["execution_summary"] = execution_summary
+    plan["execution_phases"] = execution_phases
+    plan["execution_phases_schema"] = plan.get("execution_phases_schema", "rrkal_displaytools.layer_render_plan_execution_phases.v1")
+    plan["execution_phase_count"] = len(execution_phases)
+    plan["phase_timing_contract"] = phase_timing_contract
+    plan["phase_timing_contract_schema"] = "rrkal_displaytools.layer_render_plan_phase_timing_contract.v1"
+    plan["phase_timing_runtime"] = phase_timing_runtime
+    plan["phase_timing_runtime_schema"] = "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1"
+    plan["bottleneck_recommendation"] = bottleneck_recommendation
+    plan["bottleneck_recommendation_schema"] = "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1"
+    plan["reuse_policy"] = "reuse_when_cache_key_matches_previous_compiled_plan"
+    plan["reuse_boundary"] = plan.get("reuse_boundary", "valid_until_dirty_flags_or_camera_change")
+    plan["frame_index"] = int(frame_index)
+    plan["runtime_snapshot"] = runtime_snapshot
+    plan["dirty_flags"] = runtime_snapshot.get("dirty_flags", {})
+    plan["compose_queue"] = compose_queue_packet.get("queue", [])
+    plan["compose_queue_schema"] = "rrkal_displaytools.layer_render_plan_compose_queue.v1"
+    plan["compose_queue_packet"] = compose_queue_packet
+    plan["compose_queue_count"] = compose_queue_packet.get("executable_step_count", 0)
+    plan["compose_queue_skipped_count"] = compose_queue_packet.get("skipped_step_count", 0)
+    plan["compose_runs"] = compose_queue_packet.get("compose_runs", [])
+    plan["compose_runs_schema"] = "rrkal_displaytools.layer_render_plan_compose_runs.v1"
+    plan["compose_run_count"] = compose_queue_packet.get("compose_run_count", 0)
+    plan["compose_merge_candidate_run_count"] = compose_queue_packet.get("compose_merge_candidate_run_count", 0)
+    plan["compose_run_parity_contract"] = compose_queue_packet.get("compose_run_parity_contract", {})
+    plan["compose_run_parity_contract_schema"] = "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1"
+    return plan
+
+
 def build_layer_render_plan_cache_key(
     runtime_snapshot: dict[str, object],
     composition_steps: list[dict[str, object]],

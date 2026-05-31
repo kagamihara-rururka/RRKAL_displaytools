@@ -40,6 +40,7 @@ from render_core.render_plan import (
     build_layer_render_plan_phase_timing_contract,
     build_layer_render_plan_phase_timing_runtime_packet,
     build_layer_render_plan_runtime_snapshot,
+    build_reused_compiled_layer_render_plan_packet,
 )
 from pin_projection import pin_projection_contract_packet, project_pins_to_screen
 try:
@@ -14420,42 +14421,21 @@ class HybridRenderController:
         bottleneck_recommendation = phase_timing_runtime.get("bottleneck_recommendation") if isinstance(phase_timing_runtime.get("bottleneck_recommendation"), dict) else self.layer_render_plan_bottleneck_recommendation(phase_timing_runtime)
         cached_plan = getattr(self, "compiled_layer_render_plan", None)
         if isinstance(cached_plan, dict) and getattr(self, "compiled_layer_render_plan_cache_key", None) == cache_key:
-            plan = dict(cached_plan)
-            plan["cache_status"] = "reused"
-            plan["cache_reuse_decision"] = "reused"
-            plan["cache_invalidation_reasons"] = invalidation_reasons
-            plan["cache_invalidation_scope"] = invalidation_scope
-            plan["batch_decisions"] = batch_decisions
-            plan["batch_decision_count"] = len(batch_decisions)
-            plan["apply_path"] = apply_path
-            plan["apply_path_count"] = len(apply_path)
-            plan["execution_summary"] = execution_summary
-            plan["execution_phases"] = execution_phases
-            plan["execution_phases_schema"] = plan.get("execution_phases_schema", "rrkal_displaytools.layer_render_plan_execution_phases.v1")
-            plan["execution_phase_count"] = len(execution_phases)
-            plan["phase_timing_contract"] = phase_timing_contract
-            plan["phase_timing_contract_schema"] = "rrkal_displaytools.layer_render_plan_phase_timing_contract.v1"
-            plan["phase_timing_runtime"] = phase_timing_runtime
-            plan["phase_timing_runtime_schema"] = "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1"
-            plan["bottleneck_recommendation"] = bottleneck_recommendation
-            plan["bottleneck_recommendation_schema"] = "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1"
-            plan["reuse_policy"] = "reuse_when_cache_key_matches_previous_compiled_plan"
-            plan["reuse_boundary"] = plan.get("reuse_boundary", "valid_until_dirty_flags_or_camera_change")
-            plan["frame_index"] = int(getattr(self, "frame_index", 0))
-            plan["runtime_snapshot"] = runtime_snapshot
-            plan["dirty_flags"] = runtime_snapshot.get("dirty_flags", {})
-            plan["compose_queue"] = compose_queue_packet.get("queue", [])
-            plan["compose_queue_schema"] = "rrkal_displaytools.layer_render_plan_compose_queue.v1"
-            plan["compose_queue_packet"] = compose_queue_packet
-            plan["compose_queue_count"] = compose_queue_packet.get("executable_step_count", 0)
-            plan["compose_queue_skipped_count"] = compose_queue_packet.get("skipped_step_count", 0)
-            plan["compose_runs"] = compose_queue_packet.get("compose_runs", [])
-            plan["compose_runs_schema"] = "rrkal_displaytools.layer_render_plan_compose_runs.v1"
-            plan["compose_run_count"] = compose_queue_packet.get("compose_run_count", 0)
-            plan["compose_merge_candidate_run_count"] = compose_queue_packet.get("compose_merge_candidate_run_count", 0)
-            plan["compose_run_parity_contract"] = compose_queue_packet.get("compose_run_parity_contract", {})
-            plan["compose_run_parity_contract_schema"] = "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1"
-            return plan
+            return build_reused_compiled_layer_render_plan_packet(
+                cached_plan,
+                invalidation_reasons,
+                invalidation_scope,
+                batch_decisions,
+                apply_path,
+                execution_summary,
+                execution_phases,
+                phase_timing_contract,
+                phase_timing_runtime,
+                bottleneck_recommendation,
+                int(getattr(self, "frame_index", 0)),
+                runtime_snapshot,
+                compose_queue_packet,
+            )
         self.compiled_layer_render_plan_cache_key = cache_key
         return build_compiled_layer_render_plan_packet(
             cache_key,
