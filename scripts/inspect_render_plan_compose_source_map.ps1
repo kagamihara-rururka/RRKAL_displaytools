@@ -20,6 +20,7 @@ $targets = @(
     [ordered]@{ id = "build_layer_render_plan_phase_timing_contract"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_phase_timing_contract\(" },
     [ordered]@{ id = "build_layer_render_plan_bottleneck_recommendation"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_bottleneck_recommendation\(" },
     [ordered]@{ id = "build_layer_render_plan_phase_timing_runtime_packet"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_phase_timing_runtime_packet\(" },
+    [ordered]@{ id = "build_layer_render_plan_cache_key"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_cache_key\(" },
     [ordered]@{ id = "compose_runtime_overlay"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def compose_runtime_overlay\(" },
     [ordered]@{ id = "compose_runtime_blend"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def compose_runtime_blend\(" },
     [ordered]@{ id = "layer_render_plan_runtime_snapshot"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def layer_render_plan_runtime_snapshot\(" },

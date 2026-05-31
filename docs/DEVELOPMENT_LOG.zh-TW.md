@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Extract render plan cache key builder
+
+- Added `build_layer_render_plan_cache_key` to `render_core/render_plan.py`.
+- Updated `HybridRenderController.layer_render_plan_cache_key` to collect runtime state and delegate JSON key construction to render-core.
+- Updated source-map and module boundary docs for cache-key extraction.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Extract phase timing runtime packet builder
 
 - Added `build_layer_render_plan_phase_timing_runtime_packet` to `render_core/render_plan.py`.

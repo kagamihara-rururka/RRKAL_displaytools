@@ -7,6 +7,8 @@ sequential compose behavior and does not enable runtime compose-run merging.
 
 from __future__ import annotations
 
+import json
+
 import numpy as np
 
 
@@ -463,3 +465,27 @@ def build_layer_render_plan_phase_timing_runtime_packet(
     packet["bottleneck_recommendation_schema"] = "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1"
     packet["bottleneck_recommendation"] = build_layer_render_plan_bottleneck_recommendation(packet)
     return packet
+
+
+def build_layer_render_plan_cache_key(
+    runtime_snapshot: dict[str, object],
+    composition_steps: list[dict[str, object]],
+    style_profile: object,
+    boundary_layer_ids: list[str],
+    layer_opacity: dict[str, object],
+    layer_blend: dict[str, object],
+) -> str:
+    visible_layers = runtime_snapshot.get("visible_layers") if isinstance(runtime_snapshot.get("visible_layers"), list) else []
+    visible_layer_ids = [str(layer_id) for layer_id in visible_layers]
+    payload = {
+        "style_profile": style_profile,
+        "visible_layers": visible_layer_ids,
+        "selected_layer_semantic_target": runtime_snapshot.get("selected_layer_semantic_target"),
+        "dirty_flags": runtime_snapshot.get("dirty_flags"),
+        "defer_vector_overlays": runtime_snapshot.get("defer_vector_overlays"),
+        "composition_ids": [str(step.get("id")) for step in composition_steps],
+        "boundary_layer_ids": sorted(str(layer_id) for layer_id in boundary_layer_ids),
+        "layer_opacity": {str(layer_id): layer_opacity.get(layer_id) for layer_id in visible_layer_ids},
+        "layer_blend": {str(layer_id): layer_blend.get(layer_id) for layer_id in visible_layer_ids},
+    }
+    return json.dumps(payload, sort_keys=True, default=str)

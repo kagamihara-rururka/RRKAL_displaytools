@@ -25,6 +25,7 @@ from render_core.render_plan import (
     alpha_compose_transparent,
     build_layer_render_plan_bottleneck_recommendation,
     build_layer_render_plan_apply_path,
+    build_layer_render_plan_cache_key,
     build_layer_render_plan_compose_run_parity_contract,
     build_layer_render_plan_compose_runs,
     build_layer_render_plan_execution_phases,
@@ -14334,18 +14335,14 @@ class HybridRenderController:
     ) -> str:
         visible_layers = runtime_snapshot.get("visible_layers") if isinstance(runtime_snapshot.get("visible_layers"), list) else []
         visible_layer_ids = [str(layer_id) for layer_id in visible_layers]
-        payload = {
-            "style_profile": getattr(self.args, "style_profile", "scientific"),
-            "visible_layers": visible_layer_ids,
-            "selected_layer_semantic_target": runtime_snapshot.get("selected_layer_semantic_target"),
-            "dirty_flags": runtime_snapshot.get("dirty_flags"),
-            "defer_vector_overlays": runtime_snapshot.get("defer_vector_overlays"),
-            "composition_ids": [str(step.get("id")) for step in composition_steps],
-            "boundary_layer_ids": sorted(str(layer_id) for layer_id in self.boundary_layer_rgba),
-            "layer_opacity": {layer_id: self.layer_opacity_percent(layer_id) for layer_id in visible_layer_ids},
-            "layer_blend": {layer_id: self.layer_blend_mode(layer_id) for layer_id in visible_layer_ids},
-        }
-        return json.dumps(payload, sort_keys=True, default=str)
+        return build_layer_render_plan_cache_key(
+            runtime_snapshot,
+            composition_steps,
+            style_profile=getattr(self.args, "style_profile", "scientific"),
+            boundary_layer_ids=sorted(str(layer_id) for layer_id in self.boundary_layer_rgba),
+            layer_opacity={layer_id: self.layer_opacity_percent(layer_id) for layer_id in visible_layer_ids},
+            layer_blend={layer_id: self.layer_blend_mode(layer_id) for layer_id in visible_layer_ids},
+        )
 
     def layer_render_plan_cache_invalidation_reasons(
         self,
