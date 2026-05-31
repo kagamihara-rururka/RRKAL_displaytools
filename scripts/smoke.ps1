@@ -6629,6 +6629,9 @@ if ($renderPlanMetadataSummaryInspector.summary_field -ne "layer_render_plan_sum
 if ($renderPlanMetadataSummaryInspector.adapter_payload_status_field -ne "adapter_payload_status") {
     throw "Renderer render plan metadata summary inspector adapter payload status field missing"
 }
+if ($renderPlanMetadataSummaryInspector.adapter_payload_contract_status_field -ne "adapter_payload_contract_status") {
+    throw "Renderer render plan metadata summary inspector adapter payload contract status field missing"
+}
 $renderPlanReviewPacket = powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_render_plan_review_packet.ps1 | ConvertFrom-Json
 if ($renderPlanReviewPacket.schema -ne "rrkal_displaytools.render_plan_review_packet.v1") {
     throw "Renderer render plan review packet schema missing"
@@ -6641,6 +6644,9 @@ if ($renderPlanReviewPacket.runtime_single_pass_enabled -ne $false) {
 }
 if ($renderPlanReviewPacket.adapter_payload_status_field -ne "adapter_payload_status") {
     throw "Renderer render plan review packet adapter payload status field missing"
+}
+if ($renderPlanReviewPacket.adapter_payload_contract_status_field -ne "adapter_payload_contract_status") {
+    throw "Renderer render plan review packet adapter payload contract status field missing"
 }
 if ($rendererSource -notlike "*self.layer_render_plan_snapshot = self.layer_render_plan_runtime_snapshot*") {
     throw "Renderer render_if_needed does not update the layer render plan snapshot"

@@ -10,6 +10,7 @@ $scriptName = "scripts/inspect_render_plan_metadata_summary.ps1"
 $schema = "rrkal_displaytools.render_plan_metadata_summary_inspector.v1"
 $summarySchema = "rrkal_displaytools.layer_render_plan_metadata_summary.v1"
 $adapterPayloadSchema = "rrkal_displaytools.layer_render_plan_adapter_payload_summary.v1"
+$adapterPayloadContractSchema = "rrkal_displaytools.layer_render_plan_adapter_payload_contract.v1"
 
 if ($ContractOnly) {
     [ordered]@{
@@ -18,9 +19,11 @@ if ($ContractOnly) {
         status = "contract_only_no_runtime"
         verifies_schema = $summarySchema
         verifies_adapter_payload_schema = $adapterPayloadSchema
+        verifies_adapter_payload_contract_schema = $adapterPayloadContractSchema
         full_plan_field = "layer_render_plan"
         summary_field = "layer_render_plan_summary"
         adapter_payload_status_field = "adapter_payload_status"
+        adapter_payload_contract_status_field = "adapter_payload_contract_status"
         boundary = "Inspector only; it does not launch Qt, Taichi, render frames, or write metadata files."
         portable = $true
     } | ConvertTo-Json -Depth 8
@@ -36,6 +39,8 @@ $markers = [ordered]@{
     summary_sidecar_field = $rendererSource -like '*"layer_render_plan_summary": build_layer_render_plan_metadata_summary(layer_render_plan)*'
     adapter_payload_schema = $renderPlanSource -like "*$adapterPayloadSchema*"
     adapter_payload_status_field = $renderPlanSource -like "*adapter_payload_status*"
+    adapter_payload_contract_schema = $renderPlanSource -like "*$adapterPayloadContractSchema*"
+    adapter_payload_contract_status_field = $renderPlanSource -like "*adapter_payload_contract_status*"
     full_plan_preserved_boundary = $renderPlanSource -like "*full layer_render_plan remains the renderer parity/debugging contract*"
     no_io_boundary = $rendererSource -like "*metadata_path.write_text*"
 }
@@ -52,9 +57,11 @@ foreach ($marker in $markers.GetEnumerator()) {
     status = if ($missing.Count -eq 0) { "ready" } else { "incomplete" }
     verifies_schema = $summarySchema
     verifies_adapter_payload_schema = $adapterPayloadSchema
+    verifies_adapter_payload_contract_schema = $adapterPayloadContractSchema
     full_plan_field = "layer_render_plan"
     summary_field = "layer_render_plan_summary"
     adapter_payload_status_field = "adapter_payload_status"
+    adapter_payload_contract_status_field = "adapter_payload_contract_status"
     markers = $markers
     missing_markers = $missing
     next_step = "Use this inspector when reviewing renderer output metadata sidecar readiness after clone."

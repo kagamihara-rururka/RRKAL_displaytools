@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Surface adapter payload contract status in review packet
+
+- Updated `scripts/inspect_render_plan_metadata_summary.ps1` to verify the adapter payload completeness contract schema and status field.
+- Updated `scripts/inspect_render_plan_review_packet.ps1` to expose adapter payload contract status for clone-first review.
+- Wired smoke to require adapter payload contract status visibility in both inspectors.
+- Smoke: PASS after transient file-access backoff retries (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add render plan adapter payload completeness contract
 
 - Added `build_layer_render_plan_adapter_payload_contract` to `render_core/render_plan.py`.
