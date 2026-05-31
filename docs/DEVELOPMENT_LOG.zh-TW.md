@@ -1,5 +1,13 @@
 # Development Log
 
+## 2026-05-31 - Surface composition step builder ownership
+
+- Updated `layer_render_plan_performance` so `composition_steps_helper` points to `render_core.render_plan.build_layer_render_plan_composition_steps`.
+- Added `composition_steps_input_collector` to keep the controller-owned boundary scalar collection explicit.
+- Updated smoke and render-plan compose work-order contracts so clone-first handoff can distinguish core step construction from controller runtime input collection.
+- Mirrored `composition_steps_input_collector` through the handoff inspector after smoke exposed the missing pass-through field.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Reuse composition steps in runtime snapshot
 
 - Updated `HybridRenderController.layer_render_plan_runtime_snapshot` to accept precomputed composition steps.

@@ -314,6 +314,7 @@ $summary = [ordered]@{
         runtime_snapshot_schema = $layerRenderPlanPerformance.runtime_snapshot_schema
         runtime_snapshot_helper = $layerRenderPlanPerformance.runtime_snapshot_helper
         composition_steps_helper = $layerRenderPlanPerformance.composition_steps_helper
+        composition_steps_input_collector = $layerRenderPlanPerformance.composition_steps_input_collector
         composition_apply_helper = $layerRenderPlanPerformance.composition_apply_helper
         compiled_plan_schema = $layerRenderPlanPerformance.compiled_plan_schema
         compiled_plan_helper = $layerRenderPlanPerformance.compiled_plan_helper

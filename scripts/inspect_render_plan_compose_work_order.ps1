@@ -106,7 +106,8 @@ if ($renderPlan.compiled_plan_compose_run_parity_contract_schema -ne "rrkal_disp
     source_helpers = @(
         $renderPlan.compiled_plan_helper,
         $renderPlan.compiled_plan_cache_key_helper,
-        "HybridRenderController.layer_render_plan_composition_steps",
+        $renderPlan.composition_steps_helper,
+        $renderPlan.composition_steps_input_collector,
         $renderPlan.composition_apply_helper,
         $renderPlan.compiled_plan_compose_queue_helper,
         $renderPlan.compiled_plan_compose_runs_helper,
