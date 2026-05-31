@@ -82,6 +82,7 @@
 - runtime snapshot builder ownership 已指向 `render_core.render_plan.build_layer_render_plan_runtime_snapshot`；controller wrapper 只保留為 visible layers / dirty flags / selected target 的 runtime fact collector。
 - composition step builder ownership 已指向 `render_core.render_plan.build_layer_render_plan_composition_steps`；controller wrapper 只保留為 boundary scalar input collector。
 - composition apply input selector 已指向 `render_core.render_plan.select_layer_render_plan_composition_input`；core 只決定 `compose_queue` 優先、`composition_steps` fallback，實際 ndarray compose 仍由 controller 執行。
+- composition apply action descriptor 已指向 `render_core.render_plan.build_layer_render_plan_composition_apply_action`；core 統一 step kind / layer / blend / phase / helper label，controller 只執行現有 ndarray helper。
 - compile path 會先建立 composition steps，再把同一份 steps 傳入 runtime snapshot，避免在同一次 plan compilation 中重算 step list。
 - render-plan 純決策：cache key、cache invalidation reasons/scope、batch decisions、apply path、execution summary、execution phases。
 - cache key / invalidation / batch / apply / execution / phase contract / bottleneck 這些純決策已不再保留 controller wrapper；controller 只收集 style、boundary、opacity、blend、cached-plan 這些 scalar inputs 後直接呼叫 core helper。

@@ -123,6 +123,28 @@ def select_layer_render_plan_composition_input(
     return None, "missing_composition_input"
 
 
+def build_layer_render_plan_composition_apply_action(step: dict[str, object]) -> dict[str, object]:
+    item = step if isinstance(step, dict) else {}
+    kind = str(item.get("kind") or "")
+    layer_id = str(item.get("layer_id") or item.get("id") or "")
+    helper_by_kind = {
+        "runtime_blend": "HybridRenderController.compose_runtime_blend",
+        "alpha_blend": "alpha_blend_compose",
+        "alpha_compose": "alpha_compose",
+        "runtime_overlay": "HybridRenderController.compose_runtime_overlay",
+        "style_profile_postprocess": "apply_style_profile",
+    }
+    return {
+        "kind": kind,
+        "layer_id": layer_id,
+        "blend_mode": str(item.get("blend_mode") or "Normal"),
+        "apply_helper": helper_by_kind.get(kind, "unknown_apply_helper"),
+        "phase_id": "postprocess" if kind == "style_profile_postprocess" else "compose_overlays",
+        "requires_overlay": kind in {"runtime_blend", "alpha_blend", "alpha_compose", "runtime_overlay"},
+        "single_pass_candidate": kind in {"runtime_blend", "alpha_blend", "alpha_compose", "runtime_overlay"},
+    }
+
+
 def build_layer_render_plan_composition_steps(
     boundary_layers_available: bool,
     boundary_layer_ids: list[str],
@@ -400,32 +422,25 @@ def build_layer_render_plan_apply_path(
         for decision in batch_decisions
         if isinstance(decision, dict) and decision.get("scope") == "layer"
     }
-    helper_by_kind = {
-        "runtime_blend": "HybridRenderController.compose_runtime_blend",
-        "alpha_blend": "alpha_blend_compose",
-        "alpha_compose": "alpha_compose",
-        "runtime_overlay": "HybridRenderController.compose_runtime_overlay",
-        "style_profile_postprocess": "apply_style_profile",
-    }
     path: list[dict[str, object]] = []
     for index, step in enumerate(composition_steps):
         if not isinstance(step, dict):
             continue
+        action = build_layer_render_plan_composition_apply_action(step)
         step_id = str(step.get("id") or step.get("layer_id") or "")
-        kind = str(step.get("kind") or "")
         decision = decisions_by_id.get(step_id, {})
         path.append(
             {
                 "order": index,
                 "id": step_id,
                 "layer_id": step.get("layer_id"),
-                "kind": kind,
+                "kind": action.get("kind"),
                 "decision": decision.get("decision", "compose_cached_overlay"),
-                "apply_helper": helper_by_kind.get(kind, "unknown_apply_helper"),
+                "apply_helper": action.get("apply_helper"),
                 "overlay_attr": step.get("overlay_attr"),
                 "overlay_source": step.get("overlay_source"),
                 "current_runtime_path": "HybridRenderController.apply_layer_render_plan_composition",
-                "single_pass_candidate": kind in {"runtime_blend", "alpha_blend", "alpha_compose", "runtime_overlay"},
+                "single_pass_candidate": action.get("single_pass_candidate"),
             }
         )
     return path

@@ -614,6 +614,9 @@ if ($launchPacket.layer_render_plan_performance.composition_apply_input_priority
 if ($launchPacket.layer_render_plan_performance.composition_apply_input_priority -notcontains "composition_steps") {
     throw "Launch packet layer_render_plan_performance composition apply composition steps fallback missing"
 }
+if ($launchPacket.layer_render_plan_performance.composition_apply_action_helper -ne "render_core.render_plan.build_layer_render_plan_composition_apply_action") {
+    throw "Launch packet layer_render_plan_performance composition apply action helper missing"
+}
 if ($launchPacket.layer_render_plan_performance.metadata_sidecar_field -ne "layer_render_plan") {
     throw "Launch packet layer_render_plan_performance metadata sidecar field missing"
 }
@@ -3332,6 +3335,9 @@ if ($capabilities.layer_render_plan_performance.composition_apply_input_priority
 if ($capabilities.layer_render_plan_performance.composition_apply_input_priority -notcontains "composition_steps") {
     throw "Renderer layer_render_plan_performance composition apply composition steps fallback missing"
 }
+if ($capabilities.layer_render_plan_performance.composition_apply_action_helper -ne "render_core.render_plan.build_layer_render_plan_composition_apply_action") {
+    throw "Renderer layer_render_plan_performance composition apply action helper missing"
+}
 if ($capabilities.layer_render_plan_performance.composition_apply_helper -ne "HybridRenderController.apply_layer_render_plan_composition") {
     throw "Renderer layer_render_plan_performance composition apply helper missing"
 }
@@ -4310,6 +4316,9 @@ if ($handoff.layer_render_plan_performance.composition_apply_input_priority -not
 }
 if ($handoff.layer_render_plan_performance.composition_apply_input_priority -notcontains "composition_steps") {
     throw "Handoff inspection layer render plan performance composition apply composition steps fallback missing"
+}
+if ($handoff.layer_render_plan_performance.composition_apply_action_helper -ne "render_core.render_plan.build_layer_render_plan_composition_apply_action") {
+    throw "Handoff inspection layer render plan performance composition apply action helper missing"
 }
 if ($handoff.layer_render_plan_performance.composition_apply_helper -ne "HybridRenderController.apply_layer_render_plan_composition") {
     throw "Handoff inspection layer render plan performance composition apply helper missing"
@@ -6419,6 +6428,12 @@ if ($rendererSource -notlike "*def apply_layer_render_plan_composition*") {
 if ($renderPlanCombinedSource -notlike "*def select_layer_render_plan_composition_input*") {
     throw "Render core layer render plan composition input selector is missing"
 }
+if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_composition_apply_action*") {
+    throw "Render core layer render plan composition apply action helper is missing"
+}
+if ($rendererSource -notlike "*build_layer_render_plan_composition_apply_action(step)*") {
+    throw "Renderer layer render plan composition helper does not use the core apply action helper"
+}
 if ($rendererSource -notlike "*def compile_layer_render_plan*") {
     throw "Renderer compiled layer render plan helper is missing"
 }
@@ -6488,8 +6503,8 @@ if ($renderPlanCombinedSource -notlike '*"compose_cached_overlay"*') {
 if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_apply_path*") {
     throw "Renderer render plan apply path helper is missing"
 }
-if ($renderPlanCombinedSource -notlike '*"apply_helper": helper_by_kind.get(kind, "unknown_apply_helper")*') {
-    throw "Renderer render plan apply helper mapping is missing"
+if ($renderPlanCombinedSource -notlike '*"apply_helper": action.get("apply_helper")*') {
+    throw "Renderer render plan apply helper action mapping is missing"
 }
 if ($renderPlanCombinedSource -notlike "*HybridRenderController.apply_layer_render_plan_composition*") {
     throw "Renderer render plan apply path current runtime helper is missing"

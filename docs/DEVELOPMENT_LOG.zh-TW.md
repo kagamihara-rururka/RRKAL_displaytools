@@ -1,5 +1,13 @@
 # Development Log
 
+## 2026-05-31 - Extract composition apply action descriptor
+
+- Added `build_layer_render_plan_composition_apply_action` to `render_core/render_plan.py` for pure step kind, layer, blend-mode, phase and helper-label normalization.
+- Updated `HybridRenderController.apply_layer_render_plan_composition` to consume the core action descriptor while preserving the existing ndarray composition helpers.
+- Reused the same action descriptor inside `build_layer_render_plan_apply_path` so metadata and runtime composition share the same helper mapping.
+- Added `composition_apply_action_helper` to launch/capability/handoff/work-order smoke contracts.
+- Smoke: PASS after transient file-access backoff retries (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Extract composition input selector
 
 - Added `select_layer_render_plan_composition_input` to `render_core/render_plan.py` so the pure data choice between `compose_queue` and `composition_steps` no longer lives in `render_if_needed`.
