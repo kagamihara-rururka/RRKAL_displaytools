@@ -24,6 +24,7 @@ from render_core.render_plan import (
     alpha_compose,
     alpha_compose_transparent,
     build_compiled_layer_render_plan_packet,
+    build_compiled_layer_render_plan_packet_from_adapter_payload,
     build_layer_render_plan_adapter_payload,
     build_layer_render_plan_bottleneck_recommendation,
     build_layer_render_plan_apply_path,
@@ -43,6 +44,7 @@ from render_core.render_plan import (
     build_layer_render_plan_phase_timing_runtime_packet,
     build_layer_render_plan_runtime_snapshot,
     build_reused_compiled_layer_render_plan_packet,
+    build_reused_compiled_layer_render_plan_packet_from_adapter_payload,
 )
 from pin_projection import pin_projection_contract_packet, project_pins_to_screen
 try:
@@ -14438,39 +14440,15 @@ class HybridRenderController:
         )
         cached_plan = getattr(self, "compiled_layer_render_plan", None)
         if isinstance(cached_plan, dict) and getattr(self, "compiled_layer_render_plan_cache_key", None) == cache_key:
-            return build_reused_compiled_layer_render_plan_packet(
+            return build_reused_compiled_layer_render_plan_packet_from_adapter_payload(
                 cached_plan,
-                invalidation_reasons,
-                invalidation_scope,
-                batch_decisions,
-                apply_path,
-                execution_summary,
-                execution_phases,
-                phase_timing_contract,
-                phase_timing_runtime,
-                bottleneck_recommendation,
-                int(getattr(self, "frame_index", 0)),
-                runtime_snapshot,
-                compose_queue_packet,
                 adapter_payload,
+                int(getattr(self, "frame_index", 0)),
             )
         self.compiled_layer_render_plan_cache_key = cache_key
-        return build_compiled_layer_render_plan_packet(
-            cache_key,
-            invalidation_reasons,
-            invalidation_scope,
-            batch_decisions,
-            apply_path,
-            execution_summary,
-            execution_phases,
-            phase_timing_contract,
-            phase_timing_runtime,
-            bottleneck_recommendation,
-            int(getattr(self, "frame_index", 0)),
-            runtime_snapshot,
-            composition_steps,
-            compose_queue_packet,
+        return build_compiled_layer_render_plan_packet_from_adapter_payload(
             adapter_payload,
+            int(getattr(self, "frame_index", 0)),
             source="HybridRenderController.compile_layer_render_plan",
         )
 

@@ -825,6 +825,7 @@ def build_layer_render_plan_adapter_payload(
         "schema": "rrkal_displaytools.layer_render_plan_adapter_payload.v1",
         "source": "render_core.render_plan.build_layer_render_plan_adapter_payload",
         "status": "normalized_payload",
+        "contract_role": "primary_payload_contract",
         "runtime_path_unchanged": True,
         "payload_boundary": "serializable_controller_to_core_payload_no_overlay_arrays",
         "summary_schema": "rrkal_displaytools.layer_render_plan_adapter_payload_summary.v1",
@@ -844,6 +845,67 @@ def build_layer_render_plan_adapter_payload(
         "compose_queue_packet": compose_queue_packet,
         "next_extraction_target": "make compiled/reused plan builders consume this payload as the primary contract",
     }
+
+
+def _payload_list(adapter_payload: dict[str, object], key: str) -> list[dict[str, object]]:
+    value = adapter_payload.get(key)
+    return value if isinstance(value, list) else []
+
+
+def _payload_dict(adapter_payload: dict[str, object], key: str) -> dict[str, object]:
+    value = adapter_payload.get(key)
+    return value if isinstance(value, dict) else {}
+
+
+def build_compiled_layer_render_plan_packet_from_adapter_payload(
+    adapter_payload: dict[str, object],
+    frame_index: int,
+    *,
+    source: str,
+) -> dict[str, object]:
+    payload = adapter_payload if isinstance(adapter_payload, dict) else {}
+    return build_compiled_layer_render_plan_packet(
+        str(payload.get("cache_key") or ""),
+        _payload_list(payload, "invalidation_reasons"),
+        _payload_list(payload, "invalidation_scope"),
+        _payload_list(payload, "batch_decisions"),
+        _payload_list(payload, "apply_path"),
+        _payload_dict(payload, "execution_summary"),
+        _payload_list(payload, "execution_phases"),
+        _payload_dict(payload, "phase_timing_contract"),
+        _payload_dict(payload, "phase_timing_runtime"),
+        _payload_dict(payload, "bottleneck_recommendation"),
+        frame_index,
+        _payload_dict(payload, "runtime_snapshot"),
+        _payload_list(payload, "composition_steps"),
+        _payload_dict(payload, "compose_queue_packet"),
+        payload,
+        source=source,
+    )
+
+
+def build_reused_compiled_layer_render_plan_packet_from_adapter_payload(
+    cached_plan: dict[str, object],
+    adapter_payload: dict[str, object],
+    frame_index: int,
+) -> dict[str, object]:
+    payload = adapter_payload if isinstance(adapter_payload, dict) else {}
+    return build_reused_compiled_layer_render_plan_packet(
+        cached_plan,
+        _payload_list(payload, "invalidation_reasons"),
+        _payload_list(payload, "invalidation_scope"),
+        _payload_list(payload, "batch_decisions"),
+        _payload_list(payload, "apply_path"),
+        _payload_dict(payload, "execution_summary"),
+        _payload_list(payload, "execution_phases"),
+        _payload_dict(payload, "phase_timing_contract"),
+        _payload_dict(payload, "phase_timing_runtime"),
+        _payload_dict(payload, "bottleneck_recommendation"),
+        frame_index,
+        _payload_dict(payload, "runtime_snapshot"),
+        _payload_dict(payload, "compose_queue_packet"),
+        payload,
+    )
 
 
 def build_compiled_layer_render_plan_packet(

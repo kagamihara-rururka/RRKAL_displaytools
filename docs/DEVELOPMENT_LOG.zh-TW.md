@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Route render plan builders through adapter payload
+
+- Added compiled/reused render-plan packet builder wrappers that consume `layer_render_plan_adapter_payload.v1`.
+- Updated `HybridRenderController.compile_layer_render_plan` to call the from-payload wrappers instead of passing the full long argument list directly.
+- Kept the legacy long-argument builders in place as compatibility helpers while moving the controller toward the normalized payload contract.
+- Smoke: PASS after transient file-access backoff retries (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add normalized render plan adapter payload
 
 - Added `build_layer_render_plan_adapter_payload` to `render_core/render_plan.py`.

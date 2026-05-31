@@ -6573,8 +6573,23 @@ if ($renderPlanCombinedSource -notlike "*rrkal_displaytools.layer_render_plan_ad
 if ($renderPlanCombinedSource -notlike "*serializable_controller_to_core_payload_no_overlay_arrays*") {
     throw "Renderer render plan adapter payload no-array contract marker is missing"
 }
+if ($renderPlanCombinedSource -notlike "*primary_payload_contract*") {
+    throw "Renderer render plan adapter payload primary contract marker is missing"
+}
+if ($renderPlanCombinedSource -notlike "*build_compiled_layer_render_plan_packet_from_adapter_payload*") {
+    throw "Renderer render plan compiled from-payload builder marker is missing"
+}
+if ($renderPlanCombinedSource -notlike "*build_reused_compiled_layer_render_plan_packet_from_adapter_payload*") {
+    throw "Renderer render plan reused from-payload builder marker is missing"
+}
 if ($rendererSource -notlike "*adapter_payload = build_layer_render_plan_adapter_payload(*") {
     throw "Renderer compile_layer_render_plan does not build normalized adapter payload"
+}
+if ($rendererSource -notlike "*build_compiled_layer_render_plan_packet_from_adapter_payload(*") {
+    throw "Renderer compile_layer_render_plan does not use compiled from-payload builder"
+}
+if ($rendererSource -notlike "*build_reused_compiled_layer_render_plan_packet_from_adapter_payload(*") {
+    throw "Renderer compile_layer_render_plan does not use reused from-payload builder"
 }
 if ($renderPlanCombinedSource -notlike "*serializable_summary_only_no_overlay_arrays*") {
     throw "Renderer render plan adapter payload no-array boundary marker is missing"

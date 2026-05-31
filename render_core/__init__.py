@@ -5,6 +5,7 @@ from .render_plan import (
     alpha_compose,
     alpha_compose_transparent,
     build_compiled_layer_render_plan_packet,
+    build_compiled_layer_render_plan_packet_from_adapter_payload,
     build_layer_render_plan_adapter_boundary_contract,
     build_layer_render_plan_adapter_payload,
     build_layer_render_plan_adapter_payload_summary,
@@ -27,6 +28,7 @@ from .render_plan import (
     build_layer_render_plan_runtime_snapshot,
     build_layer_render_plan_single_pass_preflight_contract,
     build_reused_compiled_layer_render_plan_packet,
+    build_reused_compiled_layer_render_plan_packet_from_adapter_payload,
 )
 
 __all__ = [
@@ -34,6 +36,7 @@ __all__ = [
     "alpha_compose",
     "alpha_compose_transparent",
     "build_compiled_layer_render_plan_packet",
+    "build_compiled_layer_render_plan_packet_from_adapter_payload",
     "build_layer_render_plan_adapter_boundary_contract",
     "build_layer_render_plan_adapter_payload",
     "build_layer_render_plan_adapter_payload_summary",
@@ -56,4 +59,5 @@ __all__ = [
     "build_layer_render_plan_runtime_snapshot",
     "build_layer_render_plan_single_pass_preflight_contract",
     "build_reused_compiled_layer_render_plan_packet",
+    "build_reused_compiled_layer_render_plan_packet_from_adapter_payload",
 ]
