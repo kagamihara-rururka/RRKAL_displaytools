@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Extract composition input selector
+
+- Added `select_layer_render_plan_composition_input` to `render_core/render_plan.py` so the pure data choice between `compose_queue` and `composition_steps` no longer lives in `render_if_needed`.
+- Updated `HybridRenderController.render_if_needed` to call the core selector before handing the selected list to `apply_layer_render_plan_composition`.
+- Added `composition_apply_input_selector_helper` and `composition_apply_input_priority` to launch/capability/handoff/work-order contracts while keeping actual ndarray composition in the controller helper.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Surface compose queue builder ownership
 
 - Updated `layer_render_plan_performance` so `compiled_plan_compose_queue_helper` points to `render_core.render_plan.build_layer_render_plan_compose_queue_packet_from_states`.

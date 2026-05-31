@@ -110,6 +110,7 @@ if ($renderPlan.compiled_plan_compose_run_parity_contract_schema -ne "rrkal_disp
         $renderPlan.compiled_plan_cache_key_helper,
         $renderPlan.composition_steps_helper,
         $renderPlan.composition_steps_input_collector,
+        $renderPlan.composition_apply_input_selector_helper,
         $renderPlan.composition_apply_helper,
         $renderPlan.compiled_plan_compose_queue_helper,
         $renderPlan.compiled_plan_compose_queue_input_collector,

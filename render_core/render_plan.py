@@ -110,6 +110,19 @@ def build_layer_render_plan_runtime_snapshot(
     }
 
 
+def select_layer_render_plan_composition_input(
+    compiled_plan: dict[str, object] | None,
+) -> tuple[list[dict[str, object]] | None, str]:
+    plan = compiled_plan if isinstance(compiled_plan, dict) else {}
+    compose_queue = plan.get("compose_queue")
+    if isinstance(compose_queue, list):
+        return compose_queue, "compose_queue"
+    composition_steps = plan.get("composition_steps")
+    if isinstance(composition_steps, list):
+        return composition_steps, "composition_steps"
+    return None, "missing_composition_input"
+
+
 def build_layer_render_plan_composition_steps(
     boundary_layers_available: bool,
     boundary_layer_ids: list[str],

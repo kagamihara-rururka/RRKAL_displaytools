@@ -44,6 +44,7 @@ from render_core.render_plan import (
     build_reused_compiled_layer_render_plan_packet,
     build_reused_compiled_layer_render_plan_packet_from_adapter_payload,
     build_layer_render_plan_step_runtime_state,
+    select_layer_render_plan_composition_input,
 )
 from pin_projection import pin_projection_contract_packet, project_pins_to_screen
 try:
@@ -16200,13 +16201,11 @@ class HybridRenderController:
         self.compiled_layer_render_plan = self.compile_layer_render_plan(changed=changed, force=force)
         phase_timing_ms["prepare_batches"] = (time.perf_counter() - prepare_started_at) * 1000.0
         self.layer_render_plan_snapshot = self.compiled_layer_render_plan.get("runtime_snapshot", {})
-        composition_steps = self.compiled_layer_render_plan.get("composition_steps")
-        compose_queue = self.compiled_layer_render_plan.get("compose_queue")
         self.layer_render_step_timing_ms = {}
-        if isinstance(compose_queue, list):
-            composition_input = compose_queue
-        else:
-            composition_input = composition_steps if isinstance(composition_steps, list) else None
+        composition_input, composition_input_source = select_layer_render_plan_composition_input(
+            self.compiled_layer_render_plan
+        )
+        self.layer_render_plan_composition_input_source = composition_input_source
         self.frame_rgba = self.apply_layer_render_plan_composition(composition_input)
         composition_timing = getattr(self, "layer_render_step_timing_ms", {})
         composition_timing = composition_timing if isinstance(composition_timing, dict) else {}

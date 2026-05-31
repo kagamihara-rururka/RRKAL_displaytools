@@ -605,6 +605,15 @@ if ($launchPacket.layer_render_plan_performance.composition_steps_helper -ne "re
 if ($launchPacket.layer_render_plan_performance.composition_steps_input_collector -ne "HybridRenderController.layer_render_plan_composition_steps") {
     throw "Launch packet layer_render_plan_performance composition steps input collector missing"
 }
+if ($launchPacket.layer_render_plan_performance.composition_apply_input_selector_helper -ne "render_core.render_plan.select_layer_render_plan_composition_input") {
+    throw "Launch packet layer_render_plan_performance composition apply input selector helper missing"
+}
+if ($launchPacket.layer_render_plan_performance.composition_apply_input_priority -notcontains "compose_queue") {
+    throw "Launch packet layer_render_plan_performance composition apply compose queue priority missing"
+}
+if ($launchPacket.layer_render_plan_performance.composition_apply_input_priority -notcontains "composition_steps") {
+    throw "Launch packet layer_render_plan_performance composition apply composition steps fallback missing"
+}
 if ($launchPacket.layer_render_plan_performance.metadata_sidecar_field -ne "layer_render_plan") {
     throw "Launch packet layer_render_plan_performance metadata sidecar field missing"
 }
@@ -3314,6 +3323,15 @@ if ($capabilities.layer_render_plan_performance.composition_steps_helper -ne "re
 if ($capabilities.layer_render_plan_performance.composition_steps_input_collector -ne "HybridRenderController.layer_render_plan_composition_steps") {
     throw "Renderer layer_render_plan_performance composition steps input collector missing"
 }
+if ($capabilities.layer_render_plan_performance.composition_apply_input_selector_helper -ne "render_core.render_plan.select_layer_render_plan_composition_input") {
+    throw "Renderer layer_render_plan_performance composition apply input selector helper missing"
+}
+if ($capabilities.layer_render_plan_performance.composition_apply_input_priority -notcontains "compose_queue") {
+    throw "Renderer layer_render_plan_performance composition apply compose queue priority missing"
+}
+if ($capabilities.layer_render_plan_performance.composition_apply_input_priority -notcontains "composition_steps") {
+    throw "Renderer layer_render_plan_performance composition apply composition steps fallback missing"
+}
 if ($capabilities.layer_render_plan_performance.composition_apply_helper -ne "HybridRenderController.apply_layer_render_plan_composition") {
     throw "Renderer layer_render_plan_performance composition apply helper missing"
 }
@@ -4283,6 +4301,15 @@ if ($handoff.layer_render_plan_performance.composition_steps_helper -ne "render_
 }
 if ($handoff.layer_render_plan_performance.composition_steps_input_collector -ne "HybridRenderController.layer_render_plan_composition_steps") {
     throw "Handoff inspection layer render plan performance composition steps input collector missing"
+}
+if ($handoff.layer_render_plan_performance.composition_apply_input_selector_helper -ne "render_core.render_plan.select_layer_render_plan_composition_input") {
+    throw "Handoff inspection layer render plan performance composition apply input selector helper missing"
+}
+if ($handoff.layer_render_plan_performance.composition_apply_input_priority -notcontains "compose_queue") {
+    throw "Handoff inspection layer render plan performance composition apply compose queue priority missing"
+}
+if ($handoff.layer_render_plan_performance.composition_apply_input_priority -notcontains "composition_steps") {
+    throw "Handoff inspection layer render plan performance composition apply composition steps fallback missing"
 }
 if ($handoff.layer_render_plan_performance.composition_apply_helper -ne "HybridRenderController.apply_layer_render_plan_composition") {
     throw "Handoff inspection layer render plan performance composition apply helper missing"
@@ -6389,6 +6416,9 @@ if ($rendererSource -notlike "*def layer_render_plan_composition_steps*") {
 if ($rendererSource -notlike "*def apply_layer_render_plan_composition*") {
     throw "Renderer layer render plan composition apply helper is missing"
 }
+if ($renderPlanCombinedSource -notlike "*def select_layer_render_plan_composition_input*") {
+    throw "Render core layer render plan composition input selector is missing"
+}
 if ($rendererSource -notlike "*def compile_layer_render_plan*") {
     throw "Renderer compiled layer render plan helper is missing"
 }
@@ -6752,6 +6782,9 @@ if ($rendererSource -notlike "*self.layer_render_plan_snapshot = self.layer_rend
 }
 if ($rendererSource -notlike "*self.frame_rgba = self.apply_layer_render_plan_composition(*") {
     throw "Renderer render_if_needed is not using the layer render plan composition helper"
+}
+if ($rendererSource -notlike "*select_layer_render_plan_composition_input(*") {
+    throw "Renderer render_if_needed is not using the core composition input selector"
 }
 if ($rendererSource -notlike "*self.compiled_layer_render_plan = self.compile_layer_render_plan*") {
     throw "Renderer render_if_needed does not compile the layer render plan before composition"

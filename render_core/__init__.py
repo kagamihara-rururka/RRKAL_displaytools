@@ -30,6 +30,7 @@ from .render_plan import (
     build_layer_render_plan_single_pass_preflight_contract,
     build_reused_compiled_layer_render_plan_packet,
     build_reused_compiled_layer_render_plan_packet_from_adapter_payload,
+    select_layer_render_plan_composition_input,
 )
 
 __all__ = [
@@ -62,4 +63,5 @@ __all__ = [
     "build_layer_render_plan_single_pass_preflight_contract",
     "build_reused_compiled_layer_render_plan_packet",
     "build_reused_compiled_layer_render_plan_packet_from_adapter_payload",
+    "select_layer_render_plan_composition_input",
 ]
