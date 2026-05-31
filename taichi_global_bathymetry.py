@@ -35,8 +35,6 @@ from render_core.render_plan import (
     build_layer_render_plan_cache_invalidation_reasons,
     build_layer_render_plan_cache_invalidation_scope,
     build_layer_render_plan_cache_key,
-    build_layer_render_plan_compose_run_parity_contract,
-    build_layer_render_plan_compose_runs,
     build_layer_render_plan_execution_phases,
     build_layer_render_plan_execution_summary,
     build_layer_render_plan_metadata_summary,
@@ -14106,24 +14104,6 @@ class HybridRenderController:
             composition_steps,
             step_runtime_states,
             source="HybridRenderController.layer_render_plan_compose_queue",
-        )
-
-    def layer_render_plan_compose_runs(
-        self,
-        compose_queue: list[dict[str, object]],
-    ) -> dict[str, object]:
-        return build_layer_render_plan_compose_runs(
-            compose_queue,
-            source="HybridRenderController.layer_render_plan_compose_runs",
-        )
-
-    def layer_render_plan_compose_run_parity_contract(
-        self,
-        compose_runs: list[dict[str, object]],
-    ) -> dict[str, object]:
-        return build_layer_render_plan_compose_run_parity_contract(
-            compose_runs,
-            source="HybridRenderController.layer_render_plan_compose_run_parity_contract",
         )
 
     def apply_layer_render_plan_composition(self, steps: list[dict[str, object]] | None = None) -> np.ndarray:

@@ -102,7 +102,7 @@ if ($renderPlan.compiled_plan_compose_run_parity_contract_schema -ne "rrkal_disp
     status = "ready_for_post_07_extraction"
     first_extraction_id = $boundaryInspection.first_extraction_id
     target_module = $boundaryInspection.first_extraction_target
-    source_owner = "taichi_global_bathymetry.py / HybridRenderController"
+    source_owner = "HybridRenderController runtime facts plus render_core/render_plan.py pure helpers"
     source_helpers = @(
         $renderPlan.compiled_plan_helper,
         $renderPlan.compiled_plan_cache_key_helper,

@@ -744,7 +744,7 @@ if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_queue_skip
 if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_runs_schema -ne "rrkal_displaytools.layer_render_plan_compose_runs.v1") {
     throw "Launch packet layer_render_plan_performance compose runs schema missing"
 }
-if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_runs_helper -ne "HybridRenderController.layer_render_plan_compose_runs") {
+if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_runs_helper -ne "render_core.render_plan.build_layer_render_plan_compose_runs") {
     throw "Launch packet layer_render_plan_performance compose runs helper missing"
 }
 if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_runs_field -ne "compose_runs") {
@@ -774,7 +774,7 @@ if ($launchPacket.layer_render_plan_performance.compose_pass_budget_summary_cont
 if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_schema -ne "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1") {
     throw "Launch packet layer_render_plan_performance compose run parity contract schema missing"
 }
-if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_helper -ne "HybridRenderController.layer_render_plan_compose_run_parity_contract") {
+if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_helper -ne "render_core.render_plan.build_layer_render_plan_compose_run_parity_contract") {
     throw "Launch packet layer_render_plan_performance compose run parity contract helper missing"
 }
 if ($launchPacket.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_field -ne "compose_run_parity_contract") {
@@ -3401,7 +3401,7 @@ if ($capabilities.layer_render_plan_performance.compiled_plan_compose_queue_skip
 if ($capabilities.layer_render_plan_performance.compiled_plan_compose_runs_schema -ne "rrkal_displaytools.layer_render_plan_compose_runs.v1") {
     throw "Renderer layer_render_plan_performance compose runs schema missing"
 }
-if ($capabilities.layer_render_plan_performance.compiled_plan_compose_runs_helper -ne "HybridRenderController.layer_render_plan_compose_runs") {
+if ($capabilities.layer_render_plan_performance.compiled_plan_compose_runs_helper -ne "render_core.render_plan.build_layer_render_plan_compose_runs") {
     throw "Renderer layer_render_plan_performance compose runs helper missing"
 }
 if ($capabilities.layer_render_plan_performance.compiled_plan_compose_runs_field -ne "compose_runs") {
@@ -3428,7 +3428,7 @@ if ($capabilities.layer_render_plan_performance.compose_pass_budget_summary_cont
 if ($capabilities.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_schema -ne "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1") {
     throw "Renderer layer_render_plan_performance compose run parity contract schema missing"
 }
-if ($capabilities.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_helper -ne "HybridRenderController.layer_render_plan_compose_run_parity_contract") {
+if ($capabilities.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_helper -ne "render_core.render_plan.build_layer_render_plan_compose_run_parity_contract") {
     throw "Renderer layer_render_plan_performance compose run parity contract helper missing"
 }
 if ($capabilities.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_field -ne "compose_run_parity_contract") {
@@ -4356,7 +4356,7 @@ if ($handoff.layer_render_plan_performance.compiled_plan_compose_queue_skip_reas
 if ($handoff.layer_render_plan_performance.compiled_plan_compose_runs_schema -ne "rrkal_displaytools.layer_render_plan_compose_runs.v1") {
     throw "Handoff inspection layer render plan performance compose runs schema missing"
 }
-if ($handoff.layer_render_plan_performance.compiled_plan_compose_runs_helper -ne "HybridRenderController.layer_render_plan_compose_runs") {
+if ($handoff.layer_render_plan_performance.compiled_plan_compose_runs_helper -ne "render_core.render_plan.build_layer_render_plan_compose_runs") {
     throw "Handoff inspection layer render plan performance compose runs helper missing"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_compose_runs_field -ne "compose_runs") {
@@ -4380,7 +4380,7 @@ if ($handoff.layer_render_plan_performance.compose_pass_budget_summary_contract_
 if ($handoff.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_schema -ne "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1") {
     throw "Handoff inspection layer render plan performance compose run parity contract schema missing"
 }
-if ($handoff.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_helper -ne "HybridRenderController.layer_render_plan_compose_run_parity_contract") {
+if ($handoff.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_helper -ne "render_core.render_plan.build_layer_render_plan_compose_run_parity_contract") {
     throw "Handoff inspection layer render plan performance compose run parity contract helper missing"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_compose_run_parity_contract_field -ne "compose_run_parity_contract") {
@@ -6443,11 +6443,11 @@ if ($rendererSource -notlike "*def layer_render_plan_bottleneck_recommendation*"
 if ($rendererSource -notlike "*def layer_render_plan_compose_queue*") {
     throw "Renderer render plan compose queue helper is missing"
 }
-if ($rendererSource -notlike "*def layer_render_plan_compose_runs*") {
-    throw "Renderer render plan compose runs helper is missing"
+if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_compose_runs*") {
+    throw "Render core render plan compose runs helper is missing"
 }
-if ($rendererSource -notlike "*def layer_render_plan_compose_run_parity_contract*") {
-    throw "Renderer render plan compose run parity helper is missing"
+if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_compose_run_parity_contract*") {
+    throw "Render core render plan compose run parity helper is missing"
 }
 if ($renderPlanCombinedSource -notlike "*block_compose_run_merge_until_visual_parity_passes*") {
     throw "Renderer render plan compose run parity gate marker is missing"

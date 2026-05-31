@@ -18,8 +18,10 @@ $targets = @(
     [ordered]@{ id = "build_reused_compiled_layer_render_plan_packet_from_adapter_payload"; path = "render_core/render_plan.py"; pattern = "^def build_reused_compiled_layer_render_plan_packet_from_adapter_payload\(" },
     [ordered]@{ id = "build_layer_render_plan_runtime_snapshot"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_runtime_snapshot\(" },
     [ordered]@{ id = "build_layer_render_plan_composition_steps"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_composition_steps\(" },
+    [ordered]@{ id = "build_layer_render_plan_step_runtime_state"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_step_runtime_state\(" },
     [ordered]@{ id = "build_layer_render_plan_compose_queue_entries"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_compose_queue_entries\(" },
     [ordered]@{ id = "build_layer_render_plan_compose_queue_packet"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_compose_queue_packet\(" },
+    [ordered]@{ id = "build_layer_render_plan_compose_queue_packet_from_states"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_compose_queue_packet_from_states\(" },
     [ordered]@{ id = "build_layer_render_plan_compose_runs"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_compose_runs\(" },
     [ordered]@{ id = "build_layer_render_plan_compose_run_parity_contract"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_compose_run_parity_contract\(" },
     [ordered]@{ id = "build_layer_render_plan_apply_path"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_apply_path\(" },
@@ -46,8 +48,6 @@ $targets = @(
     [ordered]@{ id = "layer_render_plan_step_visible"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def layer_render_plan_step_visible\(" },
     [ordered]@{ id = "layer_render_plan_overlay_is_transparent"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def layer_render_plan_overlay_is_transparent\(" },
     [ordered]@{ id = "layer_render_plan_compose_queue"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def layer_render_plan_compose_queue\(" },
-    [ordered]@{ id = "layer_render_plan_compose_runs"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def layer_render_plan_compose_runs\(" },
-    [ordered]@{ id = "layer_render_plan_compose_run_parity_contract"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def layer_render_plan_compose_run_parity_contract\(" },
     [ordered]@{ id = "apply_layer_render_plan_composition"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def apply_layer_render_plan_composition\(" },
     [ordered]@{ id = "merge_alpha_compose_overlay_run"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def merge_alpha_compose_overlay_run\(" },
     [ordered]@{ id = "apply_layer_render_plan_merged_candidate_composition"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def apply_layer_render_plan_merged_candidate_composition\(" },
@@ -121,7 +121,7 @@ foreach ($target in $targets) {
     status = if ($missing.Count -eq 0) { "ready" } else { "incomplete" }
     source_files = @("taichi_global_bathymetry.py", "render_core/render_plan.py")
     target_module = "render_core/render_plan.py"
-    source_owner = "HybridRenderController and render_core render-plan helpers"
+    source_owner = "HybridRenderController runtime fact collectors and render_core render-plan helpers"
     no_code_move = $true
     runtime_merge_enabled = $false
     targets = $matches

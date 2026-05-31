@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Retire compose run controller wrappers
+
+- Removed the residual `HybridRenderController.layer_render_plan_compose_runs` and `HybridRenderController.layer_render_plan_compose_run_parity_contract` wrappers.
+- Updated `layer_render_plan_performance` helper ownership so launch packets, renderer capabilities and handoff now point to `render_core.render_plan.build_layer_render_plan_compose_runs` and `render_core.render_plan.build_layer_render_plan_compose_run_parity_contract`.
+- Updated smoke/source-map/work-order contracts to treat compose runs and parity contract as render-core helpers while keeping controller ownership of overlay lookup and runtime fact collection.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Extract compose queue packet orchestration
 
 - Added `build_layer_render_plan_compose_queue_packet_from_states` to `render_core/render_plan.py`.
