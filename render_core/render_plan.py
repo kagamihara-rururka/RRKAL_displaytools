@@ -106,6 +106,36 @@ def build_layer_render_plan_composition_steps(
     return steps
 
 
+def build_layer_render_plan_compose_queue_packet(
+    input_step_count: int,
+    queue: list[dict[str, object]],
+    skipped_steps: list[dict[str, object]],
+    compose_runs_packet: dict[str, object],
+    compose_run_parity_contract: dict[str, object],
+    *,
+    source: str,
+) -> dict[str, object]:
+    return {
+        "schema": "rrkal_displaytools.layer_render_plan_compose_queue.v1",
+        "source": source,
+        "status": "runtime_optimized",
+        "optimization_applied": True,
+        "optimization": "skip_hidden_missing_or_transparent_overlays_before_composition",
+        "input_step_count": input_step_count,
+        "executable_step_count": len(queue),
+        "skipped_step_count": len(skipped_steps),
+        "queue": queue,
+        "skipped_steps": skipped_steps,
+        "compose_runs_schema": "rrkal_displaytools.layer_render_plan_compose_runs.v1",
+        "compose_runs": compose_runs_packet.get("runs", []),
+        "compose_run_count": compose_runs_packet.get("run_count", 0),
+        "compose_merge_candidate_run_count": compose_runs_packet.get("merge_candidate_run_count", 0),
+        "compose_run_parity_contract_schema": "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1",
+        "compose_run_parity_contract": compose_run_parity_contract,
+        "next_optimization_target": "collapse executable queue into fewer overlay composition passes",
+    }
+
+
 def build_layer_render_plan_compose_runs(
     compose_queue: list[dict[str, object]],
     *,

@@ -6470,10 +6470,10 @@ if ($renderPlanCombinedSource -notlike "*adjacent_alpha_compose_overlays_can_be_
 if ($renderPlanCombinedSource -notlike "*preserve_per_layer_visibility_opacity_blend_semantics*") {
     throw "Renderer render plan compose runs semantic boundary marker is missing"
 }
-if ($rendererSource -notlike "*compose_merge_candidate_run_count*") {
+if ($renderPlanCombinedSource -notlike "*compose_merge_candidate_run_count*") {
     throw "Renderer render plan compose merge candidate count marker is missing"
 }
-if ($rendererSource -notlike "*skip_hidden_missing_or_transparent_overlays_before_composition*") {
+if ($renderPlanCombinedSource -notlike "*skip_hidden_missing_or_transparent_overlays_before_composition*") {
     throw "Renderer render plan compose queue optimization marker is missing"
 }
 if ($rendererSource -notlike "*transparent_overlay*") {

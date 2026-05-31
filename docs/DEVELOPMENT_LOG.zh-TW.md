@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Extract compose queue packet builder
+
+- Added `build_layer_render_plan_compose_queue_packet` to `render_core/render_plan.py`.
+- Kept overlay visibility, missing-overlay and transparency checks in `HybridRenderController.layer_render_plan_compose_queue`.
+- Updated the controller to delegate only final compose-queue packet assembly to render-core.
+- Smoke: PASS after updating relocated compose queue packet source gates (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Extract composition steps builder
 
 - Added `build_layer_render_plan_composition_steps` to `render_core/render_plan.py`.

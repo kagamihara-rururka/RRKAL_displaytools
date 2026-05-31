@@ -27,6 +27,7 @@ from render_core.render_plan import (
     build_layer_render_plan_apply_path,
     build_layer_render_plan_batch_decisions,
     build_layer_render_plan_composition_steps,
+    build_layer_render_plan_compose_queue_packet,
     build_layer_render_plan_cache_invalidation_reasons,
     build_layer_render_plan_cache_invalidation_scope,
     build_layer_render_plan_cache_key,
@@ -14106,25 +14107,14 @@ class HybridRenderController:
             if isinstance(compose_runs_packet.get("runs"), list)
             else []
         )
-        return {
-            "schema": "rrkal_displaytools.layer_render_plan_compose_queue.v1",
-            "source": "HybridRenderController.layer_render_plan_compose_queue",
-            "status": "runtime_optimized",
-            "optimization_applied": True,
-            "optimization": "skip_hidden_missing_or_transparent_overlays_before_composition",
-            "input_step_count": len(composition_steps),
-            "executable_step_count": len(queue),
-            "skipped_step_count": len(skipped_steps),
-            "queue": queue,
-            "skipped_steps": skipped_steps,
-            "compose_runs_schema": "rrkal_displaytools.layer_render_plan_compose_runs.v1",
-            "compose_runs": compose_runs_packet.get("runs", []),
-            "compose_run_count": compose_runs_packet.get("run_count", 0),
-            "compose_merge_candidate_run_count": compose_runs_packet.get("merge_candidate_run_count", 0),
-            "compose_run_parity_contract_schema": "rrkal_displaytools.layer_render_plan_compose_run_parity_contract.v1",
-            "compose_run_parity_contract": compose_run_parity_contract,
-            "next_optimization_target": "collapse executable queue into fewer overlay composition passes",
-        }
+        return build_layer_render_plan_compose_queue_packet(
+            len(composition_steps),
+            queue,
+            skipped_steps,
+            compose_runs_packet,
+            compose_run_parity_contract,
+            source="HybridRenderController.layer_render_plan_compose_queue",
+        )
 
     def layer_render_plan_compose_runs(
         self,
