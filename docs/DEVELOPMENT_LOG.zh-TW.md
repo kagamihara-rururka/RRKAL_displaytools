@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Add ViewModel render plan contract
+
+- Added `build_view_model_render_plan_packet` to resolve ViewModel layers into renderer selections through Render Matrix metadata only.
+- Added `build_sample_view_model_render_plans_packet` for Earth and TimeSeries sample dispatch plans without calling adapter `render()`.
+- Updated display shell inspector, smoke gates and roadmap docs to verify `rrkal_displaytools.view_model_render_plan.v1` and `rrkal_displaytools.sample_view_model_render_plans.v1`.
+- Smoke: PASS after transient file-access backoff retries (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add sample renderer adapters
 
 - Added contract-only `DisplayToolsGeoRendererAdapter` and `ContractOnlyTimeSeriesRendererAdapter` sample classes to `display_core/render_matrix.py`.

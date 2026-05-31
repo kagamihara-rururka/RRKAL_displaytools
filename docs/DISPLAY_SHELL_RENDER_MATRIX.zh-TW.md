@@ -33,6 +33,8 @@ DisplayShell
 - `CanvasDescriptor`
 - `build_canvas_registry_packet`
 - `build_sample_view_models_packet`
+- `build_view_model_render_plan_packet`
+- `build_sample_view_model_render_plans_packet`
 - `RendererEntry`
 - `register_renderer`
 - `lookup_renderers`
@@ -56,6 +58,12 @@ DisplayShell
 - `DisplayToolsGeoRendererAdapter`: 對應 `geo_layer` + `earth` + `interactive` + `displaytools`，標記現有 globe runtime 邊界。
 - `ContractOnlyTimeSeriesRendererAdapter`: 對應 `time_series_layer` + `time_series` + `html` + `contract_only`，只證明非地球 renderer adapter 可被 registry 發現。
 - 兩者都不 import 具體繪圖套件，也不啟用 runtime canvas switching。
+
+## 最小 ViewModel render plan samples
+
+- `build_view_model_render_plan_packet`: 只讀取 `ViewModel` layer stack 與 Render Matrix registry metadata，輸出每個 layer 對應的 renderer selection。
+- `build_sample_view_model_render_plans_packet`: 對 Earth / TimeSeries sample ViewModel 產生 `rrkal_displaytools.sample_view_model_render_plans.v1`，作為 clone-first dispatch plan 證據。
+- 這一層不呼叫 adapter `render()`，因此不 import Qt、Taichi、Matplotlib、Plotly 或其他具體 renderer package。
 
 ## 後續執行順序
 

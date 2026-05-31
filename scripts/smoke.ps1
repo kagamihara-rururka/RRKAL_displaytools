@@ -6450,6 +6450,12 @@ if ($displayCoreSource -notlike "*rrkal_displaytools.canvas_registry.v1*") {
 if ($displayCoreSource -notlike "*rrkal_displaytools.sample_view_models.v1*") {
     throw "Display shell sample ViewModel schema is missing"
 }
+if ($displayCoreSource -notlike "*rrkal_displaytools.view_model_render_plan.v1*") {
+    throw "Display shell ViewModel render plan schema is missing"
+}
+if ($displayCoreSource -notlike "*rrkal_displaytools.sample_view_model_render_plans.v1*") {
+    throw "Display shell sample ViewModel render plans schema is missing"
+}
 if ($displayCoreSource -notlike "*class CanvasDescriptor*") {
     throw "Display shell CanvasDescriptor contract is missing"
 }
@@ -6471,6 +6477,9 @@ if ($displayCoreSource -notlike "*class ContractOnlyTimeSeriesRendererAdapter*")
 if ($displayCoreSource -notlike "*def lookup_renderers*") {
     throw "Display shell render matrix lookup is missing"
 }
+if ($displayCoreSource -notlike "*def build_view_model_render_plan_packet*") {
+    throw "Display shell ViewModel render plan helper is missing"
+}
 $displayShellMatrix = powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\inspect_display_shell_render_matrix.ps1 | ConvertFrom-Json
 if ($displayShellMatrix.schema -ne "rrkal_displaytools.display_shell_render_matrix_review.v1") {
     throw "Display shell render matrix inspector schema missing"
@@ -6480,6 +6489,12 @@ if ($displayShellMatrix.has_canvas_registry -ne $true) {
 }
 if ($displayShellMatrix.has_sample_view_models -ne $true) {
     throw "Display shell render matrix inspector sample ViewModel evidence missing"
+}
+if ($displayShellMatrix.has_view_model_render_plan -ne $true) {
+    throw "Display shell render matrix inspector ViewModel render plan evidence missing"
+}
+if ($displayShellMatrix.has_sample_view_model_render_plans -ne $true) {
+    throw "Display shell render matrix inspector sample ViewModel render plans evidence missing"
 }
 if ($displayShellMatrix.has_sample_renderer_adapters -ne $true) {
     throw "Display shell render matrix inspector sample renderer adapter evidence missing"

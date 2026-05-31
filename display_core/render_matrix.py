@@ -156,7 +156,7 @@ def build_canvas_registry_packet() -> dict[str, Any]:
     }
 
 
-def build_sample_view_models_packet() -> dict[str, Any]:
+def _sample_view_models() -> tuple[ViewModel, ...]:
     earth_view = ViewModel(
         view_id="rrkal_displaytools_earth_view_sample",
         canvas_type=CANVAS_EARTH,
@@ -209,7 +209,11 @@ def build_sample_view_models_packet() -> dict[str, Any]:
             ),
         ),
     )
-    samples = (earth_view, time_series_view)
+    return (earth_view, time_series_view)
+
+
+def build_sample_view_models_packet() -> dict[str, Any]:
+    samples = _sample_view_models()
     return {
         "schema": "rrkal_displaytools.sample_view_models.v1",
         "source": "display_core.render_matrix.build_sample_view_models_packet",
@@ -308,9 +312,74 @@ def lookup_renderers(
     ]
 
 
+def build_view_model_render_plan_packet(view_model: ViewModel) -> dict[str, Any]:
+    render_selections: list[dict[str, Any]] = []
+
+    for layer in sorted(view_model.layers, key=lambda item: item.order):
+        backend_hint = view_model.renderer_hint or layer.renderer_hint or None
+        candidates = lookup_renderers(
+            layer_type=layer.type,
+            canvas_type=view_model.canvas_type,
+            output_format=view_model.output_format,
+            backend=backend_hint,
+        )
+        if not candidates:
+            candidates = lookup_renderers(
+                layer_type=layer.type,
+                canvas_type=view_model.canvas_type,
+                output_format=view_model.output_format,
+            )
+
+        selected = candidates[0] if candidates else None
+        render_selections.append(
+            {
+                "order": int(layer.order),
+                "layer_id": layer.id,
+                "layer_type": layer.type,
+                "canvas_type": view_model.canvas_type,
+                "output_format": view_model.output_format,
+                "backend_hint": backend_hint or "",
+                "selected_renderer": selected.to_packet() if selected else None,
+                "candidate_count": len(candidates),
+                "status": "selected" if selected else "missing_renderer",
+            }
+        )
+
+    missing_renderer_count = sum(1 for selection in render_selections if selection["status"] != "selected")
+    return {
+        "schema": "rrkal_displaytools.view_model_render_plan.v1",
+        "source": "display_core.render_matrix.build_view_model_render_plan_packet",
+        "status": "phase1_contract_ready" if missing_renderer_count == 0 else "missing_renderer",
+        "view_id": view_model.view_id,
+        "canvas_type": view_model.canvas_type,
+        "output_format": view_model.output_format,
+        "renderer_hint": view_model.renderer_hint,
+        "renderer_selection_count": len(render_selections),
+        "missing_renderer_count": missing_renderer_count,
+        "render_selections": render_selections,
+        "runtime_render_invoked": False,
+        "boundary": "Render plan selection uses registry metadata only; adapter render() is not called.",
+    }
+
+
+def build_sample_view_model_render_plans_packet() -> dict[str, Any]:
+    samples = _sample_view_models()
+    plans = [build_view_model_render_plan_packet(sample) for sample in samples]
+    return {
+        "schema": "rrkal_displaytools.sample_view_model_render_plans.v1",
+        "source": "display_core.render_matrix.build_sample_view_model_render_plans_packet",
+        "status": "phase1_contract_ready",
+        "sample_count": len(plans),
+        "plans": plans,
+        "runtime_render_invoked": False,
+        "proves": "Sample ViewModels can be resolved to renderer adapters through registry metadata without importing concrete render packages.",
+    }
+
+
 def build_display_shell_capability_packet() -> dict[str, Any]:
     canvas_registry = build_canvas_registry_packet()
     sample_view_models = build_sample_view_models_packet()
+    sample_view_model_render_plans = build_sample_view_model_render_plans_packet()
     return {
         "schema": "rrkal_displaytools.display_shell_render_matrix.v1",
         "source": "display_core.render_matrix.build_display_shell_capability_packet",
@@ -322,6 +391,8 @@ def build_display_shell_capability_packet() -> dict[str, Any]:
         "canvas_registry": canvas_registry,
         "sample_view_models_schema": sample_view_models["schema"],
         "sample_view_models": sample_view_models,
+        "sample_view_model_render_plans_schema": sample_view_model_render_plans["schema"],
+        "sample_view_model_render_plans": sample_view_model_render_plans,
         "phase1_goal": "extract EarthCanvas boundary and add minimal TimeSeriesCanvas contract before supporting broad chart families",
         "core_imports_renderer_packages": False,
         "canvas_types": [CANVAS_EARTH, CANVAS_TIME_SERIES],

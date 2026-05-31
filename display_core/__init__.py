@@ -14,6 +14,8 @@ from .render_matrix import (
     build_canvas_registry_packet,
     build_display_shell_capability_packet,
     build_sample_view_models_packet,
+    build_sample_view_model_render_plans_packet,
+    build_view_model_render_plan_packet,
     lookup_renderers,
     register_renderer,
 )
@@ -32,6 +34,8 @@ __all__ = [
     "build_canvas_registry_packet",
     "build_display_shell_capability_packet",
     "build_sample_view_models_packet",
+    "build_sample_view_model_render_plans_packet",
+    "build_view_model_render_plan_packet",
     "lookup_renderers",
     "register_renderer",
 ]
