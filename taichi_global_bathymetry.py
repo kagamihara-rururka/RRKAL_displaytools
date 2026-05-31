@@ -25,6 +25,7 @@ from render_core.render_plan import (
     alpha_compose_transparent,
     build_layer_render_plan_bottleneck_recommendation,
     build_layer_render_plan_apply_path,
+    build_layer_render_plan_batch_decisions,
     build_layer_render_plan_cache_invalidation_reasons,
     build_layer_render_plan_cache_invalidation_scope,
     build_layer_render_plan_cache_key,
@@ -14374,69 +14375,11 @@ class HybridRenderController:
         composition_steps: list[dict[str, object]],
         invalidation_scope: list[dict[str, object]],
     ) -> list[dict[str, object]]:
-        dirty_flags = runtime_snapshot.get("dirty_flags") if isinstance(runtime_snapshot.get("dirty_flags"), dict) else {}
-        batch_targets = runtime_snapshot.get("batch_targets") if isinstance(runtime_snapshot.get("batch_targets"), list) else []
-        global_dirty = bool(dirty_flags.get("force") or dirty_flags.get("changed"))
-        dirty_scope_ids = {
-            str(scope.get("id"))
-            for scope in invalidation_scope
-            if isinstance(scope, dict) and scope.get("scope") in {"batch", "global", "plan"}
-        }
-        decisions: list[dict[str, object]] = []
-        for batch in batch_targets:
-            if not isinstance(batch, dict):
-                continue
-            batch_id = str(batch.get("id") or "")
-            dirty_flag = str(batch.get("dirty_flag") or "")
-            dirty = global_dirty or bool(dirty_flag and dirty_flags.get(dirty_flag)) or batch_id in dirty_scope_ids
-            decisions.append(
-                {
-                    "scope": "batch",
-                    "id": batch_id,
-                    "dirty_flag": dirty_flag,
-                    "source": batch.get("source"),
-                    "decision": "rebuild_batch" if dirty else "reuse_batch",
-                    "reason": f"dirty_flag:{dirty_flag}" if dirty and dirty_flag else ("global_dirty" if dirty else "cache_key_match"),
-                }
-            )
-
-        layer_dirty_map = {
-            "lakes": "hydrology_dirty",
-            "rivers": "hydrology_dirty",
-            "borders": "boundary_dirty",
-            "territorial_sea": "boundary_dirty",
-            "eez": "boundary_dirty",
-            "high_seas": "boundary_dirty",
-            "boundary_aggregate": "boundary_dirty",
-            "ais_overlay": "overlay_dirty",
-            "aircraft": "overlay_dirty",
-            "vehicle_icons": "overlay_dirty",
-            "pins": "overlay_dirty",
-            "style_profile_postprocess": "globe_dirty",
-        }
-        for step in composition_steps:
-            if not isinstance(step, dict):
-                continue
-            step_id = str(step.get("id") or step.get("layer_id") or "")
-            dirty_flag = layer_dirty_map.get(step_id)
-            dirty = global_dirty or bool(dirty_flag and dirty_flags.get(dirty_flag))
-            kind = str(step.get("kind") or "")
-            if kind == "style_profile_postprocess":
-                decision = "postprocess_each_frame"
-            else:
-                decision = "compose_dirty_overlay" if dirty else "compose_cached_overlay"
-            decisions.append(
-                {
-                    "scope": "layer",
-                    "id": step_id,
-                    "layer_id": step.get("layer_id"),
-                    "kind": kind,
-                    "dirty_flag": dirty_flag,
-                    "decision": decision,
-                    "reason": f"dirty_flag:{dirty_flag}" if dirty and dirty_flag else ("global_dirty" if dirty else "cache_key_match"),
-                }
-            )
-        return decisions
+        return build_layer_render_plan_batch_decisions(
+            runtime_snapshot,
+            composition_steps,
+            invalidation_scope,
+        )
 
     def layer_render_plan_apply_path(
         self,

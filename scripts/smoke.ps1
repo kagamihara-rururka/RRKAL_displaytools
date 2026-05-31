@@ -6326,7 +6326,7 @@ if ($rendererSource -notlike '*getattr(self, "compiled_layer_render_plan_cache_k
 if ($rendererSource -notlike "*def layer_render_plan_cache_invalidation_reasons*") {
     throw "Renderer render plan cache invalidation helper is missing"
 }
-if ($rendererSource -notlike "*dirty_flag:*") {
+if ($renderPlanCombinedSource -notlike "*dirty_flag:*") {
     throw "Renderer render plan dirty flag invalidation marker is missing"
 }
 if ($renderPlanCombinedSource -notlike "*no_previous_compiled_plan*") {
@@ -6356,16 +6356,16 @@ if ($renderPlanCombinedSource -notlike '*"scope": "reuse"*') {
 if ($rendererSource -notlike "*def layer_render_plan_batch_decisions*") {
     throw "Renderer render plan batch decisions helper is missing"
 }
-if ($rendererSource -notlike '*"decision": "rebuild_batch"*') {
+if ($renderPlanCombinedSource -notlike '*"decision": "rebuild_batch"*') {
     throw "Renderer render plan rebuild batch decision marker is missing"
 }
-if ($rendererSource -notlike '*reuse_batch*') {
+if ($renderPlanCombinedSource -notlike '*reuse_batch*') {
     throw "Renderer render plan reuse batch decision marker is missing"
 }
-if ($rendererSource -notlike '*"compose_dirty_overlay"*') {
+if ($renderPlanCombinedSource -notlike '*"compose_dirty_overlay"*') {
     throw "Renderer render plan dirty overlay compose decision marker is missing"
 }
-if ($rendererSource -notlike '*"compose_cached_overlay"*') {
+if ($renderPlanCombinedSource -notlike '*"compose_cached_overlay"*') {
     throw "Renderer render plan cached overlay compose decision marker is missing"
 }
 if ($rendererSource -notlike "*def layer_render_plan_apply_path*") {

@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Extract batch decisions builder
+
+- Added `build_layer_render_plan_batch_decisions` to `render_core/render_plan.py`.
+- Updated `HybridRenderController.layer_render_plan_batch_decisions` to delegate to the extracted helper.
+- Updated source-map and smoke gates for batch decision markers in render-core.
+- Smoke: PASS after updating relocated dirty-flag source gate (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Extract cache invalidation scope builder
 
 - Added `build_layer_render_plan_cache_invalidation_scope` to `render_core/render_plan.py`.
