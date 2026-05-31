@@ -6555,6 +6555,16 @@ if ($renderPlanCombinedSource -notlike "*runtime_single_pass_enabled*") {
 if ($renderPlanCombinedSource -notlike "*compose_run_parity_smoke*") {
     throw "Renderer render plan single-pass parity smoke gate marker is missing"
 }
+$singlePassPreflightInspector = powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_render_plan_single_pass_preflight.ps1 | ConvertFrom-Json
+if ($singlePassPreflightInspector.schema -ne "rrkal_displaytools.render_plan_single_pass_preflight_inspector.v1") {
+    throw "Renderer render plan single-pass preflight inspector schema missing"
+}
+if ($singlePassPreflightInspector.status -ne "ready") {
+    throw "Renderer render plan single-pass preflight inspector is not ready"
+}
+if ($singlePassPreflightInspector.runtime_single_pass_enabled -ne $false) {
+    throw "Renderer render plan single-pass preflight inspector must keep runtime single-pass disabled"
+}
 if ($rendererSource -notlike "*self.layer_render_plan_snapshot = self.layer_render_plan_runtime_snapshot*") {
     throw "Renderer render_if_needed does not update the layer render plan snapshot"
 }

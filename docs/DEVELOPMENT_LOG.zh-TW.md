@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Add single-pass preflight inspector
+
+- Added `scripts/inspect_render_plan_single_pass_preflight.ps1` for no-GUI clone-first review.
+- Wired smoke to require the inspector schema, ready status and disabled runtime single-pass gate.
+- Kept the inspector source-only; it does not launch Qt/Taichi or render frames.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add render plan single-pass preflight contract
 
 - Added `build_layer_render_plan_single_pass_preflight_contract` to `render_core/render_plan.py`.
