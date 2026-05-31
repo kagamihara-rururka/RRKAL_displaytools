@@ -1,5 +1,13 @@
 # Development Log
 
+## 2026-05-31 - Extract composition steps builder
+
+- Added `build_layer_render_plan_composition_steps` to `render_core/render_plan.py`.
+- Updated `HybridRenderController.layer_render_plan_composition_steps` to collect boundary state and delegate step construction to render-core.
+- Updated source-map and module boundary docs for composition step extraction.
+- Preserved the original boundary-layer branch by passing `boundary_layers_available` separately from non-null boundary ids.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Extract batch decisions builder
 
 - Added `build_layer_render_plan_batch_decisions` to `render_core/render_plan.py`.

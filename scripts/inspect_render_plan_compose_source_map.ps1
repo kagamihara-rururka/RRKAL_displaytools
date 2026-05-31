@@ -12,6 +12,7 @@ $targets = @(
     [ordered]@{ id = "alpha_compose"; path = "render_core/render_plan.py"; pattern = "^def alpha_compose\(" },
     [ordered]@{ id = "alpha_blend_compose"; path = "render_core/render_plan.py"; pattern = "^def alpha_blend_compose\(" },
     [ordered]@{ id = "alpha_compose_transparent"; path = "render_core/render_plan.py"; pattern = "^def alpha_compose_transparent\(" },
+    [ordered]@{ id = "build_layer_render_plan_composition_steps"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_composition_steps\(" },
     [ordered]@{ id = "build_layer_render_plan_compose_runs"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_compose_runs\(" },
     [ordered]@{ id = "build_layer_render_plan_compose_run_parity_contract"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_compose_run_parity_contract\(" },
     [ordered]@{ id = "build_layer_render_plan_apply_path"; path = "render_core/render_plan.py"; pattern = "^def build_layer_render_plan_apply_path\(" },

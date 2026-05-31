@@ -72,6 +72,40 @@ def alpha_compose_transparent(background: np.ndarray, overlay: np.ndarray) -> np
     return out
 
 
+def build_layer_render_plan_composition_steps(
+    boundary_layers_available: bool,
+    boundary_layer_ids: list[str],
+    boundary_aggregate_blend_mode: object,
+) -> list[dict[str, object]]:
+    steps: list[dict[str, object]] = [
+        {"id": "lakes", "kind": "runtime_blend", "layer_id": "lakes", "overlay_attr": "lake_overlay_rgba"},
+        {"id": "rivers", "kind": "runtime_blend", "layer_id": "rivers", "overlay_attr": "river_overlay_rgba"},
+    ]
+    if boundary_layers_available:
+        for layer_id in ("borders", "territorial_sea", "eez", "high_seas"):
+            if layer_id in boundary_layer_ids:
+                steps.append({"id": layer_id, "kind": "runtime_blend", "layer_id": layer_id, "overlay_source": "boundary_layer_rgba"})
+    else:
+        steps.append(
+            {
+                "id": "boundary_aggregate",
+                "kind": "alpha_blend",
+                "overlay_attr": "boundary_overlay_rgba",
+                "blend_mode": boundary_aggregate_blend_mode,
+            }
+        )
+    steps.extend(
+        [
+            {"id": "ais_overlay", "kind": "alpha_compose", "overlay_attr": "overlay_rgba"},
+            {"id": "aircraft", "kind": "runtime_overlay", "layer_id": "aircraft", "overlay_attr": "aircraft_overlay_rgba"},
+            {"id": "vehicle_icons", "kind": "runtime_overlay", "layer_id": "vehicle_icons", "overlay_attr": "vehicle_icon_overlay_rgba"},
+            {"id": "pins", "kind": "runtime_overlay", "layer_id": "pins", "overlay_attr": "pin_overlay_rgba"},
+            {"id": "style_profile_postprocess", "kind": "style_profile_postprocess"},
+        ]
+    )
+    return steps
+
+
 def build_layer_render_plan_compose_runs(
     compose_queue: list[dict[str, object]],
     *,

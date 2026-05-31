@@ -26,6 +26,7 @@ from render_core.render_plan import (
     build_layer_render_plan_bottleneck_recommendation,
     build_layer_render_plan_apply_path,
     build_layer_render_plan_batch_decisions,
+    build_layer_render_plan_composition_steps,
     build_layer_render_plan_cache_invalidation_reasons,
     build_layer_render_plan_cache_invalidation_scope,
     build_layer_render_plan_cache_key,
@@ -14034,33 +14035,15 @@ class HybridRenderController:
         }
 
     def layer_render_plan_composition_steps(self) -> list[dict[str, object]]:
-        steps: list[dict[str, object]] = [
-            {"id": "lakes", "kind": "runtime_blend", "layer_id": "lakes", "overlay_attr": "lake_overlay_rgba"},
-            {"id": "rivers", "kind": "runtime_blend", "layer_id": "rivers", "overlay_attr": "river_overlay_rgba"},
-        ]
-        if self.boundary_layer_rgba:
-            for layer_id in ("borders", "territorial_sea", "eez", "high_seas"):
-                if self.boundary_layer_rgba.get(layer_id) is not None:
-                    steps.append({"id": layer_id, "kind": "runtime_blend", "layer_id": layer_id, "overlay_source": "boundary_layer_rgba"})
-        else:
-            steps.append(
-                {
-                    "id": "boundary_aggregate",
-                    "kind": "alpha_blend",
-                    "overlay_attr": "boundary_overlay_rgba",
-                    "blend_mode": self.boundary_aggregate_blend_mode(),
-                }
-            )
-        steps.extend(
-            [
-                {"id": "ais_overlay", "kind": "alpha_compose", "overlay_attr": "overlay_rgba"},
-                {"id": "aircraft", "kind": "runtime_overlay", "layer_id": "aircraft", "overlay_attr": "aircraft_overlay_rgba"},
-                {"id": "vehicle_icons", "kind": "runtime_overlay", "layer_id": "vehicle_icons", "overlay_attr": "vehicle_icon_overlay_rgba"},
-                {"id": "pins", "kind": "runtime_overlay", "layer_id": "pins", "overlay_attr": "pin_overlay_rgba"},
-                {"id": "style_profile_postprocess", "kind": "style_profile_postprocess"},
-            ]
+        return build_layer_render_plan_composition_steps(
+            boundary_layers_available=bool(self.boundary_layer_rgba),
+            boundary_layer_ids=[
+                str(layer_id)
+                for layer_id, overlay in self.boundary_layer_rgba.items()
+                if overlay is not None
+            ],
+            boundary_aggregate_blend_mode=self.boundary_aggregate_blend_mode(),
         )
-        return steps
 
     def layer_render_plan_step_overlay(self, step: dict[str, object]) -> object:
         layer_id = str(step.get("layer_id") or step.get("id") or "")
