@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Extract compiled plan packet builder
+
+- Added `build_compiled_layer_render_plan_packet` to `render_core/render_plan.py`.
+- Kept cache reuse decision and cached-plan mutation in `HybridRenderController.compile_layer_render_plan`.
+- Updated smoke source gate for the relocated compiled cache-status marker.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Extract compose queue classifier helper
 
 - Added `build_layer_render_plan_compose_queue_entries` to `render_core/render_plan.py`.

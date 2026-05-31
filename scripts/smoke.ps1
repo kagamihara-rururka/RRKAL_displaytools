@@ -6308,7 +6308,7 @@ if ($rendererSource -notlike "*def compile_layer_render_plan*") {
 if ($rendererSource -notlike "*def layer_render_plan_cache_key*") {
     throw "Renderer layer render plan cache key helper is missing"
 }
-if ($rendererSource -notlike '*"cache_status": "compiled"*') {
+if ($renderPlanCombinedSource -notlike '*"cache_status": "compiled"*') {
     throw "Renderer compiled layer render plan cache status field is missing"
 }
 if ($rendererSource -notlike '*cache_status*reused*') {
