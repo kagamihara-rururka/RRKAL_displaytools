@@ -1,6 +1,6 @@
 # RRKAL_displaytools 模組邊界
 
-日期：2026-05-29
+日期：2026-05-31
 
 ## 定位
 
@@ -70,6 +70,31 @@
 - UI modules may display cache paths and manifest references, but must not create discovery/download policies.
 - Bridge JSON should stay small, inspectable, and reproducible.
 - Any future extraction should keep one shadow-mode path until smoke and one manual launch path both pass.
+
+## 已落地的 render-plan seam
+
+目前實際落地的第一個 renderer seam 是 `render_core/render_plan.py`。
+
+`render_core/render_plan.py` 負責：
+
+- alpha compose / alpha blend / transparent compose 這類無 UI 狀態的像素合成 helper。
+- render-plan 資料契約組包：runtime snapshot、composition steps、compose queue packet、compiled plan packet、reused compiled plan refresh。
+- render-plan 純決策：cache key、cache invalidation reasons/scope、batch decisions、apply path、execution summary、execution phases。
+- phase timing 與 bottleneck recommendation 的資料包組裝。
+- compose queue classifier：只根據 controller 提供的 step runtime state 分類 queue / skipped steps。
+
+`HybridRenderController` 仍負責：
+
+- 收集 renderer runtime state，例如 frame index、visible layers、dirty flags、selected semantic target。
+- 讀取 overlay / ndarray 物件，判斷 visibility、missing overlay、transparent overlay。
+- 維持 cache-key match 判斷與 controller 生命週期狀態。
+- 實際 render loop、Taichi/NumPy frame mutation、output metadata 寫檔。
+
+後續解耦規則：
+
+- 不要把 `np.ndarray` overlay 物件、Qt widget 或檔案寫入流程直接搬進 `render_core/render_plan.py`。
+- 若要繼續拆 compose queue，先擴充 controller-to-core adapter payload，再讓 core 做純資料分類。
+- 若要啟用合併渲染或 single-pass candidate，先保留 smoke-gated parity contract，不直接替換 runtime path。
 
 ## 目前閉環狀態
 

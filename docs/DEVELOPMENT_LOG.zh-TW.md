@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-31 - Document render-plan module boundary
+
+- Updated `docs/MODULE_BOUNDARIES.zh-TW.md` with the concrete `render_core/render_plan.py` seam.
+- Documented which render-plan responsibilities now live in render-core and which runtime/overlay/IO responsibilities remain in `HybridRenderController`.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Extract reused compiled plan refresh helper
 
 - Added `build_reused_compiled_layer_render_plan_packet` to `render_core/render_plan.py`.
