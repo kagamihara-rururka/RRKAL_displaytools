@@ -1,5 +1,14 @@
 # Development Log
 
+## 2026-05-31 - Surface adapter payload contract in performance handoff
+
+- Added adapter payload schema, summary field, completeness contract status field and primary-gate markers to `layer_render_plan_performance`.
+- Mirrored the same metadata in the Qt panel and no-GUI launch packet builders so clone-first packet export and renderer capability discovery do not drift.
+- Routed the handoff inspector summary through the same adapter payload markers.
+- Wired launch packet and handoff smoke checks so clone-first review can see the adapter payload contract without rendering.
+- Kept runtime optimization disabled; this is capability/handoff metadata only.
+- Smoke: PASS after transient file-access backoff retries (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Surface adapter payload contract status in review packet
 
 - Updated `scripts/inspect_render_plan_metadata_summary.ps1` to verify the adapter payload completeness contract schema and status field.

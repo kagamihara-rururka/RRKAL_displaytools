@@ -605,6 +605,21 @@ if ($launchPacket.layer_render_plan_performance.compiled_plan_schema -ne "rrkal_
 if ($launchPacket.layer_render_plan_performance.compiled_plan_cache_status_field -ne "cache_status") {
     throw "Launch packet layer_render_plan_performance compiled plan cache status field missing"
 }
+if ($launchPacket.layer_render_plan_performance.compiled_plan_adapter_payload_schema -ne "rrkal_displaytools.layer_render_plan_adapter_payload.v1") {
+    throw "Launch packet layer_render_plan_performance adapter payload schema missing"
+}
+if ($launchPacket.layer_render_plan_performance.compiled_plan_adapter_payload_summary_field -ne "adapter_payload_summary") {
+    throw "Launch packet layer_render_plan_performance adapter payload summary field missing"
+}
+if ($launchPacket.layer_render_plan_performance.compiled_plan_adapter_payload_contract_schema -ne "rrkal_displaytools.layer_render_plan_adapter_payload_contract.v1") {
+    throw "Launch packet layer_render_plan_performance adapter payload contract schema missing"
+}
+if ($launchPacket.layer_render_plan_performance.compiled_plan_adapter_payload_contract_status_field -ne "adapter_payload_contract_status") {
+    throw "Launch packet layer_render_plan_performance adapter payload contract status field missing"
+}
+if ($launchPacket.layer_render_plan_performance.compiled_plan_adapter_payload_primary_gate -ne "do_not_make_payload_primary_implementation_until_status_ready") {
+    throw "Launch packet layer_render_plan_performance adapter payload primary gate missing"
+}
 if ($launchPacket.layer_render_plan_performance.compiled_plan_invalidation_reason_schema -ne "rrkal_displaytools.layer_render_plan_cache_invalidation_reasons.v1") {
     throw "Launch packet layer_render_plan_performance invalidation reason schema missing"
 }
@@ -4407,6 +4422,15 @@ if ($handoff.layer_render_plan_performance.compiled_plan_reuse_decision_field -n
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_reuse_policy -ne "reuse_when_cache_key_matches_previous_compiled_plan") {
     throw "Handoff inspection layer render plan performance compiled plan reuse policy missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_adapter_payload_schema -ne "rrkal_displaytools.layer_render_plan_adapter_payload.v1") {
+    throw "Handoff inspection layer render plan performance adapter payload schema missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_adapter_payload_contract_status_field -ne "adapter_payload_contract_status") {
+    throw "Handoff inspection layer render plan performance adapter payload contract status field missing"
+}
+if ($handoff.layer_render_plan_performance.compiled_plan_adapter_payload_primary_gate -ne "do_not_make_payload_primary_implementation_until_status_ready") {
+    throw "Handoff inspection layer render plan performance adapter payload primary gate missing"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_reuse_status_values -notcontains "reused") {
     throw "Handoff inspection layer render plan performance compiled plan reuse status values missing"
