@@ -30,6 +30,7 @@ from render_core.render_plan import (
     build_layer_render_plan_execution_phases,
     build_layer_render_plan_execution_summary,
     build_layer_render_plan_phase_timing_contract,
+    build_layer_render_plan_phase_timing_runtime_packet,
 )
 from pin_projection import pin_projection_contract_packet, project_pins_to_screen
 try:
@@ -14514,36 +14515,11 @@ class HybridRenderController:
         frame_index: int,
         total_ms: float,
     ) -> dict[str, object]:
-        measured = {
-            str(phase_id): round(float(elapsed_ms), 3)
-            for phase_id, elapsed_ms in phase_timing_ms.items()
-            if isinstance(phase_id, str)
-        }
-        slowest_phase_id = None
-        slowest_phase_ms = 0.0
-        if measured:
-            slowest_phase_id = max(measured, key=lambda key: measured[key])
-            slowest_phase_ms = measured.get(slowest_phase_id, 0.0)
-        threshold_ms = 33.3
-        packet = {
-            "schema": "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1",
-            "source": "HybridRenderController.layer_render_plan_phase_timing_runtime_packet",
-            "status": "measured" if measured else "unavailable",
-            "runtime_measurements_available": bool(measured),
-            "timing_unit": "milliseconds",
-            "total_ms": round(float(total_ms), 3),
-            "phase_timing_ms": measured,
-            "measured_phase_ids": list(measured.keys()),
-            "slowest_phase_id": slowest_phase_id,
-            "slowest_phase_ms": round(float(slowest_phase_ms), 3),
-            "slow_frame": float(total_ms) > threshold_ms,
-            "slow_frame_threshold_ms": threshold_ms,
-            "frame_index": int(frame_index),
-            "next_optimization_use": "identify whether prepare_batches, compose_overlays or postprocess dominates before replacing the render loop",
-        }
-        packet["bottleneck_recommendation_schema"] = "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1"
-        packet["bottleneck_recommendation"] = self.layer_render_plan_bottleneck_recommendation(packet)
-        return packet
+        return build_layer_render_plan_phase_timing_runtime_packet(
+            phase_timing_ms,
+            frame_index,
+            total_ms,
+        )
 
     def compile_layer_render_plan(
         self,
