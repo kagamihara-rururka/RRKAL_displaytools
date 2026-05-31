@@ -12,6 +12,7 @@
 - `docs/WORKFLOW.zh-TW.md`
 - `docs/CODEX_CLOUD_HANDOFF.zh-TW.md`
 - `docs/DEVELOPMENT_LOG.zh-TW.md`
+- `docs/DISPLAY_SHELL_RENDER_MATRIX.zh-TW.md` when display shell, canvas, render matrix, or runtime boundary work is involved.
 - `docs/RRKAL_HANDOFF_CONTRACT.zh-TW.md` when RRKAL/displaytools responsibility boundaries are involved.
 
 ## Working agreement
@@ -51,6 +52,13 @@
 - `L:\RRKAL_displaytools` is the local cloud-drive working copy.
 - `taichi_global_bathymetry.py` is still a monolithic prototype.
 - `rrkal_displaytools_qt_panel.py` is the current Qt operator UI for layer/style/material launch control.
+- `display_core/` now owns renderer-package-free DisplayShell / Canvas / Layer / Render Matrix contracts.
+- `display_runtime/` now owns contract-only runtime landing zones, runtime request/result protocol, sample runtime requests, and no-render handoff contracts.
+- Current display shell review command: `py -3 scripts\export_display_shell_render_matrix.py`
+- Current display shell check command: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_display_shell_render_matrix.ps1`
+- Current display runtime contracts command: `py -3 scripts\export_display_runtime_contracts.py`
+- Current display runtime check command: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_display_runtime_contracts.ps1`
+- Current display runtime handoff command: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_display_runtime_handoff.ps1`
 - Module extraction is planned but not physically completed in this repo.
 - Do not start physical module extraction before `2026-05-31T07:00:00+08:00`; after that, run `scripts\pre_decoupling_gate.ps1` and start with `render_plan_compose`.
 - Current panel entry: `py -3 rrkal_displaytools_qt_panel.py`.
@@ -63,5 +71,6 @@
 - Runtime data/cache artifacts are local-only.
 - Keep commits intentional and scoped.
 - Do not add crawler/provider/download logic here; keep those concerns in RRKAL.
+- Do not import Qt, Taichi, Matplotlib, Plotly, VisPy, PyVista or VTK into `display_core/` or current `display_runtime/` skeletons before explicit adapter parity work.
 - Do not move RRKAL crawler/download/import/cache performance smoke into this repo; displaytools owns renderer/config/UI telemetry only.
 - Codex Cloud can work from GitHub and handoff docs, but local Qt/Taichi/GPU visual validation remains a local responsibility.

@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Update display runtime agent handoff
+
+- Updated `docs/AGENT_HANDOFF.zh-TW.md` with the new display shell/runtime source-of-truth boundaries.
+- Added current no-GUI review commands for display shell, runtime contracts and runtime handoff.
+- Added an explicit guard against importing GUI/renderer packages into `display_core` or current `display_runtime` skeletons before adapter parity work.
+- Smoke: PASS after transient file-access backoff retry (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Surface display runtime in capability summary
 
 - Added `display_shell_render_matrix` and `display_runtime_handoff` to `scripts/export_capability_summary.ps1` current capabilities.
