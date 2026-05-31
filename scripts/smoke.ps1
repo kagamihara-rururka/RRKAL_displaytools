@@ -711,7 +711,7 @@ if ($launchPacket.layer_render_plan_performance.phase_timing_unit -ne "milliseco
 if ($launchPacket.layer_render_plan_performance.compiled_plan_phase_timing_runtime_schema -ne "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1") {
     throw "Launch packet layer_render_plan_performance phase timing runtime schema missing"
 }
-if ($launchPacket.layer_render_plan_performance.compiled_plan_phase_timing_runtime_helper -ne "HybridRenderController.layer_render_plan_phase_timing_runtime_packet") {
+if ($launchPacket.layer_render_plan_performance.compiled_plan_phase_timing_runtime_helper -ne "render_core.render_plan.build_layer_render_plan_phase_timing_runtime_packet") {
     throw "Launch packet layer_render_plan_performance phase timing runtime helper missing"
 }
 if ($launchPacket.layer_render_plan_performance.compiled_plan_phase_timing_runtime_field -ne "phase_timing_runtime") {
@@ -3368,7 +3368,7 @@ if ($capabilities.layer_render_plan_performance.phase_timing_unit -ne "milliseco
 if ($capabilities.layer_render_plan_performance.compiled_plan_phase_timing_runtime_schema -ne "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1") {
     throw "Renderer layer_render_plan_performance phase timing runtime schema missing"
 }
-if ($capabilities.layer_render_plan_performance.compiled_plan_phase_timing_runtime_helper -ne "HybridRenderController.layer_render_plan_phase_timing_runtime_packet") {
+if ($capabilities.layer_render_plan_performance.compiled_plan_phase_timing_runtime_helper -ne "render_core.render_plan.build_layer_render_plan_phase_timing_runtime_packet") {
     throw "Renderer layer_render_plan_performance phase timing runtime helper missing"
 }
 if ($capabilities.layer_render_plan_performance.compiled_plan_phase_timing_runtime_field -ne "phase_timing_runtime") {
@@ -4323,7 +4323,7 @@ if ($handoff.layer_render_plan_performance.phase_timing_unit -ne "milliseconds")
 if ($handoff.layer_render_plan_performance.compiled_plan_phase_timing_runtime_schema -ne "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1") {
     throw "Handoff inspection layer render plan performance phase timing runtime schema missing"
 }
-if ($handoff.layer_render_plan_performance.compiled_plan_phase_timing_runtime_helper -ne "HybridRenderController.layer_render_plan_phase_timing_runtime_packet") {
+if ($handoff.layer_render_plan_performance.compiled_plan_phase_timing_runtime_helper -ne "render_core.render_plan.build_layer_render_plan_phase_timing_runtime_packet") {
     throw "Handoff inspection layer render plan performance phase timing runtime helper missing"
 }
 if ($handoff.layer_render_plan_performance.compiled_plan_phase_timing_runtime_field -ne "phase_timing_runtime") {
@@ -6434,8 +6434,8 @@ if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_execution_p
 if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_phase_timing_contract*") {
     throw "Renderer render plan phase timing helper is missing"
 }
-if ($rendererSource -notlike "*def layer_render_plan_phase_timing_runtime_packet*") {
-    throw "Renderer render plan phase timing runtime helper is missing"
+if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_phase_timing_runtime_packet*") {
+    throw "Render core render plan phase timing runtime helper is missing"
 }
 if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_bottleneck_recommendation*") {
     throw "Renderer render plan bottleneck recommendation helper is missing"

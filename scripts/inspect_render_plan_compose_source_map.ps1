@@ -51,7 +51,6 @@ $targets = @(
     [ordered]@{ id = "apply_layer_render_plan_composition"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def apply_layer_render_plan_composition\(" },
     [ordered]@{ id = "merge_alpha_compose_overlay_run"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def merge_alpha_compose_overlay_run\(" },
     [ordered]@{ id = "apply_layer_render_plan_merged_candidate_composition"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def apply_layer_render_plan_merged_candidate_composition\(" },
-    [ordered]@{ id = "layer_render_plan_phase_timing_runtime_packet"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def layer_render_plan_phase_timing_runtime_packet\(" },
     [ordered]@{ id = "compile_layer_render_plan"; path = "taichi_global_bathymetry.py"; pattern = "^\s+def compile_layer_render_plan\(" }
 )
 

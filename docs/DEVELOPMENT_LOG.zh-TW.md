@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Route runtime phase timing packet to core
+
+- Removed the residual `HybridRenderController.layer_render_plan_phase_timing_runtime_packet` wrapper.
+- Updated the render path to call `render_core.render_plan.build_layer_render_plan_phase_timing_runtime_packet` directly after collecting phase timing scalar values.
+- Updated performance handoff, source-map and smoke contracts so runtime phase timing packet ownership now points to render-core.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Route pure render-plan decisions directly to core
 
 - Removed residual controller wrappers for cache key, invalidation reasons/scope, batch decisions, apply path, execution summary/phases, phase timing contract and bottleneck recommendation.

@@ -604,7 +604,7 @@ def build_layer_render_plan_bottleneck_recommendation(
         slowest_phase_id,
         {
             "recommended_next_action": "collect_more_runtime_phase_timing",
-            "target_helper": "HybridRenderController.layer_render_plan_phase_timing_runtime_packet",
+            "target_helper": "render_core.render_plan.build_layer_render_plan_phase_timing_runtime_packet",
             "optimization_boundary": "wait for measured phase_timing_ms before changing render behavior",
         },
     )
@@ -643,7 +643,7 @@ def build_layer_render_plan_phase_timing_runtime_packet(
     threshold_ms = 33.3
     packet = {
         "schema": "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1",
-        "source": "HybridRenderController.layer_render_plan_phase_timing_runtime_packet",
+        "source": "render_core.render_plan.build_layer_render_plan_phase_timing_runtime_packet",
         "status": "measured" if measured else "unavailable",
         "runtime_measurements_available": bool(measured),
         "timing_unit": "milliseconds",

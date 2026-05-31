@@ -14276,18 +14276,6 @@ class HybridRenderController:
             }
             print(f"Unable to write compose parity artifacts: {exc}")
 
-    def layer_render_plan_phase_timing_runtime_packet(
-        self,
-        phase_timing_ms: dict[str, float],
-        frame_index: int,
-        total_ms: float,
-    ) -> dict[str, object]:
-        return build_layer_render_plan_phase_timing_runtime_packet(
-            phase_timing_ms,
-            frame_index,
-            total_ms,
-        )
-
     def compile_layer_render_plan(
         self,
         changed: bool | None = None,
@@ -16224,7 +16212,7 @@ class HybridRenderController:
         phase_timing_ms["postprocess"] = float(composition_timing.get("postprocess", 0.0))
         phase_timing_ms["future_single_pass_candidate"] = 0.0
         self.last_render_ms = (time.time() - start) * 1000.0
-        self.layer_render_plan_phase_timing_runtime = self.layer_render_plan_phase_timing_runtime_packet(
+        self.layer_render_plan_phase_timing_runtime = build_layer_render_plan_phase_timing_runtime_packet(
             phase_timing_ms,
             self.frame_index,
             (time.perf_counter() - runtime_phase_started_at) * 1000.0,

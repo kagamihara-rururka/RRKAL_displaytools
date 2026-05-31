@@ -67,7 +67,7 @@ def layer_render_plan_performance_packet(
         "compiled_plan_phase_timing_contract_helper": "render_core.render_plan.build_layer_render_plan_phase_timing_contract",
         "compiled_plan_phase_timing_contract_field": "phase_timing_contract",
         "compiled_plan_phase_timing_runtime_schema": "rrkal_displaytools.layer_render_plan_phase_timing_runtime.v1",
-        "compiled_plan_phase_timing_runtime_helper": "HybridRenderController.layer_render_plan_phase_timing_runtime_packet",
+        "compiled_plan_phase_timing_runtime_helper": "render_core.render_plan.build_layer_render_plan_phase_timing_runtime_packet",
         "compiled_plan_phase_timing_runtime_field": "phase_timing_runtime",
         "compiled_plan_bottleneck_recommendation_schema": "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1",
         "compiled_plan_bottleneck_recommendation_helper": "render_core.render_plan.build_layer_render_plan_bottleneck_recommendation",
