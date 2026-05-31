@@ -37,6 +37,7 @@ from render_core.render_plan import (
     build_layer_render_plan_compose_runs,
     build_layer_render_plan_execution_phases,
     build_layer_render_plan_execution_summary,
+    build_layer_render_plan_metadata_summary,
     build_layer_render_plan_phase_timing_contract,
     build_layer_render_plan_phase_timing_runtime_packet,
     build_layer_render_plan_runtime_snapshot,
@@ -14477,6 +14478,9 @@ class HybridRenderController:
             for blend_mode in [self.layer_blend_mode(layer_id)]
             if blend_mode is not None
         }
+        layer_render_plan = getattr(self, "compiled_layer_render_plan", None)
+        if not isinstance(layer_render_plan, dict):
+            layer_render_plan = self.compile_layer_render_plan()
         payload = {
             "schema": "rrkal_displaytools.renderer_output_metadata.v1",
             "created_at_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
@@ -14498,7 +14502,8 @@ class HybridRenderController:
             "selected_layer_semantic_target": self.selected_layer_semantic_target,
             "last_layer_pick_result": self.last_layer_pick_result,
             "boundary_highlight": getattr(self, "boundary_highlight_state", {}),
-            "layer_render_plan": getattr(self, "compiled_layer_render_plan", self.compile_layer_render_plan()),
+            "layer_render_plan": layer_render_plan,
+            "layer_render_plan_summary": build_layer_render_plan_metadata_summary(layer_render_plan),
             "closed_loop_status": renderer_closed_loop_status_packet(),
             "rrkal_data_manifest_ref": getattr(self.args, "rrkal_data_manifest_ref", ""),
             "rrkal_data_manifest_ref_boundary": "Reference-only; displaytools records the RRKAL manifest reference but does not discover, download, validate, import, or govern it.",

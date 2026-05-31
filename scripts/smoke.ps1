@@ -6535,8 +6535,16 @@ if ($renderPlanCombinedSource -notlike "*replace per-step overlay helpers with a
 }
 if ($rendererSource -notlike '*"layer_render_plan": getattr(self, "layer_render_plan_snapshot"*') {
     if ($rendererSource -notlike '*"layer_render_plan": getattr(self, "compiled_layer_render_plan"*') {
-        throw "Renderer metadata layer render plan sidecar field is missing"
+        if ($rendererSource -notlike '*"layer_render_plan": layer_render_plan*') {
+            throw "Renderer metadata layer render plan sidecar field is missing"
+        }
     }
+}
+if ($rendererSource -notlike '*"layer_render_plan_summary": build_layer_render_plan_metadata_summary(layer_render_plan)*') {
+    throw "Renderer metadata layer render plan summary sidecar field is missing"
+}
+if ($renderPlanCombinedSource -notlike "*rrkal_displaytools.layer_render_plan_metadata_summary.v1*") {
+    throw "Renderer render plan metadata summary schema marker is missing"
 }
 if ($rendererSource -notlike "*self.layer_render_plan_snapshot = self.layer_render_plan_runtime_snapshot*") {
     throw "Renderer render_if_needed does not update the layer render plan snapshot"

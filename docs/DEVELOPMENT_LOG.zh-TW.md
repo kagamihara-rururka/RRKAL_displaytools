@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Extract render plan metadata summary builder
+
+- Added `build_layer_render_plan_metadata_summary` to `render_core/render_plan.py`.
+- Kept output metadata file IO inside `HybridRenderController.write_output_metadata`.
+- Added a compact `layer_render_plan_summary` metadata sidecar field while preserving the full `layer_render_plan`.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Document render-plan module boundary
 
 - Updated `docs/MODULE_BOUNDARIES.zh-TW.md` with the concrete `render_core/render_plan.py` seam.

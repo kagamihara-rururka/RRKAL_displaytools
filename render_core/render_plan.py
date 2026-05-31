@@ -606,6 +606,53 @@ def build_layer_render_plan_phase_timing_runtime_packet(
     return packet
 
 
+def _render_plan_count(value: object) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
+
+
+def build_layer_render_plan_metadata_summary(plan: dict[str, object]) -> dict[str, object]:
+    compiled_plan = plan if isinstance(plan, dict) else {}
+    runtime_snapshot = compiled_plan.get("runtime_snapshot")
+    if not isinstance(runtime_snapshot, dict):
+        runtime_snapshot = {}
+    execution_summary = compiled_plan.get("execution_summary")
+    if not isinstance(execution_summary, dict):
+        execution_summary = {}
+    phase_timing_runtime = compiled_plan.get("phase_timing_runtime")
+    if not isinstance(phase_timing_runtime, dict):
+        phase_timing_runtime = {}
+    available = bool(compiled_plan)
+    return {
+        "schema": "rrkal_displaytools.layer_render_plan_metadata_summary.v1",
+        "source": "render_core.render_plan.build_layer_render_plan_metadata_summary",
+        "status": "ready" if available else "unavailable",
+        "full_plan_field": "layer_render_plan",
+        "full_plan_schema": compiled_plan.get("schema") if available else None,
+        "cache_status": compiled_plan.get("cache_status", "unavailable") if available else "unavailable",
+        "cache_reuse_decision": compiled_plan.get("cache_reuse_decision", "unavailable") if available else "unavailable",
+        "frame_index": compiled_plan.get("frame_index"),
+        "visible_layer_count": _render_plan_count(runtime_snapshot.get("visible_layer_count")),
+        "composition_step_count": _render_plan_count(compiled_plan.get("composition_step_count")),
+        "compose_queue_count": _render_plan_count(compiled_plan.get("compose_queue_count")),
+        "compose_queue_skipped_count": _render_plan_count(compiled_plan.get("compose_queue_skipped_count")),
+        "compose_run_count": _render_plan_count(compiled_plan.get("compose_run_count")),
+        "compose_merge_candidate_run_count": _render_plan_count(compiled_plan.get("compose_merge_candidate_run_count")),
+        "execution_phase_count": _render_plan_count(compiled_plan.get("execution_phase_count")),
+        "single_pass_ready": bool(compiled_plan.get("single_pass_ready", False)) if available else False,
+        "runtime_optimization_applied": bool(compiled_plan.get("runtime_optimization_applied", False)) if available else False,
+        "current_execution_mode": execution_summary.get("current_execution_mode", "unavailable"),
+        "phase_timing_status": phase_timing_runtime.get("status", "unavailable"),
+        "slowest_phase_id": phase_timing_runtime.get("slowest_phase_id"),
+        "slow_frame": bool(phase_timing_runtime.get("slow_frame", False)),
+        "reuse_policy": compiled_plan.get("reuse_policy", "unavailable") if available else "unavailable",
+        "reuse_boundary": compiled_plan.get("reuse_boundary", "unavailable") if available else "unavailable",
+        "boundary": "Summary only; full layer_render_plan remains the renderer parity/debugging contract.",
+    }
+
+
 def build_compiled_layer_render_plan_packet(
     cache_key: str,
     invalidation_reasons: list[str],

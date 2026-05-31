@@ -81,6 +81,7 @@
 - render-plan 資料契約組包：runtime snapshot、composition steps、compose queue packet、compiled plan packet、reused compiled plan refresh。
 - render-plan 純決策：cache key、cache invalidation reasons/scope、batch decisions、apply path、execution summary、execution phases。
 - phase timing 與 bottleneck recommendation 的資料包組裝。
+- output metadata 的 `layer_render_plan_summary` 摘要契約組包；實際 metadata 寫檔仍留在 controller。
 - compose queue classifier：只根據 controller 提供的 step runtime state 分類 queue / skipped steps。
 
 `HybridRenderController` 仍負責：
