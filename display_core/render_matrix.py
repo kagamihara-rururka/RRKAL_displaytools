@@ -156,6 +156,72 @@ def build_canvas_registry_packet() -> dict[str, Any]:
     }
 
 
+def build_sample_view_models_packet() -> dict[str, Any]:
+    earth_view = ViewModel(
+        view_id="rrkal_displaytools_earth_view_sample",
+        canvas_type=CANVAS_EARTH,
+        renderer_hint="displaytools",
+        output_format="interactive",
+        layers=(
+            LayerModel(
+                id="terrain",
+                name="Terrain",
+                type=LAYER_GEO,
+                semantic_type="terrain_dem",
+                data_ref="dataset.dem",
+                order=10,
+                renderer_hint="displaytools",
+            ),
+            LayerModel(
+                id="annotations",
+                name="Research annotations",
+                type=LAYER_GEO,
+                semantic_type="geo_annotation",
+                data_ref="dataset.annotations",
+                order=20,
+                renderer_hint="displaytools",
+            ),
+        ),
+    )
+    time_series_view = ViewModel(
+        view_id="rrkal_displaytools_time_series_view_sample",
+        canvas_type=CANVAS_TIME_SERIES,
+        renderer_hint="contract_only",
+        output_format="html",
+        layers=(
+            LayerModel(
+                id="series",
+                name="Series",
+                type=LAYER_TIME_SERIES,
+                semantic_type="numeric_series",
+                data_ref="dataset.series",
+                order=10,
+                renderer_hint="future_timeseries_adapter",
+            ),
+            LayerModel(
+                id="events",
+                name="Event markers",
+                type=LAYER_TIME_SERIES,
+                semantic_type="event_marker",
+                data_ref="dataset.events",
+                order=20,
+                renderer_hint="future_timeseries_adapter",
+            ),
+        ),
+    )
+    samples = (earth_view, time_series_view)
+    return {
+        "schema": "rrkal_displaytools.sample_view_models.v1",
+        "source": "display_core.render_matrix.build_sample_view_models_packet",
+        "status": "phase1_contract_ready",
+        "sample_count": len(samples),
+        "samples": [sample.to_packet() for sample in samples],
+        "canvas_types": [sample.canvas_type for sample in samples],
+        "proves": "EarthCanvas and TimeSeriesCanvas share ViewModel = Canvas + Layer Stack + Renderer Hint + Output Format.",
+        "runtime_canvas_switching_enabled": False,
+    }
+
+
 def register_renderer(
     *,
     layer_type: str,
@@ -202,6 +268,7 @@ def lookup_renderers(
 
 def build_display_shell_capability_packet() -> dict[str, Any]:
     canvas_registry = build_canvas_registry_packet()
+    sample_view_models = build_sample_view_models_packet()
     return {
         "schema": "rrkal_displaytools.display_shell_render_matrix.v1",
         "source": "display_core.render_matrix.build_display_shell_capability_packet",
@@ -211,6 +278,8 @@ def build_display_shell_capability_packet() -> dict[str, Any]:
         "runtime_canvas_switching_enabled": False,
         "canvas_registry_schema": canvas_registry["schema"],
         "canvas_registry": canvas_registry,
+        "sample_view_models_schema": sample_view_models["schema"],
+        "sample_view_models": sample_view_models,
         "phase1_goal": "extract EarthCanvas boundary and add minimal TimeSeriesCanvas contract before supporting broad chart families",
         "core_imports_renderer_packages": False,
         "canvas_types": [CANVAS_EARTH, CANVAS_TIME_SERIES],

@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Add sample display ViewModels
+
+- Added `build_sample_view_models_packet` to `display_core/render_matrix.py`.
+- Added one Earth sample view and one TimeSeries sample view to prove both canvases share the same `ViewModel = Canvas + Layer Stack + Renderer Hint + Output Format` contract.
+- Updated the display shell inspector, smoke gates and roadmap docs to verify `rrkal_displaytools.sample_view_models.v1`.
+- Smoke: PASS after transient file-access backoff retries (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add canvas registry contract
 
 - Added `CanvasDescriptor` and `build_canvas_registry_packet` to `display_core/render_matrix.py`.

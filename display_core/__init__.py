@@ -11,6 +11,7 @@ from .render_matrix import (
     ViewModel,
     build_canvas_registry_packet,
     build_display_shell_capability_packet,
+    build_sample_view_models_packet,
     lookup_renderers,
     register_renderer,
 )
@@ -26,6 +27,7 @@ __all__ = [
     "ViewModel",
     "build_canvas_registry_packet",
     "build_display_shell_capability_packet",
+    "build_sample_view_models_packet",
     "lookup_renderers",
     "register_renderer",
 ]

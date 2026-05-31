@@ -32,6 +32,7 @@ DisplayShell
 - `ViewModel`
 - `CanvasDescriptor`
 - `build_canvas_registry_packet`
+- `build_sample_view_models_packet`
 - `RendererEntry`
 - `register_renderer`
 - `lookup_renderers`
@@ -41,6 +42,12 @@ DisplayShell
 
 - `EarthCanvas`: 現有 globe runtime 的未來邊界，座標模型是 globe / latitude / longitude / altitude。
 - `TimeSeriesCanvas`: 第一個非地球 contract，座標模型是 time x numeric y，目前不啟用 runtime renderer。
+
+## 最小 ViewModel samples
+
+- `rrkal_displaytools_earth_view_sample`: `earth` canvas，包含 terrain 與 research annotation layer。
+- `rrkal_displaytools_time_series_view_sample`: `time_series` canvas，包含 numeric series 與 event marker layer。
+- 兩者都使用同一個公式：`ViewModel = Canvas + Layer Stack + Renderer Hint + Output Format`。
 
 ## 後續執行順序
 

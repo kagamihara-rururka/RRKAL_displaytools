@@ -6447,6 +6447,9 @@ if ($displayCoreSource -notlike "*rrkal_displaytools.display_shell_render_matrix
 if ($displayCoreSource -notlike "*rrkal_displaytools.canvas_registry.v1*") {
     throw "Display shell canvas registry schema is missing"
 }
+if ($displayCoreSource -notlike "*rrkal_displaytools.sample_view_models.v1*") {
+    throw "Display shell sample ViewModel schema is missing"
+}
 if ($displayCoreSource -notlike "*class CanvasDescriptor*") {
     throw "Display shell CanvasDescriptor contract is missing"
 }
@@ -6468,6 +6471,15 @@ if ($displayShellMatrix.schema -ne "rrkal_displaytools.display_shell_render_matr
 }
 if ($displayShellMatrix.has_canvas_registry -ne $true) {
     throw "Display shell render matrix inspector canvas registry evidence missing"
+}
+if ($displayShellMatrix.has_sample_view_models -ne $true) {
+    throw "Display shell render matrix inspector sample ViewModel evidence missing"
+}
+if ($displayShellMatrix.sample_view_ids -notcontains "rrkal_displaytools_earth_view_sample") {
+    throw "Display shell render matrix Earth sample ViewModel missing"
+}
+if ($displayShellMatrix.sample_view_ids -notcontains "rrkal_displaytools_time_series_view_sample") {
+    throw "Display shell render matrix TimeSeries sample ViewModel missing"
 }
 if ($displayShellMatrix.required_canvases -notcontains "earth") {
     throw "Display shell render matrix EarthCanvas contract missing"
