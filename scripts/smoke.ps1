@@ -6567,6 +6567,15 @@ if ($renderPlanCombinedSource -notlike "*normalize controller-to-core adapter pa
 if ($renderPlanCombinedSource -notlike "*rrkal_displaytools.layer_render_plan_adapter_payload_summary.v1*") {
     throw "Renderer render plan adapter payload summary schema marker is missing"
 }
+if ($renderPlanCombinedSource -notlike "*rrkal_displaytools.layer_render_plan_adapter_payload.v1*") {
+    throw "Renderer render plan adapter payload schema marker is missing"
+}
+if ($renderPlanCombinedSource -notlike "*serializable_controller_to_core_payload_no_overlay_arrays*") {
+    throw "Renderer render plan adapter payload no-array contract marker is missing"
+}
+if ($rendererSource -notlike "*adapter_payload = build_layer_render_plan_adapter_payload(*") {
+    throw "Renderer compile_layer_render_plan does not build normalized adapter payload"
+}
 if ($renderPlanCombinedSource -notlike "*serializable_summary_only_no_overlay_arrays*") {
     throw "Renderer render plan adapter payload no-array boundary marker is missing"
 }

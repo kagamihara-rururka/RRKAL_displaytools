@@ -24,6 +24,7 @@ from render_core.render_plan import (
     alpha_compose,
     alpha_compose_transparent,
     build_compiled_layer_render_plan_packet,
+    build_layer_render_plan_adapter_payload,
     build_layer_render_plan_bottleneck_recommendation,
     build_layer_render_plan_apply_path,
     build_layer_render_plan_batch_decisions,
@@ -14420,6 +14421,21 @@ class HybridRenderController:
         phase_timing_runtime = getattr(self, "layer_render_plan_phase_timing_runtime", {})
         phase_timing_runtime = phase_timing_runtime if isinstance(phase_timing_runtime, dict) else {}
         bottleneck_recommendation = phase_timing_runtime.get("bottleneck_recommendation") if isinstance(phase_timing_runtime.get("bottleneck_recommendation"), dict) else self.layer_render_plan_bottleneck_recommendation(phase_timing_runtime)
+        adapter_payload = build_layer_render_plan_adapter_payload(
+            runtime_snapshot,
+            composition_steps,
+            compose_queue_packet,
+            cache_key,
+            invalidation_reasons,
+            invalidation_scope,
+            batch_decisions,
+            apply_path,
+            execution_summary,
+            execution_phases,
+            phase_timing_contract,
+            phase_timing_runtime,
+            bottleneck_recommendation,
+        )
         cached_plan = getattr(self, "compiled_layer_render_plan", None)
         if isinstance(cached_plan, dict) and getattr(self, "compiled_layer_render_plan_cache_key", None) == cache_key:
             return build_reused_compiled_layer_render_plan_packet(
@@ -14436,6 +14452,7 @@ class HybridRenderController:
                 int(getattr(self, "frame_index", 0)),
                 runtime_snapshot,
                 compose_queue_packet,
+                adapter_payload,
             )
         self.compiled_layer_render_plan_cache_key = cache_key
         return build_compiled_layer_render_plan_packet(
@@ -14453,6 +14470,7 @@ class HybridRenderController:
             runtime_snapshot,
             composition_steps,
             compose_queue_packet,
+            adapter_payload,
             source="HybridRenderController.compile_layer_render_plan",
         )
 

@@ -85,6 +85,7 @@
 - single-pass preflight contract 組包；在 parity smoke、實測 phase timing、人工視覺審查通過前，不啟用 runtime single-pass。
 - adapter boundary contract 組包；先明確 controller-to-core payload 與 forbidden responsibilities，再移動 overlay runtime state。
 - adapter payload summary 組包；只輸出可序列化摘要，不持有 overlay ndarray。
+- adapter payload 組包；`HybridRenderController.compile_layer_render_plan` 先建立 normalized controller-to-core payload，再交給 compiled/reused plan packet builder。
 - compose queue classifier：只根據 controller 提供的 step runtime state 分類 queue / skipped steps。
 
 `HybridRenderController` 仍負責：

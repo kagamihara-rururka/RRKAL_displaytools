@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Add normalized render plan adapter payload
+
+- Added `build_layer_render_plan_adapter_payload` to `render_core/render_plan.py`.
+- Updated `HybridRenderController.compile_layer_render_plan` to build a normalized adapter payload before compiled/reused plan packet assembly.
+- Embedded the normalized payload and summary into compiled and reused render plans without moving overlay arrays or changing runtime composition.
+- Smoke: PASS after transient file-access backoff retries (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Surface adapter payload status in review packet
 
 - Updated `scripts/inspect_render_plan_metadata_summary.ps1` to verify the adapter payload summary schema and `adapter_payload_status` field.

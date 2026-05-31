@@ -801,6 +801,51 @@ def build_layer_render_plan_adapter_payload_summary(
     }
 
 
+def build_layer_render_plan_adapter_payload(
+    runtime_snapshot: dict[str, object],
+    composition_steps: list[dict[str, object]],
+    compose_queue_packet: dict[str, object],
+    cache_key: str,
+    invalidation_reasons: list[str],
+    invalidation_scope: list[dict[str, object]],
+    batch_decisions: list[dict[str, object]],
+    apply_path: list[dict[str, object]],
+    execution_summary: dict[str, object],
+    execution_phases: list[dict[str, object]],
+    phase_timing_contract: dict[str, object],
+    phase_timing_runtime: dict[str, object],
+    bottleneck_recommendation: dict[str, object],
+) -> dict[str, object]:
+    summary = build_layer_render_plan_adapter_payload_summary(
+        runtime_snapshot,
+        composition_steps,
+        compose_queue_packet,
+    )
+    return {
+        "schema": "rrkal_displaytools.layer_render_plan_adapter_payload.v1",
+        "source": "render_core.render_plan.build_layer_render_plan_adapter_payload",
+        "status": "normalized_payload",
+        "runtime_path_unchanged": True,
+        "payload_boundary": "serializable_controller_to_core_payload_no_overlay_arrays",
+        "summary_schema": "rrkal_displaytools.layer_render_plan_adapter_payload_summary.v1",
+        "summary": summary,
+        "cache_key": cache_key,
+        "invalidation_reasons": invalidation_reasons,
+        "invalidation_scope": invalidation_scope,
+        "batch_decisions": batch_decisions,
+        "apply_path": apply_path,
+        "execution_summary": execution_summary,
+        "execution_phases": execution_phases,
+        "phase_timing_contract": phase_timing_contract,
+        "phase_timing_runtime": phase_timing_runtime,
+        "bottleneck_recommendation": bottleneck_recommendation,
+        "runtime_snapshot": runtime_snapshot,
+        "composition_steps": composition_steps,
+        "compose_queue_packet": compose_queue_packet,
+        "next_extraction_target": "make compiled/reused plan builders consume this payload as the primary contract",
+    }
+
+
 def build_compiled_layer_render_plan_packet(
     cache_key: str,
     invalidation_reasons: list[str],
@@ -816,9 +861,26 @@ def build_compiled_layer_render_plan_packet(
     runtime_snapshot: dict[str, object],
     composition_steps: list[dict[str, object]],
     compose_queue_packet: dict[str, object],
+    adapter_payload: dict[str, object] | None = None,
     *,
     source: str,
 ) -> dict[str, object]:
+    if not isinstance(adapter_payload, dict):
+        adapter_payload = build_layer_render_plan_adapter_payload(
+            runtime_snapshot,
+            composition_steps,
+            compose_queue_packet,
+            cache_key,
+            invalidation_reasons,
+            invalidation_scope,
+            batch_decisions,
+            apply_path,
+            execution_summary,
+            execution_phases,
+            phase_timing_contract,
+            phase_timing_runtime,
+            bottleneck_recommendation,
+        )
     single_pass_preflight_contract = build_layer_render_plan_single_pass_preflight_contract(
         compose_queue_packet.get("compose_runs", []),
         execution_summary,
@@ -828,11 +890,13 @@ def build_compiled_layer_render_plan_packet(
         runtime_snapshot,
         composition_steps,
     )
-    adapter_payload_summary = build_layer_render_plan_adapter_payload_summary(
-        runtime_snapshot,
-        composition_steps,
-        compose_queue_packet,
-    )
+    adapter_payload_summary = adapter_payload.get("summary")
+    if not isinstance(adapter_payload_summary, dict):
+        adapter_payload_summary = build_layer_render_plan_adapter_payload_summary(
+            runtime_snapshot,
+            composition_steps,
+            compose_queue_packet,
+        )
     return {
         "schema": "rrkal_displaytools.compiled_layer_render_plan.v1",
         "source": source,
@@ -865,6 +929,8 @@ def build_compiled_layer_render_plan_packet(
         "single_pass_preflight_contract_schema": "rrkal_displaytools.layer_render_plan_single_pass_preflight_contract.v1",
         "adapter_boundary_contract": adapter_boundary_contract,
         "adapter_boundary_contract_schema": "rrkal_displaytools.layer_render_plan_adapter_boundary.v1",
+        "adapter_payload": adapter_payload,
+        "adapter_payload_schema": "rrkal_displaytools.layer_render_plan_adapter_payload.v1",
         "adapter_payload_summary": adapter_payload_summary,
         "adapter_payload_summary_schema": "rrkal_displaytools.layer_render_plan_adapter_payload_summary.v1",
         "reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",
@@ -909,6 +975,7 @@ def build_reused_compiled_layer_render_plan_packet(
     frame_index: int,
     runtime_snapshot: dict[str, object],
     compose_queue_packet: dict[str, object],
+    adapter_payload: dict[str, object] | None = None,
 ) -> dict[str, object]:
     plan = dict(cached_plan)
     plan["cache_status"] = "reused"
@@ -938,16 +1005,37 @@ def build_reused_compiled_layer_render_plan_packet(
     composition_steps = plan.get("composition_steps")
     if not isinstance(composition_steps, list):
         composition_steps = []
+    if not isinstance(adapter_payload, dict):
+        adapter_payload = build_layer_render_plan_adapter_payload(
+            runtime_snapshot,
+            composition_steps,
+            compose_queue_packet,
+            str(plan.get("cache_key") or ""),
+            invalidation_reasons,
+            invalidation_scope,
+            batch_decisions,
+            apply_path,
+            execution_summary,
+            execution_phases,
+            phase_timing_contract,
+            phase_timing_runtime,
+            bottleneck_recommendation,
+        )
     plan["adapter_boundary_contract"] = build_layer_render_plan_adapter_boundary_contract(
         runtime_snapshot,
         composition_steps,
     )
     plan["adapter_boundary_contract_schema"] = "rrkal_displaytools.layer_render_plan_adapter_boundary.v1"
-    plan["adapter_payload_summary"] = build_layer_render_plan_adapter_payload_summary(
-        runtime_snapshot,
-        composition_steps,
-        compose_queue_packet,
-    )
+    adapter_payload_summary = adapter_payload.get("summary")
+    if not isinstance(adapter_payload_summary, dict):
+        adapter_payload_summary = build_layer_render_plan_adapter_payload_summary(
+            runtime_snapshot,
+            composition_steps,
+            compose_queue_packet,
+        )
+    plan["adapter_payload"] = adapter_payload
+    plan["adapter_payload_schema"] = "rrkal_displaytools.layer_render_plan_adapter_payload.v1"
+    plan["adapter_payload_summary"] = adapter_payload_summary
     plan["adapter_payload_summary_schema"] = "rrkal_displaytools.layer_render_plan_adapter_payload_summary.v1"
     plan["reuse_policy"] = "reuse_when_cache_key_matches_previous_compiled_plan"
     plan["reuse_boundary"] = plan.get("reuse_boundary", "valid_until_dirty_flags_or_camera_change")
