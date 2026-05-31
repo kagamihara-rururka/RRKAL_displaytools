@@ -42,6 +42,7 @@ from render_core.render_plan import (
     build_layer_render_plan_phase_timing_contract,
     build_layer_render_plan_phase_timing_runtime_packet,
     build_layer_render_plan_runtime_snapshot,
+    build_layer_render_plan_style_postprocess_packet,
     build_reused_compiled_layer_render_plan_packet,
     build_reused_compiled_layer_render_plan_packet_from_adapter_payload,
     build_layer_render_plan_step_runtime_state,
@@ -14112,6 +14113,9 @@ class HybridRenderController:
     def apply_layer_render_plan_composition(self, steps: list[dict[str, object]] | None = None) -> np.ndarray:
         frame = self.globe_rgba
         plan_steps = steps if isinstance(steps, list) else self.layer_render_plan_composition_steps()
+        style_postprocess = build_layer_render_plan_style_postprocess_packet(
+            getattr(self.args, "style_profile", "scientific")
+        )
         step_timing_ms: dict[str, float] = {}
         for step in plan_steps:
             if not isinstance(step, dict):
@@ -14130,7 +14134,7 @@ class HybridRenderController:
             elif kind == "runtime_overlay" and overlay is not None:
                 frame = self.compose_runtime_overlay(frame, layer_id, overlay)
             elif kind == "style_profile_postprocess":
-                frame = apply_style_profile(frame, getattr(self.args, "style_profile", "scientific"))
+                frame = apply_style_profile(frame, style_postprocess.get("style_profile"))
             phase_id = str(action.get("phase_id") or "compose_overlays")
             step_timing_ms[phase_id] = step_timing_ms.get(phase_id, 0.0) + (
                 time.perf_counter() - step_started_at
@@ -14167,6 +14171,9 @@ class HybridRenderController:
     ) -> tuple[np.ndarray, dict[str, object]]:
         frame = self.globe_rgba
         plan_steps = steps if isinstance(steps, list) else self.layer_render_plan_composition_steps()
+        style_postprocess = build_layer_render_plan_style_postprocess_packet(
+            getattr(self.args, "style_profile", "scientific")
+        )
         candidate_runs: list[dict[str, object]] = []
         index = 0
         while index < len(plan_steps):
@@ -14217,7 +14224,7 @@ class HybridRenderController:
             elif kind == "runtime_overlay" and overlay is not None:
                 frame = self.compose_runtime_overlay(frame, layer_id, overlay)
             elif kind == "style_profile_postprocess":
-                frame = apply_style_profile(frame, getattr(self.args, "style_profile", "scientific"))
+                frame = apply_style_profile(frame, style_postprocess.get("style_profile"))
             index += 1
         packet = {
             "schema": "rrkal_displaytools.compose_run_parity_candidate.v1",

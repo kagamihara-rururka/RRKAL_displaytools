@@ -319,6 +319,7 @@ $summary = [ordered]@{
         composition_apply_input_selector_helper = $layerRenderPlanPerformance.composition_apply_input_selector_helper
         composition_apply_input_priority = @($layerRenderPlanPerformance.composition_apply_input_priority)
         composition_apply_action_helper = $layerRenderPlanPerformance.composition_apply_action_helper
+        style_postprocess_packet_helper = $layerRenderPlanPerformance.style_postprocess_packet_helper
         composition_apply_helper = $layerRenderPlanPerformance.composition_apply_helper
         compiled_plan_schema = $layerRenderPlanPerformance.compiled_plan_schema
         compiled_plan_helper = $layerRenderPlanPerformance.compiled_plan_helper

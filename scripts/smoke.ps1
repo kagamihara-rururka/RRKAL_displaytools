@@ -617,6 +617,9 @@ if ($launchPacket.layer_render_plan_performance.composition_apply_input_priority
 if ($launchPacket.layer_render_plan_performance.composition_apply_action_helper -ne "render_core.render_plan.build_layer_render_plan_composition_apply_action") {
     throw "Launch packet layer_render_plan_performance composition apply action helper missing"
 }
+if ($launchPacket.layer_render_plan_performance.style_postprocess_packet_helper -ne "render_core.render_plan.build_layer_render_plan_style_postprocess_packet") {
+    throw "Launch packet layer_render_plan_performance style postprocess packet helper missing"
+}
 if ($launchPacket.layer_render_plan_performance.metadata_sidecar_field -ne "layer_render_plan") {
     throw "Launch packet layer_render_plan_performance metadata sidecar field missing"
 }
@@ -3338,6 +3341,9 @@ if ($capabilities.layer_render_plan_performance.composition_apply_input_priority
 if ($capabilities.layer_render_plan_performance.composition_apply_action_helper -ne "render_core.render_plan.build_layer_render_plan_composition_apply_action") {
     throw "Renderer layer_render_plan_performance composition apply action helper missing"
 }
+if ($capabilities.layer_render_plan_performance.style_postprocess_packet_helper -ne "render_core.render_plan.build_layer_render_plan_style_postprocess_packet") {
+    throw "Renderer layer_render_plan_performance style postprocess packet helper missing"
+}
 if ($capabilities.layer_render_plan_performance.composition_apply_helper -ne "HybridRenderController.apply_layer_render_plan_composition") {
     throw "Renderer layer_render_plan_performance composition apply helper missing"
 }
@@ -4319,6 +4325,9 @@ if ($handoff.layer_render_plan_performance.composition_apply_input_priority -not
 }
 if ($handoff.layer_render_plan_performance.composition_apply_action_helper -ne "render_core.render_plan.build_layer_render_plan_composition_apply_action") {
     throw "Handoff inspection layer render plan performance composition apply action helper missing"
+}
+if ($handoff.layer_render_plan_performance.style_postprocess_packet_helper -ne "render_core.render_plan.build_layer_render_plan_style_postprocess_packet") {
+    throw "Handoff inspection layer render plan performance style postprocess packet helper missing"
 }
 if ($handoff.layer_render_plan_performance.composition_apply_helper -ne "HybridRenderController.apply_layer_render_plan_composition") {
     throw "Handoff inspection layer render plan performance composition apply helper missing"
@@ -6430,6 +6439,12 @@ if ($renderPlanCombinedSource -notlike "*def select_layer_render_plan_compositio
 }
 if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_composition_apply_action*") {
     throw "Render core layer render plan composition apply action helper is missing"
+}
+if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_style_postprocess_packet*") {
+    throw "Render core layer render plan style postprocess packet helper is missing"
+}
+if ($rendererSource -notlike "*build_layer_render_plan_style_postprocess_packet(*") {
+    throw "Renderer layer render plan composition helper does not use the core style postprocess packet"
 }
 if ($rendererSource -notlike "*build_layer_render_plan_composition_apply_action(step)*") {
     throw "Renderer layer render plan composition helper does not use the core apply action helper"

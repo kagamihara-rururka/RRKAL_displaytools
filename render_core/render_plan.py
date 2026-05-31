@@ -145,6 +145,20 @@ def build_layer_render_plan_composition_apply_action(step: dict[str, object]) ->
     }
 
 
+def build_layer_render_plan_style_postprocess_packet(
+    style_profile: object,
+) -> dict[str, object]:
+    return {
+        "schema": "rrkal_displaytools.layer_render_plan_style_postprocess.v1",
+        "source": "render_core.render_plan.build_layer_render_plan_style_postprocess_packet",
+        "style_profile": style_profile,
+        "apply_helper": "apply_style_profile",
+        "phase_id": "postprocess",
+        "runtime_optimization_applied": False,
+        "boundary": "Style profile value is captured as runtime input; pixel postprocess remains in the renderer helper.",
+    }
+
+
 def build_layer_render_plan_composition_steps(
     boundary_layers_available: bool,
     boundary_layer_ids: list[str],
