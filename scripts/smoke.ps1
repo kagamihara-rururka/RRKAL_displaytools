@@ -62,7 +62,7 @@ function Invoke-CapturedNative {
     return Invoke-NativeWithRetry $FilePath $ArgumentList -CaptureOutput
 }
 
-Invoke-CheckedNative py @("-3", "-m", "py_compile", "rrkal_displaytools_qt_panel.py", "taichi_global_bathymetry.py", "pin_projection.py", "closed_loop_status.py", "render_core\render_plan.py", "render_core\render_plan_performance.py", "scripts\export_display_shell_render_matrix.py")
+Invoke-CheckedNative py @("-3", "-m", "py_compile", "rrkal_displaytools_qt_panel.py", "taichi_global_bathymetry.py", "pin_projection.py", "closed_loop_status.py", "render_core\render_plan.py", "render_core\render_plan_performance.py", "display_runtime\__init__.py", "display_runtime\earth_canvas.py", "scripts\export_display_shell_render_matrix.py")
 Invoke-CheckedNative py @("-3", "profile_schema.py") | Out-Null
 Invoke-CheckedNative py @("-3", "scripts\validate_profiles.py")
 $launchPacketText = Invoke-CapturedNative py @("-3", "scripts\export_launch_packet.py", "--template", "fast_synthetic")
@@ -6536,8 +6536,19 @@ if ($earthCanvasBoundary.status -ne "ready") {
 if ($earthCanvasBoundary.evidence.has_earth_canvas_descriptor -ne $true) {
     throw "EarthCanvas runtime boundary inspector missing EarthCanvas descriptor evidence"
 }
+if ($earthCanvasBoundary.evidence.has_earth_canvas_runtime_contract -ne $true) {
+    throw "EarthCanvas runtime boundary inspector missing runtime contract evidence"
+}
 if ($visualInspectorIndex.entry_ids -notcontains "earth_canvas_runtime_boundary") {
     throw "Visual contract inspector index missing EarthCanvas runtime boundary entry"
+}
+$earthCanvasRuntimeText = Invoke-CapturedNative py @("-3", "-c", "import json; from display_runtime import build_earth_canvas_runtime_contract_packet; print(json.dumps(build_earth_canvas_runtime_contract_packet()))")
+$earthCanvasRuntime = $earthCanvasRuntimeText | ConvertFrom-Json
+if ($earthCanvasRuntime.schema -ne "rrkal_displaytools.earth_canvas_runtime_contract.v1") {
+    throw "EarthCanvas runtime contract schema missing"
+}
+if ($earthCanvasRuntime.runtime_render_invoked -ne $false) {
+    throw "EarthCanvas runtime contract should not invoke runtime render"
 }
 if ($displayShellMatrix.has_canvas_registry -ne $true) {
     throw "Display shell render matrix inspector canvas registry evidence missing"

@@ -23,6 +23,7 @@ DisplayShell
 
 - `display_core` 不 import Matplotlib、Plotly、Graphviz、PyVista、Qt 或 Taichi。
 - `scripts/check_display_core_import_boundary.ps1` 會檢查 `display_core/*.py` 沒有引入 Qt、Taichi、Matplotlib、Plotly、VisPy 或 VTK。
+- `display_runtime/earth_canvas.py` 是現有 globe runtime 的未來落點，目前只提供 `rrkal_displaytools.earth_canvas_runtime_contract.v1`，不搬動 Taichi runtime。
 - Layer 是語意模型，不是 Plotly trace、Matplotlib artist 或 Taichi buffer。
 - Renderer adapter 才擁有具體繪圖套件與輸出格式。
 - EarthCanvas 抽出前，現有 monolith globe path 不被替換。

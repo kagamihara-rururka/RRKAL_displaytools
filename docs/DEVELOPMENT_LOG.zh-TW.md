@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Add EarthCanvas runtime contract skeleton
+
+- Added `display_runtime/earth_canvas.py` as the future EarthCanvas runtime wrapper landing zone without importing Taichi or Qt.
+- Added `rrkal_displaytools.earth_canvas_runtime_contract.v1` to document the current runtime owner, first safe move and do-not-move-yet boundary.
+- Updated the EarthCanvas boundary inspector and smoke gates to verify the future module file, runtime contract schema and `runtime_render_invoked=false` guard.
+- Smoke: PASS after transient file-access backoff retries (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add EarthCanvas runtime boundary map
 
 - Added `scripts/inspect_earth_canvas_runtime_boundary.ps1` to map the current globe runtime owner and future EarthCanvas extraction seam without moving code.

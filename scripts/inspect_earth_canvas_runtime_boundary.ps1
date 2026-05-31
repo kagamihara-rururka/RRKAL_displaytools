@@ -25,6 +25,11 @@ if ($ContractOnly) {
 
 $rendererSource = Get-Content -LiteralPath "taichi_global_bathymetry.py" -Raw -Encoding UTF8
 $displayCoreSource = Get-Content -LiteralPath "display_core\render_matrix.py" -Raw -Encoding UTF8
+$earthRuntimePath = "display_runtime\earth_canvas.py"
+$earthRuntimeSource = ""
+if (Test-Path -LiteralPath $earthRuntimePath) {
+    $earthRuntimeSource = Get-Content -LiteralPath $earthRuntimePath -Raw -Encoding UTF8
+}
 
 $evidence = [ordered]@{
     has_hybrid_render_controller = $rendererSource -like "*class HybridRenderController*"
@@ -34,6 +39,8 @@ $evidence = [ordered]@{
     has_geo_layer_contract = $displayCoreSource -like "*LAYER_GEO = `"geo_layer`"*"
     has_earth_renderer_adapter_marker = $displayCoreSource -like "*class DisplayToolsGeoRendererAdapter*"
     has_view_model_render_plan_contract = $displayCoreSource -like "*rrkal_displaytools.view_model_render_plan.v1*"
+    has_future_module_file = Test-Path -LiteralPath $earthRuntimePath
+    has_earth_canvas_runtime_contract = $earthRuntimeSource -like "*rrkal_displaytools.earth_canvas_runtime_contract.v1*"
 }
 
 $missing = @()
