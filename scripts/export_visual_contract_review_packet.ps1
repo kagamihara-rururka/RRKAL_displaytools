@@ -65,6 +65,7 @@ if ($LASTEXITCODE -ne 0) {
         "py -3 scripts\export_display_runtime_contracts.py",
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_display_runtime_import_boundary.ps1",
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_display_runtime_contracts.ps1",
+        "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_display_runtime_handoff.ps1",
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_layer_visual_presets.ps1",
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_layer_operator_shortcuts.ps1",
         "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_research_interaction.ps1",

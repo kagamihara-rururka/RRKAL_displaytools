@@ -6606,6 +6606,17 @@ if ($displayRuntimeContractsCheck.status -ne "pass") {
 if ($visualInspectorIndex.entry_ids -notcontains "display_runtime_contracts_check") {
     throw "Visual contract inspector index missing display runtime contracts check entry"
 }
+$displayRuntimeHandoffText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\inspect_display_runtime_handoff.ps1")
+$displayRuntimeHandoff = $displayRuntimeHandoffText | ConvertFrom-Json
+if ($displayRuntimeHandoff.schema -ne "rrkal_displaytools.display_runtime_handoff_inspector.v1") {
+    throw "Display runtime handoff inspector schema missing"
+}
+if ($displayRuntimeHandoff.status -ne "ready") {
+    throw "Display runtime handoff inspector is not ready"
+}
+if ($visualInspectorIndex.entry_ids -notcontains "display_runtime_handoff") {
+    throw "Visual contract inspector index missing display runtime handoff entry"
+}
 if ($displayShellMatrix.has_canvas_registry -ne $true) {
     throw "Display shell render matrix inspector canvas registry evidence missing"
 }

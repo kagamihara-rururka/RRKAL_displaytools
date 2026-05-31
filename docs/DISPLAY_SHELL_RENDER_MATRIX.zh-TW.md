@@ -76,6 +76,7 @@ DisplayShell
 - `scripts/export_display_shell_render_matrix.py`: 匯出 `rrkal_displaytools.display_shell_render_matrix.v1` capability packet。
 - `scripts/export_display_runtime_contracts.py`: 匯出 `rrkal_displaytools.display_runtime_contracts.v1`，一次列出 EarthCanvas 與 TimeSeriesCanvas runtime landing zones。
 - `scripts/check_display_runtime_contracts.ps1`: 執行 runtime contracts exporter 並回傳 `rrkal_displaytools.display_runtime_contracts_check.v1` pass/fail 結果。
+- `scripts/inspect_display_runtime_handoff.ps1`: 聚合 display shell render plan 與 display runtime contracts，檢查 canvas type 對齊與 sample request coverage。
 - `scripts/check_display_shell_render_matrix.ps1`: 執行 exporter 並回傳 `rrkal_displaytools.display_shell_render_matrix_check.v1` pass/fail 結果。
 - `scripts/inspect_earth_canvas_runtime_boundary.ps1`: 標出現有 globe runtime owner 與未來 `EarthCanvas` extraction seam，但不搬動 renderer code。
 - exporter 只 import `display_core`，用來證明 DisplayShell / Canvas / Layer / Render Matrix contract 可在無 GUI、無 renderer package 的 cloned machine 上檢查。

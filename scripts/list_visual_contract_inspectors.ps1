@@ -157,6 +157,14 @@ $entries = @(
         no_launch_side_effect = $true
     },
     [ordered]@{
+        id = "display_runtime_handoff"
+        category = "display_shell"
+        schema = "rrkal_displaytools.display_runtime_handoff_inspector.v1"
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_display_runtime_handoff.ps1"
+        proves = @("display shell to runtime handoff", "canvas type alignment", "sample runtime request coverage", "no runtime render invocation")
+        no_launch_side_effect = $true
+    },
+    [ordered]@{
         id = "layer_visual_presets"
         category = "layer_control"
         schema = "rrkal_displaytools.layer_visual_presets_inspector.v1"
@@ -304,6 +312,7 @@ $entries = @(
         "display_runtime_contracts",
         "display_runtime_import_boundary",
         "display_runtime_contracts_check",
+        "display_runtime_handoff",
         "layer_visual_presets",
         "layer_operator_shortcuts",
         "research_interaction",

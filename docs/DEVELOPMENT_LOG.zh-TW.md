@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Add display runtime handoff inspector
+
+- Added `scripts/inspect_display_runtime_handoff.ps1` to aggregate display shell render plans with display runtime contracts and sample runtime requests.
+- Added `display_runtime_handoff` to the no-GUI visual contract inspector index and review packet first-command list.
+- Smoke now verifies the handoff inspector schema, ready status and reviewer index entry.
+- Smoke: PASS after transient file-access backoff retry (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Gate sample canvas runtime requests
 
 - Extended `scripts/check_display_runtime_contracts.ps1` so the pass/fail gate also validates `rrkal_displaytools.sample_canvas_runtime_requests.v1`.
