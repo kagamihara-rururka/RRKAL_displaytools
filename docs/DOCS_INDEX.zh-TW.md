@@ -16,6 +16,7 @@
 - `SETUP_WINDOWS.zh-TW.md`: clone/setup/smoke/Qt panel steps for another Windows computer.
 - `RRKAL_HANDOFF_CONTRACT.zh-TW.md`: no-GUI RRKAL/displaytools integration contract.
 - `CAPABILITY_SUMMARY.zh-TW.md`: current program capability summary for push reports and GitHub review.
+- `DISPLAY_SHELL_RENDER_MATRIX.zh-TW.md`: DisplayShell / Canvas / Render Matrix contracts, display runtime landing zones, and no-GUI review/check commands.
 
 ## Positioning
 

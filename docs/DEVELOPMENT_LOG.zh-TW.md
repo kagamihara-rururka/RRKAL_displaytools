@@ -1,5 +1,11 @@
 # Development Log
 
+## 2026-05-31 - Add display shell docs index entry
+
+- Added `DISPLAY_SHELL_RENDER_MATRIX.zh-TW.md` to `docs/DOCS_INDEX.zh-TW.md`.
+- The docs index now points future agents to the DisplayShell / Canvas / Render Matrix and display runtime landing-zone documentation.
+- Smoke: PASS after transient file-access backoff retry (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Update display runtime agent handoff
 
 - Updated `docs/AGENT_HANDOFF.zh-TW.md` with the new display shell/runtime source-of-truth boundaries.
