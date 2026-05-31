@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Extract cache invalidation scope builder
+
+- Added `build_layer_render_plan_cache_invalidation_scope` to `render_core/render_plan.py`.
+- Updated `HybridRenderController.layer_render_plan_cache_invalidation_scope` to delegate to the extracted helper.
+- Updated source-map and module boundary docs for cache invalidation scope extraction.
+- Smoke: PASS after updating relocated cache invalidation source gates (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Extract cache invalidation reasons builder
 
 - Added `build_layer_render_plan_cache_invalidation_reasons` to `render_core/render_plan.py`.

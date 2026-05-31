@@ -6329,28 +6329,28 @@ if ($rendererSource -notlike "*def layer_render_plan_cache_invalidation_reasons*
 if ($rendererSource -notlike "*dirty_flag:*") {
     throw "Renderer render plan dirty flag invalidation marker is missing"
 }
-if ($rendererSource -notlike "*no_previous_compiled_plan*") {
+if ($renderPlanCombinedSource -notlike "*no_previous_compiled_plan*") {
     throw "Renderer render plan initial compile invalidation marker is missing"
 }
-if ($rendererSource -notlike "*cache_key_changed*") {
+if ($renderPlanCombinedSource -notlike "*cache_key_changed*") {
     throw "Renderer render plan cache-key-changed invalidation marker is missing"
 }
-if ($rendererSource -notlike "*cache_key_match*") {
+if ($renderPlanCombinedSource -notlike "*cache_key_match*") {
     throw "Renderer render plan cache-key-match reuse marker is missing"
 }
 if ($rendererSource -notlike "*def layer_render_plan_cache_invalidation_scope*") {
     throw "Renderer render plan cache invalidation scope helper is missing"
 }
-if ($rendererSource -notlike '*"scope": "batch"*') {
+if ($renderPlanCombinedSource -notlike '*"scope": "batch"*') {
     throw "Renderer render plan batch invalidation scope marker is missing"
 }
-if ($rendererSource -notlike '*"scope": "global"*') {
+if ($renderPlanCombinedSource -notlike '*"scope": "global"*') {
     throw "Renderer render plan global invalidation scope marker is missing"
 }
-if ($rendererSource -notlike '*"scope": "plan"*') {
+if ($renderPlanCombinedSource -notlike '*"scope": "plan"*') {
     throw "Renderer render plan plan invalidation scope marker is missing"
 }
-if ($rendererSource -notlike '*"scope": "reuse"*') {
+if ($renderPlanCombinedSource -notlike '*"scope": "reuse"*') {
     throw "Renderer render plan reuse scope marker is missing"
 }
 if ($rendererSource -notlike "*def layer_render_plan_batch_decisions*") {

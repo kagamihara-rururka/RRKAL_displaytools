@@ -26,6 +26,7 @@ from render_core.render_plan import (
     build_layer_render_plan_bottleneck_recommendation,
     build_layer_render_plan_apply_path,
     build_layer_render_plan_cache_invalidation_reasons,
+    build_layer_render_plan_cache_invalidation_scope,
     build_layer_render_plan_cache_key,
     build_layer_render_plan_compose_run_parity_contract,
     build_layer_render_plan_compose_runs,
@@ -14362,30 +14363,10 @@ class HybridRenderController:
         runtime_snapshot: dict[str, object],
         invalidation_reasons: list[str],
     ) -> list[dict[str, object]]:
-        dirty_flags = runtime_snapshot.get("dirty_flags") if isinstance(runtime_snapshot.get("dirty_flags"), dict) else {}
-        batch_targets = runtime_snapshot.get("batch_targets") if isinstance(runtime_snapshot.get("batch_targets"), list) else []
-        scopes: list[dict[str, object]] = []
-        for batch in batch_targets:
-            if not isinstance(batch, dict):
-                continue
-            dirty_flag = str(batch.get("dirty_flag") or "")
-            if dirty_flag and dirty_flags.get(dirty_flag) is True:
-                scopes.append(
-                    {
-                        "scope": "batch",
-                        "id": str(batch.get("id") or dirty_flag),
-                        "dirty_flag": dirty_flag,
-                        "source": batch.get("source"),
-                    }
-                )
-        for global_flag in ("force", "changed"):
-            if dirty_flags.get(global_flag) is True:
-                scopes.append({"scope": "global", "id": global_flag, "dirty_flag": global_flag})
-        if "cache_key_changed" in invalidation_reasons or "no_previous_compiled_plan" in invalidation_reasons:
-            scopes.append({"scope": "plan", "id": "compiled_layer_render_plan", "dirty_flag": "cache_key"})
-        if not scopes and "cache_key_match" in invalidation_reasons:
-            scopes.append({"scope": "reuse", "id": "compiled_layer_render_plan", "dirty_flag": None})
-        return scopes
+        return build_layer_render_plan_cache_invalidation_scope(
+            runtime_snapshot,
+            invalidation_reasons,
+        )
 
     def layer_render_plan_batch_decisions(
         self,
