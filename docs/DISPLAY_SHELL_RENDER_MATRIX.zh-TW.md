@@ -68,6 +68,7 @@ DisplayShell
 ## Clone-first JSON exporter
 
 - `scripts/export_display_shell_render_matrix.py`: 匯出 `rrkal_displaytools.display_shell_render_matrix.v1` capability packet。
+- `scripts/check_display_shell_render_matrix.ps1`: 執行 exporter 並回傳 `rrkal_displaytools.display_shell_render_matrix_check.v1` pass/fail 結果。
 - exporter 只 import `display_core`，用來證明 DisplayShell / Canvas / Layer / Render Matrix contract 可在無 GUI、無 renderer package 的 cloned machine 上檢查。
 - smoke 會驗證 exporter schema、sample render plan schema，以及 `runtime_render_invoked=false`。
 

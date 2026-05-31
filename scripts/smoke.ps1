@@ -6503,6 +6503,17 @@ if ($visualInspectorIndex.entry_ids -notcontains "display_shell_render_matrix") 
 if ($visualInspectorIndex.recommended_cross_machine_sequence -notcontains "display_shell_render_matrix") {
     throw "Visual contract inspector recommended sequence missing display shell render matrix"
 }
+$displayShellCheckText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\check_display_shell_render_matrix.ps1")
+$displayShellCheck = $displayShellCheckText | ConvertFrom-Json
+if ($displayShellCheck.schema -ne "rrkal_displaytools.display_shell_render_matrix_check.v1") {
+    throw "Display shell render matrix check schema missing"
+}
+if ($displayShellCheck.status -ne "pass") {
+    throw "Display shell render matrix check did not pass"
+}
+if ($visualInspectorIndex.entry_ids -notcontains "display_shell_render_matrix_check") {
+    throw "Visual contract inspector index missing display shell render matrix check entry"
+}
 if ($displayShellMatrix.has_canvas_registry -ne $true) {
     throw "Display shell render matrix inspector canvas registry evidence missing"
 }

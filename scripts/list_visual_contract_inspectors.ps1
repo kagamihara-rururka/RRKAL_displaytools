@@ -109,6 +109,14 @@ $entries = @(
         no_launch_side_effect = $true
     },
     [ordered]@{
+        id = "display_shell_render_matrix_check"
+        category = "display_shell"
+        schema = "rrkal_displaytools.display_shell_render_matrix_check.v1"
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_display_shell_render_matrix.ps1"
+        proves = @("display shell pass/fail", "EarthCanvas and TimeSeriesCanvas presence", "metadata-only render plan guard")
+        no_launch_side_effect = $true
+    },
+    [ordered]@{
         id = "layer_visual_presets"
         category = "layer_control"
         schema = "rrkal_displaytools.layer_visual_presets_inspector.v1"
@@ -250,6 +258,7 @@ $entries = @(
         "reviewer_first_run_route",
         "capability_summary",
         "display_shell_render_matrix",
+        "display_shell_render_matrix_check",
         "layer_visual_presets",
         "layer_operator_shortcuts",
         "research_interaction",

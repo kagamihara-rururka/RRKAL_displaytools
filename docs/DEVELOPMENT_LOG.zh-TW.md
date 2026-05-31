@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Add display shell pass-fail check
+
+- Added `scripts/check_display_shell_render_matrix.ps1` to validate the headless display shell capability exporter as a pass/fail gate.
+- Added the check to the visual contract inspector index and review packet first-command list.
+- Smoke now verifies the display shell check schema, pass status and reviewer index entry.
+- Smoke: PASS after transient file-access backoff retry (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add display shell reviewer index entry
 
 - Added `display_shell_render_matrix` to the no-GUI visual contract inspector index.
