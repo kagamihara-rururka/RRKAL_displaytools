@@ -149,6 +149,14 @@ $entries = @(
         no_launch_side_effect = $true
     },
     [ordered]@{
+        id = "display_runtime_contracts_check"
+        category = "display_shell"
+        schema = "rrkal_displaytools.display_runtime_contracts_check.v1"
+        command = "powershell -NoProfile -ExecutionPolicy Bypass -File scripts\check_display_runtime_contracts.ps1"
+        proves = @("runtime contracts pass/fail", "EarthCanvas and TimeSeriesCanvas landing zones", "no runtime render invocation")
+        no_launch_side_effect = $true
+    },
+    [ordered]@{
         id = "layer_visual_presets"
         category = "layer_control"
         schema = "rrkal_displaytools.layer_visual_presets_inspector.v1"
@@ -295,6 +303,7 @@ $entries = @(
         "earth_canvas_runtime_boundary",
         "display_runtime_contracts",
         "display_runtime_import_boundary",
+        "display_runtime_contracts_check",
         "layer_visual_presets",
         "layer_operator_shortcuts",
         "research_interaction",

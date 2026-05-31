@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Add display runtime contracts check
+
+- Added `scripts/check_display_runtime_contracts.ps1` to validate the aggregated display runtime contracts exporter as a pass/fail gate.
+- Added `display_runtime_contracts_check` to the no-GUI visual contract inspector index and review packet first-command list.
+- Smoke now verifies the runtime contracts check schema, pass status and reviewer index entry.
+- Smoke: PASS after transient file-access backoff retry (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add display runtime import boundary check
 
 - Added `scripts/check_display_runtime_import_boundary.ps1` to prevent display runtime skeletons from importing Qt, Taichi or chart backends before adapter parity work.
