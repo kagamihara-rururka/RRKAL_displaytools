@@ -6527,6 +6527,12 @@ if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_step_runtim
 if ($rendererSource -notlike "*build_layer_render_plan_step_runtime_state(*") {
     throw "Renderer render plan compose queue does not use the core step runtime state builder"
 }
+if ($renderPlanCombinedSource -notlike "*def build_layer_render_plan_compose_queue_packet_from_states*") {
+    throw "Renderer render plan compose queue packet-from-states core builder is missing"
+}
+if ($rendererSource -notlike "*build_layer_render_plan_compose_queue_packet_from_states(*") {
+    throw "Renderer render plan compose queue does not use the core packet-from-states builder"
+}
 if ($rendererSource -notlike "*self.compiled_layer_render_plan.get(`"compose_queue`")*") {
     throw "Renderer render plan render path does not use compose queue"
 }

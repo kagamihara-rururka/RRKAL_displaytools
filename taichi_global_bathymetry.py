@@ -31,8 +31,7 @@ from render_core.render_plan import (
     build_layer_render_plan_apply_path,
     build_layer_render_plan_batch_decisions,
     build_layer_render_plan_composition_steps,
-    build_layer_render_plan_compose_queue_entries,
-    build_layer_render_plan_compose_queue_packet,
+    build_layer_render_plan_compose_queue_packet_from_states,
     build_layer_render_plan_cache_invalidation_reasons,
     build_layer_render_plan_cache_invalidation_scope,
     build_layer_render_plan_cache_key,
@@ -14103,22 +14102,9 @@ class HybridRenderController:
                     overlay_transparent=self.layer_render_plan_overlay_is_transparent(overlay),
                 )
             )
-        queue, skipped_steps = build_layer_render_plan_compose_queue_entries(
+        return build_layer_render_plan_compose_queue_packet_from_states(
             composition_steps,
             step_runtime_states,
-        )
-        compose_runs_packet = self.layer_render_plan_compose_runs(queue)
-        compose_run_parity_contract = self.layer_render_plan_compose_run_parity_contract(
-            compose_runs_packet.get("runs", [])
-            if isinstance(compose_runs_packet.get("runs"), list)
-            else []
-        )
-        return build_layer_render_plan_compose_queue_packet(
-            len(composition_steps),
-            queue,
-            skipped_steps,
-            compose_runs_packet,
-            compose_run_parity_contract,
             source="HybridRenderController.layer_render_plan_compose_queue",
         )
 

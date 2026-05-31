@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Extract compose queue packet orchestration
+
+- Added `build_layer_render_plan_compose_queue_packet_from_states` to `render_core/render_plan.py`.
+- Moved compose queue entries, compose runs, parity contract and queue packet assembly behind the core helper.
+- Kept controller responsibility limited to collecting per-step visible / overlay / transparency facts before calling core.
+- Smoke: PASS after transient file-access backoff retries (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Extract render-plan step runtime state builder
 
 - Added `build_layer_render_plan_step_runtime_state` to `render_core/render_plan.py`.

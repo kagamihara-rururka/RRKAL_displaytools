@@ -242,6 +242,31 @@ def build_layer_render_plan_step_runtime_state(
     }
 
 
+def build_layer_render_plan_compose_queue_packet_from_states(
+    composition_steps: list[dict[str, object]],
+    step_runtime_states: list[dict[str, object]],
+    *,
+    source: str = "render_core.render_plan.build_layer_render_plan_compose_queue_packet_from_states",
+) -> dict[str, object]:
+    queue, skipped_steps = build_layer_render_plan_compose_queue_entries(
+        composition_steps,
+        step_runtime_states,
+    )
+    compose_runs_packet = build_layer_render_plan_compose_runs(queue)
+    runs = compose_runs_packet.get("runs", [])
+    compose_run_parity_contract = build_layer_render_plan_compose_run_parity_contract(
+        runs if isinstance(runs, list) else []
+    )
+    return build_layer_render_plan_compose_queue_packet(
+        len(composition_steps),
+        queue,
+        skipped_steps,
+        compose_runs_packet,
+        compose_run_parity_contract,
+        source=source,
+    )
+
+
 def build_layer_render_plan_compose_runs(
     compose_queue: list[dict[str, object]],
     *,

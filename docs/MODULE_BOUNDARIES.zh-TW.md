@@ -90,6 +90,7 @@
 - from-payload compiled/reused builder wrapper；controller 開始以 normalized payload 作為主要 contract，舊長參數 builder 暫留相容。
 - compose queue classifier：只根據 controller 提供的 step runtime state 分類 queue / skipped steps。
 - step runtime state packet builder：controller 提供 visible / overlay_present / overlay_transparent 這些 scalar facts，core 統一產生 queue classifier 的 state packet。
+- compose queue packet-from-states orchestrator：core 統一串接 entries / compose runs / parity contract / queue packet，controller 不再手工組這段。
 - `layer_render_plan_performance_packet` 由 `render_core/render_plan_performance.py` 單一提供；renderer monolith、Qt panel、no-GUI launch exporter 只 import，不再維護本地鏡像。
 
 `HybridRenderController` 仍負責：
