@@ -247,6 +247,48 @@ def register_renderer(
     return decorator
 
 
+@register_renderer(
+    layer_type=LAYER_GEO,
+    canvas_type=CANVAS_EARTH,
+    output_format="interactive",
+    backend="displaytools",
+    priority=10,
+)
+class DisplayToolsGeoRendererAdapter:
+    """Contract-only adapter marker for the existing globe renderer path."""
+
+    def render(self, layer: LayerModel, context: dict[str, Any] | None = None) -> dict[str, Any]:
+        return {
+            "schema": "rrkal_displaytools.renderer_adapter_result.v1",
+            "adapter": self.__class__.__name__,
+            "status": "existing_globe_runtime_primary",
+            "layer": layer.to_packet(),
+            "context_keys": sorted((context or {}).keys()),
+            "runtime_render_invoked": False,
+        }
+
+
+@register_renderer(
+    layer_type=LAYER_TIME_SERIES,
+    canvas_type=CANVAS_TIME_SERIES,
+    output_format="html",
+    backend="contract_only",
+    priority=20,
+)
+class ContractOnlyTimeSeriesRendererAdapter:
+    """Contract-only adapter marker for the first non-Earth canvas."""
+
+    def render(self, layer: LayerModel, context: dict[str, Any] | None = None) -> dict[str, Any]:
+        return {
+            "schema": "rrkal_displaytools.renderer_adapter_result.v1",
+            "adapter": self.__class__.__name__,
+            "status": "contract_only_no_chart_backend_imported",
+            "layer": layer.to_packet(),
+            "context_keys": sorted((context or {}).keys()),
+            "runtime_render_invoked": False,
+        }
+
+
 def lookup_renderers(
     *,
     layer_type: str,

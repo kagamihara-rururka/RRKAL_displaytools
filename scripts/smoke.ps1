@@ -6462,6 +6462,12 @@ if ($displayCoreSource -notlike "*class ViewModel*") {
 if ($displayCoreSource -notlike "*def register_renderer*") {
     throw "Display shell render matrix decorator registry is missing"
 }
+if ($displayCoreSource -notlike "*class DisplayToolsGeoRendererAdapter*") {
+    throw "Display shell Earth renderer adapter sample is missing"
+}
+if ($displayCoreSource -notlike "*class ContractOnlyTimeSeriesRendererAdapter*") {
+    throw "Display shell TimeSeries renderer adapter sample is missing"
+}
 if ($displayCoreSource -notlike "*def lookup_renderers*") {
     throw "Display shell render matrix lookup is missing"
 }
@@ -6475,8 +6481,17 @@ if ($displayShellMatrix.has_canvas_registry -ne $true) {
 if ($displayShellMatrix.has_sample_view_models -ne $true) {
     throw "Display shell render matrix inspector sample ViewModel evidence missing"
 }
+if ($displayShellMatrix.has_sample_renderer_adapters -ne $true) {
+    throw "Display shell render matrix inspector sample renderer adapter evidence missing"
+}
 if ($displayShellMatrix.sample_view_ids -notcontains "rrkal_displaytools_earth_view_sample") {
     throw "Display shell render matrix Earth sample ViewModel missing"
+}
+if ($displayShellMatrix.sample_renderer_adapters -notcontains "DisplayToolsGeoRendererAdapter") {
+    throw "Display shell render matrix Earth renderer adapter sample missing"
+}
+if ($displayShellMatrix.sample_renderer_adapters -notcontains "ContractOnlyTimeSeriesRendererAdapter") {
+    throw "Display shell render matrix TimeSeries renderer adapter sample missing"
 }
 if ($displayShellMatrix.sample_view_ids -notcontains "rrkal_displaytools_time_series_view_sample") {
     throw "Display shell render matrix TimeSeries sample ViewModel missing"

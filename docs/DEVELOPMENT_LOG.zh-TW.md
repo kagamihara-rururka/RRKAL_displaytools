@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Add sample renderer adapters
+
+- Added contract-only `DisplayToolsGeoRendererAdapter` and `ContractOnlyTimeSeriesRendererAdapter` sample classes to `display_core/render_matrix.py`.
+- Registered both samples through the existing `register_renderer` decorator so Render Matrix discovery no longer has an empty adapter registry.
+- Updated the display shell inspector, smoke gates and roadmap docs to verify Earth and TimeSeries adapter samples without importing concrete plotting packages.
+- Smoke: PASS after transient file-access backoff retry (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add sample display ViewModels
 
 - Added `build_sample_view_models_packet` to `display_core/render_matrix.py`.

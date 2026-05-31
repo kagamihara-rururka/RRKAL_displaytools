@@ -37,6 +37,8 @@ DisplayShell
 - `register_renderer`
 - `lookup_renderers`
 - `build_display_shell_capability_packet`
+- `DisplayToolsGeoRendererAdapter`
+- `ContractOnlyTimeSeriesRendererAdapter`
 
 ## 目前 canvas registry
 
@@ -48,6 +50,12 @@ DisplayShell
 - `rrkal_displaytools_earth_view_sample`: `earth` canvas，包含 terrain 與 research annotation layer。
 - `rrkal_displaytools_time_series_view_sample`: `time_series` canvas，包含 numeric series 與 event marker layer。
 - 兩者都使用同一個公式：`ViewModel = Canvas + Layer Stack + Renderer Hint + Output Format`。
+
+## 最小 renderer adapter samples
+
+- `DisplayToolsGeoRendererAdapter`: 對應 `geo_layer` + `earth` + `interactive` + `displaytools`，標記現有 globe runtime 邊界。
+- `ContractOnlyTimeSeriesRendererAdapter`: 對應 `time_series_layer` + `time_series` + `html` + `contract_only`，只證明非地球 renderer adapter 可被 registry 發現。
+- 兩者都不 import 具體繪圖套件，也不啟用 runtime canvas switching。
 
 ## 後續執行順序
 
