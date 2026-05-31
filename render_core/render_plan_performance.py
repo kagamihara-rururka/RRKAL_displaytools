@@ -35,6 +35,7 @@ def layer_render_plan_performance_packet(
         "composition_apply_input_selector_helper": "render_core.render_plan.select_layer_render_plan_composition_input",
         "composition_apply_input_priority": ["compose_queue", "composition_steps"],
         "composition_apply_action_helper": "render_core.render_plan.build_layer_render_plan_composition_apply_action",
+        "composition_dispatch_packet_helper": "render_core.render_plan.build_layer_render_plan_composition_dispatch_packet",
         "style_postprocess_packet_helper": "render_core.render_plan.build_layer_render_plan_style_postprocess_packet",
         "composition_apply_helper": "HybridRenderController.apply_layer_render_plan_composition",
         "compiled_plan_schema": "rrkal_displaytools.compiled_layer_render_plan.v1",

@@ -159,6 +159,47 @@ def build_layer_render_plan_style_postprocess_packet(
     }
 
 
+def build_layer_render_plan_composition_dispatch_packet(
+    action: dict[str, object],
+    overlay_present: object,
+) -> dict[str, object]:
+    item = action if isinstance(action, dict) else {}
+    kind = str(item.get("kind") or "")
+    requires_overlay = bool(item.get("requires_overlay"))
+    has_overlay = bool(overlay_present)
+    if kind == "style_profile_postprocess":
+        dispatch = "style_profile_postprocess"
+        should_apply = True
+        skip_reason = ""
+    elif requires_overlay and not has_overlay:
+        dispatch = "skip"
+        should_apply = False
+        skip_reason = "missing_overlay"
+    elif kind in {"runtime_blend", "alpha_blend", "alpha_compose", "runtime_overlay"}:
+        dispatch = kind
+        should_apply = True
+        skip_reason = ""
+    else:
+        dispatch = "skip"
+        should_apply = False
+        skip_reason = "unknown_apply_action"
+    return {
+        "schema": "rrkal_displaytools.layer_render_plan_composition_dispatch.v1",
+        "source": "render_core.render_plan.build_layer_render_plan_composition_dispatch_packet",
+        "kind": kind,
+        "layer_id": item.get("layer_id"),
+        "blend_mode": item.get("blend_mode"),
+        "apply_helper": item.get("apply_helper"),
+        "phase_id": item.get("phase_id") or "compose_overlays",
+        "requires_overlay": requires_overlay,
+        "overlay_present": has_overlay,
+        "should_apply": should_apply,
+        "dispatch": dispatch,
+        "skip_reason": skip_reason,
+        "runtime_optimization_applied": False,
+    }
+
+
 def build_layer_render_plan_composition_steps(
     boundary_layers_available: bool,
     boundary_layer_ids: list[str],

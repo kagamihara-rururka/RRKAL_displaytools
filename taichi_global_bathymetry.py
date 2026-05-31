@@ -31,6 +31,7 @@ from render_core.render_plan import (
     build_layer_render_plan_apply_path,
     build_layer_render_plan_batch_decisions,
     build_layer_render_plan_composition_apply_action,
+    build_layer_render_plan_composition_dispatch_packet,
     build_layer_render_plan_composition_steps,
     build_layer_render_plan_compose_queue_packet_from_states,
     build_layer_render_plan_cache_invalidation_reasons,
@@ -14122,20 +14123,21 @@ class HybridRenderController:
                 continue
             step_started_at = time.perf_counter()
             action = build_layer_render_plan_composition_apply_action(step)
-            kind = str(action.get("kind"))
             layer_id = str(action.get("layer_id") or "")
             overlay = self.layer_render_plan_step_overlay(step)
-            if kind == "runtime_blend" and overlay is not None:
+            dispatch_packet = build_layer_render_plan_composition_dispatch_packet(action, overlay is not None)
+            dispatch = str(dispatch_packet.get("dispatch") or "")
+            if dispatch == "runtime_blend":
                 frame = self.compose_runtime_blend(frame, layer_id, overlay)
-            elif kind == "alpha_blend" and overlay is not None:
+            elif dispatch == "alpha_blend":
                 frame = alpha_blend_compose(frame, overlay, str(action.get("blend_mode") or "Normal"))
-            elif kind == "alpha_compose" and overlay is not None:
+            elif dispatch == "alpha_compose":
                 frame = alpha_compose(frame, overlay)
-            elif kind == "runtime_overlay" and overlay is not None:
+            elif dispatch == "runtime_overlay":
                 frame = self.compose_runtime_overlay(frame, layer_id, overlay)
-            elif kind == "style_profile_postprocess":
+            elif dispatch == "style_profile_postprocess":
                 frame = apply_style_profile(frame, style_postprocess.get("style_profile"))
-            phase_id = str(action.get("phase_id") or "compose_overlays")
+            phase_id = str(dispatch_packet.get("phase_id") or "compose_overlays")
             step_timing_ms[phase_id] = step_timing_ms.get(phase_id, 0.0) + (
                 time.perf_counter() - step_started_at
             ) * 1000.0
@@ -14181,10 +14183,12 @@ class HybridRenderController:
             if not isinstance(step, dict):
                 index += 1
                 continue
-            kind = str(step.get("kind"))
-            layer_id = str(step.get("layer_id") or step.get("id") or "")
+            action = build_layer_render_plan_composition_apply_action(step)
+            layer_id = str(action.get("layer_id") or "")
             overlay = self.layer_render_plan_step_overlay(step)
-            if kind == "alpha_compose" and overlay is not None:
+            dispatch_packet = build_layer_render_plan_composition_dispatch_packet(action, overlay is not None)
+            dispatch = str(dispatch_packet.get("dispatch") or "")
+            if dispatch == "alpha_compose":
                 run_steps = [step]
                 overlays = [overlay]
                 next_index = index + 1
@@ -14217,13 +14221,13 @@ class HybridRenderController:
                 )
                 index = next_index
                 continue
-            if kind == "runtime_blend" and overlay is not None:
+            if dispatch == "runtime_blend":
                 frame = self.compose_runtime_blend(frame, layer_id, overlay)
-            elif kind == "alpha_blend" and overlay is not None:
-                frame = alpha_blend_compose(frame, overlay, str(step.get("blend_mode") or "Normal"))
-            elif kind == "runtime_overlay" and overlay is not None:
+            elif dispatch == "alpha_blend":
+                frame = alpha_blend_compose(frame, overlay, str(action.get("blend_mode") or "Normal"))
+            elif dispatch == "runtime_overlay":
                 frame = self.compose_runtime_overlay(frame, layer_id, overlay)
-            elif kind == "style_profile_postprocess":
+            elif dispatch == "style_profile_postprocess":
                 frame = apply_style_profile(frame, style_postprocess.get("style_profile"))
             index += 1
         packet = {
