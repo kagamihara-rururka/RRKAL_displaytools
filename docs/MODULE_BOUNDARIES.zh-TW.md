@@ -83,6 +83,7 @@
 - phase timing 與 bottleneck recommendation 的資料包組裝。
 - output metadata 的 `layer_render_plan_summary` 摘要契約組包；實際 metadata 寫檔仍留在 controller。
 - single-pass preflight contract 組包；在 parity smoke、實測 phase timing、人工視覺審查通過前，不啟用 runtime single-pass。
+- adapter boundary contract 組包；先明確 controller-to-core payload 與 forbidden responsibilities，再移動 overlay runtime state。
 - compose queue classifier：只根據 controller 提供的 step runtime state 分類 queue / skipped steps。
 
 `HybridRenderController` 仍負責：

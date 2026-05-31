@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Add render plan adapter boundary contract
+
+- Added `build_layer_render_plan_adapter_boundary_contract` to `render_core/render_plan.py`.
+- Embedded the adapter boundary contract into compiled and reused render plans.
+- Documented controller-owned inputs, render-core-owned decisions and forbidden render-core responsibilities before moving overlay runtime state.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add render plan review packet inspector
 
 - Added `scripts/inspect_render_plan_review_packet.ps1` as a single no-GUI review entrypoint.

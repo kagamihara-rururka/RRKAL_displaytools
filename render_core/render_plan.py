@@ -698,6 +698,57 @@ def build_layer_render_plan_single_pass_preflight_contract(
     }
 
 
+def build_layer_render_plan_adapter_boundary_contract(
+    runtime_snapshot: dict[str, object],
+    composition_steps: list[dict[str, object]],
+) -> dict[str, object]:
+    visible_layers = runtime_snapshot.get("visible_layers") if isinstance(runtime_snapshot.get("visible_layers"), list) else []
+    dirty_flags = runtime_snapshot.get("dirty_flags") if isinstance(runtime_snapshot.get("dirty_flags"), dict) else {}
+    return {
+        "schema": "rrkal_displaytools.layer_render_plan_adapter_boundary.v1",
+        "source": "render_core.render_plan.build_layer_render_plan_adapter_boundary_contract",
+        "status": "documented_boundary",
+        "runtime_path_unchanged": True,
+        "controller_owned_inputs": [
+            "frame_index",
+            "visible_layers",
+            "selected_layer_semantic_target",
+            "dirty_flags",
+            "step_runtime_states",
+            "overlay_array_lookup",
+            "transparent_overlay_checks",
+        ],
+        "core_owned_decisions": [
+            "composition_steps",
+            "compose_queue_classification",
+            "compose_runs",
+            "cache_key",
+            "cache_invalidation_scope",
+            "batch_decisions",
+            "execution_summary",
+            "single_pass_preflight_contract",
+        ],
+        "forbidden_in_render_core": [
+            "Qt widgets",
+            "np.ndarray overlay object ownership",
+            "Taichi kernel/frame mutation",
+            "metadata file writes",
+            "RRKAL provider discovery/download/cache governance",
+        ],
+        "adapter_payload_fields": [
+            "runtime_snapshot",
+            "composition_steps",
+            "step_runtime_states",
+            "compose_queue_packet",
+            "compiled_layer_render_plan",
+        ],
+        "visible_layer_count": len(visible_layers),
+        "dirty_flag_count": len(dirty_flags),
+        "composition_step_count": len(composition_steps),
+        "next_extraction_target": "normalize controller-to-core adapter payload before moving overlay runtime state out of HybridRenderController",
+    }
+
+
 def build_compiled_layer_render_plan_packet(
     cache_key: str,
     invalidation_reasons: list[str],
@@ -720,6 +771,10 @@ def build_compiled_layer_render_plan_packet(
         compose_queue_packet.get("compose_runs", []),
         execution_summary,
         phase_timing_runtime,
+    )
+    adapter_boundary_contract = build_layer_render_plan_adapter_boundary_contract(
+        runtime_snapshot,
+        composition_steps,
     )
     return {
         "schema": "rrkal_displaytools.compiled_layer_render_plan.v1",
@@ -751,6 +806,8 @@ def build_compiled_layer_render_plan_packet(
         "bottleneck_recommendation_schema": "rrkal_displaytools.layer_render_plan_bottleneck_recommendation.v1",
         "single_pass_preflight_contract": single_pass_preflight_contract,
         "single_pass_preflight_contract_schema": "rrkal_displaytools.layer_render_plan_single_pass_preflight_contract.v1",
+        "adapter_boundary_contract": adapter_boundary_contract,
+        "adapter_boundary_contract_schema": "rrkal_displaytools.layer_render_plan_adapter_boundary.v1",
         "reuse_policy": "reuse_when_cache_key_matches_previous_compiled_plan",
         "reuse_status_values": ["compiled", "reused"],
         "runtime_optimization_applied": False,
@@ -819,6 +876,14 @@ def build_reused_compiled_layer_render_plan_packet(
         phase_timing_runtime,
     )
     plan["single_pass_preflight_contract_schema"] = "rrkal_displaytools.layer_render_plan_single_pass_preflight_contract.v1"
+    composition_steps = plan.get("composition_steps")
+    if not isinstance(composition_steps, list):
+        composition_steps = []
+    plan["adapter_boundary_contract"] = build_layer_render_plan_adapter_boundary_contract(
+        runtime_snapshot,
+        composition_steps,
+    )
+    plan["adapter_boundary_contract_schema"] = "rrkal_displaytools.layer_render_plan_adapter_boundary.v1"
     plan["reuse_policy"] = "reuse_when_cache_key_matches_previous_compiled_plan"
     plan["reuse_boundary"] = plan.get("reuse_boundary", "valid_until_dirty_flags_or_camera_change")
     plan["frame_index"] = int(frame_index)
