@@ -101,6 +101,14 @@ $entries = @(
         no_launch_side_effect = $true
     },
     [ordered]@{
+        id = "display_shell_render_matrix"
+        category = "display_shell"
+        schema = "rrkal_displaytools.display_shell_render_matrix.v1"
+        command = "py -3 scripts\export_display_shell_render_matrix.py"
+        proves = @("DisplayShell capability packet", "canvas registry", "sample ViewModels", "metadata-only renderer dispatch plan")
+        no_launch_side_effect = $true
+    },
+    [ordered]@{
         id = "layer_visual_presets"
         category = "layer_control"
         schema = "rrkal_displaytools.layer_visual_presets_inspector.v1"
@@ -241,6 +249,7 @@ $entries = @(
         "cross_machine_review_readiness_check",
         "reviewer_first_run_route",
         "capability_summary",
+        "display_shell_render_matrix",
         "layer_visual_presets",
         "layer_operator_shortcuts",
         "research_interaction",

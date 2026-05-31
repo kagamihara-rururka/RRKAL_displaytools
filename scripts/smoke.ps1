@@ -6495,6 +6495,14 @@ if ($displayShellPacket.sample_view_model_render_plans_schema -ne "rrkal_display
 if ($displayShellPacket.sample_view_model_render_plans.runtime_render_invoked -ne $false) {
     throw "Display shell JSON exporter should not invoke runtime render"
 }
+$visualInspectorIndexText = Invoke-CapturedNative powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "scripts\list_visual_contract_inspectors.ps1")
+$visualInspectorIndex = $visualInspectorIndexText | ConvertFrom-Json
+if ($visualInspectorIndex.entry_ids -notcontains "display_shell_render_matrix") {
+    throw "Visual contract inspector index missing display shell render matrix entry"
+}
+if ($visualInspectorIndex.recommended_cross_machine_sequence -notcontains "display_shell_render_matrix") {
+    throw "Visual contract inspector recommended sequence missing display shell render matrix"
+}
 if ($displayShellMatrix.has_canvas_registry -ne $true) {
     throw "Display shell render matrix inspector canvas registry evidence missing"
 }

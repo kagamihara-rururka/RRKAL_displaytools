@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Add display shell reviewer index entry
+
+- Added `display_shell_render_matrix` to the no-GUI visual contract inspector index.
+- Added the display shell JSON exporter to the visual contract review packet first-command list for cloned machines.
+- Smoke now verifies the reviewer index entry and recommended cross-machine sequence include the display shell render matrix exporter.
+- Smoke: PASS after transient file-access backoff retries (`powershell -NoProfile -ExecutionPolicy Bypass -File L:\RRKAL_displaytools\scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add display shell JSON exporter
 
 - Added `scripts/export_display_shell_render_matrix.py` as a headless clone-first exporter for the DisplayShell / Canvas / Render Matrix capability packet.
