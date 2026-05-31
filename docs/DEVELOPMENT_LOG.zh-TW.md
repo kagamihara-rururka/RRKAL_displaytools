@@ -1,5 +1,12 @@
 # Development Log
 
+## 2026-05-31 - Add render plan metadata summary inspector
+
+- Added `scripts/inspect_render_plan_metadata_summary.ps1` for no-GUI metadata sidecar review.
+- Wired smoke to require the inspector schema, ready status and `layer_render_plan_summary` field.
+- Kept the inspector source-only; it does not launch Qt/Taichi, render frames or write metadata.
+- Smoke: PASS (`powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1`).
+
 ## 2026-05-31 - Add single-pass preflight inspector
 
 - Added `scripts/inspect_render_plan_single_pass_preflight.ps1` for no-GUI clone-first review.

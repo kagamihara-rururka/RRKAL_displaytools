@@ -6565,6 +6565,16 @@ if ($singlePassPreflightInspector.status -ne "ready") {
 if ($singlePassPreflightInspector.runtime_single_pass_enabled -ne $false) {
     throw "Renderer render plan single-pass preflight inspector must keep runtime single-pass disabled"
 }
+$renderPlanMetadataSummaryInspector = powershell -NoProfile -ExecutionPolicy Bypass -File scripts\inspect_render_plan_metadata_summary.ps1 | ConvertFrom-Json
+if ($renderPlanMetadataSummaryInspector.schema -ne "rrkal_displaytools.render_plan_metadata_summary_inspector.v1") {
+    throw "Renderer render plan metadata summary inspector schema missing"
+}
+if ($renderPlanMetadataSummaryInspector.status -ne "ready") {
+    throw "Renderer render plan metadata summary inspector is not ready"
+}
+if ($renderPlanMetadataSummaryInspector.summary_field -ne "layer_render_plan_summary") {
+    throw "Renderer render plan metadata summary inspector sidecar field missing"
+}
 if ($rendererSource -notlike "*self.layer_render_plan_snapshot = self.layer_render_plan_runtime_snapshot*") {
     throw "Renderer render_if_needed does not update the layer render plan snapshot"
 }
